@@ -1,0 +1,7 @@
+from aiogram.fsm.state import StatesGroup, State
+
+
+class PromoCode(StatesGroup):
+    waiting_for_promo_code = State()
+    waiting_for_promo_code_name = State()
+    waiting_for_promo_code_date = State()
