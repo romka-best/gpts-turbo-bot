@@ -9,6 +9,8 @@ from pydantic import SecretStr
 class Settings(BaseSettings):
     BASE_DIR: ClassVar[Path] = Path(__file__).resolve().parent.parent
 
+    WEBHOOK_URL: str
+
     USER_BATCH_SIZE: int = 500
     LIMIT_BETWEEN_REQUESTS_SECONDS: int = 30
     ADMIN_CHAT_IDS: List[str] = ["354543567", "6078317830"]

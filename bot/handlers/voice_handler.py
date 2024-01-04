@@ -60,7 +60,7 @@ async def process_voice_message(voice_url: str, user_id: str):
         return text
 
 
-@voice_router.message(F.VOICE)
+@voice_router.message(F.voice)
 async def handle_voice(message: Message, state: FSMContext):
     user = await get_user(str(message.from_user.id))
 

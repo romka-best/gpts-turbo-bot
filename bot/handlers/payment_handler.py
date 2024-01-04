@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 from aiogram import Router, Bot, F
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
-from aiogram.types import Message, CallbackQuery, LabeledPrice, PreCheckoutQuery, SuccessfulPayment
+from aiogram.types import Message, CallbackQuery, LabeledPrice, PreCheckoutQuery, SuccessfulPayment, BufferedInputFile
 
 from bot.config import config
 from bot.database.main import bucket, db
@@ -36,13 +36,14 @@ class PaymentType:
 async def subscribe(message: Message):
     user = await get_user(str(message.from_user.id))
 
-    photo = bucket.blob(f'subscriptions/{user.language_code}_{user.currency}.png')
+    photo_path = f'subscriptions/{user.language_code}_{user.currency}.png'
+    photo = bucket.blob(photo_path)
     photo_data = photo.download_as_string()
 
     text = get_localization(user.language_code).subscribe(user.currency)
     reply_markup = build_subscriptions_keyboard(user.language_code)
 
-    await message.answer_photo(photo=photo_data,
+    await message.answer_photo(photo=BufferedInputFile(photo_data, filename=photo_path),
                                caption=text,
                                reply_markup=reply_markup)
 
@@ -91,13 +92,14 @@ async def handle_period_of_subscription_selection(callback_query: CallbackQuery)
 async def buy(message: Message):
     user = await get_user(str(message.from_user.id))
 
-    photo = bucket.blob(f'packages/{user.language_code}_{user.currency}.png')
+    photo_path = f'packages/{user.language_code}_{user.currency}.png'
+    photo = bucket.blob(photo_path)
     photo_data = photo.download_as_string()
 
     text = get_localization(user.language_code).buy()
     reply_markup = build_packages_keyboard(user.language_code)
 
-    await message.answer_photo(photo=photo_data,
+    await message.answer_photo(photo=BufferedInputFile(photo_data, filename=photo_path),
                                caption=text,
                                reply_markup=reply_markup)
 
@@ -258,7 +260,7 @@ async def pre_checkout(pre_checkout_query: PreCheckoutQuery):
         await pre_checkout_query.answer(ok=False)
 
 
-@payment_router.message(F.SUCCESSFUL_PAYMENT)
+@payment_router.message(F.successful_payment)
 async def successful_payment(message: Message):
     user_id = str(message.from_user.id)
     user = await get_user(user_id)
@@ -330,7 +332,7 @@ async def update_monthly_limits(bot: Bot):
             is_time_to_update_limits = (current_date - user.last_subscription_limit_update).days >= 30
             if user.last_subscription_limit_update and is_time_to_update_limits:
                 current_subscription = await get_last_subscription_by_user_id(user.id)
-                if current_subscription.end_date <= current_date:
+                if current_subscription and current_subscription.end_date <= current_date:
                     packages = await get_packages_by_user_id(user.id)
                     user.additional_usage_quota[Quota.VOICE_MESSAGES] = False
                     user.additional_usage_quota[Quota.FAST_MESSAGES] = False

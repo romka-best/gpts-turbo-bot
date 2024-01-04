@@ -41,7 +41,7 @@ async def info(message: Message):
     await message.answer(text=get_localization(user.language_code).INFO)
 
 
-@common_router.callback_query(lambda c: c.data == 'close')
+@common_router.callback_query(lambda c: c.data.endswith(':close'))
 async def handle_close_selection(callback_query: CallbackQuery):
     await callback_query.answer()
 

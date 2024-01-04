@@ -33,21 +33,21 @@ Let AI be your co-pilot in this adventure! 🚀
     COMMANDS = """
 🤖 Here's what you can explore:
 
-🚀 /start - *About me*
-🌐 /language - Engage with any language, *set system messages*.
-🧠 /mode - *Swap neural network models* on the fly with — *ChatGPT3*, *ChatGPT4*, *DALLE-3*, or *Face Swap*!
+🚀 /start - <b>About me</b>
+🌐 /language - Engage with any language, <b>set system messages</b>.
+🧠 /mode - <b>Swap neural network models</b> on the fly with — <b>ChatGPT3</b>, <b>ChatGPT4</b>, <b>DALLE-3</b>, or <b>Face Swap</b>!
 📜 /info - Curious about what each model can do? Here you'll find all the answers.
-💼 /profile - *Check your profile* to see your usage quota and more.
-🔧 /settings - *Customize your experience* for a seamless user experience.
-💳 /subscribe or /buy - *Learn about our plans and perks* or opt for individual packages.
-🎁 /promo\\_code - Unleash exclusive AI features and special offers with your promo code.
-🎭 /catalog - *Pick a specialized assistant* for tasks tailored just for you.
-💬 /chats - *Create, switch, or delete context-specific chats*.
+💼 /profile - <b>Check your profile</b> to see your usage quota and more.
+🔧 /settings - <b>Customize your experience</b> for a seamless user experience.
+💳 /subscribe or /buy - <b>Learn about our plans and perks</b> or opt for individual packages.
+🎁 /promo_code - Unleash exclusive AI features and special offers with your promo code.
+🎭 /catalog - <b>Pick a specialized assistant</b> for tasks tailored just for you.
+💬 /chats - <b>Create, switch, or delete context-specific chats</b>.
 
 Just type away or use a command to begin your AI journey! 🌟
 """
     FEEDBACK = """
-🌟 *Your opinion matters!* 🌟
+🌟 <b>Your opinion matters!</b> 🌟
 
 Hey there! We're always looking to improve and your feedback is like gold dust to us. 💬✨
 - Love something about our bot? Let us know!
@@ -58,7 +58,7 @@ Just type your thoughts and hit send. It's that simple! Your insights help us gr
 And remember, every piece of feedback is a step towards making our bot even more awesome. Can't wait to hear from you! 💌
 """
     FEEDBACK_SUCCESS = """
-🌟 *Feedback received!* 🌟
+🌟 <b>Feedback received!</b> 🌟
 
 Thank you for sharing your thoughts! 💌
 Your input is the secret sauce to our success. We're cooking up some improvements and your feedback is the key ingredient 🍳🔑
@@ -68,7 +68,33 @@ Your opinion matters a lot to us! 💖
 """
 
     # Profile
+    TELL_ME_YOUR_GENDER = "Tell me your gender:"
+    YOUR_GENDER = "Your gender:"
+    UNSPECIFIED = "Unspecified 🤷"
+    MALE = "Male 🚹"
+    FEMALE = "Female 🚺"
+    SEND_ME_YOUR_PICTURE = """
+    📸 <b>Ready for a photo transformation? Here's how to get started!</b>
+
+    👍 <b>Ideal photo guidelines</b>:
+    - Clear, high-quality selfie.
+    - Only one person should be in the selfie.
+
+    👎 <b>Please avoid these types of photos</b>:
+    - Group photos.
+    - Animals.
+    - Children under 18 years.
+    - Full body shots.
+    - Nude or inappropriate images.
+    - Sunglasses or any face-obscuring items.
+    - Blurry, out-of-focus images.
+    - Videos and animations.
+    - Compressed or altered images.
+
+    Once you've got the perfect shot, upload your photo and let the magic happen 🌟
+    """
     CHANGE_PHOTO = "Change photo 📷"
+    CHANGE_PHOTO_SUCCESS = "📸 Photo successfully uploaded! 🌟"
     CHANGE_GENDER = "Change gender 🚹🚺"
 
     # Language
@@ -77,14 +103,14 @@ Your opinion matters a lot to us! 💖
 
     # Promo code
     PROMO_CODE_INFO = """
-🔓 *Unlock the world of AI wonders with your secret code!* 🌟
+🔓 <b>Unlock the world of AI wonders with your secret code!</b> 🌟
 
-If you've got a *promo code*, just type it in to reveal hidden features and special surprises 🎁
+If you've got a <b>promo code</b>, just type it in to reveal hidden features and special surprises 🎁
 
-*No code?* No problem! Simply click 'Exit' to continue exploring the AI universe without it 🚀
+<b>No code?</b> No problem! Simply click 'Exit' to continue exploring the AI universe without it 🚀
 """
     PROMO_CODE_SUCCESS = """
-🎉 *Woohoo! You've Struck Gold!* 🌟
+🎉 <b>Woohoo! You've Struck Gold!</b> 🌟
 
 Your promo code has been successfully activated! Get ready to dive into a world of AI wonders with your shiny new perks 🚀
 Thanks for joining us on this AI-powered adventure. Enjoy the extra goodies and let's make some magic together! ✨
@@ -97,7 +123,7 @@ Happy exploring! 🤖🌐
 Looks like you're already part of our exclusive subscriber's club! 🌟
 """
     PROMO_CODE_EXPIRED_ERROR = """
-🕒 *Whoops, time's up on this promo code!*
+🕒 <b>Whoops, time's up on this promo code!</b>
 
 Looks like this promo code has hit its expiration date 📆. It's like a Cinderella story, but without the glass slipper 🥿
 But hey, don't lose heart! You can still explore our other magical offers with /subscribe or /buy. There's always something exciting waiting for you in our AI wonderland! 🎩✨
@@ -105,7 +131,7 @@ But hey, don't lose heart! You can still explore our other magical offers with /
 Stay curious and let the AI adventure continue! 🌟🚀
 """
     PROMO_CODE_NOT_FOUND_ERROR = """
-🔍 *Oops, promo code not found!*
+🔍 <b>Oops, promo code not found!</b>
 
 It seems like the promo code you entered is playing hide and seek with us 🕵️‍♂️. We couldn't find it in our system 🤔
 Double-check for any typos and give it another go. If it's still a no-show, maybe it's time to hunt for another code or check out our /subscribe and /buy options for some neat deals 🛍️
@@ -113,7 +139,7 @@ Double-check for any typos and give it another go. If it's still a no-show, mayb
 Keep your spirits high, and let's keep the AI fun rolling! 🚀🎈
 """
     PROMO_CODE_ALREADY_USED_ERROR = """
-🚫 *Oops, déjà vu!*
+🚫 <b>Oops, déjà vu!</b>
 
 Looks like you've already used this promo code. It's a one-time magic spell, and it seems you've already cast it! ✨🧙
 No worries, though! You can check out our latest offers with /subscribe or /buy. There's always a new trick up our AI sleeve! 🎉🔮
@@ -126,40 +152,40 @@ Keep exploring and let the AI surprises continue! 🤖
     INFO = """
 🤖 Let's check out what each model can do for you:
 
-✉️ *ChatGPT3: The Versatile Communicator*
-- _Small Talk to Deep Conversations_: Ideal for chatting about anything from daily life to sharing jokes.
-- _Educational Assistant_: Get help with homework, language learning, or complex topics like coding.
-- _Personal Coach_: Get motivation, fitness tips, or even meditation guidance.
-- _Creative Writer_: Need a post, story, or even a song? ChatGPT3 can whip it up in seconds.
-- _Travel Buddy_: Ask for travel tips, local cuisines, or historical facts about your next destination.
-- _Business Helper_: Draft emails, create business plans, or brainstorm marketing ideas.
-- _Role Play_: Engage in creative role-playing scenarios for entertainment or storytelling.
-- _Quick Summaries_: Summarize long articles or reports into concise text.
+✉️ <b>ChatGPT3: The Versatile Communicator</b>
+- <i>Small Talk to Deep Conversations</i>: Ideal for chatting about anything from daily life to sharing jokes.
+- <i>Educational Assistant</i>: Get help with homework, language learning, or complex topics like coding.
+- <i>Personal Coach</i>: Get motivation, fitness tips, or even meditation guidance.
+- <i>Creative Writer</i>: Need a post, story, or even a song? ChatGPT3 can whip it up in seconds.
+- <i>Travel Buddy</i>: Ask for travel tips, local cuisines, or historical facts about your next destination.
+- <i>Business Helper</i>: Draft emails, create business plans, or brainstorm marketing ideas.
+- <i>Role Play</i>: Engage in creative role-playing scenarios for entertainment or storytelling.
+- <i>Quick Summaries</i>: Summarize long articles or reports into concise text.
 
-🧠 *ChatGPT4: The Advanced Intellect*
-- _In-Depth Analysis_: Perfect for detailed research, technical explanations, or exploring hypothetical scenarios.
-- _Problem Solver_: Get help with advanced math problems, programming bugs, or scientific queries.
-- _Language Expert_: Translate complex texts or practice conversational skills in various languages.
-- _Creative Consultant_: Develop plot ideas for your posts, script dialogues, or explore artistic concepts.
-- _Health and Wellness_: Discuss wellness and mental health topics in-depth.
-- _Personalized Recommendations_: Get book, movie, or travel recommendations based on your interests.
+🧠 <b>ChatGPT4: The Advanced Intellect</b>
+- <i>In-Depth Analysis</i>: Perfect for detailed research, technical explanations, or exploring hypothetical scenarios.
+- <i>Problem Solver</i>: Get help with advanced math problems, programming bugs, or scientific queries.
+- <i>Language Expert</i>: Translate complex texts or practice conversational skills in various languages.
+- <i>Creative Consultant</i>: Develop plot ideas for your posts, script dialogues, or explore artistic concepts.
+- <i>Health and Wellness</i>: Discuss wellness and mental health topics in-depth.
+- <i>Personalized Recommendations</i>: Get book, movie, or travel recommendations based on your interests.
 
-🎨 *DALLE-3: The Creative Genius*
-- _Art on Demand_: Generate unique art from descriptions – perfect for illustrators or those seeking inspiration.
-- _Ad Creator_: Produce eye-catching images for advertising or social media content.
-- _Educational Tool_: Visualize complex concepts for better understanding in education.
-- _Interior Design_: Get ideas for room layouts or decoration themes.
-- _Fashion Design_: Create clothing designs or fashion illustrations.
-- _Personalized Comics_: Create comic strips or cartoon characters from your stories.
-- _Product Mockups_: Create mockups for product ideas or inventions.
+🎨 <b>DALLE-3: The Creative Genius</b>
+- <i>Art on Demand</i>: Generate unique art from descriptions – perfect for illustrators or those seeking inspiration.
+- <i>Ad Creator</i>: Produce eye-catching images for advertising or social media content.
+- <i>Educational Tool</i>: Visualize complex concepts for better understanding in education.
+- <i>Interior Design</i>: Get ideas for room layouts or decoration themes.
+- <i>Fashion Design</i>: Create clothing designs or fashion illustrations.
+- <i>Personalized Comics</i>: Create comic strips or cartoon characters from your stories.
+- <i>Product Mockups</i>: Create mockups for product ideas or inventions.
 
-🤡 *Face Swap: The Entertainment Master*
-- _Fun Reimaginations_: See how you'd look in different historical eras or as various movie characters.
-- _Personalized Greetings_: Create unique birthday cards or invitations with personalized images.
-- _Role Play_: Experiment with different looks for role-playing games or virtual meetings.
-- _Memes and Content Creation_: Spice up your social media with funny or imaginative face-swapped pictures.
-- _Digital Makeovers_: Experiment with new haircuts or makeup styles.
-- _Celebrity Mashups_: Combine your face with celebrities for fun comparisons.
+🤡 <b>Face Swap: The Entertainment Master</b>
+- <i>Fun Reimaginations</i>: See how you'd look in different historical eras or as various movie characters.
+- <i>Personalized Greetings</i>: Create unique birthday cards or invitations with personalized images.
+- <i>Role Play</i>: Experiment with different looks for role-playing games or virtual meetings.
+- <i>Memes and Content Creation</i>: Spice up your social media with funny or imaginative face-swapped pictures.
+- <i>Digital Makeovers</i>: Experiment with new haircuts or makeup styles.
+- <i>Celebrity Mashups</i>: Combine your face with celebrities for fun comparisons.
 
 To change a model use /mode 😉
 """
@@ -186,7 +212,7 @@ The adventure continues! 🚀✨
 
     # Voice
     VOICE_MESSAGES_FORBIDDEN = """
-🎙 *Oops! Seems like your voice went into the AI void!*
+🎙 <b>Oops! Seems like your voice went into the AI void!</b>
 
 To unlock the magic of voice-to-text, simply wave your wand with /subscribe or /buy.
 
@@ -200,7 +226,7 @@ Let's turn those voice messages into text and keep the conversation flowing! �
     DISCOUNT = "Discount"
     NO_DISCOUNT = "No discount"
     SUBSCRIPTION_SUCCESS = """
-🎉 *Hooray! You're all set!* 🚀
+🎉 <b>Hooray! You're all set!</b> 🚀
 
 Your subscription is now as active as a caffeinated squirrel! 🐿️☕ Welcome to the club of awesomeness. Here's what's going to happen next:
 - A world of possibilities just opened up 🌍✨
@@ -210,7 +236,7 @@ Your subscription is now as active as a caffeinated squirrel! 🐿️☕ Welcome
 Thank you for embarking on this fantastic journey with us! Let's make some magic happen! 🪄🌟
 """
     SUBSCRIPTION_RESET = """
-🚀 *Subscription quota refreshed!*
+🚀 <b>Subscription quota refreshed!</b>
 
 Hello there, fellow AI adventurer! 🌟
 Guess what? Your subscription quota has just been topped up! It's like a magic refill, but better because it's real. 🧙‍♂️
@@ -219,7 +245,7 @@ You've got a whole new month of AI-powered fun ahead of you. Chat, create, explo
 Keep unleashing the power of AI and remember, we're here to make your digital dreams come true. Let's rock this month! 🤖💥
 """
     SUBSCRIPTION_END = """
-🛑 *Subscription expired!*
+🛑 <b>Subscription expired!</b>
 
 Hey there, AI enthusiast! 🌟
 Your subscription has come to an end. But don't worry, the AI journey isn't over yet! 🚀
@@ -248,7 +274,7 @@ The AI adventure awaits! Recharge, regroup, and let's continue this exciting jou
     MIN_ERROR = "Oops! It looks like the number entered is below our minimum threshold. Please enter a value that meets or exceeds the minimum required. Let's try that again! 🔄"
     VALUE_ERROR = "Whoops! That doesn't seem like a number. 🤔 Could you please enter a numeric value? Let's give it another go! 🔢"
     PACKAGE_SUCCESS = """
-🎉 *Cha-Ching! Payment success!* 💳
+🎉 <b>Cha-Ching! Payment success!</b> 💳
 
 Your payment just zoomed through like a superhero! 🦸‍ You've successfully unlocked the awesome power of your chosen package. Get ready for a rollercoaster of AI fun and excitement! 🎢
 
@@ -257,7 +283,7 @@ Remember, with great power comes great... well, you know how it goes. Let's make
 
     # Catalog
     CATALOG = """
-🎭 *Step right up to our role catalogue extravaganza!* 🌟
+🎭 <b>Step right up to our role catalogue extravaganza!</b> 🌟
 
 Ever dreamt of having an AI sidekick specialized just for you? Our catalog is like a magical wardrobe, each role a unique outfit tailored for your adventures in AI land! 🧙‍♂️✨
 Choose from an array of AI personas, each with its own flair and expertise. Whether you need a brainstorm buddy, a creative muse, or a factual wizard, we've got them all!
@@ -265,7 +291,7 @@ Choose from an array of AI personas, each with its own flair and expertise. Whet
 👉 Ready to meet your match? Just hit the button below and let the magic begin! 🎩👇
 """
     CATALOG_FORBIDDEN_ERROR = """
-🔒 *Whoops! Looks like you've hit a VIP-only zone!* 🌟
+🔒 <b>Whoops! Looks like you've hit a VIP-only zone!</b> 🌟
 
 You're just a click away from unlocking our treasure trove of AI roles, but it seems you don't have the golden key yet. No worries, though! You can grab it easily.
 🚀 Head over to /subscribe for some fantastic subscription options, or check out /buy if you're in the mood for some a la carte AI delights.
@@ -392,6 +418,7 @@ Looks like you've hit the limit for creating new chats. But don't worry, the wor
 
 Head over to /subscribe or /buy to unlock the power of multiple chats. More chats, more fun! 🎉
 """
+    CREATE_CHAT_SUCCESS = "💬 Chat created! 🎉"
     TYPE_CHAT_NAME = "Type your chat name"
     SWITCH_CHAT = "Switch between chats"
     SWITCH_CHAT_FORBIDDEN = """
@@ -401,6 +428,7 @@ You're currently in your one and only chat universe. It's a cozy place, but why 
 
 To hop between multiple thematic chats, just get your pass from /subscribe or /buy. Let the chat-hopping begin! 🐇
 """
+    SWITCH_CHAT_SUCCESS = "🔀 Chat successfully switched! 🎉"
     DELETE_CHAT = "Delete a chat"
     DELETE_CHAT_FORBIDDEN = """
 🗑️ Delete this chat? That's lonely talk! 💬
@@ -412,55 +440,35 @@ How about adding more chats to your realm instead? Check out /subscribe or /buy 
     DELETE_CHAT_SUCCESS = "🗑️ Chat successfully deleted! 🎉"
 
     # Face swap
-    TELL_ME_YOUR_GENDER = "Tell me your gender:"
-    YOUR_GENDER = "Your gender:"
-    UNSPECIFIED = "Unspecified 🤷"
-    MALE = "Male 🚹"
-    FEMALE = "Female 🚺"
-    SEND_ME_YOUR_PICTURE = """
-📸 *Ready for a photo transformation? Here's how to get started!*
-
-👍 *Ideal photo guidelines*:
-- Clear, high-quality selfie.
-- Only one person should be in the selfie.
-
-👎 *Please avoid these types of photos*:
-- Group photos.
-- Animals.
-- Children under 18 years.
-- Full body shots.
-- Nude or inappropriate images.
-- Sunglasses or any face-obscuring items.
-- Blurry, out-of-focus images.
-- Videos and animations.
-- Compressed or altered images.
-
-Once you've got the perfect shot, upload your photo and let the magic happen 🌟
-"""
     CHOOSE_YOUR_PACKAGE = """
-🌟*Let's get creative with your photos!*
+🌟<b>Let's get creative with your photos!</b>
 
-*First step:* Choose your adventure! 🚀
+<b>First step:</b> Choose your adventure! 🚀
 
-Ready? Let's dive into a world of imagination! 🌈 Just *select a package below* and start your photo adventure 👇
+Ready? Let's dive into a world of imagination! 🌈 Just <b>select a package below</b> and start your photo adventure 👇
     """
-    CELEBRITIES = "Celebrities ⭐️"
-    MOVIE_CHARACTERS = "Movie characters 🎥"
-    PROFESSIONS = "Professions 🧑‍💻"
-    SEVEN_WONDERS_OF_THE_ANCIENT_WORLD = "Seven Wonders of the Ancient World 🌈"
+    GENERATIONS_IN_PACKAGES_ENDED = """
+🎨 <b>Wow, you've used up all your generations in our packages! Your creativity is astounding!</b> 🌟
+
+What's next?
+- 📷 Send us photos with faces for face swapping in Face Swap!
+- 🔄 Or switch models via /mode to continue creating with other AI tools!
+
+Time for new AI discoveries! 🚀
+"""
     FACE_SWAP_MIN_ERROR = """
-🤨 *Hold on there, partner!*
+🤨 <b>Hold on there, partner!</b>
 
 Looks like you're trying to request fewer than 1 image. In the world of creativity, we need at least 1 to get the ball rolling!
 
-🌟 *Tip*: Type a number greater than 0 to start the magic. Let's unleash those creative ideas!
+🌟 <b>Tip</b>: Type a number greater than 0 to start the magic. Let's unleash those creative ideas!
 """
     FACE_SWAP_MAX_ERROR = """
-🚀 *Whoa, aiming high, I see!* But, uh-oh...
+🚀 <b>Whoa, aiming high, I see!</b> But, uh-oh...
 
 You're asking for more images than we have.
 
-🧐 *How about this?* Let's try a number within the package limit!
+🧐 <b>How about this?</b> Let's try a number within the package limit!
 """
 
     ERROR = "I've got an error"
@@ -484,11 +492,12 @@ You're asking for more images than we have.
             gender_info = f"Gender: {English.UNSPECIFIED}"
 
         return f"""
-Profile 👤
+<b>Profile</b> 👤
 
 Subscription type: {subscription_type} {emojis[subscription_type]}
 {gender_info}
 Currency: RUB
+
 Current model: {current_model}
 Change model: /mode
 
@@ -520,11 +529,11 @@ Buy additional requests: /buy
         return f"""
 🤖Ready to supercharge your digital journey? Here's what's on the menu:
 
-- *Standard* ⭐: For just {prices[SubscriptionType.STANDARD]}, step into the AI playground! Perfect for daily musings, creative bursts, and those "just curious" moments. Chat up a storm with ChatGPT 3, conjure images from thin air with DALLE-3, and swap faces faster than you can say "cheese"! 🧀
+- <b>Standard</b> ⭐: For just {prices[SubscriptionType.STANDARD]}, step into the AI playground! Perfect for daily musings, creative bursts, and those "just curious" moments. Chat up a storm with ChatGPT 3, conjure images from thin air with DALLE-3, and swap faces faster than you can say "cheese"! 🧀
 
-- *VIP* 🔥: Got grander ambitions? {prices[SubscriptionType.VIP]} unlocks deeper dialogues, more complex image creation, and access to a wider array of digital personas. It's the power user's delight, offering a premium lane on the AI highway 🛣️
+- <b>VIP</b> 🔥: Got grander ambitions? {prices[SubscriptionType.VIP]} unlocks deeper dialogues, more complex image creation, and access to a wider array of digital personas. It's the power user's delight, offering a premium lane on the AI highway 🛣️
 
-- *Platinum* 💎: For the connoisseurs, {prices[SubscriptionType.PLATINUM]} grants you the keys to the AI kingdom! Max out on ChatGPT 4 prompts, create thematic chat rooms, and get exclusive access to the latest AI innovations. It's all you can AI, and then some! 🍽️
+- <b>Platinum</b> 💎: For the connoisseurs, {prices[SubscriptionType.PLATINUM]} grants you the keys to the AI kingdom! Max out on ChatGPT 4 prompts, create thematic chat rooms, and get exclusive access to the latest AI innovations. It's all you can AI, and then some! 🍽️
 
 Pick your potion and hit the button below to subscribe:
 """
@@ -534,7 +543,7 @@ Pick your potion and hit the button below to subscribe:
         emojis = Subscription.get_emojis()
 
         return f"""
-You're choosing *{subscription_type}* {emojis[subscription_type]}
+You're choosing <b>{subscription_type}</b> {emojis[subscription_type]}
 
 Please select the subscription period by clicking on the button:
 """
@@ -560,13 +569,13 @@ Please select the subscription period by clicking on the button:
 🤖 Welcome to the AI Shopping Spree! 🛍
 
 Welcome to the shop zone, where each button tap unlocks a world of AI wonders!
-🧠 *ChatGPT3 & ChatGPT4*: Engage in deep, thought-provoking conversations. Your new AI buddies await!
-🎨 *DALLE-3*: Transform ideas into stunning visuals. It's like painting with AI!
-👤 *Face Swap*: Play with identities in images. It's never been this exciting!
-🗣️ *Voice Messages*: Say it out loud! Chatting with AI has never sounded better.
-💬 *Thematic Chats*: Dive into specialized topics and explore dedicated chat realms.
-🎭 *Role Catalog Access*: Need a specific assistant? Browse our collection and find your perfect AI match.
-⚡ *Quick Messages*: Fast, efficient, and always on point. AI communication at lightning speed.
+🧠 <b>ChatGPT3 & ChatGPT4</b>: Engage in deep, thought-provoking conversations. Your new AI buddies await!
+🎨 <b>DALLE-3</b>: Transform ideas into stunning visuals. It's like painting with AI!
+👤 <b>Face Swap</b>: Play with identities in images. It's never been this exciting!
+🗣️ <b>Voice Messages</b>: Say it out loud! Chatting with AI has never sounded better.
+💬 <b>Thematic Chats</b>: Dive into specialized topics and explore dedicated chat realms.
+🎭 <b>Role Catalog Access</b>: Need a specific assistant? Browse our collection and find your perfect AI match.
+⚡ <b>Quick Messages</b>: Fast, efficient, and always on point. AI communication at lightning speed.
 
 Hit a button and embark on an extraordinary journey with AI! It's time to redefine what's possible 🌌🛍️
 """
@@ -576,15 +585,15 @@ Hit a button and embark on an extraordinary journey with AI! It's time to redefi
         return f"""
 🚀 Fantastic!
 
-You've selected the *{package_type}* package.
-🌟 Please *type in the number of requests* you'd like to go for
+You've selected the <b>{package_type}</b> package.
+🌟 Please <b>type in the number of requests</b> you'd like to go for
 """
 
     # Chats
     @staticmethod
     def chats(current_chat_name: str, total_chats: int, available_to_create_chats: int):
         return f"""
-🗨️ *Current chat: {current_chat_name}* 🌟
+🗨️ <b>Current chat: {current_chat_name}</b> 🌟
 
 Welcome to the dynamic world of AI-powered chats! Here's what you can do:
 
@@ -592,7 +601,7 @@ Welcome to the dynamic world of AI-powered chats! Here's what you can do:
 - Switch Between Chats: Effortlessly navigate through your different chat landscapes.
 - Delete Chats: Clean up by removing the chats you no longer need.
 
-📈 Total Chats: *{total_chats} | Chats Available to Create: {available_to_create_chats}*
+📈 Total Chats: <b>{total_chats} | Chats Available to Create: {available_to_create_chats}</b>
 
 Ready to tailor your chat experience? Explore the options below and let the conversations begin! 🚀👇
 """
@@ -602,25 +611,25 @@ Ready to tailor your chat experience? Explore the options below and let the conv
     def choose_face_swap_package(name: str, available_images, total_images: int, used_images: int) -> str:
         remain_images = total_images - used_images
         return f"""
-*{name}*
+<b>{name}</b>
 
-You've got a treasure trove of *{total_images} images* in your pack, ready to unleash your creativity! 🌟
+You've got a treasure trove of <b>{total_images} images</b> in your pack, ready to unleash your creativity! 🌟
 
-🌠 *Your available generations*: {available_images} images. Need more? Explore /buy and /subscribe!
-🔍 *Used so far*: {used_images} images. Wow, you're on a roll!
-🚀 *Remaining*: {remain_images} images. {'Looks like you have used them all' if remain_images == 0 else 'So much potential'}!
+🌠 <b>Your available generations</b>: {available_images} images. Need more? Explore /buy and /subscribe!
+🔍 <b>Used so far</b>: {used_images} images. {'Wow, you are on a roll!' if used_images > 0 else ''}
+🚀 <b>Remaining</b>: {remain_images} images. {'Looks like you have used them all' if remain_images == 0 else 'So much potential'}!
 
-👉 Want more? Type the number of new images to add or press the *Back* button to explore different exciting packages.
+📝 <b>Type how many face swaps you want to do, or choose from the quick selection buttons below</b>. The world of face transformations awaits! 🎭🔄
 """
 
     @staticmethod
     def face_swap_package_forbidden(available_images: int):
         return f"""
-🔔 *Oops, a little hiccup!* 🚧
+🔔 <b>Oops, a little hiccup!</b> 🚧
 
-Looks like you've got only *{available_images} generations* left in your arsenal.
+Looks like you've got only <b>{available_images} generations</b> left in your arsenal.
 
-💡 *Pro Tip*: Sometimes, less is more! Try a smaller number, or give /buy and /subscribe a whirl for unlimited possibilities!
+💡 <b>Pro Tip</b>: Sometimes, less is more! Try a smaller number, or give /buy and /subscribe a whirl for unlimited possibilities!
 """
 
     @staticmethod
@@ -628,7 +637,7 @@ Looks like you've got only *{available_images} generations* left in your arsenal
         return f"Please wait for another {seconds} seconds before sending the next question ⏳"
 
     @staticmethod
-    def processing_request():
+    def processing_request_text():
         texts = [
             "I'm currently consulting my digital crystal ball for the best answer... 🔮",
             "One moment please, I'm currently training my hamsters to generate your answer... 🐹",
@@ -645,6 +654,50 @@ Looks like you've got only *{available_images} generations* left in your arsenal
             "I'm in the kitchen cooking up a fresh batch of answers. This one's gonna be delicious... 🍳",
             "Taking a quick trip to the cloud and back. Hope to bring back some smart raindrops of info... ☁️",
             "Planting your question in my digital garden. Let's see what grows... 🌱🤖"
+        ]
+
+        return random.choice(texts)
+
+    @staticmethod
+    def processing_request_image():
+        texts = [
+            "Gathering stardust to create your cosmic artwork... 🌌",
+            "Mixing a palette of digital colors for your masterpiece... 🎨",
+            "Dipping into the virtual inkwell to sketch your vision... 🖌️",
+            "Summoning the AI muses for a stroke of genius... 🌠",
+            "Crafting pixels into perfection, just a moment... 👁️🎭",
+            "Whipping up a visual feast for your eyes... 🍽️👀",
+            "Consulting with digital Da Vinci for your artistic request... 🎭",
+            "Dusting off the digital easel for your creative request... 🖼️🖌️",
+            "Conjuring a visual spell in the AI cauldron... 🧙‍🔮",
+            "Activating the virtual canvas. Get ready for artistry... 🖼️️",
+            "Assembling your ideas in a gallery of pixels... 🖼️👨‍🎨",
+            "Embarking on a digital safari to capture your artistic vision... 🦁🎨",
+            "Revving up the AI art engines, stand by... 🏎️💨",
+            "Plunging into a pool of digital imagination... 🏊‍💭",
+            "Cooking up a visual symphony in the AI kitchen... 🍳🎼"
+        ]
+
+        return random.choice(texts)
+
+    @staticmethod
+    def processing_request_face_swap():
+        texts = [
+            "Warping into the face-swapping dimension... 🌌👤",
+            "Mixing and matching faces like a digital Picasso... 🧑‍🎨🖼️",
+            "Swapping faces faster than a chameleon changes colors... 🦎🌈",
+            "Unleashing the magic of face fusion... ✨👥",
+            "Engaging in facial alchemy, transforming identities... 🧙‍🧬",
+            "Cranking up the face-swapping machine... 🤖🔀",
+            "Concocting a potion of facial transformation... 🧪👩‍🔬🔬",
+            "Casting a spell in the realm of face enchantments... 🧚‍🎭️",
+            "Orchestrating a symphony of facial features... 🎼👩‍🎤👨‍🎤",
+            "Sculpting new faces in my digital art studio... 🎨👩‍🎨",
+            "Brewing a cauldron of face-swap magic... 🧙‍🔮",
+            "Building faces like a master architect... 🏗️👷‍",
+            "Embarking on a mystical quest for the perfect face blend... 🗺️🔍",
+            "Launching a rocket of face morphing adventures... 🚀👨‍🚀👩‍🚀",
+            "Embarking on a galactic journey of face swapping... 🌌👽"
         ]
 
         return random.choice(texts)

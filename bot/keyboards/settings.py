@@ -33,7 +33,7 @@ def build_settings_keyboard(language_code: str, settings: Dict) -> InlineKeyboar
         [
             InlineKeyboardButton(
                 text=get_localization(language_code).CLOSE,
-                callback_data='close'
+                callback_data='setting:close'
             )
         ],
     ]

@@ -52,7 +52,7 @@ async def handle_chat_selection(callback_query: CallbackQuery, state: FSMContext
         for count, chat in enumerate(all_chats):
             text += f"\n{count + 1}. <b>{chat.title}</b>"
 
-        await callback_query.message.reply_text(text=text)
+        await callback_query.message.answer(text=text)
     elif action == 'create':
         if user.additional_usage_quota[Quota.ADDITIONAL_CHATS] > 0:
             reply_markup = build_create_chat_keyboard(user.language_code)
@@ -119,10 +119,11 @@ async def handle_switch_chat_selection(callback_query: CallbackQuery):
         await handle_chats(callback_query.message, str(callback_query.from_user.id))
         await callback_query.message.delete()
     else:
-        # TODO Отправить текст об успешном переключении
         await update_user(user.id, {
             "current_chat_id": chat_id
         })
+
+        await callback_query.message.answer(text=get_localization(user.language_code).SWITCH_CHAT_SUCCESS)
 
 
 @chats_router.callback_query(lambda c: c.data.startswith('delete_chat:'))
@@ -149,6 +150,6 @@ async def chat_name_sent(message: Message, state: FSMContext):
     transaction = db.transaction()
     await create_new_chat(transaction, user, str(message.chat.id), message.text)
 
-    # TODO: Сообщение об успешном создании чата
+    await message.answer(get_localization(user.language_code).CREATE_CHAT_SUCCESS)
 
     await state.clear()

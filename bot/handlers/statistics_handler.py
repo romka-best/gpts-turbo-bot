@@ -6,6 +6,7 @@ from aiogram.types import Message, CallbackQuery
 
 from bot.config import config
 from bot.database.models.common import RoleName
+from bot.database.models.face_swap_package import FaceSwapPackageName
 from bot.database.models.subscription import SubscriptionType
 from bot.database.models.transaction import ServiceType, TransactionType
 from bot.database.operations.chat import get_chats
@@ -58,6 +59,7 @@ async def handle_statistics_selection(callback_query: CallbackQuery):
     users = await get_users(start_date, end_date)
     transactions = await get_transactions(start_date, end_date)
     chats = await get_chats(start_date, end_date)
+    face_swap_packages = await get_face_swap_packages()
 
     count_subscription_users = {
         SubscriptionType.FREE: 0,
@@ -158,6 +160,13 @@ async def handle_statistics_selection(callback_query: CallbackQuery):
     }
     for chat in chats:
         count_chats_usage[chat.role] += 1
+
+    count_face_swap_usage = {
+        FaceSwapPackageName.CELEBRITIES['name']: 0,
+        FaceSwapPackageName.MOVIE_CHARACTERS['name']: 0,
+        FaceSwapPackageName.PROFESSIONS['name']: 0,
+        'ALL': len()
+    }
 
     await callback_query.message.answer(text=get_localization(user.language_code).statistics(
         period=period,

@@ -35,7 +35,7 @@ def build_chats_keyboard(language_code: str) -> InlineKeyboardMarkup:
         [
             InlineKeyboardButton(
                 text=get_localization(language_code).CLOSE,
-                callback_data='close'
+                callback_data='chat:close'
             )
         ]
     ]

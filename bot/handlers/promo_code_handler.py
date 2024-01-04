@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 from aiogram import Router
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
-from aiogram.types import Message, CallbackQuery
+from aiogram.types import Message, CallbackQuery, BufferedInputFile
 
 from bot.database.main import bucket, db
 from bot.database.models.promo_code import PromoCodeType
@@ -113,11 +113,14 @@ async def handle_create_promo_code_selection(callback_query: CallbackQuery):
         await callback_query.delete_message()
     else:
         if promo_code_type == PromoCodeType.SUBSCRIPTION:
-            photo = bucket.blob(f'subscriptions/{user.language_code}_{user.currency}.png')
+            photo_path = f'subscriptions/{user.language_code}_{user.currency}.png'
+            photo = bucket.blob(photo_path)
             photo_data = photo.download_as_string()
+
             caption = get_localization(user.language_code).PROMO_CODE_CHOOSE_SUBSCRIPTION_ADMIN
             reply_markup = build_create_promo_code_subscription_keyboard(user.language_code)
-            await callback_query.message.answer_photo(photo=photo_data,
+
+            await callback_query.message.answer_photo(photo=BufferedInputFile(photo_data, filename=photo_path),
                                                       caption=caption,
                                                       reply_markup=reply_markup)
 

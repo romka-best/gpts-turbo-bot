@@ -29,7 +29,7 @@ def build_mode_keyboard(language_code: str, model: str) -> InlineKeyboardMarkup:
         [
             InlineKeyboardButton(
                 text=get_localization(language_code).CLOSE,
-                callback_data='close'
+                callback_data='mode:close'
             ),
         ],
     ]

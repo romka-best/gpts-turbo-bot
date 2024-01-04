@@ -1,7 +1,7 @@
-from aiogram import Router, F
+from aiogram import Router
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
-from aiogram.types import Message, CallbackQuery
+from aiogram.types import Message, CallbackQuery, BufferedInputFile
 
 from bot.database.main import bucket
 from bot.database.models.common import Model
@@ -36,10 +36,11 @@ async def profile(message: Message):
                                                         user.additional_usage_quota)
     reply_markup = build_profile_keyboard(user.language_code)
 
-    photo = bucket.blob(f'users/{user.id}.jpeg')
+    photo_path = f'users/avatars/{user.id}.jpeg'
+    photo = bucket.blob(photo_path)
     if photo.exists():
         photo_data = photo.download_as_string()
-        await message.answer_photo(photo=photo_data,
+        await message.answer_photo(photo=BufferedInputFile(photo_data, filename=photo_path),
                                    caption=text,
                                    reply_markup=reply_markup)
     else:
@@ -49,12 +50,21 @@ async def profile(message: Message):
 
 @profile_router.callback_query(lambda c: c.data.startswith('profile:'))
 async def handle_profile_selection(callback_query: CallbackQuery, state: FSMContext):
+    await callback_query.answer()
+
     user = await get_user(str(callback_query.from_user.id))
 
     action = callback_query.data.split(':')[1]
 
     if action == 'change_photo':
-        await callback_query.message.answer(text=get_localization(user.language_code).SEND_ME_YOUR_PICTURE)
+        photo_path = 'users/avatars/example.png'
+        photo = bucket.blob(photo_path)
+        photo_data = photo.download_as_string()
+
+        await callback_query.message.answer_photo(
+            photo=BufferedInputFile(photo_data, filename=photo_path),
+            caption=get_localization(user.language_code).SEND_ME_YOUR_PICTURE
+        )
 
         await state.set_state(Profile.waiting_for_photo)
     elif action == 'change_gender':
@@ -65,6 +75,8 @@ async def handle_profile_selection(callback_query: CallbackQuery, state: FSMCont
 
 @profile_router.callback_query(lambda c: c.data.startswith('profile_gender:'))
 async def handle_profile_gender_selection(callback_query: CallbackQuery, state: FSMContext):
+    await callback_query.answer()
+
     user = await get_user(str(callback_query.from_user.id))
 
     gender = callback_query.data.split(':')[1]
@@ -84,18 +96,3 @@ async def handle_profile_gender_selection(callback_query: CallbackQuery, state: 
 
     if user.current_model == Model.FACE_SWAP:
         await handle_face_swap(callback_query.message, state, str(callback_query.from_user.id))
-
-
-@profile_router.message(Profile.waiting_for_photo, F.PHOTO)
-async def handle_photo(message: Message, state: FSMContext):
-    user = await get_user(str(message.from_user.id))
-
-    photo_file = await message.photo[0]
-    photo_data = bytes(await photo_file.download())
-    blob = bucket.blob(f"users/{user.id}.jpeg")
-    blob.upload_from_string(photo_data, content_type='image/jpeg')
-
-    await state.clear()
-
-    if user.current_model == Model.FACE_SWAP:
-        await handle_face_swap(message, state, str(message.from_user.id))

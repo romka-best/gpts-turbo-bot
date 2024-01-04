@@ -1,6 +1,7 @@
 from typing import Protocol, TypedDict, Dict
 
 from bot.database.models.common import Currency, RoleName
+from bot.database.models.face_swap_package import FaceSwapPackageName
 from bot.database.models.package import PackageType
 from bot.database.models.subscription import SubscriptionType, SubscriptionPeriod, Subscription
 from bot.database.models.transaction import TransactionType, ServiceType
@@ -29,7 +30,14 @@ class Texts(Protocol):
     FEEDBACK_SUCCESS: str
 
     # Profile
+    TELL_ME_YOUR_GENDER: str
+    YOUR_GENDER: str
+    UNSPECIFIED: str
+    MALE: str
+    FEMALE: str
+    SEND_ME_YOUR_PICTURE: str
     CHANGE_PHOTO: str
+    CHANGE_PHOTO_SUCCESS: str
     CHANGE_GENDER: str
 
     # Language
@@ -187,25 +195,18 @@ TODO
     SHOW_CHATS: str
     CREATE_CHAT: str
     CREATE_CHAT_FORBIDDEN: str
+    CREATE_CHAT_SUCCESS: str
     TYPE_CHAT_NAME: str
     SWITCH_CHAT: str
     SWITCH_CHAT_FORBIDDEN: str
+    SWITCH_CHAT_SUCCESS: str
     DELETE_CHAT: str
     DELETE_CHAT_FORBIDDEN: str
     DELETE_CHAT_SUCCESS: str
 
     # Face swap
-    TELL_ME_YOUR_GENDER: str
-    YOUR_GENDER: str
-    UNSPECIFIED: str
-    MALE: str
-    FEMALE: str
-    SEND_ME_YOUR_PICTURE: str
     CHOOSE_YOUR_PACKAGE: str
-    CELEBRITIES: str
-    MOVIE_CHARACTERS: str
-    PROFESSIONS: str
-    SEVEN_WONDERS_OF_THE_ANCIENT_WORLD: str
+    GENERATIONS_IN_PACKAGES_ENDED: str
     FACE_SWAP_MIN_ERROR: str
     FACE_SWAP_MAX_ERROR: str
 
@@ -231,7 +232,8 @@ TODO
                    count_income_total_money: float,
                    count_expense_total_money: float,
                    count_total_money: float,
-                   count_chats_usage: Dict) -> str:
+                   count_chats_usage: Dict,
+                   count_face_swap_usage: Dict) -> str:
         emojis = Subscription.get_emojis()
 
         return f"""
@@ -247,6 +249,7 @@ TODO
     - <b>{SubscriptionType.PLATINUM} {emojis[SubscriptionType.PLATINUM]}:</b> {count_subscription_users[SubscriptionType.PLATINUM]}
 
 💰 <b>Финансы</b>
+<spoiler>
 4️⃣ <b>Транзакции:</b>
     ➖ <b>{TransactionType.EXPENSE}:</b> {count_expense_transactions_total}
     - <b>{ServiceType.GPT3}:</b> {count_expense_transactions[ServiceType.GPT3]}
@@ -294,21 +297,27 @@ TODO
 
     - <b>Всего:</b> {count_income_total_money}₽
 7️⃣ <b>Вал:</b> {count_total_money}₽
-
-🔢 <b>Созданные чаты</b>
-    - <b>{RoleName.PERSONAL_ASSISTANT}:</b> {count_chats_usage['PERSONAL_ASSISTANT']}
-    - <b>{RoleName.TUTOR}:</b> {count_chats_usage['TUTOR']}
-    - <b>{RoleName.LANGUAGE_TUTOR}:</b> {count_chats_usage['LANGUAGE_TUTOR']}
-    - <b>{RoleName.TECHNICAL_ADVISOR}:</b> {count_chats_usage['TECHNICAL_ADVISOR']}
-    - <b>{RoleName.MARKETER}:</b> {count_chats_usage['MARKETER']}
-    - <b>{RoleName.SMM_SPECIALIST}:</b> {count_chats_usage['SMM_SPECIALIST']}
-    - <b>{RoleName.CONTENT_SPECIALIST}:</b> {count_chats_usage['CONTENT_SPECIALIST']}
-    - <b>{RoleName.DESIGNER}:</b> {count_chats_usage['DESIGNER']}
-    - <b>{RoleName.SOCIAL_MEDIA_PRODUCER}:</b> {count_chats_usage['SOCIAL_MEDIA_PRODUCER']}
-    - <b>{RoleName.LIFE_COACH}:</b> {count_chats_usage['LIFE_COACH']}
-    - <b>{RoleName.ENTREPRENEUR}:</b> {count_chats_usage['ENTREPRENEUR']}
+</spoiler>
+💬 <b>Созданные чаты</b>
+    - <b>{RoleName.PERSONAL_ASSISTANT}:</b> {count_chats_usage[RoleName.PERSONAL_ASSISTANT]}
+    - <b>{RoleName.TUTOR}:</b> {count_chats_usage[RoleName.TUTOR]}
+    - <b>{RoleName.LANGUAGE_TUTOR}:</b> {count_chats_usage[RoleName.LANGUAGE_TUTOR]}
+    - <b>{RoleName.TECHNICAL_ADVISOR}:</b> {count_chats_usage[RoleName.TECHNICAL_ADVISOR]}
+    - <b>{RoleName.MARKETER}:</b> {count_chats_usage[RoleName.MARKETER]}
+    - <b>{RoleName.SMM_SPECIALIST}:</b> {count_chats_usage[RoleName.SMM_SPECIALIST]}
+    - <b>{RoleName.CONTENT_SPECIALIST}:</b> {count_chats_usage[RoleName.CONTENT_SPECIALIST]}
+    - <b>{RoleName.DESIGNER}:</b> {count_chats_usage[RoleName.DESIGNER]}
+    - <b>{RoleName.SOCIAL_MEDIA_PRODUCER}:</b> {count_chats_usage[RoleName.SOCIAL_MEDIA_PRODUCER]}
+    - <b>{RoleName.LIFE_COACH}:</b> {count_chats_usage[RoleName.LIFE_COACH]}
+    - <b>{RoleName.ENTREPRENEUR}:</b> {count_chats_usage[RoleName.ENTREPRENEUR]}
 
     - <b>Всего:</b> {count_chats_usage['ALL']}
+🎭 <b>Выбранные Face Swap</b>
+    - <b>{FaceSwapPackageName.CELEBRITIES['name']}:</b> {count_face_swap_usage[FaceSwapPackageName.CELEBRITIES['name']]}
+    - <b>{FaceSwapPackageName.MOVIE_CHARACTERS['name']}:</b> {count_face_swap_usage[FaceSwapPackageName.MOVIE_CHARACTERS['name']]}
+    - <b>{FaceSwapPackageName.PROFESSIONS['name']}:</b> {count_face_swap_usage[FaceSwapPackageName.PROFESSIONS['name']]}
+
+    - <b>Всего:</b> {count_face_swap_usage['ALL']}
 
 🔍 Это всё, что тебе нужно знать о текущем положении дел. Вперёд, к новым достижениям! 🚀
 """
@@ -366,5 +375,13 @@ TODO
         raise NotImplementedError
 
     @staticmethod
-    def processing_request() -> str:
+    def processing_request_text() -> str:
+        raise NotImplementedError
+
+    @staticmethod
+    def processing_request_image() -> str:
+        raise NotImplementedError
+
+    @staticmethod
+    def processing_request_face_swap() -> str:
         raise NotImplementedError

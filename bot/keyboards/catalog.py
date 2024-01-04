@@ -105,7 +105,7 @@ def build_catalog_keyboard(language_code: str, current_role: str) -> InlineKeybo
         [
             InlineKeyboardButton(
                 text=get_localization(language_code).CLOSE,
-                callback_data='close'
+                callback_data='catalog:close'
             )
         ],
     ]

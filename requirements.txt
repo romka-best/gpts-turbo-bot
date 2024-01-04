@@ -24,3 +24,6 @@ pydantic==2.5.3
 Pillow==10.1.0
 ffmpeg==1.4
 pydub==0.25.1
+uvicorn==0.25.0
+aiocron==1.8
+fastapi==0.108.0

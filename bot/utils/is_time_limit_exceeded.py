@@ -23,31 +23,31 @@ async def notify_user_after_timeout(bot: Bot, chat_id: int, delay: int, language
 
 
 async def is_time_limit_exceeded(message: Message, state: FSMContext, user: User, current_time: float) -> bool:
-    if user.additional_usage_quota[Quota.FAST_MESSAGES]:
+    if user.additional_usage_quota[Quota.FAST_MESSAGES] or user.current_model == Model.FACE_SWAP:
         return False
 
     user_data = await state.get_data()
     last_request_time = user_data.get('last_request_time', None)
 
-    if last_request_time and user.current_model != Model.FACE_SWAP:
-        time_elapsed = current_time - user_data['last_request_time']
-        if time_elapsed < config.LIMIT_BETWEEN_REQUESTS_SECONDS:
-            remaining_time = int(config.LIMIT_BETWEEN_REQUESTS_SECONDS - time_elapsed)
+    if not last_request_time:
+        return False
 
-            if user_data.get('additional_request_made', False):
-                await message.reply(text=get_localization(user.language_code).ALREADY_MAKE_REQUEST)
-                return True
+    time_elapsed = current_time - last_request_time
+    if time_elapsed >= config.LIMIT_BETWEEN_REQUESTS_SECONDS:
+        await state.clear()
+        return False
 
-            await state.update_data(additional_request_made=True)
-            await message.answer(text=get_localization(user.language_code).wait_for_another_request(remaining_time))
-            await notify_user_after_timeout(
-                bot=message.bot,
-                chat_id=message.chat.id,
-                delay=remaining_time,
-                language_code=user.language_code,
-                reply_to_message_id=message.message_id
-            )
-            return True
-        else:
-            await state.clear()
-    return False
+    remaining_time = int(config.LIMIT_BETWEEN_REQUESTS_SECONDS - time_elapsed)
+    if user_data.get('additional_request_made'):
+        await message.reply(text=get_localization(user.language_code).ALREADY_MAKE_REQUEST)
+    else:
+        await state.update_data(additional_request_made=True)
+        await message.reply(text=get_localization(user.language_code).wait_for_another_request(remaining_time))
+        asyncio.create_task(notify_user_after_timeout(
+            bot=message.bot,
+            chat_id=message.chat.id,
+            delay=remaining_time,
+            language_code=user.language_code,
+            reply_to_message_id=message.message_id
+        ))
+    return True

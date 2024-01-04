@@ -1,14 +1,12 @@
-import time
-
 from aiogram import Router
 from aiogram.fsm.context import FSMContext
-from aiogram.types import Message
+from aiogram.types import Message, CallbackQuery
 from telegram import constants
 
 from bot.database.main import db
-from bot.database.models.common import Model, Quota, Currency
+from bot.database.models.common import Quota, Currency, Model
 from bot.database.models.transaction import ServiceType, TransactionType
-from bot.database.models.user import UserSettings
+from bot.database.models.user import UserSettings, User
 from bot.database.operations.chat import get_chat
 from bot.database.operations.message import write_message, get_messages_by_chat_id
 from bot.database.operations.transaction import write_transaction
@@ -19,8 +17,6 @@ from bot.helpers.send_message_to_admins import send_message_to_admins
 from bot.integrations.openAI import get_response_message
 from bot.keyboards.chat_gpt import build_chat_gpt_continue_generating_keyboard
 from bot.locales.main import get_localization
-from bot.utils.is_messages_limit_exceeded import is_messages_limit_exceeded
-from bot.utils.is_time_limit_exceeded import is_time_limit_exceeded
 
 chat_gpt_router = Router()
 
@@ -30,24 +26,8 @@ PRICE_GPT4_INPUT = 0.00001
 PRICE_GPT4_OUTPUT = 0.00003
 
 
-@chat_gpt_router.message()
-async def handle_chatgpt(message: Message, state: FSMContext):
-    user = await get_user(str(message.from_user.id))
+async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_quota: Quota):
     user_data = await state.get_data()
-
-    current_time = time.time()
-
-    if user.current_model == Model.GPT3:
-        user_quota = Quota.GPT3
-    elif user.current_model == Model.GPT4:
-        user_quota = Quota.GPT4
-    else:
-        return
-    need_exit = (await is_time_limit_exceeded(message, state, user, current_time) or
-                 await is_messages_limit_exceeded(message, user, user_quota))
-    if need_exit:
-        return
-    await state.update_data(last_request_time=current_time)
 
     text = user_data.get('recognized_text', None)
     if text is None:
@@ -70,7 +50,7 @@ async def handle_chatgpt(message: Message, state: FSMContext):
                   } for message in sorted_messages
               ]
 
-    processing_message = await message.reply(text=get_localization(user.language_code).processing_request())
+    processing_message = await message.reply(text=get_localization(user.language_code).processing_request_text())
 
     if user.settings[UserSettings.TURN_ON_VOICE_MESSAGES]:
         await message.bot.send_chat_action(chat_id=message.chat.id, action=constants.ChatAction.RECORD_VOICE)
@@ -124,3 +104,26 @@ async def handle_chatgpt(message: Message, state: FSMContext):
                                      message=f"#error\n\nALARM! Ошибка у пользователя: {user.id}\nИнформация:\n{e}")
     finally:
         await processing_message.delete()
+
+
+@chat_gpt_router.callback_query(lambda c: c.data.startswith('chat_gpt:'))
+async def handle_face_swap_choose_selection(callback_query: CallbackQuery, state: FSMContext):
+    await callback_query.answer()
+
+    user = await get_user(str(callback_query.from_user.id))
+
+    action = callback_query.data.split(':')[1]
+
+    if action == 'continue_generating':
+        await state.update_data(recognized_text=get_localization(user.language_code).CONTINUE_GENERATING)
+        if user.current_model == Model.GPT3:
+            user_quota = Quota.GPT3
+        elif user.current_model == Model.GPT4:
+            user_quota = Quota.GPT4
+        else:
+            raise NotImplemented
+
+        await handle_chatgpt(callback_query.message, state, user, user_quota)
+        await callback_query.message.edit_reply_markup(reply_markup=None)
+
+    await state.clear()
