@@ -1,7 +1,6 @@
 from typing import Protocol, TypedDict, Dict
 
 from bot.database.models.common import Currency, RoleName
-from bot.database.models.face_swap_package import FaceSwapPackageName
 from bot.database.models.package import PackageType
 from bot.database.models.subscription import SubscriptionType, SubscriptionPeriod, Subscription
 from bot.database.models.transaction import TransactionType, ServiceType
@@ -235,6 +234,10 @@ TODO
                    count_chats_usage: Dict,
                    count_face_swap_usage: Dict) -> str:
         emojis = Subscription.get_emojis()
+        face_swap_info = ""
+        for face_swap_key, face_swap_value in count_face_swap_usage.items():
+            if face_swap_key != 'ALL':
+                face_swap_info += f"\n    - <b>{face_swap_key}:</b> {face_swap_value}"
 
         return f"""
 📈 <b>Статистика за {period} готова!</b>
@@ -249,7 +252,7 @@ TODO
     - <b>{SubscriptionType.PLATINUM} {emojis[SubscriptionType.PLATINUM]}:</b> {count_subscription_users[SubscriptionType.PLATINUM]}
 
 💰 <b>Финансы</b>
-<spoiler>
+<span class="tg-spoiler">
 4️⃣ <b>Транзакции:</b>
     ➖ <b>{TransactionType.EXPENSE}:</b> {count_expense_transactions_total}
     - <b>{ServiceType.GPT3}:</b> {count_expense_transactions[ServiceType.GPT3]}
@@ -297,7 +300,7 @@ TODO
 
     - <b>Всего:</b> {count_income_total_money}₽
 7️⃣ <b>Вал:</b> {count_total_money}₽
-</spoiler>
+</span>
 💬 <b>Созданные чаты</b>
     - <b>{RoleName.PERSONAL_ASSISTANT}:</b> {count_chats_usage[RoleName.PERSONAL_ASSISTANT]}
     - <b>{RoleName.TUTOR}:</b> {count_chats_usage[RoleName.TUTOR]}
@@ -313,9 +316,7 @@ TODO
 
     - <b>Всего:</b> {count_chats_usage['ALL']}
 🎭 <b>Выбранные Face Swap</b>
-    - <b>{FaceSwapPackageName.CELEBRITIES['name']}:</b> {count_face_swap_usage[FaceSwapPackageName.CELEBRITIES['name']]}
-    - <b>{FaceSwapPackageName.MOVIE_CHARACTERS['name']}:</b> {count_face_swap_usage[FaceSwapPackageName.MOVIE_CHARACTERS['name']]}
-    - <b>{FaceSwapPackageName.PROFESSIONS['name']}:</b> {count_face_swap_usage[FaceSwapPackageName.PROFESSIONS['name']]}
+    {face_swap_info}
 
     - <b>Всего:</b> {count_face_swap_usage['ALL']}
 

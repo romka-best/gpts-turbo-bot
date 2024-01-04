@@ -9,8 +9,8 @@ from aiogram.types import Message
 from bot.database.main import bucket
 from bot.database.models.common import Model, Quota, Currency
 from bot.database.models.transaction import TransactionType, ServiceType
-from bot.database.models.user import UserGender
-from bot.database.operations.face_swap_package import update_face_swap_package, get_face_swap_packages_by_user_id
+from bot.database.operations.face_swap_package import get_used_face_swap_packages_by_user_id, \
+    update_used_face_swap_package
 from bot.database.operations.transaction import write_transaction
 from bot.database.operations.user import get_user, update_user
 from bot.handlers.face_swap_handler import handle_face_swap
@@ -36,11 +36,10 @@ async def handle_photo(message: Message, state: FSMContext):
         blob = bucket.blob(f"users/avatars/{user.id}.jpeg")
         blob.upload_from_string(photo_data, content_type='image/jpeg')
 
-        face_swap_packages = await get_face_swap_packages_by_user_id(user.id)
-        for face_swap_package in face_swap_packages:
-            await update_face_swap_package(face_swap_package.id, {
-                UserGender.MALE: [],
-                UserGender.FEMALE: []
+        used_face_swap_packages = await get_used_face_swap_packages_by_user_id(user.id)
+        for used_face_swap_package in used_face_swap_packages:
+            await update_used_face_swap_package(used_face_swap_package.id, {
+                "used_images": []
             })
 
         await message.reply(get_localization(user.language_code).CHANGE_PHOTO_SUCCESS)

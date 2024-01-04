@@ -66,8 +66,11 @@ async def on_startup():
 
 @app.post(WEBHOOK_PATH)
 async def bot_webhook(update: dict):
-    telegram_update = types.Update(**update)
-    await dp.feed_update(bot=bot, update=telegram_update)
+    try:
+        telegram_update = types.Update(**update)
+        await dp.feed_update(bot=bot, update=telegram_update)
+    except Exception as e:
+        logging.exception(f"Error in bot_webhook: {e}")
 
 
 @app.on_event("shutdown")

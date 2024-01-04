@@ -19,7 +19,7 @@ from bot.database.operations.face_swap_package import (
     get_face_swap_package,
     get_used_face_swap_package_by_user_id_and_package_id,
     get_face_swap_package_by_name_and_gender,
-    write_used_face_swap_package, update_used_face_swap_package)
+    write_used_face_swap_package, update_used_face_swap_package, get_face_swap_packages)
 from bot.database.operations.transaction import write_transaction
 from bot.database.operations.user import get_user, update_user
 from bot.helpers.send_images import send_images
@@ -62,7 +62,8 @@ async def handle_face_swap(message: Message, state: FSMContext, user_id: str):
                     has_more = True
                     break
             if has_more:
-                reply_markup = build_face_swap_choose_keyboard(user.language_code)
+                face_swap_packages = await get_face_swap_packages()
+                reply_markup = build_face_swap_choose_keyboard(user.language_code, face_swap_packages)
                 await message.answer(text=get_localization(user.language_code).CHOOSE_YOUR_PACKAGE,
                                      reply_markup=reply_markup)
             else:
@@ -132,7 +133,8 @@ async def handle_face_swap_choose_selection(callback_query: CallbackQuery, state
     elif action == 'back':
         user = await get_user(str(callback_query.from_user.id))
 
-        reply_markup = build_face_swap_choose_keyboard(user.language_code)
+        face_swap_packages = await get_face_swap_packages()
+        reply_markup = build_face_swap_choose_keyboard(user.language_code, face_swap_packages)
         await callback_query.message.edit_text(text=get_localization(user.language_code).CHOOSE_YOUR_PACKAGE,
                                                reply_markup=reply_markup)
 
