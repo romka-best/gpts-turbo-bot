@@ -22,16 +22,10 @@ def build_create_promo_code_keyboard(language_code: str) -> InlineKeyboardMarkup
     buttons = [
         [
             InlineKeyboardButton(
-                text="💳 Подписка",
+                text=get_localization(language_code).SUBSCRIPTION,
                 callback_data=f'create_promo_code:{PromoCodeType.SUBSCRIPTION}'
             )
         ],
-        [
-            InlineKeyboardButton(
-                text=get_localization(language_code).CANCEL,
-                callback_data='create_promo_code:cancel'
-            )
-        ]
     ]
 
     return InlineKeyboardMarkup(inline_keyboard=buttons)

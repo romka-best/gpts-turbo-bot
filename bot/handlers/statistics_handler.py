@@ -4,8 +4,6 @@ from aiogram import Router
 from aiogram.filters import Command
 from aiogram.types import Message, CallbackQuery
 
-from bot.config import config
-from bot.database.models.common import RoleName
 from bot.database.models.subscription import SubscriptionType
 from bot.database.models.transaction import ServiceType, TransactionType
 from bot.database.operations.chat import get_chats
@@ -29,7 +27,7 @@ async def statistics(message: Message):
                              reply_markup=reply_markup)
 
 
-@statistics_router.callback_query()
+@statistics_router.callback_query(lambda c: c.data.startswith('statistics:'))
 async def handle_statistics_selection(callback_query: CallbackQuery):
     await callback_query.answer()
 
@@ -146,21 +144,10 @@ async def handle_statistics_selection(callback_query: CallbackQuery):
     total_money = count_income_total_money - count_expense_total_money * 100
 
     count_chats_usage = {
-        RoleName.PERSONAL_ASSISTANT: 0,
-        RoleName.TUTOR: 0,
-        RoleName.LANGUAGE_TUTOR: 0,
-        RoleName.TECHNICAL_ADVISOR: 0,
-        RoleName.MARKETER: 0,
-        RoleName.SMM_SPECIALIST: 0,
-        RoleName.CONTENT_SPECIALIST: 0,
-        RoleName.DESIGNER: 0,
-        RoleName.SOCIAL_MEDIA_PRODUCER: 0,
-        RoleName.LIFE_COACH: 0,
-        RoleName.ENTREPRENEUR: 0,
         'ALL': len(chats),
     }
     for chat in chats:
-        count_chats_usage[chat.role] += 1
+        count_chats_usage[chat.role] = count_chats_usage.get(chat.role, 0) + 1
 
     count_face_swap_usage = {
         'ALL': len(used_face_swap_packages)
@@ -170,11 +157,12 @@ async def handle_statistics_selection(callback_query: CallbackQuery):
             filter(
                 lambda used: face_swap_package.id == used.package_id, used_face_swap_packages
             )
-        )[0]
+        )
+        used_images = len(used_face_swap_package[0].used_images) if len(used_face_swap_package) else 0
         count_face_swap_usage[face_swap_package.name] = count_face_swap_usage.get(
             face_swap_package.name,
-            0
-        ) + used_face_swap_package.used_images
+            used_images
+        )
 
     await callback_query.message.answer(text=get_localization(user.language_code).statistics(
         period=period,

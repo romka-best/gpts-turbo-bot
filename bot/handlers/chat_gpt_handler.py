@@ -3,12 +3,13 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
 from telegram import constants
 
-from bot.database.main import db
+from bot.database.main import firebase
 from bot.database.models.common import Quota, Currency, Model
 from bot.database.models.transaction import ServiceType, TransactionType
 from bot.database.models.user import UserSettings, User
 from bot.database.operations.chat import get_chat
 from bot.database.operations.message import write_message, get_messages_by_chat_id
+from bot.database.operations.role import get_role_by_name
 from bot.database.operations.transaction import write_transaction
 from bot.database.operations.user import get_user
 from bot.helpers.create_new_message_and_update_user import create_new_message_and_update_user
@@ -37,11 +38,12 @@ async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_q
 
     chat = await get_chat(user.current_chat_id)
     messages = await get_messages_by_chat_id(user.current_chat_id)
+    role = await get_role_by_name(chat.role)
     sorted_messages = sorted(messages, key=lambda m: m.created_at)
     history = [
                   {
                       'role': 'system',
-                      'content': getattr(get_localization(user.language_code), chat.role)["instruction"]
+                      'content': role.translated_instructions[user.language_code]
                   }
               ] + [
                   {
@@ -80,7 +82,7 @@ async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_q
                                 quantity=1)
 
         role, content = response_message.role, response_message.content
-        transaction = db.transaction()
+        transaction = firebase.db.transaction()
         await create_new_message_and_update_user(transaction, role, content, user, user_quota)
 
         if user.settings[UserSettings.TURN_ON_VOICE_MESSAGES]:
@@ -99,9 +101,13 @@ async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_q
                 reply_markup=reply_markup if response['finish_reason'] == 'length' else None,
             )
     except Exception as e:
-        await message.answer(f"{get_localization(user.language_code).ERROR}: {e}\n\nPlease contact @roman_danilov")
+        await message.answer(
+            text=f"{get_localization(user.language_code).ERROR}\n\nPlease contact @roman_danilov",
+            parse_mode=None
+        )
         await send_message_to_admins(bot=message.bot,
-                                     message=f"#error\n\nALARM! Ошибка у пользователя: {user.id}\nИнформация:\n{e}")
+                                     message=f"#error\n\nALARM! Ошибка у пользователя: {user.id}\nИнформация:\n{e}",
+                                     parse_mode=None)
     finally:
         await processing_message.delete()
 

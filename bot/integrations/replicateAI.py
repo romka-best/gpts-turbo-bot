@@ -1,45 +1,49 @@
+import asyncio
+import logging
+import os
 import time
-from typing import Dict
+import traceback
+from typing import Dict, List
 
 import replicate
 
+from bot.config import config
 
-async def get_face_swap_image(width: int, height: int, target_image: str, source_image: str) -> Dict:
-    model_ref = "yan-ops/face_swap:1c128bbaa2b685bcee5378b39d079a2c52de358a54d6e432f5dc3d61689e9de3"
-    input_parameters = {
-        "width": width,
-        "height": height,
-        "prompt": "Please perform a high-quality face swap ensuring sharp and clear edges around the face. "
-                  "The swapped face should blend seamlessly with the target image without any blurring or pixelation. "
-                  "Adjust the lighting and texture to match the original image for a natural and realistic look. "
-                  "The face should be correctly aligned and proportionate to the body in the target image. "
-                  "Aim for a result where the face swap is not noticeable and "
-                  "appears as a natural part of the original photo.",
-        "cache_days": 10,
-        "det_thresh": 0.1,
-        "target_image": target_image,
-        "source_image": source_image,
-        "num_inference_steps": 5,
-        "num_images_per_prompt": 1
-    }
+os.environ["REPLICATE_API_TOKEN"] = config.REPLICATE_API_TOKEN.get_secret_value()
+FACE_SWAP_MODEL_REF = "yan-ops/face_swap:d5900f9ebed33e7ae08a07f17e0d98b4ebc68ab9528a70462afc3899cfe23bab"
 
-    start_time = time.time()
-    output = await replicate.async_run(
-        ref=model_ref,
-        input=input_parameters
-    )
-    end_time = time.time()
-    seconds = end_time - start_time
 
-    page_1 = await replicate.predictions.async_list()
-    for item in page_1:
-        if output == item.output:
-            try:
-                seconds = item.metrics['predict_time']
-            except KeyError:
-                break
+async def get_face_swap_images(images: List[Dict]):
+    tasks = [get_face_swap_image(image['target_image'], image['source_image']) for image in images]
+    results = await asyncio.gather(*tasks)
 
-    return {
-        "image": output['image'],
-        "seconds": seconds,
-    }
+    return results
+
+
+async def get_face_swap_image(target_image: str, source_image: str) -> Dict:
+    try:
+        input_parameters = {
+            "target_image": target_image,
+            "source_image": source_image,
+        }
+
+        start_time = time.time()
+        output = await replicate.async_run(
+            ref=FACE_SWAP_MODEL_REF,
+            input=input_parameters
+        )
+
+        end_time = time.time()
+        seconds = end_time - start_time
+
+        return {
+            "image": output['image'],
+            "seconds": seconds,
+        }
+    except Exception as e:
+        error_trace = traceback.format_exc()
+        logging.error(f'Произошла ошибка при обращении к ReplicateAPI: {e}\n{error_trace}')
+        return {
+            "image": None,
+            "seconds": 0,
+        }

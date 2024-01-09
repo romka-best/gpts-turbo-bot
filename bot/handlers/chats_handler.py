@@ -3,7 +3,7 @@ from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
 
-from bot.database.main import db
+from bot.database.main import firebase
 from bot.database.models.common import Quota
 from bot.database.operations.chat import get_chats_by_user_id, get_chat_by_user_id, delete_chat
 from bot.database.operations.user import get_user, update_user
@@ -101,10 +101,6 @@ async def handle_create_chat_selection(callback_query: CallbackQuery, state: FSM
         await callback_query.message.delete()
 
         await state.clear()
-    elif action == 'cancel':
-        await callback_query.message.delete()
-
-        await state.clear()
 
 
 @chats_router.callback_query(lambda c: c.data.startswith('switch_chat:'))
@@ -147,7 +143,7 @@ async def handle_delete_chat_selection(callback_query: CallbackQuery):
 async def chat_name_sent(message: Message, state: FSMContext):
     user = await get_user(str(message.from_user.id))
 
-    transaction = db.transaction()
+    transaction = firebase.db.transaction()
     await create_new_chat(transaction, user, str(message.chat.id), message.text)
 
     await message.answer(get_localization(user.language_code).CREATE_CHAT_SUCCESS)

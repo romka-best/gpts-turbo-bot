@@ -3,15 +3,16 @@ from datetime import datetime, timezone
 from aiogram import Router, Bot, F
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
-from aiogram.types import Message, CallbackQuery, LabeledPrice, PreCheckoutQuery, SuccessfulPayment, BufferedInputFile
+from aiogram.types import Message, CallbackQuery, LabeledPrice, PreCheckoutQuery, BufferedInputFile
 
 from bot.config import config
-from bot.database.main import bucket, db
-from bot.database.models.common import Quota
+from bot.database.main import firebase
+from bot.database.models.common import Quota, DEFAULT_ROLE
 from bot.database.models.package import PackageStatus, PackageType, Package
 from bot.database.models.subscription import Subscription, SubscriptionStatus, SubscriptionLimit, SubscriptionType
 from bot.database.models.transaction import TransactionType, ServiceType
 from bot.database.models.user import UserSettings
+from bot.database.operations.chat import update_chat
 from bot.database.operations.package import write_package, get_last_package_by_user_id, get_packages_by_user_id
 from bot.database.operations.subscription import write_subscription, get_last_subscription_by_user_id, \
     update_subscription
@@ -19,6 +20,7 @@ from bot.database.operations.transaction import write_transaction
 from bot.database.operations.user import get_user, get_users
 from bot.helpers.create_package import create_package
 from bot.helpers.create_subscription import create_subscription
+from bot.keyboards.common import build_cancel_keyboard
 from bot.keyboards.payment import build_subscriptions_keyboard, build_period_of_subscription_keyboard, \
     build_packages_keyboard, build_quantity_of_packages_keyboard
 from bot.locales.main import get_localization
@@ -32,13 +34,12 @@ class PaymentType:
     PACKAGE = 'PACKAGE'
 
 
-@payment_router.message(Command("subscribe"))
-async def subscribe(message: Message):
-    user = await get_user(str(message.from_user.id))
+async def handle_subscribe(message: Message, user_id: str):
+    user = await get_user(str(user_id))
 
     photo_path = f'subscriptions/{user.language_code}_{user.currency}.png'
-    photo = bucket.blob(photo_path)
-    photo_data = photo.download_as_string()
+    photo = await firebase.bucket.get_blob(photo_path)
+    photo_data = await photo.download()
 
     text = get_localization(user.language_code).subscribe(user.currency)
     reply_markup = build_subscriptions_keyboard(user.language_code)
@@ -48,7 +49,12 @@ async def subscribe(message: Message):
                                reply_markup=reply_markup)
 
 
-@payment_router.callback_query(lambda c: c.data.startswith('subscribe:'))
+@payment_router.message(Command("subscribe"))
+async def subscribe(message: Message):
+    await handle_subscribe(message, str(message.from_user.id))
+
+
+@payment_router.callback_query(lambda c: c.data.startswith('subscription:'))
 async def handle_subscription_selection(callback_query: CallbackQuery):
     await callback_query.answer()
 
@@ -85,7 +91,7 @@ async def handle_period_of_subscription_selection(callback_query: CallbackQuery)
         prices=[LabeledPrice(label=name, amount=price * 100)],
     )
 
-    await callback_query.delete_message()
+    await callback_query.message.delete()
 
 
 @payment_router.message(Command("buy"))
@@ -93,8 +99,8 @@ async def buy(message: Message):
     user = await get_user(str(message.from_user.id))
 
     photo_path = f'packages/{user.language_code}_{user.currency}.png'
-    photo = bucket.blob(photo_path)
-    photo_data = photo.download_as_string()
+    photo = await firebase.bucket.get_blob(photo_path)
+    photo_data = await photo.download()
 
     text = get_localization(user.language_code).buy()
     reply_markup = build_packages_keyboard(user.language_code)
@@ -126,7 +132,7 @@ async def handle_subscription_selection(callback_query: CallbackQuery, state: FS
             prices=[LabeledPrice(label=name, amount=price * 100)],
         )
 
-        await callback_query.delete_message()
+        await callback_query.message.delete()
     elif package_type == PackageType.VOICE_MESSAGES:
         price = Package.get_price(user.currency, package_type, 1)
         name = get_localization(user.language_code).ANSWERS_AND_REQUESTS_WITH_VOICE_MESSAGES
@@ -141,7 +147,7 @@ async def handle_subscription_selection(callback_query: CallbackQuery, state: FS
             prices=[LabeledPrice(label=name, amount=price * 100)],
         )
 
-        await callback_query.delete_message()
+        await callback_query.message.delete()
     elif package_type == PackageType.FAST_MESSAGES:
         price = Package.get_price(user.currency, package_type, 1)
         name = get_localization(user.language_code).FAST_ANSWERS
@@ -156,7 +162,7 @@ async def handle_subscription_selection(callback_query: CallbackQuery, state: FS
             prices=[LabeledPrice(label=name, amount=price * 100)],
         )
 
-        await callback_query.delete_message()
+        await callback_query.message.delete()
     else:
         message = get_localization(user.language_code).choose_min(package_type)
 
@@ -176,11 +182,11 @@ async def handle_quantity_of_package_selection(callback_query: CallbackQuery, st
     if callback_query.data == 'cancel':
         await state.clear()
 
-        await callback_query.delete_message()
+        await callback_query.message.delete()
 
 
 @payment_router.message(Payment.waiting_for_package_quantity)
-async def feedback_sent(message: Message, state: FSMContext):
+async def quantity_of_package_sent(message: Message, state: FSMContext):
     user = await get_user(str(message.from_user.id))
 
     try:
@@ -188,13 +194,15 @@ async def feedback_sent(message: Message, state: FSMContext):
         package_type = user_data['package_type']
         quantity = int(message.text)
         if (
-            (package_type == PackageType.GPT3 and quantity < 50) or
-            (package_type == PackageType.GPT4 and quantity < 50) or
+            (package_type == PackageType.GPT3 and quantity < 100) or
+            (package_type == PackageType.GPT4 and quantity < 10) or
             (package_type == PackageType.CHAT and quantity < 1) or
             (package_type == PackageType.DALLE3 and quantity < 10) or
             (package_type == PackageType.FACE_SWAP and quantity < 10)
         ):
-            await message.reply(text=get_localization(user.language_code).MIN_ERROR)
+            reply_markup = build_cancel_keyboard(user.language_code)
+            await message.reply(text=get_localization(user.language_code).MIN_ERROR,
+                                reply_markup=reply_markup)
         else:
             price = Package.get_price(user.currency, package_type, quantity)
             name = ""
@@ -226,7 +234,9 @@ async def feedback_sent(message: Message, state: FSMContext):
 
             await state.clear()
     except ValueError:
-        await message.reply(text=get_localization(user.language_code).VALUE_ERROR)
+        reply_markup = build_cancel_keyboard(user.language_code)
+        await message.reply(text=get_localization(user.language_code).VALUE_ERROR,
+                            reply_markup=reply_markup)
 
 
 @payment_router.pre_checkout_query()
@@ -270,7 +280,7 @@ async def successful_payment(message: Message):
     if payment_type == PaymentType.SUBSCRIPTION:
         subscription = await get_last_subscription_by_user_id(user_id)
 
-        transaction = db.transaction()
+        transaction = firebase.db.transaction()
         await create_subscription(transaction,
                                   subscription.id,
                                   subscription.user_id,
@@ -286,7 +296,7 @@ async def successful_payment(message: Message):
     elif payment_type == PaymentType.PACKAGE:
         package = await get_last_package_by_user_id(user_id)
 
-        transaction = db.transaction()
+        transaction = firebase.db.transaction()
         await create_package(transaction,
                              package.id,
                              package.user_id,
@@ -322,11 +332,11 @@ async def successful_payment(message: Message):
 async def update_monthly_limits(bot: Bot):
     all_users = await get_users()
     for i in range(0, len(all_users), config.USER_BATCH_SIZE):
-        batch = db.batch()
+        batch = firebase.db.batch()
         user_batch = all_users[i:i + config.USER_BATCH_SIZE]
 
         for user in user_batch:
-            user_ref = db.collection("users").document(user.id)
+            user_ref = firebase.db.collection("users").document(user.id)
 
             current_date = datetime.now(timezone.utc)
             is_time_to_update_limits = (current_date - user.last_subscription_limit_update).days >= 30
@@ -348,6 +358,10 @@ async def update_monthly_limits(bot: Bot):
                     if not user.additional_usage_quota[Quota.VOICE_MESSAGES]:
                         user.settings[UserSettings.TURN_ON_VOICE_MESSAGES] = False
 
+                    if not user.additional_usage_quota[Quota.ACCESS_TO_CATALOG]:
+                        await update_chat(user.current_chat_id, {
+                            "role": DEFAULT_ROLE,
+                        })
                     await update_subscription(current_subscription.id, {
                         "status": SubscriptionStatus.FINISHED,
                     })

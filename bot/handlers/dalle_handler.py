@@ -54,8 +54,12 @@ async def handle_dalle(message: Message, state: FSMContext, user: User, user_quo
             photo=response_url,
         )
     except Exception as e:
-        await message.answer(f"{get_localization(user.language_code).ERROR}: {e}\n\nPlease contact @roman_danilov")
+        await message.answer(
+            text=f"{get_localization(user.language_code).ERROR}\n\nPlease contact @roman_danilov",
+            parse_mode=None
+        )
         await send_message_to_admins(bot=message.bot,
-                                     message=f"#error\n\nALARM! Ошибка у пользователя: {user.id}\nИнформация:\n{e}")
+                                     message=f"#error\n\nALARM! Ошибка у пользователя: {user.id}\nИнформация:\n{e}",
+                                     parse_mode=None)
     finally:
         await processing_message.delete()

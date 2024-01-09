@@ -10,17 +10,19 @@ class Settings(BaseSettings):
     BASE_DIR: ClassVar[Path] = Path(__file__).resolve().parent.parent
 
     WEBHOOK_URL: str
+    REDIS_URL: str
 
     USER_BATCH_SIZE: int = 500
     LIMIT_BETWEEN_REQUESTS_SECONDS: int = 30
     ADMIN_CHAT_IDS: List[str] = ["354543567", "6078317830"]
 
-    BOT_TOKEN: SecretStr
-    YOOKASSA_TOKEN: SecretStr
-
     CERTIFICATE_NAME: SecretStr
     STORAGE_NAME: SecretStr
 
+    BOT_TOKEN: SecretStr
+    YOOKASSA_TOKEN: SecretStr
+
+    OAUTH_YANDEX_TOKEN: SecretStr
     OPENAI_API_KEY: SecretStr
     REPLICATE_API_TOKEN: SecretStr
 

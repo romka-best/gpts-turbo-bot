@@ -354,7 +354,7 @@ class FaceSwapPackageInfo:
                 'status': FaceSwapPackageStatus.PUBLIC,
             },
             {
-                'name': '11_Astronaut.jpeg',
+                'name': '11_Astronaut.jpg',
                 'status': FaceSwapPackageStatus.PUBLIC,
             },
             {

@@ -1,6 +1,6 @@
 from typing import Optional
 
-from aiogram.types import Message, InlineKeyboardMarkup
+from aiogram.types import Message, InlineKeyboardMarkup, BufferedInputFile
 
 from bot.database.models.common import Currency
 from bot.database.models.transaction import TransactionType, ServiceType
@@ -19,5 +19,5 @@ async def reply_with_voice(message: Message, text: str, user_id: str, reply_mark
                             currency=Currency.USD,
                             quantity=1)
 
-    await message.answer_voice(voice=audio_content,
+    await message.answer_voice(voice=BufferedInputFile(audio_content.read(), filename='answer.ogg'),
                                reply_markup=reply_markup)

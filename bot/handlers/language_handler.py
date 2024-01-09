@@ -29,4 +29,4 @@ async def handle_language_selection(callback_query: CallbackQuery):
         "language_code": chosen_language
     })
 
-    await callback_query.edit_message_text(text=get_localization(chosen_language).CHOOSE_LANGUAGE)
+    await callback_query.message.edit_text(text=get_localization(chosen_language).CHOOSE_LANGUAGE)

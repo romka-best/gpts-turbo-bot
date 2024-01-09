@@ -22,27 +22,27 @@ Here's a quick guide to get you started:
 ✉️ To get a text response, simply type your request into the chat
 🌅 To generate an image, first choose your AI model in /mode, then let your imagination run wild!
 🔄 Swap between different neural networks with /mode to suit your creative needs
-🔍 Use /info to learn more about what each AI model can do
+🔍 Use /mode to learn more about what each AI model can do
 👁️‍🗨️ Dive into /catalog to pick a specialized assistant tailored to your tasks
 📊 Check your usage and subscription details with /profile
 🔧 Personalize your experience further in /settings
 
-And there's more! Just tap /commands to see all the magical AI commands at your disposal.
+And there's more! Just tap /help to see all the magical AI commands at your disposal.
 Let AI be your co-pilot in this adventure! 🚀
 """
     COMMANDS = """
 🤖 Here's what you can explore:
 
-🚀 /start - <b>About me</b>
-🌐 /language - Engage with any language, <b>set system messages</b>.
+👋 /start - <b>About me</b>
+🌍 /language - Engage with any language, <b>set system messages</b>.
 🧠 /mode - <b>Swap neural network models</b> on the fly with — <b>ChatGPT3</b>, <b>ChatGPT4</b>, <b>DALLE-3</b>, or <b>Face Swap</b>!
-📜 /info - Curious about what each model can do? Here you'll find all the answers.
-💼 /profile - <b>Check your profile</b> to see your usage quota and more.
+👤 /profile - <b>Check your profile</b> to see your usage quota and more.
 🔧 /settings - <b>Customize your experience</b> for a seamless user experience.
-💳 /subscribe or /buy - <b>Learn about our plans and perks</b> or opt for individual packages.
-🎁 /promo_code - Unleash exclusive AI features and special offers with your promo code.
 🎭 /catalog - <b>Pick a specialized assistant</b> for tasks tailored just for you.
 💬 /chats - <b>Create, switch, or delete context-specific chats</b>.
+💳 /subscribe or /buy - <b>Learn about our plans and perks</b> or opt for individual packages.
+🎁 /promo_code - <b>Unleash exclusive AI features</b> and special offers with your <b>promo code</b>.
+📡 /feedback - Give me a feedback and <b>improve me</b>.
 
 Just type away or use a command to begin your AI journey! 🌟
 """
@@ -74,24 +74,24 @@ Your opinion matters a lot to us! 💖
     MALE = "Male 🚹"
     FEMALE = "Female 🚺"
     SEND_ME_YOUR_PICTURE = """
-    📸 <b>Ready for a photo transformation? Here's how to get started!</b>
+📸 <b>Ready for a photo transformation? Here's how to get started!</b>
 
-    👍 <b>Ideal photo guidelines</b>:
-    - Clear, high-quality selfie.
-    - Only one person should be in the selfie.
+👍 <b>Ideal photo guidelines</b>:
+- Clear, high-quality selfie.
+- Only one person should be in the selfie.
 
-    👎 <b>Please avoid these types of photos</b>:
-    - Group photos.
-    - Animals.
-    - Children under 18 years.
-    - Full body shots.
-    - Nude or inappropriate images.
-    - Sunglasses or any face-obscuring items.
-    - Blurry, out-of-focus images.
-    - Videos and animations.
-    - Compressed or altered images.
+👎 <b>Please avoid these types of photos</b>:
+- Group photos.
+- Animals.
+- Children under 18 years.
+- Full body shots.
+- Nude or inappropriate images.
+- Sunglasses or any face-obscuring items.
+- Blurry, out-of-focus images.
+- Videos and animations.
+- Compressed or altered images.
 
-    Once you've got the perfect shot, upload your photo and let the magic happen 🌟
+Once you've got the perfect shot, upload your photo and let the magic happen 🌟
     """
     CHANGE_PHOTO = "Change photo 📷"
     CHANGE_PHOTO_SUCCESS = "📸 Photo successfully uploaded! 🌟"
@@ -107,7 +107,7 @@ Your opinion matters a lot to us! 💖
 
 If you've got a <b>promo code</b>, just type it in to reveal hidden features and special surprises 🎁
 
-<b>No code?</b> No problem! Simply click 'Exit' to continue exploring the AI universe without it 🚀
+<b>No code?</b> No problem! Simply click 'Cancel' to continue exploring the AI universe without it 🚀
 """
     PROMO_CODE_SUCCESS = """
 🎉 <b>Woohoo! You've Struck Gold!</b> 🌟
@@ -118,7 +118,7 @@ Thanks for joining us on this AI-powered adventure. Enjoy the extra goodies and 
 Happy exploring! 🤖🌐
 """
     PROMO_CODE_ALREADY_HAVE_SUBSCRIPTION = """
-<b>Whoopsie-daisy!</b> 🙈
+🚫 <b>Whoopsie-daisy!</b> 🙈
 
 Looks like you're already part of our exclusive subscriber's club! 🌟
 """
@@ -148,8 +148,7 @@ Keep exploring and let the AI surprises continue! 🤖
 """
 
     # AI
-    MODE = "Mode:"
-    INFO = """
+    MODE = """
 🤖 Let's check out what each model can do for you:
 
 ✉️ <b>ChatGPT3: The Versatile Communicator</b>
@@ -187,7 +186,7 @@ Keep exploring and let the AI surprises continue! 🤖
 - <i>Digital Makeovers</i>: Experiment with new haircuts or makeup styles.
 - <i>Celebrity Mashups</i>: Combine your face with celebrities for fun comparisons.
 
-To change a model use /mode 😉
+To change a model choose a button below 👇
 """
     ALREADY_MAKE_REQUEST = "You've already made a request. Please wait ⚠️"
     READY_FOR_NEW_REQUEST = "You can ask the next request 😌"
@@ -298,114 +297,7 @@ You're just a click away from unlocking our treasure trove of AI roles, but it s
 
 Once you're all set up, our catalog of AI wonders will be waiting for you – your ticket to an extraordinary world of AI possibilities! 🎫✨
 """
-    PERSONAL_ASSISTANT = {
-        "name": "🤖 Personal assistant",
-        "description": """
-Your go-to for anything and everything!
-From answering questions to deep conversations, I'm here to assist you like a trusty sidekick 🌟
-Let's tackle life's puzzles together!
-""",
-        "instruction": "You are a helpful assistant."
-    }
-    TUTOR = {
-        "name": "📚 Tutor",
-        "description": """
-Unlock the world of knowledge across all subjects!
-I'm here to make complex concepts simple and learning enjoyable 📚
-Whether it's math, science, or art, let's learn together!
-""",
-        "instruction": "You are a helpful tutor."
-    }
-    LANGUAGE_TUTOR = {
-        "name": "🗣️ Language tutor",
-        "description": """
-Embark on a linguistic adventure!
-From basic phrases to fluency, I'll guide you through the nuances of languages with ease and fun 🌐
-Let's converse in new tongues!
-""",
-        "instruction": "You are a helpful language tutor."
-    }
-    CREATIVE_WRITER = {
-        "name": "🖋️ Creative writer",
-        "description": """
-Ready to explore worlds of wonder?
-From crafting captivating stories to penning heartfelt poetry, let's unleash our collective creativity 🖋️
-Your imagination is the limit!
-""",
-        "instruction": "You are a helpful creative writer."
-    }
-    TECHNICAL_ADVISOR = {
-        "name": "💻 Technical advisor",
-        "description": """
-Navigating the tech maze made easy!
-Whether it's understanding new software, fixing bugs, or exploring tech trends, I'm here to simplify technology 💻
-Let's decode the digital world together!
-""",
-        "instruction": "You are a helpful technical advisor."
-    }
-    MARKETER = {
-        "name": "📈 Marketer",
-        "description": """
-Let's elevate your brand and outreach!
-From market research to campaign strategies, I'm here to help you navigate the marketing landscape and achieve your business goals 📊
-Your success is our target!
-""",
-        "instruction": "You are a helpful marketer."
-    }
-    SMM_SPECIALIST = {
-        "name": "📱 SMM-Specialist",
-        "description": """
-Transform your social media presence!
-I'll help you create engaging content, grow your audience, and stay ahead in the ever-evolving social media space 📱
-Let's make social media work for you!
-""",
-        "instruction": "You are a helpful SMM-specialist."
-    }
-    CONTENT_SPECIALIST = {
-        "name": "📝 Content specialist",
-        "description": """
-Content is king, and I'm here to help you rule!
-From SEO optimization to compelling copy, let's create content that resonates and engages ✍️
-Your message matters!
-""",
-        "instruction": "You are a helpful content specialist."
-    }
-    DESIGNER = {
-        "name": "🎨 Designer",
-        "description": """
-Visual storytelling at its best!
-Let's design experiences that captivate and communicate, from websites to brand identities 🖌️
-Your vision, our canvas!
-""",
-        "instruction": "You are a helpful designer."
-    }
-    SOCIAL_MEDIA_PRODUCER = {
-        "name": "📸 Producer in social media",
-        "description": """
-Crafting stories that click and connect on social media!
-Let's produce content that stands out and speaks to your audience 🎥
-Your story, brilliantly told on social platforms!
-""",
-        "instruction": "You are a helpful social media producer."
-    }
-    LIFE_COACH = {
-        "name": "🌱 Life coach",
-        "description": """
-Empowering you to reach your fullest potential!
-From setting goals to overcoming obstacles, I'm here to support and inspire you on your journey to personal growth 🌱
-Let's grow together!
-""",
-        "instruction": "You are a helpful life coach."
-    }
-    ENTREPRENEUR = {
-        "name": "💼 Entrepreneur",
-        "description": """
-Turning ideas into reality!
-Whether it's starting a business or scaling up, let's navigate the entrepreneurial journey with innovative strategies and insights 💡
-Your dream, our mission!
-""",
-        "instruction": "You are a helpful entrepreneur."
-    }
+    CREATE_ROLE = "Create a new role"
 
     # Chats
     DEFAULT_CHAT_TITLE = "New chat"
@@ -422,7 +314,7 @@ Head over to /subscribe or /buy to unlock the power of multiple chats. More chat
     TYPE_CHAT_NAME = "Type your chat name"
     SWITCH_CHAT = "Switch between chats"
     SWITCH_CHAT_FORBIDDEN = """
-"🔄 Switching gears? Hold that thought! ⚙️
+"🔄 <b>Switching gears? Hold that thought!</b> ⚙️
 
 You're currently in your one and only chat universe. It's a cozy place, but why not expand your horizons? 🌌
 
@@ -431,7 +323,7 @@ To hop between multiple thematic chats, just get your pass from /subscribe or /b
     SWITCH_CHAT_SUCCESS = "🔀 Chat successfully switched! 🎉"
     DELETE_CHAT = "Delete a chat"
     DELETE_CHAT_FORBIDDEN = """
-🗑️ Delete this chat? That's lonely talk! 💬
+🗑️ <b>Delete this chat? That's lonely talk!</b> 💬
 
 This is your sole chat kingdom, and a kingdom needs its king or queen! Deleting it would be like canceling your own party. 🎈
 
@@ -475,6 +367,7 @@ You're asking for more images than we have.
     BACK = "Back ◀️"
     CLOSE = "Close 🚪"
     CANCEL = "Cancel ❌"
+    APPROVE = "Approve ✅"
 
     @staticmethod
     def profile(subscription_type: SubscriptionType,
@@ -566,7 +459,7 @@ Please select the subscription period by clicking on the button:
     @staticmethod
     def buy():
         return """
-🤖 Welcome to the AI Shopping Spree! 🛍
+🤖 <b>Welcome to the AI Shopping Spree!</b> 🛍
 
 Welcome to the shop zone, where each button tap unlocks a world of AI wonders!
 🧠 <b>ChatGPT3 & ChatGPT4</b>: Engage in deep, thought-provoking conversations. Your new AI buddies await!

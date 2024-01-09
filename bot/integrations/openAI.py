@@ -72,14 +72,14 @@ async def get_response_speech_to_text(audio_file: BinaryIO) -> str:
     return response
 
 
-async def get_response_text_to_speech(text: str):
+async def get_response_text_to_speech(text: str, voice='alloy'):
     loop = asyncio.get_event_loop()
     response = await loop.run_in_executor(
         None,
         partial(
             client.audio.speech.create,
             model="tts-1",
-            voice="alloy",
+            voice=voice,
             response_format="opus",
             input=text
         )

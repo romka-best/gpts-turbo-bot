@@ -1,111 +1,204 @@
+from typing import List
+
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
-from bot.database.models.common import RoleName
+from bot.database.models.common import DEFAULT_ROLE
+from bot.database.models.role import Role
 from bot.locales.main import get_localization
 
 
-def build_catalog_keyboard(language_code: str, current_role: str) -> InlineKeyboardMarkup:
-    buttons = [
+def build_catalog_keyboard(language_code: str, current_role: str, roles: List[Role]) -> InlineKeyboardMarkup:
+    buttons = []
+    for role in roles:
+        buttons.append(
+            [
+                InlineKeyboardButton(
+                    text=role.translated_names.get(language_code, role.name) + (
+                        " ✅" if current_role == role.name else " ❌"
+                    ),
+                    callback_data=f'catalog:{role.name}'
+                )
+            ],
+        )
+    buttons.append([
+        InlineKeyboardButton(
+            text=get_localization(language_code).CLOSE,
+            callback_data='catalog:close'
+        )
+    ])
+
+    return InlineKeyboardMarkup(inline_keyboard=buttons)
+
+
+def build_manage_catalog_keyboard(language_code: str, roles: List[Role]) -> InlineKeyboardMarkup:
+    buttons = []
+    for role in roles:
+        buttons.append(
+            [
+                InlineKeyboardButton(
+                    text=role.translated_names.get(language_code, role.name),
+                    callback_data=f'catalog_manage:{role.id}'
+                )
+            ],
+        )
+    buttons.extend([
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).PERSONAL_ASSISTANT['name'] + (
-                    " ✅" if current_role == RoleName.PERSONAL_ASSISTANT else " ❌"
-                ),
-                callback_data=f'catalog:{RoleName.PERSONAL_ASSISTANT}'
-            )
-        ],
-        [
-            InlineKeyboardButton(
-                text=get_localization(language_code).TUTOR['name'] + (
-                    " ✅" if current_role == RoleName.TUTOR else " ❌"
-                ),
-                callback_data=f'catalog:{RoleName.TUTOR}'
-            )
-        ],
-        [
-            InlineKeyboardButton(
-                text=get_localization(language_code).LANGUAGE_TUTOR['name'] + (
-                    " ✅" if current_role == RoleName.LANGUAGE_TUTOR else " ❌"
-                ),
-                callback_data=f'catalog:{RoleName.LANGUAGE_TUTOR}'
-            ),
-        ],
-        [
-            InlineKeyboardButton(
-                text=get_localization(language_code).CREATIVE_WRITER['name'] + (
-                    " ✅" if current_role == RoleName.CREATIVE_WRITER else " ❌"
-                ),
-                callback_data=f'catalog:{RoleName.CREATIVE_WRITER}'
-            ),
-        ],
-        [
-            InlineKeyboardButton(
-                text=get_localization(language_code).TECHNICAL_ADVISOR['name'] + (
-                    " ✅" if current_role == RoleName.TECHNICAL_ADVISOR else " ❌"
-                ),
-                callback_data=f'catalog:{RoleName.TECHNICAL_ADVISOR}'
-            ),
-        ],
-        [
-            InlineKeyboardButton(
-                text=get_localization(language_code).MARKETER['name'] + (
-                    " ✅" if current_role == RoleName.MARKETER else " ❌"
-                ),
-                callback_data=f'catalog:{RoleName.MARKETER}'
-            )
-        ],
-        [
-            InlineKeyboardButton(
-                text=get_localization(language_code).SMM_SPECIALIST['name'] + (
-                    " ✅" if current_role == RoleName.SMM_SPECIALIST else " ❌"
-                ),
-                callback_data=f'catalog:{RoleName.SMM_SPECIALIST}'
-            )
-        ],
-        [
-            InlineKeyboardButton(
-                text=get_localization(language_code).CONTENT_SPECIALIST['name'] + (
-                    " ✅" if current_role == RoleName.CONTENT_SPECIALIST else " ❌"
-                ),
-                callback_data=f'catalog:{RoleName.CONTENT_SPECIALIST}'
-            )
-        ],
-        [
-            InlineKeyboardButton(
-                text=get_localization(language_code).DESIGNER['name'] + (
-                    " ✅" if current_role == RoleName.DESIGNER else " ❌"
-                ),
-                callback_data=f'catalog:{RoleName.DESIGNER}'
-            )
-        ],
-        [
-            InlineKeyboardButton(
-                text=get_localization(language_code).SOCIAL_MEDIA_PRODUCER['name'] + (
-                    " ✅" if current_role == RoleName.SOCIAL_MEDIA_PRODUCER else " ❌"
-                ),
-                callback_data=f'catalog:{RoleName.SOCIAL_MEDIA_PRODUCER}'
-            )
-        ],
-        [
-            InlineKeyboardButton(
-                text=get_localization(language_code).LIFE_COACH['name'] + (
-                    " ✅" if current_role == RoleName.LIFE_COACH else " ❌"
-                ),
-                callback_data=f'catalog:{RoleName.LIFE_COACH}'
-            )
-        ],
-        [
-            InlineKeyboardButton(
-                text=get_localization(language_code).ENTREPRENEUR['name'] + (
-                    " ✅" if current_role == {RoleName.ENTREPRENEUR} else " ❌"
-                ),
-                callback_data=f'catalog:{RoleName.ENTREPRENEUR}'
+                text=get_localization(language_code).CREATE_ROLE,
+                callback_data='catalog_manage:create'
             )
         ],
         [
             InlineKeyboardButton(
                 text=get_localization(language_code).CLOSE,
-                callback_data='catalog:close'
+                callback_data='catalog_manage:close'
+            )
+        ]
+    ])
+
+    return InlineKeyboardMarkup(inline_keyboard=buttons)
+
+
+def build_manage_catalog_create_keyboard(language_code: str) -> InlineKeyboardMarkup:
+    buttons = [
+        [
+            InlineKeyboardButton(
+                text=get_localization(language_code).BACK,
+                callback_data='catalog_manage_create:back'
+            )
+        ],
+        [
+            InlineKeyboardButton(
+                text=get_localization(language_code).CANCEL,
+                callback_data='catalog_manage_create:cancel'
+            )
+        ],
+    ]
+
+    return InlineKeyboardMarkup(inline_keyboard=buttons)
+
+
+def build_manage_catalog_create_role_name_keyboard(language_code: str) -> InlineKeyboardMarkup:
+    buttons = [
+        [
+            InlineKeyboardButton(
+                text=get_localization(language_code).CANCEL,
+                callback_data='catalog_manage_create_role_name:cancel'
+            )
+        ],
+    ]
+
+    return InlineKeyboardMarkup(inline_keyboard=buttons)
+
+
+def build_manage_catalog_create_role_description_keyboard(language_code: str) -> InlineKeyboardMarkup:
+    buttons = [
+        [
+            InlineKeyboardButton(
+                text=get_localization(language_code).CANCEL,
+                callback_data='catalog_manage_create_role_description:cancel'
+            )
+        ],
+    ]
+
+    return InlineKeyboardMarkup(inline_keyboard=buttons)
+
+
+def build_manage_catalog_create_role_instruction_keyboard(language_code: str) -> InlineKeyboardMarkup:
+    buttons = [
+        [
+            InlineKeyboardButton(
+                text=get_localization(language_code).CANCEL,
+                callback_data='catalog_manage_create_role_instruction:cancel'
+            )
+        ],
+    ]
+
+    return InlineKeyboardMarkup(inline_keyboard=buttons)
+
+
+def build_manage_catalog_create_role_confirmation_keyboard(language_code: str) -> InlineKeyboardMarkup:
+    buttons = [
+        [
+            InlineKeyboardButton(
+                text=get_localization(language_code).APPROVE,
+                callback_data='catalog_manage_create_role_confirmation:approve'
+            )
+        ],
+        [
+            InlineKeyboardButton(
+                text=get_localization(language_code).CANCEL,
+                callback_data='catalog_manage_create_role_confirmation:cancel'
+            )
+        ],
+    ]
+
+    return InlineKeyboardMarkup(inline_keyboard=buttons)
+
+
+def build_manage_catalog_edit_keyboard(language_code: str, system_role: str) -> InlineKeyboardMarkup:
+    buttons = [
+        [
+            InlineKeyboardButton(
+                text=get_localization(language_code).EDIT_ROLE_NAME,
+                callback_data=f'catalog_manage_edit:name:{system_role}'
+            )
+        ],
+        [
+            InlineKeyboardButton(
+                text=get_localization(language_code).EDIT_ROLE_DESCRIPTION,
+                callback_data=f'catalog_manage_edit:description:{system_role}'
+            )
+        ],
+        [
+            InlineKeyboardButton(
+                text=get_localization(language_code).EDIT_ROLE_INSTRUCTION,
+                callback_data=f'catalog_manage_edit:instruction:{system_role}'
+            )
+        ],
+        [
+            InlineKeyboardButton(
+                text=get_localization(language_code).BACK,
+                callback_data='catalog_manage_edit:back'
+            )
+        ]
+    ]
+
+    return InlineKeyboardMarkup(inline_keyboard=buttons)
+
+
+def build_manage_catalog_edit_role_name_keyboard(language_code: str) -> InlineKeyboardMarkup:
+    buttons = [
+        [
+            InlineKeyboardButton(
+                text=get_localization(language_code).CANCEL,
+                callback_data='catalog_manage_edit_role_name:cancel'
+            )
+        ],
+    ]
+
+    return InlineKeyboardMarkup(inline_keyboard=buttons)
+
+
+def build_manage_catalog_edit_role_description_keyboard(language_code: str) -> InlineKeyboardMarkup:
+    buttons = [
+        [
+            InlineKeyboardButton(
+                text=get_localization(language_code).CANCEL,
+                callback_data='catalog_manage_edit_role_description:cancel'
+            )
+        ],
+    ]
+
+    return InlineKeyboardMarkup(inline_keyboard=buttons)
+
+
+def build_manage_catalog_edit_role_instruction_keyboard(language_code: str) -> InlineKeyboardMarkup:
+    buttons = [
+        [
+            InlineKeyboardButton(
+                text=get_localization(language_code).CANCEL,
+                callback_data='catalog_manage_edit_role_instruction:cancel'
             )
         ],
     ]

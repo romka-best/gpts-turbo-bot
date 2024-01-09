@@ -3,14 +3,14 @@ from typing import Optional, Dict, List
 
 from telegram import User as TelegramUser
 
-from bot.database.main import db
+from bot.database.main import firebase
 from bot.database.models.common import Model, Currency
 from bot.database.models.subscription import SubscriptionType, SubscriptionLimit
 from bot.database.models.user import User, UserGender
 
 
 async def get_user(user_id: str) -> Optional[User]:
-    user_ref = db.collection("users").document(user_id)
+    user_ref = firebase.db.collection("users").document(user_id)
     user = await user_ref.get()
 
     if user.exists:
@@ -19,7 +19,7 @@ async def get_user(user_id: str) -> Optional[User]:
 
 async def get_users(start_date: Optional[datetime] = None,
                     end_date: Optional[datetime] = None) -> List[User]:
-    users_query = db.collection("users")
+    users_query = firebase.db.collection("users")
 
     if start_date:
         users_query = users_query.where("created_at", ">=", start_date)
@@ -56,7 +56,7 @@ async def write_user_in_transaction(transaction,
                                     telegram_user: TelegramUser,
                                     chat_id: str,
                                     telegram_chat_id: str) -> User:
-    user_ref = db.collection('users').document(str(telegram_user.id))
+    user_ref = firebase.db.collection('users').document(str(telegram_user.id))
     user_data = (await user_ref.get()).to_dict() or {}
 
     created_user = create_user_object(telegram_user, user_data, chat_id, telegram_chat_id)
@@ -67,7 +67,7 @@ async def write_user_in_transaction(transaction,
 
 
 async def write_user(telegram_user: TelegramUser, chat_id: str, telegram_chat_id: str) -> User:
-    user_ref = db.collection('users').document(str(telegram_user.id))
+    user_ref = firebase.db.collection('users').document(str(telegram_user.id))
     user_data = (await user_ref.get()).to_dict() or {}
 
     created_user = create_user_object(telegram_user, user_data, chat_id, telegram_chat_id)
@@ -78,7 +78,7 @@ async def write_user(telegram_user: TelegramUser, chat_id: str, telegram_chat_id
 
 
 async def update_user(user_id: str, data: Dict):
-    user_ref = db.collection('users').document(user_id)
+    user_ref = firebase.db.collection('users').document(user_id)
     data['edited_at'] = datetime.now(timezone.utc)
 
     await user_ref.update(data)
@@ -87,4 +87,4 @@ async def update_user(user_id: str, data: Dict):
 async def update_user_in_transaction(transaction, user_id: str, data: Dict):
     data['edited_at'] = datetime.now(timezone.utc)
 
-    transaction.update(db.collection('users').document(user_id), data)
+    transaction.update(firebase.db.collection('users').document(user_id), data)

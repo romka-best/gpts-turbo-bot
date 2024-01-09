@@ -6,9 +6,13 @@ from aiogram import Bot
 from bot.config import config
 
 
-async def send_message_to_admins(bot: Bot, message: str):
+async def send_message_to_admins(bot: Bot, message: str, parse_mode='HTML'):
     for chat_id in config.ADMIN_CHAT_IDS:
         try:
-            await bot.send_message(chat_id=chat_id, text=message)
+            await bot.send_message(
+                chat_id=chat_id,
+                text=message,
+                parse_mode=parse_mode,
+            )
         except TelegramBadRequest as error:
             logging.error(error)

@@ -32,8 +32,8 @@ async def feedback_sent(message: Message, state: FSMContext):
     await write_feedback(user.id, message.text)
 
     text = (f"#feedback\n\n"
-            f"🚀 Новая обратная связь от пользователя: {user.id} 🚀\n\n"
-            f"{message.text}")
+            f"🚀 <b>Новая обратная связь от пользователя</b>: {user.id} 🚀\n\n"
+            f"<code>{message.text}</code>")
     await send_message_to_admins(message.bot, text)
 
     await message.reply(text=get_localization(user.language_code).FEEDBACK_SUCCESS)

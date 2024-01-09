@@ -1,13 +1,13 @@
 from datetime import datetime, timezone
 from typing import Optional, Dict, List
 
-from bot.database.main import db
+from bot.database.main import firebase
 from bot.database.models.common import Currency
 from bot.database.models.transaction import Transaction, TransactionType, ServiceType
 
 
 async def get_transaction(transaction_id: str) -> Optional[Transaction]:
-    transaction_ref = db.collection("transactions").document(str(transaction_id))
+    transaction_ref = firebase.db.collection("transactions").document(str(transaction_id))
     transaction = await transaction_ref.get()
 
     if transaction.exists:
@@ -16,7 +16,7 @@ async def get_transaction(transaction_id: str) -> Optional[Transaction]:
 
 async def get_transactions(start_date: Optional[datetime] = None,
                            end_date: Optional[datetime] = None) -> List[Transaction]:
-    transactions_query = db.collection("transactions")
+    transactions_query = firebase.db.collection("transactions")
 
     if start_date:
         transactions_query = transactions_query.where("created_at", ">=", start_date)
@@ -33,7 +33,7 @@ async def create_transaction_object(user_id: str,
                                     amount: float,
                                     currency: Currency,
                                     quantity=1) -> Transaction:
-    transaction_ref = db.collection('transactions').document()
+    transaction_ref = firebase.db.collection('transactions').document()
     return Transaction(
         id=transaction_ref.id,
         user_id=user_id,
@@ -52,7 +52,7 @@ async def write_transaction(user_id: str,
                             currency: Currency,
                             quantity=1) -> Transaction:
     transaction = await create_transaction_object(user_id, type, service, amount, currency, quantity)
-    await db.collection('transactions').document(transaction.id).set(transaction.to_dict())
+    await firebase.db.collection('transactions').document(transaction.id).set(transaction.to_dict())
 
     return transaction
 
@@ -65,13 +65,13 @@ async def write_transaction_in_transaction(transaction,
                                            currency: Currency,
                                            quantity=1) -> Transaction:
     transaction_object = await create_transaction_object(user_id, type, service, amount, currency, quantity)
-    transaction.set(db.collection('transactions').document(transaction_object.id), transaction_object.to_dict())
+    transaction.set(firebase.db.collection('transactions').document(transaction_object.id), transaction_object.to_dict())
 
     return transaction_object
 
 
 async def update_transaction(transaction_id: str, data: Dict):
-    transaction_ref = db.collection('transactions').document(transaction_id)
+    transaction_ref = firebase.db.collection('transactions').document(transaction_id)
     data['edited_at'] = datetime.now(timezone.utc)
 
     await transaction_ref.update(data)

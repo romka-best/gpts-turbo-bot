@@ -1,11 +1,11 @@
 from typing import Optional
 
-from bot.database.main import db
+from bot.database.main import firebase
 from bot.database.models.feedback import Feedback
 
 
 async def get_feedback(feedback_id: str) -> Optional[Feedback]:
-    feedback_ref = db.collection("feedbacks").document(feedback_id)
+    feedback_ref = firebase.db.collection("feedbacks").document(feedback_id)
     feedback = await feedback_ref.get()
 
     if feedback.exists:
@@ -13,7 +13,7 @@ async def get_feedback(feedback_id: str) -> Optional[Feedback]:
 
 
 async def create_feedback_object(user_id: str, content: str) -> Feedback:
-    feedback_ref = db.collection('feedbacks').document()
+    feedback_ref = firebase.db.collection('feedbacks').document()
 
     return Feedback(
         id=feedback_ref.id,
@@ -24,6 +24,6 @@ async def create_feedback_object(user_id: str, content: str) -> Feedback:
 
 async def write_feedback(user_id: str, content: str) -> Feedback:
     feedback = await create_feedback_object(user_id, content)
-    await db.collection('feedbacks').document(feedback.id).set(feedback.to_dict())
+    await firebase.db.collection('feedbacks').document(feedback.id).set(feedback.to_dict())
 
     return feedback

@@ -1,5 +1,7 @@
 from datetime import datetime, timezone
 
+from bot.database.models.common import DEFAULT_ROLE
+
 
 class Chat:
     id: str
@@ -22,7 +24,7 @@ class Chat:
         self.user_id = user_id
         self.telegram_chat_id = str(telegram_chat_id)
         self.title = title
-        self.role = role if role is not None else "PERSONAL_ASSISTANT"
+        self.role = role if role is not None else DEFAULT_ROLE
 
         current_time = datetime.now(timezone.utc)
         self.created_at = created_at if created_at is not None else current_time

@@ -5,7 +5,7 @@ from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery, BufferedInputFile
 
-from bot.database.main import bucket, db
+from bot.database.main import firebase
 from bot.database.models.promo_code import PromoCodeType
 from bot.database.models.subscription import SubscriptionType, SubscriptionStatus
 from bot.database.operations.promo_code import get_promo_code_by_name, get_used_promo_code_by_user_id_and_promo_code_id, \
@@ -13,6 +13,7 @@ from bot.database.operations.promo_code import get_promo_code_by_name, get_used_
 from bot.database.operations.subscription import write_subscription
 from bot.database.operations.user import get_user
 from bot.helpers.create_subscription import create_subscription
+from bot.keyboards.common import build_cancel_keyboard
 from bot.utils.is_admin import is_admin
 from bot.keyboards.promo_code import build_promo_code_keyboard, build_create_promo_code_keyboard, \
     build_create_promo_code_subscription_keyboard, build_create_promo_code_period_of_subscription_keyboard, \
@@ -34,18 +35,6 @@ async def promo_code(message: Message, state: FSMContext):
     await state.set_state(PromoCode.waiting_for_promo_code)
 
 
-@promo_code_router.callback_query(PromoCode.waiting_for_promo_code, lambda c: c.data.startswith('promo_code:'))
-async def handle_promo_code_selection(callback_query: CallbackQuery, state: FSMContext):
-    await callback_query.answer()
-
-    action = callback_query.data.split(':')[1]
-
-    if action == 'cancel':
-        await callback_query.delete_message()
-
-        await state.clear()
-
-
 @promo_code_router.message(PromoCode.waiting_for_promo_code)
 async def promo_code_sent(message: Message, state: FSMContext):
     user = await get_user(str(message.from_user.id))
@@ -54,9 +43,13 @@ async def promo_code_sent(message: Message, state: FSMContext):
     if typed_promo_code:
         current_date = datetime.now(timezone.utc)
         if current_date <= typed_promo_code.until:
-            used_promo_code = await get_used_promo_code_by_user_id_and_promo_code_id(user.id, promo_code.id)
+            used_promo_code = await get_used_promo_code_by_user_id_and_promo_code_id(user.id, typed_promo_code.id)
             if used_promo_code:
-                await message.reply(text=get_localization(user.language_code).PROMO_CODE_ALREADY_USED_ERROR)
+                reply_markup = build_cancel_keyboard(user.language_code)
+                await message.reply(
+                    text=get_localization(user.language_code).PROMO_CODE_ALREADY_USED_ERROR,
+                    reply_markup=reply_markup
+                )
             else:
                 if typed_promo_code.type == PromoCodeType.SUBSCRIPTION:
                     if user.subscription_type == SubscriptionType.FREE:
@@ -67,35 +60,48 @@ async def promo_code_sent(message: Message, state: FSMContext):
                                                                 user.currency,
                                                                 0)
 
-                        transaction = db.transaction()
+                        transaction = firebase.db.transaction()
                         await create_subscription(transaction,
                                                   subscription.id,
                                                   subscription.user_id,
                                                   "")
+
+                        await write_used_promo_code(user.id, typed_promo_code.id)
+                        await message.reply(
+                            text=get_localization(user.language_code).PROMO_CODE_SUCCESS
+                        )
+
                         await state.clear()
                     else:
+                        reply_markup = build_cancel_keyboard(user.language_code)
                         await message.reply(
-                            text=get_localization(user.language_code).PROMO_CODE_ALREADY_HAVE_SUBSCRIPTION
+                            text=get_localization(user.language_code).PROMO_CODE_ALREADY_HAVE_SUBSCRIPTION,
+                            reply_markup=reply_markup
                         )
-                await write_used_promo_code(user.id, promo_code.id)
-                await message.reply(
-                    text=get_localization(user.language_code).PROMO_CODE_SUCCESS
-                )
+                else:
+                    await write_used_promo_code(user.id, typed_promo_code.id)
+                    await message.reply(
+                        text=get_localization(user.language_code).PROMO_CODE_SUCCESS
+                    )
         else:
+            reply_markup = build_cancel_keyboard(user.language_code)
             await message.reply(
-                text=get_localization(user.language_code).PROMO_CODE_EXPIRED_ERROR
+                text=get_localization(user.language_code).PROMO_CODE_EXPIRED_ERROR,
+                reply_markup=reply_markup
             )
     else:
+        reply_markup = build_cancel_keyboard(user.language_code)
         await message.reply(
-            text=get_localization(user.language_code).PROMO_CODE_NOT_FOUND_ERROR
+            text=get_localization(user.language_code).PROMO_CODE_NOT_FOUND_ERROR,
+            reply_markup=reply_markup
         )
 
 
 @promo_code_router.message(Command("create_promo_code"))
 async def create_promo_code(message: Message):
-    user = await get_user(str(message.from_user.id))
-
     if is_admin(str(message.chat.id)):
+        user = await get_user(str(message.from_user.id))
+
         reply_markup = build_create_promo_code_keyboard(user.language_code)
         await message.answer(text=get_localization(user.language_code).PROMO_CODE_INFO_ADMIN,
                              reply_markup=reply_markup)
@@ -110,12 +116,12 @@ async def handle_create_promo_code_selection(callback_query: CallbackQuery):
     promo_code_type = callback_query.data.split(':')[1]
 
     if promo_code_type == 'cancel':
-        await callback_query.delete_message()
+        await callback_query.message.delete()
     else:
         if promo_code_type == PromoCodeType.SUBSCRIPTION:
             photo_path = f'subscriptions/{user.language_code}_{user.currency}.png'
-            photo = bucket.blob(photo_path)
-            photo_data = photo.download_as_string()
+            photo = await firebase.bucket.get_blob(photo_path)
+            photo_data = await photo.download()
 
             caption = get_localization(user.language_code).PROMO_CODE_CHOOSE_SUBSCRIPTION_ADMIN
             reply_markup = build_create_promo_code_subscription_keyboard(user.language_code)
@@ -124,7 +130,7 @@ async def handle_create_promo_code_selection(callback_query: CallbackQuery):
                                                       caption=caption,
                                                       reply_markup=reply_markup)
 
-        await callback_query.delete_message()
+        await callback_query.message.delete()
 
 
 @promo_code_router.callback_query(lambda c: c.data.startswith('create_promo_code_subscription:'))
@@ -136,7 +142,7 @@ async def handle_create_promo_code_subscription_selection(callback_query: Callba
     subscription_type = callback_query.data.split(':')[1]
 
     if subscription_type == 'cancel':
-        await callback_query.delete_message()
+        await callback_query.message.delete()
 
         await state.clear()
     else:
@@ -152,37 +158,19 @@ async def handle_create_promo_code_period_of_subscription_selection(callback_que
 
     user = await get_user(str(callback_query.from_user.id))
 
-    action = callback_query.data.split(':')[1]
-    if action == 'cancel':
-        await callback_query.delete_message()
+    subscription_type, subscription_period = callback_query.data.split(':')[1], callback_query.data.split(':')[2]
 
-        await state.clear()
-    else:
-        subscription_type, subscription_period = callback_query.data.split(':')[1], callback_query.data.split(':')[2]
+    reply_markup = build_create_promo_code_name_keyboard(user.language_code)
 
-        reply_markup = build_create_promo_code_name_keyboard(user.language_code)
+    await callback_query.message.edit_caption(
+        caption=get_localization(user.language_code).PROMO_CODE_CHOOSE_NAME_ADMIN,
+        reply_markup=reply_markup
+    )
 
-        await callback_query.message.edit_caption(
-            caption=get_localization(user.language_code).PROMO_CODE_CHOOSE_NAME_ADMIN,
-            reply_markup=reply_markup
-        )
-
-        await state.set_state(PromoCode.waiting_for_promo_code_name)
-        await state.update_data(promo_code_type=PromoCodeType.SUBSCRIPTION,
-                                promo_code_subscription_type=subscription_type,
-                                promo_code_subscription_period=subscription_period)
-
-
-@promo_code_router.callback_query(lambda c: c.data.startswith('create_promo_code_name:'))
-async def handle_create_promo_code_name_selection(callback_query: CallbackQuery, state: FSMContext):
-    await callback_query.answer()
-
-    action = callback_query.data.split(':')[1]
-
-    if action == 'cancel':
-        await callback_query.delete_message()
-
-        await state.clear()
+    await state.set_state(PromoCode.waiting_for_promo_code_name)
+    await state.update_data(promo_code_type=PromoCodeType.SUBSCRIPTION,
+                            promo_code_subscription_type=subscription_type,
+                            promo_code_subscription_period=subscription_period)
 
 
 @promo_code_router.message(PromoCode.waiting_for_promo_code_name)
@@ -192,8 +180,10 @@ async def promo_code_name_sent(message: Message, state: FSMContext):
     promo_code_name = message.text.upper()
     typed_promo_code = await get_promo_code_by_name(promo_code_name)
     if typed_promo_code:
+        reply_markup = build_cancel_keyboard(user.language_code)
         await message.reply(
-            text=get_localization(user.language_code).PROMO_CODE_NAME_EXISTS_ERROR
+            text=get_localization(user.language_code).PROMO_CODE_NAME_EXISTS_ERROR,
+            reply_markup=reply_markup,
         )
     else:
         reply_markup = build_create_promo_code_date_keyboard(user.language_code)
@@ -232,18 +222,8 @@ async def promo_code_date_sent(message: Message, state: FSMContext):
 
         await state.clear()
     except ValueError:
+        reply_markup = build_cancel_keyboard(user.language_code)
         await message.reply(
             text=get_localization(user.language_code).PROMO_CODE_DATE_VALUE_ERROR,
+            reply_markup=reply_markup,
         )
-
-
-@promo_code_router.callback_query(lambda c: c.data.startswith('create_promo_code_date:'))
-async def handle_create_promo_code_date_selection(callback_query: CallbackQuery, state: FSMContext):
-    await callback_query.answer()
-
-    action = callback_query.data.split(':')[1]
-
-    if action == 'cancel':
-        await callback_query.delete_message()
-
-        await state.clear()

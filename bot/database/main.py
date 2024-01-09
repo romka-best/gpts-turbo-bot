@@ -1,16 +1,45 @@
+import logging
 import os
-import firebase_admin
-from firebase_admin import credentials, firestore_async, storage
+from urllib.parse import quote
+
+from aiogram.client.session import aiohttp
+from firebase_admin import credentials, initialize_app, firestore_async
+from gcloud.aio.auth import Token
+from google.cloud.firestore_v1 import AsyncClient
+from gcloud.aio.storage import Storage, Bucket
 
 from bot.config import config
 
-path_to_credentials = os.path.join(config.BASE_DIR, config.CERTIFICATE_NAME.get_secret_value())
 
-cred = credentials.Certificate(path_to_credentials)
+class Firebase:
+    token: Token
+    db: AsyncClient
+    storage: Storage
+    bucket: Bucket
 
-default_app = firebase_admin.initialize_app(cred, {
-    'storageBucket': config.STORAGE_NAME.get_secret_value(),
-})
+    def __init__(self):
+        self.path_to_credentials = os.path.join(config.BASE_DIR, config.CERTIFICATE_NAME.get_secret_value())
 
-db = firestore_async.client()
-bucket = storage.bucket()
+    async def init(self):
+        cred = credentials.Certificate(self.path_to_credentials)
+        initialize_app(cred, {
+            'storageBucket': config.STORAGE_NAME.get_secret_value(),
+        })
+
+        scopes = ['https://www.googleapis.com/auth/cloud-platform']
+        self.token = Token(service_file=self.path_to_credentials, scopes=scopes)
+
+        self.db = firestore_async.client()
+        self.storage = Storage(token=self.token)
+        self.bucket = self.storage.get_bucket(config.STORAGE_NAME.get_secret_value())
+
+    async def close(self):
+        self.db.close()
+        await self.storage.close()
+
+    def get_public_url(self, blob_name: str):
+        blob_name = quote(blob_name, safe='')
+        return f"https://firebasestorage.googleapis.com/v0/b/{self.bucket.name}/o/{blob_name}?alt=media"
+
+
+firebase = Firebase()

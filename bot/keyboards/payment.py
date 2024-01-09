@@ -42,19 +42,19 @@ def build_period_of_subscription_keyboard(language_code: str,
         [
             InlineKeyboardButton(
                 text=f"{get_localization(language_code).MONTH_1} ({get_localization(language_code).NO_DISCOUNT})",
-                callback_data=f'period_of_subscription:{SubscriptionPeriod.MONTH1}:{subscription_type}'
+                callback_data=f'period_of_subscription:{subscription_type}:{SubscriptionPeriod.MONTH1}'
             ),
         ],
         [
             InlineKeyboardButton(
                 text=f"{get_localization(language_code).MONTHS_3} ({get_localization(language_code).DISCOUNT} 5%)",
-                callback_data=f'period_of_subscription:{SubscriptionPeriod.MONTHS3}:{subscription_type}'
+                callback_data=f'period_of_subscription:{subscription_type}:{SubscriptionPeriod.MONTHS3}'
             ),
         ],
         [
             InlineKeyboardButton(
                 text=f"{get_localization(language_code).MONTHS_6} ({get_localization(language_code).DISCOUNT} 10%)",
-                callback_data=f'period_of_subscription:{SubscriptionPeriod.MONTHS6}:{subscription_type}'
+                callback_data=f'period_of_subscription:{subscription_type}:{SubscriptionPeriod.MONTHS6}'
             ),
         ],
         [

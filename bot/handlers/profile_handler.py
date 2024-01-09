@@ -1,13 +1,14 @@
 from aiogram import Router
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
-from aiogram.types import Message, CallbackQuery, BufferedInputFile
+from aiogram.types import Message, CallbackQuery, BufferedInputFile, URLInputFile
 
-from bot.database.main import bucket
+from bot.database.main import firebase
 from bot.database.models.common import Model
 from bot.database.models.user import UserGender
 from bot.database.operations.user import get_user, update_user
 from bot.handlers.face_swap_handler import handle_face_swap
+from bot.keyboards.common import build_cancel_keyboard
 from bot.keyboards.profile import build_profile_keyboard, build_profile_gender_keyboard
 from bot.locales.main import get_localization
 from bot.states.profile import Profile
@@ -37,13 +38,13 @@ async def profile(message: Message):
     reply_markup = build_profile_keyboard(user.language_code)
 
     photo_path = f'users/avatars/{user.id}.jpeg'
-    photo = bucket.blob(photo_path)
-    if photo.exists():
-        photo_data = photo.download_as_string()
-        await message.answer_photo(photo=BufferedInputFile(photo_data, filename=photo_path),
+    try:
+        photo = await firebase.bucket.get_blob(photo_path)
+        photo_link = firebase.get_public_url(photo.name)
+        await message.answer_photo(photo=URLInputFile(photo_link, filename=photo_path),
                                    caption=text,
                                    reply_markup=reply_markup)
-    else:
+    except Exception:
         await message.answer(text=text,
                              reply_markup=reply_markup)
 
@@ -58,12 +59,14 @@ async def handle_profile_selection(callback_query: CallbackQuery, state: FSMCont
 
     if action == 'change_photo':
         photo_path = 'users/avatars/example.png'
-        photo = bucket.blob(photo_path)
-        photo_data = photo.download_as_string()
+        photo = await firebase.bucket.get_blob(photo_path)
+        photo_data = await photo.download()
 
+        reply_markup = build_cancel_keyboard(user.language_code)
         await callback_query.message.answer_photo(
             photo=BufferedInputFile(photo_data, filename=photo_path),
-            caption=get_localization(user.language_code).SEND_ME_YOUR_PICTURE
+            caption=get_localization(user.language_code).SEND_ME_YOUR_PICTURE,
+            reply_markup=reply_markup
         )
 
         await state.set_state(Profile.waiting_for_photo)
