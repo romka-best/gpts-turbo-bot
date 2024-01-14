@@ -21,10 +21,12 @@ async def create_subscription(transaction,
         "provider_payment_charge_id": provider_payment_charge_id,
     })
 
-    user.monthly_limits = SubscriptionLimit.LIMITS[subscription.type]
-    user.additional_usage_quota[Quota.ACCESS_TO_CATALOG] = True
-    user.additional_usage_quota[Quota.FAST_MESSAGES] = True
-    user.additional_usage_quota[Quota.VOICE_MESSAGES] = True
+    user.monthly_limits.update(SubscriptionLimit.LIMITS[subscription.type])
+    for key, value in SubscriptionLimit.ADDITIONAL_QUOTA_LIMITS[subscription.type].items():
+        if key in user.additional_usage_quota and key == Quota.ADDITIONAL_CHATS:
+            user.additional_usage_quota[key] += value
+        else:
+            user.additional_usage_quota[key] = value
     await update_user_in_transaction(transaction, user_id, {
         "subscription_type": subscription.type,
         "monthly_limits": user.monthly_limits,

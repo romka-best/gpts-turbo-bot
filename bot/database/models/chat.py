@@ -31,12 +31,4 @@ class Chat:
         self.edited_at = edited_at if edited_at is not None else current_time
 
     def to_dict(self):
-        return {
-            'id': self.id,
-            'user_id': self.user_id,
-            'telegram_chat_id': self.telegram_chat_id,
-            'title': self.title,
-            'role': self.role,
-            'created_at': self.created_at,
-            'edited_at': self.edited_at
-        }
+        return vars(self)

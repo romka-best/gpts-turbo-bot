@@ -104,7 +104,9 @@ async def update_face_swap_package(face_swap_package_id: str, data: Dict):
 
 
 async def get_used_face_swap_package(used_face_swap_package_id: str) -> Optional[UsedFaceSwapPackage]:
-    used_face_swap_package_ref = firebase.db.collection("used_face_swap_packages").document(str(used_face_swap_package_id))
+    used_face_swap_package_ref = firebase.db.collection("used_face_swap_packages").document(
+        str(used_face_swap_package_id)
+    )
     used_face_swap_package = await used_face_swap_package_ref.get()
 
     if used_face_swap_package.exists:

@@ -1,8 +1,6 @@
-import logging
 import os
 from urllib.parse import quote
 
-from aiogram.client.session import aiohttp
 from firebase_admin import credentials, initialize_app, firestore_async
 from gcloud.aio.auth import Token
 from google.cloud.firestore_v1 import AsyncClient
@@ -34,8 +32,10 @@ class Firebase:
         self.bucket = self.storage.get_bucket(config.STORAGE_NAME.get_secret_value())
 
     async def close(self):
-        self.db.close()
-        await self.storage.close()
+        if self.db:
+            self.db.close()
+        if self.storage:
+            await self.storage.close()
 
     def get_public_url(self, blob_name: str):
         blob_name = quote(blob_name, safe='')

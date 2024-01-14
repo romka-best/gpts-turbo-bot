@@ -2,7 +2,6 @@ from typing import List
 
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
-from bot.database.models.common import DEFAULT_ROLE
 from bot.database.models.role import Role
 from bot.locales.main import get_localization
 

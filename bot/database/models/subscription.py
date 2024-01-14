@@ -51,6 +51,32 @@ class SubscriptionLimit:
             Quota.FACE_SWAP: 100,
         }
     }
+    ADDITIONAL_QUOTA_LIMITS = {
+        SubscriptionType.FREE: {
+            Quota.ADDITIONAL_CHATS: 0,
+            Quota.ACCESS_TO_CATALOG: False,
+            Quota.FAST_MESSAGES: False,
+            Quota.VOICE_MESSAGES: False,
+        },
+        SubscriptionType.STANDARD: {
+            Quota.ADDITIONAL_CHATS: 1,
+            Quota.ACCESS_TO_CATALOG: True,
+            Quota.FAST_MESSAGES: True,
+            Quota.VOICE_MESSAGES: True,
+        },
+        SubscriptionType.VIP: {
+            Quota.ADDITIONAL_CHATS: 5,
+            Quota.ACCESS_TO_CATALOG: True,
+            Quota.FAST_MESSAGES: True,
+            Quota.VOICE_MESSAGES: True,
+        },
+        SubscriptionType.PLATINUM: {
+            Quota.ADDITIONAL_CHATS: 10,
+            Quota.ACCESS_TO_CATALOG: True,
+            Quota.FAST_MESSAGES: True,
+            Quota.VOICE_MESSAGES: True,
+        }
+    }
 
     @classmethod
     def get_limits(self, subscription_type):
@@ -108,20 +134,7 @@ class Subscription:
         self.edited_at = edited_at if edited_at is not None else current_time
 
     def to_dict(self):
-        return {
-            'id': self.id,
-            'user_id': self.user_id,
-            'type': self.type,
-            'period': self.period,
-            'status': self.status,
-            'currency': self.currency,
-            'amount': self.amount,
-            'provider_payment_charge_id': self.provider_payment_charge_id,
-            'start_date': self.start_date,
-            'end_date': self.end_date,
-            'created_at': self.created_at,
-            'edited_at': self.edited_at
-        }
+        return vars(self)
 
     @staticmethod
     def get_prices(currency: Currency):

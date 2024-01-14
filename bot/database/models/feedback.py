@@ -23,10 +23,4 @@ class Feedback:
         self.edited_at = edited_at if edited_at is not None else current_time
 
     def to_dict(self):
-        return {
-            'id': self.id,
-            'user_id': self.user_id,
-            'content': self.content,
-            'created_at': self.created_at,
-            'edited_at': self.edited_at
-        }
+        return vars(self)

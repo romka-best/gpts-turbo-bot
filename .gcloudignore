@@ -12,18 +12,12 @@ __pycache__/
 *.swo
 *~
 
-# SQLite database files (if you're using SQLite)
-*.sqlite3
-
 # Log and temporary files
 *.log
 *.tmp
 
 # Media files (if you have an uploads directory or similar)
 media/
-
-# Static files
-static/
 
 # dependencies
 /node_modules
@@ -41,9 +35,6 @@ static/
 
 # Virtual environment (commonly "venv" or ".venv")
 venv/
-
-.env*
-.env
 .env/
 
 npm-debug.log*

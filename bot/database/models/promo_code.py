@@ -38,16 +38,7 @@ class PromoCode:
         self.edited_at = edited_at if edited_at is not None else current_time
 
     def to_dict(self):
-        return {
-            'id': self.id,
-            'created_by_user_id': self.created_by_user_id,
-            'name': self.name,
-            'type': self.type,
-            'details': self.details,
-            'until': self.until,
-            'created_at': self.created_at,
-            'edited_at': self.edited_at
-        }
+        return vars(self)
 
 
 class UsedPromoCode:
@@ -69,9 +60,4 @@ class UsedPromoCode:
         self.date = date if date is not None else current_time
 
     def to_dict(self):
-        return {
-            'id': self.id,
-            'user_id': self.user_id,
-            'promo_code_id': self.promo_code_id,
-            'date': self.date
-        }
+        return vars(self)

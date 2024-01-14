@@ -46,16 +46,7 @@ class FaceSwapPackage:
         self.edited_at = edited_at if edited_at is not None else current_time
 
     def to_dict(self):
-        return {
-            'id': self.id,
-            'name': self.name,
-            'translated_names': self.translated_names,
-            'gender': self.gender,
-            'files': self.files,
-            'status': self.status,
-            'created_at': self.created_at,
-            'edited_at': self.edited_at
-        }
+        return vars(self)
 
 
 class UsedFaceSwapPackage:
@@ -83,11 +74,4 @@ class UsedFaceSwapPackage:
         self.edited_at = edited_at if edited_at is not None else current_time
 
     def to_dict(self):
-        return {
-            'id': self.id,
-            'user_id': self.user_id,
-            'package_id': self.package_id,
-            'used_images': self.used_images,
-            'created_at': self.created_at,
-            'edited_at': self.edited_at
-        }
+        return vars(self)

@@ -30,12 +30,4 @@ class Role:
         self.edited_at = edited_at if edited_at is not None else current_time
 
     def to_dict(self):
-        return {
-            'id': self.id,
-            'name': self.name,
-            'translated_names': self.translated_names,
-            'translated_descriptions': self.translated_descriptions,
-            'translated_instructions': self.translated_instructions,
-            'created_at': self.created_at,
-            'edited_at': self.edited_at
-        }
+        return vars(self)

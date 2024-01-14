@@ -12,6 +12,7 @@ async def get_chat(chat_id: str) -> Optional[Chat]:
 
     if chat.exists:
         return Chat(**chat.to_dict())
+    return None
 
 
 async def get_chat_by_user_id(user_id: str) -> Optional[Chat]:
@@ -20,6 +21,7 @@ async def get_chat_by_user_id(user_id: str) -> Optional[Chat]:
     if user:
         chat = await get_chat(user.current_chat_id)
         return chat
+    return None
 
 
 async def get_chats(start_date: Optional[datetime] = None,
@@ -42,25 +44,30 @@ async def get_chats_by_user_id(user_id: str) -> List[Chat]:
     return chats
 
 
-async def create_chat_object(user_id: str, telegram_chat_id: str, title) -> Chat:
+async def create_chat_object(user_id: str, telegram_chat_id: str, title: str) -> Chat:
     chat_ref = firebase.db.collection('chats').document()
-    return Chat(id=chat_ref.id, user_id=user_id, telegram_chat_id=telegram_chat_id, title=title)
+    return Chat(
+        id=chat_ref.id,
+        user_id=user_id,
+        telegram_chat_id=telegram_chat_id,
+        title=title,
+    )
 
 
-async def write_chat_in_transaction(transaction, user_id: str, telegram_chat_id: str, title) -> Chat:
+async def write_chat_in_transaction(transaction, user_id: str, telegram_chat_id: str, title: str) -> Chat:
     chat = await create_chat_object(user_id, telegram_chat_id, title)
     transaction.set(firebase.db.collection('chats').document(chat.id), chat.to_dict())
 
     return chat
 
 
-async def update_chat(chat_id: str, data: Dict):
+async def update_chat(chat_id: str, data: Dict) -> None:
     chat_ref = firebase.db.collection('chats').document(chat_id)
     data['edited_at'] = datetime.now(timezone.utc)
 
     await chat_ref.update(data)
 
 
-async def delete_chat(chat_id: str):
+async def delete_chat(chat_id: str) -> None:
     chat_ref = firebase.db.collection('chats').document(chat_id)
     await chat_ref.delete()

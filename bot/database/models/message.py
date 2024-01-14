@@ -23,12 +23,4 @@ class Message:
         self.edited_at = edited_at if edited_at is not None else current_time
 
     def to_dict(self):
-        return {
-            'id': self.id,
-            'chat_id': self.chat_id,
-            'sender': self.sender,
-            'sender_id': self.sender_id,
-            'content': self.content,
-            'created_at': self.created_at,
-            'edited_at': self.edited_at
-        }
+        return vars(self)

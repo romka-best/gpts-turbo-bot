@@ -3,7 +3,6 @@ import os
 from contextlib import asynccontextmanager
 
 import uvicorn
-import aiocron
 from fastapi import FastAPI
 from aiogram import Bot, Dispatcher, types
 from aiogram.enums.parse_mode import ParseMode
@@ -65,9 +64,9 @@ async def lifespan(_: FastAPI):
     )
 
     await firebase.init()
-    await daily_tasks()
     yield
     await bot.session.close()
+    await firebase.close()
 
 
 app = FastAPI(lifespan=lifespan)
@@ -82,12 +81,15 @@ async def bot_webhook(update: dict):
         logging.exception(f"Error in bot_webhook: {e}")
 
 
+@app.get("/run-daily-tasks")
 async def daily_tasks():
     await update_monthly_limits(bot)
+    return {
+        "code": 200,
+        "message": "Daily tasks executed successfully"
+    }
 
-
-aiocron.crontab('0 0 * * *', func=daily_tasks)
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
-    uvicorn.run(app, host="0.0.0.0", port=os.getenv('PORT', 8080))
+    uvicorn.run(app, host="0.0.0.0", port=os.getenv("PORT", 8080))

@@ -97,23 +97,4 @@ class User:
         self.edited_at = edited_at if edited_at is not None else current_time
 
     def to_dict(self):
-        return {
-            'id': self.id,
-            'first_name': self.first_name,
-            'last_name': self.last_name,
-            'username': self.username,
-            'gender': self.gender,
-            'language_code': self.language_code,
-            'is_premium': self.is_premium,
-            'current_model': self.current_model,
-            'currency': self.currency,
-            'subscription_type': self.subscription_type,
-            'last_subscription_limit_update': self.last_subscription_limit_update,
-            'current_chat_id': self.current_chat_id,
-            'telegram_chat_id': self.telegram_chat_id,
-            'monthly_limits': self.monthly_limits,
-            'additional_usage_quota': self.additional_usage_quota,
-            'settings': self.settings,
-            'created_at': self.created_at,
-            'edited_at': self.edited_at
-        }
+        return vars(self)

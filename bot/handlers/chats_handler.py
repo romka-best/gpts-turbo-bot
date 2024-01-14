@@ -1,7 +1,7 @@
 from aiogram import Router
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
-from aiogram.types import Message, CallbackQuery
+from aiogram.types import Message, CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup
 
 from bot.database.main import firebase
 from bot.database.models.common import Quota
@@ -115,11 +115,35 @@ async def handle_switch_chat_selection(callback_query: CallbackQuery):
         await handle_chats(callback_query.message, str(callback_query.from_user.id))
         await callback_query.message.delete()
     else:
-        await update_user(user.id, {
-            "current_chat_id": chat_id
-        })
+        keyboard = callback_query.message.reply_markup.inline_keyboard
+        keyboard_changed = False
 
-        await callback_query.message.answer(text=get_localization(user.language_code).SWITCH_CHAT_SUCCESS)
+        new_keyboard = []
+        for row in keyboard:
+            new_row = []
+            for button in row:
+                text = button.text
+                callback_data = button.callback_data.split(":", 1)[1]
+
+                if callback_data == chat_id:
+                    if "❌" in text:
+                        text = text.replace(" ❌", " ✅")
+                        keyboard_changed = True
+                else:
+                    text = text.replace(" ✅", " ❌")
+                new_row.append(InlineKeyboardButton(text=text, callback_data=button.callback_data))
+            new_keyboard.append(new_row)
+
+        if keyboard_changed:
+            await update_user(user.id, {
+                "current_chat_id": chat_id
+            })
+
+            await callback_query.message.edit_reply_markup(
+                reply_markup=InlineKeyboardMarkup(inline_keyboard=new_keyboard)
+            )
+
+            await callback_query.message.reply(text=get_localization(user.language_code).SWITCH_CHAT_SUCCESS)
 
 
 @chats_router.callback_query(lambda c: c.data.startswith('delete_chat:'))
@@ -134,9 +158,26 @@ async def handle_delete_chat_selection(callback_query: CallbackQuery):
         await handle_chats(callback_query.message, str(callback_query.from_user.id))
         await callback_query.message.delete()
     else:
+        keyboard = callback_query.message.reply_markup.inline_keyboard
+
+        new_keyboard = []
+        for row in keyboard:
+            new_row = []
+            for button in row:
+                text = button.text
+                callback_data = button.callback_data.split(":", 1)[1]
+
+                if callback_data != chat_id:
+                    new_row.append(InlineKeyboardButton(text=text, callback_data=button.callback_data))
+            new_keyboard.append(new_row)
+
         await delete_chat(chat_id)
 
-        await callback_query.message.answer(text=get_localization(user.language_code).DELETE_CHAT_SUCCESS)
+        await callback_query.message.edit_reply_markup(
+            reply_markup=InlineKeyboardMarkup(inline_keyboard=new_keyboard)
+        )
+
+        await callback_query.message.reply(text=get_localization(user.language_code).DELETE_CHAT_SUCCESS)
 
 
 @chats_router.message(Chats.waiting_for_chat_name)
@@ -147,5 +188,7 @@ async def chat_name_sent(message: Message, state: FSMContext):
     await create_new_chat(transaction, user, str(message.chat.id), message.text)
 
     await message.answer(get_localization(user.language_code).CREATE_CHAT_SUCCESS)
+
+    await message.delete()
 
     await state.clear()

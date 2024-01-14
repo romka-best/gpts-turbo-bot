@@ -7,4 +7,5 @@ class Catalog(StatesGroup):
     waiting_for_role_description = State()
     waiting_for_role_instruction = State()
 
+    # Admin
     waiting_for_new_role_info = State()

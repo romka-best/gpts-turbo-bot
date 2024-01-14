@@ -65,7 +65,8 @@ async def write_transaction_in_transaction(transaction,
                                            currency: Currency,
                                            quantity=1) -> Transaction:
     transaction_object = await create_transaction_object(user_id, type, service, amount, currency, quantity)
-    transaction.set(firebase.db.collection('transactions').document(transaction_object.id), transaction_object.to_dict())
+    transaction.set(firebase.db.collection('transactions').document(transaction_object.id),
+                    transaction_object.to_dict())
 
     return transaction_object
 

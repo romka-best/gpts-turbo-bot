@@ -423,6 +423,7 @@ TODO
    - <b>{ServiceType.DALLE3}:</b> {count_expense_money[ServiceType.DALLE3]}$
    - <b>{ServiceType.FACE_SWAP}:</b> {count_expense_money[ServiceType.FACE_SWAP]}$
    - <b>{ServiceType.VOICE_MESSAGES}:</b> {count_expense_money[ServiceType.VOICE_MESSAGES]}$
+
    - <b>Всего:</b> {count_expense_total_money}$
 6️⃣ <b>Доходы:</b>
     💳 <b>Подписки:</b> {count_income_subscriptions_total_money}₽
@@ -444,11 +445,11 @@ TODO
 7️⃣ <b>Вал:</b> {count_total_money}₽
 </span>
 💬 <b>Созданные чаты</b>
-    {chat_info}
+{chat_info}
 
     - <b>Всего:</b> {count_chats_usage['ALL']}
 🎭 <b>Выбранные Face Swap</b>
-    {face_swap_info}
+{face_swap_info}
 
     - <b>Всего:</b> {count_face_swap_usage['ALL']}
 

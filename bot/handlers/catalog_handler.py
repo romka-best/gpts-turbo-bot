@@ -79,8 +79,8 @@ async def handle_catalog_selection(callback_query: CallbackQuery):
 
         await callback_query.message.edit_reply_markup(reply_markup=InlineKeyboardMarkup(inline_keyboard=new_keyboard))
 
-        text = getattr(get_localization(user.language_code), role_name)["description"]
-        await callback_query.message.answer(text=text)
+        role = await get_role_by_name(role_name)
+        await callback_query.message.reply(text=role.translated_descriptions[user.language_code])
 
 
 # Admin

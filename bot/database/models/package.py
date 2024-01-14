@@ -58,18 +58,7 @@ class Package:
         self.edited_at = edited_at if edited_at is not None else current_time
 
     def to_dict(self):
-        return {
-            'id': self.id,
-            'user_id': self.user_id,
-            'type': self.type,
-            'status': self.status,
-            'currency': self.currency,
-            'amount': self.amount,
-            'quantity': self.quantity,
-            'provider_payment_charge_id': self.provider_payment_charge_id,
-            'created_at': self.created_at,
-            'edited_at': self.edited_at
-        }
+        return vars(self)
 
     @staticmethod
     def get_prices(currency: Currency):

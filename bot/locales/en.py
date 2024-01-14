@@ -310,7 +310,7 @@ Looks like you've hit the limit for creating new chats. But don't worry, the wor
 
 Head over to /subscribe or /buy to unlock the power of multiple chats. More chats, more fun! 🎉
 """
-    CREATE_CHAT_SUCCESS = "💬 Chat created! 🎉"
+    CREATE_CHAT_SUCCESS = "💬 Chat created! 🎉\n👌 Don't forget to switch to a new one using /chats"
     TYPE_CHAT_NAME = "Type your chat name"
     SWITCH_CHAT = "Switch between chats"
     SWITCH_CHAT_FORBIDDEN = """

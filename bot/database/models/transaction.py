@@ -57,14 +57,4 @@ class Transaction:
         self.edited_at = edited_at if edited_at is not None else current_time
 
     def to_dict(self):
-        return {
-            "id": self.id,
-            "user_id": self.user_id,
-            "type": self.type,
-            "service": self.service,
-            "amount": self.amount,
-            "currency": self.currency,
-            "quantity": self.quantity,
-            "created_at": self.created_at,
-            "edited_at": self.edited_at
-        }
+        return vars(self)

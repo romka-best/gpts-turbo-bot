@@ -1,12 +1,6 @@
 import asyncio
-import logging
 import random
-import io
-import traceback
-from asyncio import Queue
 from typing import List, Dict
-
-from PIL import Image
 
 from aiogram import Router
 from aiogram.filters import Command
