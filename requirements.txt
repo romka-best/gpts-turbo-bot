@@ -31,4 +31,6 @@ pydantic-settings==2.1.0
 pydub==0.25.1
 uvicorn==0.25.0
 fastapi==0.108.0
+ffmpeg==1.4
+ffprobe-python==1.0.3
 gcloud==0.17.0
