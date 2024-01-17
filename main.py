@@ -20,7 +20,7 @@ from bot.handlers.face_swap_handler import face_swap_router
 from bot.handlers.feedback_handler import feedback_router
 from bot.handlers.language_handler import language_router
 from bot.handlers.mode_handler import mode_router
-from bot.handlers.payment_handler import payment_router, update_monthly_limits
+from bot.handlers.payment_handler import payment_router
 from bot.handlers.photo_handler import photo_router
 from bot.handlers.profile_handler import profile_router
 from bot.handlers.promo_code_handler import promo_code_router
@@ -28,6 +28,7 @@ from bot.handlers.settings_handler import settings_router
 from bot.handlers.statistics_handler import statistics_router
 from bot.handlers.text_handler import text_router
 from bot.handlers.voice_handler import voice_router
+from bot.helpers.update_daily_limits import update_monthly_limits
 
 WEBHOOK_PATH = f"/bot/{config.BOT_TOKEN.get_secret_value()}"
 WEBHOOK_URL = config.WEBHOOK_URL + WEBHOOK_PATH
@@ -84,6 +85,7 @@ async def bot_webhook(update: dict):
 @app.get("/run-daily-tasks")
 async def daily_tasks():
     await update_monthly_limits(bot)
+
     return {
         "code": 200,
         "message": "Daily tasks executed successfully"

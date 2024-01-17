@@ -30,6 +30,7 @@ class Package:
     amount: float
     quantity: int
     provider_payment_charge_id: str
+    until_at: datetime
     created_at: datetime
     edited_at: datetime
 
@@ -42,6 +43,7 @@ class Package:
                  amount: float,
                  quantity: int,
                  provider_payment_charge_id="",
+                 until_at=None,
                  created_at=None,
                  edited_at=None):
         self.id = id
@@ -52,6 +54,7 @@ class Package:
         self.amount = amount
         self.quantity = quantity
         self.provider_payment_charge_id = provider_payment_charge_id
+        self.until_at = until_at
 
         current_time = datetime.now(timezone.utc)
         self.created_at = created_at if created_at is not None else current_time
@@ -79,27 +82,27 @@ class Package:
             prices[PackageType.CHAT] = '100₽'
             prices[PackageType.DALLE3] = '10₽'
             prices[PackageType.FACE_SWAP] = '15₽'
-            prices[PackageType.ACCESS_TO_CATALOG] = '1 000₽'
-            prices[PackageType.VOICE_MESSAGES] = '2 500₽'
-            prices[PackageType.FAST_MESSAGES] = '2 000₽'
+            prices[PackageType.ACCESS_TO_CATALOG] = '100₽'
+            prices[PackageType.VOICE_MESSAGES] = '100₽'
+            prices[PackageType.FAST_MESSAGES] = '100₽'
         elif currency == Currency.EUR:
             prices[PackageType.GPT3] = '0.01€'
             prices[PackageType.GPT4] = '0.1€'
             prices[PackageType.CHAT] = '1€'
             prices[PackageType.DALLE3] = '0.1€'
             prices[PackageType.FACE_SWAP] = '0.15€'
-            prices[PackageType.ACCESS_TO_CATALOG] = '10€'
-            prices[PackageType.VOICE_MESSAGES] = '25€'
-            prices[PackageType.FAST_MESSAGES] = '20€'
+            prices[PackageType.ACCESS_TO_CATALOG] = '1€'
+            prices[PackageType.VOICE_MESSAGES] = '1€'
+            prices[PackageType.FAST_MESSAGES] = '1€'
         else:
             prices[PackageType.GPT3] = '$0.01'
             prices[PackageType.GPT4] = '$0.1'
             prices[PackageType.CHAT] = '$1'
             prices[PackageType.DALLE3] = '$0.1'
             prices[PackageType.FACE_SWAP] = '$0.15'
-            prices[PackageType.ACCESS_TO_CATALOG] = '$10'
-            prices[PackageType.VOICE_MESSAGES] = '$25'
-            prices[PackageType.FAST_MESSAGES] = '$20'
+            prices[PackageType.ACCESS_TO_CATALOG] = '$1'
+            prices[PackageType.VOICE_MESSAGES] = '$1'
+            prices[PackageType.FAST_MESSAGES] = '$1'
 
         return prices
 

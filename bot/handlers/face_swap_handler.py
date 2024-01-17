@@ -5,14 +5,22 @@ from typing import List, Dict
 from aiogram import Router
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
-from aiogram.types import Message, CallbackQuery, BufferedInputFile, InlineKeyboardButton, InlineKeyboardMarkup, \
-    URLInputFile
+from aiogram.types import (
+    Message,
+    CallbackQuery,
+    BufferedInputFile,
+    InlineKeyboardButton,
+    InlineKeyboardMarkup,
+    URLInputFile)
 from telegram import constants
 
 from bot.database.main import firebase
 from bot.database.models.common import Quota, Currency
-from bot.database.models.face_swap_package import FaceSwapPackageStatus, FaceSwapFileData, FaceSwapPackage, \
-    UsedFaceSwapPackage
+from bot.database.models.face_swap_package import (
+    FaceSwapPackageStatus,
+    FaceSwapFileData,
+    FaceSwapPackage,
+    UsedFaceSwapPackage)
 from bot.database.models.transaction import TransactionType, ServiceType
 from bot.database.models.user import UserGender
 from bot.database.operations.face_swap_package import (
@@ -72,8 +80,9 @@ async def handle_face_swap(message: Message, state: FSMContext, user_id: str):
         await message.answer(text=get_localization(user.language_code).TELL_ME_YOUR_GENDER,
                              reply_markup=reply_markup)
     else:
-        photo = await firebase.bucket.get_blob(f'users/avatars/{user.id}.jpeg')
         try:
+            await firebase.bucket.get_blob(f'users/avatars/{user.id}.jpeg')
+
             used_face_swap_packages = await get_used_face_swap_packages_by_user_id(user.id)
             face_swap_packages = await get_face_swap_packages_by_gender(user.gender,
                                                                         status=FaceSwapPackageStatus.PUBLIC)

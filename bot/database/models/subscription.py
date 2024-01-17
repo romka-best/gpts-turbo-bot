@@ -120,11 +120,11 @@ class Subscription:
         self.provider_payment_charge_id = provider_payment_charge_id
 
         self.start_date = start_date if start_date is not None else datetime.now(timezone.utc)
-        if period == SubscriptionPeriod.MONTH1:
+        if not end_date and period == SubscriptionPeriod.MONTH1:
             self.end_date = self.start_date + timedelta(days=30)
-        elif period == SubscriptionPeriod.MONTHS3:
+        elif not end_date and period == SubscriptionPeriod.MONTHS3:
             self.end_date = self.start_date + timedelta(days=90)
-        elif period == SubscriptionPeriod.MONTHS6:
+        elif not end_date and period == SubscriptionPeriod.MONTHS6:
             self.end_date = self.start_date + timedelta(days=180)
         else:
             self.end_date = end_date

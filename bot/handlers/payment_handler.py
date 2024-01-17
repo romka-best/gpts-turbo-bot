@@ -1,28 +1,27 @@
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 
-from aiogram import Router, Bot, F
+from aiogram import Router, F
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery, LabeledPrice, PreCheckoutQuery, BufferedInputFile
 
 from bot.config import config
 from bot.database.main import firebase
-from bot.database.models.common import Quota, DEFAULT_ROLE
 from bot.database.models.package import PackageStatus, PackageType, Package
-from bot.database.models.subscription import Subscription, SubscriptionStatus, SubscriptionLimit, SubscriptionType
+from bot.database.models.subscription import Subscription, SubscriptionStatus
 from bot.database.models.transaction import TransactionType, ServiceType
-from bot.database.models.user import UserSettings
-from bot.database.operations.chat import update_chat
-from bot.database.operations.package import write_package, get_last_package_by_user_id, get_packages_by_user_id
-from bot.database.operations.subscription import write_subscription, get_last_subscription_by_user_id, \
-    update_subscription
+from bot.database.operations.package import write_package, get_last_package_by_user_id
+from bot.database.operations.subscription import write_subscription, get_last_subscription_by_user_id
 from bot.database.operations.transaction import write_transaction
-from bot.database.operations.user import get_user, get_users
+from bot.database.operations.user import get_user
 from bot.helpers.create_package import create_package
 from bot.helpers.create_subscription import create_subscription
 from bot.keyboards.common import build_cancel_keyboard
-from bot.keyboards.payment import build_subscriptions_keyboard, build_period_of_subscription_keyboard, \
-    build_packages_keyboard, build_quantity_of_packages_keyboard
+from bot.keyboards.payment import (
+    build_subscriptions_keyboard,
+    build_period_of_subscription_keyboard,
+    build_packages_keyboard,
+    build_quantity_of_packages_keyboard)
 from bot.locales.main import get_localization
 from bot.states.payment import Payment
 
@@ -111,67 +110,21 @@ async def buy(message: Message):
 
 
 @payment_router.callback_query(lambda c: c.data.startswith('package:'))
-async def handle_subscription_selection(callback_query: CallbackQuery, state: FSMContext):
+async def handle_package_selection(callback_query: CallbackQuery, state: FSMContext):
     await callback_query.answer()
 
     user = await get_user(str(callback_query.from_user.id))
 
     package_type = callback_query.data.split(':')[1]
 
-    if package_type == PackageType.ACCESS_TO_CATALOG:
-        price = Package.get_price(user.currency, package_type, 1)
-        name = get_localization(user.language_code).ACCESS_TO_CATALOG
-        description = get_localization(user.language_code).ACCESS_TO_CATALOG_DESCRIPTION
+    message = get_localization(user.language_code).choose_min(package_type)
 
-        await callback_query.message.reply_invoice(
-            title=name,
-            description=description,
-            payload=f"{PaymentType.PACKAGE}:{callback_query.from_user.id}:{package_type}:1",
-            provider_token=config.YOOKASSA_TOKEN.get_secret_value(),
-            currency=f"{user.currency}",
-            prices=[LabeledPrice(label=name, amount=price * 100)],
-        )
+    reply_markup = build_quantity_of_packages_keyboard(user.language_code)
 
-        await callback_query.message.delete()
-    elif package_type == PackageType.VOICE_MESSAGES:
-        price = Package.get_price(user.currency, package_type, 1)
-        name = get_localization(user.language_code).ANSWERS_AND_REQUESTS_WITH_VOICE_MESSAGES
-        description = get_localization(user.language_code).ANSWERS_AND_REQUESTS_WITH_VOICE_MESSAGES_DESCRIPTION
+    await callback_query.message.edit_caption(caption=message, reply_markup=reply_markup)
 
-        await callback_query.message.reply_invoice(
-            title=name,
-            description=description,
-            payload=f"{PaymentType.PACKAGE}:{callback_query.from_user.id}:{package_type}:1",
-            provider_token=config.YOOKASSA_TOKEN.get_secret_value(),
-            currency=f"{user.currency}",
-            prices=[LabeledPrice(label=name, amount=price * 100)],
-        )
-
-        await callback_query.message.delete()
-    elif package_type == PackageType.FAST_MESSAGES:
-        price = Package.get_price(user.currency, package_type, 1)
-        name = get_localization(user.language_code).FAST_ANSWERS
-        description = get_localization(user.language_code).FAST_ANSWERS_DESCRIPTION
-
-        await callback_query.message.reply_invoice(
-            title=name,
-            description=description,
-            payload=f"{PaymentType.PACKAGE}:{callback_query.from_user.id}:{package_type}:1",
-            provider_token=config.YOOKASSA_TOKEN.get_secret_value(),
-            currency=f"{user.currency}",
-            prices=[LabeledPrice(label=name, amount=price * 100)],
-        )
-
-        await callback_query.message.delete()
-    else:
-        message = get_localization(user.language_code).choose_min(package_type)
-
-        reply_markup = build_quantity_of_packages_keyboard(user.language_code)
-
-        await callback_query.message.edit_caption(caption=message, reply_markup=reply_markup)
-
-        await state.update_data(package_type=package_type)
-        await state.set_state(Payment.waiting_for_package_quantity)
+    await state.update_data(package_type=package_type)
+    await state.set_state(Payment.waiting_for_package_quantity)
 
 
 @payment_router.callback_query(Payment.waiting_for_package_quantity,
@@ -198,7 +151,10 @@ async def quantity_of_package_sent(message: Message, state: FSMContext):
             (package_type == PackageType.GPT4 and quantity < 10) or
             (package_type == PackageType.CHAT and quantity < 1) or
             (package_type == PackageType.DALLE3 and quantity < 10) or
-            (package_type == PackageType.FACE_SWAP and quantity < 10)
+            (package_type == PackageType.FACE_SWAP and quantity < 10) or
+            (package_type == PackageType.ACCESS_TO_CATALOG and quantity < 1) or
+            (package_type == PackageType.VOICE_MESSAGES and quantity < 1) or
+            (package_type == PackageType.FAST_MESSAGES and quantity < 1)
         ):
             reply_markup = build_cancel_keyboard(user.language_code)
             await message.reply(text=get_localization(user.language_code).MIN_ERROR,
@@ -222,6 +178,15 @@ async def quantity_of_package_sent(message: Message, state: FSMContext):
             elif package_type == PackageType.FACE_SWAP:
                 name = get_localization(user.language_code).FACE_SWAP_REQUESTS
                 description = get_localization(user.language_code).FACE_SWAP_REQUESTS_DESCRIPTION
+            elif package_type == PackageType.ACCESS_TO_CATALOG:
+                name = get_localization(user.language_code).ACCESS_TO_CATALOG
+                description = get_localization(user.language_code).ACCESS_TO_CATALOG_DESCRIPTION
+            elif package_type == PackageType.VOICE_MESSAGES:
+                name = get_localization(user.language_code).ANSWERS_AND_REQUESTS_WITH_VOICE_MESSAGES
+                description = get_localization(user.language_code).ANSWERS_AND_REQUESTS_WITH_VOICE_MESSAGES_DESCRIPTION
+            elif package_type == PackageType.FAST_MESSAGES:
+                name = get_localization(user.language_code).FAST_ANSWERS
+                description = get_localization(user.language_code).FAST_ANSWERS_DESCRIPTION
 
             await message.reply_invoice(
                 title=f"{name} ({quantity})",
@@ -257,12 +222,21 @@ async def pre_checkout(pre_checkout_query: PreCheckoutQuery):
     elif payment_type == PaymentType.PACKAGE:
         _, user_id, package_type, quantity = pre_checkout_query.invoice_payload.split(':')
         try:
+            until_at = None
+            if (
+                package_type == PackageType.VOICE_MESSAGES or
+                package_type == PackageType.FAST_MESSAGES or
+                package_type == PackageType.ACCESS_TO_CATALOG
+            ):
+                current_date = datetime.now(timezone.utc)
+                until_at = current_date + timedelta(days=30 * int(quantity))
             await write_package(user_id,
                                 package_type,
                                 PackageStatus.WAITING,
                                 pre_checkout_query.currency,
                                 pre_checkout_query.total_amount // 100,
-                                int(quantity))
+                                int(quantity),
+                                until_at)
             await pre_checkout_query.answer(ok=True)
         except Exception:
             await pre_checkout_query.answer(ok=False)
@@ -327,64 +301,3 @@ async def successful_payment(message: Message):
                                 quantity=package.quantity)
 
         await message.answer(text=get_localization(user.language_code).PACKAGE_SUCCESS)
-
-
-async def update_monthly_limits(bot: Bot):
-    all_users = await get_users()
-    for i in range(0, len(all_users), config.USER_BATCH_SIZE):
-        batch = firebase.db.batch()
-        user_batch = all_users[i:i + config.USER_BATCH_SIZE]
-
-        for user in user_batch:
-            user_ref = firebase.db.collection("users").document(user.id)
-
-            current_date = datetime.now(timezone.utc)
-            is_time_to_update_limits = (current_date - user.last_subscription_limit_update).days >= 30
-            if user.last_subscription_limit_update and is_time_to_update_limits:
-                current_subscription = await get_last_subscription_by_user_id(user.id)
-                if current_subscription and current_subscription.end_date <= current_date:
-                    packages = await get_packages_by_user_id(user.id)
-                    user.additional_usage_quota[Quota.VOICE_MESSAGES] = False
-                    user.additional_usage_quota[Quota.FAST_MESSAGES] = False
-                    user.additional_usage_quota[Quota.ACCESS_TO_CATALOG] = False
-                    for package in packages:
-                        if package.type == PackageType.VOICE_MESSAGES:
-                            user.additional_usage_quota[Quota.VOICE_MESSAGES] = True
-                        elif package.type == PackageType.FAST_MESSAGES:
-                            user.additional_usage_quota[Quota.FAST_MESSAGES] = True
-                        elif package.type == PackageType.ACCESS_TO_CATALOG:
-                            user.additional_usage_quota[Quota.ACCESS_TO_CATALOG] = True
-
-                    if not user.additional_usage_quota[Quota.VOICE_MESSAGES]:
-                        user.settings[UserSettings.TURN_ON_VOICE_MESSAGES] = False
-
-                    if not user.additional_usage_quota[Quota.ACCESS_TO_CATALOG]:
-                        await update_chat(user.current_chat_id, {
-                            "role": DEFAULT_ROLE,
-                        })
-                    await update_subscription(current_subscription.id, {
-                        "status": SubscriptionStatus.FINISHED,
-                    })
-                    batch.update(user_ref, {
-                        "monthly_limits": SubscriptionLimit.LIMITS[SubscriptionType.FREE],
-                        "additional_usage_quota": user.additional_usage_quota,
-                        "settings": user.settings,
-                        "last_subscription_limit_update": datetime.now(timezone.utc)
-                    })
-
-                    await bot.send_message(
-                        chat_id=user.telegram_chat_id,
-                        text=get_localization(user.language_code).SUBSCRIPTION_END
-                    )
-                else:
-                    batch.update(user_ref, {
-                        "monthly_limits": SubscriptionLimit.LIMITS[SubscriptionType.FREE],
-                        "last_subscription_limit_update": datetime.now(timezone.utc)
-                    })
-
-                    await bot.send_message(
-                        chat_id=user.telegram_chat_id,
-                        text=get_localization(user.language_code).SUBSCRIPTION_RESET
-                    )
-
-        await batch.commit()

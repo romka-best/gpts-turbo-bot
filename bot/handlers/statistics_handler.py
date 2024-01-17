@@ -129,12 +129,12 @@ async def handle_statistics_selection(callback_query: CallbackQuery):
                 count_income_subscriptions_total_money += transaction.amount
             else:
                 count_income_packages_total_money += transaction.amount
+            paid_users.add(transaction.user_id)
         elif transaction.type == TransactionType.EXPENSE:
             count_expense_transactions_total += 1
             count_expense_transactions[transaction.service] += transaction.quantity
             count_expense_money[transaction.service] += transaction.amount
             count_expense_total_money += transaction.amount
-            paid_users.add(transaction.user_id)
 
         count_transactions_total += 1
 
@@ -150,7 +150,7 @@ async def handle_statistics_selection(callback_query: CallbackQuery):
         count_chats_usage[chat.role] = count_chats_usage.get(chat.role, 0) + 1
 
     count_face_swap_usage = {
-        'ALL': len(used_face_swap_packages)
+        'ALL': 0,
     }
     for face_swap_package in face_swap_packages:
         used_face_swap_package = list(
@@ -163,6 +163,8 @@ async def handle_statistics_selection(callback_query: CallbackQuery):
             face_swap_package.name,
             used_images
         )
+    for count in count_face_swap_usage.values():
+        count_face_swap_usage['ALL'] += count
 
     await callback_query.message.answer(text=get_localization(user.language_code).statistics(
         period=period,

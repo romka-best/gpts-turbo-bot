@@ -35,7 +35,7 @@ Let AI be your co-pilot in this adventure! 🚀
 
 👋 /start - <b>About me</b>
 🌍 /language - Engage with any language, <b>set system messages</b>.
-🧠 /mode - <b>Swap neural network models</b> on the fly with — <b>ChatGPT3</b>, <b>ChatGPT4</b>, <b>DALLE-3</b>, or <b>Face Swap</b>!
+🧠 /mode - <b>Swap neural network models</b> on the fly with — <b>ChatGPT3.5</b>, <b>ChatGPT4.0</b>, <b>DALLE-3</b>, or <b>Face Swap</b>!
 👤 /profile - <b>Check your profile</b> to see your usage quota and more.
 🔧 /settings - <b>Customize your experience</b> for a seamless user experience.
 🎭 /catalog - <b>Pick a specialized assistant</b> for tasks tailored just for you.
@@ -151,17 +151,17 @@ Keep exploring and let the AI surprises continue! 🤖
     MODE = """
 🤖 Let's check out what each model can do for you:
 
-✉️ <b>ChatGPT3: The Versatile Communicator</b>
+✉️ <b>ChatGPT3.5: The Versatile Communicator</b>
 - <i>Small Talk to Deep Conversations</i>: Ideal for chatting about anything from daily life to sharing jokes.
 - <i>Educational Assistant</i>: Get help with homework, language learning, or complex topics like coding.
 - <i>Personal Coach</i>: Get motivation, fitness tips, or even meditation guidance.
-- <i>Creative Writer</i>: Need a post, story, or even a song? ChatGPT3 can whip it up in seconds.
+- <i>Creative Writer</i>: Need a post, story, or even a song? ChatGPT3.5 can whip it up in seconds.
 - <i>Travel Buddy</i>: Ask for travel tips, local cuisines, or historical facts about your next destination.
 - <i>Business Helper</i>: Draft emails, create business plans, or brainstorm marketing ideas.
 - <i>Role Play</i>: Engage in creative role-playing scenarios for entertainment or storytelling.
 - <i>Quick Summaries</i>: Summarize long articles or reports into concise text.
 
-🧠 <b>ChatGPT4: The Advanced Intellect</b>
+🧠 <b>ChatGPT4.0: The Advanced Intellect</b>
 - <i>In-Depth Analysis</i>: Perfect for detailed research, technical explanations, or exploring hypothetical scenarios.
 - <i>Problem Solver</i>: Get help with advanced math problems, programming bugs, or scientific queries.
 - <i>Language Expert</i>: Translate complex texts or practice conversational skills in various languages.
@@ -252,11 +252,29 @@ You can renew your magic pass with /subscribe to keep exploring the AI universe.
 
 The AI adventure awaits! Recharge, regroup, and let's continue this exciting journey together. 🤖✨
 """
+    PACKAGES_END = """
+🕒 <b>Your package or packages time is up!</b> ⌛
+
+Oops, it looks like your fast messages (or voice messages, catalog access) package has run its course. But don't worry, new opportunities always await beyond the horizon!
+
+🎁 Want to continue? Check out our offers in /buy or consider a subscription via /subscribe. More exciting moments are ahead!
+
+🚀 Ready for a fresh start? Rejoin and dive back into the world of amazing AI possibilities!
+"""
+    CHATS_RESET = """
+🔄 <b>Chats updated!</b> 💬
+
+Your chats have switched their unique roles to "Personal Assistant" as your access to the role catalog has ended. But don't worry, your AI helpers are still here to keep the conversation going!
+
+🎁 Want your previous roles back? Visit /buy to purchase a new package or subscribe via /subscribe for unlimited access to the catalog.
+
+🌟 Keep exploring! Your chats are always ready for new amazing conversations with AI.
+"""
 
     # Package
-    GPT3_REQUESTS = "✉️ GPT3 requests"
-    GPT3_REQUESTS_DESCRIPTION = "Unleash the power of GPT 3 for witty chats, smart advice, and endless fun! 🤖✨"
-    GPT4_REQUESTS = "🧠 GPT4 requests"
+    GPT3_REQUESTS = "✉️ GPT3.5 requests"
+    GPT3_REQUESTS_DESCRIPTION = "Unleash the power of GPT 3.5 for witty chats, smart advice, and endless fun! 🤖✨"
+    GPT4_REQUESTS = "🧠 GPT4.0 requests"
     GPT4_REQUESTS_DESCRIPTION = "Experience GPT4's advanced intelligence for deeper insights and groundbreaking conversations 🧠🌟"
     THEMATIC_CHATS = "💬 Thematic chats"
     THEMATIC_CHATS_DESCRIPTION = "Dive into topics you love with Thematic Chats, guided by AI in a world of tailored discussions 📚🗨️"
@@ -411,8 +429,17 @@ Additional face swap images: {additional_usage_quota[Quota.FACE_SWAP]}
 💬
 Additional chats: {additional_usage_quota[Quota.ADDITIONAL_CHATS]}
 
+🎭
+Access to a catalog: {'Yes' if additional_usage_quota[Quota.ACCESS_TO_CATALOG] else 'No'}
+
+🎙
+Send and get voice messages: {'Yes' if additional_usage_quota[Quota.VOICE_MESSAGES] else 'No'}
+
+⚡
+Fast answers: {'Yes' if additional_usage_quota[Quota.FAST_MESSAGES] else 'No'}
+
 Subscribe: /subscribe
-Buy additional requests: /buy
+Buy additional requests or possibilities: /buy
 """
 
     @staticmethod
@@ -462,7 +489,7 @@ Please select the subscription period by clicking on the button:
 🤖 <b>Welcome to the AI Shopping Spree!</b> 🛍
 
 Welcome to the shop zone, where each button tap unlocks a world of AI wonders!
-🧠 <b>ChatGPT3 & ChatGPT4</b>: Engage in deep, thought-provoking conversations. Your new AI buddies await!
+🧠 <b>ChatGPT3.5 & ChatGPT4.0</b>: Engage in deep, thought-provoking conversations. Your new AI buddies await!
 🎨 <b>DALLE-3</b>: Transform ideas into stunning visuals. It's like painting with AI!
 👤 <b>Face Swap</b>: Play with identities in images. It's never been this exciting!
 🗣️ <b>Voice Messages</b>: Say it out loud! Chatting with AI has never sounded better.
@@ -475,11 +502,37 @@ Hit a button and embark on an extraordinary journey with AI! It's time to redefi
 
     @staticmethod
     def choose_min(package_type: PackageType):
+        name = ""
+        quantity = ""
+        if package_type == PackageType.GPT3:
+            name = English.GPT3_REQUESTS
+            quantity = "requests"
+        elif package_type == PackageType.GPT4:
+            name = English.GPT4_REQUESTS
+            quantity = "requests"
+        elif package_type == PackageType.CHAT:
+            name = English.THEMATIC_CHATS
+            quantity = "chats"
+        elif package_type == PackageType.DALLE3:
+            name = English.DALLE3_REQUESTS
+            quantity = "images"
+        elif package_type == PackageType.FACE_SWAP:
+            name = English.FACE_SWAP_REQUESTS
+            quantity = "generations"
+        elif package_type == PackageType.ACCESS_TO_CATALOG:
+            name = English.ACCESS_TO_CATALOG
+            quantity = "months"
+        elif package_type == PackageType.VOICE_MESSAGES:
+            name = English.ANSWERS_AND_REQUESTS_WITH_VOICE_MESSAGES
+            quantity = "months"
+        elif package_type == PackageType.FAST_MESSAGES:
+            name = English.FAST_ANSWERS
+            quantity = "months"
         return f"""
 🚀 Fantastic!
 
-You've selected the <b>{package_type}</b> package.
-🌟 Please <b>type in the number of requests</b> you'd like to go for
+You've selected the <b>{name}</b> package.
+🌟 Please <b>type in the number of {quantity}</b> you'd like to go for
 """
 
     # Chats

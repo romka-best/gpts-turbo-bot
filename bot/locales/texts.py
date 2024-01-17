@@ -147,6 +147,8 @@ TODO
     SUBSCRIPTION_SUCCESS: str
     SUBSCRIPTION_RESET: str
     SUBSCRIPTION_END: str
+    PACKAGES_END: str
+    CHATS_RESET: str
 
     # Package
     GPT3_REQUESTS: str
@@ -418,13 +420,13 @@ TODO
 
     - <b>Всего:</b> {count_transactions_total}
 5️⃣ <b>Расходы:</b>
-   - <b>{ServiceType.GPT3}:</b> {count_expense_money[ServiceType.GPT3]}$
-   - <b>{ServiceType.GPT4}:</b> {count_expense_money[ServiceType.GPT4]}$
-   - <b>{ServiceType.DALLE3}:</b> {count_expense_money[ServiceType.DALLE3]}$
-   - <b>{ServiceType.FACE_SWAP}:</b> {count_expense_money[ServiceType.FACE_SWAP]}$
-   - <b>{ServiceType.VOICE_MESSAGES}:</b> {count_expense_money[ServiceType.VOICE_MESSAGES]}$
+   - <b>{ServiceType.GPT3}:</b> {round(count_expense_money[ServiceType.GPT3], 2)}$
+   - <b>{ServiceType.GPT4}:</b> {round(count_expense_money[ServiceType.GPT4], 2)}$
+   - <b>{ServiceType.DALLE3}:</b> {round(count_expense_money[ServiceType.DALLE3], 2)}$
+   - <b>{ServiceType.FACE_SWAP}:</b> {round(count_expense_money[ServiceType.FACE_SWAP], 2)}$
+   - <b>{ServiceType.VOICE_MESSAGES}:</b> {round(count_expense_money[ServiceType.VOICE_MESSAGES], 2)}$
 
-   - <b>Всего:</b> {count_expense_total_money}$
+   - <b>Всего:</b> {round(count_expense_total_money, 2)}$
 6️⃣ <b>Доходы:</b>
     💳 <b>Подписки:</b> {count_income_subscriptions_total_money}₽
     - <b>{ServiceType.STANDARD} {emojis[ServiceType.STANDARD]}:</b> {count_income_money[ServiceType.STANDARD]}₽
@@ -442,7 +444,7 @@ TODO
     - <b>{ServiceType.FAST_MESSAGES}:</b> {count_income_money[ServiceType.FAST_MESSAGES]}₽
 
     - <b>Всего:</b> {count_income_total_money}₽
-7️⃣ <b>Вал:</b> {count_total_money}₽
+7️⃣ <b>Вал:</b> {round(count_total_money, 2)}₽
 </span>
 💬 <b>Созданные чаты</b>
 {chat_info}
