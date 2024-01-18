@@ -11,7 +11,7 @@ client = openai.OpenAI(api_key=config.OPENAI_API_KEY.get_secret_value())
 
 
 def get_default_max_tokens(model: str) -> int:
-    base = 512
+    base = 1024
     if model == Model.GPT3 or model == Model.GPT4:
         return base
 

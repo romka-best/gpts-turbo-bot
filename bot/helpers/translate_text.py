@@ -40,7 +40,6 @@ async def translate_text(text: str, source_language_code: str, target_language_c
         async with session.post(url, headers=headers, data=json.dumps(payload)) as response:
             if response.status == 200:
                 data = await response.json()
-                print(data)
                 return data['translations'][0]['text']
             else:
                 error_message = await response.text()

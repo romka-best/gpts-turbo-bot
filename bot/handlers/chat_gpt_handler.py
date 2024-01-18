@@ -1,7 +1,9 @@
 from aiogram import Router
+from aiogram.exceptions import TelegramBadRequest
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
 from telegram import constants
+from telegram.constants import ParseMode
 
 from bot.database.main import firebase
 from bot.database.models.common import Quota, Currency, Model
@@ -96,10 +98,21 @@ async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_q
             footer_text = f'\n\n✉️ {user.monthly_limits[user_quota] + user.additional_usage_quota[user_quota] + 1}' \
                 if user.settings[UserSettings.SHOW_USAGE_QUOTA] else ''
             reply_markup = build_chat_gpt_continue_generating_keyboard(user.language_code)
-            await message.reply(
-                f"{header_text}{content}{footer_text}",
-                reply_markup=reply_markup if response['finish_reason'] == 'length' else None,
-            )
+            try:
+                await message.reply(
+                    f"{header_text}{content}{footer_text}",
+                    reply_markup=reply_markup if response['finish_reason'] == 'length' else None,
+                    parse_mode=ParseMode.MARKDOWN,
+                )
+            except TelegramBadRequest as e:
+                if "can't parse entities" in str(e):
+                    await message.reply(
+                        f"{header_text}{content}{footer_text}",
+                        reply_markup=reply_markup if response['finish_reason'] == 'length' else None,
+                        parse_mode=None,
+                    )
+                else:
+                    raise
     except Exception as e:
         await message.answer(
             text=f"{get_localization(user.language_code).ERROR}\n\nPlease contact @roman_danilov",
