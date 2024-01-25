@@ -77,6 +77,7 @@ async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_q
             raise NotImplemented
 
         total_price = round(input_price + output_price, 6)
+        role, content = response_message.role, response_message.content
         await write_transaction(user_id=user.id,
                                 type=TransactionType.EXPENSE,
                                 service=service,
@@ -86,10 +87,10 @@ async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_q
                                 details={
                                     "input_tokens": response['input_tokens'],
                                     "output_tokens": response['output_tokens'],
-                                    "message": response['message']
+                                    "request": text,
+                                    "answer": content,
                                 })
 
-        role, content = response_message.role, response_message.content
         transaction = firebase.db.transaction()
         await create_new_message_and_update_user(transaction, role, content, user, user_quota)
 
