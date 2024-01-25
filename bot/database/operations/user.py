@@ -14,7 +14,29 @@ async def get_user(user_id: str) -> Optional[User]:
     user = await user_ref.get()
 
     if user.exists:
-        return User(**user.to_dict())
+        user_dict = user.to_dict()
+
+        return User(
+            id=user_dict.get('id'),
+            first_name=user_dict.get('first_name'),
+            last_name=user_dict.get('last_name'),
+            username=user_dict.get('username'),
+            current_chat_id=user_dict.get('current_chat_id'),
+            telegram_chat_id=user_dict.get('telegram_chat_id'),
+            gender=user_dict.get('gender', UserGender.UNSPECIFIED),
+            language_code=user_dict.get('language_code'),
+            is_premium=user_dict.get('is_premium', False),
+            is_blocked=user_dict.get('is_blocked', False),
+            current_model=user_dict.get("current_model"),
+            currency=user_dict.get("currency"),
+            subscription_type=user_dict.get("subscription_type"),
+            last_subscription_limit_update=user_dict.get("last_subscription_limit_update"),
+            monthly_limits=user_dict.get("monthly_limits"),
+            additional_usage_quota=user_dict.get("usage_quota"),
+            settings=user_dict.get("settings"),
+            created_at=user_dict.get("created_at"),
+            edited_at=user_dict.get("edited_at")
+        )
 
 
 async def get_users(start_date: Optional[datetime] = None,
@@ -27,7 +49,29 @@ async def get_users(start_date: Optional[datetime] = None,
         users_query = users_query.where("created_at", "<=", end_date)
 
     users = users_query.stream()
-    return [User(**user.to_dict()) async for user in users]
+    return [
+        User(
+            id=user.to_dict().get('id'),
+            first_name=user.to_dict().get('first_name'),
+            last_name=user.to_dict().get('last_name'),
+            username=user.to_dict().get('username'),
+            current_chat_id=user.to_dict().get('current_chat_id'),
+            telegram_chat_id=user.to_dict().get('telegram_chat_id'),
+            gender=user.to_dict().get('gender', UserGender.UNSPECIFIED),
+            language_code=user.to_dict().get('language_code'),
+            is_premium=user.to_dict().get('is_premium', False),
+            is_blocked=user.to_dict().get('is_blocked', False),
+            current_model=user.to_dict().get("current_model"),
+            currency=user.to_dict().get("currency"),
+            subscription_type=user.to_dict().get("subscription_type"),
+            last_subscription_limit_update=user.to_dict().get("last_subscription_limit_update"),
+            monthly_limits=user.to_dict().get("monthly_limits"),
+            additional_usage_quota=user.to_dict().get("usage_quota"),
+            settings=user.to_dict().get("settings"),
+            created_at=user.to_dict().get("created_at"),
+            edited_at=user.to_dict().get("edited_at")
+        ) async for user in users
+    ]
 
 
 def create_user_object(telegram_user: TelegramUser, user_data: Dict, chat_id: str, telegram_chat_id: str) -> User:
@@ -41,6 +85,7 @@ def create_user_object(telegram_user: TelegramUser, user_data: Dict, chat_id: st
         gender=user_data.get('gender', UserGender.UNSPECIFIED),
         language_code=telegram_user.language_code,
         is_premium=telegram_user.is_premium or False,
+        is_blocked=False,
         current_model=user_data.get("current_model", Model.GPT3),
         currency=user_data.get("currency", Currency.RUB),
         subscription_type=user_data.get("subscription_type", SubscriptionType.FREE),
@@ -48,7 +93,8 @@ def create_user_object(telegram_user: TelegramUser, user_data: Dict, chat_id: st
         monthly_limits=user_data.get("monthly_limits", SubscriptionLimit.LIMITS[SubscriptionType.FREE]),
         additional_usage_quota=user_data.get("usage_quota", User.DEFAULT_ADDITIONAL_USAGE_QUOTA),
         settings=user_data.get("settings", User.DEFAULT_SETTINGS),
-        created_at=user_data.get("created_at", None)
+        created_at=user_data.get("created_at", None),
+        edited_at=user_data.get("edited_at", None)
     )
 
 

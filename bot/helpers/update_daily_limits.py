@@ -2,6 +2,7 @@ import logging
 from datetime import datetime, timezone
 
 from aiogram import Bot
+from aiogram.exceptions import TelegramForbiddenError
 from google.cloud.firestore_v1 import AsyncWriteBatch
 
 from bot.config import config
@@ -13,7 +14,7 @@ from bot.database.models.user import User, UserSettings
 from bot.database.operations.chat import get_chats_by_user_id, update_chat
 from bot.database.operations.package import get_packages_by_user_id
 from bot.database.operations.subscription import get_last_subscription_by_user_id, update_subscription
-from bot.database.operations.user import get_users
+from bot.database.operations.user import get_users, update_user
 from bot.locales.main import get_localization
 
 
@@ -25,14 +26,25 @@ async def update_monthly_limits(bot: Bot):
         user_batch = all_users[i:i + config.USER_BATCH_SIZE]
 
         for user in user_batch:
-            try:
-                had_subscription = user.subscription_type != SubscriptionType.FREE
-                user = await update_user_subscription(bot, user, batch)
-                await update_user_additional_usage_quota(bot, user, had_subscription, batch)
-            except Exception as e:
-                logging.error(f"Error updating user {user.id}: {e}")
+            if user.is_blocked:
+                continue
+
+            await update_user_monthly_limits(bot, user, batch)
 
         await batch.commit()
+
+
+async def update_user_monthly_limits(bot: Bot, user: User, batch: AsyncWriteBatch):
+    try:
+        had_subscription = user.subscription_type != SubscriptionType.FREE
+        user = await update_user_subscription(bot, user, batch)
+        await update_user_additional_usage_quota(bot, user, had_subscription, batch)
+    except TelegramForbiddenError:
+        await update_user(user.id, {
+            "is_blocked": True
+        })
+    except Exception as e:
+        logging.error(f"Error updating user {user.id}: {e}")
 
 
 async def update_user_subscription(bot: Bot, user: User, batch: AsyncWriteBatch):

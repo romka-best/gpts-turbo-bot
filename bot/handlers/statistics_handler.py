@@ -66,8 +66,11 @@ async def handle_statistics_selection(callback_query: CallbackQuery):
         SubscriptionType.VIP: 0,
         SubscriptionType.PLATINUM: 0,
     }
+    count_blocked_users = 0
     for user in users:
         count_subscription_users[user.subscription_type] += 1
+        if user.is_blocked:
+            count_blocked_users += 1
 
     paid_users = set()
     count_income_transactions = {
@@ -170,6 +173,7 @@ async def handle_statistics_selection(callback_query: CallbackQuery):
         period=period,
         count_all_users=count_all_users,
         count_activated_users=count_activated_users,
+        count_blocked_users=count_blocked_users,
         count_subscription_users=count_subscription_users,
         count_income_transactions=count_income_transactions,
         count_expense_transactions=count_expense_transactions,

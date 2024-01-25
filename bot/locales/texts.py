@@ -356,6 +356,7 @@ TODO
     def statistics(period: str,
                    count_all_users: int,
                    count_activated_users: int,
+                   count_blocked_users: int,
                    count_subscription_users: Dict,
                    count_income_transactions: Dict,
                    count_expense_transactions: Dict,
@@ -388,16 +389,17 @@ TODO
 
 👤 <b>Пользователи</b>
 1️⃣ <b>{'Всего пользователей' if period == 'всё время' else 'Новых пользователей'}:</b> {count_all_users}
-2️⃣ <b>Из них, пользователи, оплатившие хоть раз:</b> {count_activated_users}
-3️⃣ <b>Из них, пользователи-подписчики:</b>
+2️⃣ <b>Оплатившие хоть раз:</b> {count_activated_users}
+3️⃣ <b>Подписчики:</b>
     - <b>{SubscriptionType.FREE}:</b> {count_subscription_users[SubscriptionType.FREE]}
     - <b>{SubscriptionType.STANDARD} {emojis[SubscriptionType.STANDARD]}:</b> {count_subscription_users[SubscriptionType.STANDARD]}
     - <b>{SubscriptionType.VIP} {emojis[SubscriptionType.VIP]}:</b> {count_subscription_users[SubscriptionType.VIP]}
     - <b>{SubscriptionType.PLATINUM} {emojis[SubscriptionType.PLATINUM]}:</b> {count_subscription_users[SubscriptionType.PLATINUM]}
+4️⃣ <b>Заблокировал бота:</b> {count_blocked_users}
 
 💰 <b>Финансы</b>
 <span class="tg-spoiler">
-4️⃣ <b>Транзакции:</b>
+1️⃣ <b>Транзакции:</b>
     ➖ <b>{TransactionType.EXPENSE}:</b> {count_expense_transactions_total}
     - <b>{ServiceType.GPT3}:</b> {count_expense_transactions[ServiceType.GPT3]}
     - <b>{ServiceType.GPT4}:</b> {count_expense_transactions[ServiceType.GPT4]}
@@ -419,7 +421,7 @@ TODO
     - <b>{ServiceType.PLATINUM}:</b> {count_income_transactions[ServiceType.PLATINUM]}
 
     - <b>Всего:</b> {count_transactions_total}
-5️⃣ <b>Расходы:</b>
+2️⃣ <b>Расходы:</b>
    - <b>{ServiceType.GPT3}:</b> {round(count_expense_money[ServiceType.GPT3], 2)}$
    - <b>{ServiceType.GPT4}:</b> {round(count_expense_money[ServiceType.GPT4], 2)}$
    - <b>{ServiceType.DALLE3}:</b> {round(count_expense_money[ServiceType.DALLE3], 2)}$
@@ -427,7 +429,7 @@ TODO
    - <b>{ServiceType.VOICE_MESSAGES}:</b> {round(count_expense_money[ServiceType.VOICE_MESSAGES], 2)}$
 
    - <b>Всего:</b> {round(count_expense_total_money, 2)}$
-6️⃣ <b>Доходы:</b>
+3️⃣ <b>Доходы:</b>
     💳 <b>Подписки:</b> {count_income_subscriptions_total_money}₽
     - <b>{ServiceType.STANDARD} {emojis[ServiceType.STANDARD]}:</b> {count_income_money[ServiceType.STANDARD]}₽
     - <b>{ServiceType.VIP} {emojis[ServiceType.VIP]}:</b> {count_income_money[ServiceType.VIP]}₽
@@ -444,7 +446,7 @@ TODO
     - <b>{ServiceType.FAST_MESSAGES}:</b> {count_income_money[ServiceType.FAST_MESSAGES]}₽
 
     - <b>Всего:</b> {count_income_total_money}₽
-7️⃣ <b>Вал:</b> {round(count_total_money, 2)}₽
+4️⃣ <b>Вал:</b> {round(count_total_money, 2)}₽
 </span>
 💬 <b>Созданные чаты</b>
 {chat_info}
