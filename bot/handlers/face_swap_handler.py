@@ -155,8 +155,10 @@ async def handle_face_swap_choose_selection(callback_query: CallbackQuery, state
         ),
         reply_markup=reply_markup)
 
-    await state.set_state(FaceSwap.waiting_for_face_swap_quantity)
     await state.update_data(face_swap_package_name=face_swap_package.name)
+    await state.update_data(maximum_quantity=maximum_quantity)
+    if maximum_quantity > 0:
+        await state.set_state(FaceSwap.waiting_for_face_swap_quantity)
 
 
 @face_swap_router.callback_query(lambda c: c.data.startswith('face_swap_package:'))
@@ -237,7 +239,7 @@ async def face_swap_quantity_handler(message: Message, state: FSMContext, user_i
         quantity = int(chosen_quantity)
         name = user_data['face_swap_package_name']
         face_swap_package = await get_face_swap_package_by_name_and_gender(name, user.gender)
-        face_swap_package_quantity = count_active_files(face_swap_package.files)
+        face_swap_package_quantity = user_data['maximum_quantity']
 
         if quota < quantity:
             reply_markup = build_cancel_keyboard(user.language_code)
@@ -272,19 +274,29 @@ async def face_swap_quantity_handler(message: Message, state: FSMContext, user_i
             await send_images(message, images)
 
             quantity_to_delete = len(images)
-            user.monthly_limits[Quota.FACE_SWAP] = max(
-                user.monthly_limits[Quota.FACE_SWAP] - quantity_to_delete,
-                0,
-            )
-            user.additional_usage_quota[Quota.FACE_SWAP] = max(
-                user.additional_usage_quota[Quota.FACE_SWAP] - quantity_to_delete,
-                0,
-            )
+            quantity_deleted = 0
+            while quantity_deleted != quantity_to_delete:
+                if user.monthly_limits[Quota.FACE_SWAP] != 0:
+                    user.monthly_limits[Quota.FACE_SWAP] -= 1
+                    quantity_deleted += 1
+                elif user.additional_usage_quota[Quota.FACE_SWAP] != 0:
+                    user.additional_usage_quota[Quota.FACE_SWAP] -= 1
+                    quantity_deleted += 1
+                else:
+                    break
 
             update_tasks = [
-                write_transaction(user_id=user.id, type=TransactionType.EXPENSE, service=ServiceType.FACE_SWAP,
-                                  amount=round(PRICE_FACE_SWAP * total_seconds, 6), currency=Currency.USD,
-                                  quantity=quantity),
+                write_transaction(user_id=user.id,
+                                  type=TransactionType.EXPENSE,
+                                  service=ServiceType.FACE_SWAP,
+                                  amount=round(PRICE_FACE_SWAP * total_seconds, 6),
+                                  currency=Currency.USD,
+                                  quantity=quantity_to_delete,
+                                  details={
+                                      'name': face_swap_package.name,
+                                      'images': images,
+                                      'seconds': total_seconds,
+                                  }),
                 update_user(user.id, {
                     "monthly_limits": user.monthly_limits,
                     "additional_usage_quota": user.additional_usage_quota

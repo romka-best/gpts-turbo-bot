@@ -188,6 +188,14 @@ Keep exploring and let the AI surprises continue! 🤖
 
 To change a model choose a button below 👇
 """
+    REQUEST_FORBIDDEN_ERROR = """
+<b>Oops! Your request just bumped into our safety guardian!</b> 🚨
+
+It seems there's something in your request that our vigilant content defender decided to block 🛑
+Please check your text for any forbidden content and try again!
+
+Our goal is safety and respect for every user! 🌟
+"""
     ALREADY_MAKE_REQUEST = "You've already made a request. Please wait ⚠️"
     READY_FOR_NEW_REQUEST = "You can ask the next request 😌"
     CONTINUE_GENERATING = "Continue generating"

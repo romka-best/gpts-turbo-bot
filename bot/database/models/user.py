@@ -26,6 +26,7 @@ class User:
     language_code: str
     gender: UserGender
     is_premium: bool
+    is_blocked: bool
     current_model: str
     currency: Currency
     subscription_type: SubscriptionType
@@ -63,6 +64,7 @@ class User:
                  gender=UserGender.UNSPECIFIED,
                  language_code="en",
                  is_premium=False,
+                 is_blocked=False,
                  current_model=Model.GPT3,
                  currency=Currency.RUB,
                  subscription_type=SubscriptionType.FREE,
@@ -79,6 +81,7 @@ class User:
         self.gender = gender
         self.language_code = language_code
         self.is_premium = is_premium
+        self.is_blocked = is_blocked
         self.current_model = current_model
         self.currency = currency
         self.subscription_type = subscription_type

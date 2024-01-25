@@ -4,8 +4,9 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
 
 from bot.database.main import firebase
-from bot.database.operations.user import get_user
+from bot.database.operations.user import get_user, update_user
 from bot.helpers.initialize_user_for_the_first_time import initialize_user_for_the_first_time
+from bot.helpers.update_daily_limits import update_user_monthly_limits
 from bot.utils.is_admin import is_admin
 
 from bot.locales.main import get_localization
@@ -22,6 +23,15 @@ async def start(message: Message, state: FSMContext):
         chat_title = get_localization(message.from_user.language_code).DEFAULT_CHAT_TITLE
         transaction = firebase.db.transaction()
         await initialize_user_for_the_first_time(transaction, message.from_user, str(message.chat.id), chat_title)
+    elif user and user.is_blocked:
+        user.is_blocked = False
+        await update_user(user.id, {
+            "is_blocked": user.is_blocked,
+        })
+
+        batch = firebase.db.batch()
+        await update_user_monthly_limits(message.bot, user, batch)
+        await batch.commit()
 
     greeting = get_localization(user.language_code if user else message.from_user.language_code).START
     await message.answer(greeting)

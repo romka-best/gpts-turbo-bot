@@ -81,7 +81,7 @@ async def handle_photo(message: Message, state: FSMContext):
         await message.answer(text=get_localization(user.language_code).FACE_SWAP_MANAGE_EDIT_SUCCESS)
     elif user.current_model == Model.FACE_SWAP:
         quota = user.monthly_limits[Quota.FACE_SWAP] + user.additional_usage_quota[Quota.FACE_SWAP]
-        quantity = len(message.photo)
+        quantity = 1
         if quota < quantity:
             await message.answer(text=get_localization(user.language_code).face_swap_package_forbidden(quota))
         else:
@@ -102,20 +102,27 @@ async def handle_photo(message: Message, state: FSMContext):
                 photo=URLInputFile(result['image'], filename=background_path),
             )
 
-            quantity_to_delete = 1
             user.monthly_limits[Quota.FACE_SWAP] = max(
-                user.monthly_limits[Quota.FACE_SWAP] - quantity_to_delete,
+                user.monthly_limits[Quota.FACE_SWAP] - quantity,
                 0,
             )
             user.additional_usage_quota[Quota.FACE_SWAP] = max(
-                user.additional_usage_quota[Quota.FACE_SWAP] - quantity_to_delete,
+                user.additional_usage_quota[Quota.FACE_SWAP] - quantity,
                 0,
             )
 
             update_tasks = [
-                write_transaction(user_id=user.id, type=TransactionType.EXPENSE, service=ServiceType.FACE_SWAP,
-                                  amount=round(PRICE_FACE_SWAP * result['seconds'], 6), currency=Currency.USD,
-                                  quantity=quantity),
+                write_transaction(user_id=user.id,
+                                  type=TransactionType.EXPENSE,
+                                  service=ServiceType.FACE_SWAP,
+                                  amount=round(PRICE_FACE_SWAP * result['seconds'], 6),
+                                  currency=Currency.USD,
+                                  quantity=quantity,
+                                  details={
+                                      'name': 'CUSTOM',
+                                      'images': [result['image']],
+                                      'seconds': result['seconds'],
+                                  }),
                 update_user(user.id, {
                     "monthly_limits": user.monthly_limits,
                     "additional_usage_quota": user.additional_usage_quota

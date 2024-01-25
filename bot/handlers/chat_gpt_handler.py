@@ -1,3 +1,4 @@
+import openai
 from aiogram import Router
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.fsm.context import FSMContext
@@ -76,14 +77,20 @@ async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_q
             raise NotImplemented
 
         total_price = round(input_price + output_price, 6)
+        role, content = response_message.role, response_message.content
         await write_transaction(user_id=user.id,
                                 type=TransactionType.EXPENSE,
                                 service=service,
                                 amount=total_price,
                                 currency=Currency.USD,
-                                quantity=1)
+                                quantity=1,
+                                details={
+                                    "input_tokens": response['input_tokens'],
+                                    "output_tokens": response['output_tokens'],
+                                    "request": text,
+                                    "answer": content,
+                                })
 
-        role, content = response_message.role, response_message.content
         transaction = firebase.db.transaction()
         await create_new_message_and_update_user(transaction, role, content, user, user_quota)
 
@@ -113,13 +120,19 @@ async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_q
                     )
                 else:
                     raise
+    except openai.BadRequestError as e:
+        if e.code == 'content_policy_violation':
+            await message.reply(
+                text=get_localization(user.language_code).REQUEST_FORBIDDEN_ERROR,
+            )
     except Exception as e:
         await message.answer(
             text=f"{get_localization(user.language_code).ERROR}\n\nPlease contact @roman_danilov",
             parse_mode=None
         )
         await send_message_to_admins(bot=message.bot,
-                                     message=f"#error\n\nALARM! Ошибка у пользователя: {user.id}\nИнформация:\n{e}",
+                                     message=f"#error\n\nALARM! Ошибка у пользователя при запросе в ChatGPT: {user.id}\n"
+                                             f"Информация:\n{e}",
                                      parse_mode=None)
     finally:
         await processing_message.delete()

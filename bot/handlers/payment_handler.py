@@ -264,7 +264,11 @@ async def successful_payment(message: Message):
                                 service=subscription.type,
                                 amount=subscription.amount,
                                 currency=subscription.currency,
-                                quantity=1)
+                                quantity=1,
+                                details={
+                                    'subscription_id': subscription.id,
+                                    'provider_payment_charge_id': payment.provider_payment_charge_id
+                                })
 
         await message.answer(text=get_localization(user.language_code).SUBSCRIPTION_SUCCESS)
     elif payment_type == PaymentType.PACKAGE:
@@ -298,6 +302,10 @@ async def successful_payment(message: Message):
                                 service=service_type,
                                 amount=package.amount,
                                 currency=package.currency,
-                                quantity=package.quantity)
+                                quantity=package.quantity,
+                                details={
+                                    'package_id': package.id,
+                                    'provider_payment_charge_id': payment.provider_payment_charge_id
+                                })
 
         await message.answer(text=get_localization(user.language_code).PACKAGE_SUCCESS)

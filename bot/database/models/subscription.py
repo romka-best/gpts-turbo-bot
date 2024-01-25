@@ -146,15 +146,15 @@ class Subscription:
 
         if currency == Currency.RUB:
             prices[SubscriptionType.STANDARD] = '299₽'
-            prices[SubscriptionType.VIP] = '999₽'
+            prices[SubscriptionType.VIP] = '749₽'
             prices[SubscriptionType.PLATINUM] = '1 999₽'
         elif currency == Currency.EUR:
             prices[SubscriptionType.STANDARD] = '2.99€'
-            prices[SubscriptionType.VIP] = '9.99€'
+            prices[SubscriptionType.VIP] = '7.49€'
             prices[SubscriptionType.PLATINUM] = '19.99€'
         else:
             prices[SubscriptionType.STANDARD] = '$2.99'
-            prices[SubscriptionType.VIP] = '$9.99'
+            prices[SubscriptionType.VIP] = '$7.49'
             prices[SubscriptionType.PLATINUM] = '$19.99'
 
         return prices

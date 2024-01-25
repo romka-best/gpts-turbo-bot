@@ -3,6 +3,7 @@ import os
 from contextlib import asynccontextmanager
 
 import uvicorn
+from aiogram.exceptions import TelegramForbiddenError
 from fastapi import FastAPI
 from aiogram import Bot, Dispatcher, types
 from aiogram.enums.parse_mode import ParseMode
@@ -11,6 +12,7 @@ from aiogram.fsm.strategy import FSMStrategy
 
 from bot.config import config
 from bot.database.main import firebase
+from bot.database.operations.user import update_user
 from bot.handlers.catalog_handler import catalog_router
 from bot.handlers.chat_gpt_handler import chat_gpt_router
 from bot.handlers.chats_handler import chats_router
@@ -28,6 +30,7 @@ from bot.handlers.settings_handler import settings_router
 from bot.handlers.statistics_handler import statistics_router
 from bot.handlers.text_handler import text_router
 from bot.handlers.voice_handler import voice_router
+from bot.helpers.send_message_to_admins import send_message_to_admins
 from bot.helpers.update_daily_limits import update_monthly_limits
 
 WEBHOOK_PATH = f"/bot/{config.BOT_TOKEN.get_secret_value()}"
@@ -75,9 +78,20 @@ app = FastAPI(lifespan=lifespan)
 
 @app.post(WEBHOOK_PATH)
 async def bot_webhook(update: dict):
+    telegram_update = types.Update(**update)
     try:
-        telegram_update = types.Update(**update)
         await dp.feed_update(bot=bot, update=telegram_update)
+    except TelegramForbiddenError:
+        user_id = None
+        if telegram_update.callback_query and telegram_update.callback_query.message.from_user.id:
+            user_id = str(telegram_update.callback_query.message.from_user.id)
+        elif telegram_update.message and telegram_update.message.from_user.id:
+            user_id = str(telegram_update.message.from_user.id)
+
+        if user_id:
+            await update_user(user_id, {
+                "is_blocked": True
+            })
     except Exception as e:
         logging.exception(f"Error in bot_webhook: {e}")
 
@@ -86,9 +100,12 @@ async def bot_webhook(update: dict):
 async def daily_tasks():
     await update_monthly_limits(bot)
 
+    message = "Daily tasks executed successfully"
+    await send_message_to_admins(bot, f'<b>{message}</b> 🎉')
+
     return {
         "code": 200,
-        "message": "Daily tasks executed successfully"
+        "message": message,
     }
 
 

@@ -17,7 +17,11 @@ async def reply_with_voice(message: Message, text: str, user_id: str, reply_mark
                             service=ServiceType.VOICE_MESSAGES,
                             amount=total_price,
                             currency=Currency.USD,
-                            quantity=1)
+                            quantity=1,
+                            details={
+                                'subtype': 'TTS',
+                                'text': text,
+                            })
 
     await message.answer_voice(voice=BufferedInputFile(audio_content.read(), filename='answer.ogg'),
                                reply_markup=reply_markup)

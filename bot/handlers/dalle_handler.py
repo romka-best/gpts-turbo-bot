@@ -1,3 +1,4 @@
+import openai
 from aiogram import Router
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
@@ -45,7 +46,10 @@ async def handle_dalle(message: Message, state: FSMContext, user: User, user_quo
                                 service=ServiceType.DALLE3,
                                 amount=PRICE_DALLE3,
                                 currency=Currency.USD,
-                                quantity=1)
+                                quantity=1,
+                                details={
+                                    'text': text,
+                                })
 
         footer_text = f'\n\n✉️ {user.monthly_limits[user_quota] + user.additional_usage_quota[user_quota] + 1}' \
             if user.settings[UserSettings.SHOW_USAGE_QUOTA] else ''
@@ -53,13 +57,18 @@ async def handle_dalle(message: Message, state: FSMContext, user: User, user_quo
             caption=f"{get_localization(user.language_code).IMAGE_SUCCESS}{footer_text}",
             photo=response_url,
         )
+    except openai.BadRequestError as e:
+        if e.code == 'content_policy_violation':
+            await message.reply(
+                text=get_localization(user.language_code).REQUEST_FORBIDDEN_ERROR,
+            )
     except Exception as e:
         await message.answer(
             text=f"{get_localization(user.language_code).ERROR}\n\nPlease contact @roman_danilov",
             parse_mode=None
         )
         await send_message_to_admins(bot=message.bot,
-                                     message=f"#error\n\nALARM! Ошибка у пользователя: {user.id}\nИнформация:\n{e}",
+                                     message=f"#error\n\nALARM! Ошибка у пользователя при запросе в DALLE: {user.id}\nИнформация:\n{e}",
                                      parse_mode=None)
     finally:
         await processing_message.delete()
