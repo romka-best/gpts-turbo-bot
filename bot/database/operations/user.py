@@ -32,7 +32,7 @@ async def get_user(user_id: str) -> Optional[User]:
             subscription_type=user_dict.get("subscription_type"),
             last_subscription_limit_update=user_dict.get("last_subscription_limit_update"),
             monthly_limits=user_dict.get("monthly_limits"),
-            additional_usage_quota=user_dict.get("usage_quota"),
+            additional_usage_quota=user_dict.get("additional_usage_quota"),
             settings=user_dict.get("settings"),
             created_at=user_dict.get("created_at"),
             edited_at=user_dict.get("edited_at")
@@ -66,7 +66,7 @@ async def get_users(start_date: Optional[datetime] = None,
             subscription_type=user.to_dict().get("subscription_type"),
             last_subscription_limit_update=user.to_dict().get("last_subscription_limit_update"),
             monthly_limits=user.to_dict().get("monthly_limits"),
-            additional_usage_quota=user.to_dict().get("usage_quota"),
+            additional_usage_quota=user.to_dict().get("additional_usage_quota"),
             settings=user.to_dict().get("settings"),
             created_at=user.to_dict().get("created_at"),
             edited_at=user.to_dict().get("edited_at")
@@ -91,7 +91,7 @@ def create_user_object(telegram_user: TelegramUser, user_data: Dict, chat_id: st
         subscription_type=user_data.get("subscription_type", SubscriptionType.FREE),
         last_subscription_limit_update=user_data.get("last_subscription_limit_update", datetime.now(timezone.utc)),
         monthly_limits=user_data.get("monthly_limits", SubscriptionLimit.LIMITS[SubscriptionType.FREE]),
-        additional_usage_quota=user_data.get("usage_quota", User.DEFAULT_ADDITIONAL_USAGE_QUOTA),
+        additional_usage_quota=user_data.get("additional_usage_quota", User.DEFAULT_ADDITIONAL_USAGE_QUOTA),
         settings=user_data.get("settings", User.DEFAULT_SETTINGS),
         created_at=user_data.get("created_at", None),
         edited_at=user_data.get("edited_at", None)

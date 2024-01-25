@@ -1,3 +1,4 @@
+import openai
 from aiogram import Router
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.fsm.context import FSMContext
@@ -113,13 +114,19 @@ async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_q
                     )
                 else:
                     raise
+    except openai.BadRequestError as e:
+        if e.code == 'content_policy_violation':
+            await message.reply(
+                text=get_localization(user.language_code).REQUEST_FORBIDDEN_ERROR,
+            )
     except Exception as e:
         await message.answer(
             text=f"{get_localization(user.language_code).ERROR}\n\nPlease contact @roman_danilov",
             parse_mode=None
         )
         await send_message_to_admins(bot=message.bot,
-                                     message=f"#error\n\nALARM! Ошибка у пользователя: {user.id}\nИнформация:\n{e}",
+                                     message=f"#error\n\nALARM! Ошибка у пользователя при запросе в ChatGPT: {user.id}\n"
+                                             f"Информация:\n{e}",
                                      parse_mode=None)
     finally:
         await processing_message.delete()
