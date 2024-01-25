@@ -32,7 +32,8 @@ async def create_transaction_object(user_id: str,
                                     service: ServiceType,
                                     amount: float,
                                     currency: Currency,
-                                    quantity=1) -> Transaction:
+                                    quantity=1,
+                                    created_at=None) -> Transaction:
     transaction_ref = firebase.db.collection('transactions').document()
     return Transaction(
         id=transaction_ref.id,
@@ -42,6 +43,7 @@ async def create_transaction_object(user_id: str,
         amount=amount,
         currency=currency,
         quantity=quantity,
+        created_at=created_at,
     )
 
 
@@ -50,8 +52,9 @@ async def write_transaction(user_id: str,
                             service: ServiceType,
                             amount: float,
                             currency: Currency,
-                            quantity=1) -> Transaction:
-    transaction = await create_transaction_object(user_id, type, service, amount, currency, quantity)
+                            quantity=1,
+                            created_at=None) -> Transaction:
+    transaction = await create_transaction_object(user_id, type, service, amount, currency, quantity, created_at)
     await firebase.db.collection('transactions').document(transaction.id).set(transaction.to_dict())
 
     return transaction
