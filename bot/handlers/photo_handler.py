@@ -102,14 +102,10 @@ async def handle_photo(message: Message, state: FSMContext):
                 photo=URLInputFile(result['image'], filename=background_path),
             )
 
-            user.monthly_limits[Quota.FACE_SWAP] = max(
-                user.monthly_limits[Quota.FACE_SWAP] - quantity,
-                0,
-            )
-            user.additional_usage_quota[Quota.FACE_SWAP] = max(
-                user.additional_usage_quota[Quota.FACE_SWAP] - quantity,
-                0,
-            )
+            if user.monthly_limits[Quota.FACE_SWAP] >= quantity:
+                user.monthly_limits[Quota.FACE_SWAP] -= quantity
+            elif user.additional_usage_quota[Quota.FACE_SWAP] >= quantity:
+                user.additional_usage_quota[Quota.FACE_SWAP] -= quantity
 
             update_tasks = [
                 write_transaction(user_id=user.id,

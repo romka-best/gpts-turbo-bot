@@ -490,7 +490,7 @@ TODO
    - <b>{ServiceType.FACE_SWAP}:</b> {round(count_expense_money[ServiceType.FACE_SWAP], 2)}$
    - <b>{ServiceType.VOICE_MESSAGES}:</b> {round(count_expense_money[ServiceType.VOICE_MESSAGES], 2)}$
    - <b>{ServiceType.SERVER}:</b> {round(count_expense_money[ServiceType.SERVER])}$
-   - <b>{ServiceType.DATABASE}:</b> {round(count_expense_money[ServiceType.DATABASE])}
+   - <b>{ServiceType.DATABASE}:</b> {round(count_expense_money[ServiceType.DATABASE])}$
 
    - <b>Всего:</b> {round(count_expense_total_money, 2)}$
 3️⃣ <b>Доходы:</b>

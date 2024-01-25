@@ -109,6 +109,7 @@ async def handle_statistics_selection(callback_query: CallbackQuery):
         ServiceType.VOICE_MESSAGES: 0,
         ServiceType.SERVER: 0,
         ServiceType.DATABASE: 0,
+        ServiceType.OTHER: 0,
     }
     count_income_transactions_total = 0
     count_expense_transactions_total = 0
@@ -134,6 +135,7 @@ async def handle_statistics_selection(callback_query: CallbackQuery):
         ServiceType.VOICE_MESSAGES: 0,
         ServiceType.SERVER: 0,
         ServiceType.DATABASE: 0,
+        ServiceType.OTHER: 0,
     }
     count_income_subscriptions_total_money = 0
     count_income_packages_total_money = 0
