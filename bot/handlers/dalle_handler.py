@@ -46,7 +46,10 @@ async def handle_dalle(message: Message, state: FSMContext, user: User, user_quo
                                 service=ServiceType.DALLE3,
                                 amount=PRICE_DALLE3,
                                 currency=Currency.USD,
-                                quantity=1)
+                                quantity=1,
+                                details={
+                                    'text': text,
+                                })
 
         footer_text = f'\n\n✉️ {user.monthly_limits[user_quota] + user.additional_usage_quota[user_quota] + 1}' \
             if user.settings[UserSettings.SHOW_USAGE_QUOTA] else ''

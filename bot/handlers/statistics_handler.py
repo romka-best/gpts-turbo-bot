@@ -8,7 +8,6 @@ from aiogram.types import Message, CallbackQuery
 from bot.database.models.subscription import SubscriptionType
 from bot.database.models.transaction import ServiceType, TransactionType
 from bot.database.operations.chat import get_chats
-from bot.database.operations.face_swap_package import get_used_face_swap_packages, get_face_swap_packages
 from bot.database.operations.transaction import get_transactions, write_transaction
 from bot.database.operations.user import get_user, get_users
 from bot.keyboards.common import build_cancel_keyboard
@@ -75,8 +74,6 @@ async def handle_statistics_selection(callback_query: CallbackQuery):
     users = await get_users(start_date, end_date)
     transactions = await get_transactions(start_date, end_date)
     chats = await get_chats(start_date, end_date)
-    face_swap_packages = await get_face_swap_packages()
-    used_face_swap_packages = await get_used_face_swap_packages(start_date, end_date)
 
     count_subscription_users = {
         SubscriptionType.FREE: 0,
@@ -141,6 +138,10 @@ async def handle_statistics_selection(callback_query: CallbackQuery):
     count_income_subscriptions_total_money = 0
     count_income_packages_total_money = 0
     count_expense_total_money = 0
+    count_face_swap_usage = {
+        'CUSTOM': 0,
+        'ALL': 0,
+    }
     for transaction in transactions:
         if transaction.type == TransactionType.INCOME:
             count_income_transactions_total += 1
@@ -161,6 +162,14 @@ async def handle_statistics_selection(callback_query: CallbackQuery):
             count_expense_money[transaction.service] += transaction.amount
             count_expense_total_money += transaction.amount
 
+            if transaction.service == ServiceType.FACE_SWAP:
+                face_swap_name = transaction.details.get('name', 'CUSTOM')
+                face_swap_images = transaction.details.get('images', [])
+                count_face_swap_usage[face_swap_name] = count_face_swap_usage.get(
+                    face_swap_name,
+                    0,
+                ) + len(face_swap_images)
+
         count_transactions_total += 1
 
     count_all_users = len(users)
@@ -174,22 +183,8 @@ async def handle_statistics_selection(callback_query: CallbackQuery):
     for chat in chats:
         count_chats_usage[chat.role] = count_chats_usage.get(chat.role, 0) + 1
 
-    count_face_swap_usage = {
-        'ALL': 0,
-    }
-    for face_swap_package in face_swap_packages:
-        used_face_swap_package = list(
-            filter(
-                lambda used: face_swap_package.id == used.package_id, used_face_swap_packages
-            )
-        )
-        used_images = len(used_face_swap_package[0].used_images) if len(used_face_swap_package) else 0
-        count_face_swap_usage[face_swap_package.name] = count_face_swap_usage.get(
-            face_swap_package.name,
-            used_images
-        )
-    for count in count_face_swap_usage.values():
-        count_face_swap_usage['ALL'] += count
+    for face_swap_package_count in count_face_swap_usage.values():
+        count_face_swap_usage['ALL'] += face_swap_package_count
 
     await callback_query.message.answer(
         text=get_localization(user.language_code).statistics(

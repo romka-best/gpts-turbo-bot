@@ -11,7 +11,19 @@ async def get_transaction(transaction_id: str) -> Optional[Transaction]:
     transaction = await transaction_ref.get()
 
     if transaction.exists:
-        return Transaction(**transaction.to_dict())
+        transaction_dict = transaction.to_dict()
+        return Transaction(
+            id=transaction_dict.get('id'),
+            user_id=transaction_dict.get('user_id'),
+            type=transaction_dict.get('type'),
+            service=transaction_dict.get('service'),
+            amount=transaction_dict.get('amount'),
+            currency=transaction_dict.get('currency'),
+            quantity=transaction_dict.get('quantity'),
+            details=transaction_dict.get('details'),
+            created_at=transaction_dict.get('created_at'),
+            edited_at=transaction_dict.get('edited_at'),
+        )
 
 
 async def get_transactions(start_date: Optional[datetime] = None,
@@ -24,7 +36,20 @@ async def get_transactions(start_date: Optional[datetime] = None,
         transactions_query = transactions_query.where("created_at", "<=", end_date)
 
     transactions = transactions_query.stream()
-    return [Transaction(**transaction.to_dict()) async for transaction in transactions]
+    return [
+        Transaction(
+            id=transaction.to_dict().get('id'),
+            user_id=transaction.to_dict().get('user_id'),
+            type=transaction.to_dict().get('type'),
+            service=transaction.to_dict().get('service'),
+            amount=transaction.to_dict().get('amount'),
+            currency=transaction.to_dict().get('currency'),
+            quantity=transaction.to_dict().get('quantity'),
+            details=transaction.to_dict().get('details'),
+            created_at=transaction.to_dict().get('created_at'),
+            edited_at=transaction.to_dict().get('edited_at'),
+        ) async for transaction in transactions
+    ]
 
 
 async def create_transaction_object(user_id: str,
@@ -33,6 +58,7 @@ async def create_transaction_object(user_id: str,
                                     amount: float,
                                     currency: Currency,
                                     quantity=1,
+                                    details=None,
                                     created_at=None) -> Transaction:
     transaction_ref = firebase.db.collection('transactions').document()
     return Transaction(
@@ -43,6 +69,7 @@ async def create_transaction_object(user_id: str,
         amount=amount,
         currency=currency,
         quantity=quantity,
+        details=details,
         created_at=created_at,
     )
 
@@ -53,8 +80,16 @@ async def write_transaction(user_id: str,
                             amount: float,
                             currency: Currency,
                             quantity=1,
+                            details=None,
                             created_at=None) -> Transaction:
-    transaction = await create_transaction_object(user_id, type, service, amount, currency, quantity, created_at)
+    transaction = await create_transaction_object(user_id,
+                                                  type,
+                                                  service,
+                                                  amount,
+                                                  currency,
+                                                  quantity,
+                                                  details,
+                                                  created_at)
     await firebase.db.collection('transactions').document(transaction.id).set(transaction.to_dict())
 
     return transaction
@@ -66,8 +101,17 @@ async def write_transaction_in_transaction(transaction,
                                            service: ServiceType,
                                            amount: float,
                                            currency: Currency,
-                                           quantity=1) -> Transaction:
-    transaction_object = await create_transaction_object(user_id, type, service, amount, currency, quantity)
+                                           quantity=1,
+                                           details=None,
+                                           created_at=None) -> Transaction:
+    transaction_object = await create_transaction_object(user_id,
+                                                         type,
+                                                         service,
+                                                         amount,
+                                                         currency,
+                                                         quantity,
+                                                         details,
+                                                         created_at)
     transaction.set(firebase.db.collection('transactions').document(transaction_object.id),
                     transaction_object.to_dict())
 

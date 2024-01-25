@@ -282,9 +282,17 @@ async def face_swap_quantity_handler(message: Message, state: FSMContext, user_i
             )
 
             update_tasks = [
-                write_transaction(user_id=user.id, type=TransactionType.EXPENSE, service=ServiceType.FACE_SWAP,
-                                  amount=round(PRICE_FACE_SWAP * total_seconds, 6), currency=Currency.USD,
-                                  quantity=quantity),
+                write_transaction(user_id=user.id,
+                                  type=TransactionType.EXPENSE,
+                                  service=ServiceType.FACE_SWAP,
+                                  amount=round(PRICE_FACE_SWAP * total_seconds, 6),
+                                  currency=Currency.USD,
+                                  quantity=quantity,
+                                  details={
+                                      'name': face_swap_package.name,
+                                      'images': images,
+                                      'seconds': total_seconds,
+                                  }),
                 update_user(user.id, {
                     "monthly_limits": user.monthly_limits,
                     "additional_usage_quota": user.additional_usage_quota

@@ -45,7 +45,11 @@ async def process_voice_message(bot: Bot, voice: File, user_id: str):
                                 service=ServiceType.VOICE_MESSAGES,
                                 amount=total_price,
                                 currency=Currency.USD,
-                                quantity=1)
+                                quantity=1,
+                                details={
+                                    'subtype': 'STT',
+                                    'text': text,
+                                })
 
         return text
 

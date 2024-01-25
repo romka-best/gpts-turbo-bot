@@ -33,6 +33,7 @@ class Transaction:
     amount: float
     currency: Currency
     quantity: int
+    details: dict
     created_at: datetime
     edited_at: datetime
 
@@ -44,6 +45,7 @@ class Transaction:
                  amount: float,
                  currency: Currency,
                  quantity=1,
+                 details=None,
                  created_at=None,
                  edited_at=None):
         self.id = str(id)
@@ -53,6 +55,7 @@ class Transaction:
         self.amount = amount
         self.currency = currency
         self.quantity = quantity
+        self.details = {} if details is None else details
 
         current_time = datetime.now(timezone.utc)
         self.created_at = created_at if created_at is not None else current_time

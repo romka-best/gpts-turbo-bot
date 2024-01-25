@@ -82,7 +82,12 @@ async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_q
                                 service=service,
                                 amount=total_price,
                                 currency=Currency.USD,
-                                quantity=1)
+                                quantity=1,
+                                details={
+                                    "input_tokens": response['input_tokens'],
+                                    "output_tokens": response['output_tokens'],
+                                    "message": response['message']
+                                })
 
         role, content = response_message.role, response_message.content
         transaction = firebase.db.transaction()
