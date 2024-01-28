@@ -5,6 +5,7 @@ from contextlib import asynccontextmanager
 import uvicorn
 from aiogram.exceptions import TelegramForbiddenError
 from fastapi import FastAPI
+from fastapi.responses import JSONResponse
 from aiogram import Bot, Dispatcher, types
 from aiogram.enums.parse_mode import ParseMode
 from aiogram.fsm.storage.redis import RedisStorage
@@ -30,11 +31,15 @@ from bot.handlers.settings_handler import settings_router
 from bot.handlers.statistics_handler import statistics_router
 from bot.handlers.text_handler import text_router
 from bot.handlers.voice_handler import voice_router
+from bot.helpers.handle_replicate_webhook import handle_replicate_webhook
 from bot.helpers.send_message_to_admins import send_message_to_admins
 from bot.helpers.update_daily_limits import update_monthly_limits
 
-WEBHOOK_PATH = f"/bot/{config.BOT_TOKEN.get_secret_value()}"
-WEBHOOK_URL = config.WEBHOOK_URL + WEBHOOK_PATH
+WEBHOOK_BOT_PATH = f"/bot/{config.BOT_TOKEN.get_secret_value()}"
+WEBHOOK_REPLICATE_PATH = config.WEBHOOK_REPLICATE_PATH
+
+WEBHOOK_BOT_URL = config.WEBHOOK_URL + WEBHOOK_BOT_PATH
+WEBHOOK_REPLICATE_URL = config.WEBHOOK_URL + config.WEBHOOK_REPLICATE_PATH
 
 bot = Bot(token=config.BOT_TOKEN.get_secret_value(), parse_mode=ParseMode.HTML)
 storage = RedisStorage.from_url(config.REDIS_URL)
@@ -44,8 +49,8 @@ dp = Dispatcher(storage=storage, sm_strategy=FSMStrategy.GLOBAL_USER)
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     webhook_info = await bot.get_webhook_info()
-    if webhook_info.url != WEBHOOK_URL:
-        await bot.set_webhook(url=WEBHOOK_URL)
+    if webhook_info.url != WEBHOOK_BOT_URL:
+        await bot.set_webhook(url=WEBHOOK_BOT_URL)
 
     dp.include_routers(
         common_router,
@@ -76,7 +81,7 @@ async def lifespan(_: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 
-@app.post(WEBHOOK_PATH)
+@app.post(WEBHOOK_BOT_PATH)
 async def bot_webhook(update: dict):
     telegram_update = types.Update(**update)
     try:
@@ -94,6 +99,13 @@ async def bot_webhook(update: dict):
             })
     except Exception as e:
         logging.exception(f"Error in bot_webhook: {e}")
+
+
+@app.post(WEBHOOK_REPLICATE_PATH)
+async def replicate_webhook(prediction: dict):
+    is_ok = await handle_replicate_webhook(bot, dp, prediction)
+    if not is_ok:
+        return JSONResponse(content={}, status_code=500)
 
 
 @app.get("/run-daily-tasks")

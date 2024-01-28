@@ -4,8 +4,12 @@ from typing import Optional, Dict, List
 from google.cloud.firestore import Query
 
 from bot.database.main import firebase
-from bot.database.models.face_swap_package import FaceSwapPackage, UsedFaceSwapPackage, FaceSwapPackageStatus, \
-    FaceSwapFileData
+from bot.database.models.face_swap_package import (
+    FaceSwapPackage,
+    UsedFaceSwapPackage,
+    FaceSwapPackageStatus,
+    FaceSwapFileData,
+)
 from bot.database.models.user import UserGender
 
 

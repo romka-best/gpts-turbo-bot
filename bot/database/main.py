@@ -7,11 +7,13 @@ from google.cloud.firestore_v1 import AsyncClient
 from gcloud.aio.storage import Storage, Bucket
 
 from bot.config import config
+from bot.database.distributed_counters import Counter
 
 
 class Firebase:
     token: Token
     db: AsyncClient
+    counter: Counter
     storage: Storage
     bucket: Bucket
 
@@ -28,6 +30,7 @@ class Firebase:
         self.token = Token(service_file=self.path_to_credentials, scopes=scopes)
 
         self.db = firestore_async.client()
+        self.counter = Counter(10)
         self.storage = Storage(token=self.token)
         self.bucket = self.storage.get_bucket(config.STORAGE_NAME.get_secret_value())
 

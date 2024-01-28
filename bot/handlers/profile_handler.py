@@ -98,4 +98,7 @@ async def handle_profile_gender_selection(callback_query: CallbackQuery, state: 
     )
 
     if user.current_model == Model.FACE_SWAP:
-        await handle_face_swap(callback_query.message, state, str(callback_query.from_user.id))
+        await handle_face_swap(callback_query.bot,
+                               str(callback_query.message.chat.id),
+                               state,
+                               str(callback_query.from_user.id))

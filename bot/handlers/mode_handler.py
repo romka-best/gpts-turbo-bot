@@ -1,6 +1,4 @@
-import logging
-
-from aiogram import Router, exceptions
+from aiogram import Router
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup
@@ -56,4 +54,7 @@ async def handle_mode_selection(callback_query: CallbackQuery, state: FSMContext
         await callback_query.message.edit_reply_markup(reply_markup=InlineKeyboardMarkup(inline_keyboard=new_keyboard))
 
     if chosen_mode == Model.FACE_SWAP:
-        await handle_face_swap(callback_query.message, state, str(callback_query.from_user.id))
+        await handle_face_swap(callback_query.bot,
+                               str(callback_query.message.chat.id),
+                               state,
+                               str(callback_query.from_user.id))

@@ -42,4 +42,4 @@ async def handle_text(message: Message, state: FSMContext):
     elif user_quota == Quota.DALLE3:
         await handle_dalle(message, state, user, user_quota)
     elif user_quota == Quota.FACE_SWAP:
-        await handle_face_swap(message, state, user_id=str(message.from_user.id))
+        await handle_face_swap(message.bot, str(message.chat.id), state, str(message.from_user.id))
