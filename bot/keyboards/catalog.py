@@ -118,6 +118,12 @@ def build_manage_catalog_edit_keyboard(language_code: str, system_role: str) -> 
         ],
         [
             InlineKeyboardButton(
+                text=get_localization(language_code).EDIT_ROLE_PHOTO,
+                callback_data=f'catalog_manage_edit:photo:{system_role}'
+            )
+        ],
+        [
+            InlineKeyboardButton(
                 text=get_localization(language_code).BACK,
                 callback_data='catalog_manage_edit:back'
             )

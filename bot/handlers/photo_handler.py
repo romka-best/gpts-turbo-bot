@@ -2,7 +2,7 @@ import uuid
 
 from aiogram import Router, F
 from aiogram.fsm.context import FSMContext
-from aiogram.types import Message
+from aiogram.types import Message, URLInputFile
 
 from bot.database.main import firebase
 from bot.database.models.common import Model, Quota
@@ -18,7 +18,9 @@ from bot.database.operations.request import write_request
 from bot.database.operations.user import get_user
 from bot.handlers.face_swap_handler import handle_face_swap
 from bot.integrations.replicateAI import create_face_swap_image
+from bot.keyboards.catalog import build_manage_catalog_create_role_confirmation_keyboard
 from bot.locales.main import get_localization
+from bot.states.catalog import Catalog
 from bot.states.face_swap import FaceSwap
 from bot.states.profile import Profile
 
@@ -56,6 +58,33 @@ async def handle_photo(message: Message, state: FSMContext):
 
         if user.current_model == Model.FACE_SWAP:
             await handle_face_swap(message.bot, str(message.chat.id), state, str(message.from_user.id))
+    elif current_state == Catalog.waiting_for_role_photo:
+        user_data = await state.get_data()
+
+        photo = message.photo[-1]
+        photo_file = await message.bot.get_file(photo.file_id)
+        photo_data_io = await message.bot.download_file(photo_file.file_path)
+        photo_data = photo_data_io.read()
+
+        photo_name = f'{user_data["system_role_name"]}.jpeg'
+        photo_path = f'roles/{photo_name.lower()}'
+        photo_blob = firebase.bucket.new_blob(photo_path)
+        await photo_blob.upload(photo_data)
+
+        image = await firebase.bucket.get_blob(photo_path)
+        image_link = firebase.get_public_url(image.name)
+
+        reply_markup = build_manage_catalog_create_role_confirmation_keyboard(user.language_code)
+        await message.answer_photo(
+            photo=URLInputFile(image_link, filename=photo_path),
+            caption=get_localization(user.language_code).catalog_manage_create_role_confirmation(
+                role_system_name=user_data.get('system_role_name', None),
+                role_names=user_data.get('role_names', {}),
+                role_descriptions=user_data.get('role_descriptions', {}),
+                role_instructions=user_data.get('role_instructions', {}),
+            ),
+            reply_markup=reply_markup,
+        )
     elif current_state == FaceSwap.waiting_for_face_swap_picture.state:
         user_data = await state.get_data()
 
@@ -67,8 +96,8 @@ async def handle_photo(message: Message, state: FSMContext):
         face_swap_package = await get_face_swap_package(user_data['face_swap_package_id'])
         photo_name = f'{len(face_swap_package.files) + 1}_{uuid.uuid4()}.jpeg'
         photo_path = f'face_swap/{user_data["gender"].lower()}/{user_data["package_name"].lower()}/{photo_name}'
-        photo_bolb = firebase.bucket.new_blob(photo_path)
-        await photo_bolb.upload(photo_data)
+        photo_blob = firebase.bucket.new_blob(photo_path)
+        await photo_blob.upload(photo_data)
         face_swap_package.files.append({
             "name": photo_name,
             "status": FaceSwapPackageStatus.PRIVATE,

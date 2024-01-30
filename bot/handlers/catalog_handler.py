@@ -1,8 +1,9 @@
 from aiogram import Router, F
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
-from aiogram.types import Message, CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup
+from aiogram.types import Message, CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup, URLInputFile
 
+from bot.database.main import firebase
 from bot.database.models.common import Quota
 from bot.database.operations.chat import get_chat_by_user_id, update_chat
 from bot.database.operations.role import get_roles, get_role_by_name, write_role, get_role, update_role
@@ -12,7 +13,6 @@ from bot.keyboards.catalog import (
     build_catalog_keyboard,
     build_manage_catalog_keyboard,
     build_manage_catalog_create_keyboard,
-    build_manage_catalog_create_role_confirmation_keyboard,
     build_manage_catalog_edit_keyboard,
 )
 from bot.keyboards.common import build_cancel_keyboard
@@ -29,17 +29,13 @@ async def catalog(message: Message, state: FSMContext):
 
     user = await get_user(str(message.from_user.id))
 
-    if not user.additional_usage_quota[Quota.ACCESS_TO_CATALOG]:
-        text = get_localization(user.language_code).CATALOG_FORBIDDEN_ERROR
-        await message.answer(text=text)
-    else:
-        text = get_localization(user.language_code).CATALOG
-        current_chat = await get_chat_by_user_id(user.id)
-        roles = await get_roles()
-        reply_markup = build_catalog_keyboard(user.language_code, current_chat.role, roles)
+    text = get_localization(user.language_code).CATALOG
+    current_chat = await get_chat_by_user_id(user.id)
+    roles = await get_roles()
+    reply_markup = build_catalog_keyboard(user.language_code, current_chat.role, roles)
 
-        await message.answer(text=text,
-                             reply_markup=reply_markup)
+    await message.answer(text=text,
+                         reply_markup=reply_markup)
 
 
 @catalog_router.callback_query(lambda c: c.data.startswith('catalog:'))
@@ -47,38 +43,52 @@ async def handle_catalog_selection(callback_query: CallbackQuery):
     await callback_query.answer()
 
     role_name = callback_query.data.split(':')[1]
+    role_photo_path = f'roles/{role_name.lower()}.jpeg'
+    role_photo = await firebase.bucket.get_blob(role_photo_path)
+    role_photo_link = firebase.get_public_url(role_photo.name)
 
     user = await get_user(str(callback_query.from_user.id))
+    if not user.additional_usage_quota[Quota.ACCESS_TO_CATALOG]:
+        text = get_localization(user.language_code).CATALOG_FORBIDDEN_ERROR
+        await callback_query.message.reply_photo(
+            photo=URLInputFile(role_photo_link, filename=role_photo_path),
+            caption=text,
+        )
+    else:
+        keyboard = callback_query.message.reply_markup.inline_keyboard
+        keyboard_changed = False
 
-    keyboard = callback_query.message.reply_markup.inline_keyboard
-    keyboard_changed = False
+        new_keyboard = []
+        for row in keyboard:
+            new_row = []
+            for button in row:
+                text = button.text
+                callback_data = button.callback_data.split(":", 1)[1]
 
-    new_keyboard = []
-    for row in keyboard:
-        new_row = []
-        for button in row:
-            text = button.text
-            callback_data = button.callback_data.split(":", 1)[1]
+                if callback_data == role_name:
+                    if "❌" in text:
+                        text = text.replace(" ❌", " ✅")
+                        keyboard_changed = True
+                else:
+                    text = text.replace(" ✅", " ❌")
+                new_row.append(InlineKeyboardButton(text=text, callback_data=button.callback_data))
+            new_keyboard.append(new_row)
 
-            if callback_data == role_name:
-                if "❌" in text:
-                    text = text.replace(" ❌", " ✅")
-                    keyboard_changed = True
-            else:
-                text = text.replace(" ✅", " ❌")
-            new_row.append(InlineKeyboardButton(text=text, callback_data=button.callback_data))
-        new_keyboard.append(new_row)
+        if keyboard_changed:
+            current_chat = await get_chat_by_user_id(user.id)
+            await update_chat(current_chat.id, {
+                "role": role_name,
+            })
 
-    if keyboard_changed:
-        current_chat = await get_chat_by_user_id(user.id)
-        await update_chat(current_chat.id, {
-            "role": role_name,
-        })
+            await callback_query.message.edit_reply_markup(
+                reply_markup=InlineKeyboardMarkup(inline_keyboard=new_keyboard),
+            )
 
-        await callback_query.message.edit_reply_markup(reply_markup=InlineKeyboardMarkup(inline_keyboard=new_keyboard))
-
-        role = await get_role_by_name(role_name)
-        await callback_query.message.reply(text=role.translated_descriptions.get(user.language_code, 'en'))
+            role = await get_role_by_name(role_name)
+            await callback_query.message.reply_photo(
+                photo=URLInputFile(role_photo_link, filename=role_photo_path),
+                caption=role.translated_descriptions.get(user.language_code, 'en'),
+            )
 
 
 # Admin
@@ -118,9 +128,14 @@ async def handle_catalog_manage_selection(callback_query: CallbackQuery, state: 
         await state.set_state(Catalog.waiting_for_system_role_name)
     else:
         role = await get_role(action)
+        role_photo_path = f'roles/{role.name.lower()}.jpeg'
+        role_photo = await firebase.bucket.get_blob(role_photo_path)
+        role_photo_link = firebase.get_public_url(role_photo.name)
+
         reply_markup = build_manage_catalog_edit_keyboard(user.language_code, role.name)
-        await callback_query.message.edit_text(
-            text=get_localization(user.language_code).catalog_manage_role_edit(
+        await callback_query.message.answer_photo(
+            photo=URLInputFile(role_photo_link, filename=role_photo_path),
+            caption=get_localization(user.language_code).catalog_manage_role_edit(
                 role_system_name=role.name,
                 role_names=role.translated_names,
                 role_descriptions=role.translated_descriptions,
@@ -128,6 +143,8 @@ async def handle_catalog_manage_selection(callback_query: CallbackQuery, state: 
             ),
             reply_markup=reply_markup,
         )
+
+        await callback_query.message.delete()
 
 
 @catalog_router.callback_query(lambda c: c.data.startswith('catalog_manage_create:'))
@@ -241,7 +258,6 @@ async def catalog_manage_create_role_description_sent(message: Message, state: F
 @catalog_router.message(Catalog.waiting_for_role_instruction, ~F.text.startswith('/'))
 async def catalog_manage_create_role_instruction_sent(message: Message, state: FSMContext):
     user = await get_user(str(message.from_user.id))
-    user_data = await state.get_data()
 
     role_instructions = {}
     for language_code in localization_classes.keys():
@@ -254,18 +270,14 @@ async def catalog_manage_create_role_instruction_sent(message: Message, state: F
             else:
                 role_instructions[language_code] = message.text
 
-    reply_markup = build_manage_catalog_create_role_confirmation_keyboard(user.language_code)
+    reply_markup = build_cancel_keyboard(user.language_code)
     await message.answer(
-        text=get_localization(user.language_code).catalog_manage_create_role_confirmation(
-            role_system_name=user_data.get('system_role_name', None),
-            role_names=user_data.get('role_names', {}),
-            role_descriptions=user_data.get('role_descriptions', {}),
-            role_instructions=role_instructions,
-        ),
+        text=get_localization(user.language_code).CATALOG_MANAGE_CREATE_ROLE_PHOTO,
         reply_markup=reply_markup,
     )
 
     await state.update_data(role_instructions=role_instructions)
+    await state.set_state(Catalog.waiting_for_role_photo)
 
 
 @catalog_router.callback_query(lambda c: c.data.startswith('catalog_manage_edit:'))
@@ -291,18 +303,30 @@ async def handle_catalog_manage_edit_selection(callback_query: CallbackQuery, st
                 text=get_localization(user.language_code).CATALOG_MANAGE_EDIT_ROLE_NAME,
                 reply_markup=reply_markup,
             )
+
+            await state.set_state(Catalog.waiting_for_new_role_info)
         elif action == 'description':
             await callback_query.message.edit_text(
                 text=get_localization(user.language_code).CATALOG_MANAGE_EDIT_ROLE_DESCRIPTION,
                 reply_markup=reply_markup,
             )
+
+            await state.set_state(Catalog.waiting_for_new_role_info)
         elif action == 'instruction':
             await callback_query.message.edit_text(
                 text=get_localization(user.language_code).CATALOG_MANAGE_EDIT_ROLE_INSTRUCTION,
                 reply_markup=reply_markup,
             )
 
-        await state.set_state(Catalog.waiting_for_new_role_info)
+            await state.set_state(Catalog.waiting_for_new_role_info)
+        elif action == 'photo':
+            await callback_query.message.edit_text(
+                text=get_localization(user.language_code).CATALOG_MANAGE_EDIT_ROLE_PHOTO,
+                reply_markup=reply_markup,
+            )
+
+            await state.set_state(Catalog.waiting_for_role_photo)
+
         await state.update_data(system_role=system_role, info_type=action)
 
 
