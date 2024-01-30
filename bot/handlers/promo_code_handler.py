@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 
-from aiogram import Router
+from aiogram import Router, F
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery, BufferedInputFile
@@ -43,7 +43,7 @@ async def promo_code(message: Message, state: FSMContext):
     await state.set_state(PromoCode.waiting_for_promo_code)
 
 
-@promo_code_router.message(PromoCode.waiting_for_promo_code)
+@promo_code_router.message(PromoCode.waiting_for_promo_code, ~F.text.startswith('/'))
 async def promo_code_sent(message: Message, state: FSMContext):
     user = await get_user(str(message.from_user.id))
 
@@ -177,7 +177,7 @@ async def handle_create_promo_code_period_of_subscription_selection(callback_que
                             promo_code_subscription_period=subscription_period)
 
 
-@promo_code_router.message(PromoCode.waiting_for_promo_code_name)
+@promo_code_router.message(PromoCode.waiting_for_promo_code_name, ~F.text.startswith('/'))
 async def promo_code_name_sent(message: Message, state: FSMContext):
     user = await get_user(str(message.from_user.id))
 
@@ -200,7 +200,7 @@ async def promo_code_name_sent(message: Message, state: FSMContext):
         await state.set_state(PromoCode.waiting_for_promo_code_date)
 
 
-@promo_code_router.message(PromoCode.waiting_for_promo_code_date)
+@promo_code_router.message(PromoCode.waiting_for_promo_code_date, ~F.text.startswith('/'))
 async def promo_code_date_sent(message: Message, state: FSMContext):
     user = await get_user(str(message.from_user.id))
 

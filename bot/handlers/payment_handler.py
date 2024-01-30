@@ -132,7 +132,7 @@ async def handle_package_selection(callback_query: CallbackQuery, state: FSMCont
     await state.set_state(Payment.waiting_for_package_quantity)
 
 
-@payment_router.message(Payment.waiting_for_package_quantity)
+@payment_router.message(Payment.waiting_for_package_quantity, ~F.text.startswith('/'))
 async def quantity_of_package_sent(message: Message, state: FSMContext):
     user = await get_user(str(message.from_user.id))
 

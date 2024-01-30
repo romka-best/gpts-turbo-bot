@@ -1,4 +1,4 @@
-from aiogram import Router
+from aiogram import Router, F
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup
@@ -78,7 +78,7 @@ async def handle_catalog_selection(callback_query: CallbackQuery):
         await callback_query.message.edit_reply_markup(reply_markup=InlineKeyboardMarkup(inline_keyboard=new_keyboard))
 
         role = await get_role_by_name(role_name)
-        await callback_query.message.reply(text=role.translated_descriptions[user.language_code])
+        await callback_query.message.reply(text=role.translated_descriptions.get(user.language_code, 'en'))
 
 
 # Admin
@@ -167,7 +167,7 @@ async def handle_catalog_manage_create_role_confirmation_selection(callback_quer
         await state.clear()
 
 
-@catalog_router.message(Catalog.waiting_for_system_role_name)
+@catalog_router.message(Catalog.waiting_for_system_role_name, ~F.text.startswith('/'))
 async def catalog_manage_create_role_system_name_sent(message: Message, state: FSMContext):
     user = await get_user(str(message.from_user.id))
 
@@ -188,7 +188,7 @@ async def catalog_manage_create_role_system_name_sent(message: Message, state: F
         await state.set_state(Catalog.waiting_for_role_name)
 
 
-@catalog_router.message(Catalog.waiting_for_role_name)
+@catalog_router.message(Catalog.waiting_for_role_name, ~F.text.startswith('/'))
 async def catalog_manage_create_role_name_sent(message: Message, state: FSMContext):
     user = await get_user(str(message.from_user.id))
 
@@ -213,7 +213,7 @@ async def catalog_manage_create_role_name_sent(message: Message, state: FSMConte
     await state.set_state(Catalog.waiting_for_role_description)
 
 
-@catalog_router.message(Catalog.waiting_for_role_description)
+@catalog_router.message(Catalog.waiting_for_role_description, ~F.text.startswith('/'))
 async def catalog_manage_create_role_description_sent(message: Message, state: FSMContext):
     user = await get_user(str(message.from_user.id))
 
@@ -238,7 +238,7 @@ async def catalog_manage_create_role_description_sent(message: Message, state: F
     await state.set_state(Catalog.waiting_for_role_instruction)
 
 
-@catalog_router.message(Catalog.waiting_for_role_instruction)
+@catalog_router.message(Catalog.waiting_for_role_instruction, ~F.text.startswith('/'))
 async def catalog_manage_create_role_instruction_sent(message: Message, state: FSMContext):
     user = await get_user(str(message.from_user.id))
     user_data = await state.get_data()
@@ -306,7 +306,7 @@ async def handle_catalog_manage_edit_selection(callback_query: CallbackQuery, st
         await state.update_data(system_role=system_role, info_type=action)
 
 
-@catalog_router.message(Catalog.waiting_for_new_role_info)
+@catalog_router.message(Catalog.waiting_for_new_role_info, ~F.text.startswith('/'))
 async def catalog_manage_edit_role_sent(message: Message, state: FSMContext):
     user = await get_user(str(message.from_user.id))
     user_data = await state.get_data()

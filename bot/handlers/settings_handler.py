@@ -19,9 +19,9 @@ async def settings(message: Message, state: FSMContext):
 
     user = await get_user(str(message.from_user.id))
 
-    reply_markup = build_settings_keyboard(user.language_code, user.settings)
+    reply_markup = build_settings_keyboard(user.language_code, user.current_model, user.settings)
 
-    await message.answer(text=get_localization(user.language_code).SETTINGS,
+    await message.answer(text=get_localization(user.language_code).settings(user.current_model),
                          reply_markup=reply_markup)
 
 
@@ -33,10 +33,10 @@ async def handle_setting_selection(callback_query: CallbackQuery):
 
     user = await get_user(str(callback_query.from_user.id))
     if chosen_setting == UserSettings.TURN_ON_VOICE_MESSAGES and not user.additional_usage_quota[Quota.VOICE_MESSAGES]:
-        user.settings[chosen_setting] = False
+        user.settings[user.current_model][chosen_setting] = False
         await handle_subscribe(callback_query.message, str(callback_query.from_user.id))
         return
-    user.settings[chosen_setting] = not user.settings[chosen_setting]
+    user.settings[user.current_model][chosen_setting] = not user.settings[user.current_model][chosen_setting]
 
     keyboard = callback_query.message.reply_markup.inline_keyboard
 
@@ -56,6 +56,6 @@ async def handle_setting_selection(callback_query: CallbackQuery):
         new_keyboard.append(new_row)
 
     await update_user(str(callback_query.from_user.id), {
-        "settings": user.settings
+        "settings": user.settings,
     })
     await callback_query.message.edit_reply_markup(reply_markup=InlineKeyboardMarkup(inline_keyboard=new_keyboard))

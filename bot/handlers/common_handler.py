@@ -1,5 +1,5 @@
 from aiogram import Router
-from aiogram.filters import Command
+from aiogram.filters import Command, CommandStart
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
 
@@ -15,7 +15,7 @@ from bot.locales.main import get_localization
 common_router = Router()
 
 
-@common_router.message(Command("start"))
+@common_router.message(CommandStart())
 async def start(message: Message, state: FSMContext):
     await state.clear()
 

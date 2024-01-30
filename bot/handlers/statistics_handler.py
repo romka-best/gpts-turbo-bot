@@ -1,6 +1,6 @@
 from datetime import datetime, timezone, timedelta
 
-from aiogram import Router
+from aiogram import Router, F
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
@@ -277,7 +277,7 @@ async def handle_statistics_choose_currency_selection(callback_query: CallbackQu
     await state.update_data(currency=currency)
 
 
-@statistics_router.message(Statistics.waiting_for_statistics_service_quantity)
+@statistics_router.message(Statistics.waiting_for_statistics_service_quantity, ~F.text.startswith('/'))
 async def statistics_service_quantity_sent(message: Message, state: FSMContext):
     user = await get_user(str(message.from_user.id))
 
@@ -300,7 +300,7 @@ async def statistics_service_quantity_sent(message: Message, state: FSMContext):
                             reply_markup=reply_markup)
 
 
-@statistics_router.message(Statistics.waiting_for_statistics_service_amount)
+@statistics_router.message(Statistics.waiting_for_statistics_service_amount, ~F.text.startswith('/'))
 async def statistics_service_amount_sent(message: Message, state: FSMContext):
     user = await get_user(str(message.from_user.id))
 
@@ -323,7 +323,7 @@ async def statistics_service_amount_sent(message: Message, state: FSMContext):
                             reply_markup=reply_markup)
 
 
-@statistics_router.message(Statistics.waiting_for_statistics_service_date)
+@statistics_router.message(Statistics.waiting_for_statistics_service_date, ~F.text.startswith('/'))
 async def statistics_service_date_sent(message: Message, state: FSMContext):
     user = await get_user(str(message.from_user.id))
 

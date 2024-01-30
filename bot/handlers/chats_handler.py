@@ -1,4 +1,4 @@
-from aiogram import Router
+from aiogram import Router, F
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup
@@ -187,7 +187,7 @@ async def handle_delete_chat_selection(callback_query: CallbackQuery):
         await callback_query.message.reply(text=get_localization(user.language_code).DELETE_CHAT_SUCCESS)
 
 
-@chats_router.message(Chats.waiting_for_chat_name)
+@chats_router.message(Chats.waiting_for_chat_name, ~F.text.startswith('/'))
 async def chat_name_sent(message: Message, state: FSMContext):
     user = await get_user(str(message.from_user.id))
 

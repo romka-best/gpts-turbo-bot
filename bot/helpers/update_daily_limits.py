@@ -114,7 +114,7 @@ async def update_user_additional_usage_quota(bot: Bot, user: User, had_subscript
                 count_active_packages_after += 1
 
         if not user.additional_usage_quota[Quota.VOICE_MESSAGES]:
-            user.settings[UserSettings.TURN_ON_VOICE_MESSAGES] = False
+            user.settings[user.current_model][UserSettings.TURN_ON_VOICE_MESSAGES] = False
 
         if not user.additional_usage_quota[Quota.ACCESS_TO_CATALOG]:
             await reset_user_chats(user, bot)

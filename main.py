@@ -13,7 +13,7 @@ from aiogram.fsm.strategy import FSMStrategy
 
 from bot.config import config
 from bot.database.main import firebase
-from bot.database.operations.user import update_user
+from bot.database.operations.user import update_user, get_user
 from bot.handlers.catalog_handler import catalog_router
 from bot.handlers.chat_gpt_handler import chat_gpt_router
 from bot.handlers.chats_handler import chats_router
@@ -34,6 +34,8 @@ from bot.handlers.voice_handler import voice_router
 from bot.helpers.handle_replicate_webhook import handle_replicate_webhook
 from bot.helpers.send_message_to_admins import send_message_to_admins
 from bot.helpers.update_daily_limits import update_monthly_limits
+from bot.locales.main import get_localization
+from bot.utils.migration_user_settings import migration_users_settings
 
 WEBHOOK_BOT_PATH = f"/bot/{config.BOT_TOKEN.get_secret_value()}"
 WEBHOOK_REPLICATE_PATH = config.WEBHOOK_REPLICATE_PATH
@@ -73,6 +75,7 @@ async def lifespan(_: FastAPI):
     )
 
     await firebase.init()
+    await migration_users_settings(bot)
     yield
     await bot.session.close()
     await firebase.close()
@@ -95,7 +98,7 @@ async def bot_webhook(update: dict):
 
         if user_id:
             await update_user(user_id, {
-                "is_blocked": True
+                "is_blocked": True,
             })
     except TelegramBadRequest as e:
         if e.message == "Bad Request: message can't be deleted for everyone":
@@ -106,6 +109,23 @@ async def bot_webhook(update: dict):
             raise e
     except Exception as e:
         logging.exception(f"Error in bot_webhook: {e}")
+
+        user_id = None
+        if telegram_update.callback_query and telegram_update.callback_query.message.from_user.id:
+            user_id = str(telegram_update.callback_query.message.from_user.id)
+        elif telegram_update.message and telegram_update.message.from_user.id:
+            user_id = str(telegram_update.message.from_user.id)
+
+        if user_id:
+            user = await get_user(user_id)
+            await bot.send_message(
+                chat_id=user.telegram_chat_id,
+                text=get_localization(user.language_code).ERROR,
+            )
+            await send_message_to_admins(bot=bot,
+                                         message=f"#error\n\nALARM! Ошибка у пользователя: {user.id}\n"
+                                                 f"Информация:\n{e}",
+                                         parse_mode=None)
 
 
 @app.post(WEBHOOK_REPLICATE_PATH)

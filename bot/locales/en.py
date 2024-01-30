@@ -16,13 +16,13 @@ I'm your personal gateway to the world of artificial intelligence and neural net
 ✉️ Communicate with <b>ChatGPT3.5</b>: ask questions, get answers
 🧠 Explore advanced intelligence with <b>ChatGPT4.0</b>
 🎨 Create unique images with <b>DALL-E 3</b>
-😜 Try <b>FaceSwap</b> to exchange faces with someone in a photo
+😜 Try <b>Face Swap</b> to exchange faces with someone in a photo
 
 Here's a quick guide to get started:
 ✉️ To receive a text response from <b>ChatGPT3.5</b>, simply enter your query in the chat
 🧠 To get a text response from <b>ChatGPT4.0</b>, enter the command /chatgpt4 and then just write your query in the chat
 🎨 To create an image with <b>DALL-E 3</b>, enter the command /dalle3, and then let your imagination run wild with your request
-😜 To swap faces with someone in a photo with <b>FaceSwap</b>, enter the command /face_swap, then choose images from our unique packages or send your own
+😜 To swap faces with someone in a photo with <b>Face Swap</b>, enter the command /face_swap, then choose images from our unique packages or send your own
 🔄 To switch between different neural networks, enter the command /mode, and then select the neural network depending on your creative needs
 🔍 To learn more about the capabilities of each AI model, enter the command /info
 🎭️ To choose a specialized digital assistant in <b>ChatGPT3.5</b> and <b>ChatGPT4.0</b> models, enter the command /catalog, and then select a specific digital assistant to help with your tasks
@@ -42,7 +42,7 @@ I'm here to be your co-pilot on this adventure! 🚀
 ✉️ /chatgpt3 - <b>Engage with ChatGPT3.5</b>: Start chatting in a text-based conversation.
 🧠 /chatgpt4 - <b>Explore ChatGPT4.0</b>: Experience advanced AI responses.
 🎨 /dalle3 - <b>Create with DALL-E 3</b>: Bring your imaginations to life with images.
-😜 /face_swap - <b>Have fun with FaceSwap</b>: Change faces in photos.
+😜 /face_swap - <b>Have fun with Face Swap</b>: Change faces in photos.
 👤 /profile - <b>View your profile</b>: Check your subscription details or usage quota and more.
 🔧 /settings - <b>Customize your experience</b>: Tailor me to fit your needs.
 🎭 /catalog - <b>Select a specialized assistant</b>: Pick a digital helper designed for your tasks.
@@ -219,9 +219,9 @@ You've switched to the DALLE-3 model — your personal AI artist. Now, you can r
 Time to create! 🎉
 """
     SWITCHED_TO_FACE_SWAP = """
-🎭 <b>Welcome to the world of FaceSwap!</b>
+🎭 <b>Welcome to the world of Face Swap!</b>
 
-You've switched to the FaceSwap model — where faces switch places as if by magic. Here, you can choose images from our unique packages or send your own photo. Want to see yourself in the guise of a celebrity or a movie character? Just select or send the desired image, and let FaceSwap work its magic
+You've switched to the Face Swap model — where faces switch places as if by magic. Here, you can choose images from our unique packages or send your own photo. Want to see yourself in the guise of a celebrity or a movie character? Just select or send the desired image, and let Face Swap work its magic
 
 Your new face awaits! 🎉
 """
@@ -256,8 +256,8 @@ The adventure continues! 🚀✨
     IMAGE_SUCCESS = "✨ Here's your image creation! 🎨"
 
     # Settings
-    SETTINGS = "Settings:"
-    SHOW_NAME_OF_THE_CHAT = "Show name of the chat"
+    SHOW_THE_NAME_OF_THE_CHATS = "Show the name of the chats"
+    SHOW_THE_NAME_OF_THE_ROLES = "Show the name of the roles"
     SHOW_USAGE_QUOTA_IN_MESSAGES = "Show usage quota in messages"
     TURN_ON_VOICE_MESSAGES_FROM_RESPONDS = "Turn on voice messages from responds"
 
@@ -433,7 +433,11 @@ You're asking for more images than we have.
 🧐 <b>How about this?</b> Let's try a number within the package limit!
 """
 
-    ERROR = "I've got an error"
+    ERROR = """
+I've got an unknown error 🤒
+
+Please try again or contact @roman_danilov 🔧
+"""
     BACK = "Back ◀️"
     CLOSE = "Close 🚪"
     CANCEL = "Cancel ❌"
@@ -785,3 +789,10 @@ Looks like you've got only <b>{available_images} generations</b> left in your ar
         ]
 
         return random.choice(texts)
+
+    # Settings
+    @staticmethod
+    def settings(model: Model) -> str:
+        return f"""
+⚙️ <b>Settings for model:</b> <i>{model}</i> 🤖
+"""

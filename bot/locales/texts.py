@@ -21,6 +21,7 @@ class Texts(Protocol):
 """
     INFO: str
 
+
     # Feedback
     FEEDBACK: str
     FEEDBACK_SUCCESS: str
@@ -194,8 +195,8 @@ TODO
     IMAGE_SUCCESS: str
 
     # Settings
-    SETTINGS: str
-    SHOW_NAME_OF_THE_CHAT: str
+    SHOW_THE_NAME_OF_THE_CHATS: str
+    SHOW_THE_NAME_OF_THE_ROLES: str
     SHOW_USAGE_QUOTA_IN_MESSAGES: str
     TURN_ON_VOICE_MESSAGES_FROM_RESPONDS: str
 
@@ -708,4 +709,9 @@ TODO
 
     @staticmethod
     def processing_request_face_swap() -> str:
+        raise NotImplementedError
+
+    # Settings
+    @staticmethod
+    def settings(model: Model) -> str:
         raise NotImplementedError

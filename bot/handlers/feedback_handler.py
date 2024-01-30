@@ -1,4 +1,4 @@
-from aiogram import Router
+from aiogram import Router, F
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
@@ -28,7 +28,7 @@ async def feedback(message: Message, state: FSMContext):
     await state.set_state(Feedback.waiting_for_feedback)
 
 
-@feedback_router.message(Feedback.waiting_for_feedback)
+@feedback_router.message(Feedback.waiting_for_feedback, ~F.text.startswith('/'))
 async def feedback_sent(message: Message, state: FSMContext):
     user = await get_user(str(message.from_user.id))
 
