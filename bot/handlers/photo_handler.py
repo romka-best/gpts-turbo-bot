@@ -1,4 +1,3 @@
-import asyncio
 import uuid
 
 from aiogram import Router, F
@@ -8,8 +7,12 @@ from aiogram.types import Message
 from bot.database.main import firebase
 from bot.database.models.common import Model, Quota
 from bot.database.models.face_swap_package import FaceSwapPackageStatus
-from bot.database.operations.face_swap_package import get_used_face_swap_packages_by_user_id, \
-    update_used_face_swap_package, get_face_swap_package, update_face_swap_package
+from bot.database.operations.face_swap_package import (
+    get_used_face_swap_packages_by_user_id,
+    update_used_face_swap_package,
+    get_face_swap_package,
+    update_face_swap_package,
+)
 from bot.database.operations.generation import write_generation
 from bot.database.operations.request import write_request
 from bot.database.operations.user import get_user

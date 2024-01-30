@@ -1,6 +1,6 @@
-from typing import Protocol, Dict
+from typing import Protocol, Dict, List
 
-from bot.database.models.common import Currency
+from bot.database.models.common import Currency, Model
 from bot.database.models.package import PackageType
 from bot.database.models.subscription import SubscriptionType, SubscriptionPeriod, Subscription
 from bot.database.models.transaction import TransactionType, ServiceType
@@ -19,6 +19,7 @@ class Texts(Protocol):
 🎩 /manage_catalog - <b>Управление ролями в чатах</b>
 📊 /statistics - <b>Просмотр статистики</b>
 """
+    INFO: str
 
     # Feedback
     FEEDBACK: str
@@ -46,13 +47,12 @@ class Texts(Protocol):
 
 Выбери, для чего ты хочешь создать промокод:
 🌠 <b>Подписка</b> - открой доступ к эксклюзивным функциям и контенту.
-🎨 <b>Пакет</b> - добавь специальные возможности для использования AI.
 
 Нажми на нужную кнопку и приступим к созданию! 🚀
 """
     PROMO_CODE_SUCCESS: str
     PROMO_CODE_SUCCESS_ADMIN = """
-🌟 Вау!
+🌟 <b>Вау!</b>
 
 Твой <b>промокод успешно создан</b> и готов к путешествию в карманы наших пользователей. 🚀
 Этот маленький кодик обязательно принесёт радость кому-то там!
@@ -181,6 +181,11 @@ TODO
 
     # AI
     MODE: str
+    SWITCHED_TO_CHATGPT3: str
+    SWITCHED_TO_CHATGPT4: str
+    SWITCHED_TO_DALLE3: str
+    SWITCHED_TO_FACE_SWAP: str
+    ALREADY_SWITCHED_TO_THIS_MODEL: str
     REQUEST_FORBIDDEN_ERROR: str
     ALREADY_MAKE_REQUEST: str
     READY_FOR_NEW_REQUEST: str
@@ -674,6 +679,19 @@ TODO
 
     @staticmethod
     def face_swap_package_forbidden(available_images: int) -> str:
+        raise NotImplementedError
+
+    # AI
+    @staticmethod
+    def switched(model: Model):
+        raise NotImplementedError
+
+    @staticmethod
+    def chatgpt_recommendations() -> List[str]:
+        raise NotImplementedError
+
+    @staticmethod
+    def dalle_recommendations() -> List[str]:
         raise NotImplementedError
 
     @staticmethod

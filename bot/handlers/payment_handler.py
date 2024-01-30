@@ -7,7 +7,8 @@ from aiogram.types import Message, CallbackQuery, LabeledPrice, PreCheckoutQuery
 
 from bot.config import config
 from bot.database.main import firebase
-from bot.database.models.package import PackageStatus, PackageType, Package
+from bot.database.models.common import Model
+from bot.database.models.package import PackageStatus, PackageType, Package, PackageMinimum
 from bot.database.models.subscription import Subscription, SubscriptionStatus
 from bot.database.models.transaction import TransactionType, ServiceType
 from bot.database.operations.package import write_package, get_last_package_by_user_id
@@ -16,12 +17,12 @@ from bot.database.operations.transaction import write_transaction
 from bot.database.operations.user import get_user
 from bot.helpers.create_package import create_package
 from bot.helpers.create_subscription import create_subscription
-from bot.keyboards.common import build_cancel_keyboard
+from bot.keyboards.common import build_cancel_keyboard, build_recommendations_keyboard
 from bot.keyboards.payment import (
     build_subscriptions_keyboard,
     build_period_of_subscription_keyboard,
     build_packages_keyboard,
-    build_quantity_of_packages_keyboard)
+)
 from bot.locales.main import get_localization
 from bot.states.payment import Payment
 
@@ -49,7 +50,9 @@ async def handle_subscribe(message: Message, user_id: str):
 
 
 @payment_router.message(Command("subscribe"))
-async def subscribe(message: Message):
+async def subscribe(message: Message, state: FSMContext):
+    await state.clear()
+
     await handle_subscribe(message, str(message.from_user.id))
 
 
@@ -94,7 +97,9 @@ async def handle_period_of_subscription_selection(callback_query: CallbackQuery)
 
 
 @payment_router.message(Command("buy"))
-async def buy(message: Message):
+async def buy(message: Message, state: FSMContext):
+    await state.clear()
+
     user = await get_user(str(message.from_user.id))
 
     photo_path = f'packages/{user.language_code}_{user.currency}.png'
@@ -119,23 +124,12 @@ async def handle_package_selection(callback_query: CallbackQuery, state: FSMCont
 
     message = get_localization(user.language_code).choose_min(package_type)
 
-    reply_markup = build_quantity_of_packages_keyboard(user.language_code)
+    reply_markup = build_cancel_keyboard(user.language_code)
 
     await callback_query.message.edit_caption(caption=message, reply_markup=reply_markup)
 
     await state.update_data(package_type=package_type)
     await state.set_state(Payment.waiting_for_package_quantity)
-
-
-@payment_router.callback_query(Payment.waiting_for_package_quantity,
-                               lambda c: c.data.startswith('quantity_of_package:'))
-async def handle_quantity_of_package_selection(callback_query: CallbackQuery, state: FSMContext):
-    await callback_query.answer()
-
-    if callback_query.data == 'cancel':
-        await state.clear()
-
-        await callback_query.message.delete()
 
 
 @payment_router.message(Payment.waiting_for_package_quantity)
@@ -147,14 +141,14 @@ async def quantity_of_package_sent(message: Message, state: FSMContext):
         package_type = user_data['package_type']
         quantity = int(message.text)
         if (
-            (package_type == PackageType.GPT3 and quantity < 100) or
-            (package_type == PackageType.GPT4 and quantity < 10) or
-            (package_type == PackageType.CHAT and quantity < 1) or
-            (package_type == PackageType.DALLE3 and quantity < 10) or
-            (package_type == PackageType.FACE_SWAP and quantity < 10) or
-            (package_type == PackageType.ACCESS_TO_CATALOG and quantity < 1) or
-            (package_type == PackageType.VOICE_MESSAGES and quantity < 1) or
-            (package_type == PackageType.FAST_MESSAGES and quantity < 1)
+            (package_type == PackageType.GPT3 and quantity < PackageMinimum.GPT3) or
+            (package_type == PackageType.GPT4 and quantity < PackageMinimum.GPT4) or
+            (package_type == PackageType.CHAT and quantity < PackageMinimum.CHAT) or
+            (package_type == PackageType.DALLE3 and quantity < PackageMinimum.DALLE3) or
+            (package_type == PackageType.FACE_SWAP and quantity < PackageMinimum.FACE_SWAP) or
+            (package_type == PackageType.ACCESS_TO_CATALOG and quantity < PackageMinimum.ACCESS_TO_CATALOG) or
+            (package_type == PackageType.VOICE_MESSAGES and quantity < PackageMinimum.VOICE_MESSAGES) or
+            (package_type == PackageType.FAST_MESSAGES and quantity < PackageMinimum.FAST_MESSAGES)
         ):
             reply_markup = build_cancel_keyboard(user.language_code)
             await message.reply(text=get_localization(user.language_code).MIN_ERROR,
@@ -309,3 +303,9 @@ async def successful_payment(message: Message):
                                 })
 
         await message.answer(text=get_localization(user.language_code).PACKAGE_SUCCESS)
+
+    reply_markup = await build_recommendations_keyboard(user)
+    await message.answer(
+        text=get_localization(user.language_code).switched(user.current_model),
+        reply_markup=reply_markup,
+    )

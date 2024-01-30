@@ -127,16 +127,3 @@ def build_packages_keyboard(language_code: str) -> InlineKeyboardMarkup:
     ]
 
     return InlineKeyboardMarkup(inline_keyboard=buttons)
-
-
-def build_quantity_of_packages_keyboard(language_code: str) -> InlineKeyboardMarkup:
-    buttons = [
-        [
-            InlineKeyboardButton(
-                text=get_localization(language_code).CANCEL,
-                callback_data='quantity_of_package:cancel'
-            )
-        ]
-    ]
-
-    return InlineKeyboardMarkup(inline_keyboard=buttons)

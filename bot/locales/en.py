@@ -1,7 +1,8 @@
 import random
+from typing import List
 
 from bot.locales.texts import Texts
-from bot.database.models.common import Currency, Quota
+from bot.database.models.common import Currency, Quota, Model
 from bot.database.models.package import PackageType
 from bot.database.models.subscription import Subscription, SubscriptionType, SubscriptionPeriod, SubscriptionLimit
 from bot.database.models.user import UserGender
@@ -9,43 +10,89 @@ from bot.database.models.user import UserGender
 
 class English(Texts):
     START = """
-🤖 Welcome to the future of AI with <b>GPTsTurboBot</b> 🎉
+🤖 <b>Welcome to the future of artificial intelligence with GPTsTurboBot!</b> 🎉
 
-The bot allows you to access AI and neural networks.
-Embark on a journey through the realms of AI with:
-✉️ Unlimited ChatGPT 3 queries... Well, almost! Check out our 'Free' tier
-🧠 The wisdom of ChatGPT 4, if you're feeling extra brainy today
-🎨 Artistic creations with DALL-E 3 that will make Picasso look twice
-😜 And, ever wanted to swap faces with Mona Lisa? Just ask for our Face Swap feature
+I'm your personal gateway to the world of artificial intelligence and neural networks. Discover the capabilities of AI:
+✉️ Communicate with <b>ChatGPT3.5</b>: ask questions, get answers
+🧠 Explore advanced intelligence with <b>ChatGPT4.0</b>
+🎨 Create unique images with <b>DALL-E 3</b>
+😜 Try <b>FaceSwap</b> to exchange faces with someone in a photo
 
-Here's a quick guide to get you started:
-✉️ To get a text response, simply type your request into the chat
-🌅 To generate an image, first choose your AI model in /mode, then let your imagination run wild!
-🔄 Swap between different neural networks with /mode to suit your creative needs
-🔍 Use /mode to learn more about what each AI model can do
-👁️‍🗨️ Dive into /catalog to pick a specialized assistant tailored to your tasks
-📊 Check your usage and subscription details with /profile
-🔧 Personalize your experience further in /settings
+Here's a quick guide to get started:
+✉️ To receive a text response from <b>ChatGPT3.5</b>, simply enter your query in the chat
+🧠 To get a text response from <b>ChatGPT4.0</b>, enter the command /chatgpt4 and then just write your query in the chat
+🎨 To create an image with <b>DALL-E 3</b>, enter the command /dalle3, and then let your imagination run wild with your request
+😜 To swap faces with someone in a photo with <b>FaceSwap</b>, enter the command /face_swap, then choose images from our unique packages or send your own
+🔄 To switch between different neural networks, enter the command /mode, and then select the neural network depending on your creative needs
+🔍 To learn more about the capabilities of each AI model, enter the command /info
+🎭️ To choose a specialized digital assistant in <b>ChatGPT3.5</b> and <b>ChatGPT4.0</b> models, enter the command /catalog, and then select a specific digital assistant to help with your tasks
+💬 To manage thematic chats, enter the command /chats
+📊 To check usage information and subscription/purchase details, enter the command /profile
+🔧 To customize me to improve your experience, enter the command /settings
 
-And there's more! Just tap /help to see all the magical AI commands at your disposal.
-Let AI be your co-pilot in this adventure! 🚀
+And that's not all! Just press /help to see all my magical AI commands available to you.
+I'm here to be your co-pilot on this adventure! 🚀
 """
     COMMANDS = """
 🤖 Here's what you can explore:
 
-👋 /start - <b>About me</b>
-🌍 /language - Engage with any language, <b>set system messages</b>.
+👋 /start - <b>About me</b>: Discover what I can do for you.
+🌍 /language - <b>Switch Languages</b>: Set your preferred language for system messages.
 🧠 /mode - <b>Swap neural network models</b> on the fly with — <b>ChatGPT3.5</b>, <b>ChatGPT4.0</b>, <b>DALLE-3</b>, or <b>Face Swap</b>!
-👤 /profile - <b>Check your profile</b> to see your usage quota and more.
-🔧 /settings - <b>Customize your experience</b> for a seamless user experience.
-🎭 /catalog - <b>Pick a specialized assistant</b> for tasks tailored just for you.
-💬 /chats - <b>Create, switch, or delete context-specific chats</b>.
-💳 /subscribe or /buy - <b>Learn about our plans and perks</b> or opt for individual packages.
+✉️ /chatgpt3 - <b>Engage with ChatGPT3.5</b>: Start chatting in a text-based conversation.
+🧠 /chatgpt4 - <b>Explore ChatGPT4.0</b>: Experience advanced AI responses.
+🎨 /dalle3 - <b>Create with DALL-E 3</b>: Bring your imaginations to life with images.
+😜 /face_swap - <b>Have fun with FaceSwap</b>: Change faces in photos.
+👤 /profile - <b>View your profile</b>: Check your subscription details or usage quota and more.
+🔧 /settings - <b>Customize your experience</b>: Tailor me to fit your needs.
+🎭 /catalog - <b>Select a specialized assistant</b>: Pick a digital helper designed for your tasks.
+💬 /chats - <b>Manage context-specific chats</b>: Create, switch, or delete thematic chats.
+💳 /subscribe or /buy - <b>Learn about our subscriptions and benefits</b> or <b>choose individual packages</b>.
 🎁 /promo_code - <b>Unleash exclusive AI features</b> and special offers with your <b>promo code</b>.
-📡 /feedback - Give me a feedback and <b>improve me</b>.
+📡 /feedback - <b>Leave feedback</b>: Help me improve.
 
 Just type away or use a command to begin your AI journey! 🌟
 """
+    INFO = """
+🤖 <b>Let's check out what each model can do for you:</b>
+
+✉️ <b>ChatGPT3.5: The Versatile Communicator</b>
+- <i>Small Talk to Deep Conversations</i>: Ideal for chatting about anything from daily life to sharing jokes.
+- <i>Educational Assistant</i>: Get help with homework, language learning, or complex topics like coding.
+- <i>Personal Coach</i>: Get motivation, fitness tips, or even meditation guidance.
+- <i>Creative Writer</i>: Need a post, story, or even a song? ChatGPT3.5 can whip it up in seconds.
+- <i>Travel Buddy</i>: Ask for travel tips, local cuisines, or historical facts about your next destination.
+- <i>Business Helper</i>: Draft emails, create business plans, or brainstorm marketing ideas.
+- <i>Role Play</i>: Engage in creative role-playing scenarios for entertainment or storytelling.
+- <i>Quick Summaries</i>: Summarize long articles or reports into concise text.
+
+🧠 <b>ChatGPT4.0: The Advanced Intellect</b>
+- <i>In-Depth Analysis</i>: Perfect for detailed research, technical explanations, or exploring hypothetical scenarios.
+- <i>Problem Solver</i>: Get help with advanced math problems, programming bugs, or scientific queries.
+- <i>Language Expert</i>: Translate complex texts or practice conversational skills in various languages.
+- <i>Creative Consultant</i>: Develop plot ideas for your posts, script dialogues, or explore artistic concepts.
+- <i>Health and Wellness</i>: Discuss wellness and mental health topics in-depth.
+- <i>Personalized Recommendations</i>: Get book, movie, or travel recommendations based on your interests.
+
+🎨 <b>DALLE-3: The Creative Genius</b>
+- <i>Art on Demand</i>: Generate unique art from descriptions – perfect for illustrators or those seeking inspiration.
+- <i>Ad Creator</i>: Produce eye-catching images for advertising or social media content.
+- <i>Educational Tool</i>: Visualize complex concepts for better understanding in education.
+- <i>Interior Design</i>: Get ideas for room layouts or decoration themes.
+- <i>Fashion Design</i>: Create clothing designs or fashion illustrations.
+- <i>Personalized Comics</i>: Create comic strips or cartoon characters from your stories.
+- <i>Product Mockups</i>: Create mockups for product ideas or inventions.
+
+🤡 <b>Face Swap: The Entertainment Master</b>
+- <i>Fun Reimaginations</i>: See how you'd look in different historical eras or as various movie characters.
+- <i>Personalized Greetings</i>: Create unique birthday cards or invitations with personalized images.
+- <i>Role Play</i>: Experiment with different looks for role-playing games or virtual meetings.
+- <i>Memes and Content Creation</i>: Spice up your social media with funny or imaginative face-swapped pictures.
+- <i>Digital Makeovers</i>: Experiment with new haircuts or makeup styles.
+- <i>Celebrity Mashups</i>: Combine your face with celebrities for fun comparisons.
+"""
+
+    # Feedback
     FEEDBACK = """
 🌟 <b>Your opinion matters!</b> 🌟
 
@@ -110,12 +157,11 @@ If you've got a <b>promo code</b>, just type it in to reveal hidden features and
 <b>No code?</b> No problem! Simply click 'Cancel' to continue exploring the AI universe without it 🚀
 """
     PROMO_CODE_SUCCESS = """
-🎉 <b>Woohoo! You've Struck Gold!</b> 🌟
+🎉 <b>Your promo code has been successfully activated!</b> 🌟
 
-Your promo code has been successfully activated! Get ready to dive into a world of AI wonders with your shiny new perks 🚀
-Thanks for joining us on this AI-powered adventure. Enjoy the extra goodies and let's make some magic together! ✨
+To see what the activated promo code has brought you, type the command /profile ✨
 
-Happy exploring! 🤖🌐
+Get ready to dive into a world of AI wonders with your shiny new perks. Happy exploring! 🚀
 """
     PROMO_CODE_ALREADY_HAVE_SUBSCRIPTION = """
 🚫 <b>Whoopsie-daisy!</b> 🙈
@@ -149,44 +195,42 @@ Keep exploring and let the AI surprises continue! 🤖
 
     # AI
     MODE = """
-🤖 Let's check out what each model can do for you:
-
-✉️ <b>ChatGPT3.5: The Versatile Communicator</b>
-- <i>Small Talk to Deep Conversations</i>: Ideal for chatting about anything from daily life to sharing jokes.
-- <i>Educational Assistant</i>: Get help with homework, language learning, or complex topics like coding.
-- <i>Personal Coach</i>: Get motivation, fitness tips, or even meditation guidance.
-- <i>Creative Writer</i>: Need a post, story, or even a song? ChatGPT3.5 can whip it up in seconds.
-- <i>Travel Buddy</i>: Ask for travel tips, local cuisines, or historical facts about your next destination.
-- <i>Business Helper</i>: Draft emails, create business plans, or brainstorm marketing ideas.
-- <i>Role Play</i>: Engage in creative role-playing scenarios for entertainment or storytelling.
-- <i>Quick Summaries</i>: Summarize long articles or reports into concise text.
-
-🧠 <b>ChatGPT4.0: The Advanced Intellect</b>
-- <i>In-Depth Analysis</i>: Perfect for detailed research, technical explanations, or exploring hypothetical scenarios.
-- <i>Problem Solver</i>: Get help with advanced math problems, programming bugs, or scientific queries.
-- <i>Language Expert</i>: Translate complex texts or practice conversational skills in various languages.
-- <i>Creative Consultant</i>: Develop plot ideas for your posts, script dialogues, or explore artistic concepts.
-- <i>Health and Wellness</i>: Discuss wellness and mental health topics in-depth.
-- <i>Personalized Recommendations</i>: Get book, movie, or travel recommendations based on your interests.
-
-🎨 <b>DALLE-3: The Creative Genius</b>
-- <i>Art on Demand</i>: Generate unique art from descriptions – perfect for illustrators or those seeking inspiration.
-- <i>Ad Creator</i>: Produce eye-catching images for advertising or social media content.
-- <i>Educational Tool</i>: Visualize complex concepts for better understanding in education.
-- <i>Interior Design</i>: Get ideas for room layouts or decoration themes.
-- <i>Fashion Design</i>: Create clothing designs or fashion illustrations.
-- <i>Personalized Comics</i>: Create comic strips or cartoon characters from your stories.
-- <i>Product Mockups</i>: Create mockups for product ideas or inventions.
-
-🤡 <b>Face Swap: The Entertainment Master</b>
-- <i>Fun Reimaginations</i>: See how you'd look in different historical eras or as various movie characters.
-- <i>Personalized Greetings</i>: Create unique birthday cards or invitations with personalized images.
-- <i>Role Play</i>: Experiment with different looks for role-playing games or virtual meetings.
-- <i>Memes and Content Creation</i>: Spice up your social media with funny or imaginative face-swapped pictures.
-- <i>Digital Makeovers</i>: Experiment with new haircuts or makeup styles.
-- <i>Celebrity Mashups</i>: Combine your face with celebrities for fun comparisons.
-
 To change a model choose a button below 👇
+"""
+    SWITCHED_TO_CHATGPT3 = """
+🤖 <b>Welcome to the world of ChatGPT3!</b>
+
+You've successfully switched to the ChatGPT3 model. Consider this your personal virtual brain, ready to handle all your questions and ideas. Feel free to write anything - from simple queries to complex tasks. And don't worry, your previous conversations are stored in memory, so the context of your dialogue won't be lost
+
+Go ahead, explore the capabilities of ChatGPT3! 🎉
+"""
+    SWITCHED_TO_CHATGPT4 = """
+🚀 <b>Welcome to the world of ChatGPT4!</b>
+
+Congratulations, you've switched to the ChatGPT4 model. This is a real breakthrough in the world of neural networks! ChatGPT4 offers deeper understanding and expanded capabilities compared to its predecessors. Discover new horizons of communication with AI. Your previous conversations are remembered, and the context history is preserved
+
+Start your journey into the future with ChatGPT4! 🎉
+"""
+    SWITCHED_TO_DALLE3 = """
+🎨 <b>Welcome to the world of DALLE-3!</b>
+
+You've switched to the DALLE-3 model — your personal AI artist. Now, you can request to have any image drawn, whatever comes to your mind. Just describe your idea in a single message, and DALLE-3 will transform it into a visual masterpiece. Note: each new message is processed individually, previous request contexts are not considered
+
+Time to create! 🎉
+"""
+    SWITCHED_TO_FACE_SWAP = """
+🎭 <b>Welcome to the world of FaceSwap!</b>
+
+You've switched to the FaceSwap model — where faces switch places as if by magic. Here, you can choose images from our unique packages or send your own photo. Want to see yourself in the guise of a celebrity or a movie character? Just select or send the desired image, and let FaceSwap work its magic
+
+Your new face awaits! 🎉
+"""
+    ALREADY_SWITCHED_TO_THIS_MODEL = """
+🔄 <b>Oops, looks like everything stayed the same!</b>
+
+You've selected the same model that's already active. Don't worry, your digital universe remains unchanged. You can continue chatting or creating as usual. If you want to switch things up, simply choose a different model
+
+Either way, we're here to help! 🛟
 """
     REQUEST_FORBIDDEN_ERROR = """
 <b>Oops! Your request just bumped into our safety guardian!</b> 🚨
@@ -585,6 +629,92 @@ Looks like you've got only <b>{available_images} generations</b> left in your ar
 
 💡 <b>Pro Tip</b>: Sometimes, less is more! Try a smaller number, or give /buy and /subscribe a whirl for unlimited possibilities!
 """
+
+    # AI
+    @staticmethod
+    def switched(model: Model):
+        if model == Model.GPT3:
+            return English.SWITCHED_TO_CHATGPT3
+        elif model == Model.GPT4:
+            return English.SWITCHED_TO_CHATGPT4
+        elif model == Model.DALLE3:
+            return English.SWITCHED_TO_DALLE3
+        elif model == Model.FACE_SWAP:
+            return English.SWITCHED_TO_FACE_SWAP
+
+    @staticmethod
+    def chatgpt_recommendations() -> List[str]:
+        texts = [
+            "Tell me an interesting fact about space 👩‍🚀",
+            "What could be the consequences of global warming? 🌍",
+            "Write a short story titled 'Time Travel' 🕔",
+            "What are the best strategies for learning a new language? 🦜",
+            "Explain to me how photosynthesis works 🌿",
+            "Suggest some interesting science fiction books to read 📚",
+            "What are some methods for stress management? 🧘",
+            "Write a poem about nature 🌳",
+            "What are the basic principles of healthy eating? 🥦",
+            "Tell a story about a traveler who can move between parallel worlds 🌌",
+            "Describe what an ideal city of the future would look like 🏙️",
+            "Invent a recipe for a unique dish inspired by the sea 🐟",
+            "Create a script for a movie about adventures in the dinosaur era 🦖",
+            "Develop a game where players build their own civilizations from scratch 🌍",
+            "Write a poem dedicated to the first flight to Mars 🚀",
+            "Propose ideas for an eco-friendly home of the future 🌱",
+            "Describe a world where music can change reality 🎶",
+            "Invent a story about a wizard who secretly lives in the modern world 🧙",
+            "What would life be like if humans could communicate with animals? 🐾",
+            "What would be the consequences if people could read each other's minds? 🧠",
+            "Describe a world where all technology is powered by magic ✨",
+            "Tell about a city where all inhabitants are robots 🤖",
+            "Invent a fairy tale about a dragon that is afraid of fire 🔥",
+            "Describe a utopian society with no conflicts and poverty 🕊️",
+            "How would history change if dinosaurs had never gone extinct? 🦕",
+            "Describe a world where every person is born with a unique talent 🌟",
+            "Tell about an underwater city and its inhabitants 🌊",
+            "Propose a concept for an experimental music genre 🎵",
+            "Write a story about an encounter with aliens on Earth 👽",
+            "Describe a future sports competition 🚀",
+        ]
+
+        return texts
+
+    @staticmethod
+    def dalle_recommendations() -> List[str]:
+        texts = [
+            "Martian cityscape under a pink sky 🪐",
+            "Steampunk version of the Taj Mahal 🕌",
+            "Surreal landscape with floating islands 🌌",
+            "Futuristic cyberpunk cityscape 🏙️",
+            "Portrait of a cat as a king 👑🐱",
+            "Garden with crystal flowers and neon trees 🌸",
+            "Castle in the clouds ☁️🏰",
+            "Ice sculptures in the Antarctic desert ❄️🌵",
+            "Medieval knight battling robots 🤖🗡️",
+            "Enchanted forest with talking trees 🌲",
+            "Underwater city with mermaids and dolphins 🧜‍♀️🐬",
+            "Apocalyptic landscape with abandoned buildings 🌪️",
+            "Human-alien encounter on the Moon 🌕👽",
+            "Animated chess pieces on a board ♟️",
+            "Dragon flying around a waterfall 🐉🌊",
+            "Abstract Picasso-style composition 🎨",
+            "Modern city built on giant trees 🌳🏢",
+            "Magical portal to another world 🌀",
+            "Victorian-style festive fairground city 🎪",
+            "Lost temple in the jungle with mysterious ruins 🌿🛕",
+            "Heavenly city with floating islands and rainbow bridges 🌈",
+            "Dystopian city with robotic plants 🌿🤖",
+            "Pirate ship atop a cloud ☁️🏴‍☠️",
+            "Portrait of a dog dressed as King Louis XIV 🐶👑",
+            "Future city with flying cars and glass roads 🚗🌉",
+            "Space diner with galactic meals and starry light 🌌🍽️",
+            "Magical mirror reflecting a parallel universe 🪞🌌",
+            "Magical waterfall with floating crystals and light beings 💎🌊",
+            "Space station orbiting an earthy forest 🌍🛰️",
+            "Labyrinth of green hedges on another planet with two suns 🌿🪐",
+        ]
+
+        return texts
 
     @staticmethod
     def wait_for_another_request(seconds: int) -> str:

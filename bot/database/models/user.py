@@ -27,7 +27,7 @@ class User:
     gender: UserGender
     is_premium: bool
     is_blocked: bool
-    current_model: str
+    current_model: Model
     currency: Currency
     subscription_type: SubscriptionType
     last_subscription_limit_update: datetime

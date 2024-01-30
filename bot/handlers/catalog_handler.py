@@ -12,14 +12,10 @@ from bot.keyboards.catalog import (
     build_catalog_keyboard,
     build_manage_catalog_keyboard,
     build_manage_catalog_create_keyboard,
-    build_manage_catalog_create_role_name_keyboard,
-    build_manage_catalog_create_role_description_keyboard,
-    build_manage_catalog_create_role_instruction_keyboard,
     build_manage_catalog_create_role_confirmation_keyboard,
     build_manage_catalog_edit_keyboard,
-    build_manage_catalog_edit_role_name_keyboard,
-    build_manage_catalog_edit_role_description_keyboard,
-    build_manage_catalog_edit_role_instruction_keyboard)
+)
+from bot.keyboards.common import build_cancel_keyboard
 from bot.locales.main import get_localization, localization_classes
 from bot.states.catalog import Catalog
 from bot.utils.is_admin import is_admin
@@ -28,7 +24,9 @@ catalog_router = Router()
 
 
 @catalog_router.message(Command("catalog"))
-async def catalog(message: Message):
+async def catalog(message: Message, state: FSMContext):
+    await state.clear()
+
     user = await get_user(str(message.from_user.id))
 
     if not user.additional_usage_quota[Quota.ACCESS_TO_CATALOG]:
@@ -96,7 +94,9 @@ async def handle_manage_catalog(message: Message, user_id: str):
 
 
 @catalog_router.message(Command("manage_catalog"))
-async def manage_catalog(message: Message):
+async def manage_catalog(message: Message, state: FSMContext):
+    await state.clear()
+
     await handle_manage_catalog(message, str(message.from_user.id))
 
 
@@ -178,7 +178,7 @@ async def catalog_manage_create_role_system_name_sent(message: Message, state: F
             text=get_localization(user.language_code).CATALOG_MANAGE_CREATE_ALREADY_EXISTS_ERROR,
         )
     else:
-        reply_markup = build_manage_catalog_create_role_name_keyboard(user.language_code)
+        reply_markup = build_cancel_keyboard(user.language_code)
         await message.answer(
             text=get_localization(user.language_code).CATALOG_MANAGE_CREATE_ROLE_NAME,
             reply_markup=reply_markup,
@@ -203,7 +203,7 @@ async def catalog_manage_create_role_name_sent(message: Message, state: FSMConte
             else:
                 role_names[language_code] = message.text
 
-    reply_markup = build_manage_catalog_create_role_description_keyboard(user.language_code)
+    reply_markup = build_cancel_keyboard(user.language_code)
     await message.answer(
         text=get_localization(user.language_code).CATALOG_MANAGE_CREATE_ROLE_DESCRIPTION,
         reply_markup=reply_markup,
@@ -228,7 +228,7 @@ async def catalog_manage_create_role_description_sent(message: Message, state: F
             else:
                 role_descriptions[language_code] = message.text
 
-    reply_markup = build_manage_catalog_create_role_instruction_keyboard(user.language_code)
+    reply_markup = build_cancel_keyboard(user.language_code)
     await message.answer(
         text=get_localization(user.language_code).CATALOG_MANAGE_CREATE_ROLE_INSTRUCTION,
         reply_markup=reply_markup,
@@ -285,20 +285,18 @@ async def handle_catalog_manage_edit_selection(callback_query: CallbackQuery, st
 
         user = await get_user(str(callback_query.from_user.id))
 
+        reply_markup = build_cancel_keyboard(user.language_code)
         if action == 'name':
-            reply_markup = build_manage_catalog_edit_role_name_keyboard(user.language_code)
             await callback_query.message.edit_text(
                 text=get_localization(user.language_code).CATALOG_MANAGE_EDIT_ROLE_NAME,
                 reply_markup=reply_markup,
             )
         elif action == 'description':
-            reply_markup = build_manage_catalog_edit_role_description_keyboard(user.language_code)
             await callback_query.message.edit_text(
                 text=get_localization(user.language_code).CATALOG_MANAGE_EDIT_ROLE_DESCRIPTION,
                 reply_markup=reply_markup,
             )
         elif action == 'instruction':
-            reply_markup = build_manage_catalog_edit_role_instruction_keyboard(user.language_code)
             await callback_query.message.edit_text(
                 text=get_localization(user.language_code).CATALOG_MANAGE_EDIT_ROLE_INSTRUCTION,
                 reply_markup=reply_markup,

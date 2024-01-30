@@ -15,6 +15,17 @@ class PackageType:
     FAST_MESSAGES = "FAST_MESSAGES"
 
 
+class PackageMinimum:
+    GPT3 = 100
+    GPT4 = 10
+    DALLE3 = 20
+    FACE_SWAP = 10
+    CHAT = 1
+    ACCESS_TO_CATALOG = 1
+    VOICE_MESSAGES = 1
+    FAST_MESSAGES = 1
+
+
 class PackageStatus:
     SUCCESS = 'SUCCESS'
     WAITING = 'WAITING'
@@ -80,7 +91,7 @@ class Package:
             prices[PackageType.GPT3] = '1₽'
             prices[PackageType.GPT4] = '10₽'
             prices[PackageType.CHAT] = '100₽'
-            prices[PackageType.DALLE3] = '10₽'
+            prices[PackageType.DALLE3] = '5₽'
             prices[PackageType.FACE_SWAP] = '10₽'
             prices[PackageType.ACCESS_TO_CATALOG] = '100₽'
             prices[PackageType.VOICE_MESSAGES] = '100₽'
@@ -89,7 +100,7 @@ class Package:
             prices[PackageType.GPT3] = '0.01€'
             prices[PackageType.GPT4] = '0.1€'
             prices[PackageType.CHAT] = '1€'
-            prices[PackageType.DALLE3] = '0.1€'
+            prices[PackageType.DALLE3] = '0.05€'
             prices[PackageType.FACE_SWAP] = '0.1€'
             prices[PackageType.ACCESS_TO_CATALOG] = '1€'
             prices[PackageType.VOICE_MESSAGES] = '1€'
@@ -98,7 +109,7 @@ class Package:
             prices[PackageType.GPT3] = '$0.01'
             prices[PackageType.GPT4] = '$0.1'
             prices[PackageType.CHAT] = '$1'
-            prices[PackageType.DALLE3] = '$0.1'
+            prices[PackageType.DALLE3] = '$0.05'
             prices[PackageType.FACE_SWAP] = '$0.1'
             prices[PackageType.ACCESS_TO_CATALOG] = '$1'
             prices[PackageType.VOICE_MESSAGES] = '$1'

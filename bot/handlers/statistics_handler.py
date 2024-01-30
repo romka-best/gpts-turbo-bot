@@ -13,8 +13,12 @@ from bot.database.operations.user import get_user, get_users
 from bot.keyboards.common import build_cancel_keyboard
 from bot.states.statistics import Statistics
 from bot.utils.is_admin import is_admin
-from bot.keyboards.statistics import build_statistics_keyboard, build_statistics_write_transaction_keyboard, \
-    build_statistics_choose_service_keyboard, build_statistics_choose_currency_keyboard
+from bot.keyboards.statistics import (
+    build_statistics_keyboard,
+    build_statistics_write_transaction_keyboard,
+    build_statistics_choose_service_keyboard,
+    build_statistics_choose_currency_keyboard,
+)
 from bot.locales.main import get_localization
 
 statistics_router = Router()
@@ -30,7 +34,9 @@ async def handle_statistics(chat_id: str, user_id: str, message: Message):
 
 
 @statistics_router.message(Command("statistics"))
-async def statistics(message: Message):
+async def statistics(message: Message, state: FSMContext):
+    await state.clear()
+
     await handle_statistics(str(message.chat.id), str(message.from_user.id), message)
 
 
@@ -242,20 +248,16 @@ async def handle_statistics_choose_service_selection(callback_query: CallbackQue
     await callback_query.answer()
 
     service_type = callback_query.data.split(':')[1]
-    if service_type == 'cancel':
-        await callback_query.message.delete()
-        await state.clear()
-    else:
-        user = await get_user(str(callback_query.from_user.id))
+    user = await get_user(str(callback_query.from_user.id))
 
-        reply_markup = build_statistics_choose_currency_keyboard(user.language_code)
-        await callback_query.message.edit_text(
-            text=get_localization(user.language_code).STATISTICS_CHOOSE_CURRENCY,
-            reply_markup=reply_markup
-        )
+    reply_markup = build_statistics_choose_currency_keyboard(user.language_code)
+    await callback_query.message.edit_text(
+        text=get_localization(user.language_code).STATISTICS_CHOOSE_CURRENCY,
+        reply_markup=reply_markup
+    )
 
-        await state.set_state(Statistics.waiting_for_statistics_service_quantity)
-        await state.update_data(service_type=service_type)
+    await state.set_state(Statistics.waiting_for_statistics_service_quantity)
+    await state.update_data(service_type=service_type)
 
 
 @statistics_router.callback_query(lambda c: c.data.startswith('statistics_choose_currency:'))
@@ -263,20 +265,16 @@ async def handle_statistics_choose_currency_selection(callback_query: CallbackQu
     await callback_query.answer()
 
     currency = callback_query.data.split(':')[1]
-    if currency == 'cancel':
-        await callback_query.message.delete()
-        await state.clear()
-    else:
-        user = await get_user(str(callback_query.from_user.id))
+    user = await get_user(str(callback_query.from_user.id))
 
-        reply_markup = build_cancel_keyboard(user.language_code)
-        await callback_query.message.edit_text(
-            text=get_localization(user.language_code).STATISTICS_SERVICE_QUANTITY,
-            reply_markup=reply_markup
-        )
+    reply_markup = build_cancel_keyboard(user.language_code)
+    await callback_query.message.edit_text(
+        text=get_localization(user.language_code).STATISTICS_SERVICE_QUANTITY,
+        reply_markup=reply_markup
+    )
 
-        await state.set_state(Statistics.waiting_for_statistics_service_quantity)
-        await state.update_data(currency=currency)
+    await state.set_state(Statistics.waiting_for_statistics_service_quantity)
+    await state.update_data(currency=currency)
 
 
 @statistics_router.message(Statistics.waiting_for_statistics_service_quantity)

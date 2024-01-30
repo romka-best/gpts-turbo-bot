@@ -1,6 +1,7 @@
 import openai
 from aiogram import Router
 from aiogram.exceptions import TelegramBadRequest
+from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
 from telegram import constants
@@ -14,12 +15,13 @@ from bot.database.operations.chat import get_chat
 from bot.database.operations.message import write_message, get_messages_by_chat_id
 from bot.database.operations.role import get_role_by_name
 from bot.database.operations.transaction import write_transaction
-from bot.database.operations.user import get_user
+from bot.database.operations.user import get_user, update_user
 from bot.helpers.create_new_message_and_update_user import create_new_message_and_update_user
 from bot.helpers.reply_with_voice import reply_with_voice
 from bot.helpers.send_message_to_admins import send_message_to_admins
 from bot.integrations.openAI import get_response_message
 from bot.keyboards.chat_gpt import build_chat_gpt_continue_generating_keyboard
+from bot.keyboards.common import build_recommendations_keyboard
 from bot.locales.main import get_localization
 
 chat_gpt_router = Router()
@@ -28,6 +30,52 @@ PRICE_GPT3_INPUT = 0.000001
 PRICE_GPT3_OUTPUT = 0.000002
 PRICE_GPT4_INPUT = 0.00001
 PRICE_GPT4_OUTPUT = 0.00003
+
+
+@chat_gpt_router.message(Command("chatgpt3"))
+async def chatgpt3(message: Message, state: FSMContext):
+    await state.clear()
+
+    user = await get_user(str(message.from_user.id))
+
+    reply_markup = await build_recommendations_keyboard(user)
+    if user.current_model == Model.GPT3:
+        await message.answer(
+            text=get_localization(user.language_code).ALREADY_SWITCHED_TO_THIS_MODEL,
+            reply_markup=reply_markup,
+        )
+    else:
+        await update_user(user.id, {
+            "current_model": Model.GPT3,
+        })
+
+        await message.answer(
+            text=get_localization(user.language_code).SWITCHED_TO_CHATGPT3,
+            reply_markup=reply_markup,
+        )
+
+
+@chat_gpt_router.message(Command("chatgpt4"))
+async def chatgpt4(message: Message, state: FSMContext):
+    await state.clear()
+
+    user = await get_user(str(message.from_user.id))
+
+    reply_markup = await build_recommendations_keyboard(user)
+    if user.current_model == Model.GPT4:
+        await message.answer(
+            text=get_localization(user.language_code).ALREADY_SWITCHED_TO_THIS_MODEL,
+            reply_markup=reply_markup,
+        )
+    else:
+        await update_user(user.id, {
+            "current_model": Model.GPT4,
+        })
+
+        await message.answer(
+            text=get_localization(user.language_code).SWITCHED_TO_CHATGPT4,
+            reply_markup=reply_markup,
+        )
 
 
 async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_quota: Quota):

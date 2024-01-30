@@ -1,5 +1,6 @@
 from aiogram import Router
 from aiogram.filters import Command
+from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup
 
 from bot.database.models.common import Quota
@@ -13,7 +14,9 @@ settings_router = Router()
 
 
 @settings_router.message(Command("settings"))
-async def settings(message: Message):
+async def settings(message: Message, state: FSMContext):
+    await state.clear()
+
     user = await get_user(str(message.from_user.id))
 
     reply_markup = build_settings_keyboard(user.language_code, user.settings)

@@ -4,7 +4,7 @@ from bot.database.models.common import Model
 from bot.locales.main import get_localization
 
 
-def build_mode_keyboard(language_code: str, model: str) -> InlineKeyboardMarkup:
+def build_mode_keyboard(language_code: str, model: Model) -> InlineKeyboardMarkup:
     buttons = [
         [
             InlineKeyboardButton(
@@ -12,7 +12,7 @@ def build_mode_keyboard(language_code: str, model: str) -> InlineKeyboardMarkup:
                 callback_data=f'mode:{Model.GPT3}'
             ),
             InlineKeyboardButton(
-                text="✉️ ChatGPT 4.0" + (" ✅" if model == Model.GPT4 else ""),
+                text="🧠 ChatGPT 4.0" + (" ✅" if model == Model.GPT4 else ""),
                 callback_data=f'mode:{Model.GPT4}'
             ),
         ],

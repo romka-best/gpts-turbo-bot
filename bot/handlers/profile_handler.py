@@ -17,7 +17,9 @@ profile_router = Router()
 
 
 @profile_router.message(Command("profile"))
-async def profile(message: Message):
+async def profile(message: Message, state: FSMContext):
+    await state.clear()
+
     telegram_user = message.from_user
 
     user_id = str(telegram_user.id)

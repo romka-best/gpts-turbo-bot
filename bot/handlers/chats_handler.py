@@ -14,6 +14,7 @@ from bot.keyboards.chats import (
     build_switch_chat_keyboard,
     build_delete_chat_keyboard,
 )
+from bot.keyboards.common import build_recommendations_keyboard
 from bot.locales.main import get_localization
 from bot.states.chats import Chats
 
@@ -34,7 +35,9 @@ async def handle_chats(message: Message, user_id: str):
 
 
 @chats_router.message(Command("chats"))
-async def chats(message: Message):
+async def chats(message: Message, state: FSMContext):
+    await state.clear()
+
     await handle_chats(message, str(message.from_user.id))
 
 
@@ -143,7 +146,11 @@ async def handle_switch_chat_selection(callback_query: CallbackQuery):
                 reply_markup=InlineKeyboardMarkup(inline_keyboard=new_keyboard)
             )
 
-            await callback_query.message.reply(text=get_localization(user.language_code).SWITCH_CHAT_SUCCESS)
+            reply_markup = await build_recommendations_keyboard(user)
+            await callback_query.message.reply(
+                text=get_localization(user.language_code).SWITCH_CHAT_SUCCESS,
+                reply_markup=reply_markup,
+            )
 
 
 @chats_router.callback_query(lambda c: c.data.startswith('delete_chat:'))

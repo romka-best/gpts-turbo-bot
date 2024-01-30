@@ -16,7 +16,8 @@ from bot.database.operations.request import get_request, update_request
 from bot.database.operations.transaction import write_transaction
 from bot.database.operations.user import get_user, update_user
 from bot.handlers.face_swap_handler import PRICE_FACE_SWAP, handle_face_swap
-from bot.helpers.send_images import send_images
+from bot.helpers.send_images import send_image
+from bot.keyboards.face_swap import build_face_swap_reaction_keyboard
 
 
 async def handle_replicate_webhook(bot: Bot, dp: Dispatcher, prediction: dict):
@@ -37,23 +38,32 @@ async def handle_replicate_webhook(bot: Bot, dp: Dispatcher, prediction: dict):
         })
         logging.error(f"Error in replicate_webhook: {prediction.get('logs')}")
     else:
+        generation.status = GenerationStatus.FINISHED
+        generation.result = generation_result
+        generation.seconds = seconds
         await update_generation(generation.id, {
-            "status": GenerationStatus.FINISHED,
-            "result": generation_result,
-            "seconds": seconds,
+            "status": generation.status,
+            "result": generation.result,
+            "seconds": generation.seconds,
         })
 
     await firebase.counter.increment_counter(firebase.db.collection('requests').document(generation.request_id))
     executed = await firebase.counter.get_count(firebase.db.collection('requests').document(generation.request_id))
     request = await get_request(generation.request_id)
+    user = await get_user(request.user_id)
+
+    if request.model == Model.FACE_SWAP:
+        reply_markup = build_face_swap_reaction_keyboard(
+            user.language_code,
+            generation.id,
+        )
+        await send_image(bot, user.telegram_chat_id, generation.result, reply_markup)
 
     if executed == request.requested and request.status != RequestStatus.FINISHED:
         request.status = RequestStatus.FINISHED
         await update_request(request.id, {
             "status": request.status
         })
-
-        user = await get_user(request.user_id)
 
         request_generations = await get_generations_by_request_id(request.id)
         success_generations = []
@@ -122,7 +132,6 @@ async def handle_replicate_webhook(bot: Bot, dp: Dispatcher, prediction: dict):
                     })
                 ]
 
-            await send_images(bot, user.telegram_chat_id, success_generations)
             await asyncio.gather(*update_tasks)
 
             state = FSMContext(

@@ -9,7 +9,6 @@ import replicate
 from bot.config import config
 
 os.environ["REPLICATE_API_TOKEN"] = config.REPLICATE_API_TOKEN.get_secret_value()
-FACE_SWAP_MODEL_REF = "yan-ops/face_swap:d5900f9ebed33e7ae08a07f17e0d98b4ebc68ab9528a70462afc3899cfe23bab"
 WEBHOOK_REPLICATE_URL = config.WEBHOOK_URL + config.WEBHOOK_REPLICATE_PATH
 
 
@@ -40,4 +39,4 @@ async def create_face_swap_image(target_image: str, source_image: str) -> Option
         return prediction.id
     except Exception as e:
         error_trace = traceback.format_exc()
-        logging.error(f'Произошла ошибка при обращении к ReplicateAPI: {e}\n{error_trace}')
+        logging.error(f'Error in create_face_swap_image: {e}\n{error_trace}')

@@ -55,3 +55,11 @@ class Generation:
 
     def to_dict(self):
         return vars(self)
+
+    @staticmethod
+    def get_reaction_emojis():
+        return {
+            GenerationReaction.NONE: '',
+            GenerationReaction.LIKED: '👍',
+            GenerationReaction.DISLIKED: '👎',
+        }

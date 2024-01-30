@@ -1,21 +1,46 @@
 import openai
 from aiogram import Router
+from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 from telegram import constants
 
-from bot.database.models.common import Quota, Currency
+from bot.database.models.common import Quota, Currency, Model
 from bot.database.models.transaction import TransactionType, ServiceType
 from bot.database.models.user import UserSettings, User
 from bot.database.operations.transaction import write_transaction
-from bot.database.operations.user import update_user
+from bot.database.operations.user import update_user, get_user
 from bot.helpers.send_message_to_admins import send_message_to_admins
 from bot.integrations.openAI import get_response_image
+from bot.keyboards.common import build_recommendations_keyboard
 from bot.locales.main import get_localization
 
 dalle_router = Router()
 
 PRICE_DALLE3 = 0.040
+
+
+@dalle_router.message(Command("dalle3"))
+async def dalle3(message: Message, state: FSMContext):
+    await state.clear()
+
+    user = await get_user(str(message.from_user.id))
+
+    reply_markup = await build_recommendations_keyboard(user)
+    if user.current_model == Model.DALLE3:
+        await message.answer(
+            text=get_localization(user.language_code).ALREADY_SWITCHED_TO_THIS_MODEL,
+            reply_markup=reply_markup,
+        )
+    else:
+        await update_user(user.id, {
+            "current_model": Model.DALLE3,
+        })
+
+        await message.answer(
+            text=get_localization(user.language_code).SWITCHED_TO_DALLE3,
+            reply_markup=reply_markup,
+        )
 
 
 async def handle_dalle(message: Message, state: FSMContext, user: User, user_quota: Quota):

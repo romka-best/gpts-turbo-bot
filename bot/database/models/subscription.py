@@ -29,26 +29,26 @@ class SubscriptionLimit:
         SubscriptionType.FREE: {
             Quota.GPT3: 100,
             Quota.GPT4: 0,
-            Quota.DALLE3: 0,
-            Quota.FACE_SWAP: 0,
-        },
-        SubscriptionType.STANDARD: {
-            Quota.GPT3: 300,
-            Quota.GPT4: 10,
             Quota.DALLE3: 10,
             Quota.FACE_SWAP: 20,
         },
-        SubscriptionType.VIP: {
+        SubscriptionType.STANDARD: {
             Quota.GPT3: 1000,
-            Quota.GPT4: 50,
-            Quota.DALLE3: 20,
-            Quota.FACE_SWAP: 50,
-        },
-        SubscriptionType.PLATINUM: {
-            Quota.GPT3: 2000,
             Quota.GPT4: 100,
             Quota.DALLE3: 50,
             Quota.FACE_SWAP: 100,
+        },
+        SubscriptionType.VIP: {
+            Quota.GPT3: 2000,
+            Quota.GPT4: 200,
+            Quota.DALLE3: 100,
+            Quota.FACE_SWAP: 200,
+        },
+        SubscriptionType.PLATINUM: {
+            Quota.GPT3: 3000,
+            Quota.GPT4: 300,
+            Quota.DALLE3: 200,
+            Quota.FACE_SWAP: 400,
         }
     }
     ADDITIONAL_QUOTA_LIMITS = {
@@ -59,19 +59,19 @@ class SubscriptionLimit:
             Quota.VOICE_MESSAGES: False,
         },
         SubscriptionType.STANDARD: {
-            Quota.ADDITIONAL_CHATS: 1,
-            Quota.ACCESS_TO_CATALOG: True,
-            Quota.FAST_MESSAGES: True,
-            Quota.VOICE_MESSAGES: True,
-        },
-        SubscriptionType.VIP: {
             Quota.ADDITIONAL_CHATS: 5,
             Quota.ACCESS_TO_CATALOG: True,
             Quota.FAST_MESSAGES: True,
             Quota.VOICE_MESSAGES: True,
         },
-        SubscriptionType.PLATINUM: {
+        SubscriptionType.VIP: {
             Quota.ADDITIONAL_CHATS: 10,
+            Quota.ACCESS_TO_CATALOG: True,
+            Quota.FAST_MESSAGES: True,
+            Quota.VOICE_MESSAGES: True,
+        },
+        SubscriptionType.PLATINUM: {
+            Quota.ADDITIONAL_CHATS: 20,
             Quota.ACCESS_TO_CATALOG: True,
             Quota.FAST_MESSAGES: True,
             Quota.VOICE_MESSAGES: True,
@@ -173,7 +173,7 @@ class Subscription:
         price_discount = {
             SubscriptionPeriod.MONTH1: 0,
             SubscriptionPeriod.MONTHS3: 5,
-            SubscriptionPeriod.MONTHS6: 10
+            SubscriptionPeriod.MONTHS6: 10,
         }
         price_period = {
             SubscriptionPeriod.MONTH1: 1,
