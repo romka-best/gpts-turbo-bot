@@ -3,7 +3,7 @@ import os
 from contextlib import asynccontextmanager
 
 import uvicorn
-from aiogram.exceptions import TelegramForbiddenError
+from aiogram.exceptions import TelegramForbiddenError, TelegramBadRequest
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 from aiogram import Bot, Dispatcher, types
@@ -97,6 +97,13 @@ async def bot_webhook(update: dict):
             await update_user(user_id, {
                 "is_blocked": True
             })
+    except TelegramBadRequest as e:
+        if e.message == "Bad Request: message can't be deleted for everyone":
+            logging.info(e)
+        elif e.message == "Bad Request: message to reply not found":
+            logging.warning(e)
+        else:
+            raise e
     except Exception as e:
         logging.exception(f"Error in bot_webhook: {e}")
 

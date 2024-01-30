@@ -51,6 +51,7 @@ async def handle_mode_selection(callback_query: CallbackQuery, state: FSMContext
             new_row.append(InlineKeyboardButton(text=text, callback_data=button.callback_data))
         new_keyboard.append(new_row)
 
+    user.current_model = chosen_model
     reply_markup = await build_recommendations_keyboard(user)
     if keyboard_changed:
         await update_user(user.id, {
