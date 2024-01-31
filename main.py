@@ -35,7 +35,6 @@ from bot.helpers.handle_replicate_webhook import handle_replicate_webhook
 from bot.helpers.notify_admins_about_error import notify_admins_about_error
 from bot.helpers.send_message_to_admins import send_message_to_admins
 from bot.helpers.update_daily_limits import update_monthly_limits
-from bot.utils.migration_user_settings import migration_users_settings
 
 WEBHOOK_BOT_PATH = f"/bot/{config.BOT_TOKEN.get_secret_value()}"
 WEBHOOK_REPLICATE_PATH = config.WEBHOOK_REPLICATE_PATH
@@ -75,7 +74,6 @@ async def lifespan(_: FastAPI):
     )
 
     await firebase.init()
-    await migration_users_settings(bot)
     yield
     await bot.session.close()
     await storage.close()
