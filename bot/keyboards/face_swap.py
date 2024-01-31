@@ -59,12 +59,6 @@ def build_face_swap_reaction_keyboard(language_code: str, generation_id: str) ->
                 callback_data=f'face_swap_reaction:{GenerationReaction.DISLIKED}:{generation_id}'
             ),
         ],
-        [
-            InlineKeyboardButton(
-                text=get_localization(language_code).CLOSE,
-                callback_data='face_swap_reaction:close'
-            )
-        ]
     ]
 
     return InlineKeyboardMarkup(inline_keyboard=buttons)

@@ -27,17 +27,19 @@ async def dalle3(message: Message, state: FSMContext):
 
     user = await get_user(str(message.from_user.id))
 
-    reply_markup = await build_recommendations_keyboard(user)
     if user.current_model == Model.DALLE3:
+        reply_markup = await build_recommendations_keyboard(user)
         await message.answer(
             text=get_localization(user.language_code).ALREADY_SWITCHED_TO_THIS_MODEL,
             reply_markup=reply_markup,
         )
     else:
+        user.current_model = Model.DALLE3
         await update_user(user.id, {
-            "current_model": Model.DALLE3,
+            "current_model": user.current_model,
         })
 
+        reply_markup = await build_recommendations_keyboard(user)
         await message.answer(
             text=get_localization(user.language_code).SWITCHED_TO_DALLE3,
             reply_markup=reply_markup,

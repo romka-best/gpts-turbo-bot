@@ -14,7 +14,6 @@ from aiogram.types import (
     InlineKeyboardMarkup,
 )
 from aiogram.utils.chat_action import ChatActionSender
-from telegram import constants
 
 from bot.database.main import firebase
 from bot.database.models.common import Quota, Model
@@ -80,17 +79,19 @@ async def face_swap(message: Message, state: FSMContext):
 
     user = await get_user(str(message.from_user.id))
 
-    reply_markup = await build_recommendations_keyboard(user)
     if user.current_model == Model.FACE_SWAP:
+        reply_markup = await build_recommendations_keyboard(user)
         await message.answer(
             text=get_localization(user.language_code).ALREADY_SWITCHED_TO_THIS_MODEL,
             reply_markup=reply_markup,
         )
     else:
+        user.current_model = Model.FACE_SWAP
         await update_user(user.id, {
-            "current_model": Model.FACE_SWAP,
+            "current_model": user.current_model,
         })
 
+        reply_markup = await build_recommendations_keyboard(user)
         await message.answer(
             text=get_localization(user.language_code).SWITCHED_TO_FACE_SWAP,
             reply_markup=reply_markup,
@@ -131,7 +132,7 @@ async def handle_face_swap(bot: Bot, chat_id: str, state: FSMContext, user_id: s
                 chosen_package = next(
                     (
                         face_swap_package for face_swap_package in face_swap_packages if
-                        face_swap_package.translated_names.get(user.language_code, chosen_package)
+                        face_swap_package.translated_names.get(user.language_code) == chosen_package
                     ),
                     None,
                 ) if chosen_package else None
@@ -338,7 +339,6 @@ async def face_swap_quantity_handler(message: Message, state: FSMContext, user_i
                         "face_swap_package_name": face_swap_package.name,
                     },
                 )
-                await firebase.counter.init_counter(firebase.db.collection("requests").document(request.id))
 
                 results, random_names = await generate_face_swap_images(quantity,
                                                                         user.gender.lower(),
@@ -564,10 +564,12 @@ async def handle_face_swap_manage_edit_choose_package_selection(callback_query: 
     await state.update_data(package_name=package_name)
 
 
-async def show_picture(file: Dict, language_code: str, face_swap_package: FaceSwapPackage,
+async def show_picture(file: Dict,
+                       language_code: str,
+                       face_swap_package: FaceSwapPackage,
                        callback_query: CallbackQuery):
+    file_name, file_status = file.get('name'), file.get('status')
     try:
-        file_name, file_status = file.get('name'), file.get('status')
         reply_markup = build_manage_face_swap_edit_picture_keyboard(language_code, file_name)
 
         photo_path = f'face_swap/{face_swap_package.gender.lower()}/{face_swap_package.name.lower()}/{file_name}'
@@ -627,10 +629,24 @@ async def handle_face_swap_manage_edit_selection(callback_query: CallbackQuery, 
         elif action == 'add_new_picture':
             reply_markup = build_cancel_keyboard(user.language_code)
             await callback_query.message.edit_text(
-                text=get_localization(user.language_code).FACE_SWAP_MANAGE_ADD_NEW_PICTURE,
+                text=get_localization(user.language_code).FACE_SWAP_MANAGE_ADD_NEW_PICTURE_NAME,
                 reply_markup=reply_markup,
             )
-            await state.set_state(FaceSwap.waiting_for_face_swap_picture)
+            await state.set_state(FaceSwap.waiting_for_face_swap_picture_name)
+
+
+@face_swap_router.message(FaceSwap.waiting_for_face_swap_picture_name, ~F.text.startswith('/'))
+async def face_swap_manage_picture_name_sent(message: Message, state: FSMContext):
+    user = await get_user(str(message.from_user.id))
+
+    reply_markup = build_cancel_keyboard(user.language_code)
+    await message.answer(
+        text=get_localization(user.language_code).FACE_SWAP_MANAGE_ADD_NEW_PICTURE_IMAGE,
+        reply_markup=reply_markup,
+    )
+
+    await state.update_data(face_swap_picture_name=message.text.title())
+    await state.set_state(FaceSwap.waiting_for_face_swap_picture_image)
 
 
 @face_swap_router.callback_query(lambda c: c.data.startswith('fsm_edit_package_change_status:'))
@@ -719,7 +735,6 @@ async def handle_face_swap_manage_edit_picture_selection(callback_query: Callbac
                     "face_swap_package_name": face_swap_package.name,
                 },
             )
-            await firebase.counter.init_counter(firebase.db.collection("requests").document(request.id))
 
             face_swap_response = await create_face_swap_image(image_link, user_photo_link)
             await write_generation(

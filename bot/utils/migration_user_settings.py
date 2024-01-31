@@ -15,6 +15,7 @@ async def migration_users_settings(bot: Bot):
         logging.info("START_MIGRATION_USER_SETTINGS")
 
         all_users = await get_users()
+        need_notify = False
         for i in range(0, len(all_users), config.USER_BATCH_SIZE):
             batch = firebase.db.batch()
             user_batch = all_users[i:i + config.USER_BATCH_SIZE]
@@ -29,18 +30,27 @@ async def migration_users_settings(bot: Bot):
                     await update_user(user.id, {
                         "settings": {
                             Model.GPT3: {
-                                UserSettings.SHOW_THE_NAME_OF_THE_CHATS: user.settings.get('show_name_of_the_chat', True),
+                                UserSettings.SHOW_THE_NAME_OF_THE_CHATS: user.settings.get(
+                                    'show_name_of_the_chat',
+                                    True,
+                                ),
                                 UserSettings.SHOW_THE_NAME_OF_THE_ROLES: False,
                                 UserSettings.SHOW_USAGE_QUOTA: user.settings.get(UserSettings.SHOW_USAGE_QUOTA, True),
-                                UserSettings.TURN_ON_VOICE_MESSAGES: user.settings.get(UserSettings.TURN_ON_VOICE_MESSAGES,
-                                                                                       False),
+                                UserSettings.TURN_ON_VOICE_MESSAGES: user.settings.get(
+                                    UserSettings.TURN_ON_VOICE_MESSAGES,
+                                    False),
                             },
                             Model.GPT4: {
-                                UserSettings.SHOW_THE_NAME_OF_THE_CHATS: user.settings.get('show_name_of_the_chat', True),
+                                UserSettings.SHOW_THE_NAME_OF_THE_CHATS: user.settings.get(
+                                    'show_name_of_the_chat',
+                                    True,
+                                ),
                                 UserSettings.SHOW_THE_NAME_OF_THE_ROLES: False,
                                 UserSettings.SHOW_USAGE_QUOTA: user.settings.get(UserSettings.SHOW_USAGE_QUOTA, True),
-                                UserSettings.TURN_ON_VOICE_MESSAGES: user.settings.get(UserSettings.TURN_ON_VOICE_MESSAGES,
-                                                                                       False),
+                                UserSettings.TURN_ON_VOICE_MESSAGES: user.settings.get(
+                                    UserSettings.TURN_ON_VOICE_MESSAGES,
+                                    False,
+                                ),
                             },
                             Model.DALLE3: {
                                 UserSettings.SHOW_USAGE_QUOTA: user.settings.get(UserSettings.SHOW_USAGE_QUOTA, True),
@@ -50,9 +60,11 @@ async def migration_users_settings(bot: Bot):
                             },
                         }
                     })
+                    need_notify = True
 
             await batch.commit()
-        await send_message_to_admins(bot, "<b>The database migration was successful!</b> 🎉")
+        if need_notify:
+            await send_message_to_admins(bot, "<b>The database migration was successful!</b> 🎉")
     except Exception:
         await send_message_to_admins(bot, "<b>The database migration was not successful!</b> 🚨")
     finally:

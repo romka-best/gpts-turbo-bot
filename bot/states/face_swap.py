@@ -7,4 +7,5 @@ class FaceSwap(StatesGroup):
     # Admin
     waiting_for_face_swap_system_package_name = State()
     waiting_for_face_swap_package_name = State()
-    waiting_for_face_swap_picture = State()
+    waiting_for_face_swap_picture_name = State()
+    waiting_for_face_swap_picture_image = State()

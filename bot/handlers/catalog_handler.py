@@ -43,7 +43,7 @@ async def handle_catalog_selection(callback_query: CallbackQuery):
     await callback_query.answer()
 
     role_name = callback_query.data.split(':')[1]
-    role_photo_path = f'roles/{role_name.lower()}.jpeg'
+    role_photo_path = f'roles/{role_name}.png'
     role_photo = await firebase.bucket.get_blob(role_photo_path)
     role_photo_link = firebase.get_public_url(role_photo.name)
 
@@ -128,7 +128,7 @@ async def handle_catalog_manage_selection(callback_query: CallbackQuery, state: 
         await state.set_state(Catalog.waiting_for_system_role_name)
     else:
         role = await get_role(action)
-        role_photo_path = f'roles/{role.name.lower()}.jpeg'
+        role_photo_path = f'roles/{role.name}.png'
         role_photo = await firebase.bucket.get_blob(role_photo_path)
         role_photo_link = firebase.get_public_url(role_photo.name)
 

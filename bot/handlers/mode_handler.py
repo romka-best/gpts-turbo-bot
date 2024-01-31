@@ -59,7 +59,7 @@ async def handle_mode_selection(callback_query: CallbackQuery, state: FSMContext
         })
         await callback_query.message.edit_reply_markup(reply_markup=InlineKeyboardMarkup(inline_keyboard=new_keyboard))
 
-        await callback_query.message.answer(
+        await callback_query.message.reply(
             text=get_localization(user.language_code).switched(user.current_model),
             reply_markup=reply_markup,
         )

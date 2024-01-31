@@ -5,7 +5,6 @@ from aiogram import Bot, Dispatcher
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.storage.base import StorageKey
 
-from bot.database.main import firebase
 from bot.database.models.common import Model, Currency, Quota
 from bot.database.models.generation import GenerationStatus
 from bot.database.models.request import RequestStatus
@@ -47,10 +46,9 @@ async def handle_replicate_webhook(bot: Bot, dp: Dispatcher, prediction: dict):
             "seconds": generation.seconds,
         })
 
-    await firebase.counter.increment_counter(firebase.db.collection('requests').document(generation.request_id))
-    executed = await firebase.counter.get_count(firebase.db.collection('requests').document(generation.request_id))
     request = await get_request(generation.request_id)
     user = await get_user(request.user_id)
+    current_count = await dp.storage.redis.incr(request.id)
 
     if request.model == Model.FACE_SWAP:
         reply_markup = build_face_swap_reaction_keyboard(
@@ -59,7 +57,7 @@ async def handle_replicate_webhook(bot: Bot, dp: Dispatcher, prediction: dict):
         )
         await send_image(bot, user.telegram_chat_id, generation.result, reply_markup)
 
-    if executed == request.requested and request.status != RequestStatus.FINISHED:
+    if current_count == request.requested and request.status != RequestStatus.FINISHED:
         request.status = RequestStatus.FINISHED
         await update_request(request.id, {
             "status": request.status
@@ -145,4 +143,4 @@ async def handle_replicate_webhook(bot: Bot, dp: Dispatcher, prediction: dict):
 
             await bot.delete_message(user.telegram_chat_id, request.message_id)
 
-        return True
+    return True

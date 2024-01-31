@@ -39,17 +39,19 @@ async def chatgpt3(message: Message, state: FSMContext):
 
     user = await get_user(str(message.from_user.id))
 
-    reply_markup = await build_recommendations_keyboard(user)
     if user.current_model == Model.GPT3:
+        reply_markup = await build_recommendations_keyboard(user)
         await message.answer(
             text=get_localization(user.language_code).ALREADY_SWITCHED_TO_THIS_MODEL,
             reply_markup=reply_markup,
         )
     else:
+        user.current_model = Model.GPT3
         await update_user(user.id, {
-            "current_model": Model.GPT3,
+            "current_model": user.current_model,
         })
 
+        reply_markup = await build_recommendations_keyboard(user)
         await message.answer(
             text=get_localization(user.language_code).SWITCHED_TO_CHATGPT3,
             reply_markup=reply_markup,
@@ -62,17 +64,19 @@ async def chatgpt4(message: Message, state: FSMContext):
 
     user = await get_user(str(message.from_user.id))
 
-    reply_markup = await build_recommendations_keyboard(user)
     if user.current_model == Model.GPT4:
+        reply_markup = await build_recommendations_keyboard(user)
         await message.answer(
             text=get_localization(user.language_code).ALREADY_SWITCHED_TO_THIS_MODEL,
             reply_markup=reply_markup,
         )
     else:
+        user.current_model = Model.GPT4
         await update_user(user.id, {
-            "current_model": Model.GPT4,
+            "current_model": user.current_model,
         })
 
+        reply_markup = await build_recommendations_keyboard(user)
         await message.answer(
             text=get_localization(user.language_code).SWITCHED_TO_CHATGPT4,
             reply_markup=reply_markup,
