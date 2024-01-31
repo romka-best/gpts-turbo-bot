@@ -117,7 +117,7 @@ async def handle_replicate_webhook(bot: Bot, dp: Dispatcher, prediction: dict):
                                       currency=Currency.USD,
                                       quantity=quantity_to_delete,
                                       details={
-                                          'name': request.details.get("face_swap_package_name"),
+                                          'name': request.details.get("face_swap_package_name", "CUSTOM"),
                                           'images': success_generations,
                                           'seconds': total_seconds,
                                       }),
@@ -125,10 +125,13 @@ async def handle_replicate_webhook(bot: Bot, dp: Dispatcher, prediction: dict):
                         "monthly_limits": user.monthly_limits,
                         "additional_usage_quota": user.additional_usage_quota
                     }),
-                    update_used_face_swap_package(used_face_swap_package.id, {
-                        "used_images": used_face_swap_package.used_images + used_face_swap_package_used_images,
-                    })
                 ]
+                if used_face_swap_package and used_face_swap_package_used_images:
+                    update_tasks.append(
+                        update_used_face_swap_package(used_face_swap_package.id, {
+                            "used_images": used_face_swap_package.used_images + used_face_swap_package_used_images,
+                        })
+                    )
 
             await asyncio.gather(*update_tasks)
 
@@ -139,6 +142,7 @@ async def handle_replicate_webhook(bot: Bot, dp: Dispatcher, prediction: dict):
                     user_id=int(user.id),
                     bot_id=bot.id)
             )
+            await state.clear()
             await handle_face_swap(bot, user.telegram_chat_id, state, user.id)
 
             await bot.delete_message(user.telegram_chat_id, request.message_id)
