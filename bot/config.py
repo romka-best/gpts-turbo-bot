@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     BASE_DIR: ClassVar[Path] = Path(__file__).resolve().parent.parent
 
     WEBHOOK_URL: str
+    WEBHOOK_REPLICATE_PATH: str
     REDIS_URL: str
 
     USER_BATCH_SIZE: int = 500

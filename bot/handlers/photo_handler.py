@@ -1,4 +1,3 @@
-import asyncio
 import uuid
 
 from aiogram import Router, F
@@ -6,16 +5,22 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, URLInputFile
 
 from bot.database.main import firebase
-from bot.database.models.common import Model, Quota, Currency
+from bot.database.models.common import Model, Quota
 from bot.database.models.face_swap_package import FaceSwapPackageStatus
-from bot.database.models.transaction import TransactionType, ServiceType
-from bot.database.operations.face_swap_package import get_used_face_swap_packages_by_user_id, \
-    update_used_face_swap_package, get_face_swap_package, update_face_swap_package
-from bot.database.operations.transaction import write_transaction
-from bot.database.operations.user import get_user, update_user
-from bot.handlers.face_swap_handler import handle_face_swap, PRICE_FACE_SWAP
-from bot.integrations.replicateAI import get_face_swap_image
+from bot.database.operations.face_swap_package import (
+    get_used_face_swap_packages_by_user_id,
+    update_used_face_swap_package,
+    get_face_swap_package,
+    update_face_swap_package,
+)
+from bot.database.operations.generation import write_generation
+from bot.database.operations.request import write_request
+from bot.database.operations.user import get_user
+from bot.handlers.face_swap_handler import handle_face_swap
+from bot.integrations.replicateAI import create_face_swap_image
+from bot.keyboards.catalog import build_manage_catalog_create_role_confirmation_keyboard
 from bot.locales.main import get_localization
+from bot.states.catalog import Catalog
 from bot.states.face_swap import FaceSwap
 from bot.states.profile import Profile
 
@@ -52,8 +57,8 @@ async def handle_photo(message: Message, state: FSMContext):
         await state.clear()
 
         if user.current_model == Model.FACE_SWAP:
-            await handle_face_swap(message, state, str(message.from_user.id))
-    elif current_state == FaceSwap.waiting_for_face_swap_picture.state:
+            await handle_face_swap(message.bot, str(message.chat.id), state, str(message.from_user.id))
+    elif current_state == Catalog.waiting_for_role_photo.state:
         user_data = await state.get_data()
 
         photo = message.photo[-1]
@@ -61,11 +66,36 @@ async def handle_photo(message: Message, state: FSMContext):
         photo_data_io = await message.bot.download_file(photo_file.file_path)
         photo_data = photo_data_io.read()
 
-        face_swap_package = await get_face_swap_package(user_data['face_swap_package_id'])
-        photo_name = f'{len(face_swap_package.files) + 1}_{uuid.uuid4()}.jpeg'
+        photo_name = f'{user_data["system_role_name"]}.png'
+        photo_path = f'roles/{photo_name}'
+        photo_blob = firebase.bucket.new_blob(photo_path)
+        await photo_blob.upload(photo_data)
+
+        reply_markup = build_manage_catalog_create_role_confirmation_keyboard(user.language_code)
+        await message.answer(
+            text=get_localization(user.language_code).catalog_manage_create_role_confirmation(
+                role_system_name=user_data.get('system_role_name', None),
+                role_names=user_data.get('role_names', {}),
+                role_descriptions=user_data.get('role_descriptions', {}),
+                role_instructions=user_data.get('role_instructions', {}),
+            ),
+            reply_markup=reply_markup,
+        )
+    elif current_state == FaceSwap.waiting_for_face_swap_picture_image.state:
+        user_data = await state.get_data()
+        face_swap_package_id = user_data['face_swap_package_id']
+        face_swap_picture_name = user_data['face_swap_picture_name']
+
+        photo = message.photo[-1]
+        photo_file = await message.bot.get_file(photo.file_id)
+        photo_data_io = await message.bot.download_file(photo_file.file_path)
+        photo_data = photo_data_io.read()
+
+        face_swap_package = await get_face_swap_package(face_swap_package_id)
+        photo_name = f'{len(face_swap_package.files) + 1}_{face_swap_picture_name}.jpeg'
         photo_path = f'face_swap/{user_data["gender"].lower()}/{user_data["package_name"].lower()}/{photo_name}'
-        photo_bolb = firebase.bucket.new_blob(photo_path)
-        await photo_bolb.upload(photo_data)
+        photo_blob = firebase.bucket.new_blob(photo_path)
+        await photo_blob.upload(photo_data)
         face_swap_package.files.append({
             "name": photo_name,
             "status": FaceSwapPackageStatus.PRIVATE,
@@ -85,6 +115,10 @@ async def handle_photo(message: Message, state: FSMContext):
         if quota < quantity:
             await message.answer(text=get_localization(user.language_code).face_swap_package_forbidden(quota))
         else:
+            processing_message = await message.reply(
+                text=get_localization(user.language_code).processing_request_face_swap()
+            )
+
             user_photo = await firebase.bucket.get_blob(f'users/avatars/{user.id}.jpeg')
             user_photo_link = firebase.get_public_url(user_photo.name)
             photo = message.photo[-1]
@@ -97,39 +131,18 @@ async def handle_photo(message: Message, state: FSMContext):
             await background_photo.upload(photo_data)
             background_photo_link = firebase.get_public_url(background_path)
 
-            result = await get_face_swap_image(background_photo_link, user_photo_link)
-            await message.reply_photo(
-                photo=URLInputFile(result['image'], filename=background_path),
+            result = await create_face_swap_image(background_photo_link, user_photo_link)
+            request = await write_request(
+                user_id=user.id,
+                message_id=processing_message.message_id,
+                model=Model.FACE_SWAP,
+                requested=1,
             )
-
-            user.monthly_limits[Quota.FACE_SWAP] = max(
-                user.monthly_limits[Quota.FACE_SWAP] - quantity,
-                0,
+            await write_generation(
+                id=result,
+                request_id=request.id,
+                model=Model.FACE_SWAP,
+                has_error=result is None
             )
-            user.additional_usage_quota[Quota.FACE_SWAP] = max(
-                user.additional_usage_quota[Quota.FACE_SWAP] - quantity,
-                0,
-            )
-
-            update_tasks = [
-                write_transaction(user_id=user.id,
-                                  type=TransactionType.EXPENSE,
-                                  service=ServiceType.FACE_SWAP,
-                                  amount=round(PRICE_FACE_SWAP * result['seconds'], 6),
-                                  currency=Currency.USD,
-                                  quantity=quantity,
-                                  details={
-                                      'name': 'CUSTOM',
-                                      'images': [result['image']],
-                                      'seconds': result['seconds'],
-                                  }),
-                update_user(user.id, {
-                    "monthly_limits": user.monthly_limits,
-                    "additional_usage_quota": user.additional_usage_quota
-                }),
-            ]
-            await asyncio.gather(*update_tasks)
-
-            await handle_face_swap(message, state, user.id)
 
             await state.clear()

@@ -5,7 +5,8 @@ from bot.database.models.subscription import SubscriptionType, SubscriptionLimit
 
 
 class UserSettings:
-    SHOW_NAME_OF_THE_CHAT = 'show_name_of_the_chat'
+    SHOW_THE_NAME_OF_THE_CHATS = 'show_the_name_of_the_chats'
+    SHOW_THE_NAME_OF_THE_ROLES = 'show_the_name_of_the_roles'
     SHOW_USAGE_QUOTA = 'show_usage_quota'
     TURN_ON_VOICE_MESSAGES = 'turn_on_voice_messages'
 
@@ -27,7 +28,7 @@ class User:
     gender: UserGender
     is_premium: bool
     is_blocked: bool
-    current_model: str
+    current_model: Model
     currency: Currency
     subscription_type: SubscriptionType
     last_subscription_limit_update: datetime
@@ -49,9 +50,24 @@ class User:
     }
 
     DEFAULT_SETTINGS = {
-        UserSettings.SHOW_NAME_OF_THE_CHAT: False,
-        UserSettings.SHOW_USAGE_QUOTA: True,
-        UserSettings.TURN_ON_VOICE_MESSAGES: False,
+        Model.GPT3: {
+            UserSettings.SHOW_THE_NAME_OF_THE_CHATS: False,
+            UserSettings.SHOW_THE_NAME_OF_THE_ROLES: False,
+            UserSettings.SHOW_USAGE_QUOTA: True,
+            UserSettings.TURN_ON_VOICE_MESSAGES: False,
+        },
+        Model.GPT4: {
+            UserSettings.SHOW_THE_NAME_OF_THE_CHATS: False,
+            UserSettings.SHOW_THE_NAME_OF_THE_ROLES: False,
+            UserSettings.SHOW_USAGE_QUOTA: True,
+            UserSettings.TURN_ON_VOICE_MESSAGES: False,
+        },
+        Model.DALLE3: {
+            UserSettings.SHOW_USAGE_QUOTA: True,
+        },
+        Model.FACE_SWAP: {
+            UserSettings.SHOW_USAGE_QUOTA: True,
+        },
     }
 
     def __init__(self,

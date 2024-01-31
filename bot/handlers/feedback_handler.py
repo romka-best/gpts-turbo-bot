@@ -1,4 +1,4 @@
-from aiogram import Router
+from aiogram import Router, F
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
@@ -6,7 +6,8 @@ from aiogram.types import Message, CallbackQuery
 from bot.database.operations.feedback import write_feedback
 from bot.database.operations.user import get_user
 from bot.helpers.send_message_to_admins import send_message_to_admins
-from bot.keyboards.feedback import build_feedback_keyboard
+
+from bot.keyboards.common import build_cancel_keyboard
 from bot.locales.main import get_localization
 from bot.states.feedback import Feedback
 
@@ -15,9 +16,11 @@ feedback_router = Router()
 
 @feedback_router.message(Command("feedback"))
 async def feedback(message: Message, state: FSMContext):
+    await state.clear()
+
     user = await get_user(str(message.from_user.id))
 
-    reply_markup = build_feedback_keyboard(user.language_code)
+    reply_markup = build_cancel_keyboard(user.language_code)
 
     await message.answer(text=get_localization(user.language_code).FEEDBACK,
                          reply_markup=reply_markup)
@@ -25,7 +28,7 @@ async def feedback(message: Message, state: FSMContext):
     await state.set_state(Feedback.waiting_for_feedback)
 
 
-@feedback_router.message(Feedback.waiting_for_feedback)
+@feedback_router.message(Feedback.waiting_for_feedback, ~F.text.startswith('/'))
 async def feedback_sent(message: Message, state: FSMContext):
     user = await get_user(str(message.from_user.id))
 

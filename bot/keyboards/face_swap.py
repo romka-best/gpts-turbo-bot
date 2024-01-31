@@ -3,6 +3,7 @@ from typing import List
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 from bot.database.models.face_swap_package import FaceSwapPackage, FaceSwapPackageStatus
+from bot.database.models.generation import GenerationReaction
 from bot.database.models.user import UserGender
 from bot.locales.main import get_localization
 
@@ -42,6 +43,23 @@ def build_face_swap_package_keyboard(language_code: str, quantities: List[int]) 
             )
         ],
     ])
+
+    return InlineKeyboardMarkup(inline_keyboard=buttons)
+
+
+def build_face_swap_reaction_keyboard(language_code: str, generation_id: str) -> InlineKeyboardMarkup:
+    buttons = [
+        [
+            InlineKeyboardButton(
+                text="👍",
+                callback_data=f'face_swap_reaction:{GenerationReaction.LIKED}:{generation_id}'
+            ),
+            InlineKeyboardButton(
+                text="👎",
+                callback_data=f'face_swap_reaction:{GenerationReaction.DISLIKED}:{generation_id}'
+            ),
+        ],
+    ]
 
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
@@ -90,19 +108,6 @@ def build_manage_face_swap_create_keyboard(language_code: str) -> InlineKeyboard
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
-def build_manage_face_swap_create_package_name_keyboard(language_code: str) -> InlineKeyboardMarkup:
-    buttons = [
-        [
-            InlineKeyboardButton(
-                text=get_localization(language_code).CANCEL,
-                callback_data='fsm_create_package_name:cancel'
-            )
-        ],
-    ]
-
-    return InlineKeyboardMarkup(inline_keyboard=buttons)
-
-
 def build_manage_face_swap_create_confirmation_keyboard(language_code: str) -> InlineKeyboardMarkup:
     buttons = [
         [
@@ -141,7 +146,8 @@ def build_manage_face_swap_edit_choose_gender_keyboard(language_code: str) -> In
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
-def build_manage_face_swap_edit_choose_package_keyboard(language_code: str, packages: List[FaceSwapPackage]) -> InlineKeyboardMarkup:
+def build_manage_face_swap_edit_choose_package_keyboard(language_code: str,
+                                                        packages: List[FaceSwapPackage]) -> InlineKeyboardMarkup:
     buttons = []
     for package in packages:
         buttons.append([
@@ -263,19 +269,6 @@ def build_manage_face_swap_edit_picture_change_status_keyboard(language_code: st
             InlineKeyboardButton(
                 text=get_localization(language_code).BACK,
                 callback_data='fsm_edit_picture_change_status:back'
-            )
-        ],
-    ]
-
-    return InlineKeyboardMarkup(inline_keyboard=buttons)
-
-
-def build_manage_face_swap_add_picture_keyboard(language_code: str) -> InlineKeyboardMarkup:
-    buttons = [
-        [
-            InlineKeyboardButton(
-                text=get_localization(language_code).CANCEL,
-                callback_data=f'fsm_add_picture:cancel'
             )
         ],
     ]

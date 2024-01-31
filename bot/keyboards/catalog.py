@@ -77,45 +77,6 @@ def build_manage_catalog_create_keyboard(language_code: str) -> InlineKeyboardMa
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
-def build_manage_catalog_create_role_name_keyboard(language_code: str) -> InlineKeyboardMarkup:
-    buttons = [
-        [
-            InlineKeyboardButton(
-                text=get_localization(language_code).CANCEL,
-                callback_data='catalog_manage_create_role_name:cancel'
-            )
-        ],
-    ]
-
-    return InlineKeyboardMarkup(inline_keyboard=buttons)
-
-
-def build_manage_catalog_create_role_description_keyboard(language_code: str) -> InlineKeyboardMarkup:
-    buttons = [
-        [
-            InlineKeyboardButton(
-                text=get_localization(language_code).CANCEL,
-                callback_data='catalog_manage_create_role_description:cancel'
-            )
-        ],
-    ]
-
-    return InlineKeyboardMarkup(inline_keyboard=buttons)
-
-
-def build_manage_catalog_create_role_instruction_keyboard(language_code: str) -> InlineKeyboardMarkup:
-    buttons = [
-        [
-            InlineKeyboardButton(
-                text=get_localization(language_code).CANCEL,
-                callback_data='catalog_manage_create_role_instruction:cancel'
-            )
-        ],
-    ]
-
-    return InlineKeyboardMarkup(inline_keyboard=buttons)
-
-
 def build_manage_catalog_create_role_confirmation_keyboard(language_code: str) -> InlineKeyboardMarkup:
     buttons = [
         [
@@ -157,49 +118,16 @@ def build_manage_catalog_edit_keyboard(language_code: str, system_role: str) -> 
         ],
         [
             InlineKeyboardButton(
+                text=get_localization(language_code).EDIT_ROLE_PHOTO,
+                callback_data=f'catalog_manage_edit:photo:{system_role}'
+            )
+        ],
+        [
+            InlineKeyboardButton(
                 text=get_localization(language_code).BACK,
                 callback_data='catalog_manage_edit:back'
             )
         ]
-    ]
-
-    return InlineKeyboardMarkup(inline_keyboard=buttons)
-
-
-def build_manage_catalog_edit_role_name_keyboard(language_code: str) -> InlineKeyboardMarkup:
-    buttons = [
-        [
-            InlineKeyboardButton(
-                text=get_localization(language_code).CANCEL,
-                callback_data='catalog_manage_edit_role_name:cancel'
-            )
-        ],
-    ]
-
-    return InlineKeyboardMarkup(inline_keyboard=buttons)
-
-
-def build_manage_catalog_edit_role_description_keyboard(language_code: str) -> InlineKeyboardMarkup:
-    buttons = [
-        [
-            InlineKeyboardButton(
-                text=get_localization(language_code).CANCEL,
-                callback_data='catalog_manage_edit_role_description:cancel'
-            )
-        ],
-    ]
-
-    return InlineKeyboardMarkup(inline_keyboard=buttons)
-
-
-def build_manage_catalog_edit_role_instruction_keyboard(language_code: str) -> InlineKeyboardMarkup:
-    buttons = [
-        [
-            InlineKeyboardButton(
-                text=get_localization(language_code).CANCEL,
-                callback_data='catalog_manage_edit_role_instruction:cancel'
-            )
-        ],
     ]
 
     return InlineKeyboardMarkup(inline_keyboard=buttons)
