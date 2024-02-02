@@ -14,6 +14,7 @@ from aiogram.fsm.strategy import FSMStrategy
 from bot.config import config
 from bot.database.main import firebase
 from bot.database.operations.user import update_user
+from bot.handlers.blast_handler import blast_router
 from bot.handlers.bonus_handler import bonus_router
 from bot.handlers.catalog_handler import catalog_router
 from bot.handlers.chat_gpt_handler import chat_gpt_router
@@ -65,6 +66,7 @@ async def lifespan(_: FastAPI):
         profile_router,
         promo_code_router,
         bonus_router,
+        blast_router,
         settings_router,
         statistics_router,
         chat_gpt_router,

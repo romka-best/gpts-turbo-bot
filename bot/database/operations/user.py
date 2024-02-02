@@ -82,6 +82,39 @@ async def get_users_by_referral(referred_by: str) -> List[User]:
     users_stream = firebase.db.collection("users") \
         .where("referred_by", "==", referred_by) \
         .stream()
+
+    return [
+        User(
+            id=user.to_dict().get('id'),
+            first_name=user.to_dict().get('first_name'),
+            last_name=user.to_dict().get('last_name'),
+            username=user.to_dict().get('username'),
+            current_chat_id=user.to_dict().get('current_chat_id'),
+            telegram_chat_id=user.to_dict().get('telegram_chat_id'),
+            gender=user.to_dict().get('gender', UserGender.UNSPECIFIED),
+            language_code=user.to_dict().get('language_code'),
+            is_premium=user.to_dict().get('is_premium', False),
+            is_blocked=user.to_dict().get('is_blocked', False),
+            current_model=user.to_dict().get("current_model"),
+            currency=user.to_dict().get("currency"),
+            balance=user.to_dict().get("balance", 0),
+            subscription_type=user.to_dict().get("subscription_type"),
+            last_subscription_limit_update=user.to_dict().get("last_subscription_limit_update"),
+            monthly_limits=user.to_dict().get("monthly_limits"),
+            additional_usage_quota=user.to_dict().get("additional_usage_quota"),
+            settings=user.to_dict().get("settings"),
+            referred_by=user.to_dict().get("referred_by"),
+            created_at=user.to_dict().get("created_at"),
+            edited_at=user.to_dict().get("edited_at")
+        ) async for user in users_stream
+    ]
+
+
+async def get_users_by_language_code(language_code: str) -> List[User]:
+    users_stream = firebase.db.collection("users") \
+        .where("language_code", "==", language_code) \
+        .stream()
+
     return [
         User(
             id=user.to_dict().get('id'),
