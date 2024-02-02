@@ -9,7 +9,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import (
     Message,
     CallbackQuery,
-    BufferedInputFile,
+    URLInputFile,
     InlineKeyboardButton,
     InlineKeyboardMarkup,
 )
@@ -149,12 +149,12 @@ async def handle_face_swap(bot: Bot, chat_id: str, state: FSMContext, user_id: s
         except aiohttp.ClientResponseError:
             photo_path = 'users/avatars/example.png'
             photo = await firebase.bucket.get_blob(photo_path)
-            photo_data = await photo.download()
+            photo_link = firebase.get_public_url(photo.name)
 
             reply_markup = build_cancel_keyboard(user.language_code)
             await bot.send_photo(
                 chat_id=chat_id,
-                photo=BufferedInputFile(photo_data, filename=photo_path),
+                photo=URLInputFile(photo_link, filename=photo_path),
                 caption=get_localization(user.language_code).SEND_ME_YOUR_PICTURE,
                 reply_markup=reply_markup
             )
@@ -574,10 +574,10 @@ async def show_picture(file: Dict,
 
         photo_path = f'face_swap/{face_swap_package.gender.lower()}/{face_swap_package.name.lower()}/{file_name}'
         photo = await firebase.bucket.get_blob(photo_path)
-        photo_data = await photo.download()
+        photo_link = firebase.get_public_url(photo.name)
 
         await callback_query.message.answer_photo(
-            photo=BufferedInputFile(photo_data, filename=photo_path),
+            photo=URLInputFile(photo_link, filename=photo_path),
             caption=f'<b>{file_name}</b>\n\n{file_status}',
             reply_markup=reply_markup,
         )

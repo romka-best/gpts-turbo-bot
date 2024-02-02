@@ -21,7 +21,6 @@ class Texts(Protocol):
 """
     INFO: str
 
-
     # Feedback
     FEEDBACK: str
     FEEDBACK_SUCCESS: str
@@ -40,6 +39,9 @@ class Texts(Protocol):
     # Language
     LANGUAGE: str
     CHOOSE_LANGUAGE: str
+
+    # Bonus
+    BONUS_ACTIVATED_SUCCESSFUL: str
 
     # Promo code
     PROMO_CODE_INFO: str
@@ -234,6 +236,7 @@ TODO
     FAST_ANSWERS: str
     FAST_ANSWERS_DESCRIPTION: str
     MIN_ERROR: str
+    MAX_ERROR: str
     VALUE_ERROR: str
     PACKAGE_SUCCESS: str
 
@@ -734,4 +737,13 @@ TODO
     # Settings
     @staticmethod
     def settings(model: Model) -> str:
+        raise NotImplementedError
+
+    # Bonus
+    @staticmethod
+    def bonus(user_id: str, referred_count: int, balance: float, currency: Currency) -> str:
+        raise NotImplementedError
+
+    @staticmethod
+    def referral_successful(added_to_balance: float, currency: Currency) -> str:
         raise NotImplementedError

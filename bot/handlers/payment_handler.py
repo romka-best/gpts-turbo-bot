@@ -3,11 +3,10 @@ from datetime import datetime, timezone, timedelta
 from aiogram import Router, F
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
-from aiogram.types import Message, CallbackQuery, LabeledPrice, PreCheckoutQuery, BufferedInputFile
+from aiogram.types import Message, CallbackQuery, LabeledPrice, PreCheckoutQuery, URLInputFile
 
 from bot.config import config
 from bot.database.main import firebase
-from bot.database.models.common import Model
 from bot.database.models.package import PackageStatus, PackageType, Package, PackageMinimum
 from bot.database.models.subscription import Subscription, SubscriptionStatus
 from bot.database.models.transaction import TransactionType, ServiceType
@@ -39,12 +38,12 @@ async def handle_subscribe(message: Message, user_id: str):
 
     photo_path = f'subscriptions/{user.language_code}_{user.currency}.png'
     photo = await firebase.bucket.get_blob(photo_path)
-    photo_data = await photo.download()
+    photo_link = firebase.get_public_url(photo.name)
 
     text = get_localization(user.language_code).subscribe(user.currency)
     reply_markup = build_subscriptions_keyboard(user.language_code)
 
-    await message.answer_photo(photo=BufferedInputFile(photo_data, filename=photo_path),
+    await message.answer_photo(photo=URLInputFile(photo_link, filename=photo_path),
                                caption=text,
                                reply_markup=reply_markup)
 
@@ -104,12 +103,12 @@ async def buy(message: Message, state: FSMContext):
 
     photo_path = f'packages/{user.language_code}_{user.currency}.png'
     photo = await firebase.bucket.get_blob(photo_path)
-    photo_data = await photo.download()
+    photo_link = firebase.get_public_url(photo.name)
 
     text = get_localization(user.language_code).buy()
     reply_markup = build_packages_keyboard(user.language_code)
 
-    await message.answer_photo(photo=BufferedInputFile(photo_data, filename=photo_path),
+    await message.answer_photo(photo=URLInputFile(photo_link, filename=photo_path),
                                caption=text,
                                reply_markup=reply_markup)
 

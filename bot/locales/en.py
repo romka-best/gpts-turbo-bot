@@ -48,7 +48,8 @@ I'm here to be your co-pilot on this adventure! 🚀
 🎭 /catalog - <b>Select a specialized assistant</b>: Pick a digital helper designed for your tasks.
 💬 /chats - <b>Manage context-specific chats</b>: Create, switch, or delete thematic chats.
 💳 /subscribe or /buy - <b>Learn about our subscriptions and benefits</b> or <b>choose individual packages</b>.
-🎁 /promo_code - <b>Unleash exclusive AI features</b> and special offers with your <b>promo code</b>.
+🎁 /bonus - Learn about your bonus balance, invite friends, and <b>exchange bonuses for unique generation packages</b>.
+🔑 /promo_code - <b>Unleash exclusive AI features</b> and special offers with your <b>promo code</b>.
 📡 /feedback - <b>Leave feedback</b>: Help me improve.
 
 Just type away or use a command to begin your AI journey! 🌟
@@ -148,11 +149,20 @@ Once you've got the perfect shot, upload your photo and let the magic happen �
     LANGUAGE = "Language:"
     CHOOSE_LANGUAGE = "Selected language: English 🇺🇸"
 
+    # Bonus
+    BONUS_ACTIVATED_SUCCESSFUL = """
+🌟 <b>Bonus activated!</b> 🌟
+
+Congratulations! You've successfully used your bonus balance. Now, you can dive deeper into the world of artificial intelligence.
+
+Start using your generations right now and discover new horizons with our neural networks! 🚀
+"""
+
     # Promo code
     PROMO_CODE_INFO = """
 🔓 <b>Unlock the world of AI wonders with your secret code!</b> 🌟
 
-If you've got a <b>promo code</b>, just type it in to reveal hidden features and special surprises 🎁
+If you've got a <b>promo code</b>, just type it in to reveal hidden features and special surprises 🔑
 
 <b>No code?</b> No problem! Simply click 'Cancel' to continue exploring the AI universe without it 🚀
 """
@@ -300,7 +310,7 @@ Keep unleashing the power of AI and remember, we're here to make your digital dr
 
 Hey there, AI enthusiast! 🌟
 Your subscription has come to an end. But don't worry, the AI journey isn't over yet! 🚀
-You can renew your magic pass with /subscribe to keep exploring the AI universe. Or, if you prefer, take a peek at /buy for some tailor-made individual packages. 🎁
+You can renew your magic pass with /subscribe to keep exploring the AI universe. Or, if you prefer, take a peek at /buy for some tailor-made individual packages 🎁
 
 The AI adventure awaits! Recharge, regroup, and let's continue this exciting journey together. 🤖✨
 """
@@ -341,6 +351,7 @@ Your chats have switched their unique roles to "Personal Assistant" as your acce
     FAST_ANSWERS = "⚡ Fast answers"
     FAST_ANSWERS_DESCRIPTION = "Quick Messages feature offers lightning-fast, accurate AI responses, ensuring you're always a step ahead in communication"
     MIN_ERROR = "Oops! It looks like the number entered is below our minimum threshold. Please enter a value that meets or exceeds the minimum required. Let's try that again! 🔄"
+    MAX_ERROR = "Oops! It looks like the number entered is higher than you can purchase. Please enter a smaller value or one corresponding to your balance. Let's try that again! 🔄"
     VALUE_ERROR = "Whoops! That doesn't seem like a number. 🤔 Could you please enter a numeric value? Let's give it another go! 🔢"
     PACKAGE_SUCCESS = """
 🎉 <b>Cha-Ching! Payment success!</b> 💳
@@ -471,6 +482,8 @@ Change model: /mode
 ✉️
 GPT-3.5 requests for month: {monthly_limits[Quota.GPT3]}/{SubscriptionLimit.LIMITS[subscription_type][Quota.GPT3]}
 Additional GPT-3.5 requests: {additional_usage_quota[Quota.GPT3]}
+
+🧠
 GPT-4.0 requests for month: {monthly_limits[Quota.GPT4]}/{SubscriptionLimit.LIMITS[subscription_type][Quota.GPT4]}
 Additional GPT-4.0 requests: {additional_usage_quota[Quota.GPT4]}
 
@@ -494,6 +507,7 @@ Send and get voice messages: {'Yes' if additional_usage_quota[Quota.VOICE_MESSAG
 ⚡
 Fast answers: {'Yes' if additional_usage_quota[Quota.FAST_MESSAGES] else 'No'}
 
+Invite friends and get bonus: /bonus
 Subscribe: /subscribe
 Buy additional requests or possibilities: /buy
 """
@@ -587,7 +601,8 @@ Hit a button and embark on an extraordinary journey with AI! It's time to redefi
         return f"""
 🚀 Fantastic!
 
-You've selected the <b>{name}</b> package.
+You've selected the <b>{name}</b> package
+
 🌟 Please <b>type in the number of {quantity}</b> you'd like to go for
 """
 
@@ -795,4 +810,39 @@ Looks like you've got only <b>{available_images} generations</b> left in your ar
     def settings(model: Model) -> str:
         return f"""
 ⚙️ <b>Settings for model:</b> <i>{model}</i> 🤖
+"""
+
+    # Bonus
+    @staticmethod
+    def bonus(user_id: str, referred_count: int, balance: float, currency: Currency) -> str:
+        if currency == Currency.USD:
+            balance = f"{Currency.SYMBOLS[currency]}{balance}"
+        else:
+            balance = f"{balance}{Currency.SYMBOLS[currency]}"
+
+        return f"""
+🎁 <b>Your bonus balance</b>
+
+👤 You've invited: {referred_count}
+💰 Current balance: {balance}
+
+🌟 Your personal referral link for invitations:
+https://t.me/GPTsTurboBot?start={user_id}
+
+Choose how to spend your earnings:
+"""
+
+    @staticmethod
+    def referral_successful(added_to_balance: float, currency: Currency) -> str:
+        if currency == Currency.USD:
+            added_to_balance = f"{Currency.SYMBOLS[currency]}{added_to_balance}"
+        else:
+            added_to_balance = f"{added_to_balance}{Currency.SYMBOLS[currency]}"
+
+        return f"""
+🌟 <b>Congratulations! Your referral magic worked!</b> 🌟
+
+Thanks to you, a new user has joined us, and as a token of our appreciation, your balance has been increased by {added_to_balance}! Use them to access exclusive features or to add more generations in the neural networks. 💸
+
+To use the bonus, enter the /bonus command and follow the instructions. Let every invitation bring you not only the joy of communication but also pleasant bonuses!
 """
