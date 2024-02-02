@@ -439,6 +439,7 @@ TODO
     def statistics(period: str,
                    count_all_users: int,
                    count_activated_users: int,
+                   count_paid_users: int,
                    count_blocked_users: int,
                    count_subscription_users: Dict,
                    count_income_transactions: Dict,
@@ -472,13 +473,14 @@ TODO
 
 👤 <b>Пользователи</b>
 1️⃣ <b>{'Всего пользователей' if period == 'всё время' else 'Новых пользователей'}:</b> {count_all_users}
-2️⃣ <b>Оплатившие хоть раз:</b> {count_activated_users}
-3️⃣ <b>Подписчики:</b>
+2️⃣ <b>Активированные:</b> {count_activated_users}
+3️⃣ <b>Оплатившие хоть раз:</b> {count_paid_users}
+4️⃣ <b>Подписчики:</b>
     - <b>{SubscriptionType.FREE}:</b> {count_subscription_users[SubscriptionType.FREE]}
     - <b>{SubscriptionType.STANDARD} {emojis[SubscriptionType.STANDARD]}:</b> {count_subscription_users[SubscriptionType.STANDARD]}
     - <b>{SubscriptionType.VIP} {emojis[SubscriptionType.VIP]}:</b> {count_subscription_users[SubscriptionType.VIP]}
     - <b>{SubscriptionType.PLATINUM} {emojis[SubscriptionType.PLATINUM]}:</b> {count_subscription_users[SubscriptionType.PLATINUM]}
-4️⃣ <b>Заблокировали бота:</b> {count_blocked_users}
+5️⃣ <b>Заблокировали бота:</b> {count_blocked_users}
 
 💰 <b>Финансы</b>
 1️⃣ <b>Транзакции:</b>

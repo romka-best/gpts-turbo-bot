@@ -6,7 +6,7 @@ from aiogram.types import Message, CallbackQuery
 from bot.database.main import firebase
 from bot.database.operations.user import get_user, update_user
 from bot.helpers.initialize_user_for_the_first_time import initialize_user_for_the_first_time
-from bot.helpers.update_daily_limits import update_user_monthly_limits
+from bot.helpers.update_monthly_limits import update_user_monthly_limits
 from bot.keyboards.common import build_recommendations_keyboard
 from bot.utils.is_admin import is_admin
 

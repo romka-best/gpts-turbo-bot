@@ -94,6 +94,7 @@ async def handle_statistics_selection(callback_query: CallbackQuery):
             count_blocked_users += 1
 
     paid_users = set()
+    activated_users = set()
     count_income_transactions = {
         ServiceType.GPT3: 0,
         ServiceType.GPT4: 0,
@@ -171,34 +172,35 @@ async def handle_statistics_selection(callback_query: CallbackQuery):
             count_expense_total_money += transaction.amount
 
             if transaction.service == ServiceType.FACE_SWAP:
-                face_swap_name = transaction.details.get('name', 'CUSTOM')
-                face_swap_images = transaction.details.get('images', [])
+                face_swap_name = transaction.details.get('name', 'UNKNOWN')
+                face_swap_images = transaction.details.get('images', ['UNKNOWN'])
                 count_face_swap_usage[face_swap_name] = count_face_swap_usage.get(
                     face_swap_name,
                     0,
                 ) + len(face_swap_images)
 
+        activated_users.add(transaction.user_id)
         count_transactions_total += 1
 
     count_all_users = len(users)
-    count_activated_users = len(paid_users)
+    count_activated_users = len(activated_users)
+    count_paid_users = len(paid_users)
     count_income_total_money = count_income_subscriptions_total_money + count_income_packages_total_money
     total_money = count_income_total_money - count_expense_total_money * 100
 
     count_chats_usage = {
         'ALL': len(chats),
     }
+    count_face_swap_usage['ALL'] = sum(count_face_swap_usage.values())
     for chat in chats:
         count_chats_usage[chat.role] = count_chats_usage.get(chat.role, 0) + 1
-
-    for face_swap_package_count in count_face_swap_usage.values():
-        count_face_swap_usage['ALL'] += face_swap_package_count
 
     await callback_query.message.answer(
         text=get_localization(user.language_code).statistics(
             period=period,
             count_all_users=count_all_users,
             count_activated_users=count_activated_users,
+            count_paid_users=count_paid_users,
             count_blocked_users=count_blocked_users,
             count_subscription_users=count_subscription_users,
             count_income_transactions=count_income_transactions,
