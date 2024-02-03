@@ -382,8 +382,8 @@ Once you're all set up, our catalog of AI wonders will be waiting for you – yo
 
     # Chats
     DEFAULT_CHAT_TITLE = "New chat"
-    SHOW_CHATS = "Show chats"
-    CREATE_CHAT = "Create a new chat"
+    SHOW_CHATS = "Show chats 👁️"
+    CREATE_CHAT = "Create a new chat 💬"
     CREATE_CHAT_FORBIDDEN = """
 🚫 Oops!
 
@@ -393,7 +393,7 @@ Head over to /subscribe or /buy to unlock the power of multiple chats. More chat
 """
     CREATE_CHAT_SUCCESS = "💬 Chat created! 🎉\n👌 Don't forget to switch to a new one using /chats"
     TYPE_CHAT_NAME = "Type your chat name"
-    SWITCH_CHAT = "Switch between chats"
+    SWITCH_CHAT = "Switch between chats 🔄"
     SWITCH_CHAT_FORBIDDEN = """
 "🔄 <b>Switching gears? Hold that thought!</b> ⚙️
 
@@ -401,8 +401,22 @@ You're currently in your one and only chat universe. It's a cozy place, but why 
 
 To hop between multiple thematic chats, just get your pass from /subscribe or /buy. Let the chat-hopping begin! 🐇
 """
-    SWITCH_CHAT_SUCCESS = "🔀 Chat successfully switched! 🎉"
-    DELETE_CHAT = "Delete a chat"
+    SWITCH_CHAT_SUCCESS = "Chat successfully switched! 🎉"
+    RESET_CHAT = "Reset chat ♻️"
+    RESET_CHAT_WARNING = """
+🧹 <b>Chat cleanup incoming!</b> 🚨
+
+You're about to erase all messages and clear the context of this chat. This action is irreversible, and all your conversations will vanish into virtual dust. Are you sure you want to proceed?
+
+✅ <b>Approve</b> - Yes, let's start with a clean slate.
+❌ <b>Cancel</b> - No, I still have more to say!
+"""
+    RESET_CHAT_SUCCESS = """
+🧹<b>Chat successfully cleared!</b> ✨
+
+Now, like a goldfish, I don't remember what was said before 🐠
+"""
+    DELETE_CHAT = "Delete a chat 🗑"
     DELETE_CHAT_FORBIDDEN = """
 🗑️ <b>Delete this chat? That's lonely talk!</b> 💬
 
@@ -620,7 +634,7 @@ Welcome to the dynamic world of AI-powered chats! Here's what you can do:
 
 📈 Total Chats: <b>{total_chats} | Chats Available to Create: {available_to_create_chats}</b>
 
-Ready to tailor your chat experience? Explore the options below and let the conversations begin! 🚀👇
+Ready to tailor your chat experience? Explore the options below and let the conversations begin! 👇
 """
 
     # Face swap

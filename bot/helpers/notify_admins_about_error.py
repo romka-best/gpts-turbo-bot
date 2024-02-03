@@ -11,8 +11,8 @@ from bot.locales.main import get_localization
 async def notify_admins_about_error(bot: Bot, telegram_update: Update, e):
     try:
         user_id = None
-        if telegram_update.callback_query and telegram_update.callback_query.message.from_user.id:
-            user_id = str(telegram_update.callback_query.message.from_user.id)
+        if telegram_update.callback_query and telegram_update.callback_query.from_user.id:
+            user_id = str(telegram_update.callback_query.from_user.id)
         elif telegram_update.message and telegram_update.message.from_user.id:
             user_id = str(telegram_update.message.from_user.id)
 

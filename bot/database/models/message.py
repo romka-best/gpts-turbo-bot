@@ -7,16 +7,25 @@ class Message:
     sender: str
     sender_id: str
     content: str
+    is_in_context: bool
     created_at: datetime
     edited_at: datetime
 
-    def __init__(self, id: str, chat_id: str, sender: str, sender_id: str, content: str, created_at=None,
+    def __init__(self,
+                 id: str,
+                 chat_id: str,
+                 sender: str,
+                 sender_id: str,
+                 content: str,
+                 is_in_context=True,
+                 created_at=None,
                  edited_at=None):
         self.id = str(id)
         self.chat_id = str(chat_id)
         self.sender = sender
         self.sender_id = str(sender_id)
         self.content = content
+        self.is_in_context = is_in_context
 
         current_time = datetime.now(timezone.utc)
         self.created_at = created_at if created_at is not None else current_time

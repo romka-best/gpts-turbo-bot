@@ -1,8 +1,10 @@
+import asyncio
 from datetime import datetime, timezone
 from typing import Optional, Dict, List
 
 from bot.database.main import firebase
 from bot.database.models.chat import Chat
+from bot.database.operations.message import get_messages_by_chat_id, update_message
 from bot.database.operations.user import get_user
 
 
@@ -71,3 +73,18 @@ async def update_chat(chat_id: str, data: Dict) -> None:
 async def delete_chat(chat_id: str) -> None:
     chat_ref = firebase.db.collection('chats').document(chat_id)
     await chat_ref.delete()
+
+
+async def reset_chat(chat_id: str) -> None:
+    chat_messages_ref = await get_messages_by_chat_id(chat_id, 0)
+    tasks = []
+    for chat_message_ref in chat_messages_ref:
+        tasks.append(
+            update_message(
+                chat_message_ref.id,
+                {
+                    "is_in_context": False,
+                }
+            )
+        )
+    await asyncio.gather(*tasks)

@@ -388,6 +388,9 @@ TODO
     DELETE_CHAT: str
     DELETE_CHAT_FORBIDDEN: str
     DELETE_CHAT_SUCCESS: str
+    RESET_CHAT: str
+    RESET_CHAT_WARNING: str
+    RESET_CHAT_SUCCESS: str
 
     # Face swap
     CHOOSE_YOUR_PACKAGE: str
