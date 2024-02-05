@@ -9,6 +9,7 @@ class PackageType:
     GPT4 = "GPT4"
     DALLE3 = "DALLE3"
     FACE_SWAP = "FACE_SWAP"
+    MUSIC_GEN = "MUSIC_GEN"
     CHAT = "CHAT"
     ACCESS_TO_CATALOG = "ACCESS_TO_CATALOG"
     VOICE_MESSAGES = "VOICE_MESSAGES"
@@ -18,8 +19,9 @@ class PackageType:
 class PackageMinimum:
     GPT3 = 100
     GPT4 = 10
-    DALLE3 = 20
-    FACE_SWAP = 10
+    DALLE3 = 10
+    FACE_SWAP = 20
+    MUSIC_GEN = 100
     CHAT = 1
     ACCESS_TO_CATALOG = 1
     VOICE_MESSAGES = 1
@@ -82,6 +84,7 @@ class Package:
             PackageType.CHAT: '',
             PackageType.DALLE3: '',
             PackageType.FACE_SWAP: '',
+            PackageType.MUSIC_GEN: '',
             PackageType.ACCESS_TO_CATALOG: '',
             PackageType.VOICE_MESSAGES: '',
             PackageType.FAST_MESSAGES: '',
@@ -91,8 +94,9 @@ class Package:
             prices[PackageType.GPT3] = '1₽'
             prices[PackageType.GPT4] = '10₽'
             prices[PackageType.CHAT] = '100₽'
-            prices[PackageType.DALLE3] = '5₽'
-            prices[PackageType.FACE_SWAP] = '10₽'
+            prices[PackageType.DALLE3] = '10₽'
+            prices[PackageType.FACE_SWAP] = '5₽'
+            prices[PackageType.MUSIC_GEN] = '1₽'
             prices[PackageType.ACCESS_TO_CATALOG] = '100₽'
             prices[PackageType.VOICE_MESSAGES] = '100₽'
             prices[PackageType.FAST_MESSAGES] = '100₽'
@@ -100,8 +104,9 @@ class Package:
             prices[PackageType.GPT3] = '0.01€'
             prices[PackageType.GPT4] = '0.1€'
             prices[PackageType.CHAT] = '1€'
-            prices[PackageType.DALLE3] = '0.05€'
-            prices[PackageType.FACE_SWAP] = '0.1€'
+            prices[PackageType.DALLE3] = '0.1€'
+            prices[PackageType.FACE_SWAP] = '0.05€'
+            prices[PackageType.MUSIC_GEN] = '0.01€'
             prices[PackageType.ACCESS_TO_CATALOG] = '1€'
             prices[PackageType.VOICE_MESSAGES] = '1€'
             prices[PackageType.FAST_MESSAGES] = '1€'
@@ -109,8 +114,9 @@ class Package:
             prices[PackageType.GPT3] = '$0.01'
             prices[PackageType.GPT4] = '$0.1'
             prices[PackageType.CHAT] = '$1'
-            prices[PackageType.DALLE3] = '$0.05'
-            prices[PackageType.FACE_SWAP] = '$0.1'
+            prices[PackageType.DALLE3] = '$0.1'
+            prices[PackageType.FACE_SWAP] = '$0.05'
+            prices[PackageType.MUSIC_GEN] = '$0.01'
             prices[PackageType.ACCESS_TO_CATALOG] = '$1'
             prices[PackageType.VOICE_MESSAGES] = '$1'
             prices[PackageType.FAST_MESSAGES] = '$1'

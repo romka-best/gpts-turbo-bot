@@ -217,6 +217,7 @@ TODO
     SWITCHED_TO_CHATGPT4: str
     SWITCHED_TO_DALLE3: str
     SWITCHED_TO_FACE_SWAP: str
+    SWITCHED_TO_MUSIC_GEN: str
     ALREADY_SWITCHED_TO_THIS_MODEL: str
     REQUEST_FORBIDDEN_ERROR: str
     ALREADY_MAKE_REQUEST: str
@@ -224,6 +225,14 @@ TODO
     CONTINUE_GENERATING: str
     REACHED_USAGE_LIMIT: str
     IMAGE_SUCCESS: str
+
+    # MusicGen
+    MUSIC_GEN_INFO: str
+    MUSIC_GEN_TYPE_SECONDS: str
+    MUSIC_GEN_MIN_ERROR: str
+    SECONDS_30: str
+    SECONDS_60: str
+    SECONDS_180: str
 
     # Settings
     SHOW_THE_NAME_OF_THE_CHATS: str
@@ -258,6 +267,8 @@ TODO
     DALLE3_REQUESTS_DESCRIPTION: str
     FACE_SWAP_REQUESTS: str
     FACE_SWAP_REQUESTS_DESCRIPTION: str
+    MUSIC_GEN_REQUESTS: str
+    MUSIC_GEN_REQUESTS_DESCRIPTION: str
     ACCESS_TO_CATALOG: str
     ACCESS_TO_CATALOG_DESCRIPTION: str
     ANSWERS_AND_REQUESTS_WITH_VOICE_MESSAGES: str
@@ -756,6 +767,11 @@ TODO
     def face_swap_package_forbidden(available_images: int) -> str:
         raise NotImplementedError
 
+    # MusicGen
+    @staticmethod
+    def music_gen_forbidden(available_seconds: int) -> str:
+        raise NotImplementedError
+
     # AI
     @staticmethod
     def switched(model: Model):
@@ -767,6 +783,10 @@ TODO
 
     @staticmethod
     def dalle_recommendations() -> List[str]:
+        raise NotImplementedError
+
+    @staticmethod
+    def music_gen_recommendations() -> List[str]:
         raise NotImplementedError
 
     @staticmethod
@@ -783,6 +803,10 @@ TODO
 
     @staticmethod
     def processing_request_face_swap() -> str:
+        raise NotImplementedError
+
+    @staticmethod
+    def processing_request_music_gen() -> str:
         raise NotImplementedError
 
     # Settings

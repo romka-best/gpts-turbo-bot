@@ -9,6 +9,7 @@ from bot.database.operations.user import get_user
 from bot.handlers.chat_gpt_handler import handle_chatgpt
 from bot.handlers.dalle_handler import handle_dalle
 from bot.handlers.face_swap_handler import handle_face_swap
+from bot.handlers.music_gen_handler import handle_music_gen
 from bot.utils.is_messages_limit_exceeded import is_messages_limit_exceeded
 from bot.utils.is_time_limit_exceeded import is_time_limit_exceeded
 
@@ -29,6 +30,8 @@ async def handle_text(message: Message, state: FSMContext):
         user_quota = Quota.DALLE3
     elif user.current_model == Model.FACE_SWAP:
         user_quota = Quota.FACE_SWAP
+    elif user.current_model == Model.MUSIC_GEN:
+        user_quota = Quota.MUSIC_GEN
     else:
         return
     need_exit = (await is_time_limit_exceeded(message, state, user, current_time) or
@@ -42,4 +45,6 @@ async def handle_text(message: Message, state: FSMContext):
     elif user_quota == Quota.DALLE3:
         await handle_dalle(message, state, user, user_quota)
     elif user_quota == Quota.FACE_SWAP:
-        await handle_face_swap(message.bot, str(message.chat.id), state, str(message.from_user.id), message.text)
+        await handle_face_swap(message.bot, str(message.chat.id), state, user.id, message.text)
+    elif user_quota == Quota.MUSIC_GEN:
+        await handle_music_gen(message.bot, str(message.chat.id), state, user.id, message.text)

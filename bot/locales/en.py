@@ -17,12 +17,14 @@ I'm your personal gateway to the world of artificial intelligence and neural net
 🧠 Explore advanced intelligence with <b>ChatGPT4.0</b>
 🎨 Create unique images with <b>DALL-E 3</b>
 😜 Try <b>Face Swap</b> to exchange faces with someone in a photo
+🎵 Compose original melodies with <b>MusicGen</b>
 
 Here's a quick guide to get started:
 ✉️ To receive a text response from <b>ChatGPT3.5</b>, simply enter your query in the chat
 🧠 To get a text response from <b>ChatGPT4.0</b>, enter the command /chatgpt4 and then just write your query in the chat
 🎨 To create an image with <b>DALL-E 3</b>, enter the command /dalle3, and then let your imagination run wild with your request
 😜 To swap faces with someone in a photo with <b>Face Swap</b>, enter the command /face_swap, then choose images from our unique packages or send your own
+🎵 To create a melody with <b>MusicGen</b>, enter the command /music_gen, and then write a description of the melody
 🔄 To switch between different neural networks, enter the command /mode, and then select the neural network depending on your creative needs
 🔍 To learn more about the capabilities of each AI model, enter the command /info
 🎭️ To choose a specialized digital assistant in <b>ChatGPT3.5</b> and <b>ChatGPT4.0</b> models, enter the command /catalog, and then select a specific digital assistant to help with your tasks
@@ -43,10 +45,11 @@ I'm here to be your co-pilot on this adventure! 🚀
 🧠 /chatgpt4 - <b>Explore ChatGPT4.0</b>: Experience advanced AI responses.
 🎨 /dalle3 - <b>Create with DALL-E 3</b>: Bring your imaginations to life with images.
 😜 /face_swap - <b>Have fun with Face Swap</b>: Change faces in photos.
+🎵 /music_gen - <b>Melodies with MusicGen</b>: Create music without copyrights.
 👤 /profile - <b>View your profile</b>: Check your subscription details or usage quota and more.
 🔧 /settings - <b>Customize your experience</b>: Tailor me to fit your needs.
 🎭 /catalog - <b>Select a specialized assistant</b>: Pick a digital helper designed for your tasks.
-💬 /chats - <b>Manage context-specific chats</b>: Create, switch, or delete thematic chats.
+💬 /chats - <b>Manage context-specific chats</b>: Create, switch, reset, or delete thematic chats.
 💳 /subscribe or /buy - <b>Learn about our subscriptions and benefits</b> or <b>choose individual packages</b>.
 🎁 /bonus - Learn about your bonus balance, invite friends, and <b>exchange bonuses for unique generation packages</b>.
 🔑 /promo_code - <b>Unleash exclusive AI features</b> and special offers with your <b>promo code</b>.
@@ -235,6 +238,13 @@ You've switched to the Face Swap model — where faces switch places as if by ma
 
 Your new face awaits! 🎉
 """
+    SWITCHED_TO_MUSIC_GEN = """
+🎵 <b>Welcome to the world of MusicGen!</b>
+
+You've switched to the MusicGen model — a marvelous world where music is born before your eyes. Create a unique melody by sharing your mood or idea for a composition. From a classical symphony to a modern beat, MusicGen will help you turn your musical dreams into reality.
+
+Let every note tell your story! 🎶
+"""
     ALREADY_SWITCHED_TO_THIS_MODEL = """
 🔄 <b>Oops, looks like everything stayed the same!</b>
 
@@ -264,6 +274,32 @@ But don't worry, you've got options:
 The adventure continues! 🚀✨
 """
     IMAGE_SUCCESS = "✨ Here's your image creation! 🎨"
+
+    # MusicGen
+    MUSIC_GEN_INFO = """
+Your musical workshop 🎹
+
+Open the door to a world where every idea of yours turns into music! With <b>MusicGen</b>, your imagination is the only limit. We're ready to transform your words and descriptions into unique melodies 🎼
+
+Tell us what kind of music you want to create. Use words to describe its style, mood, and instruments. You don't need to be a professional - just share your idea, and let's bring it to life together! 🎤
+"""
+    MUSIC_GEN_TYPE_SECONDS = """
+<b>How many seconds in your symphony?</b> ⏳
+
+Fantastic! Your melody idea is ready to come to life. Now, the exciting part: how much time do we give this musical magic to unfold in all its glory? <b>MusicGen</b> awaits your decision 🎼
+
+Write or choose the duration of your composition in seconds. Whether it's a flash of inspiration or an epic odyssey, we're ready to create! ✨
+"""
+    MUSIC_GEN_MIN_ERROR = """
+🤨 <b>Hold on there, partner!</b>
+
+Looks like you're trying to request fewer than 1 second. In the world of creativity, we need at least 1 to get the ball rolling!
+
+🌟 <b>Tip</b>: Type a number greater than 0 to start the magic. Let's unleash those creative ideas!
+"""
+    SECONDS_30 = "🔹 30 seconds"
+    SECONDS_60 = "🔹 60 seconds"
+    SECONDS_180 = "🔹 180 seconds"
 
     # Settings
     SHOW_THE_NAME_OF_THE_CHATS = "Show the name of the chats"
@@ -344,6 +380,8 @@ Your chats have switched their unique roles to "Personal Assistant" as your acce
     DALLE3_REQUESTS_DESCRIPTION = "Turn ideas into art with DALLE3 – where your imagination becomes stunning visual reality! 🎨🌈"
     FACE_SWAP_REQUESTS = "📷 Images with face replacement"
     FACE_SWAP_REQUESTS_DESCRIPTION = "Enter the playful world of Face Swap for laughs and surprises in every image! 😂🔄"
+    MUSIC_GEN_REQUESTS = "🎵 Seconds of generation of melodies"
+    MUSIC_GEN_REQUESTS_DESCRIPTION = "Discover a world where every prompt turns into a unique melody! 🎶✨"
     ACCESS_TO_CATALOG = "🎭 Access to a roles catalog"
     ACCESS_TO_CATALOG_DESCRIPTION = "Unlock a universe of specialized AI assistants with access to our exclusive catalog, where every role is tailored to fit your unique needs and tasks"
     ANSWERS_AND_REQUESTS_WITH_VOICE_MESSAGES = "🎙 Answers and requests with voice messages"
@@ -509,6 +547,10 @@ Additional DALL-E 3 images: {additional_usage_quota[Quota.DALLE3]}
 Face swap images for month: {monthly_limits[Quota.FACE_SWAP]}/{SubscriptionLimit.LIMITS[subscription_type][Quota.FACE_SWAP]}
 Additional face swap images: {additional_usage_quota[Quota.FACE_SWAP]}
 
+🎵
+Seconds for creating melodies for month: {monthly_limits[Quota.MUSIC_GEN]}/{SubscriptionLimit.LIMITS[subscription_type][Quota.MUSIC_GEN]}
+Additional seconds for creating melodies: {additional_usage_quota[Quota.MUSIC_GEN]}
+
 💬
 Additional chats: {additional_usage_quota[Quota.ADDITIONAL_CHATS]}
 
@@ -603,6 +645,9 @@ Hit a button and embark on an extraordinary journey with AI! It's time to redefi
         elif package_type == PackageType.FACE_SWAP:
             name = English.FACE_SWAP_REQUESTS
             quantity = "generations"
+        elif package_type == PackageType.MUSIC_GEN:
+            name = English.MUSIC_GEN_REQUESTS
+            quantity = "seconds"
         elif package_type == PackageType.ACCESS_TO_CATALOG:
             name = English.ACCESS_TO_CATALOG
             quantity = "months"
@@ -659,6 +704,17 @@ You've got a treasure trove of <b>{total_images} images</b> in your pack, ready 
 🔔 <b>Oops, a little hiccup!</b> 🚧
 
 Looks like you've got only <b>{available_images} generations</b> left in your arsenal.
+
+💡 <b>Pro Tip</b>: Sometimes, less is more! Try a smaller number, or give /buy and /subscribe a whirl for unlimited possibilities!
+"""
+
+    # MusicGen
+    @staticmethod
+    def music_gen_forbidden(available_seconds: int):
+        return f"""
+🔔 <b>Oops, a little hiccup!</b> 🚧
+
+Looks like you've got only <b>{available_seconds} seconds</b> left in your arsenal.
 
 💡 <b>Pro Tip</b>: Sometimes, less is more! Try a smaller number, or give /buy and /subscribe a whirl for unlimited possibilities!
 """
@@ -750,6 +806,43 @@ Looks like you've got only <b>{available_images} generations</b> left in your ar
         return texts
 
     @staticmethod
+    def music_gen_recommendations() -> List[str]:
+        texts = [
+            "A pop track with infectious melodies, tropical percussion, and cheerful rhythms, perfect for the beach 🏖",
+            "A magnificent orchestral arrangement with powerful beats, epic brass fanfares, creating a cinematic atmosphere worthy of a heroic battle 🎻",
+            "A classic reggae track with an electric guitar solo 🎸",
+            "A dynamic combination of hip-hop and orchestral elements, with sweeping strings and brass, evoking a sense of the city's live energy 🌆",
+            "Violins and synthesizers, inspiring reflections on life and the universe 🌌",
+            "An 80s electronic track with melodic synthesizers, memorable beat, and groovy bass 💾",
+            "An energetic reggaeton track with loud 808 bass, synthesizer melodies layered with Latin percussion elements, uplifting the mood 🎉",
+            "A duet of piano and cello, playing sad chamber music 🎹🎻",
+            "Smooth jazz with a saxophone solo, piano chords 🎷",
+            "An acoustic folk song for road trips: guitar, flute, choirs 🚗",
+            "A rock track with guitars, a heavy bass line, and crazy drum breaks 🎶",
+            "A horror movie soundtrack with dark melodies and unexpected sound effects, creating an atmosphere of tension 🎬👻",
+            "An energetic techno track with hard basses and a fast rhythm, ideal for the dance floor 🕺",
+            "Jazz-fusion with elements of funk, saxophone solo, and complex rhythmic patterns 🎷🎶",
+            "Calm meditative music with Eastern motifs for relaxation and peace 🧘‍✨",
+            "Rhythmic beats for gym workouts 🏋️‍♂️",
+            "A video game soundtrack with epic orchestral melodies and digital effects, giving a sense of adventure 🎮🔊",
+            "Melancholic cello for deep reflections 🎻",
+            "Cheerful music for a children's party 🎈",
+            "Classical music in a modern arrangement with electronic elements, a bridge between the past and future 🎻💫",
+            "Dubstep with powerful basses and jerky rhythms, raises adrenaline 🎛️🔊",
+            "Classical music for a candlelit dinner 🕯️",
+            "Light and airy music for yoga 🧘",
+            "An invigorating track for a morning jog 🏃‍",
+            "A romantic guitar melody for a date 👩‍❤️‍👨",
+            "Relaxing music for sleep with the sound of rain 🌧️",
+            "An inspiring soundtrack for traveling 🚗",
+            "A live jazz composition for evening relaxation 🎷",
+            "A dance hit for a party 🎉",
+            "Calm piano melodies for studying 📚",
+        ]
+
+        return texts
+
+    @staticmethod
     def wait_for_another_request(seconds: int) -> str:
         return f"Please wait for another {seconds} seconds before sending the next question ⏳"
 
@@ -817,7 +910,35 @@ Looks like you've got only <b>{available_images} generations</b> left in your ar
             "Embarking on a galactic journey of face swapping... 🌌👽"
         ]
 
-        return random.choice(texts)
+        text = random.choice(texts)
+        text += "\n\n⚠️ Generation can take up to 5 minutes"
+
+        return text
+
+    @staticmethod
+    def processing_request_music_gen():
+        texts = [
+            "Launching the music generator, hold onto your ears... 🎶👂",
+            "Mixing notes like a DJ at a party... 🎧🕺",
+            "The melody wizard is in action, get ready for magic... 🧙‍✨",
+            "Creating music that will make even robots dance... 🤖💃",
+            "The music laboratory is in action, things are heating up... 🔬🔥",
+            "Catching a wave of inspiration and turning it into sounds... 🌊🎹",
+            "Climbing to musical peaks, anticipate... 🏔️🎶",
+            "Creating something that ears have never heard before... 🌟👂",
+            "Time to dive into an ocean of harmony and rhythm... 🌊🎶",
+            "Opening the door to a world where music creates reality... 🚪🌍",
+            "Cracking the codes of composition to create something unique... 🧬🎶",
+            "Crafting melodies like a chef crafts culinary masterpieces... 🍽️🎹",
+            "Throwing a party on the keys, each note is a guest... 🎉🎹",
+            "Carving a path through the melodic labyrinth... 🌀🎵",
+            "Turning air vibrations into magical sounds... 🌬️🎼",
+        ]
+
+        text = random.choice(texts)
+        text += "\n\n⚠️ Generation can take up to 10 minutes"
+
+        return text
 
     # Settings
     @staticmethod

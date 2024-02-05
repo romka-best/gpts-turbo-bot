@@ -15,6 +15,8 @@ from bot.database.operations.transaction import write_transaction
 from bot.database.operations.user import get_user
 from bot.handlers.chat_gpt_handler import handle_chatgpt
 from bot.handlers.dalle_handler import handle_dalle
+from bot.handlers.face_swap_handler import handle_face_swap
+from bot.handlers.music_gen_handler import handle_music_gen
 from bot.integrations.openAI import get_response_speech_to_text
 from bot.locales.main import get_localization
 
@@ -70,6 +72,10 @@ async def handle_voice(message: Message, state: FSMContext):
             await handle_chatgpt(message, state, user, Quota.GPT4)
         elif user.current_model == Model.DALLE3:
             await handle_dalle(message, state, user, Quota.DALLE3)
+        elif user.current_model == Model.FACE_SWAP:
+            await handle_face_swap(message.bot, str(message.chat.id), state, user.id, text)
+        elif user.current_model == Model.MUSIC_GEN:
+            await handle_music_gen(message.bot, str(message.chat.id), state, user.id, text)
         await state.update_data(recognized_text=None)
     else:
         await message.answer(text=get_localization(user.language_code).VOICE_MESSAGES_FORBIDDEN)

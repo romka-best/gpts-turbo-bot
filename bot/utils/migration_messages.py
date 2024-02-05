@@ -24,9 +24,9 @@ async def migration_messages(bot: Bot):
             )
         await asyncio.gather(*tasks)
 
-        await send_message_to_admins(bot, "<b>The database migration was successful!</b> 🎉")
+        await send_message_to_admins(bot, "<b>The database migration with messages was successful!</b> 🎉")
     except Exception as e:
         logging.exception("Error in migration_messages", e)
-        await send_message_to_admins(bot, "<b>The database migration was not successful!</b> 🚨")
+        await send_message_to_admins(bot, "<b>The database migration with messages was not successful!</b> 🚨")
     finally:
         logging.info("END_MIGRATION_MESSAGES")

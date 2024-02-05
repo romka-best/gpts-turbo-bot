@@ -5,6 +5,8 @@ from aiogram.types import Message, CallbackQuery
 
 from bot.database.main import firebase
 from bot.database.models.common import Currency
+from bot.database.models.generation import Generation
+from bot.database.operations.generation import update_generation
 from bot.database.operations.user import get_user, update_user
 from bot.helpers.initialize_user_for_the_first_time import initialize_user_for_the_first_time
 from bot.helpers.update_monthly_limits import update_user_monthly_limits
@@ -97,6 +99,21 @@ async def info(message: Message, state: FSMContext):
     await message.answer(
         text=text,
         reply_markup=reply_markup,
+    )
+
+
+@common_router.callback_query(lambda c: c.data.startswith('reaction:'))
+async def reaction_selection(callback_query: CallbackQuery):
+    await callback_query.answer()
+
+    reaction, generation_id = callback_query.data.split(':')[1], callback_query.data.split(':')[2]
+    await update_generation(generation_id, {
+        "reaction": reaction,
+    })
+
+    await callback_query.message.edit_caption(
+        caption=Generation.get_reaction_emojis()[reaction],
+        reply_markup=None,
     )
 
 

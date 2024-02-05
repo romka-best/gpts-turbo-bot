@@ -61,6 +61,16 @@ def build_settings_keyboard(language_code: str, model: Model, settings: Dict) ->
                 ),
             ],
         ]
+    elif model == Model.MUSIC_GEN:
+        buttons = [
+            [
+                InlineKeyboardButton(
+                    text=get_localization(language_code).SHOW_USAGE_QUOTA_IN_MESSAGES + (
+                        " ✅" if settings[model][UserSettings.SHOW_USAGE_QUOTA] else " ❌"),
+                    callback_data=f'setting:{UserSettings.SHOW_USAGE_QUOTA}'
+                ),
+            ],
+        ]
 
     buttons.append([
         InlineKeyboardButton(

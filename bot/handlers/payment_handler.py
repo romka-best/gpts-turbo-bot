@@ -145,6 +145,7 @@ async def quantity_of_package_sent(message: Message, state: FSMContext):
             (package_type == PackageType.CHAT and quantity < PackageMinimum.CHAT) or
             (package_type == PackageType.DALLE3 and quantity < PackageMinimum.DALLE3) or
             (package_type == PackageType.FACE_SWAP and quantity < PackageMinimum.FACE_SWAP) or
+            (package_type == PackageType.MUSIC_GEN and quantity < PackageMinimum.MUSIC_GEN) or
             (package_type == PackageType.ACCESS_TO_CATALOG and quantity < PackageMinimum.ACCESS_TO_CATALOG) or
             (package_type == PackageType.VOICE_MESSAGES and quantity < PackageMinimum.VOICE_MESSAGES) or
             (package_type == PackageType.FAST_MESSAGES and quantity < PackageMinimum.FAST_MESSAGES)
@@ -171,6 +172,9 @@ async def quantity_of_package_sent(message: Message, state: FSMContext):
             elif package_type == PackageType.FACE_SWAP:
                 name = get_localization(user.language_code).FACE_SWAP_REQUESTS
                 description = get_localization(user.language_code).FACE_SWAP_REQUESTS_DESCRIPTION
+            elif package_type == PackageType.MUSIC_GEN:
+                name = get_localization(user.language_code).MUSIC_GEN_REQUESTS
+                description = get_localization(user.language_code).MUSIC_GEN_REQUESTS_DESCRIPTION
             elif package_type == PackageType.ACCESS_TO_CATALOG:
                 name = get_localization(user.language_code).ACCESS_TO_CATALOG
                 description = get_localization(user.language_code).ACCESS_TO_CATALOG_DESCRIPTION

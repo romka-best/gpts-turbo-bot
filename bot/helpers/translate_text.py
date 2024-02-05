@@ -18,7 +18,7 @@ async def get_translate_token() -> str:
                 return token_data.get('iamToken', '')
             else:
                 error_message = await response.text()
-                logging.error(f"Ошибка при получении IAM_TOKEN: {error_message}")
+                logging.error(f"Error trying to get IAM_TOKEN: {error_message}")
                 return ''
 
 
@@ -43,4 +43,4 @@ async def translate_text(text: str, source_language_code: str, target_language_c
                 return data['translations'][0]['text']
             else:
                 error_message = await response.text()
-                logging.error(f"Ошибка перевода: {error_message}")
+                logging.error(f"Error in translate_text: {error_message}")

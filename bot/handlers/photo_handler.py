@@ -1,8 +1,9 @@
 import uuid
 
+import aiohttp
 from aiogram import Router, F
 from aiogram.fsm.context import FSMContext
-from aiogram.types import Message
+from aiogram.types import Message, URLInputFile
 from aiogram.utils.chat_action import ChatActionSender
 
 from bot.database.main import firebase
@@ -20,6 +21,7 @@ from bot.database.operations.user import get_user
 from bot.handlers.face_swap_handler import handle_face_swap
 from bot.integrations.replicateAI import create_face_swap_image
 from bot.keyboards.catalog import build_manage_catalog_create_role_confirmation_keyboard
+from bot.keyboards.common import build_cancel_keyboard
 from bot.locales.main import get_localization
 from bot.states.catalog import Catalog
 from bot.states.face_swap import FaceSwap
@@ -121,33 +123,46 @@ async def handle_photo(message: Message, state: FSMContext):
             )
 
             async with ChatActionSender.upload_photo(bot=message.bot, chat_id=message.chat.id):
-                user_photo = await firebase.bucket.get_blob(f'users/avatars/{user.id}.jpeg')
-                user_photo_link = firebase.get_public_url(user_photo.name)
-                photo = message.photo[-1]
-                photo_file = await message.bot.get_file(photo.file_id)
-                photo_data_io = await message.bot.download_file(photo_file.file_path)
-                photo_data = photo_data_io.read()
+                try:
+                    user_photo = await firebase.bucket.get_blob(f'users/avatars/{user.id}.jpeg')
+                    user_photo_link = firebase.get_public_url(user_photo.name)
+                    photo = message.photo[-1]
+                    photo_file = await message.bot.get_file(photo.file_id)
+                    photo_data_io = await message.bot.download_file(photo_file.file_path)
+                    photo_data = photo_data_io.read()
 
-                background_path = f"users/backgrounds/{user.id}/{uuid.uuid4()}.jpeg"
-                background_photo = firebase.bucket.new_blob(background_path)
-                await background_photo.upload(photo_data)
-                background_photo_link = firebase.get_public_url(background_path)
+                    background_path = f"users/backgrounds/{user.id}/{uuid.uuid4()}.jpeg"
+                    background_photo = firebase.bucket.new_blob(background_path)
+                    await background_photo.upload(photo_data)
+                    background_photo_link = firebase.get_public_url(background_path)
 
-                result = await create_face_swap_image(background_photo_link, user_photo_link)
-                request = await write_request(
-                    user_id=user.id,
-                    message_id=processing_message.message_id,
-                    model=Model.FACE_SWAP,
-                    requested=1,
-                    details={
-                        "is_test": False,
-                    }
-                )
-                await write_generation(
-                    id=result,
-                    request_id=request.id,
-                    model=Model.FACE_SWAP,
-                    has_error=result is None
-                )
+                    result = await create_face_swap_image(background_photo_link, user_photo_link)
+                    request = await write_request(
+                        user_id=user.id,
+                        message_id=processing_message.message_id,
+                        model=Model.FACE_SWAP,
+                        requested=1,
+                        details={
+                            "is_test": False,
+                        }
+                    )
+                    await write_generation(
+                        id=result,
+                        request_id=request.id,
+                        model=Model.FACE_SWAP,
+                        has_error=result is None
+                    )
 
-                await state.clear()
+                    await state.clear()
+                except aiohttp.ClientResponseError:
+                    photo_path = 'users/avatars/example.png'
+                    photo = await firebase.bucket.get_blob(photo_path)
+                    photo_link = firebase.get_public_url(photo.name)
+
+                    reply_markup = build_cancel_keyboard(user.language_code)
+                    await message.answer_photo(
+                        photo=URLInputFile(photo_link, filename=photo_path),
+                        caption=get_localization(user.language_code).SEND_ME_YOUR_PICTURE,
+                        reply_markup=reply_markup
+                    )
+                    await state.set_state(Profile.waiting_for_photo)

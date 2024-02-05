@@ -28,6 +28,12 @@ def build_mode_keyboard(language_code: str, model: Model) -> InlineKeyboardMarku
         ],
         [
             InlineKeyboardButton(
+                text="🎵 MusicGen" + (" ✅" if model == Model.MUSIC_GEN else ""),
+                callback_data=f'mode:{Model.MUSIC_GEN}'
+            ),
+        ],
+        [
+            InlineKeyboardButton(
                 text=get_localization(language_code).CLOSE,
                 callback_data='mode:close'
             ),

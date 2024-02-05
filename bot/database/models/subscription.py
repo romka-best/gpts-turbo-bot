@@ -31,24 +31,28 @@ class SubscriptionLimit:
             Quota.GPT4: 0,
             Quota.DALLE3: 10,
             Quota.FACE_SWAP: 20,
+            Quota.MUSIC_GEN: 60,
         },
         SubscriptionType.STANDARD: {
             Quota.GPT3: 1000,
             Quota.GPT4: 100,
             Quota.DALLE3: 50,
             Quota.FACE_SWAP: 100,
+            Quota.MUSIC_GEN: 300,
         },
         SubscriptionType.VIP: {
             Quota.GPT3: 2000,
             Quota.GPT4: 200,
             Quota.DALLE3: 100,
             Quota.FACE_SWAP: 200,
+            Quota.MUSIC_GEN: 900,
         },
         SubscriptionType.PLATINUM: {
             Quota.GPT3: 3000,
             Quota.GPT4: 300,
             Quota.DALLE3: 200,
             Quota.FACE_SWAP: 400,
+            Quota.MUSIC_GEN: 1800,
         }
     }
     ADDITIONAL_QUOTA_LIMITS = {

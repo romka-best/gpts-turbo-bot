@@ -46,6 +46,7 @@ class User:
         Quota.ADDITIONAL_CHATS: 0,
         Quota.DALLE3: 0,
         Quota.FACE_SWAP: 0,
+        Quota.MUSIC_GEN: 0,
         Quota.FAST_MESSAGES: False,
         Quota.VOICE_MESSAGES: False,
         Quota.ACCESS_TO_CATALOG: False,
@@ -68,6 +69,9 @@ class User:
             UserSettings.SHOW_USAGE_QUOTA: True,
         },
         Model.FACE_SWAP: {
+            UserSettings.SHOW_USAGE_QUOTA: True,
+        },
+        Model.MUSIC_GEN: {
             UserSettings.SHOW_USAGE_QUOTA: True,
         },
     }

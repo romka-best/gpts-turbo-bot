@@ -38,6 +38,12 @@ def build_bonus_keyboard(language_code: str) -> InlineKeyboardMarkup:
         ],
         [
             InlineKeyboardButton(
+                text=get_localization(language_code).MUSIC_GEN_REQUESTS,
+                callback_data=f'bonus:{PackageType.MUSIC_GEN}'
+            ),
+        ],
+        [
+            InlineKeyboardButton(
                 text=get_localization(language_code).ACCESS_TO_CATALOG,
                 callback_data=f'bonus:{PackageType.ACCESS_TO_CATALOG}'
             ),
