@@ -46,6 +46,7 @@ async def create_music_gen_melody(prompt: str, duration: int) -> Optional[str]:
     try:
         input_parameters = {
             "model_version": "stereo-large",
+            "output_format": "mp3",
             "prompt": prompt,
             "duration": duration,
         }

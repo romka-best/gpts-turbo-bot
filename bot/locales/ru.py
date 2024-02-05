@@ -744,6 +744,8 @@ DALL-E 3 изображений на месяц: {monthly_limits[Quota.DALLE3]}/
             return Russian.SWITCHED_TO_DALLE3
         elif model == Model.FACE_SWAP:
             return Russian.SWITCHED_TO_FACE_SWAP
+        elif model == Model.MUSIC_GEN:
+            return Russian.SWITCHED_TO_MUSIC_GEN
 
     @staticmethod
     def chatgpt_recommendations() -> List[str]:

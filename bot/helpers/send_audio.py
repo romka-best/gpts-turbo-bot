@@ -3,6 +3,8 @@ import logging
 from aiogram import Bot
 from aiogram.types import URLInputFile
 
+from bot.helpers.send_message_to_admins import send_message_to_admins
+
 
 async def send_audio(bot: Bot,
                      chat_id: str,
@@ -21,3 +23,9 @@ async def send_audio(bot: Bot,
         )
     except Exception as e:
         logging.error(f'Error in send_audio: {e}')
+        await send_message_to_admins(
+            bot=bot,
+            message=f"#error\n\nALARM! Ошибка при отправке аудио у пользователя: {chat_id}\n"
+                    f"Информация:\n{e}",
+            parse_mode=None,
+        )

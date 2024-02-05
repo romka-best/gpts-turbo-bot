@@ -738,6 +738,8 @@ Looks like you've got only <b>{available_seconds} seconds</b> left in your arsen
             return English.SWITCHED_TO_DALLE3
         elif model == Model.FACE_SWAP:
             return English.SWITCHED_TO_FACE_SWAP
+        elif model == Model.MUSIC_GEN:
+            return English.SWITCHED_TO_MUSIC_GEN
 
     @staticmethod
     def chatgpt_recommendations() -> List[str]:

@@ -5,6 +5,8 @@ from typing import List
 from aiogram import Bot
 from aiogram.types import InputMediaPhoto, URLInputFile
 
+from bot.helpers.send_message_to_admins import send_message_to_admins
+
 
 async def send_image(bot: Bot, chat_id: str, image: str, reply_markup=None):
     try:
@@ -15,6 +17,12 @@ async def send_image(bot: Bot, chat_id: str, image: str, reply_markup=None):
         )
     except Exception as e:
         logging.error(f'Error in send_image: {e}')
+        await send_message_to_admins(
+            bot=bot,
+            message=f"#error\n\nALARM! Ошибка при отправке изображения у пользователя: {chat_id}\n"
+                    f"Информация:\n{e}",
+            parse_mode=None,
+        )
 
 
 async def send_images(bot: Bot, chat_id: str, images: List[str]):
@@ -33,3 +41,9 @@ async def send_images(bot: Bot, chat_id: str, images: List[str]):
                     )
                 except Exception as e:
                     logging.error(f'Error in send_images with second try: {e}')
+                    await send_message_to_admins(
+                        bot=bot,
+                        message=f"#error\n\nALARM! Ошибка при отправке изображения у пользователя: {chat_id}\n"
+                                f"Информация:\n{e}",
+                        parse_mode=None,
+                    )
