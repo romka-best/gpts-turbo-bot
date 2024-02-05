@@ -4,6 +4,7 @@ from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMar
 
 from bot.database.models.common import Model
 from bot.database.models.face_swap_package import FaceSwapPackageStatus
+from bot.database.models.generation import GenerationReaction
 from bot.database.models.user import User
 from bot.database.operations.face_swap_package import get_face_swap_packages_by_gender
 from bot.locales.main import get_localization
@@ -40,12 +41,38 @@ async def build_recommendations_keyboard(user: User) -> ReplyKeyboardMarkup:
                     )
                 ],
             )
+    elif user.current_model == Model.MUSIC_GEN:
+        recommendations = get_localization(user.language_code).music_gen_recommendations()
+        random.shuffle(recommendations)
+        for recommendation in recommendations[:4]:
+            buttons.append([
+                KeyboardButton(
+                    text=recommendation,
+                )
+            ])
 
     return ReplyKeyboardMarkup(
         keyboard=buttons,
         resize_keyboard=True,
         one_time_keyboard=True,
     )
+
+
+def build_reaction_keyboard(generation_id: str) -> InlineKeyboardMarkup:
+    buttons = [
+        [
+            InlineKeyboardButton(
+                text="👍",
+                callback_data=f'reaction:{GenerationReaction.LIKED}:{generation_id}'
+            ),
+            InlineKeyboardButton(
+                text="👎",
+                callback_data=f'reaction:{GenerationReaction.DISLIKED}:{generation_id}'
+            ),
+        ],
+    ]
+
+    return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
 def build_cancel_keyboard(language_code: str) -> InlineKeyboardMarkup:

@@ -47,23 +47,6 @@ def build_face_swap_package_keyboard(language_code: str, quantities: List[int]) 
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
-def build_face_swap_reaction_keyboard(language_code: str, generation_id: str) -> InlineKeyboardMarkup:
-    buttons = [
-        [
-            InlineKeyboardButton(
-                text="👍",
-                callback_data=f'face_swap_reaction:{GenerationReaction.LIKED}:{generation_id}'
-            ),
-            InlineKeyboardButton(
-                text="👎",
-                callback_data=f'face_swap_reaction:{GenerationReaction.DISLIKED}:{generation_id}'
-            ),
-        ],
-    ]
-
-    return InlineKeyboardMarkup(inline_keyboard=buttons)
-
-
 def build_manage_face_swap_keyboard(language_code: str) -> InlineKeyboardMarkup:
     buttons = [
         [

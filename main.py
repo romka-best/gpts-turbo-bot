@@ -14,6 +14,8 @@ from aiogram.fsm.strategy import FSMStrategy
 from bot.config import config
 from bot.database.main import firebase
 from bot.database.operations.user import update_user
+from bot.handlers.blast_handler import blast_router
+from bot.handlers.bonus_handler import bonus_router
 from bot.handlers.catalog_handler import catalog_router
 from bot.handlers.chat_gpt_handler import chat_gpt_router
 from bot.handlers.chats_handler import chats_router
@@ -23,6 +25,7 @@ from bot.handlers.face_swap_handler import face_swap_router
 from bot.handlers.feedback_handler import feedback_router
 from bot.handlers.language_handler import language_router
 from bot.handlers.mode_handler import mode_router
+from bot.handlers.music_gen_handler import music_gen_router
 from bot.handlers.payment_handler import payment_router
 from bot.handlers.photo_handler import photo_router
 from bot.handlers.profile_handler import profile_router
@@ -33,8 +36,9 @@ from bot.handlers.text_handler import text_router
 from bot.handlers.voice_handler import voice_router
 from bot.helpers.handle_replicate_webhook import handle_replicate_webhook
 from bot.helpers.notify_admins_about_error import notify_admins_about_error
+from bot.helpers.send_daily_statistics import send_daily_statistics
 from bot.helpers.send_message_to_admins import send_message_to_admins
-from bot.helpers.update_daily_limits import update_monthly_limits
+from bot.helpers.update_monthly_limits import update_monthly_limits
 
 WEBHOOK_BOT_PATH = f"/bot/{config.BOT_TOKEN.get_secret_value()}"
 WEBHOOK_REPLICATE_PATH = config.WEBHOOK_REPLICATE_PATH
@@ -63,11 +67,14 @@ async def lifespan(_: FastAPI):
         payment_router,
         profile_router,
         promo_code_router,
+        bonus_router,
+        blast_router,
         settings_router,
         statistics_router,
         chat_gpt_router,
         dalle_router,
         face_swap_router,
+        music_gen_router,
         photo_router,
         voice_router,
         text_router,
@@ -122,6 +129,7 @@ async def replicate_webhook(prediction: dict):
 @app.get("/run-daily-tasks")
 async def daily_tasks():
     await update_monthly_limits(bot)
+    await send_daily_statistics(bot)
 
     message = "Daily tasks executed successfully"
     await send_message_to_admins(bot, f'<b>{message}</b> 🎉')

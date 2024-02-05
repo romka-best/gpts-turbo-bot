@@ -5,7 +5,6 @@ from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
 from aiogram.utils.chat_action import ChatActionSender
-from telegram import constants
 from telegram.constants import ParseMode
 
 from bot.database.main import firebase

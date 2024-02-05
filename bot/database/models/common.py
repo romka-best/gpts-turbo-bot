@@ -15,6 +15,7 @@ class Model:
     GPT4 = 'gpt-4-1106-preview'
     DALLE3 = 'dall-e-3'
     FACE_SWAP = 'face-swap'
+    MUSIC_GEN = 'music-gen'
 
 
 class Quota:
@@ -22,6 +23,7 @@ class Quota:
     GPT4 = "gpt4"
     DALLE3 = "dalle3"
     FACE_SWAP = "face_swap"
+    MUSIC_GEN = "music_gen"
     ADDITIONAL_CHATS = "additional_chats"
     FAST_MESSAGES = "fast_messages"
     VOICE_MESSAGES = "voice_messages"

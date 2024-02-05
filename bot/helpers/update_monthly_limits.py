@@ -15,6 +15,7 @@ from bot.database.operations.chat import get_chats_by_user_id, update_chat
 from bot.database.operations.package import get_packages_by_user_id
 from bot.database.operations.subscription import get_last_subscription_by_user_id, update_subscription
 from bot.database.operations.user import get_users, update_user
+from bot.helpers.send_message_to_admins import send_message_to_admins
 from bot.locales.main import get_localization
 
 
@@ -45,6 +46,12 @@ async def update_user_monthly_limits(bot: Bot, user: User, batch: AsyncWriteBatc
         })
     except Exception as e:
         logging.error(f"Error updating user {user.id}: {e}")
+        await send_message_to_admins(
+            bot=bot,
+            message=f"#error\n\nALARM! Ошибка при обновления пользователя: {user.id}\n"
+                    f"Информация:\n{e}",
+            parse_mode=None,
+        )
 
 
 async def update_user_subscription(bot: Bot, user: User, batch: AsyncWriteBatch):

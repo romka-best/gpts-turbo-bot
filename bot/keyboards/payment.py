@@ -102,6 +102,12 @@ def build_packages_keyboard(language_code: str) -> InlineKeyboardMarkup:
         ],
         [
             InlineKeyboardButton(
+                text=get_localization(language_code).MUSIC_GEN_REQUESTS,
+                callback_data=f'package:{PackageType.MUSIC_GEN}'
+            ),
+        ],
+        [
+            InlineKeyboardButton(
                 text=get_localization(language_code).ACCESS_TO_CATALOG,
                 callback_data=f'package:{PackageType.ACCESS_TO_CATALOG}'
             ),

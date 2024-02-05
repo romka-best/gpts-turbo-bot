@@ -1,7 +1,7 @@
 from aiogram import Router
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
-from aiogram.types import Message, CallbackQuery, BufferedInputFile, URLInputFile
+from aiogram.types import Message, CallbackQuery, URLInputFile
 
 from bot.database.main import firebase
 from bot.database.models.common import Model
@@ -62,11 +62,11 @@ async def handle_profile_selection(callback_query: CallbackQuery, state: FSMCont
     if action == 'change_photo':
         photo_path = 'users/avatars/example.png'
         photo = await firebase.bucket.get_blob(photo_path)
-        photo_data = await photo.download()
+        photo_link = firebase.get_public_url(photo.name)
 
         reply_markup = build_cancel_keyboard(user.language_code)
         await callback_query.message.answer_photo(
-            photo=BufferedInputFile(photo_data, filename=photo_path),
+            photo=URLInputFile(photo_link, filename=photo_path),
             caption=get_localization(user.language_code).SEND_ME_YOUR_PICTURE,
             reply_markup=reply_markup
         )

@@ -3,11 +3,10 @@ from datetime import datetime, timezone, timedelta
 from aiogram import Router, F
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
-from aiogram.types import Message, CallbackQuery, LabeledPrice, PreCheckoutQuery, BufferedInputFile
+from aiogram.types import Message, CallbackQuery, LabeledPrice, PreCheckoutQuery, URLInputFile
 
 from bot.config import config
 from bot.database.main import firebase
-from bot.database.models.common import Model
 from bot.database.models.package import PackageStatus, PackageType, Package, PackageMinimum
 from bot.database.models.subscription import Subscription, SubscriptionStatus
 from bot.database.models.transaction import TransactionType, ServiceType
@@ -39,12 +38,12 @@ async def handle_subscribe(message: Message, user_id: str):
 
     photo_path = f'subscriptions/{user.language_code}_{user.currency}.png'
     photo = await firebase.bucket.get_blob(photo_path)
-    photo_data = await photo.download()
+    photo_link = firebase.get_public_url(photo.name)
 
     text = get_localization(user.language_code).subscribe(user.currency)
     reply_markup = build_subscriptions_keyboard(user.language_code)
 
-    await message.answer_photo(photo=BufferedInputFile(photo_data, filename=photo_path),
+    await message.answer_photo(photo=URLInputFile(photo_link, filename=photo_path),
                                caption=text,
                                reply_markup=reply_markup)
 
@@ -104,12 +103,12 @@ async def buy(message: Message, state: FSMContext):
 
     photo_path = f'packages/{user.language_code}_{user.currency}.png'
     photo = await firebase.bucket.get_blob(photo_path)
-    photo_data = await photo.download()
+    photo_link = firebase.get_public_url(photo.name)
 
     text = get_localization(user.language_code).buy()
     reply_markup = build_packages_keyboard(user.language_code)
 
-    await message.answer_photo(photo=BufferedInputFile(photo_data, filename=photo_path),
+    await message.answer_photo(photo=URLInputFile(photo_link, filename=photo_path),
                                caption=text,
                                reply_markup=reply_markup)
 
@@ -146,6 +145,7 @@ async def quantity_of_package_sent(message: Message, state: FSMContext):
             (package_type == PackageType.CHAT and quantity < PackageMinimum.CHAT) or
             (package_type == PackageType.DALLE3 and quantity < PackageMinimum.DALLE3) or
             (package_type == PackageType.FACE_SWAP and quantity < PackageMinimum.FACE_SWAP) or
+            (package_type == PackageType.MUSIC_GEN and quantity < PackageMinimum.MUSIC_GEN) or
             (package_type == PackageType.ACCESS_TO_CATALOG and quantity < PackageMinimum.ACCESS_TO_CATALOG) or
             (package_type == PackageType.VOICE_MESSAGES and quantity < PackageMinimum.VOICE_MESSAGES) or
             (package_type == PackageType.FAST_MESSAGES and quantity < PackageMinimum.FAST_MESSAGES)
@@ -172,6 +172,9 @@ async def quantity_of_package_sent(message: Message, state: FSMContext):
             elif package_type == PackageType.FACE_SWAP:
                 name = get_localization(user.language_code).FACE_SWAP_REQUESTS
                 description = get_localization(user.language_code).FACE_SWAP_REQUESTS_DESCRIPTION
+            elif package_type == PackageType.MUSIC_GEN:
+                name = get_localization(user.language_code).MUSIC_GEN_REQUESTS
+                description = get_localization(user.language_code).MUSIC_GEN_REQUESTS_DESCRIPTION
             elif package_type == PackageType.ACCESS_TO_CATALOG:
                 name = get_localization(user.language_code).ACCESS_TO_CATALOG
                 description = get_localization(user.language_code).ACCESS_TO_CATALOG_DESCRIPTION
@@ -283,6 +286,8 @@ async def successful_payment(message: Message):
             service_type = ServiceType.DALLE3
         elif package.type == PackageType.FACE_SWAP:
             service_type = ServiceType.FACE_SWAP
+        elif package.type == PackageType.MUSIC_GEN:
+            service_type = ServiceType.MUSIC_GEN
         elif package.type == PackageType.CHAT:
             service_type = ServiceType.ADDITIONAL_CHATS
         elif package.type == PackageType.ACCESS_TO_CATALOG:
@@ -291,16 +296,18 @@ async def successful_payment(message: Message):
             service_type = ServiceType.VOICE_MESSAGES
         elif package.type == PackageType.FAST_MESSAGES:
             service_type = ServiceType.FAST_MESSAGES
-        await write_transaction(user_id=user.id,
-                                type=TransactionType.INCOME,
-                                service=service_type,
-                                amount=package.amount,
-                                currency=package.currency,
-                                quantity=package.quantity,
-                                details={
-                                    'package_id': package.id,
-                                    'provider_payment_charge_id': payment.provider_payment_charge_id
-                                })
+        await write_transaction(
+            user_id=user.id,
+            type=TransactionType.INCOME,
+            service=service_type,
+            amount=package.amount,
+            currency=package.currency,
+            quantity=package.quantity,
+            details={
+                'package_id': package.id,
+                'provider_payment_charge_id': payment.provider_payment_charge_id
+            },
+        )
 
         await message.answer(text=get_localization(user.language_code).PACKAGE_SUCCESS)
 

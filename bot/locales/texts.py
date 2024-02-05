@@ -18,9 +18,9 @@ class Texts(Protocol):
 📸 /manage_face_swap - <b>Управление контентом в FaceSwap</b>
 🎩 /manage_catalog - <b>Управление ролями в чатах</b>
 📊 /statistics - <b>Просмотр статистики</b>
+📣 /blast - <b>Сделать рассылку</b>
 """
     INFO: str
-
 
     # Feedback
     FEEDBACK: str
@@ -40,6 +40,37 @@ class Texts(Protocol):
     # Language
     LANGUAGE: str
     CHOOSE_LANGUAGE: str
+
+    # Bonus
+    BONUS_ACTIVATED_SUCCESSFUL: str
+
+    # Blast
+    BLAST_CHOOSE_LANGUAGE = """
+📣 <b>Пора делать рассылку!</b>
+
+Выберите язык для рассылки или отправьте всем сразу:
+"""
+    BLAST_WRITE_IN_CHOSEN_LANGUAGE = """
+✍️ <b>Пора создать ваше послание!</b> 🚀
+
+Вы выбрали язык, теперь пришло время вложить душу в сообщение!
+
+Напишите текст рассылки, который затронет сердца ваших пользователей, развеселит их или даже вдохновит на новые подвиги. Помните, каждое слово – это кисть, а ваш текст – полотно, на котором вы можете нарисовать что угодно. Вперёд, наполните этот мир красками вашего воображения! 🌈✨
+"""
+    BLAST_WRITE_IN_DEFAULT_LANGUAGE = """
+🚀 <b>Время для масштабной рассылки!</b> 🌍
+
+Вы выбрали "Для всех" и это означает, что ваше сообщение достигнет каждого моего уголка, независимо от языковых предпочтений пользователей. Напишите ваше сообщение на русском, и я автоматически переведу его для всех наших пользователей. Создайте сообщение, которое вдохновит, развлечет или проинформирует - ведь оно полетит к сердцам и умам людей по всему миру.
+
+Помните, ваши слова могут изменить чей-то день к лучшему! 🌟
+"""
+    BLAST_SUCCESS = """
+🎉 <b>Рассылка успешно отправлена!</b> 💌
+
+Твоё сообщение уже в пути к пользователям, готово разбудить интерес и вызвать улыбки. Ты сделал настоящий шаг навстречу вовлечённости и общению. Поздравляем, админ-волшебник, твоё творение скоро оценят по достоинству! 🌟
+
+Спасибо, что делаешь меня ярче и интереснее каждым своим действием! ✨
+"""
 
     # Promo code
     PROMO_CODE_INFO: str
@@ -186,6 +217,7 @@ TODO
     SWITCHED_TO_CHATGPT4: str
     SWITCHED_TO_DALLE3: str
     SWITCHED_TO_FACE_SWAP: str
+    SWITCHED_TO_MUSIC_GEN: str
     ALREADY_SWITCHED_TO_THIS_MODEL: str
     REQUEST_FORBIDDEN_ERROR: str
     ALREADY_MAKE_REQUEST: str
@@ -193,6 +225,14 @@ TODO
     CONTINUE_GENERATING: str
     REACHED_USAGE_LIMIT: str
     IMAGE_SUCCESS: str
+
+    # MusicGen
+    MUSIC_GEN_INFO: str
+    MUSIC_GEN_TYPE_SECONDS: str
+    MUSIC_GEN_MIN_ERROR: str
+    SECONDS_30: str
+    SECONDS_60: str
+    SECONDS_180: str
 
     # Settings
     SHOW_THE_NAME_OF_THE_CHATS: str
@@ -227,6 +267,8 @@ TODO
     DALLE3_REQUESTS_DESCRIPTION: str
     FACE_SWAP_REQUESTS: str
     FACE_SWAP_REQUESTS_DESCRIPTION: str
+    MUSIC_GEN_REQUESTS: str
+    MUSIC_GEN_REQUESTS_DESCRIPTION: str
     ACCESS_TO_CATALOG: str
     ACCESS_TO_CATALOG_DESCRIPTION: str
     ANSWERS_AND_REQUESTS_WITH_VOICE_MESSAGES: str
@@ -234,6 +276,7 @@ TODO
     FAST_ANSWERS: str
     FAST_ANSWERS_DESCRIPTION: str
     MIN_ERROR: str
+    MAX_ERROR: str
     VALUE_ERROR: str
     PACKAGE_SUCCESS: str
 
@@ -356,6 +399,9 @@ TODO
     DELETE_CHAT: str
     DELETE_CHAT_FORBIDDEN: str
     DELETE_CHAT_SUCCESS: str
+    RESET_CHAT: str
+    RESET_CHAT_WARNING: str
+    RESET_CHAT_SUCCESS: str
 
     # Face swap
     CHOOSE_YOUR_PACKAGE: str
@@ -439,6 +485,7 @@ TODO
     def statistics(period: str,
                    count_all_users: int,
                    count_activated_users: int,
+                   count_paid_users: int,
                    count_blocked_users: int,
                    count_subscription_users: Dict,
                    count_income_transactions: Dict,
@@ -472,13 +519,14 @@ TODO
 
 👤 <b>Пользователи</b>
 1️⃣ <b>{'Всего пользователей' if period == 'всё время' else 'Новых пользователей'}:</b> {count_all_users}
-2️⃣ <b>Оплатившие хоть раз:</b> {count_activated_users}
-3️⃣ <b>Подписчики:</b>
+2️⃣ <b>Активированные:</b> {count_activated_users}
+3️⃣ <b>Оплатившие хоть раз:</b> {count_paid_users}
+4️⃣ <b>Подписчики:</b>
     - <b>{SubscriptionType.FREE}:</b> {count_subscription_users[SubscriptionType.FREE]}
     - <b>{SubscriptionType.STANDARD} {emojis[SubscriptionType.STANDARD]}:</b> {count_subscription_users[SubscriptionType.STANDARD]}
     - <b>{SubscriptionType.VIP} {emojis[SubscriptionType.VIP]}:</b> {count_subscription_users[SubscriptionType.VIP]}
     - <b>{SubscriptionType.PLATINUM} {emojis[SubscriptionType.PLATINUM]}:</b> {count_subscription_users[SubscriptionType.PLATINUM]}
-4️⃣ <b>Заблокировали бота:</b> {count_blocked_users}
+5️⃣ <b>Заблокировали бота:</b> {count_blocked_users}
 
 💰 <b>Финансы</b>
 1️⃣ <b>Транзакции:</b>
@@ -487,6 +535,7 @@ TODO
     - <b>{ServiceType.GPT4}:</b> {count_expense_transactions[ServiceType.GPT4]}
     - <b>{ServiceType.DALLE3}:</b> {count_expense_transactions[ServiceType.DALLE3]}
     - <b>{ServiceType.FACE_SWAP}:</b> {count_expense_transactions[ServiceType.FACE_SWAP]}
+    - <b>{ServiceType.MUSIC_GEN}:</b> {count_expense_transactions[ServiceType.MUSIC_GEN]}
     - <b>{ServiceType.VOICE_MESSAGES}:</b> {count_expense_transactions[ServiceType.VOICE_MESSAGES]}
     - <b>{ServiceType.SERVER}:</b> {count_expense_transactions[ServiceType.SERVER]}
     - <b>{ServiceType.DATABASE}:</b> {count_expense_transactions[ServiceType.DATABASE]}
@@ -496,6 +545,7 @@ TODO
     - <b>{ServiceType.GPT4}:</b> {count_income_transactions[ServiceType.GPT4]}
     - <b>{ServiceType.DALLE3}:</b> {count_income_transactions[ServiceType.DALLE3]}
     - <b>{ServiceType.FACE_SWAP}:</b> {count_income_transactions[ServiceType.FACE_SWAP]}
+    - <b>{ServiceType.MUSIC_GEN}:</b> {count_income_transactions[ServiceType.MUSIC_GEN]}
     - <b>{ServiceType.ADDITIONAL_CHATS}:</b> {count_income_transactions[ServiceType.ADDITIONAL_CHATS]}
     - <b>{ServiceType.ACCESS_TO_CATALOG}:</b> {count_income_transactions[ServiceType.ACCESS_TO_CATALOG]}
     - <b>{ServiceType.VOICE_MESSAGES}:</b> {count_income_transactions[ServiceType.VOICE_MESSAGES]}
@@ -511,6 +561,7 @@ TODO
    - <b>{ServiceType.GPT4}:</b> {round(count_expense_money[ServiceType.GPT4], 2)}$
    - <b>{ServiceType.DALLE3}:</b> {round(count_expense_money[ServiceType.DALLE3], 2)}$
    - <b>{ServiceType.FACE_SWAP}:</b> {round(count_expense_money[ServiceType.FACE_SWAP], 2)}$
+   - <b>{ServiceType.MUSIC_GEN}:</b> {round(count_expense_money[ServiceType.MUSIC_GEN], 2)}$
    - <b>{ServiceType.VOICE_MESSAGES}:</b> {round(count_expense_money[ServiceType.VOICE_MESSAGES], 2)}$
    - <b>{ServiceType.SERVER}:</b> {round(count_expense_money[ServiceType.SERVER])}$
    - <b>{ServiceType.DATABASE}:</b> {round(count_expense_money[ServiceType.DATABASE])}$
@@ -527,6 +578,7 @@ TODO
     - <b>{ServiceType.GPT4}:</b> {count_income_money[ServiceType.GPT4]}₽
     - <b>{ServiceType.DALLE3}:</b> {count_income_money[ServiceType.DALLE3]}₽
     - <b>{ServiceType.FACE_SWAP}:</b> {count_income_money[ServiceType.FACE_SWAP]}₽
+    - <b>{ServiceType.MUSIC_GEN}:</b> {count_income_money[ServiceType.MUSIC_GEN]}₽
     - <b>{ServiceType.ADDITIONAL_CHATS}:</b> {count_income_money[ServiceType.ADDITIONAL_CHATS]}₽
     - <b>{ServiceType.ACCESS_TO_CATALOG}:</b> {count_income_money[ServiceType.ACCESS_TO_CATALOG]}₽
     - <b>{ServiceType.VOICE_MESSAGES}:</b> {count_income_money[ServiceType.VOICE_MESSAGES]}₽
@@ -545,6 +597,25 @@ TODO
     - <b>Всего:</b> {count_face_swap_usage['ALL']}
 
 🔍 Это всё, что тебе нужно знать о текущем положении дел. Вперёд, к новым достижениям! 🚀
+"""
+
+    # Blast
+    @staticmethod
+    def blast_confirmation(
+        blast_letters: Dict,
+    ):
+        letters = ""
+        for i, (language_code, letter) in enumerate(blast_letters.items()):
+            letters += f'{language_code}:\n{letter}'
+            letters += '\n' if i < len(blast_letters.items()) - 1 else ''
+
+        return f"""
+📢 <b>Последний шаг перед великим запуском!</b> 🚀
+
+🤖 Текст рассылки:
+{letters}
+
+Если все выглядит идеально, нажмите "Подтвердить", а если нужны правки, выберите "Отменить" 🌟
 """
 
     @staticmethod
@@ -700,6 +771,11 @@ TODO
     def face_swap_package_forbidden(available_images: int) -> str:
         raise NotImplementedError
 
+    # MusicGen
+    @staticmethod
+    def music_gen_forbidden(available_seconds: int) -> str:
+        raise NotImplementedError
+
     # AI
     @staticmethod
     def switched(model: Model):
@@ -711,6 +787,10 @@ TODO
 
     @staticmethod
     def dalle_recommendations() -> List[str]:
+        raise NotImplementedError
+
+    @staticmethod
+    def music_gen_recommendations() -> List[str]:
         raise NotImplementedError
 
     @staticmethod
@@ -729,7 +809,20 @@ TODO
     def processing_request_face_swap() -> str:
         raise NotImplementedError
 
+    @staticmethod
+    def processing_request_music_gen() -> str:
+        raise NotImplementedError
+
     # Settings
     @staticmethod
     def settings(model: Model) -> str:
+        raise NotImplementedError
+
+    # Bonus
+    @staticmethod
+    def bonus(user_id: str, referred_count: int, balance: float, currency: Currency) -> str:
+        raise NotImplementedError
+
+    @staticmethod
+    def referral_successful(added_to_balance: float, currency: Currency) -> str:
         raise NotImplementedError

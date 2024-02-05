@@ -5,13 +5,14 @@ from aiogram.types import Message, CallbackQuery, InlineKeyboardButton, InlineKe
 
 from bot.database.main import firebase
 from bot.database.models.common import Quota
-from bot.database.operations.chat import get_chats_by_user_id, get_chat_by_user_id, delete_chat
+from bot.database.operations.chat import get_chats_by_user_id, get_chat_by_user_id, delete_chat, reset_chat
 from bot.database.operations.user import get_user, update_user
 from bot.helpers.create_new_chat import create_new_chat
 from bot.keyboards.chats import (
     build_chats_keyboard,
     build_create_chat_keyboard,
     build_switch_chat_keyboard,
+    build_reset_chat_keyboard,
     build_delete_chat_keyboard,
 )
 from bot.keyboards.common import build_recommendations_keyboard
@@ -79,6 +80,12 @@ async def handle_chat_selection(callback_query: CallbackQuery, state: FSMContext
             await callback_query.message.delete()
         else:
             await callback_query.message.answer(text=get_localization(user.language_code).SWITCH_CHAT_FORBIDDEN)
+    elif action == 'reset':
+        reply_keyboard = build_reset_chat_keyboard(user.language_code)
+        await callback_query.message.answer(
+            text=get_localization(user.language_code).RESET_CHAT_WARNING,
+            reply_markup=reply_keyboard,
+        )
     elif action == 'delete':
         all_chats = await get_chats_by_user_id(user.id)
 
@@ -199,3 +206,17 @@ async def chat_name_sent(message: Message, state: FSMContext):
     await message.delete()
 
     await state.clear()
+
+
+@chats_router.callback_query(lambda c: c.data.startswith('reset_chat:'))
+async def handle_reset_chat_selection(callback_query: CallbackQuery):
+    await callback_query.answer()
+
+    user = await get_user(str(callback_query.from_user.id))
+
+    action = callback_query.data.split(':')[1]
+    if action == 'approve':
+        await reset_chat(user.current_chat_id)
+        await callback_query.message.edit_text(
+            text=get_localization(user.language_code).RESET_CHAT_SUCCESS,
+        )

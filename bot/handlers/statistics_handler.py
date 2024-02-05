@@ -1,6 +1,6 @@
 from datetime import datetime, timezone, timedelta
 
-from aiogram import Router, F
+from aiogram import Router, F, Bot
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
@@ -46,33 +46,42 @@ async def handle_write_transaction(callback_query: CallbackQuery, language_code:
                                            reply_markup=reply_markup)
 
 
-@statistics_router.callback_query(lambda c: c.data.startswith('statistics:'))
-async def handle_statistics_selection(callback_query: CallbackQuery):
-    await callback_query.answer()
-
-    user = await get_user(str(callback_query.from_user.id))
-
-    period = callback_query.data.split(':')[1]
-
-    if period == 'write_transaction':
-        await handle_write_transaction(callback_query, user.language_code)
-        return
-
+async def handle_get_statistics(language_code: str, period: str):
     current_date = datetime.now(timezone.utc)
     start_date = None
     end_date = None
     if period == "day":
-        start_date = current_date - timedelta(days=1)
-        end_date = current_date - timedelta(days=1)
-        period = current_date.strftime("%d.%m.%Y")
+        start_date = (current_date - timedelta(days=1)).replace(hour=0,
+                                                                minute=0,
+                                                                second=0,
+                                                                microsecond=0)
+        end_date = (current_date - timedelta(days=1)).replace(hour=23,
+                                                              minute=59,
+                                                              second=59,
+                                                              microsecond=999999)
+        period = start_date.strftime("%d.%m.%Y")
     elif period == "week":
-        start_date = current_date - timedelta(days=current_date.weekday())
-        end_date = start_date + timedelta(days=6)
+        start_date = (current_date - timedelta(days=current_date.weekday())).replace(hour=0,
+                                                                                     minute=0,
+                                                                                     second=0,
+                                                                                     microsecond=0)
+        end_date = (start_date + timedelta(days=6)).replace(hour=23,
+                                                            minute=59,
+                                                            second=59,
+                                                            microsecond=999999)
         period = f"{start_date.strftime('%d.%m.%Y')}-{end_date.strftime('%d.%m.%Y')}"
     elif period == "month":
-        start_date = current_date.replace(day=1)
-        end_date = current_date.replace(day=1) + timedelta(days=32)
-        end_date = end_date - timedelta(days=end_date.day)
+        start_date = current_date.replace(
+            day=1,
+            hour=0,
+            minute=0,
+            second=0,
+            microsecond=0)
+        end_date = start_date + timedelta(days=32)
+        end_date = (end_date - timedelta(days=end_date.day)).replace(hour=23,
+                                                                     minute=59,
+                                                                     second=59,
+                                                                     microsecond=999999)
         period = f"{start_date.strftime('%d.%m.%Y')}-{end_date.strftime('%d.%m.%Y')}"
     else:
         period = "всё время"
@@ -94,11 +103,13 @@ async def handle_statistics_selection(callback_query: CallbackQuery):
             count_blocked_users += 1
 
     paid_users = set()
+    activated_users = set()
     count_income_transactions = {
         ServiceType.GPT3: 0,
         ServiceType.GPT4: 0,
         ServiceType.DALLE3: 0,
         ServiceType.FACE_SWAP: 0,
+        ServiceType.MUSIC_GEN: 0,
         ServiceType.ADDITIONAL_CHATS: 0,
         ServiceType.ACCESS_TO_CATALOG: 0,
         ServiceType.VOICE_MESSAGES: 0,
@@ -112,6 +123,7 @@ async def handle_statistics_selection(callback_query: CallbackQuery):
         ServiceType.GPT4: 0,
         ServiceType.DALLE3: 0,
         ServiceType.FACE_SWAP: 0,
+        ServiceType.MUSIC_GEN: 0,
         ServiceType.VOICE_MESSAGES: 0,
         ServiceType.SERVER: 0,
         ServiceType.DATABASE: 0,
@@ -125,6 +137,7 @@ async def handle_statistics_selection(callback_query: CallbackQuery):
         ServiceType.GPT4: 0,
         ServiceType.DALLE3: 0,
         ServiceType.FACE_SWAP: 0,
+        ServiceType.MUSIC_GEN: 0,
         ServiceType.ADDITIONAL_CHATS: 0,
         ServiceType.ACCESS_TO_CATALOG: 0,
         ServiceType.VOICE_MESSAGES: 0,
@@ -138,6 +151,7 @@ async def handle_statistics_selection(callback_query: CallbackQuery):
         ServiceType.GPT4: 0,
         ServiceType.DALLE3: 0,
         ServiceType.FACE_SWAP: 0,
+        ServiceType.MUSIC_GEN: 0,
         ServiceType.VOICE_MESSAGES: 0,
         ServiceType.SERVER: 0,
         ServiceType.DATABASE: 0,
@@ -171,51 +185,68 @@ async def handle_statistics_selection(callback_query: CallbackQuery):
             count_expense_total_money += transaction.amount
 
             if transaction.service == ServiceType.FACE_SWAP:
-                face_swap_name = transaction.details.get('name', 'CUSTOM')
-                face_swap_images = transaction.details.get('images', [])
+                face_swap_name = transaction.details.get('name', 'UNKNOWN')
+                face_swap_images = transaction.details.get('images', ['UNKNOWN'])
                 count_face_swap_usage[face_swap_name] = count_face_swap_usage.get(
                     face_swap_name,
                     0,
                 ) + len(face_swap_images)
 
+        activated_users.add(transaction.user_id)
         count_transactions_total += 1
 
     count_all_users = len(users)
-    count_activated_users = len(paid_users)
+    count_activated_users = len(activated_users)
+    count_paid_users = len(paid_users)
     count_income_total_money = count_income_subscriptions_total_money + count_income_packages_total_money
     total_money = count_income_total_money - count_expense_total_money * 100
 
     count_chats_usage = {
         'ALL': len(chats),
     }
+    count_face_swap_usage['ALL'] = sum(count_face_swap_usage.values())
     for chat in chats:
         count_chats_usage[chat.role] = count_chats_usage.get(chat.role, 0) + 1
 
-    for face_swap_package_count in count_face_swap_usage.values():
-        count_face_swap_usage['ALL'] += face_swap_package_count
+    return get_localization(language_code).statistics(
+        period=period,
+        count_all_users=count_all_users,
+        count_activated_users=count_activated_users,
+        count_paid_users=count_paid_users,
+        count_blocked_users=count_blocked_users,
+        count_subscription_users=count_subscription_users,
+        count_income_transactions=count_income_transactions,
+        count_expense_transactions=count_expense_transactions,
+        count_income_transactions_total=count_income_transactions_total,
+        count_expense_transactions_total=count_expense_transactions_total,
+        count_transactions_total=count_transactions_total,
+        count_expense_money=count_expense_money,
+        count_income_money=count_income_money,
+        count_income_subscriptions_total_money=count_income_subscriptions_total_money,
+        count_income_packages_total_money=count_income_packages_total_money,
+        count_income_total_money=count_income_total_money,
+        count_expense_total_money=count_expense_total_money,
+        count_total_money=total_money,
+        count_chats_usage=count_chats_usage,
+        count_face_swap_usage=count_face_swap_usage,
+    )
 
+
+@statistics_router.callback_query(lambda c: c.data.startswith('statistics:'))
+async def handle_statistics_selection(callback_query: CallbackQuery):
+    await callback_query.answer()
+
+    user = await get_user(str(callback_query.from_user.id))
+
+    period = callback_query.data.split(':')[1]
+
+    if period == 'write_transaction':
+        await handle_write_transaction(callback_query, user.language_code)
+        return
+
+    text = await handle_get_statistics(user.language_code, period)
     await callback_query.message.answer(
-        text=get_localization(user.language_code).statistics(
-            period=period,
-            count_all_users=count_all_users,
-            count_activated_users=count_activated_users,
-            count_blocked_users=count_blocked_users,
-            count_subscription_users=count_subscription_users,
-            count_income_transactions=count_income_transactions,
-            count_expense_transactions=count_expense_transactions,
-            count_income_transactions_total=count_income_transactions_total,
-            count_expense_transactions_total=count_expense_transactions_total,
-            count_transactions_total=count_transactions_total,
-            count_expense_money=count_expense_money,
-            count_income_money=count_income_money,
-            count_income_subscriptions_total_money=count_income_subscriptions_total_money,
-            count_income_packages_total_money=count_income_packages_total_money,
-            count_income_total_money=count_income_total_money,
-            count_expense_total_money=count_expense_total_money,
-            count_total_money=total_money,
-            count_chats_usage=count_chats_usage,
-            count_face_swap_usage=count_face_swap_usage,
-        ),
+        text=text,
         protect_content=True,
     )
 

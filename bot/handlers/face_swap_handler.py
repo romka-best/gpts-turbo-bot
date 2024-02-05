@@ -9,7 +9,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import (
     Message,
     CallbackQuery,
-    BufferedInputFile,
+    URLInputFile,
     InlineKeyboardButton,
     InlineKeyboardMarkup,
 )
@@ -23,7 +23,6 @@ from bot.database.models.face_swap_package import (
     FaceSwapPackage,
     UsedFaceSwapPackage,
 )
-from bot.database.models.generation import Generation
 from bot.database.models.user import UserGender, User
 from bot.database.operations.face_swap_package import (
     get_used_face_swap_packages_by_user_id,
@@ -35,8 +34,8 @@ from bot.database.operations.face_swap_package import (
     update_face_swap_package,
     get_face_swap_packages_by_gender,
 )
-from bot.database.operations.generation import write_generation, update_generation
-from bot.database.operations.request import write_request
+from bot.database.operations.generation import write_generation
+from bot.database.operations.request import write_request, get_started_requests_by_user_id_and_model
 from bot.database.operations.user import get_user, update_user
 from bot.helpers.translate_text import translate_text
 from bot.integrations.replicateAI import create_face_swap_image, create_face_swap_images
@@ -80,11 +79,7 @@ async def face_swap(message: Message, state: FSMContext):
     user = await get_user(str(message.from_user.id))
 
     if user.current_model == Model.FACE_SWAP:
-        reply_markup = await build_recommendations_keyboard(user)
-        await message.answer(
-            text=get_localization(user.language_code).ALREADY_SWITCHED_TO_THIS_MODEL,
-            reply_markup=reply_markup,
-        )
+        await message.answer(text=get_localization(user.language_code).ALREADY_SWITCHED_TO_THIS_MODEL)
     else:
         user.current_model = Model.FACE_SWAP
         await update_user(user.id, {
@@ -149,12 +144,12 @@ async def handle_face_swap(bot: Bot, chat_id: str, state: FSMContext, user_id: s
         except aiohttp.ClientResponseError:
             photo_path = 'users/avatars/example.png'
             photo = await firebase.bucket.get_blob(photo_path)
-            photo_data = await photo.download()
+            photo_link = firebase.get_public_url(photo.name)
 
             reply_markup = build_cancel_keyboard(user.language_code)
             await bot.send_photo(
                 chat_id=chat_id,
-                photo=BufferedInputFile(photo_data, filename=photo_path),
+                photo=URLInputFile(photo_link, filename=photo_path),
                 caption=get_localization(user.language_code).SEND_ME_YOUR_PICTURE,
                 reply_markup=reply_markup
             )
@@ -323,6 +318,15 @@ async def face_swap_quantity_handler(message: Message, state: FSMContext, user_i
                 await message.answer(text=get_localization(user.language_code).FACE_SWAP_MAX_ERROR,
                                      reply_markup=reply_markup)
             else:
+                user_not_finished_requests = await get_started_requests_by_user_id_and_model(user.id, Model.FACE_SWAP)
+
+                if len(user_not_finished_requests):
+                    await message.reply(
+                        text=get_localization(user.language_code).ALREADY_MAKE_REQUEST,
+                    )
+                    await processing_message.delete()
+                    return
+
                 user_photo = await firebase.bucket.get_blob(f'users/avatars/{user.id}.jpeg')
                 user_photo_link = firebase.get_public_url(user_photo.name)
                 used_face_swap_package = await get_used_face_swap_package_by_user_id_and_package_id(user.id,
@@ -372,21 +376,6 @@ async def face_swap_quantity_handler(message: Message, state: FSMContext, user_i
 @face_swap_router.message(FaceSwap.waiting_for_face_swap_quantity, ~F.text.startswith('/'))
 async def face_swap_quantity_sent(message: Message, state: FSMContext):
     await face_swap_quantity_handler(message, state, str(message.from_user.id), message.text)
-
-
-@face_swap_router.callback_query(lambda c: c.data.startswith('face_swap_reaction:'))
-async def face_swap_reaction_selection(callback_query: CallbackQuery):
-    await callback_query.answer()
-
-    reaction, generation_id = callback_query.data.split(':')[1], callback_query.data.split(':')[2]
-    await update_generation(generation_id, {
-        "reaction": reaction,
-    })
-
-    await callback_query.message.edit_caption(
-        caption=Generation.get_reaction_emojis()[reaction],
-        reply_markup=None,
-    )
 
 
 # Admin
@@ -574,10 +563,10 @@ async def show_picture(file: Dict,
 
         photo_path = f'face_swap/{face_swap_package.gender.lower()}/{face_swap_package.name.lower()}/{file_name}'
         photo = await firebase.bucket.get_blob(photo_path)
-        photo_data = await photo.download()
+        photo_link = firebase.get_public_url(photo.name)
 
         await callback_query.message.answer_photo(
-            photo=BufferedInputFile(photo_data, filename=photo_path),
+            photo=URLInputFile(photo_link, filename=photo_path),
             caption=f'<b>{file_name}</b>\n\n{file_status}',
             reply_markup=reply_markup,
         )
