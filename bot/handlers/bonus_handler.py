@@ -71,6 +71,7 @@ async def quantity_of_bonus_package_sent(message: Message, state: FSMContext):
             (package_type == PackageType.CHAT and quantity < PackageMinimum.CHAT) or
             (package_type == PackageType.DALLE3 and quantity < PackageMinimum.DALLE3) or
             (package_type == PackageType.FACE_SWAP and quantity < PackageMinimum.FACE_SWAP) or
+            (package_type == PackageType.MUSIC_GEN and quantity < PackageMinimum.MUSIC_GEN) or
             (package_type == PackageType.ACCESS_TO_CATALOG and quantity < PackageMinimum.ACCESS_TO_CATALOG) or
             (package_type == PackageType.VOICE_MESSAGES and quantity < PackageMinimum.VOICE_MESSAGES) or
             (package_type == PackageType.FAST_MESSAGES and quantity < PackageMinimum.FAST_MESSAGES)
@@ -115,6 +116,9 @@ async def quantity_of_bonus_package_sent(message: Message, state: FSMContext):
                 elif package_type == PackageType.FACE_SWAP:
                     user.additional_usage_quota[Quota.FACE_SWAP] += quantity
                     service_type = ServiceType.FACE_SWAP
+                elif package_type == PackageType.MUSIC_GEN:
+                    user.additional_usage_quota[Quota.MUSIC_GEN] += quantity
+                    service_type = ServiceType.MUSIC_GEN
                 elif package_type == PackageType.CHAT:
                     user.additional_usage_quota[Quota.ADDITIONAL_CHATS] += quantity
                     service_type = ServiceType.ADDITIONAL_CHATS

@@ -535,6 +535,7 @@ TODO
     - <b>{ServiceType.GPT4}:</b> {count_expense_transactions[ServiceType.GPT4]}
     - <b>{ServiceType.DALLE3}:</b> {count_expense_transactions[ServiceType.DALLE3]}
     - <b>{ServiceType.FACE_SWAP}:</b> {count_expense_transactions[ServiceType.FACE_SWAP]}
+    - <b>{ServiceType.MUSIC_GEN}:</b> {count_expense_transactions[ServiceType.MUSIC_GEN]}
     - <b>{ServiceType.VOICE_MESSAGES}:</b> {count_expense_transactions[ServiceType.VOICE_MESSAGES]}
     - <b>{ServiceType.SERVER}:</b> {count_expense_transactions[ServiceType.SERVER]}
     - <b>{ServiceType.DATABASE}:</b> {count_expense_transactions[ServiceType.DATABASE]}
@@ -544,6 +545,7 @@ TODO
     - <b>{ServiceType.GPT4}:</b> {count_income_transactions[ServiceType.GPT4]}
     - <b>{ServiceType.DALLE3}:</b> {count_income_transactions[ServiceType.DALLE3]}
     - <b>{ServiceType.FACE_SWAP}:</b> {count_income_transactions[ServiceType.FACE_SWAP]}
+    - <b>{ServiceType.MUSIC_GEN}:</b> {count_income_transactions[ServiceType.MUSIC_GEN]}
     - <b>{ServiceType.ADDITIONAL_CHATS}:</b> {count_income_transactions[ServiceType.ADDITIONAL_CHATS]}
     - <b>{ServiceType.ACCESS_TO_CATALOG}:</b> {count_income_transactions[ServiceType.ACCESS_TO_CATALOG]}
     - <b>{ServiceType.VOICE_MESSAGES}:</b> {count_income_transactions[ServiceType.VOICE_MESSAGES]}
@@ -559,6 +561,7 @@ TODO
    - <b>{ServiceType.GPT4}:</b> {round(count_expense_money[ServiceType.GPT4], 2)}$
    - <b>{ServiceType.DALLE3}:</b> {round(count_expense_money[ServiceType.DALLE3], 2)}$
    - <b>{ServiceType.FACE_SWAP}:</b> {round(count_expense_money[ServiceType.FACE_SWAP], 2)}$
+   - <b>{ServiceType.MUSIC_GEN}:</b> {round(count_expense_money[ServiceType.MUSIC_GEN], 2)}$
    - <b>{ServiceType.VOICE_MESSAGES}:</b> {round(count_expense_money[ServiceType.VOICE_MESSAGES], 2)}$
    - <b>{ServiceType.SERVER}:</b> {round(count_expense_money[ServiceType.SERVER])}$
    - <b>{ServiceType.DATABASE}:</b> {round(count_expense_money[ServiceType.DATABASE])}$
@@ -575,6 +578,7 @@ TODO
     - <b>{ServiceType.GPT4}:</b> {count_income_money[ServiceType.GPT4]}₽
     - <b>{ServiceType.DALLE3}:</b> {count_income_money[ServiceType.DALLE3]}₽
     - <b>{ServiceType.FACE_SWAP}:</b> {count_income_money[ServiceType.FACE_SWAP]}₽
+    - <b>{ServiceType.MUSIC_GEN}:</b> {count_income_money[ServiceType.MUSIC_GEN]}₽
     - <b>{ServiceType.ADDITIONAL_CHATS}:</b> {count_income_money[ServiceType.ADDITIONAL_CHATS]}₽
     - <b>{ServiceType.ACCESS_TO_CATALOG}:</b> {count_income_money[ServiceType.ACCESS_TO_CATALOG]}₽
     - <b>{ServiceType.VOICE_MESSAGES}:</b> {count_income_money[ServiceType.VOICE_MESSAGES]}₽

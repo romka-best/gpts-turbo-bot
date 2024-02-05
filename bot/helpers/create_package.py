@@ -30,6 +30,8 @@ async def create_package(transaction,
         user.additional_usage_quota[Quota.DALLE3] += package.quantity
     elif package.type == PackageType.FACE_SWAP:
         user.additional_usage_quota[Quota.FACE_SWAP] += package.quantity
+    elif package.type == PackageType.MUSIC_GEN:
+        user.additional_usage_quota[Quota.MUSIC_GEN] += package.quantity
     elif package.type == PackageType.CHAT:
         user.additional_usage_quota[Quota.ADDITIONAL_CHATS] += package.quantity
     elif package.type == PackageType.FAST_MESSAGES:

@@ -45,9 +45,9 @@ async def get_messages() -> List[Message]:
 async def get_messages_by_chat_id(chat_id: str, limit=10, is_in_context=True) -> List[Message]:
     messages_query = firebase.db.collection("messages").where("chat_id", "==", chat_id)
     if is_in_context is not None:
-        messages_query.where("is_in_context", "==", is_in_context)
+        messages_query = messages_query.where("is_in_context", "==", is_in_context)
     if limit > 0:
-        messages_query.limit(limit)
+        messages_query = messages_query.limit(limit)
     messages_stream = messages_query.order_by("created_at", direction=Query.DESCENDING).stream()
 
     messages = [

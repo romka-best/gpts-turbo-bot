@@ -286,6 +286,8 @@ async def successful_payment(message: Message):
             service_type = ServiceType.DALLE3
         elif package.type == PackageType.FACE_SWAP:
             service_type = ServiceType.FACE_SWAP
+        elif package.type == PackageType.MUSIC_GEN:
+            service_type = ServiceType.MUSIC_GEN
         elif package.type == PackageType.CHAT:
             service_type = ServiceType.ADDITIONAL_CHATS
         elif package.type == PackageType.ACCESS_TO_CATALOG:
@@ -294,16 +296,18 @@ async def successful_payment(message: Message):
             service_type = ServiceType.VOICE_MESSAGES
         elif package.type == PackageType.FAST_MESSAGES:
             service_type = ServiceType.FAST_MESSAGES
-        await write_transaction(user_id=user.id,
-                                type=TransactionType.INCOME,
-                                service=service_type,
-                                amount=package.amount,
-                                currency=package.currency,
-                                quantity=package.quantity,
-                                details={
-                                    'package_id': package.id,
-                                    'provider_payment_charge_id': payment.provider_payment_charge_id
-                                })
+        await write_transaction(
+            user_id=user.id,
+            type=TransactionType.INCOME,
+            service=service_type,
+            amount=package.amount,
+            currency=package.currency,
+            quantity=package.quantity,
+            details={
+                'package_id': package.id,
+                'provider_payment_charge_id': payment.provider_payment_charge_id
+            },
+        )
 
         await message.answer(text=get_localization(user.language_code).PACKAGE_SUCCESS)
 

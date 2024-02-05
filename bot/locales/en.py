@@ -94,6 +94,14 @@ Just type away or use a command to begin your AI journey! 🌟
 - <i>Memes and Content Creation</i>: Spice up your social media with funny or imaginative face-swapped pictures.
 - <i>Digital Makeovers</i>: Experiment with new haircuts or makeup styles.
 - <i>Celebrity Mashups</i>: Combine your face with celebrities for fun comparisons.
+
+🎶 <b>MusicGen: Your Personal Composer</b>
+<i>Creating Unique Melodies</i>: Turn your ideas into musical pieces of any genre - from classical to pop.
+<i>Music for Every Moment</i>: Specially created compositions for relaxation, study, workouts, or meditation.
+<i>Personalized Soundtracks</i>: Create a soundtrack for your next video project, game, or presentation.
+<i>Exploring Musical Styles</i>: Experiment with different musical genres and sounds to find your unique style.
+<i>Learning and Inspiration</i>: Gain new insights into music theory and the history of genres through music creation.
+<i>Instant Melody Creation</i>: Just enter a text description or mood, and MusicGen will instantly turn it into music.
 """
 
     # Feedback

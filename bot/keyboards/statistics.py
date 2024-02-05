@@ -122,6 +122,12 @@ def build_statistics_choose_service_keyboard(language_code: str,
             ],
             [
                 InlineKeyboardButton(
+                    text="MusicGen 🎵",
+                    callback_data=f'statistics_choose_service:{ServiceType.MUSIC_GEN}'
+                )
+            ],
+            [
+                InlineKeyboardButton(
                     text="Additional chats 💬",
                     callback_data=f'statistics_choose_service:{ServiceType.ADDITIONAL_CHATS}'
                 )
@@ -175,6 +181,12 @@ def build_statistics_choose_service_keyboard(language_code: str,
                 InlineKeyboardButton(
                     text="FaceSwap 📷",
                     callback_data=f'statistics_choose_service:{ServiceType.FACE_SWAP}'
+                )
+            ],
+            [
+                InlineKeyboardButton(
+                    text="MusicGen 🎵",
+                    callback_data=f'statistics_choose_service:{ServiceType.MUSIC_GEN}'
                 )
             ],
             [
