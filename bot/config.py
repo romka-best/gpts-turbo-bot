@@ -15,6 +15,7 @@ class Settings(BaseSettings):
 
     USER_BATCH_SIZE: int = 500
     LIMIT_BETWEEN_REQUESTS_SECONDS: int = 30
+    LIMIT_PROCESSING_SECONDS: int = 60
     ADMIN_CHAT_IDS: List[str] = ["354543567", "6078317830"]
 
     CERTIFICATE_NAME: SecretStr

@@ -2,6 +2,7 @@ import io
 import math
 import os
 import tempfile
+import time
 import uuid
 
 from pydub import AudioSegment
@@ -19,6 +20,9 @@ from bot.handlers.face_swap_handler import handle_face_swap
 from bot.handlers.music_gen_handler import handle_music_gen
 from bot.integrations.openAI import get_response_speech_to_text
 from bot.locales.main import get_localization
+from bot.utils.is_already_processing import is_already_processing
+from bot.utils.is_messages_limit_exceeded import is_messages_limit_exceeded
+from bot.utils.is_time_limit_exceeded import is_time_limit_exceeded
 
 voice_router = Router()
 
@@ -42,16 +46,18 @@ async def process_voice_message(bot: Bot, voice: File, user_id: str):
         audio_file.close()
 
         total_price = 0.0001 * math.ceil(audio_in_seconds)
-        await write_transaction(user_id=user_id,
-                                type=TransactionType.EXPENSE,
-                                service=ServiceType.VOICE_MESSAGES,
-                                amount=total_price,
-                                currency=Currency.USD,
-                                quantity=1,
-                                details={
-                                    'subtype': 'STT',
-                                    'text': text,
-                                })
+        await write_transaction(
+            user_id=user_id,
+            type=TransactionType.EXPENSE,
+            service=ServiceType.VOICE_MESSAGES,
+            amount=total_price,
+            currency=Currency.USD,
+            quantity=1,
+            details={
+                'subtype': 'STT',
+                'text': text,
+            },
+        )
 
         return text
 
@@ -61,17 +67,38 @@ async def handle_voice(message: Message, state: FSMContext):
     user = await get_user(str(message.from_user.id))
 
     if user.additional_usage_quota[Quota.VOICE_MESSAGES]:
+        current_time = time.time()
+
+        if user.current_model == Model.GPT3:
+            user_quota = Quota.GPT3
+        elif user.current_model == Model.GPT4:
+            user_quota = Quota.GPT4
+        elif user.current_model == Model.DALLE3:
+            user_quota = Quota.DALLE3
+        elif user.current_model == Model.FACE_SWAP:
+            user_quota = Quota.FACE_SWAP
+        elif user.current_model == Model.MUSIC_GEN:
+            user_quota = Quota.MUSIC_GEN
+        else:
+            return
+
+        need_exit = (
+            await is_time_limit_exceeded(message, state, user, current_time) or
+            await is_messages_limit_exceeded(message, user, user_quota) or
+            await is_already_processing(message, state, user, current_time)
+        )
+        if need_exit:
+            return
+
         voice_file = await message.bot.get_file(message.voice.file_id)
 
         text = await process_voice_message(message.bot, voice_file, user.id)
 
         await state.update_data(recognized_text=text)
-        if user.current_model == Model.GPT3:
-            await handle_chatgpt(message, state, user, Quota.GPT3)
-        elif user.current_model == Model.GPT4:
-            await handle_chatgpt(message, state, user, Quota.GPT4)
+        if user.current_model == Model.GPT3 or user.current_model == Model.GPT4:
+            await handle_chatgpt(message, state, user, user_quota)
         elif user.current_model == Model.DALLE3:
-            await handle_dalle(message, state, user, Quota.DALLE3)
+            await handle_dalle(message, state, user)
         elif user.current_model == Model.FACE_SWAP:
             await handle_face_swap(message.bot, str(message.chat.id), state, user.id, text)
         elif user.current_model == Model.MUSIC_GEN:
