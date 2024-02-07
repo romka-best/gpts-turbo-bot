@@ -83,6 +83,8 @@ async def chatgpt4(message: Message, state: FSMContext):
 
 
 async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_quota: Quota):
+    await state.update_data(is_processing=True)
+
     user_data = await state.get_data()
 
     text = user_data.get('recognized_text', None)
@@ -131,28 +133,32 @@ async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_q
 
             total_price = round(input_price + output_price, 6)
             message_role, message_content = response_message.role, response_message.content
-            await write_transaction(user_id=user.id,
-                                    type=TransactionType.EXPENSE,
-                                    service=service,
-                                    amount=total_price,
-                                    currency=Currency.USD,
-                                    quantity=1,
-                                    details={
-                                        "input_tokens": response['input_tokens'],
-                                        "output_tokens": response['output_tokens'],
-                                        "request": text,
-                                        "answer": message_content,
-                                    })
+            await write_transaction(
+                user_id=user.id,
+                type=TransactionType.EXPENSE,
+                service=service,
+                amount=total_price,
+                currency=Currency.USD,
+                quantity=1,
+                details={
+                    "input_tokens": response['input_tokens'],
+                    "output_tokens": response['output_tokens'],
+                    "request": text,
+                    "answer": message_content,
+                },
+            )
 
             transaction = firebase.db.transaction()
             await create_new_message_and_update_user(transaction, message_role, message_content, user, user_quota)
 
             if user.settings[user.current_model][UserSettings.TURN_ON_VOICE_MESSAGES]:
                 reply_markup = build_chat_gpt_continue_generating_keyboard(user.language_code)
-                await reply_with_voice(message=message,
-                                       text=message_content,
-                                       user_id=user.id,
-                                       reply_markup=reply_markup if response['finish_reason'] == 'length' else None)
+                await reply_with_voice(
+                    message=message,
+                    text=message_content,
+                    user_id=user.id,
+                    reply_markup=reply_markup if response['finish_reason'] == 'length' else None,
+                )
             else:
                 chat_info = f'💬 {chat.title}\n' if (
                     user.settings[user.current_model][UserSettings.SHOW_THE_NAME_OF_THE_CHATS]
@@ -187,14 +193,17 @@ async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_q
         except Exception as e:
             await message.answer(
                 text=get_localization(user.language_code).ERROR,
-                parse_mode=None
+                parse_mode=None,
             )
-            await send_message_to_admins(bot=message.bot,
-                                         message=f"#error\n\nALARM! Ошибка у пользователя при запросе в ChatGPT: {user.id}\n"
-                                                 f"Информация:\n{e}",
-                                         parse_mode=None)
+            await send_message_to_admins(
+                bot=message.bot,
+                message=f"#error\n\nALARM! Ошибка у пользователя при запросе в ChatGPT: {user.id}\n"
+                        f"Информация:\n{e}",
+                parse_mode=None,
+            )
         finally:
             await processing_message.delete()
+            await state.update_data(is_processing=False)
 
 
 @chat_gpt_router.callback_query(lambda c: c.data.startswith('chat_gpt:'))

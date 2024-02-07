@@ -1,3 +1,4 @@
+import asyncio
 import logging
 import os
 from contextlib import asynccontextmanager
@@ -37,7 +38,6 @@ from bot.handlers.voice_handler import voice_router
 from bot.helpers.handle_replicate_webhook import handle_replicate_webhook
 from bot.helpers.notify_admins_about_error import notify_admins_about_error
 from bot.helpers.send_daily_statistics import send_daily_statistics
-from bot.helpers.send_message_to_admins import send_message_to_admins
 from bot.helpers.update_monthly_limits import update_monthly_limits
 
 WEBHOOK_BOT_PATH = f"/bot/{config.BOT_TOKEN.get_secret_value()}"
@@ -93,8 +93,15 @@ app = FastAPI(lifespan=lifespan)
 @app.post(WEBHOOK_BOT_PATH)
 async def bot_webhook(update: dict):
     telegram_update = types.Update(**update)
+    asyncio.create_task(handle_update(telegram_update))
+
+
+async def handle_update(telegram_update: types.Update):
     try:
-        await dp.feed_update(bot=bot, update=telegram_update)
+        is_processing = await dp.storage.redis.get(f"update:{telegram_update.update_id}:processing")
+        if not is_processing:
+            await dp.storage.redis.set(f"update:{telegram_update.update_id}:processing", 1, ex=300)
+            await dp.feed_update(bot=bot, update=telegram_update)
     except TelegramForbiddenError:
         user_id = None
         if telegram_update.callback_query and telegram_update.callback_query.message.from_user.id:
@@ -128,16 +135,10 @@ async def replicate_webhook(prediction: dict):
 
 @app.get("/run-daily-tasks")
 async def daily_tasks():
-    await update_monthly_limits(bot)
-    await send_daily_statistics(bot)
+    asyncio.create_task(update_monthly_limits(bot))
+    asyncio.create_task(send_daily_statistics(bot))
 
-    message = "Daily tasks executed successfully"
-    await send_message_to_admins(bot, f'<b>{message}</b> 🎉')
-
-    return {
-        "code": 200,
-        "message": message,
-    }
+    return {"code": 200}
 
 
 if __name__ == "__main__":
