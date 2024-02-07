@@ -92,16 +92,13 @@ app = FastAPI(lifespan=lifespan)
 
 @app.post(WEBHOOK_BOT_PATH)
 async def bot_webhook(update: dict):
+    asyncio.create_task(handle_update(update))
+
+
+async def handle_update(update: dict):
     telegram_update = types.Update(**update)
-    asyncio.create_task(handle_update(telegram_update))
-
-
-async def handle_update(telegram_update: types.Update):
     try:
-        is_processing = await dp.storage.redis.get(f"update:{telegram_update.update_id}:processing")
-        if not is_processing:
-            await dp.storage.redis.set(f"update:{telegram_update.update_id}:processing", 1, ex=300)
-            await dp.feed_update(bot=bot, update=telegram_update)
+        await dp.feed_update(bot=bot, update=telegram_update)
     except TelegramForbiddenError:
         user_id = None
         if telegram_update.callback_query and telegram_update.callback_query.message.from_user.id:
