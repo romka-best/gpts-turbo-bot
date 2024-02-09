@@ -256,7 +256,7 @@ Let every note tell your story! 🎶
     ALREADY_SWITCHED_TO_THIS_MODEL = """
 🔄 <b>Oops, looks like everything stayed the same!</b>
 
-You've selected the same model that's already active. Don't worry, your digital universe remains unchanged. You can continue chatting or creating as usual. If you want to switch things up, simply choose a different model
+You've selected the same model that's already active. Don't worry, your digital universe remains unchanged. You can continue chatting or creating as usual. If you want to switch things up, simply choose a different model using /mode
 
 Either way, we're here to help! 🛟
 """
@@ -626,6 +626,7 @@ Welcome to the shop zone, where each button tap unlocks a world of AI wonders!
 🧠 <b>ChatGPT3.5 & ChatGPT4.0</b>: Engage in deep, thought-provoking conversations. Your new AI buddies await!
 🎨 <b>DALLE-3</b>: Transform ideas into stunning visuals. It's like painting with AI!
 👤 <b>Face Swap</b>: Play with identities in images. It's never been this exciting!
+🎵 <b>Harmony with MusicGen</b>: Create unique melodies that will belong only to you!
 🗣️ <b>Voice Messages</b>: Say it out loud! Chatting with AI has never sounded better.
 💬 <b>Thematic Chats</b>: Dive into specialized topics and explore dedicated chat realms.
 🎭 <b>Role Catalog Access</b>: Need a specific assistant? Browse our collection and find your perfect AI match.

@@ -5,7 +5,7 @@ from contextlib import asynccontextmanager
 
 import uvicorn
 from aiogram.exceptions import TelegramForbiddenError, TelegramBadRequest
-from fastapi import FastAPI
+from fastapi import FastAPI, BackgroundTasks
 from fastapi.responses import JSONResponse
 from aiogram import Bot, Dispatcher, types
 from aiogram.enums.parse_mode import ParseMode
@@ -131,9 +131,9 @@ async def replicate_webhook(prediction: dict):
 
 
 @app.get("/run-daily-tasks")
-async def daily_tasks():
-    asyncio.create_task(update_monthly_limits(bot))
-    asyncio.create_task(send_daily_statistics(bot))
+async def daily_tasks(background_tasks: BackgroundTasks):
+    background_tasks.add_task(update_monthly_limits, bot)
+    background_tasks.add_task(send_daily_statistics, bot)
 
     return {"code": 200}
 
