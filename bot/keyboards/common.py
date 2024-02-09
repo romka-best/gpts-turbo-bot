@@ -31,8 +31,10 @@ async def build_recommendations_keyboard(user: User) -> ReplyKeyboardMarkup:
                 )
             ])
     elif user.current_model == Model.FACE_SWAP:
-        face_swap_packages = await get_face_swap_packages_by_gender(user.gender,
-                                                                    status=FaceSwapPackageStatus.PUBLIC)
+        face_swap_packages = await get_face_swap_packages_by_gender(
+            user.gender,
+            status=FaceSwapPackageStatus.PUBLIC,
+        )
         for face_swap_package in face_swap_packages:
             buttons.append(
                 [
