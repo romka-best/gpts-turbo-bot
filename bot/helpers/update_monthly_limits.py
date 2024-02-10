@@ -45,7 +45,7 @@ async def update_user_monthly_limits(bot: Bot, user: User, batch: AsyncWriteBatc
         await update_user_additional_usage_quota(bot, user, had_subscription, batch)
     except TelegramForbiddenError:
         await update_user(user.id, {
-            "is_blocked": True
+            "is_blocked": True,
         })
     except Exception as e:
         logging.error(f"Error updating user {user.id}: {e}")
@@ -76,6 +76,7 @@ async def update_user_subscription(bot: Bot, user: User, batch: AsyncWriteBatch)
             "subscription_type": user.subscription_type,
             "monthly_limits": user.monthly_limits,
             "last_subscription_limit_update": current_date,
+            "edited_at": current_date,
         })
 
         await bot.send_message(chat_id=user.telegram_chat_id,
@@ -87,6 +88,7 @@ async def update_user_subscription(bot: Bot, user: User, batch: AsyncWriteBatch)
         batch.update(user_ref, {
             "monthly_limits": SubscriptionLimit.LIMITS[user.subscription_type],
             "last_subscription_limit_update": current_date,
+            "edited_at": current_date,
         })
         await bot.send_message(
             chat_id=user.telegram_chat_id,
@@ -132,6 +134,7 @@ async def update_user_additional_usage_quota(bot: Bot, user: User, had_subscript
         batch.update(user_ref, {
             "additional_usage_quota": user.additional_usage_quota,
             "settings": user.settings,
+            "edited_at": current_date,
         })
 
         if not had_subscription and count_active_packages_before > count_active_packages_after:

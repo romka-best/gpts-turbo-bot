@@ -38,6 +38,8 @@ from bot.handlers.voice_handler import voice_router
 from bot.helpers.handle_replicate_webhook import handle_replicate_webhook
 from bot.helpers.notify_admins_about_error import notify_admins_about_error
 from bot.helpers.send_daily_statistics import send_daily_statistics
+from bot.helpers.set_commands import set_commands
+from bot.helpers.set_description import set_description
 from bot.helpers.update_monthly_limits import update_monthly_limits
 
 WEBHOOK_BOT_PATH = f"/bot/{config.BOT_TOKEN.get_secret_value()}"
@@ -80,6 +82,8 @@ async def lifespan(_: FastAPI):
         text_router,
     )
 
+    await set_description(bot)
+    await set_commands(bot)
     await firebase.init()
     yield
     await bot.session.close()
