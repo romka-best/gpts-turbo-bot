@@ -972,6 +972,7 @@ Looks like you've got only <b>{available_seconds} seconds</b> left in your arsen
 👤 You've invited: {referred_count}
 💰 Current balance: {balance}
 
+💸 For each invited user, you get 50₽ to your bonus balance
 🌟 Your personal referral link for invitations:
 https://t.me/GPTsTurboBot?start={user_id}
 
