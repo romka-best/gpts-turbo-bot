@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 
-from bot.database.models.common import Currency, Model, Quota
+from bot.database.models.common import Currency, Model, Quota, DALLEResolution, DALLEQuality
 from bot.database.models.subscription import SubscriptionType, SubscriptionLimit
 
 
@@ -9,6 +9,9 @@ class UserSettings:
     SHOW_THE_NAME_OF_THE_ROLES = 'show_the_name_of_the_roles'
     SHOW_USAGE_QUOTA = 'show_usage_quota'
     TURN_ON_VOICE_MESSAGES = 'turn_on_voice_messages'
+    VOICE = 'voice'
+    RESOLUTION = 'resolution'
+    QUALITY = 'quality'
 
 
 class UserGender:
@@ -58,15 +61,19 @@ class User:
             UserSettings.SHOW_THE_NAME_OF_THE_ROLES: False,
             UserSettings.SHOW_USAGE_QUOTA: True,
             UserSettings.TURN_ON_VOICE_MESSAGES: False,
+            UserSettings.VOICE: 'alloy',
         },
         Model.GPT4: {
             UserSettings.SHOW_THE_NAME_OF_THE_CHATS: False,
             UserSettings.SHOW_THE_NAME_OF_THE_ROLES: False,
             UserSettings.SHOW_USAGE_QUOTA: True,
             UserSettings.TURN_ON_VOICE_MESSAGES: False,
+            UserSettings.VOICE: 'alloy',
         },
         Model.DALLE3: {
             UserSettings.SHOW_USAGE_QUOTA: True,
+            UserSettings.RESOLUTION: DALLEResolution.LOW,
+            UserSettings.QUALITY: DALLEQuality.STANDARD,
         },
         Model.FACE_SWAP: {
             UserSettings.SHOW_USAGE_QUOTA: True,

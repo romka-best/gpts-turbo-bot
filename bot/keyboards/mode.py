@@ -8,27 +8,27 @@ def build_mode_keyboard(language_code: str, model: Model) -> InlineKeyboardMarku
     buttons = [
         [
             InlineKeyboardButton(
-                text="✉️ ChatGPT 3.5" + (" ✅" if model == Model.GPT3 else ""),
+                text=get_localization(language_code).CHATGPT3 + (" ✅" if model == Model.GPT3 else ""),
                 callback_data=f'mode:{Model.GPT3}'
             ),
             InlineKeyboardButton(
-                text="🧠 ChatGPT 4.0" + (" ✅" if model == Model.GPT4 else ""),
+                text=get_localization(language_code).CHATGPT4 + (" ✅" if model == Model.GPT4 else ""),
                 callback_data=f'mode:{Model.GPT4}'
             ),
         ],
         [
             InlineKeyboardButton(
-                text="🖼️ DALL-E 3" + (" ✅" if model == Model.DALLE3 else ""),
+                text=get_localization(language_code).DALLE3 + (" ✅" if model == Model.DALLE3 else ""),
                 callback_data=f'mode:{Model.DALLE3}'
             ),
             InlineKeyboardButton(
-                text="📷️ Face Swap" + (" ✅" if model == Model.FACE_SWAP else ""),
+                text=get_localization(language_code).FACE_SWAP + (" ✅" if model == Model.FACE_SWAP else ""),
                 callback_data=f'mode:{Model.FACE_SWAP}'
             ),
         ],
         [
             InlineKeyboardButton(
-                text="🎵 MusicGen" + (" ✅" if model == Model.MUSIC_GEN else ""),
+                text=get_localization(language_code).MUSIC_GEN + (" ✅" if model == Model.MUSIC_GEN else ""),
                 callback_data=f'mode:{Model.MUSIC_GEN}'
             ),
         ],

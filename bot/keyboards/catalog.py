@@ -21,8 +21,8 @@ def build_catalog_keyboard(language_code: str, current_role: str, roles: List[Ro
         )
     buttons.append([
         InlineKeyboardButton(
-            text=get_localization(language_code).CLOSE,
-            callback_data='catalog:close'
+            text=get_localization(language_code).BACK,
+            callback_data='catalog:back'
         )
     ])
 

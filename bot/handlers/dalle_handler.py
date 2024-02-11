@@ -11,7 +11,7 @@ from bot.database.models.user import UserSettings, User
 from bot.database.operations.transaction import write_transaction
 from bot.database.operations.user import update_user, get_user
 from bot.helpers.send_message_to_admins import send_message_to_admins
-from bot.integrations.openAI import get_response_image
+from bot.integrations.openAI import get_response_image, get_cost_for_image
 from bot.keyboards.common import build_recommendations_keyboard
 from bot.locales.main import get_localization
 
@@ -58,22 +58,43 @@ async def handle_dalle(message: Message, state: FSMContext, user: User):
 
     async with ChatActionSender.upload_photo(bot=message.bot, chat_id=message.chat.id):
         try:
-            response_url = await get_response_image(text)
+            maximum_generations = user.monthly_limits[Quota.DALLE3] + user.additional_usage_quota[Quota.DALLE3]
+            resolution = user.settings[Model.DALLE3][UserSettings.RESOLUTION]
+            quality = user.settings[Model.DALLE3][UserSettings.QUALITY]
+            cost = get_cost_for_image(quality, resolution)
+            if maximum_generations < cost:
+                await message.reply(get_localization(user.language_code).REACHED_USAGE_LIMIT)
+                return
 
-            if user.monthly_limits[Quota.DALLE3] > 0:
-                user.monthly_limits[Quota.DALLE3] -= 1
-            else:
-                user.additional_usage_quota[Quota.DALLE3] -= 1
+            response_url = await get_response_image(
+                text,
+                resolution,
+                quality,
+            )
 
-            await update_user(user.id, {
-                "monthly_limits": user.monthly_limits,
-                "additional_usage_quota": user.additional_usage_quota,
-            })
+            quantity_to_delete = cost
+            quantity_deleted = 0
+            while quantity_deleted != quantity_to_delete:
+                if user.monthly_limits[Quota.DALLE3] != 0:
+                    user.monthly_limits[Quota.DALLE3] -= 1
+                    quantity_deleted += 1
+                elif user.additional_usage_quota[Quota.DALLE3] != 0:
+                    user.additional_usage_quota[Quota.DALLE3] -= 1
+                    quantity_deleted += 1
+                else:
+                    break
+
+            await update_user(
+                user.id, {
+                    "monthly_limits": user.monthly_limits,
+                    "additional_usage_quota": user.additional_usage_quota,
+                },
+            )
             await write_transaction(
                 user_id=user.id,
                 type=TransactionType.EXPENSE,
                 service=ServiceType.DALLE3,
-                amount=PRICE_DALLE3,
+                amount=PRICE_DALLE3 * cost,
                 currency=Currency.USD,
                 quantity=1,
                 details={

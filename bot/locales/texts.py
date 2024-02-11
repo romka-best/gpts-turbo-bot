@@ -212,7 +212,13 @@ TODO
 """
 
     # AI
+    CHATGPT3 = "✉️ ChatGPT-3.5"
+    CHATGPT4 = "🧠 ChatGPT-4.0"
+    DALLE3 = "🖼️ DALL-E 3"
+    FACE_SWAP = "📷️ FaceSwap"
+    MUSIC_GEN = "🎵 MusicGen"
     MODE: str
+    CHOOSE_CHATGPT_MODEL: str
     SWITCHED_TO_CHATGPT3: str
     SWITCHED_TO_CHATGPT4: str
     SWITCHED_TO_DALLE3: str
@@ -235,13 +241,19 @@ TODO
     SECONDS_180: str
 
     # Settings
+    SETTINGS_CHOOSE_MODEL: str
     SHOW_THE_NAME_OF_THE_CHATS: str
     SHOW_THE_NAME_OF_THE_ROLES: str
     SHOW_USAGE_QUOTA_IN_MESSAGES: str
+    VOICE_MESSAGES: str
     TURN_ON_VOICE_MESSAGES_FROM_RESPONDS: str
+    LISTEN_VOICES: str
 
     # Voice
     VOICE_MESSAGES_FORBIDDEN: str
+
+    # Payment
+    BUY: str
 
     # Subscription
     MONTH_1: str
@@ -249,7 +261,7 @@ TODO
     MONTHS_6: str
     DISCOUNT: str
     NO_DISCOUNT: str
-    SUBSCRIPTION = "💳 Подписка"
+    SUBSCRIPTION: str
     SUBSCRIPTION_SUCCESS: str
     SUBSCRIPTION_RESET: str
     SUBSCRIPTION_END: str
@@ -257,6 +269,7 @@ TODO
     CHATS_RESET: str
 
     # Package
+    PACKAGE: str
     GPT3_REQUESTS: str
     GPT3_REQUESTS_DESCRIPTION: str
     GPT4_REQUESTS: str
@@ -281,6 +294,7 @@ TODO
     PACKAGE_SUCCESS: str
 
     # Catalog
+    MANAGE_CATALOG: str
     CATALOG: str
     CATALOG_FORBIDDEN_ERROR: str
     CATALOG_MANAGE = """
@@ -388,6 +402,7 @@ TODO
 
     # Chats
     DEFAULT_CHAT_TITLE: str
+    MANAGE_CHATS: str
     SHOW_CHATS: str
     CREATE_CHAT: str
     CREATE_CHAT_FORBIDDEN: str
@@ -403,7 +418,7 @@ TODO
     RESET_CHAT_WARNING: str
     RESET_CHAT_SUCCESS: str
 
-    # Face swap
+    # FaceSwap
     CHOOSE_YOUR_PACKAGE: str
     CREATE_PACKAGE = "Создать новый пакет"
     EDIT_PACKAGE = "Редактировать существующий пакет"
@@ -468,7 +483,7 @@ TODO
     FACE_SWAP_MANAGE_EDIT_SUCCESS = """
 🌟 <b>Пакет успешно отредактирован!</b> 🎉
 
-👏 Браво, админ! Ваши изменения успешно применены. Пакет FaceSwap теперь обновлён и ещё более прекрасен. Чтобы продолжить редактирование Face Swap, введите команду /manage_face_swap
+👏 Браво, админ! Ваши изменения успешно применены. Пакет FaceSwap теперь обновлён и ещё более прекрасен. Чтобы продолжить редактирование FaceSwap, введите команду /manage_face_swap
 
 🚀 Готовы к новым приключениям? Ваша креативность и умение управлять пакетами делают мир FaceSwap ещё ярче и интереснее. Продолжайте творить и вдохновлять пользователей своими уникальными идеями!
 """
@@ -482,26 +497,28 @@ TODO
     APPROVE: str
 
     @staticmethod
-    def statistics(period: str,
-                   count_all_users: int,
-                   count_activated_users: int,
-                   count_paid_users: int,
-                   count_blocked_users: int,
-                   count_subscription_users: Dict,
-                   count_income_transactions: Dict,
-                   count_expense_transactions: Dict,
-                   count_income_transactions_total: int,
-                   count_expense_transactions_total: int,
-                   count_transactions_total: int,
-                   count_expense_money: Dict,
-                   count_income_money: Dict,
-                   count_income_subscriptions_total_money: float,
-                   count_income_packages_total_money: float,
-                   count_income_total_money: float,
-                   count_expense_total_money: float,
-                   count_total_money: float,
-                   count_chats_usage: Dict,
-                   count_face_swap_usage: Dict) -> str:
+    def statistics(
+        period: str,
+        count_all_users: int,
+        count_activated_users: int,
+        count_paid_users: int,
+        count_blocked_users: int,
+        count_subscription_users: Dict,
+        count_income_transactions: Dict,
+        count_expense_transactions: Dict,
+        count_income_transactions_total: int,
+        count_expense_transactions_total: int,
+        count_transactions_total: int,
+        count_expense_money: Dict,
+        count_income_money: Dict,
+        count_income_subscriptions_total_money: float,
+        count_income_packages_total_money: float,
+        count_income_total_money: float,
+        count_expense_total_money: float,
+        count_total_money: float,
+        count_chats_usage: Dict,
+        count_face_swap_usage: Dict,
+    ) -> str:
         emojis = Subscription.get_emojis()
         chat_info = ""
         for i, (chat_key, chat_value) in enumerate(count_chats_usage.items()):
@@ -519,7 +536,7 @@ TODO
 
 👤 <b>Пользователи</b>
 1️⃣ <b>{'Всего пользователей' if period == 'всё время' else 'Новых пользователей'}:</b> {count_all_users}
-2️⃣ <b>Активированные:</b> {count_activated_users}
+2️⃣ <b>{'Активированные' if period == 'всё время' else 'Активные'}:</b> {count_activated_users}
 3️⃣ <b>Оплатившие хоть раз:</b> {count_paid_users}
 4️⃣ <b>Подписчики:</b>
     - <b>{SubscriptionType.FREE}:</b> {count_subscription_users[SubscriptionType.FREE]}
@@ -591,7 +608,7 @@ TODO
 {chat_info}
 
     - <b>Всего:</b> {count_chats_usage['ALL']}
-🎭 <b>Выбранные Face Swap</b>
+🎭 <b>Выбранные FaceSwap</b>
 {face_swap_info}
 
     - <b>Всего:</b> {count_face_swap_usage['ALL']}
@@ -724,11 +741,14 @@ TODO
 """
 
     @staticmethod
-    def profile(subscription_type: SubscriptionType,
-                gender: UserGender,
-                current_model: str,
-                monthly_limits,
-                additional_usage_quota) -> str:
+    def profile(
+        subscription_type: SubscriptionType,
+        gender: UserGender,
+        current_model: str,
+        monthly_limits,
+        additional_usage_quota,
+        renewal_date,
+    ) -> str:
         raise NotImplementedError
 
     # Subscription
@@ -750,7 +770,7 @@ TODO
 
     # Package
     @staticmethod
-    def buy() -> str:
+    def package() -> str:
         raise NotImplementedError
 
     @staticmethod
@@ -762,7 +782,7 @@ TODO
     def chats(current_chat_name: str, total_chats: int, available_to_create_chats: int) -> str:
         raise NotImplementedError
 
-    # Face swap
+    # FaceSwap
     @staticmethod
     def choose_face_swap_package(name: str, available_images: int, total_images: int, used_images: int) -> str:
         raise NotImplementedError
@@ -815,7 +835,7 @@ TODO
 
     # Settings
     @staticmethod
-    def settings(model: Model) -> str:
+    def settings(human_model: str, current_model: Model, dalle_cost=1) -> str:
         raise NotImplementedError
 
     # Bonus

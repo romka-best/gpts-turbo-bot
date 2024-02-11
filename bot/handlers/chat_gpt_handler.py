@@ -3,7 +3,7 @@ from aiogram import Router
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
-from aiogram.types import Message, CallbackQuery
+from aiogram.types import Message, CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.utils.chat_action import ChatActionSender
 from telegram.constants import ParseMode
 
@@ -20,94 +20,155 @@ from bot.helpers.create_new_message_and_update_user import create_new_message_an
 from bot.helpers.reply_with_voice import reply_with_voice
 from bot.helpers.send_message_to_admins import send_message_to_admins
 from bot.integrations.openAI import get_response_message
-from bot.keyboards.chat_gpt import build_chat_gpt_continue_generating_keyboard
+from bot.keyboards.chat_gpt import build_chat_gpt_continue_generating_keyboard, build_chat_gpt_keyboard
 from bot.keyboards.common import build_recommendations_keyboard
 from bot.locales.main import get_localization
 
 chat_gpt_router = Router()
 
-PRICE_GPT3_INPUT = 0.000001
-PRICE_GPT3_OUTPUT = 0.000002
+PRICE_GPT3_INPUT = 0.0000005
+PRICE_GPT3_OUTPUT = 0.0000015
 PRICE_GPT4_INPUT = 0.00001
 PRICE_GPT4_OUTPUT = 0.00003
 
 
-@chat_gpt_router.message(Command("chatgpt3"))
-async def chatgpt3(message: Message, state: FSMContext):
+@chat_gpt_router.message(Command("chatgpt"))
+async def chatgpt(message: Message, state: FSMContext):
     await state.clear()
 
     user = await get_user(str(message.from_user.id))
 
-    if user.current_model == Model.GPT3:
+    reply_markup = build_chat_gpt_keyboard(user.language_code, user.current_model)
+    await message.answer(
+        text=get_localization(user.language_code).CHOOSE_CHATGPT_MODEL,
+        reply_markup=reply_markup,
+    )
+
+
+@chat_gpt_router.callback_query(lambda c: c.data.startswith('chat_gpt:'))
+async def handle_chat_gpt_choose_selection(callback_query: CallbackQuery, state: FSMContext):
+    await callback_query.answer()
+
+    user = await get_user(str(callback_query.from_user.id))
+
+    chosen_model = callback_query.data.split(':')[1]
+
+    if chosen_model == user.current_model:
         reply_markup = await build_recommendations_keyboard(user)
-        await message.answer(
+        await callback_query.message.answer(
             text=get_localization(user.language_code).ALREADY_SWITCHED_TO_THIS_MODEL,
             reply_markup=reply_markup,
         )
     else:
-        user.current_model = Model.GPT3
-        await update_user(user.id, {
-            "current_model": user.current_model,
-        })
+        keyboard = callback_query.message.reply_markup.inline_keyboard
+        keyboard_changed = False
+
+        new_keyboard = []
+        for row in keyboard:
+            new_row = []
+            for button in row:
+                text = button.text
+                callback_data = button.callback_data.split(":", 1)[1]
+
+                if callback_data == chosen_model:
+                    if "✅" not in text:
+                        text += " ✅"
+                        keyboard_changed = True
+                else:
+                    text = text.replace(" ✅", "")
+                new_row.append(InlineKeyboardButton(text=text, callback_data=button.callback_data))
+            new_keyboard.append(new_row)
+        await callback_query.message.edit_reply_markup(reply_markup=InlineKeyboardMarkup(inline_keyboard=new_keyboard))
 
         reply_markup = await build_recommendations_keyboard(user)
-        await message.answer(
-            text=get_localization(user.language_code).SWITCHED_TO_CHATGPT3,
-            reply_markup=reply_markup,
-        )
+        if keyboard_changed:
+            user.current_model = chosen_model
+            await update_user(user.id, {
+                "current_model": user.current_model,
+            })
 
+            text = get_localization(user.language_code).SWITCHED_TO_CHATGPT3 if user.current_model == Model.GPT3 \
+                else get_localization(user.language_code).SWITCHED_TO_CHATGPT4
+            await callback_query.message.answer(
+                text=text,
+                reply_markup=reply_markup,
+            )
+        else:
+            text = get_localization(user.language_code).ALREADY_SWITCHED_TO_THIS_MODEL
+            await callback_query.message.answer(
+                text=text,
+                reply_markup=reply_markup,
+            )
 
-@chat_gpt_router.message(Command("chatgpt4"))
-async def chatgpt4(message: Message, state: FSMContext):
     await state.clear()
 
-    user = await get_user(str(message.from_user.id))
 
-    if user.current_model == Model.GPT4:
-        reply_markup = await build_recommendations_keyboard(user)
-        await message.answer(
-            text=get_localization(user.language_code).ALREADY_SWITCHED_TO_THIS_MODEL,
-            reply_markup=reply_markup,
-        )
-    else:
-        user.current_model = Model.GPT4
-        await update_user(user.id, {
-            "current_model": user.current_model,
-        })
+async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_quota: Quota, photo_filename=None):
+    if user_quota != Quota.GPT3 and user_quota != Quota.GPT4:
+        raise NotImplemented
 
-        reply_markup = await build_recommendations_keyboard(user)
-        await message.answer(
-            text=get_localization(user.language_code).SWITCHED_TO_CHATGPT4,
-            reply_markup=reply_markup,
-        )
-
-
-async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_quota: Quota):
     await state.update_data(is_processing=True)
 
     user_data = await state.get_data()
 
     text = user_data.get('recognized_text', None)
     if text is None:
-        text = message.text
+        if message.caption:
+            text = message.caption
+        else:
+            text = message.text
 
-    await write_message(user.current_chat_id, "user", user.id, text)
+    if photo_filename and user_quota == Quota.GPT4:
+        await write_message(user.current_chat_id, "user", user.id, text, True, photo_filename)
+    else:
+        await write_message(user.current_chat_id, "user", user.id, text)
 
     chat = await get_chat(user.current_chat_id)
     messages = await get_messages_by_chat_id(user.current_chat_id)
     role = await get_role_by_name(chat.role)
     sorted_messages = sorted(messages, key=lambda m: m.created_at)
-    history = [
-                  {
-                      'role': 'system',
-                      'content': role.translated_instructions.get(user.language_code, 'en')
-                  }
-              ] + [
-                  {
-                      'role': message.sender,
-                      'content': message.content
-                  } for message in sorted_messages
-              ]
+    if user_quota == Quota.GPT3:
+        history = [
+                      {
+                          'role': 'system',
+                          'content': role.translated_instructions.get(user.language_code, 'en')
+                      }
+                  ] + [
+                      {
+                          'role': message.sender,
+                          'content': message.content
+                      } for message in sorted_messages
+                  ]
+    else:
+        history = [
+            {
+                'role': 'system',
+                'content': role.translated_instructions.get(user.language_code, 'en')
+            }
+        ]
+        for sorted_message in sorted_messages:
+            content = []
+            if sorted_message.content:
+                content.append({
+                    'type': 'text',
+                    'text': sorted_message.content,
+                })
+
+            if sorted_message.photo_filename:
+                photo_path = f'users/chatgpt4_vision/{user.id}/{sorted_message.photo_filename}'
+                photo = await firebase.bucket.get_blob(photo_path)
+                photo_link = firebase.get_public_url(photo.name)
+                content.append({
+                    'type': 'image_url',
+                    'image_url': {
+                        'url': photo_link,
+                    },
+                })
+
+            history.append({
+                'role': sorted_message.sender,
+                'content': content,
+            })
 
     processing_message = await message.reply(text=get_localization(user.language_code).processing_request_text())
 
@@ -124,12 +185,10 @@ async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_q
                 service = ServiceType.GPT3
                 input_price = response['input_tokens'] * PRICE_GPT3_INPUT
                 output_price = response['output_tokens'] * PRICE_GPT3_OUTPUT
-            elif user_quota == Quota.GPT4:
+            else:
                 service = ServiceType.GPT4
                 input_price = response['input_tokens'] * PRICE_GPT4_INPUT
                 output_price = response['output_tokens'] * PRICE_GPT4_OUTPUT
-            else:
-                raise NotImplemented
 
             total_price = round(input_price + output_price, 6)
             message_role, message_content = response_message.role, response_message.content
@@ -206,15 +265,15 @@ async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_q
             await state.update_data(is_processing=False)
 
 
-@chat_gpt_router.callback_query(lambda c: c.data.startswith('chat_gpt:'))
-async def handle_chat_gpt_choose_selection(callback_query: CallbackQuery, state: FSMContext):
+@chat_gpt_router.callback_query(lambda c: c.data.startswith('chat_gpt_continue_generation:'))
+async def handle_chat_gpt_continue_generation_choose_selection(callback_query: CallbackQuery, state: FSMContext):
     await callback_query.answer()
 
     user = await get_user(str(callback_query.from_user.id))
 
     action = callback_query.data.split(':')[1]
 
-    if action == 'continue_generating':
+    if action == 'continue':
         await state.update_data(recognized_text=get_localization(user.language_code).CONTINUE_GENERATING)
         if user.current_model == Model.GPT3:
             user_quota = Quota.GPT3

@@ -18,6 +18,7 @@ from bot.database.operations.face_swap_package import (
 from bot.database.operations.generation import write_generation
 from bot.database.operations.request import write_request
 from bot.database.operations.user import get_user
+from bot.handlers.chat_gpt_handler import handle_chatgpt
 from bot.handlers.face_swap_handler import handle_face_swap
 from bot.integrations.replicateAI import create_face_swap_image
 from bot.keyboards.catalog import build_manage_catalog_create_role_confirmation_keyboard
@@ -112,6 +113,21 @@ async def handle_photo(message: Message, state: FSMContext):
         )
 
         await message.answer(text=get_localization(user.language_code).FACE_SWAP_MANAGE_EDIT_SUCCESS)
+    elif user.current_model == Model.GPT3 or user.current_model == Model.GPT4:
+        if user.current_model == Model.GPT3:
+            await handle_chatgpt(message, state, user, Quota.GPT3)
+        else:
+            photo = message.photo[-1]
+            photo_file = await message.bot.get_file(photo.file_id)
+            photo_data_io = await message.bot.download_file(photo_file.file_path)
+            photo_data = photo_data_io.read()
+
+            photo_vision_filename = f"{uuid.uuid4()}.jpeg"
+            photo_vision_path = f"users/chatgpt4_vision/{user.id}/{photo_vision_filename}"
+            photo_vision = firebase.bucket.new_blob(photo_vision_path)
+            await photo_vision.upload(photo_data)
+
+            await handle_chatgpt(message, state, user, Quota.GPT4, photo_vision_filename)
     elif user.current_model == Model.FACE_SWAP:
         quota = user.monthly_limits[Quota.FACE_SWAP] + user.additional_usage_quota[Quota.FACE_SWAP]
         quantity = 1

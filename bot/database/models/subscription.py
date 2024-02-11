@@ -31,7 +31,7 @@ class SubscriptionLimit:
             Quota.GPT4: 0,
             Quota.DALLE3: 10,
             Quota.FACE_SWAP: 20,
-            Quota.MUSIC_GEN: 60,
+            Quota.MUSIC_GEN: 30,
         },
         SubscriptionType.STANDARD: {
             Quota.GPT3: 1000,

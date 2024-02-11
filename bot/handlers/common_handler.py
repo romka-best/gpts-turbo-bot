@@ -38,7 +38,10 @@ async def start(message: Message, state: FSMContext):
                 await update_user(referred_by_user.id, {
                     "balance": referred_by_user.balance,
                 })
-                text = get_localization(user.language_code).referral_successful(added_to_balance, user.currency)
+                text = get_localization(referred_by_user.language_code).referral_successful(
+                    added_to_balance,
+                    referred_by_user.currency,
+                )
                 await message.bot.send_message(
                     chat_id=referred_by_user.telegram_chat_id,
                     text=text,
@@ -46,11 +49,13 @@ async def start(message: Message, state: FSMContext):
 
         chat_title = get_localization(message.from_user.language_code).DEFAULT_CHAT_TITLE
         transaction = firebase.db.transaction()
-        await initialize_user_for_the_first_time(transaction,
-                                                 message.from_user,
-                                                 str(message.chat.id),
-                                                 chat_title,
-                                                 referred_by)
+        await initialize_user_for_the_first_time(
+            transaction,
+            message.from_user,
+            str(message.chat.id),
+            chat_title,
+            referred_by,
+        )
 
         user = await get_user(str(message.from_user.id))
     elif user and user.is_blocked:

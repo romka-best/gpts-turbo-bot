@@ -1,16 +1,13 @@
 from aiogram import Router, F
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
-from aiogram.types import Message, CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup, URLInputFile
+from aiogram.types import Message, CallbackQuery, URLInputFile
 
 from bot.database.main import firebase
-from bot.database.models.common import Quota
-from bot.database.operations.chat import get_chat_by_user_id, update_chat
 from bot.database.operations.role import get_roles, get_role_by_name, write_role, get_role, update_role
 from bot.database.operations.user import get_user
 from bot.helpers.translate_text import translate_text
 from bot.keyboards.catalog import (
-    build_catalog_keyboard,
     build_manage_catalog_keyboard,
     build_manage_catalog_create_keyboard,
     build_manage_catalog_edit_keyboard,
@@ -21,74 +18,6 @@ from bot.states.catalog import Catalog
 from bot.utils.is_admin import is_admin
 
 catalog_router = Router()
-
-
-@catalog_router.message(Command("catalog"))
-async def catalog(message: Message, state: FSMContext):
-    await state.clear()
-
-    user = await get_user(str(message.from_user.id))
-
-    text = get_localization(user.language_code).CATALOG
-    current_chat = await get_chat_by_user_id(user.id)
-    roles = await get_roles()
-    reply_markup = build_catalog_keyboard(user.language_code, current_chat.role, roles)
-
-    await message.answer(text=text,
-                         reply_markup=reply_markup)
-
-
-@catalog_router.callback_query(lambda c: c.data.startswith('catalog:'))
-async def handle_catalog_selection(callback_query: CallbackQuery):
-    await callback_query.answer()
-
-    role_name = callback_query.data.split(':')[1]
-    role_photo_path = f'roles/{role_name}.png'
-    role_photo = await firebase.bucket.get_blob(role_photo_path)
-    role_photo_link = firebase.get_public_url(role_photo.name)
-
-    user = await get_user(str(callback_query.from_user.id))
-    if not user.additional_usage_quota[Quota.ACCESS_TO_CATALOG]:
-        text = get_localization(user.language_code).CATALOG_FORBIDDEN_ERROR
-        await callback_query.message.reply_photo(
-            photo=URLInputFile(role_photo_link, filename=role_photo_path),
-            caption=text,
-        )
-    else:
-        keyboard = callback_query.message.reply_markup.inline_keyboard
-        keyboard_changed = False
-
-        new_keyboard = []
-        for row in keyboard:
-            new_row = []
-            for button in row:
-                text = button.text
-                callback_data = button.callback_data.split(":", 1)[1]
-
-                if callback_data == role_name:
-                    if "❌" in text:
-                        text = text.replace(" ❌", " ✅")
-                        keyboard_changed = True
-                else:
-                    text = text.replace(" ✅", " ❌")
-                new_row.append(InlineKeyboardButton(text=text, callback_data=button.callback_data))
-            new_keyboard.append(new_row)
-
-        if keyboard_changed:
-            current_chat = await get_chat_by_user_id(user.id)
-            await update_chat(current_chat.id, {
-                "role": role_name,
-            })
-
-            await callback_query.message.edit_reply_markup(
-                reply_markup=InlineKeyboardMarkup(inline_keyboard=new_keyboard),
-            )
-
-            role = await get_role_by_name(role_name)
-            await callback_query.message.reply_photo(
-                photo=URLInputFile(role_photo_link, filename=role_photo_path),
-                caption=role.translated_descriptions.get(user.language_code, 'en'),
-            )
 
 
 # Admin

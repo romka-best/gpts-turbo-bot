@@ -40,8 +40,8 @@ def build_chats_keyboard(language_code: str) -> InlineKeyboardMarkup:
         ],
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).CLOSE,
-                callback_data='chat:close'
+                text=get_localization(language_code).BACK,
+                callback_data='chat:back'
             )
         ]
     ]
@@ -51,12 +51,6 @@ def build_chats_keyboard(language_code: str) -> InlineKeyboardMarkup:
 
 def build_create_chat_keyboard(language_code: str) -> InlineKeyboardMarkup:
     buttons = [
-        [
-            InlineKeyboardButton(
-                text=get_localization(language_code).BACK,
-                callback_data='create_chat:back'
-            )
-        ],
         [
             InlineKeyboardButton(
                 text=get_localization(language_code).CANCEL,
@@ -79,8 +73,8 @@ def build_switch_chat_keyboard(language_code: str, current_chat_id: str, chats: 
         ])
     buttons.append([
         InlineKeyboardButton(
-            text=get_localization(language_code).BACK,
-            callback_data='switch_chat:back'
+            text=get_localization(language_code).CANCEL,
+            callback_data='switch_chat:cancel'
         )
     ])
 
@@ -99,8 +93,8 @@ def build_delete_chat_keyboard(language_code: str, current_chat_id: str, chats: 
             ])
     buttons.append([
         InlineKeyboardButton(
-            text=get_localization(language_code).BACK,
-            callback_data='delete_chat:back'
+            text=get_localization(language_code).CANCEL,
+            callback_data='delete_chat:cancel'
         )
     ])
 

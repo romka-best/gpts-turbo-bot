@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from aiogram import Router
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
@@ -32,23 +34,31 @@ async def profile(message: Message, state: FSMContext):
         "is_premium": telegram_user.is_premium or False,
     })
 
-    text = get_localization(user.language_code).profile(user.subscription_type,
-                                                        user.gender,
-                                                        user.current_model,
-                                                        user.monthly_limits,
-                                                        user.additional_usage_quota)
+    renewal_date = (user.last_subscription_limit_update + timedelta(days=30))
+    text = get_localization(user.language_code).profile(
+        user.subscription_type,
+        user.gender,
+        user.current_model,
+        user.monthly_limits,
+        user.additional_usage_quota,
+        renewal_date.strftime("%d.%m.%Y"),
+    )
     reply_markup = build_profile_keyboard(user.language_code)
 
     photo_path = f'users/avatars/{user.id}.jpeg'
     try:
         photo = await firebase.bucket.get_blob(photo_path)
         photo_link = firebase.get_public_url(photo.name)
-        await message.answer_photo(photo=URLInputFile(photo_link, filename=photo_path),
-                                   caption=text,
-                                   reply_markup=reply_markup)
+        await message.answer_photo(
+            photo=URLInputFile(photo_link, filename=photo_path),
+            caption=text,
+            reply_markup=reply_markup,
+        )
     except Exception:
-        await message.answer(text=text,
-                             reply_markup=reply_markup)
+        await message.answer(
+            text=text,
+            reply_markup=reply_markup,
+        )
 
 
 @profile_router.callback_query(lambda c: c.data.startswith('profile:'))
@@ -100,7 +110,9 @@ async def handle_profile_gender_selection(callback_query: CallbackQuery, state: 
     )
 
     if user.current_model == Model.FACE_SWAP:
-        await handle_face_swap(callback_query.bot,
-                               str(callback_query.message.chat.id),
-                               state,
-                               str(callback_query.from_user.id))
+        await handle_face_swap(
+            callback_query.bot,
+            str(callback_query.message.chat.id),
+            state,
+            str(callback_query.from_user.id),
+        )

@@ -19,7 +19,6 @@ from bot.handlers.blast_handler import blast_router
 from bot.handlers.bonus_handler import bonus_router
 from bot.handlers.catalog_handler import catalog_router
 from bot.handlers.chat_gpt_handler import chat_gpt_router
-from bot.handlers.chats_handler import chats_router
 from bot.handlers.common_handler import common_router
 from bot.handlers.dalle_handler import dalle_router
 from bot.handlers.face_swap_handler import face_swap_router
@@ -41,6 +40,7 @@ from bot.helpers.send_daily_statistics import send_daily_statistics
 from bot.helpers.set_commands import set_commands
 from bot.helpers.set_description import set_description
 from bot.helpers.update_monthly_limits import update_monthly_limits
+from bot.utils.migrate_users import migrate_users
 
 WEBHOOK_BOT_PATH = f"/bot/{config.BOT_TOKEN.get_secret_value()}"
 WEBHOOK_REPLICATE_PATH = config.WEBHOOK_REPLICATE_PATH
@@ -62,7 +62,6 @@ async def lifespan(_: FastAPI):
     dp.include_routers(
         common_router,
         catalog_router,
-        chats_router,
         feedback_router,
         language_router,
         mode_router,
@@ -85,6 +84,7 @@ async def lifespan(_: FastAPI):
     await set_description(bot)
     await set_commands(bot)
     await firebase.init()
+    await migrate_users(bot)
     yield
     await bot.session.close()
     await storage.close()
@@ -105,8 +105,8 @@ async def handle_update(update: dict):
         await dp.feed_update(bot=bot, update=telegram_update)
     except TelegramForbiddenError:
         user_id = None
-        if telegram_update.callback_query and telegram_update.callback_query.message.from_user.id:
-            user_id = str(telegram_update.callback_query.message.from_user.id)
+        if telegram_update.callback_query and telegram_update.callback_query.from_user.id:
+            user_id = str(telegram_update.callback_query.from_user.id)
         elif telegram_update.message and telegram_update.message.from_user.id:
             user_id = str(telegram_update.message.from_user.id)
 
@@ -118,6 +118,8 @@ async def handle_update(update: dict):
         if e.message == "Bad Request: message can't be deleted for everyone":
             logging.info(e)
         elif e.message == "Bad Request: message to reply not found":
+            logging.warning(e)
+        elif e.message == "Bad Request: message to delete not found":
             logging.warning(e)
         else:
             logging.exception(f"Error in bot_webhook: {e}")

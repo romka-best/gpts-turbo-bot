@@ -20,6 +20,7 @@ async def get_message(message_id: str) -> Optional[Message]:
             sender_id=message_dict.get('sender_id'),
             content=message_dict.get('content'),
             is_in_context=message_dict.get('is_in_context'),
+            photo_filename=message_dict.get('photo_filename'),
             created_at=message_dict.get('created_at'),
             edited_at=message_dict.get('edited_at'),
         )
@@ -36,6 +37,7 @@ async def get_messages() -> List[Message]:
             sender_id=message.to_dict().get('sender_id'),
             content=message.to_dict().get('content'),
             is_in_context=message.to_dict().get('is_in_context'),
+            photo_filename=message.to_dict().get('photo_filename'),
             created_at=message.to_dict().get('created_at'),
             edited_at=message.to_dict().get('edited_at'),
         ) async for message in messages
@@ -58,6 +60,7 @@ async def get_messages_by_chat_id(chat_id: str, limit=10, is_in_context=True) ->
             sender_id=message.to_dict().get('sender_id'),
             content=message.to_dict().get('content'),
             is_in_context=message.to_dict().get('is_in_context'),
+            photo_filename=message.to_dict().get('photo_filename'),
             created_at=message.to_dict().get('created_at'),
             edited_at=message.to_dict().get('edited_at'),
         )
@@ -73,6 +76,7 @@ async def create_message_object(
     sender_id: str,
     content: str,
     is_in_context=True,
+    photo_filename=None,
 ) -> Message:
     message_ref = firebase.db.collection('messages').document()
 
@@ -83,27 +87,34 @@ async def create_message_object(
         sender_id=sender_id,
         content=content,
         is_in_context=is_in_context,
+        photo_filename=photo_filename,
     )
 
 
-async def write_message(chat_id: str,
-                        sender: str,
-                        sender_id: str,
-                        content: str,
-                        is_in_context=True) -> Message:
-    message = await create_message_object(chat_id, sender, sender_id, content, is_in_context)
+async def write_message(
+    chat_id: str,
+    sender: str,
+    sender_id: str,
+    content: str,
+    is_in_context=True,
+    photo_filename=None,
+) -> Message:
+    message = await create_message_object(chat_id, sender, sender_id, content, is_in_context, photo_filename)
     await firebase.db.collection('messages').document(message.id).set(message.to_dict())
 
     return message
 
 
-async def write_message_in_transaction(transaction,
-                                       chat_id: str,
-                                       sender: str,
-                                       sender_id: str,
-                                       content: str,
-                                       is_in_context=True) -> Message:
-    message = await create_message_object(chat_id, sender, sender_id, content, is_in_context)
+async def write_message_in_transaction(
+    transaction,
+    chat_id: str,
+    sender: str,
+    sender_id: str,
+    content: str,
+    is_in_context=True,
+    photo_filename=None,
+) -> Message:
+    message = await create_message_object(chat_id, sender, sender_id, content, is_in_context, photo_filename)
     transaction.set(firebase.db.collection('messages').document(message.id), message.to_dict())
 
     return message

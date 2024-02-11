@@ -1,8 +1,28 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
+from bot.database.models.common import PaymentType
 from bot.database.models.package import PackageType
 from bot.database.models.subscription import SubscriptionType, SubscriptionPeriod
 from bot.locales.main import get_localization
+
+
+def build_buy_keyboard(language_code: str) -> InlineKeyboardMarkup:
+    buttons = [
+        [
+            InlineKeyboardButton(
+                text=get_localization(language_code).SUBSCRIPTION,
+                callback_data=f'buy:{PaymentType.SUBSCRIPTION}'
+            )
+        ],
+        [
+            InlineKeyboardButton(
+                text=get_localization(language_code).PACKAGE,
+                callback_data=f'buy:{PaymentType.PACKAGE}'
+            )
+        ],
+    ]
+
+    return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
 def build_subscriptions_keyboard(language_code: str) -> InlineKeyboardMarkup:
@@ -27,17 +47,19 @@ def build_subscriptions_keyboard(language_code: str) -> InlineKeyboardMarkup:
         ],
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).CLOSE,
-                callback_data='subscription:close'
+                text=get_localization(language_code).BACK,
+                callback_data='subscription:back'
             )
-        ]
+        ],
     ]
 
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
-def build_period_of_subscription_keyboard(language_code: str,
-                                          subscription_type: SubscriptionType) -> InlineKeyboardMarkup:
+def build_period_of_subscription_keyboard(
+    language_code: str,
+    subscription_type: SubscriptionType,
+) -> InlineKeyboardMarkup:
     buttons = [
         [
             InlineKeyboardButton(
@@ -57,12 +79,6 @@ def build_period_of_subscription_keyboard(language_code: str,
                 callback_data=f'period_of_subscription:{subscription_type}:{SubscriptionPeriod.MONTHS6}'
             ),
         ],
-        [
-            InlineKeyboardButton(
-                text=get_localization(language_code).CLOSE,
-                callback_data='period_of_subscription:close'
-            )
-        ]
     ]
 
     return InlineKeyboardMarkup(inline_keyboard=buttons)
@@ -126,10 +142,10 @@ def build_packages_keyboard(language_code: str) -> InlineKeyboardMarkup:
         ],
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).CLOSE,
-                callback_data='package:close'
+                text=get_localization(language_code).BACK,
+                callback_data='package:back'
             )
-        ]
+        ],
     ]
 
     return InlineKeyboardMarkup(inline_keyboard=buttons)

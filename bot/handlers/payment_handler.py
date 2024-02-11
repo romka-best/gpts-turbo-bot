@@ -7,6 +7,7 @@ from aiogram.types import Message, CallbackQuery, LabeledPrice, PreCheckoutQuery
 
 from bot.config import config
 from bot.database.main import firebase
+from bot.database.models.common import PaymentType
 from bot.database.models.package import PackageStatus, PackageType, Package, PackageMinimum
 from bot.database.models.subscription import Subscription, SubscriptionStatus
 from bot.database.models.transaction import TransactionType, ServiceType
@@ -18,6 +19,7 @@ from bot.helpers.create_package import create_package
 from bot.helpers.create_subscription import create_subscription
 from bot.keyboards.common import build_cancel_keyboard, build_recommendations_keyboard
 from bot.keyboards.payment import (
+    build_buy_keyboard,
     build_subscriptions_keyboard,
     build_period_of_subscription_keyboard,
     build_packages_keyboard,
@@ -28,9 +30,37 @@ from bot.states.payment import Payment
 payment_router = Router()
 
 
-class PaymentType:
-    SUBSCRIPTION = 'SUBSCRIPTION'
-    PACKAGE = 'PACKAGE'
+async def handle_buy(message: Message, user_id: str):
+    user = await get_user(user_id)
+
+    reply_keyboard = build_buy_keyboard(user.language_code)
+    text = get_localization(user.language_code).BUY
+    await message.answer(
+        text=text,
+        reply_markup=reply_keyboard,
+    )
+
+
+@payment_router.message(Command("buy"))
+async def buy(message: Message, state: FSMContext):
+    await state.clear()
+
+    await handle_buy(message, str(message.from_user.id))
+
+
+@payment_router.callback_query(lambda c: c.data.startswith('buy:'))
+async def handle_buy_selection(callback_query: CallbackQuery):
+    await callback_query.answer()
+
+    user_id = str(callback_query.from_user.id)
+
+    payment_type = callback_query.data.split(':')[1]
+    if payment_type == PaymentType.PACKAGE:
+        await handle_package(callback_query.message, user_id)
+    elif payment_type == PaymentType.SUBSCRIPTION:
+        await handle_subscribe(callback_query.message, user_id)
+
+    await callback_query.message.delete()
 
 
 async def handle_subscribe(message: Message, user_id: str):
@@ -42,31 +72,30 @@ async def handle_subscribe(message: Message, user_id: str):
 
     text = get_localization(user.language_code).subscribe(user.currency)
     reply_markup = build_subscriptions_keyboard(user.language_code)
-
-    await message.answer_photo(photo=URLInputFile(photo_link, filename=photo_path),
-                               caption=text,
-                               reply_markup=reply_markup)
-
-
-@payment_router.message(Command("subscribe"))
-async def subscribe(message: Message, state: FSMContext):
-    await state.clear()
-
-    await handle_subscribe(message, str(message.from_user.id))
+    await message.answer_photo(
+        photo=URLInputFile(photo_link, filename=photo_path),
+        caption=text,
+        reply_markup=reply_markup,
+    )
 
 
 @payment_router.callback_query(lambda c: c.data.startswith('subscription:'))
 async def handle_subscription_selection(callback_query: CallbackQuery):
     await callback_query.answer()
 
-    language_code = (await get_user(str(callback_query.from_user.id))).language_code
+    user_id = str(callback_query.from_user.id)
 
     subscription_type = callback_query.data.split(':')[1]
+    if subscription_type == 'back':
+        await handle_buy(callback_query.message, user_id)
+        await callback_query.message.delete()
+    else:
+        user = await get_user(user_id)
 
-    message = get_localization(language_code).choose_how_many_months_to_subscribe(subscription_type)
-    reply_markup = build_period_of_subscription_keyboard(language_code, subscription_type)
+        message = get_localization(user.language_code).choose_how_many_months_to_subscribe(subscription_type)
+        reply_markup = build_period_of_subscription_keyboard(user.language_code, subscription_type)
 
-    await callback_query.message.edit_caption(caption=message, reply_markup=reply_markup)
+        await callback_query.message.edit_caption(caption=message, reply_markup=reply_markup)
 
 
 @payment_router.callback_query(lambda c: c.data.startswith('period_of_subscription:'))
@@ -95,40 +124,44 @@ async def handle_period_of_subscription_selection(callback_query: CallbackQuery)
     await callback_query.message.delete()
 
 
-@payment_router.message(Command("buy"))
-async def buy(message: Message, state: FSMContext):
-    await state.clear()
-
-    user = await get_user(str(message.from_user.id))
+async def handle_package(message: Message, user_id: str):
+    user = await get_user(user_id)
 
     photo_path = f'packages/{user.language_code}_{user.currency}.png'
     photo = await firebase.bucket.get_blob(photo_path)
     photo_link = firebase.get_public_url(photo.name)
 
-    text = get_localization(user.language_code).buy()
+    text = get_localization(user.language_code).package()
     reply_markup = build_packages_keyboard(user.language_code)
 
-    await message.answer_photo(photo=URLInputFile(photo_link, filename=photo_path),
-                               caption=text,
-                               reply_markup=reply_markup)
+    await message.answer_photo(
+        photo=URLInputFile(photo_link, filename=photo_path),
+        caption=text,
+        reply_markup=reply_markup,
+    )
 
 
 @payment_router.callback_query(lambda c: c.data.startswith('package:'))
 async def handle_package_selection(callback_query: CallbackQuery, state: FSMContext):
     await callback_query.answer()
 
-    user = await get_user(str(callback_query.from_user.id))
+    user_id = str(callback_query.from_user.id)
 
     package_type = callback_query.data.split(':')[1]
+    if package_type == 'back':
+        await handle_buy(callback_query.message, user_id)
+        await callback_query.message.delete()
+    else:
+        user = await get_user(user_id)
 
-    message = get_localization(user.language_code).choose_min(package_type)
+        message = get_localization(user.language_code).choose_min(package_type)
 
-    reply_markup = build_cancel_keyboard(user.language_code)
+        reply_markup = build_cancel_keyboard(user.language_code)
 
-    await callback_query.message.edit_caption(caption=message, reply_markup=reply_markup)
+        await callback_query.message.edit_caption(caption=message, reply_markup=reply_markup)
 
-    await state.update_data(package_type=package_type)
-    await state.set_state(Payment.waiting_for_package_quantity)
+        await state.update_data(package_type=package_type)
+        await state.set_state(Payment.waiting_for_package_quantity)
 
 
 @payment_router.message(Payment.waiting_for_package_quantity, ~F.text.startswith('/'))
@@ -207,12 +240,14 @@ async def pre_checkout(pre_checkout_query: PreCheckoutQuery):
     if payment_type == PaymentType.SUBSCRIPTION:
         _, user_id, subscription_type, subscription_period = pre_checkout_query.invoice_payload.split(':')
         try:
-            await write_subscription(user_id,
-                                     subscription_type,
-                                     subscription_period,
-                                     SubscriptionStatus.WAITING,
-                                     pre_checkout_query.currency,
-                                     pre_checkout_query.total_amount // 100)
+            await write_subscription(
+                user_id,
+                subscription_type,
+                subscription_period,
+                SubscriptionStatus.WAITING,
+                pre_checkout_query.currency,
+                pre_checkout_query.total_amount // 100,
+            )
             await pre_checkout_query.answer(ok=True)
         except Exception:
             await pre_checkout_query.answer(ok=False)
@@ -227,13 +262,15 @@ async def pre_checkout(pre_checkout_query: PreCheckoutQuery):
             ):
                 current_date = datetime.now(timezone.utc)
                 until_at = current_date + timedelta(days=30 * int(quantity))
-            await write_package(user_id,
-                                package_type,
-                                PackageStatus.WAITING,
-                                pre_checkout_query.currency,
-                                pre_checkout_query.total_amount // 100,
-                                int(quantity),
-                                until_at)
+            await write_package(
+                user_id,
+                package_type,
+                PackageStatus.WAITING,
+                pre_checkout_query.currency,
+                pre_checkout_query.total_amount // 100,
+                int(quantity),
+                until_at,
+            )
             await pre_checkout_query.answer(ok=True)
         except Exception:
             await pre_checkout_query.answer(ok=False)
@@ -256,26 +293,30 @@ async def successful_payment(message: Message):
                                   subscription.id,
                                   subscription.user_id,
                                   payment.provider_payment_charge_id)
-        await write_transaction(user_id=user.id,
-                                type=TransactionType.INCOME,
-                                service=subscription.type,
-                                amount=subscription.amount,
-                                currency=subscription.currency,
-                                quantity=1,
-                                details={
-                                    'subscription_id': subscription.id,
-                                    'provider_payment_charge_id': payment.provider_payment_charge_id
-                                })
+        await write_transaction(
+            user_id=user.id,
+            type=TransactionType.INCOME,
+            service=subscription.type,
+            amount=subscription.amount,
+            currency=subscription.currency,
+            quantity=1,
+            details={
+                'subscription_id': subscription.id,
+                'provider_payment_charge_id': payment.provider_payment_charge_id
+            },
+        )
 
         await message.answer(text=get_localization(user.language_code).SUBSCRIPTION_SUCCESS)
     elif payment_type == PaymentType.PACKAGE:
         package = await get_last_package_by_user_id(user_id)
 
         transaction = firebase.db.transaction()
-        await create_package(transaction,
-                             package.id,
-                             package.user_id,
-                             payment.provider_payment_charge_id)
+        await create_package(
+            transaction,
+            package.id,
+            package.user_id,
+            payment.provider_payment_charge_id,
+        )
 
         service_type = package.type
         if package.type == PackageType.GPT3:
