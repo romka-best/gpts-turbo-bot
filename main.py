@@ -11,6 +11,8 @@ from aiogram import Bot, Dispatcher, types
 from aiogram.enums.parse_mode import ParseMode
 from aiogram.fsm.storage.redis import RedisStorage
 from aiogram.fsm.strategy import FSMStrategy
+from redis.backoff import FullJitterBackoff
+from redis.retry import Retry
 
 from bot.config import config
 from bot.database.main import firebase
@@ -49,7 +51,12 @@ WEBHOOK_BOT_URL = config.WEBHOOK_URL + WEBHOOK_BOT_PATH
 WEBHOOK_REPLICATE_URL = config.WEBHOOK_URL + config.WEBHOOK_REPLICATE_PATH
 
 bot = Bot(token=config.BOT_TOKEN.get_secret_value(), parse_mode=ParseMode.HTML)
-storage = RedisStorage.from_url(config.REDIS_URL)
+storage = RedisStorage.from_url(config.REDIS_URL, {
+    'socket_keepalive': True,
+    'health_check_interval': 30,
+    'retry_on_timeout': True,
+    'retry': Retry(FullJitterBackoff(cap=5, base=1), 5),
+})
 dp = Dispatcher(storage=storage, sm_strategy=FSMStrategy.GLOBAL_USER)
 
 
