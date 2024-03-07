@@ -4,6 +4,8 @@ from bot.database.models.common import DEFAULT_ROLE
 
 
 class Chat:
+    COLLECTION_NAME = "chats"
+
     id: str
     user_id: str
     telegram_chat_id: str
@@ -12,14 +14,16 @@ class Chat:
     created_at: datetime
     edited_at: datetime
 
-    def __init__(self,
-                 id: str,
-                 user_id: str,
-                 telegram_chat_id: str,
-                 title: str,
-                 role=None,
-                 created_at=None,
-                 edited_at=None):
+    def __init__(
+        self,
+        id: str,
+        user_id: str,
+        telegram_chat_id: str,
+        title: str,
+        role=None,
+        created_at=None,
+        edited_at=None,
+    ):
         self.id = str(id)
         self.user_id = user_id
         self.telegram_chat_id = str(telegram_chat_id)

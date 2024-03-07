@@ -10,16 +10,20 @@ from bot.database.models.generation import Generation, GenerationStatus
 from bot.database.models.request import Request, RequestStatus
 from bot.database.models.transaction import TransactionType, ServiceType
 from bot.database.models.user import User, UserSettings
-from bot.database.operations.face_swap_package import update_used_face_swap_package, get_used_face_swap_package
-from bot.database.operations.generation import get_generation, update_generation, get_generations_by_request_id
-from bot.database.operations.request import get_request, update_request
-from bot.database.operations.transaction import write_transaction
-from bot.database.operations.user import get_user, update_user
-from bot.handlers.face_swap_handler import PRICE_FACE_SWAP, handle_face_swap
-from bot.handlers.music_gen_handler import PRICE_MUSIC_GEN, handle_music_gen
-from bot.helpers.send_audio import send_audio
-from bot.helpers.send_images import send_image
-from bot.keyboards.common import build_reaction_keyboard
+from bot.database.operations.face_swap_package.getters import get_used_face_swap_package
+from bot.database.operations.face_swap_package.updaters import update_used_face_swap_package
+from bot.database.operations.generation.getters import get_generations_by_request_id, get_generation
+from bot.database.operations.generation.updaters import update_generation
+from bot.database.operations.request.getters import get_request
+from bot.database.operations.request.updaters import update_request
+from bot.database.operations.transaction.writers import write_transaction
+from bot.database.operations.user.getters import get_user
+from bot.database.operations.user.updaters import update_user
+from bot.handlers.ai.face_swap_handler import PRICE_FACE_SWAP, handle_face_swap
+from bot.handlers.ai.music_gen_handler import PRICE_MUSIC_GEN, handle_music_gen
+from bot.helpers.senders.send_audio import send_audio
+from bot.helpers.senders.send_images import send_image
+from bot.keyboards.common.common import build_reaction_keyboard
 
 
 async def handle_replicate_webhook(bot: Bot, dp: Dispatcher, prediction: dict):
@@ -63,11 +67,13 @@ async def handle_replicate_webhook(bot: Bot, dp: Dispatcher, prediction: dict):
     return True
 
 
-async def handle_replicate_face_swap(bot: Bot,
-                                     dp: Dispatcher,
-                                     user: User,
-                                     request: Request,
-                                     generation: Generation):
+async def handle_replicate_face_swap(
+    bot: Bot,
+    dp: Dispatcher,
+    user: User,
+    request: Request,
+    generation: Generation,
+):
     reply_markup = build_reaction_keyboard(generation.id)
     await send_image(bot, user.telegram_chat_id, generation.result, reply_markup)
 
@@ -166,11 +172,13 @@ async def handle_replicate_face_swap(bot: Bot,
         await bot.delete_message(user.telegram_chat_id, request.message_id)
 
 
-async def handle_replicate_music_gen(bot: Bot,
-                                     dp: Dispatcher,
-                                     user: User,
-                                     request: Request,
-                                     generation: Generation):
+async def handle_replicate_music_gen(
+    bot: Bot,
+    dp: Dispatcher,
+    user: User,
+    request: Request,
+    generation: Generation,
+):
     prompt = generation.details.get('prompt')
     duration = int(generation.details.get('duration'))
 

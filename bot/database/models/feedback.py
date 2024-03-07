@@ -2,18 +2,22 @@ from datetime import datetime, timezone
 
 
 class Feedback:
+    COLLECTION_NAME = "feedbacks"
+
     id: str
     user_id: str
     content: str
     created_at: datetime
     edited_at: datetime
 
-    def __init__(self,
-                 id: str,
-                 user_id: str,
-                 content: str,
-                 created_at=None,
-                 edited_at=None):
+    def __init__(
+        self,
+        id: str,
+        user_id: str,
+        content: str,
+        created_at=None,
+        edited_at=None,
+    ):
         self.id = id
         self.user_id = user_id
         self.content = content

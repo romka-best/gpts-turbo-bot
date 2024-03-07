@@ -21,6 +21,8 @@ class UserGender:
 
 
 class User:
+    COLLECTION_NAME = "users"
+
     id: str
     first_name: str
     last_name: str
@@ -83,28 +85,30 @@ class User:
         },
     }
 
-    def __init__(self,
-                 id: str,
-                 first_name: str,
-                 last_name: str,
-                 username: str,
-                 current_chat_id: str,
-                 telegram_chat_id: str,
-                 gender=UserGender.UNSPECIFIED,
-                 language_code="en",
-                 is_premium=False,
-                 is_blocked=False,
-                 current_model=Model.GPT3,
-                 currency=Currency.RUB,
-                 balance=0,
-                 subscription_type=SubscriptionType.FREE,
-                 last_subscription_limit_update=None,
-                 monthly_limits=None,
-                 additional_usage_quota=None,
-                 settings=None,
-                 referred_by=None,
-                 created_at=None,
-                 edited_at=None):
+    def __init__(
+        self,
+        id: str,
+        first_name: str,
+        last_name: str,
+        username: str,
+        current_chat_id: str,
+        telegram_chat_id: str,
+        gender=UserGender.UNSPECIFIED,
+        language_code="en",
+        is_premium=False,
+        is_blocked=False,
+        current_model=Model.GPT3,
+        currency=Currency.RUB,
+        balance=0,
+        subscription_type=SubscriptionType.FREE,
+        last_subscription_limit_update=None,
+        monthly_limits=None,
+        additional_usage_quota=None,
+        settings=None,
+        referred_by=None,
+        created_at=None,
+        edited_at=None,
+    ):
         self.id = str(id)
         self.first_name = first_name
         self.last_name = last_name

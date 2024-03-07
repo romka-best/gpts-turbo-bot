@@ -25,8 +25,6 @@ async def get_response_message(current_model: Model, history: list) -> Dict:
         max_tokens=max_tokens,
     )
 
-    print(response)
-
     return {
         "finish_reason": response.choices[0].finish_reason,
         "message": response.choices[0].message,

@@ -16,6 +16,8 @@ class FaceSwapFileData(TypedDict):
 
 
 class FaceSwapPackage:
+    COLLECTION_NAME = "face_swap_packages"
+
     id: str
     name: str
     translated_names: Dict
@@ -25,15 +27,17 @@ class FaceSwapPackage:
     created_at: datetime
     edited_at: datetime
 
-    def __init__(self,
-                 id: str,
-                 name: str,
-                 translated_names: Dict,
-                 gender: UserGender,
-                 files: List[FaceSwapFileData],
-                 status: FaceSwapPackageStatus,
-                 created_at=None,
-                 edited_at=None):
+    def __init__(
+        self,
+        id: str,
+        name: str,
+        translated_names: Dict,
+        gender: UserGender,
+        files: List[FaceSwapFileData],
+        status: FaceSwapPackageStatus,
+        created_at=None,
+        edited_at=None,
+    ):
         self.id = id
         self.name = name
         self.translated_names = translated_names
@@ -50,6 +54,8 @@ class FaceSwapPackage:
 
 
 class UsedFaceSwapPackage:
+    COLLECTION_NAME = "used_face_swap_packages"
+
     id: str
     user_id: str
     package_id: str
@@ -57,13 +63,15 @@ class UsedFaceSwapPackage:
     created_at: datetime
     edited_at: datetime
 
-    def __init__(self,
-                 id: str,
-                 user_id: str,
-                 package_id: str,
-                 used_images: List[str],
-                 created_at=None,
-                 edited_at=None):
+    def __init__(
+        self,
+        id: str,
+        user_id: str,
+        package_id: str,
+        used_images: List[str],
+        created_at=None,
+        edited_at=None,
+    ):
         self.id = id
         self.user_id = user_id
         self.package_id = package_id

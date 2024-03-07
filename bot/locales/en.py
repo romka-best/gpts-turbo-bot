@@ -1,9 +1,9 @@
 import random
-from typing import List
+from typing import List, Dict
 
 from bot.locales.texts import Texts
 from bot.database.models.common import Currency, Quota, Model
-from bot.database.models.package import PackageType
+from bot.database.models.package import PackageType, Package
 from bot.database.models.subscription import Subscription, SubscriptionType, SubscriptionPeriod, SubscriptionLimit
 from bot.database.models.user import UserGender
 
@@ -168,6 +168,7 @@ Start using your generations right now and discover new horizons with our neural
 """
 
     # Promo code
+    PROMO_CODE_ACTIVATE = "🔑 Activate promo code"
     PROMO_CODE_INFO = """
 🔓 <b>Unlock the world of AI wonders with your secret code!</b> 🌟
 
@@ -191,7 +192,7 @@ Looks like you're already part of our exclusive subscriber's club! 🌟
 🕒 <b>Whoops, time's up on this promo code!</b>
 
 Looks like this promo code has hit its expiration date 📆. It's like a Cinderella story, but without the glass slipper 🥿
-But hey, don't lose heart! You can still explore our other magical offers with /subscribe or /buy. There's always something exciting waiting for you in our AI wonderland! 🎩✨
+But hey, don't lose heart! You can still explore our other magical offers with /buy. There's always something exciting waiting for you in our AI wonderland! 🎩✨
 
 Stay curious and let the AI adventure continue! 🌟🚀
 """
@@ -199,7 +200,7 @@ Stay curious and let the AI adventure continue! 🌟🚀
 🔍 <b>Oops, promo code not found!</b>
 
 It seems like the promo code you entered is playing hide and seek with us 🕵️‍♂️. We couldn't find it in our system 🤔
-Double-check for any typos and give it another go. If it's still a no-show, maybe it's time to hunt for another code or check out our /subscribe and /buy options for some neat deals 🛍️
+Double-check for any typos and give it another go. If it's still a no-show, maybe it's time to hunt for another code or check out our /buy options for some neat deals 🛍️
 
 Keep your spirits high, and let's keep the AI fun rolling! 🚀🎈
 """
@@ -207,7 +208,7 @@ Keep your spirits high, and let's keep the AI fun rolling! 🚀🎈
 🚫 <b>Oops, déjà vu!</b>
 
 Looks like you've already used this promo code. It's a one-time magic spell, and it seems you've already cast it! ✨🧙
-No worries, though! You can check out our latest offers with /subscribe or /buy. There's always a new trick up our AI sleeve! 🎉🔮
+No worries, though! You can check out our latest offers with /buy. There's always a new trick up our AI sleeve! 🎉🔮
 
 Keep exploring and let the AI surprises continue! 🤖
 """
@@ -277,7 +278,7 @@ Our goal is safety and respect for every user! 🌟
 
 Your quota for the current model has just done a Houdini and disappeared! 🎩
 But don't worry, you've got options:
-- Check out /buy or /subscribe for more magical moments, or
+- Check out /buy for more magical moments, or
 - Switch up the fun with a different AI model using /mode
 
 The adventure continues! 🚀✨
@@ -330,7 +331,7 @@ Here you are the artist, and settings are your palette. Choose the model you wan
     VOICE_MESSAGES_FORBIDDEN = """
 🎙 <b>Oops! Seems like your voice went into the AI void!</b>
 
-To unlock the magic of voice-to-text, simply wave your wand with /subscribe or /buy.
+To unlock the magic of voice-to-text, simply wave your wand with /buy.
 
 Let's turn those voice messages into text and keep the conversation flowing! 🌟🔮
 """
@@ -344,7 +345,7 @@ The gates to a world of exclusive opportunities are now open before you! What wi
 🌟 <b>Subscription: Your VIP pass to a world of opportunities!</b>
 Gain full access to the entire spectrum of innovative services: from conversations with ChatGPT to creating unique melodies with MusicGen. Use thematic chats to delve into topics of interest and expand your horizons every day. Discover the comfort of quick responses and the uniqueness of personalized images with FaceSwap. All this and much more are waiting for you in our subscriptions: <b>STANDARD</b> ✨, <b>VIP</b> 🔥, or <b>PLATINUM</b> 💎
 
-📦 <b>Package: The perfect solution for specific needs!</b>
+🛍 <b>Packages: The perfect solution for specific needs!</b>
 Looking for a targeted solution for a one-time project? Our Package provides the necessary number of requests and services to help you achieve your goals. Choose only what you need for your next creative breakthrough or business task, and pay only for the resources you use
 
 Choose by clicking a button below 👇
@@ -354,7 +355,7 @@ Choose by clicking a button below 👇
     MONTH_1 = "1 month"
     MONTHS_3 = "3 months"
     MONTHS_6 = "6 months"
-    DISCOUNT = "Discount"
+    DISCOUNT = "💸 Discount"
     NO_DISCOUNT = "No discount"
     SUBSCRIPTION = "💳 Subscription"
     SUBSCRIPTION_SUCCESS = """
@@ -381,7 +382,7 @@ Keep unleashing the power of AI and remember, we're here to make your digital dr
 
 Hey there, AI enthusiast! 🌟
 Your subscription has come to an end. But don't worry, the AI journey isn't over yet! 🚀
-You can renew your magic pass with /subscribe to keep exploring the AI universe. Or, if you prefer, take a peek at /buy for some tailor-made individual packages 🎁
+You can renew your magic pass with /buy to keep exploring the AI universe or, if you prefer, take a peek for some tailor-made individual packages 🎁
 
 The AI adventure awaits! Recharge, regroup, and let's continue this exciting journey together. 🤖✨
 """
@@ -390,7 +391,7 @@ The AI adventure awaits! Recharge, regroup, and let's continue this exciting jou
 
 Oops, it looks like your fast messages (or voice messages, catalog access) package has run its course. But don't worry, new opportunities always await beyond the horizon!
 
-🎁 Want to continue? Check out our offers in /buy or consider a subscription via /subscribe. More exciting moments are ahead!
+🎁 Want to continue? Check out our offers or consider a subscription via /buy. More exciting moments are ahead!
 
 🚀 Ready for a fresh start? Rejoin and dive back into the world of amazing AI possibilities!
 """
@@ -399,13 +400,25 @@ Oops, it looks like your fast messages (or voice messages, catalog access) packa
 
 Your chats have switched their unique roles to "Personal Assistant" as your access to the role catalog has ended. But don't worry, your AI helpers are still here to keep the conversation going!
 
-🎁 Want your previous roles back? Visit /buy to purchase a new package or subscribe via /subscribe for unlimited access to the catalog.
+🎁 Want your previous roles back? Visit /buy to purchase a new package or subscribe for unlimited access to the catalog.
 
 🌟 Keep exploring! Your chats are always ready for new amazing conversations with AI.
 """
 
     # Package
-    PACKAGE = "📦 Package"
+    PACKAGE = "🛍 Package"
+    PACKAGES = "🛍 Packages"
+    SHOPPING_CART = "🛒 Cart"
+    ADD_TO_CART = "➕ Add to cart"
+    BUY_NOW = "🛍 Buy now"
+    REMOVE_FROM_CART = "➖ Remove from cart"
+    GO_TO_CART = "🛒 Go to cart"
+    CONTINUE_SHOPPING = "🛍 Continue shopping"
+    PROCEED_TO_CHECKOUT = "💳 Proceed to checkout"
+    CLEAR_CART = "🗑 Clear cart"
+    ADD_TO_CART_OR_BUY_NOW = "Buy now or add to cart?"
+    ADDED_TO_CART = "Added to cart ✅"
+    GO_TO_CART_OR_CONTINUE_SHOPPING = "Go to cart or continue shopping?"
     GPT3_REQUESTS = "✉️ ChatGPT-3.5 requests"
     GPT3_REQUESTS_DESCRIPTION = "Unleash the power of GPT 3.5 for witty chats, smart advice, and endless fun! 🤖✨"
     GPT4_REQUESTS = "🧠 ChatGPT-4.0 requests"
@@ -424,13 +437,20 @@ Your chats have switched their unique roles to "Personal Assistant" as your acce
     ANSWERS_AND_REQUESTS_WITH_VOICE_MESSAGES_DESCRIPTION = "Experience the ease and convenience of voice communication with our AI: Send and receive voice messages for a more dynamic and expressive interaction"
     FAST_ANSWERS = "⚡ Fast answers"
     FAST_ANSWERS_DESCRIPTION = "Quick Messages feature offers lightning-fast, accurate AI responses, ensuring you're always a step ahead in communication"
-    MIN_ERROR = "Oops! It looks like the number entered is below our minimum threshold. Please enter a value that meets or exceeds the minimum required. Let's try that again! 🔄"
+    MIN_ERROR = "Oops! It looks like the total sum is below our minimum threshold. Please choose count of packages that meets or exceeds the minimum required. Let's try that again! 🔄"
     MAX_ERROR = "Oops! It looks like the number entered is higher than you can purchase. Please enter a smaller value or one corresponding to your balance. Let's try that again! 🔄"
     VALUE_ERROR = "Whoops! That doesn't seem like a number. 🤔 Could you please enter a numeric value? Let's give it another go! 🔢"
     PACKAGE_SUCCESS = """
 🎉 <b>Cha-Ching! Payment success!</b> 💳
 
 Your payment just zoomed through like a superhero! 🦸‍ You've successfully unlocked the awesome power of your chosen package. Get ready for a rollercoaster of AI fun and excitement! 🎢
+
+Remember, with great power comes great... well, you know how it goes. Let's make some magic happen! ✨🪄
+"""
+    PACKAGES_SUCCESS = """
+🎉 <b>Cha-Ching! Payment success!</b> 💳
+
+Your payment just zoomed through like a superhero! 🦸‍ You've successfully unlocked the awesome power of your chosen packages. Get ready for a rollercoaster of AI fun and excitement! 🎢
 
 Remember, with great power comes great... well, you know how it goes. Let's make some magic happen! ✨🪄
 """
@@ -449,7 +469,7 @@ Choose from an array of AI personas, each with its own flair and expertise. Whet
 🔒 <b>Whoops! Looks like you've hit a VIP-only zone!</b> 🌟
 
 You're just a click away from unlocking our treasure trove of AI roles, but it seems you don't have the golden key yet. No worries, though! You can grab it easily.
-🚀 Head over to /subscribe for some fantastic subscription options, or check out /buy if you're in the mood for some a la carte AI delights.
+🚀 Head over to /buy for some fantastic subscription options, or check out individual packages if you're in the mood for some a la carte AI delights.
 
 Once you're all set up, our catalog of AI wonders will be waiting for you – your ticket to an extraordinary world of AI possibilities! 🎫✨
 """
@@ -465,7 +485,7 @@ Once you're all set up, our catalog of AI wonders will be waiting for you – yo
 
 Looks like you've hit the limit for creating new chats. But don't worry, the world of endless chats is just a click away! 🌍✨
 
-Head over to /subscribe or /buy to unlock the power of multiple chats. More chats, more fun! 🎉
+Head over to /buy to unlock the power of multiple chats. More chats, more fun! 🎉
 """
     CREATE_CHAT_SUCCESS = "💬 Chat created! 🎉\n👌 Don't forget to switch to a new one using /chats"
     TYPE_CHAT_NAME = "Type your chat name"
@@ -475,7 +495,7 @@ Head over to /subscribe or /buy to unlock the power of multiple chats. More chat
 
 You're currently in your one and only chat universe. It's a cozy place, but why not expand your horizons? 🌌
 
-To hop between multiple thematic chats, just get your pass from /subscribe or /buy. Let the chat-hopping begin! 🐇
+To hop between multiple thematic chats, just get your pass from /buy. Let the chat-hopping begin! 🐇
 """
     SWITCH_CHAT_SUCCESS = "Chat successfully switched! 🎉"
     RESET_CHAT = "Reset chat ♻️"
@@ -498,7 +518,7 @@ Now, like a goldfish, I don't remember what was said before 🐠
 
 This is your sole chat kingdom, and a kingdom needs its king or queen! Deleting it would be like canceling your own party. 🎈
 
-How about adding more chats to your realm instead? Check out /subscribe or /buy to build your chat empire! 👑
+How about adding more chats to your realm instead? Check out /buy to build your chat empire! 👑
 """
     DELETE_CHAT_SUCCESS = "🗑️ Chat successfully deleted! 🎉"
 
@@ -688,7 +708,7 @@ Hit a button and embark on an extraordinary journey with AI! It's time to redefi
 """
 
     @staticmethod
-    def choose_min(package_type: PackageType):
+    def get_package_name_and_quantity_by_package_type(package_type: PackageType):
         name = ""
         quantity = ""
         if package_type == PackageType.GPT3:
@@ -718,12 +738,46 @@ Hit a button and embark on an extraordinary journey with AI! It's time to redefi
         elif package_type == PackageType.FAST_MESSAGES:
             name = English.FAST_ANSWERS
             quantity = "months"
+        return name, quantity
+
+    @staticmethod
+    def choose_min(package_type: PackageType):
+        name, quantity = English.get_package_name_and_quantity_by_package_type(package_type)
+
         return f"""
 🚀 Fantastic!
 
 You've selected the <b>{name}</b> package
 
 🌟 Please <b>type in the number of {quantity}</b> you'd like to go for
+"""
+
+    @staticmethod
+    def shopping_cart(currency: Currency, cart_items: List[Dict]):
+        text = ""
+        total_sum = 0.0
+        for index, cart_item in enumerate(cart_items):
+            package_type, package_quantity = cart_item.get("package_type", None), cart_item.get("quantity", 0)
+
+            name, quantity = English.get_package_name_and_quantity_by_package_type(package_type)
+
+            text += f"{index + 1}. {name} ({package_quantity} {quantity})\n"
+            total_sum += Package.get_price(currency, package_type, package_quantity)
+
+        if currency == Currency.USD:
+            total_sum = f"{Currency.SYMBOLS[currency]}{total_sum}"
+        else:
+            total_sum = f"{total_sum}{Currency.SYMBOLS[currency]}"
+
+        if not text:
+            text = "Ваша корзина пуста"
+
+        return f"""
+🛒 <b>Cart</b>
+
+{text}
+
+💳 Total: {total_sum}
 """
 
     # Chats
@@ -753,7 +807,7 @@ Ready to tailor your chat experience? Explore the options below and let the conv
 
 You've got a treasure trove of <b>{total_images} images</b> in your pack, ready to unleash your creativity! 🌟
 
-🌠 <b>Your available generations</b>: {available_images} images. Need more? Explore /buy and /subscribe!
+🌠 <b>Your available generations</b>: {available_images} images. Need more? Explore /buy!
 🔍 <b>Used so far</b>: {used_images} images. {'Wow, you are on a roll!' if used_images > 0 else ''}
 🚀 <b>Remaining</b>: {remain_images} images. {'Looks like you have used them all' if remain_images == 0 else 'So much potential'}!
 
@@ -767,7 +821,7 @@ You've got a treasure trove of <b>{total_images} images</b> in your pack, ready 
 
 Looks like you've got only <b>{available_images} generations</b> left in your arsenal.
 
-💡 <b>Pro Tip</b>: Sometimes, less is more! Try a smaller number, or give /buy and /subscribe a whirl for unlimited possibilities!
+💡 <b>Pro Tip</b>: Sometimes, less is more! Try a smaller number, or give /buy a whirl for unlimited possibilities!
 """
 
     # MusicGen
@@ -778,7 +832,7 @@ Looks like you've got only <b>{available_images} generations</b> left in your ar
 
 Looks like you've got only <b>{available_seconds} seconds</b> left in your arsenal.
 
-💡 <b>Pro Tip</b>: Sometimes, less is more! Try a smaller number, or give /buy and /subscribe a whirl for unlimited possibilities!
+💡 <b>Pro Tip</b>: Sometimes, less is more! Try a smaller number, or give /buy a whirl for unlimited possibilities!
 """
 
     # AI

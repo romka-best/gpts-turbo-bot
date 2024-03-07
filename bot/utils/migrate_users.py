@@ -2,15 +2,20 @@ import asyncio
 import logging
 
 from aiogram import Bot
+from aiogram.fsm.storage.base import BaseStorage
 
 from bot.database.models.common import Model, DALLEResolution, DALLEQuality
 from bot.database.models.user import UserSettings
-from bot.database.operations.user import get_users, update_user
-from bot.helpers.send_message_to_admins import send_message_to_admins
-from bot.helpers.set_commands import set_commands_for_user
+from bot.database.operations.cart.getters import get_cart_by_user_id
+from bot.database.operations.cart.writers import write_cart
+from bot.database.operations.user.getters import get_users
+from bot.database.operations.user.updaters import update_user
+from bot.helpers.senders.send_message_to_admins import send_message_to_admins
+from bot.helpers.setters.set_commands import set_commands_for_user
+from bot.locales.main import set_user_language
 
 
-async def migrate_users(bot: Bot):
+async def migrate_users(bot: Bot, storage: BaseStorage):
     logging.info("START_MIGRATION_USERS")
 
     try:
@@ -41,6 +46,13 @@ async def migrate_users(bot: Bot):
             }
 
             tasks.append(
+                set_user_language(
+                    user.id,
+                    user.language_code,
+                    storage,
+                )
+            )
+            tasks.append(
                 update_user(
                     user.id,
                     {
@@ -56,6 +68,15 @@ async def migrate_users(bot: Bot):
                     user.language_code,
                 )
             )
+
+            cart = await get_cart_by_user_id(user.id)
+            if not cart:
+                tasks.append(
+                    write_cart(
+                        user.id,
+                        [],
+                    )
+                )
         await asyncio.gather(*tasks)
 
         await send_message_to_admins(bot, "<b>The database migration with users was successful!</b> 🎉")

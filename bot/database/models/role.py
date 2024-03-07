@@ -3,6 +3,8 @@ from typing import Dict
 
 
 class Role:
+    COLLECTION_NAME = "roles"
+
     id: str
     name: str
     translated_names: Dict
@@ -11,14 +13,16 @@ class Role:
     created_at: datetime
     edited_at: datetime
 
-    def __init__(self,
-                 id: str,
-                 name: str,
-                 translated_names: Dict,
-                 translated_descriptions: Dict,
-                 translated_instructions: Dict,
-                 created_at=None,
-                 edited_at=None):
+    def __init__(
+        self,
+        id: str,
+        name: str,
+        translated_names: Dict,
+        translated_descriptions: Dict,
+        translated_instructions: Dict,
+        created_at=None,
+        edited_at=None,
+    ):
         self.id = id
         self.name = name
         self.translated_names = translated_names

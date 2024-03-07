@@ -16,15 +16,6 @@ __pycache__/
 *.log
 *.tmp
 
-# Media files (if you have an uploads directory or similar)
-media/
-
-# dependencies
-/node_modules
-
-# production
-/build
-
 # misc
 .idea
 .DS_Store
@@ -36,7 +27,3 @@ media/
 # Virtual environment (commonly "venv" or ".venv")
 venv/
 .env/
-
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*

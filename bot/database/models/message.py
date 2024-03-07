@@ -2,6 +2,8 @@ from datetime import datetime, timezone
 
 
 class Message:
+    COLLECTION_NAME = "messages"
+
     id: str
     chat_id: str
     sender: str
@@ -12,16 +14,18 @@ class Message:
     created_at: datetime
     edited_at: datetime
 
-    def __init__(self,
-                 id: str,
-                 chat_id: str,
-                 sender: str,
-                 sender_id: str,
-                 content: str,
-                 is_in_context=True,
-                 photo_filename=None,
-                 created_at=None,
-                 edited_at=None):
+    def __init__(
+        self,
+        id: str,
+        chat_id: str,
+        sender: str,
+        sender_id: str,
+        content: str,
+        is_in_context=True,
+        photo_filename=None,
+        created_at=None,
+        edited_at=None,
+    ):
         self.id = str(id)
         self.chat_id = str(chat_id)
         self.sender = sender

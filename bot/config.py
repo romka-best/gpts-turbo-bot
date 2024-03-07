@@ -20,6 +20,7 @@ class Settings(BaseSettings):
 
     CERTIFICATE_NAME: SecretStr
     STORAGE_NAME: SecretStr
+    BILLING_TABLE: SecretStr
 
     BOT_TOKEN: SecretStr
     YOOKASSA_TOKEN: SecretStr

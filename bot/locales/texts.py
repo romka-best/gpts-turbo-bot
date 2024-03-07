@@ -1,8 +1,9 @@
 from typing import Protocol, Dict, List
 
 from bot.database.models.common import Currency, Model
+from bot.database.models.generation import GenerationReaction
 from bot.database.models.package import PackageType
-from bot.database.models.subscription import SubscriptionType, SubscriptionPeriod, Subscription
+from bot.database.models.subscription import Subscription, SubscriptionType, SubscriptionPeriod
 from bot.database.models.transaction import TransactionType, ServiceType
 from bot.database.models.user import UserGender
 
@@ -73,12 +74,15 @@ class Texts(Protocol):
 """
 
     # Promo code
+    PROMO_CODE_ACTIVATE: str
     PROMO_CODE_INFO: str
     PROMO_CODE_INFO_ADMIN = """
 🔑 <b>Время создать магию с промокодами!</b> ✨
 
 Выбери, для чего ты хочешь создать промокод:
 🌠 <b>Подписка</b> - открой доступ к эксклюзивным функциям и контенту.
+🎨 <b>Пакет</b> - добавь специальные возможности для использования AI.
+🪙 <b>Скидка</b> - дай возможность приобрести генерации подешевле.
 
 Нажми на нужную кнопку и приступим к созданию! 🚀
 """
@@ -102,7 +106,14 @@ class Texts(Protocol):
 Выбери и нажми, чтобы создать волшебный ключ доступа! ✨
 """
     PROMO_CODE_CHOOSE_PACKAGE_ADMIN = """
-TODO
+🌟 <b>Выбираем пакет для промокода!</b> 🎁
+
+Выбери для начала пакет 👇
+"""
+    PROMO_CODE_CHOOSE_DISCOUNT_ADMIN = """
+🌟 <b>Выбираем скидку для промокода!</b> 🎁
+
+Напиши мне скидку в диапазоне от 1% до 50%, которую ты хочешь дать пользователям 👇
 """
     PROMO_CODE_CHOOSE_NAME_ADMIN = """
 🖋️ <b>Придумай название для промокода</b> ✨
@@ -270,6 +281,18 @@ TODO
 
     # Package
     PACKAGE: str
+    PACKAGES: str
+    SHOPPING_CART: str
+    ADD_TO_CART: str
+    BUY_NOW: str
+    REMOVE_FROM_CART: str
+    GO_TO_CART: str
+    CONTINUE_SHOPPING: str
+    PROCEED_TO_CHECKOUT: str
+    CLEAR_CART: str
+    ADD_TO_CART_OR_BUY_NOW: str
+    ADDED_TO_CART: str
+    GO_TO_CART_OR_CONTINUE_SHOPPING: str
     GPT3_REQUESTS: str
     GPT3_REQUESTS_DESCRIPTION: str
     GPT4_REQUESTS: str
@@ -292,6 +315,7 @@ TODO
     MAX_ERROR: str
     VALUE_ERROR: str
     PACKAGE_SUCCESS: str
+    PACKAGES_SUCCESS: str
 
     # Catalog
     MANAGE_CATALOG: str
@@ -460,7 +484,7 @@ TODO
 
 🌟 Поздравляем с успешным созданием! Ваш новый пакет скоро будет ждать своих поклонников. Готовьтесь к тому, что ваше творение вот-вот захватит воображение пользователей!
 
-🖼 Время для магии фото! Теперь вы можете начать наполнять пакет самыми невероятными и забавными фотографиями. От смешных до вдохновляющих, каждое изображение добавит уникальности вашему пакету. Для этого вернитесь в /manage_face_swap и выберите созданный пакет
+🖼 Время для магии фото! Теперь вы можете начать наполнять пакет самыми невероятными и забавными фотографиями. От смешных до вдохновляющих, каждое изображение добавит уникальности вашему пакету
 """
     FACE_SWAP_MANAGE_EDIT_CHOOSE_GENDER = "Выбери пол:"
     FACE_SWAP_MANAGE_EDIT_CHOOSE_PACKAGE = "Выбери пакет:"
@@ -483,7 +507,7 @@ TODO
     FACE_SWAP_MANAGE_EDIT_SUCCESS = """
 🌟 <b>Пакет успешно отредактирован!</b> 🎉
 
-👏 Браво, админ! Ваши изменения успешно применены. Пакет FaceSwap теперь обновлён и ещё более прекрасен. Чтобы продолжить редактирование FaceSwap, введите команду /manage_face_swap
+👏 Браво, админ! Ваши изменения успешно применены. Пакет FaceSwap теперь обновлён и ещё более прекрасен
 
 🚀 Готовы к новым приключениям? Ваша креативность и умение управлять пакетами делают мир FaceSwap ещё ярче и интереснее. Продолжайте творить и вдохновлять пользователей своими уникальными идеями!
 """
@@ -501,6 +525,10 @@ TODO
         period: str,
         count_all_users: int,
         count_activated_users: int,
+        count_referral_users: int,
+        count_english_users: int,
+        count_russian_users: int,
+        count_other_users: int,
         count_paid_users: int,
         count_blocked_users: int,
         count_subscription_users: Dict,
@@ -518,6 +546,7 @@ TODO
         count_total_money: float,
         count_chats_usage: Dict,
         count_face_swap_usage: Dict,
+        count_reactions: Dict,
     ) -> str:
         emojis = Subscription.get_emojis()
         chat_info = ""
@@ -537,13 +566,18 @@ TODO
 👤 <b>Пользователи</b>
 1️⃣ <b>{'Всего пользователей' if period == 'всё время' else 'Новых пользователей'}:</b> {count_all_users}
 2️⃣ <b>{'Активированные' if period == 'всё время' else 'Активные'}:</b> {count_activated_users}
-3️⃣ <b>Оплатившие хоть раз:</b> {count_paid_users}
-4️⃣ <b>Подписчики:</b>
+3️⃣ <b>Перешли по реферальной ссылке:</b> {count_referral_users}
+4️⃣ <b>Языки:</b>
+🇺🇸 - {count_english_users} ({(count_english_users / count_all_users) * 100}%)
+🇷🇺 - {count_russian_users} ({(count_russian_users / count_all_users) * 100}%)
+🌍 - {count_other_users} ({(count_other_users / count_all_users) * 100}%)
+5️⃣ <b>Оплатившие хоть раз:</b> {count_paid_users}
+6️⃣ <b>Подписчики:</b>
     - <b>{SubscriptionType.FREE}:</b> {count_subscription_users[SubscriptionType.FREE]}
     - <b>{SubscriptionType.STANDARD} {emojis[SubscriptionType.STANDARD]}:</b> {count_subscription_users[SubscriptionType.STANDARD]}
     - <b>{SubscriptionType.VIP} {emojis[SubscriptionType.VIP]}:</b> {count_subscription_users[SubscriptionType.VIP]}
     - <b>{SubscriptionType.PLATINUM} {emojis[SubscriptionType.PLATINUM]}:</b> {count_subscription_users[SubscriptionType.PLATINUM]}
-5️⃣ <b>Заблокировали бота:</b> {count_blocked_users}
+7️⃣ <b>Заблокировали бота:</b> {count_blocked_users}
 
 💰 <b>Финансы</b>
 1️⃣ <b>Транзакции:</b>
@@ -552,7 +586,7 @@ TODO
     - <b>{ServiceType.GPT4}:</b> {count_expense_transactions[ServiceType.GPT4]}
     - <b>{ServiceType.DALLE3}:</b> {count_expense_transactions[ServiceType.DALLE3]}
     - <b>{ServiceType.FACE_SWAP}:</b> {count_expense_transactions[ServiceType.FACE_SWAP]}
-    - <b>{ServiceType.MUSIC_GEN}:</b> {count_expense_transactions[ServiceType.MUSIC_GEN]}
+    - <b>{ServiceType.MUSIC_GEN}:</b> {count_expense_transactions[ServiceType.MUSIC_GEN][0]} ({count_expense_transactions[ServiceType.MUSIC_GEN][1]})
     - <b>{ServiceType.VOICE_MESSAGES}:</b> {count_expense_transactions[ServiceType.VOICE_MESSAGES]}
     - <b>{ServiceType.SERVER}:</b> {count_expense_transactions[ServiceType.SERVER]}
     - <b>{ServiceType.DATABASE}:</b> {count_expense_transactions[ServiceType.DATABASE]}
@@ -572,7 +606,7 @@ TODO
     - <b>{ServiceType.PLATINUM}:</b> {count_income_transactions[ServiceType.PLATINUM]}
 
     - <b>Всего:</b> {count_transactions_total}
-<span class="tg-spoiler">
+
 2️⃣ <b>Расходы:</b>
    - <b>{ServiceType.GPT3}:</b> {round(count_expense_money[ServiceType.GPT3], 2)}$
    - <b>{ServiceType.GPT4}:</b> {round(count_expense_money[ServiceType.GPT4], 2)}$
@@ -603,15 +637,28 @@ TODO
 
     - <b>Всего:</b> {count_income_total_money}₽
 4️⃣ <b>Вал:</b> {round(count_total_money, 2)}₽
-</span>
-💬 <b>Созданные чаты</b>
+
+💬 <b>Чаты</b>
+    - Роли:
 {chat_info}
 
     - <b>Всего:</b> {count_chats_usage['ALL']}
-🎭 <b>Выбранные FaceSwap</b>
+🎭 <b>FaceSwap</b>
+    - Генерации:
 {face_swap_info}
 
     - <b>Всего:</b> {count_face_swap_usage['ALL']}
+
+    - Реакции:
+    👍 {count_reactions[ServiceType.FACE_SWAP][GenerationReaction.LIKED]}
+    👎 {count_reactions[ServiceType.FACE_SWAP][GenerationReaction.DISLIKED]}
+    🤷 {count_reactions[ServiceType.FACE_SWAP][GenerationReaction.NONE]}
+
+🎵 <b>MusicGen</b>
+    - Реакции:
+    👍 {count_reactions[ServiceType.MUSIC_GEN][GenerationReaction.LIKED]}
+    👎 {count_reactions[ServiceType.MUSIC_GEN][GenerationReaction.DISLIKED]}
+    🤷 {count_reactions[ServiceType.MUSIC_GEN][GenerationReaction.NONE]}
 
 🔍 Это всё, что тебе нужно знать о текущем положении дел. Вперёд, к новым достижениям! 🚀
 """
@@ -698,13 +745,13 @@ TODO
 
 🔧 Вы решили отполировать <b>{role_system_name}</b>! Настало время превратить его в настоящую звезду AI-мира 🌟
 
-🌍 Имена:
+🌍 <b>Имена:</b>
 {names}
 
-💬 Описания:
+💬 <b>Описания:</b>
 {descriptions}
 
-📜 Инструкции:
+📜 <b>Инструкции:</b>
 {instructions}
 
 🛠️ Теперь ваша очередь внести магию! Выберите, что хотите изменить:
@@ -729,10 +776,10 @@ TODO
 🌟 <b>Вот и всё! Ваш новый пакет FaceSwap почти готов к дебюту!</b> 🎉
 
 📝 Проверьте все детали:
-- 🤖 Системное название:
+- 🤖 <b>Системное название:</b>
 {package_system_name}
 
-- 🌍 Имена:
+- 🌍 <b>Имена:</b>
 {names}
 
 🔍 Убедитесь, что все верно. Это ваше творение, и оно должно быть идеальным!
@@ -774,7 +821,15 @@ TODO
         raise NotImplementedError
 
     @staticmethod
+    def get_package_name_and_quantity_by_package_type(package_type: PackageType):
+        raise NotImplementedError
+
+    @staticmethod
     def choose_min(package_type: PackageType) -> str:
+        raise NotImplementedError
+
+    @staticmethod
+    def shopping_cart(currency: Currency, cart_items: List[Dict]):
         raise NotImplementedError
 
     # Chats

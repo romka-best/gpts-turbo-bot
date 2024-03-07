@@ -12,24 +12,9 @@ __pycache__/
 *.swo
 *~
 
-# SQLite database files (if you're using SQLite)
-*.sqlite3
-
 # Log and temporary files
 *.log
 *.tmp
-
-# Media files (if you have an uploads directory or similar)
-media/
-
-# Static files
-static/
-
-# dependencies
-/node_modules
-
-# production
-/build
 
 # misc
 .idea
@@ -46,9 +31,4 @@ venv/
 .env*
 .env/
 
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-AnnaDoncovaBackend/settings.py
 service_account_key*.json

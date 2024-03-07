@@ -44,6 +44,7 @@ class DALLEQuality:
 class PaymentType:
     SUBSCRIPTION = 'SUBSCRIPTION'
     PACKAGE = 'PACKAGE'
+    CART = 'CART'
 
 
 DEFAULT_ROLE = "PERSONAL_ASSISTANT"
