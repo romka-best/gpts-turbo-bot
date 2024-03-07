@@ -568,9 +568,9 @@ class Texts(Protocol):
 2️⃣ <b>{'Активированные' if period == 'всё время' else 'Активные'}:</b> {count_activated_users}
 3️⃣ <b>Перешли по реферальной ссылке:</b> {count_referral_users}
 4️⃣ <b>Языки:</b>
-🇺🇸 - {count_english_users} ({(count_english_users / count_all_users) * 100}%)
-🇷🇺 - {count_russian_users} ({(count_russian_users / count_all_users) * 100}%)
-🌍 - {count_other_users} ({(count_other_users / count_all_users) * 100}%)
+🇺🇸 - {count_english_users} ({round((count_english_users / count_all_users) * 100, 2)}%)
+🇷🇺 - {count_russian_users} ({(round(count_russian_users / count_all_users) * 100, 2)}%)
+🌍 - {count_other_users} ({(round(count_other_users / count_all_users) * 100, 2)}%)
 5️⃣ <b>Оплатившие хоть раз:</b> {count_paid_users}
 6️⃣ <b>Подписчики:</b>
     - <b>{SubscriptionType.FREE}:</b> {count_subscription_users[SubscriptionType.FREE]}
@@ -614,8 +614,8 @@ class Texts(Protocol):
    - <b>{ServiceType.FACE_SWAP}:</b> {round(count_expense_money[ServiceType.FACE_SWAP], 2)}$
    - <b>{ServiceType.MUSIC_GEN}:</b> {round(count_expense_money[ServiceType.MUSIC_GEN], 2)}$
    - <b>{ServiceType.VOICE_MESSAGES}:</b> {round(count_expense_money[ServiceType.VOICE_MESSAGES], 2)}$
-   - <b>{ServiceType.SERVER}:</b> {round(count_expense_money[ServiceType.SERVER])}$
-   - <b>{ServiceType.DATABASE}:</b> {round(count_expense_money[ServiceType.DATABASE])}$
+   - <b>{ServiceType.SERVER}:</b> {round(count_expense_money[ServiceType.SERVER], 2)}$
+   - <b>{ServiceType.DATABASE}:</b> {round(count_expense_money[ServiceType.DATABASE], 2)}$
 
    - <b>Всего:</b> {round(count_expense_total_money, 2)}$
 3️⃣ <b>Доходы:</b>
@@ -639,23 +639,24 @@ class Texts(Protocol):
 4️⃣ <b>Вал:</b> {round(count_total_money, 2)}₽
 
 💬 <b>Чаты</b>
-    - Роли:
+    Роли:
 {chat_info}
 
     - <b>Всего:</b> {count_chats_usage['ALL']}
+
 🎭 <b>FaceSwap</b>
-    - Генерации:
+    <b>Генерации:</b>
 {face_swap_info}
 
     - <b>Всего:</b> {count_face_swap_usage['ALL']}
 
-    - Реакции:
+    <b>Реакции:</b>
     👍 {count_reactions[ServiceType.FACE_SWAP][GenerationReaction.LIKED]}
     👎 {count_reactions[ServiceType.FACE_SWAP][GenerationReaction.DISLIKED]}
     🤷 {count_reactions[ServiceType.FACE_SWAP][GenerationReaction.NONE]}
 
 🎵 <b>MusicGen</b>
-    - Реакции:
+    <b>Реакции:</b>
     👍 {count_reactions[ServiceType.MUSIC_GEN][GenerationReaction.LIKED]}
     👎 {count_reactions[ServiceType.MUSIC_GEN][GenerationReaction.DISLIKED]}
     🤷 {count_reactions[ServiceType.MUSIC_GEN][GenerationReaction.NONE]}

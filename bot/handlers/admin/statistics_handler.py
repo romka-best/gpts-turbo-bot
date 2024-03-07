@@ -133,7 +133,7 @@ async def handle_get_statistics(language_code: str, period: str):
         if user.language_code == 'en':
             english_users.add(user.id)
         elif user.language_code == 'ru':
-            english_users.add(user.id)
+            russian_users.add(user.id)
         else:
             other_users.add(user.id)
 

@@ -3,11 +3,12 @@ from aiogram.types import Message
 
 from bot.config import config
 from bot.database.models.user import User
-from bot.locales.main import get_localization
+from bot.locales.main import get_localization, get_user_language
 
 
-async def is_already_processing(message: Message, state: FSMContext, user: User, current_time: float):
+async def is_already_processing(message: Message, state: FSMContext, current_time: float):
     user_data = await state.get_data()
+    user_language_code = await get_user_language(str(message.chat.id), state.storage)
     is_processing = user_data.get('is_processing')
 
     if not is_processing:
@@ -19,5 +20,5 @@ async def is_already_processing(message: Message, state: FSMContext, user: User,
         await state.update_data(is_processing=False)
         return False
 
-    await message.reply(text=get_localization(user.language_code).ALREADY_MAKE_REQUEST)
+    await message.reply(text=get_localization(user_language_code).ALREADY_MAKE_REQUEST)
     return True

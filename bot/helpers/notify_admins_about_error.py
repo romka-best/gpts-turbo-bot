@@ -5,7 +5,7 @@ from aiogram.types import Update
 
 from bot.database.operations.user.getters import get_user
 from bot.helpers.senders.send_message_to_admins import send_message_to_admins
-from bot.locales.main import get_localization
+from bot.locales.main import get_localization, get_user_language
 
 
 async def notify_admins_about_error(bot: Bot, telegram_update: Update, e):

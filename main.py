@@ -48,7 +48,6 @@ from bot.helpers.senders.send_daily_statistics import send_daily_statistics
 from bot.helpers.setters.set_commands import set_commands
 from bot.helpers.setters.set_description import set_description
 from bot.helpers.update_monthly_limits import update_monthly_limits
-from bot.utils.migrate_users import migrate_users
 
 WEBHOOK_BOT_PATH = f"/bot/{config.BOT_TOKEN.get_secret_value()}"
 WEBHOOK_REPLICATE_PATH = config.WEBHOOK_REPLICATE_PATH
@@ -105,7 +104,6 @@ async def lifespan(_: FastAPI):
     await set_description(bot)
     await set_commands(bot)
     await firebase.init()
-    await migrate_users(bot, storage)
     yield
     await bot.session.close()
     await storage.close()
@@ -136,13 +134,13 @@ async def handle_update(update: dict):
                 "is_blocked": True,
             })
     except TelegramBadRequest as e:
-        if e.message == "Bad Request: message can't be deleted for everyone":
+        if e.message.startswith("Bad Request: message can't be deleted for everyone"):
             logging.info(e)
-        elif e.message == "Bad Request: message to reply not found":
+        elif e.message.startswith("Bad Request: message to reply not found"):
             logging.warning(e)
-        elif e.message == "Bad Request: message to delete not found":
+        elif e.message.startswith("Bad Request: message to delete not found"):
             logging.warning(e)
-        elif e.message == "Bad Request: message is not modified":
+        elif e.message.startswith("Bad Request: message is not modified"):
             logging.warning(e)
         else:
             logging.exception(f"Error in bot_webhook: {e}")

@@ -48,7 +48,7 @@ async def handle_create_promo_code_selection(callback_query: CallbackQuery, stat
 
     promo_code_type = callback_query.data.split(':')[1]
     if promo_code_type == PromoCodeType.SUBSCRIPTION:
-        photo_path = f'subscriptions/{user_language_code}_{user.currency}.png'
+        photo_path = f'payments/subscriptions_{user_language_code}_{user.currency}.png'
         photo = await firebase.bucket.get_blob(photo_path)
         photo_link = firebase.get_public_url(photo.name)
 
@@ -60,7 +60,7 @@ async def handle_create_promo_code_selection(callback_query: CallbackQuery, stat
             reply_markup=reply_markup,
         )
     elif promo_code_type == PromoCodeType.PACKAGE:
-        photo_path = f'packages/{user_language_code}_{user.currency}.png'
+        photo_path = f'payments/packages_{user_language_code}_{user.currency}.png'
         photo = await firebase.bucket.get_blob(photo_path)
         photo_link = firebase.get_public_url(photo.name)
 
