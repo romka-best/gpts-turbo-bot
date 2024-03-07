@@ -15,6 +15,8 @@ class GenerationReaction:
 
 
 class Generation:
+    COLLECTION_NAME = "generations"
+
     id: str
     request_id: str
     model: Model
@@ -27,18 +29,20 @@ class Generation:
     created_at: datetime
     edited_at: datetime
 
-    def __init__(self,
-                 id: str,
-                 request_id: str,
-                 model: Model,
-                 result="",
-                 has_error=False,
-                 status=GenerationStatus.STARTED,
-                 reaction=GenerationReaction.NONE,
-                 seconds=0.00,
-                 details=None,
-                 created_at=None,
-                 edited_at=None):
+    def __init__(
+        self,
+        id: str,
+        request_id: str,
+        model: Model,
+        result="",
+        has_error=False,
+        status=GenerationStatus.STARTED,
+        reaction=GenerationReaction.NONE,
+        seconds=0.00,
+        details=None,
+        created_at=None,
+        edited_at=None,
+    ):
         self.id = id
         self.request_id = request_id
         self.model = model

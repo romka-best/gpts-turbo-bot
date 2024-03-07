@@ -8,7 +8,7 @@ from telegram import constants
 from bot.config import config
 from bot.database.models.common import Quota, Model
 from bot.database.models.user import User
-from bot.locales.main import get_localization
+from bot.locales.main import get_localization, get_user_language
 
 
 async def notify_user_after_timeout(bot: Bot, chat_id: int, delay: int, language_code: str, reply_to_message_id: int):
@@ -31,6 +31,7 @@ async def is_time_limit_exceeded(message: Message, state: FSMContext, user: User
         return False
 
     user_data = await state.get_data()
+    user_language_code = await get_user_language(str(message.chat.id), state.storage)
     last_request_time = user_data.get('last_request_time', None)
 
     if not last_request_time:
@@ -43,16 +44,16 @@ async def is_time_limit_exceeded(message: Message, state: FSMContext, user: User
 
     remaining_time = int(config.LIMIT_BETWEEN_REQUESTS_SECONDS - time_elapsed)
     if user_data.get('additional_request_made'):
-        await message.reply(text=get_localization(user.language_code).ALREADY_MAKE_REQUEST)
+        await message.reply(text=get_localization(user_language_code).ALREADY_MAKE_REQUEST)
     else:
         await state.update_data(additional_request_made=True)
-        await message.reply(text=get_localization(user.language_code).wait_for_another_request(remaining_time))
+        await message.reply(text=get_localization(user_language_code).wait_for_another_request(remaining_time))
         asyncio.create_task(
             notify_user_after_timeout(
                 bot=message.bot,
                 chat_id=message.chat.id,
                 delay=remaining_time,
-                language_code=user.language_code,
+                language_code=user_language_code,
                 reply_to_message_id=message.message_id
             )
         )

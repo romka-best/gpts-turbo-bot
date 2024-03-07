@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 
-from bot.database.models.common import Currency, Model, Quota
+from bot.database.models.common import Currency, Model, Quota, DALLEResolution, DALLEQuality
 from bot.database.models.subscription import SubscriptionType, SubscriptionLimit
 
 
@@ -9,6 +9,9 @@ class UserSettings:
     SHOW_THE_NAME_OF_THE_ROLES = 'show_the_name_of_the_roles'
     SHOW_USAGE_QUOTA = 'show_usage_quota'
     TURN_ON_VOICE_MESSAGES = 'turn_on_voice_messages'
+    VOICE = 'voice'
+    RESOLUTION = 'resolution'
+    QUALITY = 'quality'
 
 
 class UserGender:
@@ -18,6 +21,8 @@ class UserGender:
 
 
 class User:
+    COLLECTION_NAME = "users"
+
     id: str
     first_name: str
     last_name: str
@@ -58,15 +63,19 @@ class User:
             UserSettings.SHOW_THE_NAME_OF_THE_ROLES: False,
             UserSettings.SHOW_USAGE_QUOTA: True,
             UserSettings.TURN_ON_VOICE_MESSAGES: False,
+            UserSettings.VOICE: 'alloy',
         },
         Model.GPT4: {
             UserSettings.SHOW_THE_NAME_OF_THE_CHATS: False,
             UserSettings.SHOW_THE_NAME_OF_THE_ROLES: False,
             UserSettings.SHOW_USAGE_QUOTA: True,
             UserSettings.TURN_ON_VOICE_MESSAGES: False,
+            UserSettings.VOICE: 'alloy',
         },
         Model.DALLE3: {
             UserSettings.SHOW_USAGE_QUOTA: True,
+            UserSettings.RESOLUTION: DALLEResolution.LOW,
+            UserSettings.QUALITY: DALLEQuality.STANDARD,
         },
         Model.FACE_SWAP: {
             UserSettings.SHOW_USAGE_QUOTA: True,
@@ -76,28 +85,30 @@ class User:
         },
     }
 
-    def __init__(self,
-                 id: str,
-                 first_name: str,
-                 last_name: str,
-                 username: str,
-                 current_chat_id: str,
-                 telegram_chat_id: str,
-                 gender=UserGender.UNSPECIFIED,
-                 language_code="en",
-                 is_premium=False,
-                 is_blocked=False,
-                 current_model=Model.GPT3,
-                 currency=Currency.RUB,
-                 balance=0,
-                 subscription_type=SubscriptionType.FREE,
-                 last_subscription_limit_update=None,
-                 monthly_limits=None,
-                 additional_usage_quota=None,
-                 settings=None,
-                 referred_by=None,
-                 created_at=None,
-                 edited_at=None):
+    def __init__(
+        self,
+        id: str,
+        first_name: str,
+        last_name: str,
+        username: str,
+        current_chat_id: str,
+        telegram_chat_id: str,
+        gender=UserGender.UNSPECIFIED,
+        language_code="en",
+        is_premium=False,
+        is_blocked=False,
+        current_model=Model.GPT3,
+        currency=Currency.RUB,
+        balance=0,
+        subscription_type=SubscriptionType.FREE,
+        last_subscription_limit_update=None,
+        monthly_limits=None,
+        additional_usage_quota=None,
+        settings=None,
+        referred_by=None,
+        created_at=None,
+        edited_at=None,
+    ):
         self.id = str(id)
         self.first_name = first_name
         self.last_name = last_name

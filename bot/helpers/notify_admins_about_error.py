@@ -3,9 +3,9 @@ import logging
 from aiogram import Bot
 from aiogram.types import Update
 
-from bot.database.operations.user import get_user
-from bot.helpers.send_message_to_admins import send_message_to_admins
-from bot.locales.main import get_localization
+from bot.database.operations.user.getters import get_user
+from bot.helpers.senders.send_message_to_admins import send_message_to_admins
+from bot.locales.main import get_localization, get_user_language
 
 
 async def notify_admins_about_error(bot: Bot, telegram_update: Update, e):
@@ -22,9 +22,11 @@ async def notify_admins_about_error(bot: Bot, telegram_update: Update, e):
                 chat_id=user.telegram_chat_id,
                 text=get_localization(user.language_code).ERROR,
             )
-            await send_message_to_admins(bot=bot,
-                                         message=f"#error\n\nALARM! Ошибка у пользователя: {user.id}\n"
-                                                 f"Информация:\n{e}",
-                                         parse_mode=None)
+            await send_message_to_admins(
+                bot=bot,
+                message=f"#error\n\nALARM! Ошибка у пользователя: {user.id}\n"
+                        f"Информация:\n{e}",
+                parse_mode=None,
+            )
     except Exception as e:
         logging.exception(f"Error in notify_admins_about_error: {e}")

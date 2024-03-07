@@ -31,7 +31,7 @@ class SubscriptionLimit:
             Quota.GPT4: 0,
             Quota.DALLE3: 10,
             Quota.FACE_SWAP: 20,
-            Quota.MUSIC_GEN: 60,
+            Quota.MUSIC_GEN: 30,
         },
         SubscriptionType.STANDARD: {
             Quota.GPT3: 1000,
@@ -88,6 +88,8 @@ class SubscriptionLimit:
 
 
 class Subscription:
+    COLLECTION_NAME = "subscriptions"
+
     id: str
     user_id: str
     type: SubscriptionType
@@ -101,19 +103,21 @@ class Subscription:
     created_at: datetime
     edited_at: datetime
 
-    def __init__(self,
-                 id: str,
-                 user_id: str,
-                 type: SubscriptionType,
-                 period: SubscriptionPeriod,
-                 status: SubscriptionStatus,
-                 currency: Currency,
-                 amount: float,
-                 provider_payment_charge_id="",
-                 start_date=None,
-                 end_date=None,
-                 created_at=None,
-                 edited_at=None):
+    def __init__(
+        self,
+        id: str,
+        user_id: str,
+        type: SubscriptionType,
+        period: SubscriptionPeriod,
+        status: SubscriptionStatus,
+        currency: Currency,
+        amount: float,
+        provider_payment_charge_id="",
+        start_date=None,
+        end_date=None,
+        created_at=None,
+        edited_at=None,
+    ):
         self.id = str(id)
         self.user_id = str(user_id)
         self.type = type

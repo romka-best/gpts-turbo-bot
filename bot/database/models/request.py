@@ -9,6 +9,8 @@ class RequestStatus:
 
 
 class Request:
+    COLLECTION_NAME = "requests"
+
     id: str
     user_id: str
     message_id: int
@@ -19,16 +21,18 @@ class Request:
     created_at: datetime
     edited_at: datetime
 
-    def __init__(self,
-                 id: str,
-                 user_id: str,
-                 message_id: int,
-                 model: Model,
-                 requested: int,
-                 status=RequestStatus.STARTED,
-                 details=None,
-                 created_at=None,
-                 edited_at=None):
+    def __init__(
+        self,
+        id: str,
+        user_id: str,
+        message_id: int,
+        model: Model,
+        requested: int,
+        status=RequestStatus.STARTED,
+        details=None,
+        created_at=None,
+        edited_at=None,
+    ):
         self.id = id
         self.user_id = user_id
         self.message_id = message_id

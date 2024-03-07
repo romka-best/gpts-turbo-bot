@@ -27,6 +27,8 @@ class ServiceType:
 
 
 class Transaction:
+    COLLECTION_NAME = "transactions"
+
     id: str
     user_id: str
     type: TransactionType
@@ -38,17 +40,19 @@ class Transaction:
     created_at: datetime
     edited_at: datetime
 
-    def __init__(self,
-                 id: str,
-                 user_id: str,
-                 type: TransactionType,
-                 service: ServiceType,
-                 amount: float,
-                 currency: Currency,
-                 quantity=1,
-                 details=None,
-                 created_at=None,
-                 edited_at=None):
+    def __init__(
+        self,
+        id: str,
+        user_id: str,
+        type: TransactionType,
+        service: ServiceType,
+        amount: float,
+        currency: Currency,
+        quantity=1,
+        details=None,
+        created_at=None,
+        edited_at=None,
+    ):
         self.id = str(id)
         self.user_id = str(user_id)
         self.type = type

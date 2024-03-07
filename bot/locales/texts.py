@@ -1,8 +1,9 @@
 from typing import Protocol, Dict, List
 
 from bot.database.models.common import Currency, Model
+from bot.database.models.generation import GenerationReaction
 from bot.database.models.package import PackageType
-from bot.database.models.subscription import SubscriptionType, SubscriptionPeriod, Subscription
+from bot.database.models.subscription import Subscription, SubscriptionType, SubscriptionPeriod
 from bot.database.models.transaction import TransactionType, ServiceType
 from bot.database.models.user import UserGender
 
@@ -73,12 +74,15 @@ class Texts(Protocol):
 """
 
     # Promo code
+    PROMO_CODE_ACTIVATE: str
     PROMO_CODE_INFO: str
     PROMO_CODE_INFO_ADMIN = """
 🔑 <b>Время создать магию с промокодами!</b> ✨
 
 Выбери, для чего ты хочешь создать промокод:
 🌠 <b>Подписка</b> - открой доступ к эксклюзивным функциям и контенту.
+🎨 <b>Пакет</b> - добавь специальные возможности для использования AI.
+🪙 <b>Скидка</b> - дай возможность приобрести генерации подешевле.
 
 Нажми на нужную кнопку и приступим к созданию! 🚀
 """
@@ -102,7 +106,14 @@ class Texts(Protocol):
 Выбери и нажми, чтобы создать волшебный ключ доступа! ✨
 """
     PROMO_CODE_CHOOSE_PACKAGE_ADMIN = """
-TODO
+🌟 <b>Выбираем пакет для промокода!</b> 🎁
+
+Выбери для начала пакет 👇
+"""
+    PROMO_CODE_CHOOSE_DISCOUNT_ADMIN = """
+🌟 <b>Выбираем скидку для промокода!</b> 🎁
+
+Напиши мне скидку в диапазоне от 1% до 50%, которую ты хочешь дать пользователям 👇
 """
     PROMO_CODE_CHOOSE_NAME_ADMIN = """
 🖋️ <b>Придумай название для промокода</b> ✨
@@ -212,7 +223,13 @@ TODO
 """
 
     # AI
+    CHATGPT3 = "✉️ ChatGPT-3.5"
+    CHATGPT4 = "🧠 ChatGPT-4.0"
+    DALLE3 = "🖼️ DALL-E 3"
+    FACE_SWAP = "📷️ FaceSwap"
+    MUSIC_GEN = "🎵 MusicGen"
     MODE: str
+    CHOOSE_CHATGPT_MODEL: str
     SWITCHED_TO_CHATGPT3: str
     SWITCHED_TO_CHATGPT4: str
     SWITCHED_TO_DALLE3: str
@@ -235,13 +252,19 @@ TODO
     SECONDS_180: str
 
     # Settings
+    SETTINGS_CHOOSE_MODEL: str
     SHOW_THE_NAME_OF_THE_CHATS: str
     SHOW_THE_NAME_OF_THE_ROLES: str
     SHOW_USAGE_QUOTA_IN_MESSAGES: str
+    VOICE_MESSAGES: str
     TURN_ON_VOICE_MESSAGES_FROM_RESPONDS: str
+    LISTEN_VOICES: str
 
     # Voice
     VOICE_MESSAGES_FORBIDDEN: str
+
+    # Payment
+    BUY: str
 
     # Subscription
     MONTH_1: str
@@ -249,7 +272,7 @@ TODO
     MONTHS_6: str
     DISCOUNT: str
     NO_DISCOUNT: str
-    SUBSCRIPTION = "💳 Подписка"
+    SUBSCRIPTION: str
     SUBSCRIPTION_SUCCESS: str
     SUBSCRIPTION_RESET: str
     SUBSCRIPTION_END: str
@@ -257,6 +280,19 @@ TODO
     CHATS_RESET: str
 
     # Package
+    PACKAGE: str
+    PACKAGES: str
+    SHOPPING_CART: str
+    ADD_TO_CART: str
+    BUY_NOW: str
+    REMOVE_FROM_CART: str
+    GO_TO_CART: str
+    CONTINUE_SHOPPING: str
+    PROCEED_TO_CHECKOUT: str
+    CLEAR_CART: str
+    ADD_TO_CART_OR_BUY_NOW: str
+    ADDED_TO_CART: str
+    GO_TO_CART_OR_CONTINUE_SHOPPING: str
     GPT3_REQUESTS: str
     GPT3_REQUESTS_DESCRIPTION: str
     GPT4_REQUESTS: str
@@ -279,8 +315,10 @@ TODO
     MAX_ERROR: str
     VALUE_ERROR: str
     PACKAGE_SUCCESS: str
+    PACKAGES_SUCCESS: str
 
     # Catalog
+    MANAGE_CATALOG: str
     CATALOG: str
     CATALOG_FORBIDDEN_ERROR: str
     CATALOG_MANAGE = """
@@ -388,6 +426,7 @@ TODO
 
     # Chats
     DEFAULT_CHAT_TITLE: str
+    MANAGE_CHATS: str
     SHOW_CHATS: str
     CREATE_CHAT: str
     CREATE_CHAT_FORBIDDEN: str
@@ -403,7 +442,7 @@ TODO
     RESET_CHAT_WARNING: str
     RESET_CHAT_SUCCESS: str
 
-    # Face swap
+    # FaceSwap
     CHOOSE_YOUR_PACKAGE: str
     CREATE_PACKAGE = "Создать новый пакет"
     EDIT_PACKAGE = "Редактировать существующий пакет"
@@ -445,7 +484,7 @@ TODO
 
 🌟 Поздравляем с успешным созданием! Ваш новый пакет скоро будет ждать своих поклонников. Готовьтесь к тому, что ваше творение вот-вот захватит воображение пользователей!
 
-🖼 Время для магии фото! Теперь вы можете начать наполнять пакет самыми невероятными и забавными фотографиями. От смешных до вдохновляющих, каждое изображение добавит уникальности вашему пакету. Для этого вернитесь в /manage_face_swap и выберите созданный пакет
+🖼 Время для магии фото! Теперь вы можете начать наполнять пакет самыми невероятными и забавными фотографиями. От смешных до вдохновляющих, каждое изображение добавит уникальности вашему пакету
 """
     FACE_SWAP_MANAGE_EDIT_CHOOSE_GENDER = "Выбери пол:"
     FACE_SWAP_MANAGE_EDIT_CHOOSE_PACKAGE = "Выбери пакет:"
@@ -468,7 +507,7 @@ TODO
     FACE_SWAP_MANAGE_EDIT_SUCCESS = """
 🌟 <b>Пакет успешно отредактирован!</b> 🎉
 
-👏 Браво, админ! Ваши изменения успешно применены. Пакет FaceSwap теперь обновлён и ещё более прекрасен. Чтобы продолжить редактирование Face Swap, введите команду /manage_face_swap
+👏 Браво, админ! Ваши изменения успешно применены. Пакет FaceSwap теперь обновлён и ещё более прекрасен
 
 🚀 Готовы к новым приключениям? Ваша креативность и умение управлять пакетами делают мир FaceSwap ещё ярче и интереснее. Продолжайте творить и вдохновлять пользователей своими уникальными идеями!
 """
@@ -482,26 +521,33 @@ TODO
     APPROVE: str
 
     @staticmethod
-    def statistics(period: str,
-                   count_all_users: int,
-                   count_activated_users: int,
-                   count_paid_users: int,
-                   count_blocked_users: int,
-                   count_subscription_users: Dict,
-                   count_income_transactions: Dict,
-                   count_expense_transactions: Dict,
-                   count_income_transactions_total: int,
-                   count_expense_transactions_total: int,
-                   count_transactions_total: int,
-                   count_expense_money: Dict,
-                   count_income_money: Dict,
-                   count_income_subscriptions_total_money: float,
-                   count_income_packages_total_money: float,
-                   count_income_total_money: float,
-                   count_expense_total_money: float,
-                   count_total_money: float,
-                   count_chats_usage: Dict,
-                   count_face_swap_usage: Dict) -> str:
+    def statistics(
+        period: str,
+        count_all_users: int,
+        count_activated_users: int,
+        count_referral_users: int,
+        count_english_users: int,
+        count_russian_users: int,
+        count_other_users: int,
+        count_paid_users: int,
+        count_blocked_users: int,
+        count_subscription_users: Dict,
+        count_income_transactions: Dict,
+        count_expense_transactions: Dict,
+        count_income_transactions_total: int,
+        count_expense_transactions_total: int,
+        count_transactions_total: int,
+        count_expense_money: Dict,
+        count_income_money: Dict,
+        count_income_subscriptions_total_money: float,
+        count_income_packages_total_money: float,
+        count_income_total_money: float,
+        count_expense_total_money: float,
+        count_total_money: float,
+        count_chats_usage: Dict,
+        count_face_swap_usage: Dict,
+        count_reactions: Dict,
+    ) -> str:
         emojis = Subscription.get_emojis()
         chat_info = ""
         for i, (chat_key, chat_value) in enumerate(count_chats_usage.items()):
@@ -519,14 +565,19 @@ TODO
 
 👤 <b>Пользователи</b>
 1️⃣ <b>{'Всего пользователей' if period == 'всё время' else 'Новых пользователей'}:</b> {count_all_users}
-2️⃣ <b>Активированные:</b> {count_activated_users}
-3️⃣ <b>Оплатившие хоть раз:</b> {count_paid_users}
-4️⃣ <b>Подписчики:</b>
+2️⃣ <b>{'Активированные' if period == 'всё время' else 'Активные'}:</b> {count_activated_users}
+3️⃣ <b>Перешли по реферальной ссылке:</b> {count_referral_users}
+4️⃣ <b>Языки:</b>
+🇺🇸 - {count_english_users} ({round((count_english_users / count_all_users) * 100, 2)}%)
+🇷🇺 - {count_russian_users} ({(round(count_russian_users / count_all_users) * 100, 2)}%)
+🌍 - {count_other_users} ({(round(count_other_users / count_all_users) * 100, 2)}%)
+5️⃣ <b>Оплатившие хоть раз:</b> {count_paid_users}
+6️⃣ <b>Подписчики:</b>
     - <b>{SubscriptionType.FREE}:</b> {count_subscription_users[SubscriptionType.FREE]}
     - <b>{SubscriptionType.STANDARD} {emojis[SubscriptionType.STANDARD]}:</b> {count_subscription_users[SubscriptionType.STANDARD]}
     - <b>{SubscriptionType.VIP} {emojis[SubscriptionType.VIP]}:</b> {count_subscription_users[SubscriptionType.VIP]}
     - <b>{SubscriptionType.PLATINUM} {emojis[SubscriptionType.PLATINUM]}:</b> {count_subscription_users[SubscriptionType.PLATINUM]}
-5️⃣ <b>Заблокировали бота:</b> {count_blocked_users}
+7️⃣ <b>Заблокировали бота:</b> {count_blocked_users}
 
 💰 <b>Финансы</b>
 1️⃣ <b>Транзакции:</b>
@@ -535,7 +586,7 @@ TODO
     - <b>{ServiceType.GPT4}:</b> {count_expense_transactions[ServiceType.GPT4]}
     - <b>{ServiceType.DALLE3}:</b> {count_expense_transactions[ServiceType.DALLE3]}
     - <b>{ServiceType.FACE_SWAP}:</b> {count_expense_transactions[ServiceType.FACE_SWAP]}
-    - <b>{ServiceType.MUSIC_GEN}:</b> {count_expense_transactions[ServiceType.MUSIC_GEN]}
+    - <b>{ServiceType.MUSIC_GEN}:</b> {count_expense_transactions[ServiceType.MUSIC_GEN][0]} ({count_expense_transactions[ServiceType.MUSIC_GEN][1]})
     - <b>{ServiceType.VOICE_MESSAGES}:</b> {count_expense_transactions[ServiceType.VOICE_MESSAGES]}
     - <b>{ServiceType.SERVER}:</b> {count_expense_transactions[ServiceType.SERVER]}
     - <b>{ServiceType.DATABASE}:</b> {count_expense_transactions[ServiceType.DATABASE]}
@@ -555,7 +606,7 @@ TODO
     - <b>{ServiceType.PLATINUM}:</b> {count_income_transactions[ServiceType.PLATINUM]}
 
     - <b>Всего:</b> {count_transactions_total}
-<span class="tg-spoiler">
+
 2️⃣ <b>Расходы:</b>
    - <b>{ServiceType.GPT3}:</b> {round(count_expense_money[ServiceType.GPT3], 2)}$
    - <b>{ServiceType.GPT4}:</b> {round(count_expense_money[ServiceType.GPT4], 2)}$
@@ -563,8 +614,8 @@ TODO
    - <b>{ServiceType.FACE_SWAP}:</b> {round(count_expense_money[ServiceType.FACE_SWAP], 2)}$
    - <b>{ServiceType.MUSIC_GEN}:</b> {round(count_expense_money[ServiceType.MUSIC_GEN], 2)}$
    - <b>{ServiceType.VOICE_MESSAGES}:</b> {round(count_expense_money[ServiceType.VOICE_MESSAGES], 2)}$
-   - <b>{ServiceType.SERVER}:</b> {round(count_expense_money[ServiceType.SERVER])}$
-   - <b>{ServiceType.DATABASE}:</b> {round(count_expense_money[ServiceType.DATABASE])}$
+   - <b>{ServiceType.SERVER}:</b> {round(count_expense_money[ServiceType.SERVER], 2)}$
+   - <b>{ServiceType.DATABASE}:</b> {round(count_expense_money[ServiceType.DATABASE], 2)}$
 
    - <b>Всего:</b> {round(count_expense_total_money, 2)}$
 3️⃣ <b>Доходы:</b>
@@ -586,15 +637,29 @@ TODO
 
     - <b>Всего:</b> {count_income_total_money}₽
 4️⃣ <b>Вал:</b> {round(count_total_money, 2)}₽
-</span>
-💬 <b>Созданные чаты</b>
+
+💬 <b>Чаты</b>
+    Роли:
 {chat_info}
 
     - <b>Всего:</b> {count_chats_usage['ALL']}
-🎭 <b>Выбранные Face Swap</b>
+
+🎭 <b>FaceSwap</b>
+    <b>Генерации:</b>
 {face_swap_info}
 
     - <b>Всего:</b> {count_face_swap_usage['ALL']}
+
+    <b>Реакции:</b>
+    👍 {count_reactions[ServiceType.FACE_SWAP][GenerationReaction.LIKED]}
+    👎 {count_reactions[ServiceType.FACE_SWAP][GenerationReaction.DISLIKED]}
+    🤷 {count_reactions[ServiceType.FACE_SWAP][GenerationReaction.NONE]}
+
+🎵 <b>MusicGen</b>
+    <b>Реакции:</b>
+    👍 {count_reactions[ServiceType.MUSIC_GEN][GenerationReaction.LIKED]}
+    👎 {count_reactions[ServiceType.MUSIC_GEN][GenerationReaction.DISLIKED]}
+    🤷 {count_reactions[ServiceType.MUSIC_GEN][GenerationReaction.NONE]}
 
 🔍 Это всё, что тебе нужно знать о текущем положении дел. Вперёд, к новым достижениям! 🚀
 """
@@ -681,13 +746,13 @@ TODO
 
 🔧 Вы решили отполировать <b>{role_system_name}</b>! Настало время превратить его в настоящую звезду AI-мира 🌟
 
-🌍 Имена:
+🌍 <b>Имена:</b>
 {names}
 
-💬 Описания:
+💬 <b>Описания:</b>
 {descriptions}
 
-📜 Инструкции:
+📜 <b>Инструкции:</b>
 {instructions}
 
 🛠️ Теперь ваша очередь внести магию! Выберите, что хотите изменить:
@@ -712,10 +777,10 @@ TODO
 🌟 <b>Вот и всё! Ваш новый пакет FaceSwap почти готов к дебюту!</b> 🎉
 
 📝 Проверьте все детали:
-- 🤖 Системное название:
+- 🤖 <b>Системное название:</b>
 {package_system_name}
 
-- 🌍 Имена:
+- 🌍 <b>Имена:</b>
 {names}
 
 🔍 Убедитесь, что все верно. Это ваше творение, и оно должно быть идеальным!
@@ -724,11 +789,14 @@ TODO
 """
 
     @staticmethod
-    def profile(subscription_type: SubscriptionType,
-                gender: UserGender,
-                current_model: str,
-                monthly_limits,
-                additional_usage_quota) -> str:
+    def profile(
+        subscription_type: SubscriptionType,
+        gender: UserGender,
+        current_model: str,
+        monthly_limits,
+        additional_usage_quota,
+        renewal_date,
+    ) -> str:
         raise NotImplementedError
 
     # Subscription
@@ -750,11 +818,19 @@ TODO
 
     # Package
     @staticmethod
-    def buy() -> str:
+    def package() -> str:
+        raise NotImplementedError
+
+    @staticmethod
+    def get_package_name_and_quantity_by_package_type(package_type: PackageType):
         raise NotImplementedError
 
     @staticmethod
     def choose_min(package_type: PackageType) -> str:
+        raise NotImplementedError
+
+    @staticmethod
+    def shopping_cart(currency: Currency, cart_items: List[Dict]):
         raise NotImplementedError
 
     # Chats
@@ -762,7 +838,7 @@ TODO
     def chats(current_chat_name: str, total_chats: int, available_to_create_chats: int) -> str:
         raise NotImplementedError
 
-    # Face swap
+    # FaceSwap
     @staticmethod
     def choose_face_swap_package(name: str, available_images: int, total_images: int, used_images: int) -> str:
         raise NotImplementedError
@@ -815,7 +891,7 @@ TODO
 
     # Settings
     @staticmethod
-    def settings(model: Model) -> str:
+    def settings(human_model: str, current_model: Model, dalle_cost=1) -> str:
         raise NotImplementedError
 
     # Bonus

@@ -11,11 +11,14 @@ from bot.database.models.common import Quota, DEFAULT_ROLE
 from bot.database.models.package import PackageType
 from bot.database.models.subscription import SubscriptionType, SubscriptionStatus, SubscriptionLimit
 from bot.database.models.user import User, UserSettings
-from bot.database.operations.chat import get_chats_by_user_id, update_chat
-from bot.database.operations.package import get_packages_by_user_id
-from bot.database.operations.subscription import get_last_subscription_by_user_id, update_subscription
-from bot.database.operations.user import get_users, update_user
-from bot.helpers.send_message_to_admins import send_message_to_admins
+from bot.database.operations.chat.getters import get_chats_by_user_id
+from bot.database.operations.chat.updaters import update_chat
+from bot.database.operations.package.getters import get_packages_by_user_id
+from bot.database.operations.subscription.getters import get_last_subscription_by_user_id
+from bot.database.operations.subscription.updaters import update_subscription
+from bot.database.operations.user.getters import get_users
+from bot.database.operations.user.updaters import update_user
+from bot.helpers.senders.send_message_to_admins import send_message_to_admins
 from bot.locales.main import get_localization
 
 
@@ -79,8 +82,10 @@ async def update_user_subscription(bot: Bot, user: User, batch: AsyncWriteBatch)
             "edited_at": current_date,
         })
 
-        await bot.send_message(chat_id=user.telegram_chat_id,
-                               text=get_localization(user.language_code).SUBSCRIPTION_END)
+        await bot.send_message(
+            chat_id=user.telegram_chat_id,
+            text=get_localization(user.language_code).SUBSCRIPTION_END,
+        )
         return user
 
     is_time_to_update_limits = (current_date - user.last_subscription_limit_update).days >= 30
@@ -92,7 +97,7 @@ async def update_user_subscription(bot: Bot, user: User, batch: AsyncWriteBatch)
         })
         await bot.send_message(
             chat_id=user.telegram_chat_id,
-            text=get_localization(user.language_code).SUBSCRIPTION_RESET
+            text=get_localization(user.language_code).SUBSCRIPTION_RESET,
         )
 
     return user
@@ -140,7 +145,7 @@ async def update_user_additional_usage_quota(bot: Bot, user: User, had_subscript
         if not had_subscription and count_active_packages_before > count_active_packages_after:
             await bot.send_message(
                 chat_id=user.telegram_chat_id,
-                text=get_localization(user.language_code).PACKAGES_END
+                text=get_localization(user.language_code).PACKAGES_END,
             )
 
 
@@ -158,5 +163,5 @@ async def reset_user_chats(user: User, bot: Bot):
     if need_to_send_message:
         await bot.send_message(
             chat_id=user.telegram_chat_id,
-            text=get_localization(user.language_code).CHATS_RESET
+            text=get_localization(user.language_code).CHATS_RESET,
         )

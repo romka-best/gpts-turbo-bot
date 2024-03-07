@@ -8,6 +8,8 @@ class PromoCodeType:
 
 
 class PromoCode:
+    COLLECTION_NAME = "promo_codes"
+
     id: str
     created_by_user_id: str
     name: str
@@ -17,15 +19,17 @@ class PromoCode:
     created_at: datetime
     edited_at: datetime
 
-    def __init__(self,
-                 id: str,
-                 created_by_user_id: str,
-                 name: str,
-                 type: PromoCodeType,
-                 details: dict,
-                 until=None,
-                 created_at=None,
-                 edited_at=None):
+    def __init__(
+        self,
+        id: str,
+        created_by_user_id: str,
+        name: str,
+        type: PromoCodeType,
+        details: dict,
+        until=None,
+        created_at=None,
+        edited_at=None,
+    ):
         self.id = id
         self.created_by_user_id = created_by_user_id
         self.name = name
@@ -42,16 +46,20 @@ class PromoCode:
 
 
 class UsedPromoCode:
+    COLLECTION_NAME = "used_promo_codes"
+
     id: str
     user_id: str
     promo_code_id: str
     date: datetime
 
-    def __init__(self,
-                 id: str,
-                 user_id: str,
-                 promo_code_id: str,
-                 date=None):
+    def __init__(
+        self,
+        id: str,
+        user_id: str,
+        promo_code_id: str,
+        date=None,
+    ):
         self.id = id
         self.user_id = user_id
         self.promo_code_id = promo_code_id

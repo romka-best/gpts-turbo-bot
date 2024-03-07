@@ -2,8 +2,10 @@ import asyncio
 import logging
 import os
 from contextlib import asynccontextmanager
+from datetime import datetime, timezone, timedelta
 
 import uvicorn
+from aiogram.client.default import DefaultBotProperties
 from aiogram.exceptions import TelegramForbiddenError, TelegramBadRequest
 from fastapi import FastAPI, BackgroundTasks
 from fastapi.responses import JSONResponse
@@ -11,35 +13,40 @@ from aiogram import Bot, Dispatcher, types
 from aiogram.enums.parse_mode import ParseMode
 from aiogram.fsm.storage.redis import RedisStorage
 from aiogram.fsm.strategy import FSMStrategy
+from redis.backoff import FullJitterBackoff
+from redis.retry import Retry
 
 from bot.config import config
 from bot.database.main import firebase
-from bot.database.operations.user import update_user
-from bot.handlers.blast_handler import blast_router
-from bot.handlers.bonus_handler import bonus_router
-from bot.handlers.catalog_handler import catalog_router
-from bot.handlers.chat_gpt_handler import chat_gpt_router
-from bot.handlers.chats_handler import chats_router
-from bot.handlers.common_handler import common_router
-from bot.handlers.dalle_handler import dalle_router
-from bot.handlers.face_swap_handler import face_swap_router
-from bot.handlers.feedback_handler import feedback_router
-from bot.handlers.language_handler import language_router
-from bot.handlers.mode_handler import mode_router
-from bot.handlers.music_gen_handler import music_gen_router
-from bot.handlers.payment_handler import payment_router
-from bot.handlers.photo_handler import photo_router
-from bot.handlers.profile_handler import profile_router
-from bot.handlers.promo_code_handler import promo_code_router
-from bot.handlers.settings_handler import settings_router
-from bot.handlers.statistics_handler import statistics_router
-from bot.handlers.text_handler import text_router
-from bot.handlers.voice_handler import voice_router
+from bot.database.operations.user.updaters import update_user
+from bot.handlers.admin.blast_handler import blast_router
+from bot.handlers.admin.catalog_handler import catalog_router
+from bot.handlers.admin.face_swap_handler import admin_face_swap_router
+from bot.handlers.admin.promo_code import admin_promo_code_router
+from bot.handlers.admin.statistics_handler import statistics_router
+from bot.handlers.ai.chat_gpt_handler import chat_gpt_router
+from bot.handlers.ai.dalle_handler import dalle_router
+from bot.handlers.ai.face_swap_handler import face_swap_router
+from bot.handlers.ai.mode_handler import mode_router
+from bot.handlers.ai.music_gen_handler import music_gen_router
+from bot.handlers.common.common_handler import common_router
+from bot.handlers.common.document_handler import document_router
+from bot.handlers.common.feedback_handler import feedback_router
+from bot.handlers.common.photo_handler import photo_router
+from bot.handlers.common.profile_handler import profile_router
+from bot.handlers.common.text_handler import text_router
+from bot.handlers.common.voice_handler import voice_router
+from bot.handlers.payment.bonus_handler import bonus_router
+from bot.handlers.payment.payment_handler import payment_router
+from bot.handlers.payment.promo_code_handler import promo_code_router
+from bot.handlers.settings.language_handler import language_router
+from bot.handlers.settings.settings_handler import settings_router
+from bot.helpers.billing.update_daily_expenses import update_daily_expenses
 from bot.helpers.handle_replicate_webhook import handle_replicate_webhook
 from bot.helpers.notify_admins_about_error import notify_admins_about_error
-from bot.helpers.send_daily_statistics import send_daily_statistics
-from bot.helpers.set_commands import set_commands
-from bot.helpers.set_description import set_description
+from bot.helpers.senders.send_daily_statistics import send_daily_statistics
+from bot.helpers.setters.set_commands import set_commands
+from bot.helpers.setters.set_description import set_description
 from bot.helpers.update_monthly_limits import update_monthly_limits
 
 WEBHOOK_BOT_PATH = f"/bot/{config.BOT_TOKEN.get_secret_value()}"
@@ -48,8 +55,18 @@ WEBHOOK_REPLICATE_PATH = config.WEBHOOK_REPLICATE_PATH
 WEBHOOK_BOT_URL = config.WEBHOOK_URL + WEBHOOK_BOT_PATH
 WEBHOOK_REPLICATE_URL = config.WEBHOOK_URL + config.WEBHOOK_REPLICATE_PATH
 
-bot = Bot(token=config.BOT_TOKEN.get_secret_value(), parse_mode=ParseMode.HTML)
-storage = RedisStorage.from_url(config.REDIS_URL)
+bot = Bot(
+    token=config.BOT_TOKEN.get_secret_value(),
+    default=DefaultBotProperties(
+        parse_mode=ParseMode.HTML,
+    ),
+)
+storage = RedisStorage.from_url(config.REDIS_URL, {
+    'socket_keepalive': True,
+    'health_check_interval': 30,
+    'retry_on_timeout': True,
+    'retry': Retry(FullJitterBackoff(cap=5, base=1), 5),
+})
 dp = Dispatcher(storage=storage, sm_strategy=FSMStrategy.GLOBAL_USER)
 
 
@@ -62,13 +79,13 @@ async def lifespan(_: FastAPI):
     dp.include_routers(
         common_router,
         catalog_router,
-        chats_router,
         feedback_router,
         language_router,
         mode_router,
         payment_router,
         profile_router,
         promo_code_router,
+        admin_promo_code_router,
         bonus_router,
         blast_router,
         settings_router,
@@ -76,7 +93,9 @@ async def lifespan(_: FastAPI):
         chat_gpt_router,
         dalle_router,
         face_swap_router,
+        admin_face_swap_router,
         music_gen_router,
+        document_router,
         photo_router,
         voice_router,
         text_router,
@@ -105,8 +124,8 @@ async def handle_update(update: dict):
         await dp.feed_update(bot=bot, update=telegram_update)
     except TelegramForbiddenError:
         user_id = None
-        if telegram_update.callback_query and telegram_update.callback_query.message.from_user.id:
-            user_id = str(telegram_update.callback_query.message.from_user.id)
+        if telegram_update.callback_query and telegram_update.callback_query.from_user.id:
+            user_id = str(telegram_update.callback_query.from_user.id)
         elif telegram_update.message and telegram_update.message.from_user.id:
             user_id = str(telegram_update.message.from_user.id)
 
@@ -115,9 +134,13 @@ async def handle_update(update: dict):
                 "is_blocked": True,
             })
     except TelegramBadRequest as e:
-        if e.message == "Bad Request: message can't be deleted for everyone":
+        if e.message.startswith("Bad Request: message can't be deleted for everyone"):
             logging.info(e)
-        elif e.message == "Bad Request: message to reply not found":
+        elif e.message.startswith("Bad Request: message to reply not found"):
+            logging.warning(e)
+        elif e.message.startswith("Bad Request: message to delete not found"):
+            logging.warning(e)
+        elif e.message.startswith("Bad Request: message is not modified"):
             logging.warning(e)
         else:
             logging.exception(f"Error in bot_webhook: {e}")
@@ -136,6 +159,9 @@ async def replicate_webhook(prediction: dict):
 
 @app.get("/run-daily-tasks")
 async def daily_tasks(background_tasks: BackgroundTasks):
+    yesterday_utc_day = datetime.now(timezone.utc) - timedelta(days=1)
+    await update_daily_expenses(yesterday_utc_day)
+
     background_tasks.add_task(update_monthly_limits, bot)
     background_tasks.add_task(send_daily_statistics, bot)
 
