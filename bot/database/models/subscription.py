@@ -177,11 +177,16 @@ class Subscription:
         }
 
     @staticmethod
-    def get_price(currency: Currency, subscription_type: SubscriptionType, subscription_period: SubscriptionPeriod):
+    def get_price(
+        currency: Currency,
+        subscription_type: SubscriptionType,
+        subscription_period: SubscriptionPeriod,
+        user_discount: int,
+    ):
         price_discount = {
-            SubscriptionPeriod.MONTH1: 0,
-            SubscriptionPeriod.MONTHS3: 5,
-            SubscriptionPeriod.MONTHS6: 10,
+            SubscriptionPeriod.MONTH1: user_discount if user_discount > 0 else 0,
+            SubscriptionPeriod.MONTHS3: user_discount if user_discount > 5 else 5,
+            SubscriptionPeriod.MONTHS6: user_discount if user_discount > 10 else 10,
         }
         price_period = {
             SubscriptionPeriod.MONTH1: 1,

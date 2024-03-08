@@ -569,8 +569,8 @@ class Texts(Protocol):
 3️⃣ <b>Перешли по реферальной ссылке:</b> {count_referral_users}
 4️⃣ <b>Языки:</b>
 🇺🇸 - {count_english_users} ({round((count_english_users / count_all_users) * 100, 2)}%)
-🇷🇺 - {count_russian_users} ({(round(count_russian_users / count_all_users) * 100, 2)}%)
-🌍 - {count_other_users} ({(round(count_other_users / count_all_users) * 100, 2)}%)
+🇷🇺 - {count_russian_users} ({round((count_russian_users / count_all_users) * 100, 2)}%)
+🌍 - {count_other_users} ({round((count_other_users / count_all_users) * 100, 2)}%)
 5️⃣ <b>Оплатившие хоть раз:</b> {count_paid_users}
 6️⃣ <b>Подписчики:</b>
     - <b>{SubscriptionType.FREE}:</b> {count_subscription_users[SubscriptionType.FREE]}
@@ -639,7 +639,7 @@ class Texts(Protocol):
 4️⃣ <b>Вал:</b> {round(count_total_money, 2)}₽
 
 💬 <b>Чаты</b>
-    Роли:
+    <b>Роли:</b>
 {chat_info}
 
     - <b>Всего:</b> {count_chats_usage['ALL']}
@@ -796,6 +796,7 @@ class Texts(Protocol):
         monthly_limits,
         additional_usage_quota,
         renewal_date,
+        discount: int,
     ) -> str:
         raise NotImplementedError
 

@@ -107,7 +107,7 @@ async def handle_get_statistics(language_code: str, period: str):
 
     users = await get_users(start_date, end_date)
     transactions = await get_transactions(start_date, end_date)
-    generations = await get_generations()
+    generations = await get_generations(start_date, end_date)
     chats = await get_chats(start_date, end_date)
 
     paid_users = set()

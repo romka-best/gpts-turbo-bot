@@ -52,6 +52,7 @@ async def profile(message: Message, state: FSMContext):
         user.monthly_limits,
         user.additional_usage_quota,
         renewal_date.strftime("%d.%m.%Y"),
+        user.discount,
     )
     reply_markup = build_profile_keyboard(user_language_code)
 

@@ -42,6 +42,7 @@ class User:
     additional_usage_quota: dict
     settings: dict
     referred_by: str
+    discount: int
     created_at: datetime
     edited_at: datetime
 
@@ -106,6 +107,7 @@ class User:
         additional_usage_quota=None,
         settings=None,
         referred_by=None,
+        discount=0,
         created_at=None,
         edited_at=None,
     ):
@@ -129,6 +131,7 @@ class User:
             else self.DEFAULT_ADDITIONAL_USAGE_QUOTA
         self.settings = settings if settings is not None else self.DEFAULT_SETTINGS
         self.referred_by = referred_by
+        self.discount = discount
 
         current_time = datetime.now(timezone.utc)
         self.last_subscription_limit_update = last_subscription_limit_update \

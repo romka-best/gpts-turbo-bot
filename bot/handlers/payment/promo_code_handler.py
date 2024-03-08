@@ -17,9 +17,10 @@ from bot.database.operations.promo_code.getters import (
 from bot.database.operations.promo_code.writers import write_used_promo_code
 from bot.database.operations.subscription.writers import write_subscription
 from bot.database.operations.user.getters import get_user
+from bot.database.operations.user.updaters import update_user
 from bot.helpers.creaters.create_package import create_package
 from bot.helpers.creaters.create_subscription import create_subscription
-from bot.keyboards.common.common import build_cancel_keyboard, build_recommendations_keyboard
+from bot.keyboards.common.common import build_cancel_keyboard
 from bot.locales.main import get_localization, get_user_language
 from bot.states.promo_code import PromoCode
 
@@ -131,15 +132,18 @@ async def promo_code_sent(message: Message, state: FSMContext):
                     )
 
                     await state.clear()
-                else:
-                    await write_used_promo_code(user_id, typed_promo_code.id)
+                elif typed_promo_code.type == PromoCodeType.DISCOUNT:
+                    discount = int(typed_promo_code.details['discount'])
+                    await update_user(user_id, {
+                        "discount": discount,
+                    })
 
-                    reply_markup = await build_recommendations_keyboard(user.current_model, user_language_code,
-                                                                        user.gender)
+                    await write_used_promo_code(user_id, typed_promo_code.id)
                     await message.reply(
-                        text=get_localization(user_language_code).PROMO_CODE_SUCCESS,
-                        reply_markup=reply_markup,
+                        text=get_localization(user_language_code).PROMO_CODE_SUCCESS
                     )
+
+                    await state.clear()
         else:
             reply_markup = build_cancel_keyboard(user_language_code)
             await message.reply(

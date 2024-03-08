@@ -27,7 +27,7 @@ SELECT
   service.description AS service,
   SUM(cost) + IFNULL(SUM((SELECT SUM(amount) FROM UNNEST(credits))), 0) AS total_cost
 FROM
-  `{config.BILLING_TABLE}`
+  `{config.BILLING_TABLE.get_secret_value()}`
 WHERE
   _PARTITIONTIME = TIMESTAMP("{date.strftime("%Y-%m-%d")}")
   AND project.name = 'GPTsTurboBot'

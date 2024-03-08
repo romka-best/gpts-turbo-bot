@@ -572,6 +572,7 @@ Please try again or contact @roman_danilov 🔧
         monthly_limits,
         additional_usage_quota,
         renewal_date,
+        discount,
     ) -> str:
         emojis = Subscription.get_emojis()
 
@@ -639,6 +640,7 @@ Fast answers: {'Yes' if additional_usage_quota[Quota.FAST_MESSAGES] else 'No'}
 
 🎁 Invite friends and get bonus: /bonus
 💎 Subscribe or purchase individual packages: /buy
+{f'💸 Discount for the next subscription: {discount}%' if discount > 0 else ''}
 """
 
     @staticmethod

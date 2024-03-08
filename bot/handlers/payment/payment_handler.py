@@ -21,6 +21,7 @@ from bot.database.operations.subscription.getters import get_last_subscription_b
 from bot.database.operations.subscription.writers import write_subscription
 from bot.database.operations.transaction.writers import write_transaction
 from bot.database.operations.user.getters import get_user
+from bot.database.operations.user.updaters import update_user
 from bot.handlers.payment.promo_code_handler import handle_promo_code
 from bot.helpers.creaters.create_package import create_package
 from bot.helpers.creaters.create_subscription import create_subscription
@@ -110,7 +111,7 @@ async def handle_subscription_selection(callback_query: CallbackQuery, state: FS
         user_language_code = await get_user_language(user_id, state.storage)
 
         caption = get_localization(user_language_code).choose_how_many_months_to_subscribe(subscription_type)
-        reply_markup = build_period_of_subscription_keyboard(user_language_code, subscription_type)
+        reply_markup = build_period_of_subscription_keyboard(user_language_code, subscription_type, user.discount)
         photo_path = f'payments/subscription_{subscription_type.lower()}_{user_language_code}_{user.currency}.png'
         photo = await firebase.bucket.get_blob(photo_path)
         photo_link = firebase.get_public_url(photo.name)
@@ -134,7 +135,7 @@ async def handle_period_of_subscription_selection(callback_query: CallbackQuery,
     subscription_type, subscription_period = callback_query.data.split(':')[1], callback_query.data.split(':')[2]
 
     emojis = Subscription.get_emojis()
-    price = Subscription.get_price(user.currency, subscription_type, subscription_period)
+    price = Subscription.get_price(user.currency, subscription_type, subscription_period, user.discount)
     name = (f"{subscription_type} {emojis[subscription_type]} "
             f"({get_localization(user_language_code).cycles_subscribe()[subscription_period]})")
     description = get_localization(user_language_code).confirmation_subscribe(subscription_type, subscription_period)
@@ -531,6 +532,9 @@ async def successful_payment(message: Message, state: FSMContext):
                 'provider_payment_charge_id': payment.provider_payment_charge_id
             },
         )
+        await update_user(user_id, {
+            "discount": 0,
+        })
 
         await message.answer(text=get_localization(user_language_code).SUBSCRIPTION_SUCCESS)
         await send_message_to_admins(
