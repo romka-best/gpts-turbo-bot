@@ -65,23 +65,31 @@ def build_subscriptions_keyboard(language_code: str) -> InlineKeyboardMarkup:
 def build_period_of_subscription_keyboard(
     language_code: str,
     subscription_type: SubscriptionType,
+    discount: int,
 ) -> InlineKeyboardMarkup:
+    discount_month_1 = f"{get_localization(language_code).DISCOUNT} {discount}%" \
+        if discount > 0 else get_localization(language_code).NO_DISCOUNT
+    discount_months_3 = f"{get_localization(language_code).DISCOUNT} {discount}%" \
+        if discount > 5 else f"{get_localization(language_code).DISCOUNT} 5%"
+    discount_months_6 = f"{get_localization(language_code).DISCOUNT} {discount}%" \
+        if discount > 10 else f"{get_localization(language_code).DISCOUNT} 10%"
+
     buttons = [
         [
             InlineKeyboardButton(
-                text=f"{get_localization(language_code).MONTH_1} ({get_localization(language_code).NO_DISCOUNT})",
+                text=f"{get_localization(language_code).MONTH_1} ({discount_month_1})",
                 callback_data=f'period_of_subscription:{subscription_type}:{SubscriptionPeriod.MONTH1}'
             ),
         ],
         [
             InlineKeyboardButton(
-                text=f"{get_localization(language_code).MONTHS_3} ({get_localization(language_code).DISCOUNT} 5%)",
+                text=f"{get_localization(language_code).MONTHS_3} ({discount_months_3})",
                 callback_data=f'period_of_subscription:{subscription_type}:{SubscriptionPeriod.MONTHS3}'
             ),
         ],
         [
             InlineKeyboardButton(
-                text=f"{get_localization(language_code).MONTHS_6} ({get_localization(language_code).DISCOUNT} 10%)",
+                text=f"{get_localization(language_code).MONTHS_6} ({discount_months_6})",
                 callback_data=f'period_of_subscription:{subscription_type}:{SubscriptionPeriod.MONTHS6}'
             ),
         ],

@@ -578,6 +578,7 @@ class Russian(Texts):
         monthly_limits,
         additional_usage_quota,
         renewal_date,
+        discount,
     ) -> str:
         emojis = Subscription.get_emojis()
 
@@ -645,6 +646,7 @@ class Russian(Texts):
 
 🎁 Пригласить друзей и получить бонус: /bonus
 💎 Оформить подписку или приобрести индивидуальные пакеты: /buy
+{f'💸 Скидка на следующую подписку: {discount}%' if discount > 0 else ''}
 """
 
     @staticmethod

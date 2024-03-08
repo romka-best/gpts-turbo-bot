@@ -34,6 +34,7 @@ async def get_user(user_id: str) -> Optional[User]:
             additional_usage_quota=user_dict.get("additional_usage_quota"),
             settings=user_dict.get("settings"),
             referred_by=user_dict.get("referred_by"),
+            discount=user_dict.get("discount", 0),
             created_at=user_dict.get("created_at"),
             edited_at=user_dict.get("edited_at")
         )
@@ -72,6 +73,7 @@ async def get_users(
             additional_usage_quota=user.to_dict().get("additional_usage_quota"),
             settings=user.to_dict().get("settings"),
             referred_by=user.to_dict().get("referred_by"),
+            discount=user.to_dict().get("discount", 0),
             created_at=user.to_dict().get("created_at"),
             edited_at=user.to_dict().get("edited_at")
         ) async for user in users
@@ -104,6 +106,7 @@ async def get_users_by_referral(referred_by: str) -> List[User]:
             additional_usage_quota=user.to_dict().get("additional_usage_quota"),
             settings=user.to_dict().get("settings"),
             referred_by=user.to_dict().get("referred_by"),
+            discount=user.to_dict().get("discount", 0),
             created_at=user.to_dict().get("created_at"),
             edited_at=user.to_dict().get("edited_at")
         ) async for user in users_stream
@@ -136,6 +139,7 @@ async def get_users_by_language_code(language_code: str) -> List[User]:
             additional_usage_quota=user.to_dict().get("additional_usage_quota"),
             settings=user.to_dict().get("settings"),
             referred_by=user.to_dict().get("referred_by"),
+            discount=user.to_dict().get("discount", 0),
             created_at=user.to_dict().get("created_at"),
             edited_at=user.to_dict().get("edited_at")
         ) async for user in users_stream

@@ -79,6 +79,8 @@ async def handle_create_promo_code_selection(callback_query: CallbackQuery, stat
             reply_markup=reply_markup,
         )
 
+        await state.set_state(PromoCode.waiting_for_promo_code_discount)
+
     await callback_query.message.delete()
 
 
@@ -159,24 +161,47 @@ async def handle_create_promo_promo_code_package_quantity_sent(message: Message,
         )
 
 
-@admin_promo_code_router.message(PromoCode.waiting_for_promo_code_package_quantity, ~F.text.startswith('/'))
-async def handle_create_promo_promo_code_discount_sent(message: Message, state: FSMContext):
+@admin_promo_code_router.callback_query(lambda c: c.data.startswith('create_promo_code_discount:'))
+async def handle_create_promo_code_discount_selection(callback_query: CallbackQuery, state: FSMContext):
+    await callback_query.answer()
+
+    user_language_code = await get_user_language(str(callback_query.from_user.id), state.storage)
+
+    discount = int(callback_query.data.split(':')[1])
+    reply_markup = build_cancel_keyboard(user_language_code)
+    await callback_query.message.answer(
+        text=get_localization(user_language_code).PROMO_CODE_CHOOSE_NAME_ADMIN,
+        reply_markup=reply_markup
+    )
+
+    await state.set_state(PromoCode.waiting_for_promo_code_name)
+    await state.update_data(
+        promo_code_type=PromoCodeType.DISCOUNT,
+        promo_code_discount=discount,
+    )
+
+
+@admin_promo_code_router.message(PromoCode.waiting_for_promo_code_discount, ~F.text.startswith('/'))
+async def handle_create_promo_code_discount_sent(message: Message, state: FSMContext):
     user_language_code = await get_user_language(str(message.from_user.id), state.storage)
 
     try:
         discount = int(message.text)
 
-        reply_markup = build_cancel_keyboard(user_language_code)
-        await message.answer(
-            text=get_localization(user_language_code).PROMO_CODE_CHOOSE_NAME_ADMIN,
-            reply_markup=reply_markup
-        )
+        if 1 <= discount <= 50:
+            reply_markup = build_cancel_keyboard(user_language_code)
+            await message.answer(
+                text=get_localization(user_language_code).PROMO_CODE_CHOOSE_NAME_ADMIN,
+                reply_markup=reply_markup
+            )
 
-        await state.set_state(PromoCode.waiting_for_promo_code_name)
-        await state.update_data(
-            promo_code_type=PromoCodeType.DISCOUNT,
-            promo_code_discount=discount,
-        )
+            await state.set_state(PromoCode.waiting_for_promo_code_name)
+            await state.update_data(
+                promo_code_type=PromoCodeType.DISCOUNT,
+                promo_code_discount=discount,
+            )
+        else:
+            raise ValueError
     except (TypeError, ValueError):
         reply_markup = build_cancel_keyboard(user_language_code)
         await message.reply(
@@ -226,7 +251,7 @@ async def promo_code_date_sent(message: Message, state: FSMContext):
             details['package_type'] = user_data['promo_code_package_type']
             details['package_quantity'] = user_data['promo_code_package_quantity']
         elif promo_code_type == PromoCodeType.DISCOUNT:
-            details['discount'] = user_data['promo_code_discount']
+            details['discount'] = int(user_data['promo_code_discount'])
 
         await write_promo_code(
             created_by_user_id=user_id,

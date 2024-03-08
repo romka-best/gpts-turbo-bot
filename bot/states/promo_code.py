@@ -7,3 +7,4 @@ class PromoCode(StatesGroup):
     waiting_for_promo_code_date = State()
 
     waiting_for_promo_code_package_quantity = State()
+    waiting_for_promo_code_discount = State()
