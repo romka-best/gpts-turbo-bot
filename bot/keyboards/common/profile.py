@@ -4,17 +4,19 @@ from bot.database.models.user import UserGender
 from bot.locales.main import get_localization
 
 
-def build_profile_keyboard(language_code: str) -> InlineKeyboardMarkup:
+def build_profile_keyboard(language_code: str, is_photo_uploaded: bool, is_gender_chosen: bool) -> InlineKeyboardMarkup:
     buttons = [
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).CHANGE_PHOTO,
+                text=get_localization(language_code).CHANGE_PHOTO if is_photo_uploaded else get_localization(
+                    language_code).UPLOAD_PHOTO,
                 callback_data=f'profile:change_photo'
             ),
         ],
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).CHANGE_GENDER,
+                text=get_localization(language_code).CHANGE_GENDER if is_gender_chosen else get_localization(
+                    language_code).CHOOSE_GENDER,
                 callback_data=f'profile:change_gender'
             ),
         ],

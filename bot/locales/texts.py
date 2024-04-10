@@ -34,8 +34,12 @@ class Texts(Protocol):
     MALE: str
     FEMALE: str
     SEND_ME_YOUR_PICTURE: str
+    UPLOAD_PHOTO: str
+    UPLOADING_PHOTO: str
+    NO_FACE_IN_PHOTO: str
     CHANGE_PHOTO: str
     CHANGE_PHOTO_SUCCESS: str
+    CHOOSE_GENDER: str
     CHANGE_GENDER: str
 
     # Language

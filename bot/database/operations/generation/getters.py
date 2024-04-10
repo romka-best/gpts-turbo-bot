@@ -24,7 +24,7 @@ async def get_generations(
     if start_date:
         generations_query = generations_query.where(filter=FieldFilter("created_at", ">=", start_date))
     if end_date:
-        generations_query = generations_query.where(filter=FieldFilter("created_at", "<=", start_date))
+        generations_query = generations_query.where(filter=FieldFilter("created_at", "<=", end_date))
 
     generations_stream = generations_query.stream()
     generations = [Generation(**generation.to_dict()) async for generation in generations_stream]

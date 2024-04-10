@@ -150,8 +150,14 @@ Your opinion matters a lot to us! 💖
 
 Once you've got the perfect shot, upload your photo and let the magic happen 🌟
     """
+    UPLOAD_PHOTO = "Upload photo 📷"
+    UPLOADING_PHOTO = "Uploading photo..."
+    NO_FACE_IN_PHOTO = "I can't see a face in the photo. Please try another 📷"
+
     CHANGE_PHOTO = "Change photo 📷"
     CHANGE_PHOTO_SUCCESS = "📸 Photo successfully uploaded! 🌟"
+
+    CHOOSE_GENDER = "Choose gender 🚹🚺"
     CHANGE_GENDER = "Change gender 🚹🚺"
 
     # Language
