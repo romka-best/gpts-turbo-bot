@@ -145,6 +145,11 @@ async def handle_music_gen_selection(
                         "duration": duration,
                     }
                 )
+        except KeyError:
+            await handle_music_gen(message.bot, user.telegram_chat_id, state, user_id)
+
+            await processing_message.delete()
+            await message.delete()
         except (TypeError, ValueError):
             reply_markup = build_cancel_keyboard(user_language_code)
             await message.reply(

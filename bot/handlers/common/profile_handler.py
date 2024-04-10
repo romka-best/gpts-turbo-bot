@@ -54,18 +54,20 @@ async def profile(message: Message, state: FSMContext):
         renewal_date.strftime("%d.%m.%Y"),
         user.discount,
     )
-    reply_markup = build_profile_keyboard(user_language_code)
 
     photo_path = f'users/avatars/{user_id}.jpeg'
     try:
         photo = await firebase.bucket.get_blob(photo_path)
         photo_link = firebase.get_public_url(photo.name)
+
+        reply_markup = build_profile_keyboard(user_language_code, True, user.gender != UserGender.UNSPECIFIED)
         await message.answer_photo(
             photo=URLInputFile(photo_link, filename=photo_path),
             caption=text,
             reply_markup=reply_markup,
         )
     except Exception:
+        reply_markup = build_profile_keyboard(user_language_code, False, user.gender != UserGender.UNSPECIFIED)
         await message.answer(
             text=text,
             reply_markup=reply_markup,

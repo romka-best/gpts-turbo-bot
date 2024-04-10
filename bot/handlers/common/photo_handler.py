@@ -4,12 +4,13 @@ import aiohttp
 from aiogram import Router, F
 
 from aiogram.fsm.context import FSMContext
-from aiogram.types import Message, URLInputFile, File
+from aiogram.types import Message, URLInputFile, File, ReactionTypeEmoji
 from aiogram.utils.chat_action import ChatActionSender
 
 from bot.database.main import firebase
-from bot.database.models.common import Model, Quota
+from bot.database.models.common import Model, Quota, Currency
 from bot.database.models.face_swap_package import FaceSwapPackageStatus
+from bot.database.models.transaction import TransactionType, ServiceType
 from bot.database.operations.face_swap_package.getters import (
     get_face_swap_package,
     get_used_face_swap_packages_by_user_id,
@@ -17,10 +18,12 @@ from bot.database.operations.face_swap_package.getters import (
 from bot.database.operations.face_swap_package.updaters import update_face_swap_package, update_used_face_swap_package
 from bot.database.operations.generation.writers import write_generation
 from bot.database.operations.request.writers import write_request
+from bot.database.operations.transaction.writers import write_transaction
 from bot.database.operations.user.getters import get_user
 from bot.handlers.admin.face_swap_handler import handle_manage_face_swap
-from bot.handlers.ai.chat_gpt_handler import handle_chatgpt
+from bot.handlers.ai.chat_gpt_handler import handle_chatgpt, PRICE_GPT4_INPUT, PRICE_GPT4_OUTPUT
 from bot.handlers.ai.face_swap_handler import handle_face_swap
+from bot.integrations.openAI import get_response_message
 from bot.integrations.replicateAI import create_face_swap_image
 from bot.keyboards.admin.catalog import build_manage_catalog_create_role_confirmation_keyboard
 from bot.keyboards.common.common import build_cancel_keyboard
@@ -39,6 +42,8 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
 
     current_state = await state.get_state()
     if current_state == Profile.waiting_for_photo.state:
+        processing_message = await message.reply(text=get_localization(user_language_code).UPLOADING_PHOTO)
+
         photo_data_io = await message.bot.download_file(photo_file.file_path)
         photo_data = photo_data_io.read()
 
@@ -50,18 +55,76 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
             blob = firebase.bucket.new_blob(blob_path)
             await blob.upload(photo_data)
 
-        used_face_swap_packages = await get_used_face_swap_packages_by_user_id(user_id)
-        for used_face_swap_package in used_face_swap_packages:
-            await update_used_face_swap_package(used_face_swap_package.id, {
-                "used_images": []
-            })
+        history = [
+            {
+                'role': 'user',
+                'content': [
+                    {
+                        'type': 'text',
+                        'text': 'If you see clearly a face in the photo, just write "YES", but if you do not see the face in the photo, just write "NO".'
+                    },
+                    {
+                        "type": "image_url",
+                        "image_url": {
+                            "url": firebase.get_public_url(blob.name),
+                        },
+                    },
+                ]
+            }
+        ]
+        response = await get_response_message(Model.GPT4, history)
+        response_message = response['message']
+        if response_message.content == "YES":
+            await message.bot.set_message_reaction(
+                message.chat.id,
+                message.message_id,
+                [ReactionTypeEmoji(emoji="🤩")],
+                True,
+            )
 
-        await message.reply(get_localization(user_language_code).CHANGE_PHOTO_SUCCESS)
+            used_face_swap_packages = await get_used_face_swap_packages_by_user_id(user_id)
+            for used_face_swap_package in used_face_swap_packages:
+                await update_used_face_swap_package(used_face_swap_package.id, {
+                    "used_images": []
+                })
 
-        await state.clear()
+            await processing_message.edit_text(get_localization(user_language_code).CHANGE_PHOTO_SUCCESS)
 
-        if user.current_model == Model.FACE_SWAP:
-            await handle_face_swap(message.bot, str(message.chat.id), state, str(message.from_user.id))
+            await state.clear()
+
+            if user.current_model == Model.FACE_SWAP:
+                await handle_face_swap(message.bot, str(message.chat.id), state, str(message.from_user.id))
+        else:
+            await message.bot.set_message_reaction(
+                message.chat.id,
+                message.message_id,
+                [ReactionTypeEmoji(emoji="🤔")],
+                True,
+            )
+
+            await firebase.delete_blob(blob.name)
+
+            reply_markup = build_cancel_keyboard(user_language_code)
+            await processing_message.edit_text(
+                text=get_localization(user_language_code).NO_FACE_IN_PHOTO,
+                reply_markup=reply_markup,
+            )
+
+        input_price = response['input_tokens'] * PRICE_GPT4_INPUT
+        output_price = response['output_tokens'] * PRICE_GPT4_OUTPUT
+        total_price = round(input_price + output_price, 6)
+        await write_transaction(
+            user_id=user.id,
+            type=TransactionType.EXPENSE,
+            service=ServiceType.FACE_SWAP,
+            amount=total_price,
+            currency=Currency.USD,
+            quantity=0,
+            details={
+                "input_tokens": response['input_tokens'],
+                "output_tokens": response['output_tokens'],
+            },
+        )
     elif current_state == Catalog.waiting_for_role_photo.state:
         user_data = await state.get_data()
 
@@ -145,24 +208,62 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
                     await background_photo.upload(photo_data)
                     background_photo_link = firebase.get_public_url(background_path)
 
-                    result = await create_face_swap_image(background_photo_link, user_photo_link)
-                    request = await write_request(
-                        user_id=user_id,
-                        message_id=processing_message.message_id,
-                        model=Model.FACE_SWAP,
-                        requested=1,
-                        details={
-                            "is_test": False,
+                    history = [
+                        {
+                            'role': 'user',
+                            'content': [
+                                {
+                                    'type': 'text',
+                                    'text': 'If you see clearly a face in the photo, just write "YES", but if you do not see the face in the photo, just write "NO".'
+                                },
+                                {
+                                    "type": "image_url",
+                                    "image_url": {
+                                        "url": firebase.get_public_url(background_photo_link.name),
+                                    },
+                                },
+                            ]
                         }
-                    )
-                    await write_generation(
-                        id=result,
-                        request_id=request.id,
-                        model=Model.FACE_SWAP,
-                        has_error=result is None
-                    )
+                    ]
+                    response = await get_response_message(Model.GPT4, history)
+                    response_message = response['message']
+                    if response_message == "YES":
+                        result = await create_face_swap_image(background_photo_link, user_photo_link)
+                        request = await write_request(
+                            user_id=user_id,
+                            message_id=processing_message.message_id,
+                            model=Model.FACE_SWAP,
+                            requested=1,
+                            details={
+                                "is_test": False,
+                            }
+                        )
+                        await write_generation(
+                            id=result,
+                            request_id=request.id,
+                            model=Model.FACE_SWAP,
+                            has_error=result is None
+                        )
 
-                    await state.clear()
+                        await state.clear()
+                    else:
+                        await processing_message.edit_text(text=get_localization(user_language_code).NO_FACE_IN_PHOTO)
+
+                    input_price = response['input_tokens'] * PRICE_GPT4_INPUT
+                    output_price = response['output_tokens'] * PRICE_GPT4_OUTPUT
+                    total_price = round(input_price + output_price, 6)
+                    await write_transaction(
+                        user_id=user.id,
+                        type=TransactionType.EXPENSE,
+                        service=ServiceType.FACE_SWAP,
+                        amount=total_price,
+                        currency=Currency.USD,
+                        quantity=0,
+                        details={
+                            "input_tokens": response['input_tokens'],
+                            "output_tokens": response['output_tokens'],
+                        },
+                    )
                 except aiohttp.ClientResponseError:
                     photo_path = 'users/avatars/example.png'
                     example_photo = await firebase.bucket.get_blob(photo_path)

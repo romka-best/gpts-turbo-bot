@@ -41,5 +41,8 @@ class Firebase:
         blob_name = quote(blob_name, safe='')
         return f"https://firebasestorage.googleapis.com/v0/b/{self.bucket.name}/o/{blob_name}?alt=media"
 
+    async def delete_blob(self, blob_name: str):
+        await self.storage.delete(self.bucket.name, blob_name)
+
 
 firebase = Firebase()

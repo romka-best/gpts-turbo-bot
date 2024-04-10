@@ -233,7 +233,7 @@ async def handle_get_statistics(language_code: str, period: str):
             count_expense_money[transaction.service] += transaction.amount
             count_expense_total_money += transaction.amount
 
-            if transaction.service == ServiceType.FACE_SWAP:
+            if transaction.service == ServiceType.FACE_SWAP and transaction.quantity != 0:
                 face_swap_name = transaction.details.get('name', 'UNKNOWN')
                 face_swap_images = transaction.details.get('images', ['UNKNOWN'])
                 count_face_swap_usage[face_swap_name] = count_face_swap_usage.get(
