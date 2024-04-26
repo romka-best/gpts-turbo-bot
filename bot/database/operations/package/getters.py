@@ -51,6 +51,28 @@ async def get_last_package_by_user_id(user_id: str) -> Optional[Package]:
         )
 
 
+async def get_packages() -> List[Package]:
+    packages = firebase.db.collection(Package.COLLECTION_NAME).stream()
+
+    packages = [
+        Package(
+            id=package.to_dict().get('id'),
+            user_id=package.to_dict().get('user_id'),
+            type=package.to_dict().get('type'),
+            status=package.to_dict().get('status'),
+            currency=package.to_dict().get('currency'),
+            amount=package.to_dict().get('amount'),
+            quantity=package.to_dict().get('quantity'),
+            provider_payment_charge_id=package.to_dict().get('provider_payment_charge_id'),
+            until_at=package.to_dict().get('until_at'),
+            created_at=package.to_dict().get('created_at'),
+            edited_at=package.to_dict().get('edited_at'),
+        ) async for package in packages
+    ]
+
+    return packages
+
+
 async def get_packages_by_user_id_and_status(user_id: str, status: PackageStatus) -> List[Package]:
     packages_query = firebase.db.collection(Package.COLLECTION_NAME) \
         .where(filter=FieldFilter("user_id", "==", user_id)) \

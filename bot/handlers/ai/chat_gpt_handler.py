@@ -8,7 +8,7 @@ from aiogram.utils.chat_action import ChatActionSender
 from telegram.constants import ParseMode
 
 from bot.database.main import firebase
-from bot.database.models.common import Quota, Currency, Model
+from bot.database.models.common import Quota, Currency, GPTVersion, Model
 from bot.database.models.transaction import ServiceType, TransactionType
 from bot.database.models.user import UserSettings, User
 from bot.database.operations.chat.getters import get_chat
@@ -42,7 +42,7 @@ async def chatgpt(message: Message, state: FSMContext):
     user = await get_user(user_id)
     user_language_code = await get_user_language(user_id, state.storage)
 
-    reply_markup = build_chat_gpt_keyboard(user_language_code, user.current_model)
+    reply_markup = build_chat_gpt_keyboard(user_language_code, user.current_model, user.settings[Model.CHAT_GPT][UserSettings.VERSION])
     await message.answer(
         text=get_localization(user_language_code).CHOOSE_CHATGPT_MODEL,
         reply_markup=reply_markup,
@@ -57,9 +57,9 @@ async def handle_chat_gpt_choose_selection(callback_query: CallbackQuery, state:
     user = await get_user(user_id)
     user_language_code = await get_user_language(user_id, state.storage)
 
-    chosen_model = callback_query.data.split(':')[1]
+    chosen_version = callback_query.data.split(':')[1]
 
-    if chosen_model == user.current_model:
+    if user.current_model == Model.CHAT_GPT and chosen_version == user.settings[Model.CHAT_GPT][UserSettings.VERSION]:
         reply_markup = await build_recommendations_keyboard(user.current_model, user_language_code, user.gender)
         await callback_query.message.answer(
             text=get_localization(user_language_code).ALREADY_SWITCHED_TO_THIS_MODEL,
@@ -76,7 +76,7 @@ async def handle_chat_gpt_choose_selection(callback_query: CallbackQuery, state:
                 text = button.text
                 callback_data = button.callback_data.split(":", 1)[1]
 
-                if callback_data == chosen_model:
+                if callback_data == chosen_version:
                     if "✅" not in text:
                         text += " ✅"
                         keyboard_changed = True
@@ -88,12 +88,15 @@ async def handle_chat_gpt_choose_selection(callback_query: CallbackQuery, state:
 
         reply_markup = await build_recommendations_keyboard(user.current_model, user_language_code, user.gender)
         if keyboard_changed:
-            user.current_model = chosen_model
+            user.current_model = Model.CHAT_GPT
+            user.settings[Model.CHAT_GPT][UserSettings.VERSION] = chosen_version
             await update_user(user_id, {
                 "current_model": user.current_model,
+                "settings": user.settings,
             })
 
-            text = get_localization(user_language_code).SWITCHED_TO_CHATGPT3 if user.current_model == Model.GPT3 \
+            text = get_localization(user_language_code).SWITCHED_TO_CHATGPT3 \
+                if user.settings[user.current_model][UserSettings.VERSION] == GPTVersion.V3 \
                 else get_localization(user_language_code).SWITCHED_TO_CHATGPT4
             await callback_query.message.answer(
                 text=text,
@@ -110,7 +113,7 @@ async def handle_chat_gpt_choose_selection(callback_query: CallbackQuery, state:
 
 
 async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_quota: Quota, photo_filename=None):
-    if user_quota != Quota.GPT3 and user_quota != Quota.GPT4:
+    if user_quota != Quota.CHAT_GPT3 and user_quota != Quota.CHAT_GPT4:
         raise NotImplemented
 
     await state.update_data(is_processing=True)
@@ -125,7 +128,7 @@ async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_q
         else:
             text = message.text
 
-    if photo_filename and user_quota == Quota.GPT4:
+    if photo_filename and user_quota == Quota.CHAT_GPT4:
         await write_message(user.current_chat_id, "user", user.id, text, True, photo_filename)
     else:
         await write_message(user.current_chat_id, "user", user.id, text)
@@ -134,7 +137,7 @@ async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_q
     messages = await get_messages_by_chat_id(user.current_chat_id)
     role = await get_role_by_name(chat.role)
     sorted_messages = sorted(messages, key=lambda m: m.created_at)
-    if user_quota == Quota.GPT3:
+    if user_quota == Quota.CHAT_GPT3:
         history = [
                       {
                           'role': 'system',
@@ -186,14 +189,14 @@ async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_q
 
     async with chat_action_sender(bot=message.bot, chat_id=message.chat.id):
         try:
-            response = await get_response_message(user.current_model, history)
+            response = await get_response_message(user.settings[user.current_model][UserSettings.VERSION], history)
             response_message = response['message']
-            if user_quota == Quota.GPT3:
-                service = ServiceType.GPT3
+            if user_quota == Quota.CHAT_GPT3:
+                service = ServiceType.CHAT_GPT3
                 input_price = response['input_tokens'] * PRICE_GPT3_INPUT
                 output_price = response['output_tokens'] * PRICE_GPT3_OUTPUT
             else:
-                service = ServiceType.GPT4
+                service = ServiceType.CHAT_GPT4
                 input_price = response['input_tokens'] * PRICE_GPT4_INPUT
                 output_price = response['output_tokens'] * PRICE_GPT4_OUTPUT
 
@@ -285,10 +288,10 @@ async def handle_chat_gpt_continue_generation_choose_selection(callback_query: C
 
     if action == 'continue':
         await state.update_data(recognized_text=get_localization(user_language_code).CONTINUE_GENERATING)
-        if user.current_model == Model.GPT3:
-            user_quota = Quota.GPT3
-        elif user.current_model == Model.GPT4:
-            user_quota = Quota.GPT4
+        if user.settings[user.current_model][UserSettings.VERSION] == GPTVersion.V3:
+            user_quota = Quota.CHAT_GPT3
+        elif user.settings[user.current_model][UserSettings.VERSION] == GPTVersion.V4:
+            user_quota = Quota.CHAT_GPT4
         else:
             raise NotImplemented
 

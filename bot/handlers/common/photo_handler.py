@@ -8,9 +8,10 @@ from aiogram.types import Message, URLInputFile, File, ReactionTypeEmoji
 from aiogram.utils.chat_action import ChatActionSender
 
 from bot.database.main import firebase
-from bot.database.models.common import Model, Quota, Currency
+from bot.database.models.common import Model, Quota, Currency, GPTVersion
 from bot.database.models.face_swap_package import FaceSwapPackageStatus
 from bot.database.models.transaction import TransactionType, ServiceType
+from bot.database.models.user import UserSettings
 from bot.database.operations.face_swap_package.getters import (
     get_face_swap_package,
     get_used_face_swap_packages_by_user_id,
@@ -72,7 +73,7 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
                 ]
             }
         ]
-        response = await get_response_message(Model.GPT4, history)
+        response = await get_response_message(GPTVersion.V4, history)
         response_message = response['message']
         if response_message.content == "YES":
             await message.bot.set_message_reaction(
@@ -173,9 +174,9 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
 
         await message.answer(text=get_localization(user_language_code).FACE_SWAP_MANAGE_EDIT_SUCCESS)
         await handle_manage_face_swap(message, str(message.from_user.id), state)
-    elif user.current_model == Model.GPT3 or user.current_model == Model.GPT4:
-        if user.current_model == Model.GPT3:
-            await handle_chatgpt(message, state, user, Quota.GPT3)
+    elif user.current_model == Model.CHAT_GPT:
+        if user.settings[user.current_model][UserSettings.VERSION] == GPTVersion.V3:
+            await handle_chatgpt(message, state, user, Quota.CHAT_GPT3)
         else:
             photo_data_io = await message.bot.download_file(photo_file.file_path)
             photo_data = photo_data_io.read()
@@ -185,7 +186,7 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
             photo_vision = firebase.bucket.new_blob(photo_vision_path)
             await photo_vision.upload(photo_data)
 
-            await handle_chatgpt(message, state, user, Quota.GPT4, photo_vision_filename)
+            await handle_chatgpt(message, state, user, Quota.CHAT_GPT4, photo_vision_filename)
     elif user.current_model == Model.FACE_SWAP:
         quota = user.monthly_limits[Quota.FACE_SWAP] + user.additional_usage_quota[Quota.FACE_SWAP]
         quantity = 1
@@ -219,13 +220,13 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
                                 {
                                     "type": "image_url",
                                     "image_url": {
-                                        "url": firebase.get_public_url(background_photo_link.name),
+                                        "url": firebase.get_public_url(background_photo.name),
                                     },
                                 },
                             ]
                         }
                     ]
-                    response = await get_response_message(Model.GPT4, history)
+                    response = await get_response_message(GPTVersion.V4, history)
                     response_message = response['message']
                     if response_message == "YES":
                         result = await create_face_swap_image(background_photo_link, user_photo_link)

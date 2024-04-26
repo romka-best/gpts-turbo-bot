@@ -25,8 +25,9 @@ from bot.handlers.admin.face_swap_handler import admin_face_swap_router
 from bot.handlers.admin.promo_code import admin_promo_code_router
 from bot.handlers.admin.statistics_handler import statistics_router
 from bot.handlers.ai.chat_gpt_handler import chat_gpt_router
-from bot.handlers.ai.dalle_handler import dalle_router
+from bot.handlers.ai.dalle_handler import dall_e_router
 from bot.handlers.ai.face_swap_handler import face_swap_router
+from bot.handlers.ai.midjourney_handler import midjourney_router
 from bot.handlers.ai.mode_handler import mode_router
 from bot.handlers.ai.music_gen_handler import music_gen_router
 from bot.handlers.common.common_handler import common_router
@@ -42,15 +43,19 @@ from bot.handlers.payment.promo_code_handler import promo_code_router
 from bot.handlers.settings.language_handler import language_router
 from bot.handlers.settings.settings_handler import settings_router
 from bot.helpers.billing.update_daily_expenses import update_daily_expenses
+from bot.helpers.check_unresolved_requests import check_unresolved_requests
+from bot.helpers.handle_midjourney_webhook import handle_midjourney_webhook
 from bot.helpers.handle_replicate_webhook import handle_replicate_webhook
 from bot.helpers.notify_admins_about_error import notify_admins_about_error
-from bot.helpers.senders.send_daily_statistics import send_daily_statistics
+from bot.helpers.senders.send_admin_statistics import send_admin_statistics
 from bot.helpers.setters.set_commands import set_commands
 from bot.helpers.setters.set_description import set_description
 from bot.helpers.update_monthly_limits import update_monthly_limits
+from bot.utils.migrate import migrate
 
 WEBHOOK_BOT_PATH = f"/bot/{config.BOT_TOKEN.get_secret_value()}"
 WEBHOOK_REPLICATE_PATH = config.WEBHOOK_REPLICATE_PATH
+WEBHOOK_MIDJOURNEY_PATH = config.WEBHOOK_MIDJOURNEY_PATH
 
 WEBHOOK_BOT_URL = config.WEBHOOK_URL + WEBHOOK_BOT_PATH
 WEBHOOK_REPLICATE_URL = config.WEBHOOK_URL + config.WEBHOOK_REPLICATE_PATH
@@ -91,7 +96,8 @@ async def lifespan(_: FastAPI):
         settings_router,
         statistics_router,
         chat_gpt_router,
-        dalle_router,
+        dall_e_router,
+        midjourney_router,
         face_swap_router,
         admin_face_swap_router,
         music_gen_router,
@@ -104,6 +110,7 @@ async def lifespan(_: FastAPI):
     await set_description(bot)
     await set_commands(bot)
     await firebase.init()
+    await migrate(bot)
     yield
     await bot.session.close()
     await storage.close()
@@ -157,13 +164,28 @@ async def replicate_webhook(prediction: dict):
         return JSONResponse(content={}, status_code=500)
 
 
+@app.post(WEBHOOK_MIDJOURNEY_PATH)
+async def midjourney_webhook(body: dict):
+    is_ok = await handle_midjourney_webhook(bot, dp, body)
+    if not is_ok:
+        return JSONResponse(content={}, status_code=500)
+
+
 @app.get("/run-daily-tasks")
 async def daily_tasks(background_tasks: BackgroundTasks):
     yesterday_utc_day = datetime.now(timezone.utc) - timedelta(days=1)
     await update_daily_expenses(yesterday_utc_day)
 
+    await check_unresolved_requests(bot)
+
     background_tasks.add_task(update_monthly_limits, bot)
-    background_tasks.add_task(send_daily_statistics, bot)
+
+    today = datetime.now()
+    background_tasks.add_task(send_admin_statistics, bot, 'day')
+    if today.weekday() == 0:
+        background_tasks.add_task(send_admin_statistics, bot, 'week')
+    if today.day == 1:
+        background_tasks.add_task(send_admin_statistics, bot, 'month')
 
     return {"code": 200}
 

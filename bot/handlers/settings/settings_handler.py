@@ -13,7 +13,7 @@ from aiogram.types import (
 )
 
 from bot.database.main import firebase
-from bot.database.models.common import Quota, DALLEResolution, DALLEQuality, Model
+from bot.database.models.common import Quota, DALLEResolution, DALLEQuality, Model, MidjourneyVersion, DALLEVersion
 from bot.database.models.user import UserSettings
 from bot.database.operations.chat.deleters import delete_chat, reset_chat
 from bot.database.operations.chat.getters import get_chat_by_user_id, get_chats_by_user_id
@@ -63,16 +63,16 @@ async def handle_settings_choose_model_selection(callback_query: CallbackQuery, 
     user = await get_user(user_id)
     user_language_code = await get_user_language(user_id, state.storage)
 
-    dalle_cost = 1
+    dall_e_cost = 1
     chosen_model = callback_query.data.split(':')[1]
-    if chosen_model == Model.GPT3 or chosen_model == Model.GPT4:
+    if chosen_model == Model.CHAT_GPT:
         human_model = f"{get_localization(user_language_code).CHATGPT3} / {get_localization(user_language_code).CHATGPT4}"
-    elif chosen_model == Model.DALLE3:
-        dalle_cost = get_cost_for_image(
-            user.settings[Model.DALLE3][UserSettings.QUALITY],
-            user.settings[Model.DALLE3][UserSettings.RESOLUTION],
+    elif chosen_model == Model.DALL_E:
+        dall_e_cost = get_cost_for_image(
+            user.settings[Model.DALL_E][UserSettings.QUALITY],
+            user.settings[Model.DALL_E][UserSettings.RESOLUTION],
         )
-        human_model = get_localization(user_language_code).DALLE3
+        human_model = get_localization(user_language_code).DALL_E
     elif chosen_model == Model.FACE_SWAP:
         human_model = get_localization(user_language_code).FACE_SWAP
     elif chosen_model == Model.MUSIC_GEN:
@@ -82,7 +82,7 @@ async def handle_settings_choose_model_selection(callback_query: CallbackQuery, 
 
     reply_markup = build_settings_keyboard(user_language_code, chosen_model, user.settings)
     await callback_query.message.edit_text(
-        text=get_localization(user_language_code).settings(human_model, chosen_model, dalle_cost),
+        text=get_localization(user_language_code).settings(human_model, chosen_model, dall_e_cost),
         reply_markup=reply_markup,
     )
 
@@ -115,18 +115,20 @@ async def handle_setting_selection(callback_query: CallbackQuery, state: FSMCont
     elif chosen_setting == 'manage_catalog':
         await handle_catalog(callback_query.message, user_id, state)
         return
+    elif chosen_setting == MidjourneyVersion.V5 or chosen_setting == MidjourneyVersion.V6:
+        user.settings[Model.MIDJOURNEY][UserSettings.VERSION] = chosen_setting
+        what_changed = UserSettings.VERSION
     elif chosen_setting == DALLEResolution.LOW or chosen_setting == DALLEResolution.MEDIUM or chosen_setting == DALLEResolution.HIGH:
-        user.settings[Model.DALLE3][UserSettings.RESOLUTION] = chosen_setting
+        user.settings[Model.DALL_E][UserSettings.RESOLUTION] = chosen_setting
         what_changed = UserSettings.RESOLUTION
     elif chosen_setting == DALLEQuality.STANDARD or chosen_setting == DALLEQuality.HD:
-        user.settings[Model.DALLE3][UserSettings.QUALITY] = chosen_setting
+        user.settings[Model.DALL_E][UserSettings.QUALITY] = chosen_setting
         what_changed = UserSettings.QUALITY
+    elif chosen_setting == DALLEVersion.V2 or chosen_setting == DALLEVersion.V3:
+        user.settings[Model.DALL_E][UserSettings.VERSION] = chosen_setting
+        what_changed = UserSettings.VERSION
     else:
-        if chosen_model == Model.GPT3 or chosen_model == Model.GPT4:
-            user.settings[Model.GPT3][chosen_setting] = not user.settings[Model.GPT3][chosen_setting]
-            user.settings[Model.GPT4][chosen_setting] = not user.settings[Model.GPT4][chosen_setting]
-        else:
-            user.settings[chosen_model][chosen_setting] = not user.settings[chosen_model][chosen_setting]
+        user.settings[chosen_model][chosen_setting] = not user.settings[chosen_model][chosen_setting]
         what_changed = chosen_setting
 
     keyboard = callback_query.message.reply_markup.inline_keyboard
@@ -139,7 +141,17 @@ async def handle_setting_selection(callback_query: CallbackQuery, state: FSMCont
             text = button.text
             callback_data = button.callback_data.split(":")[1]
 
-            if what_changed == UserSettings.QUALITY:
+            if what_changed == UserSettings.VERSION:
+                if callback_data == chosen_setting and "✅" not in text:
+                    text += " ✅"
+                    keyboard_changed = True
+                elif (
+                    callback_data == MidjourneyVersion.V5 or callback_data == MidjourneyVersion.V6
+                ) or (
+                    callback_data == DALLEVersion.V2 or callback_data == DALLEVersion.V3
+                ):
+                    text = text.replace(" ✅", "")
+            elif what_changed == UserSettings.QUALITY:
                 if callback_data == chosen_setting and "✅" not in text:
                     text += " ✅"
                     keyboard_changed = True
@@ -172,15 +184,15 @@ async def handle_setting_selection(callback_query: CallbackQuery, state: FSMCont
             },
         )
 
-        dalle_cost = 1
-        if chosen_model == Model.GPT3 or chosen_model == Model.GPT4:
+        dall_e_cost = 1
+        if chosen_model == Model.CHAT_GPT:
             human_model = f"{get_localization(user_language_code).CHATGPT3} / {get_localization(user_language_code).CHATGPT4}"
-        elif chosen_model == Model.DALLE3:
-            dalle_cost = get_cost_for_image(
-                user.settings[Model.DALLE3][UserSettings.QUALITY],
-                user.settings[Model.DALLE3][UserSettings.RESOLUTION],
+        elif chosen_model == Model.DALL_E:
+            dall_e_cost = get_cost_for_image(
+                user.settings[Model.DALL_E][UserSettings.QUALITY],
+                user.settings[Model.DALL_E][UserSettings.RESOLUTION],
             )
-            human_model = get_localization(user_language_code).DALLE3
+            human_model = get_localization(user_language_code).DALL_E
         elif chosen_model == Model.FACE_SWAP:
             human_model = get_localization(user_language_code).FACE_SWAP
         elif chosen_model == Model.MUSIC_GEN:
@@ -188,7 +200,7 @@ async def handle_setting_selection(callback_query: CallbackQuery, state: FSMCont
         else:
             human_model = chosen_model
         await callback_query.message.edit_text(
-            text=get_localization(user_language_code).settings(human_model, chosen_model, dalle_cost),
+            text=get_localization(user_language_code).settings(human_model, chosen_model, dall_e_cost),
             reply_markup=InlineKeyboardMarkup(inline_keyboard=new_keyboard),
         )
 
@@ -216,17 +228,16 @@ async def handle_voice_messages_setting_selection(callback_query: CallbackQuery,
 
     if chosen_setting == 'back':
         human_model = f"{get_localization(user_language_code).CHATGPT3} / {get_localization(user_language_code).CHATGPT4}"
-        reply_markup = build_settings_keyboard(user_language_code, Model.GPT3, user.settings)
+        reply_markup = build_settings_keyboard(user_language_code, Model.CHAT_GPT, user.settings)
         await callback_query.message.edit_text(
-            text=get_localization(user_language_code).settings(human_model, Model.GPT3),
+            text=get_localization(user_language_code).settings(human_model, Model.CHAT_GPT),
             reply_markup=reply_markup,
         )
         return
     elif (
         chosen_setting == UserSettings.TURN_ON_VOICE_MESSAGES and not user.additional_usage_quota[Quota.VOICE_MESSAGES]
     ):
-        user.settings[Model.GPT3][chosen_setting] = False
-        user.settings[Model.GPT4][chosen_setting] = False
+        user.settings[Model.CHAT_GPT][chosen_setting] = False
         await handle_buy(callback_query.message, user_id, state)
         return
     elif chosen_setting == 'listen':
@@ -271,11 +282,9 @@ async def handle_voice_messages_setting_selection(callback_query: CallbackQuery,
 
     if keyboard_changed:
         if chosen_setting in ["alloy", "echo", "fable", "onyx", "nova", "shimmer"]:
-            user.settings[Model.GPT3][UserSettings.VOICE] = chosen_setting
-            user.settings[Model.GPT4][UserSettings.VOICE] = chosen_setting
+            user.settings[Model.CHAT_GPT][UserSettings.VOICE] = chosen_setting
         else:
-            user.settings[Model.GPT3][chosen_setting] = not user.settings[Model.GPT3][chosen_setting]
-            user.settings[Model.GPT4][chosen_setting] = not user.settings[Model.GPT4][chosen_setting]
+            user.settings[Model.CHAT_GPT][chosen_setting] = not user.settings[Model.CHAT_GPT][chosen_setting]
 
         await update_user(
             user_id, {
@@ -311,9 +320,9 @@ async def handle_catalog_selection(callback_query: CallbackQuery, state: FSMCont
     role_name = callback_query.data.split(':')[1]
     if role_name == 'back':
         human_model = f"{get_localization(user_language_code).CHATGPT3} / {get_localization(user_language_code).CHATGPT4}"
-        reply_markup = build_settings_keyboard(user_language_code, Model.GPT3, user.settings)
+        reply_markup = build_settings_keyboard(user_language_code, Model.CHAT_GPT, user.settings)
         await callback_query.message.edit_text(
-            text=get_localization(user_language_code).settings(human_model, Model.GPT3),
+            text=get_localization(user_language_code).settings(human_model, Model.CHAT_GPT),
             reply_markup=reply_markup,
         )
         return
@@ -394,9 +403,9 @@ async def handle_chat_selection(callback_query: CallbackQuery, state: FSMContext
 
     if action == 'back':
         human_model = f"{get_localization(user_language_code).CHATGPT3} / {get_localization(user_language_code).CHATGPT4}"
-        reply_markup = build_settings_keyboard(user_language_code, Model.GPT3, user.settings)
+        reply_markup = build_settings_keyboard(user_language_code, Model.CHAT_GPT, user.settings)
         await callback_query.message.edit_text(
-            text=get_localization(user_language_code).settings(human_model, Model.GPT3),
+            text=get_localization(user_language_code).settings(human_model, Model.CHAT_GPT),
             reply_markup=reply_markup,
         )
         return

@@ -45,10 +45,7 @@ async def handle_replicate_webhook(bot: Bot, dp: Dispatcher, prediction: dict):
         logging.error(f"Error in replicate_webhook: {prediction.get('logs')}")
     else:
         generation.status = GenerationStatus.FINISHED
-        if generation.model == Model.FACE_SWAP:
-            generation.result = generation_result.get("image")
-        else:
-            generation.result = generation_result
+        generation.result = generation_result
         generation.seconds = seconds
         await update_generation(generation.id, {
             "status": generation.status,

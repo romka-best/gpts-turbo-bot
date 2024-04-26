@@ -44,8 +44,12 @@ commands_en = [
         description="🧠 Switch to ChatGPT model",
     ),
     BotCommand(
-        command="dalle3",
-        description="🖼️ Switch to DALL-E 3 model",
+        command="dalle",
+        description="🖼️ Switch to DALL-E model",
+    ),
+    BotCommand(
+        command="midjourney",
+        description="🎨 Switch to Midjourney model",
     ),
     BotCommand(
         command="face_swap",
@@ -107,8 +111,12 @@ commands_ru = [
         description="🧠 Переключаться на ChatGPT модель",
     ),
     BotCommand(
-        command="dalle3",
-        description="🖼️ Перключиться на DALL-E 3 модель",
+        command="dalle",
+        description="🖼️ Перключиться на DALL-E модель",
+    ),
+    BotCommand(
+        command="midjourney",
+        description="🎨 Перключиться на Midjourney модель",
     ),
     BotCommand(
         command="face_swap",

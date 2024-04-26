@@ -4,6 +4,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup
 
 from bot.database.models.common import Model
+from bot.database.models.user import UserSettings
 from bot.database.operations.user.getters import get_user
 from bot.database.operations.user.updaters import update_user
 from bot.handlers.ai.face_swap_handler import handle_face_swap
@@ -22,7 +23,11 @@ async def mode(message: Message, state: FSMContext):
     user = await get_user(user_id)
     user_language_code = await get_user_language(user_id, state.storage)
 
-    reply_markup = build_mode_keyboard(user_language_code, user.current_model)
+    reply_markup = build_mode_keyboard(
+        user_language_code,
+        user.current_model,
+        user.settings[Model.CHAT_GPT][UserSettings.VERSION],
+    )
 
     await message.answer(
         text=get_localization(user_language_code).MODE,
@@ -39,6 +44,9 @@ async def handle_mode_selection(callback_query: CallbackQuery, state: FSMContext
     user_language_code = await get_user_language(user_id, state.storage)
 
     chosen_model = callback_query.data.split(':')[1]
+    chosen_version = ""
+    if chosen_model == Model.CHAT_GPT:
+        chosen_version = callback_query.data.split(':')[2]
 
     keyboard = callback_query.message.reply_markup.inline_keyboard
     keyboard_changed = False
@@ -50,7 +58,10 @@ async def handle_mode_selection(callback_query: CallbackQuery, state: FSMContext
             text = button.text
             callback_data = button.callback_data.split(":", 1)[1]
 
-            if callback_data == chosen_model:
+            if (
+                (callback_data.startswith(chosen_model) and callback_data.endswith(chosen_version)) or
+                callback_data == chosen_model
+            ):
                 if "✅" not in text:
                     text += " ✅"
                     keyboard_changed = True
@@ -62,13 +73,16 @@ async def handle_mode_selection(callback_query: CallbackQuery, state: FSMContext
     user.current_model = chosen_model
     reply_markup = await build_recommendations_keyboard(user.current_model, user_language_code, user.gender)
     if keyboard_changed:
+        if chosen_model == Model.CHAT_GPT:
+            user.settings[Model.CHAT_GPT][UserSettings.VERSION] = chosen_version
         await update_user(user_id, {
             "current_model": chosen_model,
+            "settings": user.settings,
         })
         await callback_query.message.edit_reply_markup(reply_markup=InlineKeyboardMarkup(inline_keyboard=new_keyboard))
 
         await callback_query.message.reply(
-            text=get_localization(user_language_code).switched(user.current_model),
+            text=get_localization(user_language_code).switched(user.current_model, chosen_version),
             reply_markup=reply_markup,
         )
     else:

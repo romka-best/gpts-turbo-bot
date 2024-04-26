@@ -5,7 +5,7 @@ from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
 
-from bot.database.models.common import Model
+from bot.database.models.common import Model, MidjourneyAction
 from bot.database.models.generation import GenerationReaction
 from bot.database.models.subscription import SubscriptionType
 from bot.database.models.transaction import TransactionType, ServiceType
@@ -138,9 +138,10 @@ async def handle_get_statistics(language_code: str, period: str):
             other_users.add(user.id)
 
     count_income_transactions = {
-        ServiceType.GPT3: 0,
-        ServiceType.GPT4: 0,
-        ServiceType.DALLE3: 0,
+        ServiceType.CHAT_GPT3: 0,
+        ServiceType.CHAT_GPT4: 0,
+        ServiceType.DALL_E: 0,
+        ServiceType.MIDJOURNEY: 0,
         ServiceType.FACE_SWAP: 0,
         ServiceType.MUSIC_GEN: 0,
         ServiceType.ADDITIONAL_CHATS: 0,
@@ -152,9 +153,10 @@ async def handle_get_statistics(language_code: str, period: str):
         ServiceType.PLATINUM: 0,
     }
     count_expense_transactions = {
-        ServiceType.GPT3: 0,
-        ServiceType.GPT4: 0,
-        ServiceType.DALLE3: 0,
+        ServiceType.CHAT_GPT3: 0,
+        ServiceType.CHAT_GPT4: 0,
+        ServiceType.DALL_E: 0,
+        ServiceType.MIDJOURNEY: 0,
         ServiceType.FACE_SWAP: 0,
         ServiceType.MUSIC_GEN: [0, 0],
         ServiceType.VOICE_MESSAGES: 0,
@@ -166,9 +168,10 @@ async def handle_get_statistics(language_code: str, period: str):
     count_expense_transactions_total = 0
     count_transactions_total = 0
     count_income_money = {
-        ServiceType.GPT3: 0,
-        ServiceType.GPT4: 0,
-        ServiceType.DALLE3: 0,
+        ServiceType.CHAT_GPT3: 0,
+        ServiceType.CHAT_GPT4: 0,
+        ServiceType.DALL_E: 0,
+        ServiceType.MIDJOURNEY: 0,
         ServiceType.FACE_SWAP: 0,
         ServiceType.MUSIC_GEN: 0,
         ServiceType.ADDITIONAL_CHATS: 0,
@@ -180,9 +183,10 @@ async def handle_get_statistics(language_code: str, period: str):
         ServiceType.PLATINUM: 0,
     }
     count_expense_money = {
-        ServiceType.GPT3: 0,
-        ServiceType.GPT4: 0,
-        ServiceType.DALLE3: 0,
+        ServiceType.CHAT_GPT3: 0,
+        ServiceType.CHAT_GPT4: 0,
+        ServiceType.DALL_E: 0,
+        ServiceType.MIDJOURNEY: 0,
         ServiceType.FACE_SWAP: 0,
         ServiceType.MUSIC_GEN: 0,
         ServiceType.VOICE_MESSAGES: 0,
@@ -193,11 +197,23 @@ async def handle_get_statistics(language_code: str, period: str):
     count_income_subscriptions_total_money = 0
     count_income_packages_total_money = 0
     count_expense_total_money = 0
+    count_midjourney_usage = {
+        MidjourneyAction.IMAGINE: 0,
+        MidjourneyAction.UPSCALE: 0,
+        MidjourneyAction.VARIATION: 0,
+        MidjourneyAction.REROLL: 0,
+        'ALL': 0,
+    }
     count_face_swap_usage = {
         'CUSTOM': 0,
         'ALL': 0,
     }
     count_reactions = {
+        ServiceType.MIDJOURNEY: {
+            GenerationReaction.LIKED: 0,
+            GenerationReaction.DISLIKED: 0,
+            GenerationReaction.NONE: 0,
+        },
         ServiceType.FACE_SWAP: {
             GenerationReaction.LIKED: 0,
             GenerationReaction.DISLIKED: 0,
@@ -233,6 +249,13 @@ async def handle_get_statistics(language_code: str, period: str):
             count_expense_money[transaction.service] += transaction.amount
             count_expense_total_money += transaction.amount
 
+            if transaction.service == ServiceType.MIDJOURNEY:
+                midjourney_action = transaction.details.get('type')
+                count_midjourney_usage[midjourney_action] = count_midjourney_usage.get(
+                    midjourney_action,
+                    0,
+                ) + 1
+
             if transaction.service == ServiceType.FACE_SWAP and transaction.quantity != 0:
                 face_swap_name = transaction.details.get('name', 'UNKNOWN')
                 face_swap_images = transaction.details.get('images', ['UNKNOWN'])
@@ -245,7 +268,9 @@ async def handle_get_statistics(language_code: str, period: str):
         count_transactions_total += 1
 
     for generation in generations:
-        if generation.model == Model.FACE_SWAP:
+        if generation.model == Model.MIDJOURNEY and generation.details.get('action') == MidjourneyAction.UPSCALE:
+            count_reactions[ServiceType.MIDJOURNEY][generation.reaction] += 1
+        elif generation.model == Model.FACE_SWAP:
             count_reactions[ServiceType.FACE_SWAP][generation.reaction] += 1
         elif generation.model == Model.MUSIC_GEN:
             count_reactions[ServiceType.MUSIC_GEN][generation.reaction] += 1
@@ -263,6 +288,7 @@ async def handle_get_statistics(language_code: str, period: str):
     count_chats_usage = {
         'ALL': len(chats),
     }
+    count_midjourney_usage['ALL'] = sum(count_midjourney_usage.values())
     count_face_swap_usage['ALL'] = sum(count_face_swap_usage.values())
     for chat in chats:
         count_chats_usage[chat.role] = count_chats_usage.get(chat.role, 0) + 1
@@ -291,6 +317,7 @@ async def handle_get_statistics(language_code: str, period: str):
         count_expense_total_money=count_expense_total_money,
         count_total_money=total_money,
         count_chats_usage=count_chats_usage,
+        count_midjourney_usage=count_midjourney_usage,
         count_face_swap_usage=count_face_swap_usage,
         count_reactions=count_reactions,
     )

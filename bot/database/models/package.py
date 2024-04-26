@@ -8,9 +8,10 @@ from bot.database.models.transaction import ServiceType
 
 
 class PackageType:
-    GPT3 = "GPT3"
-    GPT4 = "GPT4"
-    DALLE3 = "DALLE3"
+    CHAT_GPT3 = "GPT3"
+    CHAT_GPT4 = "GPT4"
+    DALL_E = "DALL_E"
+    MIDJOURNEY = "MIDJOURNEY"
     FACE_SWAP = "FACE_SWAP"
     MUSIC_GEN = "MUSIC_GEN"
     CHAT = "CHAT"
@@ -94,10 +95,11 @@ class Package:
     @staticmethod
     def get_prices(currency: Currency):
         prices = {
-            PackageType.GPT3: '',
-            PackageType.GPT4: '',
+            PackageType.CHAT_GPT3: '',
+            PackageType.CHAT_GPT4: '',
             PackageType.CHAT: '',
-            PackageType.DALLE3: '',
+            PackageType.DALL_E: '',
+            PackageType.MIDJOURNEY: '',
             PackageType.FACE_SWAP: '',
             PackageType.MUSIC_GEN: '',
             PackageType.ACCESS_TO_CATALOG: '',
@@ -106,35 +108,38 @@ class Package:
         }
 
         if currency == Currency.RUB:
-            prices[PackageType.GPT3] = '1₽'
-            prices[PackageType.GPT4] = '10₽'
-            prices[PackageType.CHAT] = '100₽'
-            prices[PackageType.DALLE3] = '10₽'
+            prices[PackageType.CHAT_GPT3] = '1₽'
+            prices[PackageType.CHAT_GPT4] = '5₽'
+            prices[PackageType.CHAT] = '50₽'
+            prices[PackageType.DALL_E] = '5₽'
+            prices[PackageType.MIDJOURNEY] = '5₽'
             prices[PackageType.FACE_SWAP] = '5₽'
             prices[PackageType.MUSIC_GEN] = '1₽'
-            prices[PackageType.ACCESS_TO_CATALOG] = '100₽'
-            prices[PackageType.VOICE_MESSAGES] = '100₽'
-            prices[PackageType.FAST_MESSAGES] = '100₽'
+            prices[PackageType.ACCESS_TO_CATALOG] = '50₽'
+            prices[PackageType.VOICE_MESSAGES] = '50₽'
+            prices[PackageType.FAST_MESSAGES] = '50₽'
         elif currency == Currency.EUR:
-            prices[PackageType.GPT3] = '0.01€'
-            prices[PackageType.GPT4] = '0.1€'
-            prices[PackageType.CHAT] = '1€'
-            prices[PackageType.DALLE3] = '0.1€'
+            prices[PackageType.CHAT_GPT3] = '0.01€'
+            prices[PackageType.CHAT_GPT4] = '0.05€'
+            prices[PackageType.CHAT] = '0.5€'
+            prices[PackageType.DALL_E] = '0.05€'
+            prices[PackageType.MIDJOURNEY] = '0.05€'
             prices[PackageType.FACE_SWAP] = '0.05€'
             prices[PackageType.MUSIC_GEN] = '0.01€'
-            prices[PackageType.ACCESS_TO_CATALOG] = '1€'
-            prices[PackageType.VOICE_MESSAGES] = '1€'
-            prices[PackageType.FAST_MESSAGES] = '1€'
+            prices[PackageType.ACCESS_TO_CATALOG] = '0.5€'
+            prices[PackageType.VOICE_MESSAGES] = '0.5€'
+            prices[PackageType.FAST_MESSAGES] = '0.5€'
         else:
-            prices[PackageType.GPT3] = '$0.01'
-            prices[PackageType.GPT4] = '$0.1'
-            prices[PackageType.CHAT] = '$1'
-            prices[PackageType.DALLE3] = '$0.1'
+            prices[PackageType.CHAT_GPT3] = '$0.01'
+            prices[PackageType.CHAT_GPT4] = '$0.05'
+            prices[PackageType.CHAT] = '$0.5'
+            prices[PackageType.DALL_E] = '$0.05'
+            prices[PackageType.MIDJOURNEY] = '$0.05'
             prices[PackageType.FACE_SWAP] = '$0.05'
             prices[PackageType.MUSIC_GEN] = '$0.01'
-            prices[PackageType.ACCESS_TO_CATALOG] = '$1'
-            prices[PackageType.VOICE_MESSAGES] = '$1'
-            prices[PackageType.FAST_MESSAGES] = '$1'
+            prices[PackageType.ACCESS_TO_CATALOG] = '$0.5'
+            prices[PackageType.VOICE_MESSAGES] = '$0.5'
+            prices[PackageType.FAST_MESSAGES] = '$0.5'
 
         return prices
 
@@ -151,15 +156,18 @@ class Package:
     def get_translate_name_and_description(localization, package_type: str):
         name = None
         description = None
-        if package_type == PackageType.GPT3:
+        if package_type == PackageType.CHAT_GPT3:
             name = localization.GPT3_REQUESTS
             description = localization.GPT3_REQUESTS_DESCRIPTION
-        elif package_type == PackageType.GPT4:
+        elif package_type == PackageType.CHAT_GPT4:
             name = localization.GPT4_REQUESTS
             description = localization.GPT4_REQUESTS_DESCRIPTION
-        elif package_type == PackageType.DALLE3:
-            name = localization.DALLE3_REQUESTS
-            description = localization.DALLE3_REQUESTS_DESCRIPTION
+        elif package_type == PackageType.DALL_E:
+            name = localization.DALL_E_REQUESTS
+            description = localization.DALL_E_REQUESTS_DESCRIPTION
+        elif package_type == PackageType.MIDJOURNEY:
+            name = localization.MIDJOURNEY_REQUESTS
+            description = localization.MIDJOURNEY_REQUESTS_DESCRIPTION
         elif package_type == PackageType.FACE_SWAP:
             name = localization.FACE_SWAP_REQUESTS
             description = localization.FACE_SWAP_REQUESTS_DESCRIPTION
@@ -195,15 +203,18 @@ class Package:
     @staticmethod
     def get_service_type_and_update_quota(package_type: str, additional_usage_quota: dict, quantity: int):
         service_type = package_type
-        if package_type == PackageType.GPT3:
-            additional_usage_quota[Quota.GPT3] += quantity
-            service_type = ServiceType.GPT3
-        elif package_type == PackageType.GPT4:
-            additional_usage_quota[Quota.GPT4] += quantity
-            service_type = ServiceType.GPT4
-        elif package_type == PackageType.DALLE3:
-            additional_usage_quota[Quota.DALLE3] += quantity
-            service_type = ServiceType.DALLE3
+        if package_type == PackageType.CHAT_GPT3:
+            additional_usage_quota[Quota.CHAT_GPT3] += quantity
+            service_type = ServiceType.CHAT_GPT3
+        elif package_type == PackageType.CHAT_GPT4:
+            additional_usage_quota[Quota.CHAT_GPT4] += quantity
+            service_type = ServiceType.CHAT_GPT4
+        elif package_type == PackageType.DALL_E:
+            additional_usage_quota[Quota.DALL_E] += quantity
+            service_type = ServiceType.DALL_E
+        elif package_type == PackageType.MIDJOURNEY:
+            additional_usage_quota[Quota.MIDJOURNEY] += quantity
+            service_type = ServiceType.MIDJOURNEY
         elif package_type == PackageType.FACE_SWAP:
             additional_usage_quota[Quota.FACE_SWAP] += quantity
             service_type = ServiceType.FACE_SWAP

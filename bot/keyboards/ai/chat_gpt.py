@@ -1,19 +1,19 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
-from bot.database.models.common import Model
+from bot.database.models.common import Model, GPTVersion
 from bot.locales.main import get_localization
 
 
-def build_chat_gpt_keyboard(language_code: str, model: Model) -> InlineKeyboardMarkup:
+def build_chat_gpt_keyboard(language_code: str, model: Model, model_version: GPTVersion) -> InlineKeyboardMarkup:
     buttons = [
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).CHATGPT3 + (" ✅" if model == Model.GPT3 else ""),
-                callback_data=f'chat_gpt:{Model.GPT3}'
+                text=get_localization(language_code).CHATGPT3 + (" ✅" if model == Model.CHAT_GPT and model_version == GPTVersion.V3 else ""),
+                callback_data=f'chat_gpt:{GPTVersion.V3}'
             ),
             InlineKeyboardButton(
-                text=get_localization(language_code).CHATGPT4 + (" ✅" if model == Model.GPT4 else ""),
-                callback_data=f'chat_gpt:{Model.GPT4}'
+                text=get_localization(language_code).CHATGPT4 + (" ✅" if model == Model.CHAT_GPT and model_version == GPTVersion.V4 else ""),
+                callback_data=f'chat_gpt:{GPTVersion.V4}'
             ),
         ]
     ]

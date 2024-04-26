@@ -229,14 +229,16 @@ class Texts(Protocol):
     # AI
     CHATGPT3 = "✉️ ChatGPT-3.5"
     CHATGPT4 = "🧠 ChatGPT-4.0"
-    DALLE3 = "🖼️ DALL-E 3"
+    DALL_E = "🖼️ DALL-E"
+    MIDJOURNEY = "🎨 Midjourney"
     FACE_SWAP = "📷️ FaceSwap"
     MUSIC_GEN = "🎵 MusicGen"
     MODE: str
     CHOOSE_CHATGPT_MODEL: str
     SWITCHED_TO_CHATGPT3: str
     SWITCHED_TO_CHATGPT4: str
-    SWITCHED_TO_DALLE3: str
+    SWITCHED_TO_DALL_E: str
+    SWITCHED_TO_MIDJOURNEY: str
     SWITCHED_TO_FACE_SWAP: str
     SWITCHED_TO_MUSIC_GEN: str
     ALREADY_SWITCHED_TO_THIS_MODEL: str
@@ -303,8 +305,10 @@ class Texts(Protocol):
     GPT4_REQUESTS_DESCRIPTION: str
     THEMATIC_CHATS: str
     THEMATIC_CHATS_DESCRIPTION: str
-    DALLE3_REQUESTS: str
-    DALLE3_REQUESTS_DESCRIPTION: str
+    DALL_E_REQUESTS: str
+    DALL_E_REQUESTS_DESCRIPTION: str
+    MIDJOURNEY_REQUESTS: str
+    MIDJOURNEY_REQUESTS_DESCRIPTION: str
     FACE_SWAP_REQUESTS: str
     FACE_SWAP_REQUESTS_DESCRIPTION: str
     MUSIC_GEN_REQUESTS: str
@@ -549,6 +553,7 @@ class Texts(Protocol):
         count_expense_total_money: float,
         count_total_money: float,
         count_chats_usage: Dict,
+        count_midjourney_usage: Dict,
         count_face_swap_usage: Dict,
         count_reactions: Dict,
     ) -> str:
@@ -558,6 +563,11 @@ class Texts(Protocol):
             if chat_key != 'ALL':
                 chat_info += f"    - <b>{chat_key}:</b> {chat_value}"
                 chat_info += '\n' if i < len(count_chats_usage.items()) - 1 else ''
+        midjourney_info = ""
+        for i, (midjourney_key, midjourney_value) in enumerate(count_midjourney_usage.items()):
+            if midjourney_key != 'ALL':
+                midjourney_info += f"    - <b>{midjourney_key}:</b> {midjourney_value}"
+                midjourney_info += '\n' if i < len(count_midjourney_usage.items()) - 1 else ''
         face_swap_info = ""
         for i, (face_swap_key, face_swap_value) in enumerate(count_face_swap_usage.items()):
             if face_swap_key != 'ALL':
@@ -586,9 +596,10 @@ class Texts(Protocol):
 💰 <b>Финансы</b>
 1️⃣ <b>Транзакции:</b>
     ➖ <b>{TransactionType.EXPENSE}:</b> {count_expense_transactions_total}
-    - <b>{ServiceType.GPT3}:</b> {count_expense_transactions[ServiceType.GPT3]}
-    - <b>{ServiceType.GPT4}:</b> {count_expense_transactions[ServiceType.GPT4]}
-    - <b>{ServiceType.DALLE3}:</b> {count_expense_transactions[ServiceType.DALLE3]}
+    - <b>{ServiceType.CHAT_GPT3}:</b> {count_expense_transactions[ServiceType.CHAT_GPT3]}
+    - <b>{ServiceType.CHAT_GPT4}:</b> {count_expense_transactions[ServiceType.CHAT_GPT4]}
+    - <b>{ServiceType.DALL_E}:</b> {count_expense_transactions[ServiceType.DALL_E]}
+    - <b>{ServiceType.MIDJOURNEY}:</b> {count_expense_transactions[ServiceType.MIDJOURNEY]}
     - <b>{ServiceType.FACE_SWAP}:</b> {count_expense_transactions[ServiceType.FACE_SWAP]}
     - <b>{ServiceType.MUSIC_GEN}:</b> {count_expense_transactions[ServiceType.MUSIC_GEN][0]} ({count_expense_transactions[ServiceType.MUSIC_GEN][1]})
     - <b>{ServiceType.VOICE_MESSAGES}:</b> {count_expense_transactions[ServiceType.VOICE_MESSAGES]}
@@ -596,9 +607,10 @@ class Texts(Protocol):
     - <b>{ServiceType.DATABASE}:</b> {count_expense_transactions[ServiceType.DATABASE]}
 
     ➕ <b>{TransactionType.INCOME}:</b> {count_income_transactions_total}
-    - <b>{ServiceType.GPT3}:</b> {count_income_transactions[ServiceType.GPT3]}
-    - <b>{ServiceType.GPT4}:</b> {count_income_transactions[ServiceType.GPT4]}
-    - <b>{ServiceType.DALLE3}:</b> {count_income_transactions[ServiceType.DALLE3]}
+    - <b>{ServiceType.CHAT_GPT3}:</b> {count_income_transactions[ServiceType.CHAT_GPT3]}
+    - <b>{ServiceType.CHAT_GPT4}:</b> {count_income_transactions[ServiceType.CHAT_GPT4]}
+    - <b>{ServiceType.DALL_E}:</b> {count_income_transactions[ServiceType.DALL_E]}
+    - <b>{ServiceType.MIDJOURNEY}:</b> {count_income_transactions[ServiceType.MIDJOURNEY]}
     - <b>{ServiceType.FACE_SWAP}:</b> {count_income_transactions[ServiceType.FACE_SWAP]}
     - <b>{ServiceType.MUSIC_GEN}:</b> {count_income_transactions[ServiceType.MUSIC_GEN]}
     - <b>{ServiceType.ADDITIONAL_CHATS}:</b> {count_income_transactions[ServiceType.ADDITIONAL_CHATS]}
@@ -612,9 +624,10 @@ class Texts(Protocol):
     - <b>Всего:</b> {count_transactions_total}
 
 2️⃣ <b>Расходы:</b>
-   - <b>{ServiceType.GPT3}:</b> {round(count_expense_money[ServiceType.GPT3], 2)}$
-   - <b>{ServiceType.GPT4}:</b> {round(count_expense_money[ServiceType.GPT4], 2)}$
-   - <b>{ServiceType.DALLE3}:</b> {round(count_expense_money[ServiceType.DALLE3], 2)}$
+   - <b>{ServiceType.CHAT_GPT3}:</b> {round(count_expense_money[ServiceType.CHAT_GPT3], 2)}$
+   - <b>{ServiceType.CHAT_GPT4}:</b> {round(count_expense_money[ServiceType.CHAT_GPT4], 2)}$
+   - <b>{ServiceType.DALL_E}:</b> {round(count_expense_money[ServiceType.DALL_E], 2)}$
+   - <b>{ServiceType.MIDJOURNEY}:</b> {round(count_expense_money[ServiceType.MIDJOURNEY], 2)}$
    - <b>{ServiceType.FACE_SWAP}:</b> {round(count_expense_money[ServiceType.FACE_SWAP], 2)}$
    - <b>{ServiceType.MUSIC_GEN}:</b> {round(count_expense_money[ServiceType.MUSIC_GEN], 2)}$
    - <b>{ServiceType.VOICE_MESSAGES}:</b> {round(count_expense_money[ServiceType.VOICE_MESSAGES], 2)}$
@@ -629,9 +642,10 @@ class Texts(Protocol):
     - <b>{ServiceType.PLATINUM} {emojis[ServiceType.PLATINUM]}:</b> {count_income_money[ServiceType.PLATINUM]}₽
 
     💵 <b>Пакеты:</b> {count_income_packages_total_money}₽
-    - <b>{ServiceType.GPT3}:</b> {count_income_money[ServiceType.GPT3]}₽
-    - <b>{ServiceType.GPT4}:</b> {count_income_money[ServiceType.GPT4]}₽
-    - <b>{ServiceType.DALLE3}:</b> {count_income_money[ServiceType.DALLE3]}₽
+    - <b>{ServiceType.CHAT_GPT3}:</b> {count_income_money[ServiceType.CHAT_GPT3]}₽
+    - <b>{ServiceType.CHAT_GPT4}:</b> {count_income_money[ServiceType.CHAT_GPT4]}₽
+    - <b>{ServiceType.DALL_E}:</b> {count_income_money[ServiceType.DALL_E]}₽
+    - <b>{ServiceType.MIDJOURNEY}:</b> {count_income_money[ServiceType.MIDJOURNEY]}₽
     - <b>{ServiceType.FACE_SWAP}:</b> {count_income_money[ServiceType.FACE_SWAP]}₽
     - <b>{ServiceType.MUSIC_GEN}:</b> {count_income_money[ServiceType.MUSIC_GEN]}₽
     - <b>{ServiceType.ADDITIONAL_CHATS}:</b> {count_income_money[ServiceType.ADDITIONAL_CHATS]}₽
@@ -647,6 +661,17 @@ class Texts(Protocol):
 {chat_info}
 
     - <b>Всего:</b> {count_chats_usage['ALL']}
+
+🎨 <b>Midjourney</b>
+    <b>Генерации:</b>
+{midjourney_info}
+
+    - <b>Всего:</b> {count_midjourney_usage['ALL']}
+
+    <b>Реакции:</b>
+    👍 {count_reactions[ServiceType.MIDJOURNEY][GenerationReaction.LIKED]}
+    👎 {count_reactions[ServiceType.MIDJOURNEY][GenerationReaction.DISLIKED]}
+    🤷 {count_reactions[ServiceType.MIDJOURNEY][GenerationReaction.NONE]}
 
 🎭 <b>FaceSwap</b>
     <b>Генерации:</b>
@@ -797,6 +822,7 @@ class Texts(Protocol):
         subscription_type: SubscriptionType,
         gender: UserGender,
         current_model: str,
+        current_model_version: str,
         monthly_limits,
         additional_usage_quota,
         renewal_date,
@@ -859,7 +885,7 @@ class Texts(Protocol):
 
     # AI
     @staticmethod
-    def switched(model: Model):
+    def switched(model: Model, model_version: str):
         raise NotImplementedError
 
     @staticmethod
@@ -867,7 +893,7 @@ class Texts(Protocol):
         raise NotImplementedError
 
     @staticmethod
-    def dalle_recommendations() -> List[str]:
+    def image_recommendations() -> List[str]:
         raise NotImplementedError
 
     @staticmethod
@@ -896,7 +922,7 @@ class Texts(Protocol):
 
     # Settings
     @staticmethod
-    def settings(human_model: str, current_model: Model, dalle_cost=1) -> str:
+    def settings(human_model: str, current_model: Model, dall_e_cost=1) -> str:
         raise NotImplementedError
 
     # Bonus
