@@ -19,6 +19,7 @@ from bot.database.operations.user.getters import get_user
 from bot.database.operations.user.updaters import update_user
 from bot.handlers.ai.midjourney_handler import PRICE_MIDJOURNEY_REQUEST
 from bot.helpers.senders.send_images import send_image
+from bot.helpers.senders.send_message_to_admins import send_message_to_admins
 from bot.keyboards.ai.midjourney import build_midjourney_keyboard
 from bot.keyboards.common.common import build_reaction_keyboard
 from bot.locales.main import get_localization, get_user_language
@@ -69,7 +70,7 @@ async def handle_midjourney_result(
     if not generation.has_error:
         reply_markup = build_midjourney_keyboard(generation.id) if action_type != MidjourneyAction.UPSCALE \
             else build_reaction_keyboard(generation.id)
-        footer_text = f'\n\n✉️ {user.monthly_limits[Quota.MIDJOURNEY] + user.additional_usage_quota[Quota.MIDJOURNEY]}' \
+        footer_text = f'\n\n🖼 {user.monthly_limits[Quota.MIDJOURNEY] + user.additional_usage_quota[Quota.MIDJOURNEY]}' \
             if user.settings[Model.MIDJOURNEY][UserSettings.SHOW_USAGE_QUOTA] else ''
         caption = f"{get_localization(user_language_code).IMAGE_SUCCESS}{footer_text}"
         await send_image(bot, user.telegram_chat_id, generation.result, reply_markup, caption)
@@ -84,6 +85,11 @@ async def handle_midjourney_result(
             await bot.send_message(
                 chat_id=user.telegram_chat_id,
                 text=get_localization(user_language_code).ERROR,
+            )
+            await send_message_to_admins(
+                bot=bot,
+                message=f"#error\n\nALARM! Ошибка у пользователя при запросе в MIDJOURNEY: {user.id}\nИнформация:\n{generation_error}",
+                parse_mode=None,
             )
 
     request.status = RequestStatus.FINISHED

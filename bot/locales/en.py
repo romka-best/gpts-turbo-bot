@@ -41,7 +41,7 @@ I'm here to be your co-pilot on this adventure! 🚀
 🤖 <b>Here's what you can explore:</b>
 
 👋 /start - <b>About me</b>: Discover what I can do for you.
-🤖 /mode - <b>Swap neural network models</b> on the fly with — <b>ChatGPT-3.5</b>, <b>ChatGPT-4.0</b>, <b>DALL-E</b>, <Midjourney>, <b>FaceSwap</b>, or <b>MusicGen</b>!
+🤖 /mode - <b>Swap neural network models</b> on the fly with — <b>ChatGPT-3.5</b>, <b>ChatGPT-4.0</b>, <b>DALL-E</b>, <b>Midjourney</b>, <b>FaceSwap</b>, or <b>MusicGen</b>!
 💳 /buy - <b>Subscribe or buy individual packages</b>: Get a new level.
 👤 /profile - <b>View your profile</b>: Check your subscription details or usage quota and more.
 🔧 /settings - <b>Customize your experience</b>: Tailor model to fit your needs. There you can also <b>select a digital employee</b> with <b>context-specific chats management</b>
@@ -59,7 +59,7 @@ I'm here to be your co-pilot on this adventure! 🚀
 Just type away or use a command to begin your AI journey! 🌟
 """
     INFO = """
-🤖 <b>Let's check out what each model can do for you:</b>
+🤖 <b>There is what each model can do for you:</b>
 
 ✉️ <b>ChatGPT-3.5: The Versatile Communicator</b>
 - <i>Small Talk to Deep Conversations</i>: Ideal for chatting about anything from daily life to sharing jokes.
@@ -68,15 +68,12 @@ Just type away or use a command to begin your AI journey! 🌟
 - <i>Creative Writer</i>: Need a post, story, or even a song? ChatGPT-3.5 can whip it up in seconds.
 - <i>Travel Buddy</i>: Ask for travel tips, local cuisines, or historical facts about your next destination.
 - <i>Business Helper</i>: Draft emails, create business plans, or brainstorm marketing ideas.
-- <i>Role Play</i>: Engage in creative role-playing scenarios for entertainment or storytelling.
-- <i>Quick Summaries</i>: Summarize long articles or reports into concise text.
 
 🧠 <b>ChatGPT-4.0: The Advanced Intellect</b>
 - <i>In-Depth Analysis</i>: Perfect for detailed research, technical explanations, or exploring hypothetical scenarios.
 - <i>Problem Solver</i>: Get help with advanced math problems, programming bugs, or scientific queries.
 - <i>Language Expert</i>: Translate complex texts or practice conversational skills in various languages.
 - <i>Creative Consultant</i>: Develop plot ideas for your posts, script dialogues, or explore artistic concepts.
-- <i>Health and Wellness</i>: Discuss wellness and mental health topics in-depth.
 - <i>Personalized Recommendations</i>: Get book, movie, or travel recommendations based on your interests.
 
 🖼 <b>DALL-E: The Creative Genius</b>
@@ -85,8 +82,6 @@ Just type away or use a command to begin your AI journey! 🌟
 - <i>Educational Tool</i>: Visualize complex concepts for better understanding in education.
 - <i>Interior Design</i>: Get ideas for room layouts or decoration themes.
 - <i>Fashion Design</i>: Create clothing designs or fashion illustrations.
-- <i>Personalized Comics</i>: Create comic strips or cartoon characters from your stories.
-- <i>Product Mockups</i>: Create mockups for product ideas or inventions.
 
 🎨 <b>Midjourney: Navigator of Creativity</b>
 - <i>Art Design</i>: Creating visual masterpieces and abstractions, ideal for artists and designers in search of a unique style.
@@ -94,20 +89,16 @@ Just type away or use a command to begin your AI journey! 🌟
 - <i>Educational assistant</i>: Illustrations for educational materials that improve the perception and understanding of complex topics.
 - <i>Interior design</i>: Visualization of interior solutions, from classics to modern trends.
 - <i>Fashion and style</i>: The development of fashionable bows and accessories, experiments with colors and shapes.
-- <i>Custom illustrations</i>: Create unique characters and scenarios for your projects and presentations.
-- <i>Product prototyping</i>: Visualization of new product ideas, from sketches to full-fledged concerts.
 
 🤡 <b>FaceSwap: The Entertainment Master</b>
 - <i>Fun Reimaginations</i>: See how you'd look in different historical eras or as various movie characters.
 - <i>Personalized Greetings</i>: Create unique birthday cards or invitations with personalized images.
-- <i>Role Play</i>: Experiment with different looks for role-playing games or virtual meetings.
 - <i>Memes and Content Creation</i>: Spice up your social media with funny or imaginative face-swapped pictures.
 - <i>Digital Makeovers</i>: Experiment with new haircuts or makeup styles.
 - <i>Celebrity Mashups</i>: Combine your face with celebrities for fun comparisons.
 
 🎶 <b>MusicGen: Your Personal Composer</b>
 <i>Creating Unique Melodies</i>: Turn your ideas into musical pieces of any genre - from classical to pop.
-<i>Music for Every Moment</i>: Specially created compositions for relaxation, study, workouts, or meditation.
 <i>Personalized Soundtracks</i>: Create a soundtrack for your next video project, game, or presentation.
 <i>Exploring Musical Styles</i>: Experiment with different musical genres and sounds to find your unique style.
 <i>Learning and Inspiration</i>: Gain new insights into music theory and the history of genres through music creation.
@@ -683,11 +674,11 @@ Fast answers: {'Yes' if additional_usage_quota[Quota.FAST_MESSAGES] else 'No'}
         return f"""
 🤖 Ready to supercharge your digital journey? Here's what's on the menu:
 
-- <b>Standard</b> ⭐: For just {prices[SubscriptionType.STANDARD]}, step into the AI playground!
+- <b>STANDARD</b> ⭐: For just {prices[SubscriptionType.STANDARD]}, step into the AI playground!
 
 - <b>VIP</b> 🔥: Got grander ambitions? {prices[SubscriptionType.VIP]} unlocks deeper dialogues, more complex image creation, and access to a wider array of digital personas!
 
-- <b>Platinum</b> 💎: For the connoisseurs, {prices[SubscriptionType.PLATINUM]} grants you the keys to the AI kingdom!
+- <b>PLATINUM</b> 💎: For the connoisseurs, {prices[SubscriptionType.PLATINUM]} grants you the keys to the AI kingdom!
 
 P.S. We're in the process of integrating more currency options directly in our bot, but you can visit our payment page and pay in different currencies just right here: https://app.lava.top/en/gptsturbobot
 
@@ -725,13 +716,13 @@ Please select the subscription period by clicking on the button:
 🤖 <b>Welcome to the AI shopping spree!</b> 📦
 
 Each button tap unlocks a world of AI wonders:
-🧠 <b>ChatGPT-3.5 & ChatGPT-4.0</b>: Engage in deep, thought-provoking conversations. Your new AI buddies await!
+🧠 <b>ChatGPT</b>: Engage in deep, thought-provoking conversations!
 
-🖼 <b>DALL-E</b>: Transform ideas into stunning visuals. It's like painting with AI!
+🖼 <b>DALL-E</b>: Transform ideas into stunning visuals!
 
-🎨 <b>Midjourney</b>: Turn ideas into incredible images. It is difficult to distinguish from real images!
+🎨 <b>Midjourney</b>: Turn ideas into incredible realistic images!
 
-👤 <b>FaceSwap</b>: Play with identities in images. It's never been this exciting!
+👤 <b>FaceSwap</b>: Play with identities in images!
 
 🎵 <b>Harmony with MusicGen</b>: Create unique melodies that will belong only to you!
 

@@ -5,7 +5,7 @@ from aiogram.types import Message, CallbackQuery
 from aiogram.utils.chat_action import ChatActionSender
 
 from bot.database.models.common import Model, Quota, MidjourneyAction
-from bot.database.models.user import User
+from bot.database.models.user import User, UserSettings
 from bot.database.operations.generation.getters import get_generation
 from bot.database.operations.generation.writers import write_generation
 from bot.database.operations.request.getters import get_started_requests_by_user_id_and_model
@@ -69,6 +69,7 @@ async def handle_midjourney(
     user_data = await state.get_data()
 
     prompt = user_data.get('recognized_text', prompt)
+    version = user.settings[Model.MIDJOURNEY][UserSettings.VERSION]
 
     processing_message = await message.reply(text=get_localization(user_language_code).processing_request_image())
 
@@ -95,11 +96,13 @@ async def handle_midjourney(
                     details={
                         "prompt": prompt,
                         "action": action,
+                        "version": version,
                     }
                 )
 
                 if user_language_code != 'en':
                     prompt = await translate_text(prompt, user_language_code, 'en')
+                prompt += f" --v {version}"
 
                 if action == MidjourneyAction.UPSCALE:
                     result_id = await create_midjourney_image(hash_id, choice)
@@ -117,12 +120,13 @@ async def handle_midjourney(
                     details={
                         "prompt": prompt,
                         "action": action,
+                        "version": version,
                     }
                 )
         except Exception as e:
             await message.answer(
                 text=get_localization(user_language_code).ERROR,
-                parse_mode=None
+                parse_mode=None,
             )
             await send_message_to_admins(
                 bot=message.bot,

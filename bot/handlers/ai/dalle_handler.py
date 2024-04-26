@@ -108,7 +108,7 @@ async def handle_dall_e(message: Message, state: FSMContext, user: User):
                 },
             )
 
-            footer_text = f'\n\n✉️ {user.monthly_limits[Quota.DALL_E] + user.additional_usage_quota[Quota.DALL_E] + 1}' \
+            footer_text = f'\n\n🖼 {user.monthly_limits[Quota.DALL_E] + user.additional_usage_quota[Quota.DALL_E] + 1}' \
                 if user.settings[user.current_model][UserSettings.SHOW_USAGE_QUOTA] else ''
             await message.reply_photo(
                 caption=f"{get_localization(user_language_code).IMAGE_SUCCESS}{footer_text}",

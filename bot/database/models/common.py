@@ -53,8 +53,8 @@ class DALLEVersion:
 
 
 class MidjourneyVersion:
-    V6 = '6.0'
     V5 = '5.2'
+    V6 = '6.0'
 
 
 class MidjourneyAction:
