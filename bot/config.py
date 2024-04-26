@@ -11,6 +11,7 @@ class Settings(BaseSettings):
 
     WEBHOOK_URL: str
     WEBHOOK_REPLICATE_PATH: str
+    WEBHOOK_MIDJOURNEY_PATH: str
     REDIS_URL: str
 
     USER_BATCH_SIZE: int = 500
@@ -28,6 +29,7 @@ class Settings(BaseSettings):
     OAUTH_YANDEX_TOKEN: SecretStr
     OPENAI_API_KEY: SecretStr
     REPLICATE_API_TOKEN: SecretStr
+    MIDJOURNEY_API_TOKEN: SecretStr
 
     model_config = SettingsConfigDict(env_file=str(BASE_DIR / f'.env.{os.getenv("ENVIRONMENT", "testing")}'),
                                       env_file_encoding='utf-8')

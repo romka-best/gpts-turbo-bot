@@ -16,39 +16,39 @@ from bot.integrations.openAI import get_response_image, get_cost_for_image
 from bot.keyboards.common.common import build_recommendations_keyboard
 from bot.locales.main import get_localization, get_user_language
 
-dalle_router = Router()
+dall_e_router = Router()
 
-PRICE_DALLE3 = 0.040
+PRICE_DALL_E = 0.040
 
 
-@dalle_router.message(Command("dalle3"))
-async def dalle3(message: Message, state: FSMContext):
+@dall_e_router.message(Command("dalle"))
+async def dall_e(message: Message, state: FSMContext):
     await state.clear()
 
     user_id = str(message.from_user.id)
     user = await get_user(user_id)
     user_language_code = await get_user_language(user_id, state.storage)
 
-    if user.current_model == Model.DALLE3:
+    if user.current_model == Model.DALL_E:
         reply_markup = await build_recommendations_keyboard(user.current_model, user_language_code, user.gender)
         await message.answer(
             text=get_localization(user_language_code).ALREADY_SWITCHED_TO_THIS_MODEL,
             reply_markup=reply_markup,
         )
     else:
-        user.current_model = Model.DALLE3
+        user.current_model = Model.DALL_E
         await update_user(user_id, {
             "current_model": user.current_model,
         })
 
         reply_markup = await build_recommendations_keyboard(user.current_model, user_language_code, user.gender)
         await message.answer(
-            text=get_localization(user_language_code).SWITCHED_TO_DALLE3,
+            text=get_localization(user_language_code).SWITCHED_TO_DALL_E,
             reply_markup=reply_markup,
         )
 
 
-async def handle_dalle(message: Message, state: FSMContext, user: User):
+async def handle_dall_e(message: Message, state: FSMContext, user: User):
     await state.update_data(is_processing=True)
 
     user_language_code = await get_user_language(user.id, state.storage)
@@ -62,15 +62,17 @@ async def handle_dalle(message: Message, state: FSMContext, user: User):
 
     async with ChatActionSender.upload_photo(bot=message.bot, chat_id=message.chat.id):
         try:
-            maximum_generations = user.monthly_limits[Quota.DALLE3] + user.additional_usage_quota[Quota.DALLE3]
-            resolution = user.settings[Model.DALLE3][UserSettings.RESOLUTION]
-            quality = user.settings[Model.DALLE3][UserSettings.QUALITY]
+            maximum_generations = user.monthly_limits[Quota.DALL_E] + user.additional_usage_quota[Quota.DALL_E]
+            model_version = user.settings[Model.DALL_E][UserSettings.VERSION]
+            resolution = user.settings[Model.DALL_E][UserSettings.RESOLUTION]
+            quality = user.settings[Model.DALL_E][UserSettings.QUALITY]
             cost = get_cost_for_image(quality, resolution)
             if maximum_generations < cost:
                 await message.reply(get_localization(user_language_code).REACHED_USAGE_LIMIT)
                 return
 
             response_url = await get_response_image(
+                model_version,
                 text,
                 resolution,
                 quality,
@@ -79,11 +81,11 @@ async def handle_dalle(message: Message, state: FSMContext, user: User):
             quantity_to_delete = cost
             quantity_deleted = 0
             while quantity_deleted != quantity_to_delete:
-                if user.monthly_limits[Quota.DALLE3] != 0:
-                    user.monthly_limits[Quota.DALLE3] -= 1
+                if user.monthly_limits[Quota.DALL_E] != 0:
+                    user.monthly_limits[Quota.DALL_E] -= 1
                     quantity_deleted += 1
-                elif user.additional_usage_quota[Quota.DALLE3] != 0:
-                    user.additional_usage_quota[Quota.DALLE3] -= 1
+                elif user.additional_usage_quota[Quota.DALL_E] != 0:
+                    user.additional_usage_quota[Quota.DALL_E] -= 1
                     quantity_deleted += 1
                 else:
                     break
@@ -97,8 +99,8 @@ async def handle_dalle(message: Message, state: FSMContext, user: User):
             await write_transaction(
                 user_id=user.id,
                 type=TransactionType.EXPENSE,
-                service=ServiceType.DALLE3,
-                amount=PRICE_DALLE3 * cost,
+                service=ServiceType.DALL_E,
+                amount=PRICE_DALL_E * cost,
                 currency=Currency.USD,
                 quantity=1,
                 details={
@@ -106,7 +108,7 @@ async def handle_dalle(message: Message, state: FSMContext, user: User):
                 },
             )
 
-            footer_text = f'\n\n✉️ {user.monthly_limits[Quota.DALLE3] + user.additional_usage_quota[Quota.DALLE3] + 1}' \
+            footer_text = f'\n\n🖼 {user.monthly_limits[Quota.DALL_E] + user.additional_usage_quota[Quota.DALL_E] + 1}' \
                 if user.settings[user.current_model][UserSettings.SHOW_USAGE_QUOTA] else ''
             await message.reply_photo(
                 caption=f"{get_localization(user_language_code).IMAGE_SUCCESS}{footer_text}",

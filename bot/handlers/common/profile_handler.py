@@ -7,7 +7,7 @@ from aiogram.types import Message, CallbackQuery, URLInputFile
 
 from bot.database.main import firebase
 from bot.database.models.common import Model
-from bot.database.models.user import UserGender
+from bot.database.models.user import UserGender, UserSettings
 from bot.database.operations.user.getters import get_user
 from bot.database.operations.user.updaters import update_user
 from bot.handlers.ai.face_swap_handler import handle_face_swap
@@ -49,6 +49,7 @@ async def profile(message: Message, state: FSMContext):
         user.subscription_type,
         user.gender,
         user.current_model,
+        user.settings[Model.CHAT_GPT][UserSettings.VERSION],
         user.monthly_limits,
         user.additional_usage_quota,
         renewal_date.strftime("%d.%m.%Y"),

@@ -2,7 +2,6 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
 from bot.config import config
-from bot.database.models.user import User
 from bot.locales.main import get_localization, get_user_language
 
 

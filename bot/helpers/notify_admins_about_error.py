@@ -5,7 +5,7 @@ from aiogram.types import Update
 
 from bot.database.operations.user.getters import get_user
 from bot.helpers.senders.send_message_to_admins import send_message_to_admins
-from bot.locales.main import get_localization, get_user_language
+from bot.locales.main import get_localization
 
 
 async def notify_admins_about_error(bot: Bot, telegram_update: Update, e):
@@ -30,3 +30,10 @@ async def notify_admins_about_error(bot: Bot, telegram_update: Update, e):
             )
     except Exception as e:
         logging.exception(f"Error in notify_admins_about_error: {e}")
+
+        await send_message_to_admins(
+            bot=bot,
+            message=f"#error\n\nALARM! ALARM! ALARM! Неизвестная ошибка\n"
+                    f"Информация:\n{e}",
+            parse_mode=None,
+        )

@@ -23,12 +23,11 @@ async def create_face_swap_image(target_image: str, source_image: str) -> Option
     try:
         input_parameters = {
             "target_image": target_image,
-            "source_image": source_image,
-            "cache_days": 180,
+            "swap_image": source_image,
         }
 
-        model = await replicate.models.async_get("yan-ops/face_swap")
-        version = await model.versions.async_get("d5900f9ebed33e7ae08a07f17e0d98b4ebc68ab9528a70462afc3899cfe23bab")
+        model = await replicate.models.async_get("omniedgeio/face-swap")
+        version = await model.versions.async_get("c2d783366e8d32e6e82c40682fab6b4c23b9c6eff2692c0cf7585fc16c238cfe")
         prediction = await replicate.predictions.async_create(
             version=version,
             input=input_parameters,
@@ -52,7 +51,7 @@ async def create_music_gen_melody(prompt: str, duration: int) -> Optional[str]:
         }
 
         model = await replicate.models.async_get("meta/musicgen")
-        version = await model.versions.async_get("b05b1dff1d8c6dc63d14b0cdb42135378dcb87f6373b0d3d341ede46e59e2b38")
+        version = await model.versions.async_get("671ac645ce5e552cc63a54a2bbff63fcf798043055d2dac5fc9e36a837eedcfb")
         prediction = await replicate.predictions.async_create(
             version=version,
             input=input_parameters,

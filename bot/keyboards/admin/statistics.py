@@ -99,19 +99,25 @@ def build_statistics_choose_service_keyboard(language_code: str,
             [
                 InlineKeyboardButton(
                     text="ChatGPT 3.5 ✉️",
-                    callback_data=f'statistics_choose_service:{ServiceType.GPT3}'
+                    callback_data=f'statistics_choose_service:{ServiceType.CHAT_GPT3}'
                 )
             ],
             [
                 InlineKeyboardButton(
                     text="ChatGPT 4.0 🧠",
-                    callback_data=f'statistics_choose_service:{ServiceType.GPT4}'
+                    callback_data=f'statistics_choose_service:{ServiceType.CHAT_GPT4}'
                 )
             ],
             [
                 InlineKeyboardButton(
-                    text="DALLE-3 🖼",
-                    callback_data=f'statistics_choose_service:{ServiceType.DALLE3}'
+                    text="DALL-E 🖼",
+                    callback_data=f'statistics_choose_service:{ServiceType.DALL_E}'
+                )
+            ],
+            [
+                InlineKeyboardButton(
+                    text="Midjourney 🎨",
+                    callback_data=f'statistics_choose_service:{ServiceType.MIDJOURNEY}'
                 )
             ],
             [
@@ -162,19 +168,25 @@ def build_statistics_choose_service_keyboard(language_code: str,
             [
                 InlineKeyboardButton(
                     text="ChatGPT 3.5 ✉️",
-                    callback_data=f'statistics_choose_service:{ServiceType.GPT3}'
+                    callback_data=f'statistics_choose_service:{ServiceType.CHAT_GPT3}'
                 )
             ],
             [
                 InlineKeyboardButton(
                     text="ChatGPT 4.0 🧠",
-                    callback_data=f'statistics_choose_service:{ServiceType.GPT4}'
+                    callback_data=f'statistics_choose_service:{ServiceType.CHAT_GPT4}'
                 )
             ],
             [
                 InlineKeyboardButton(
-                    text="DALLE-3 🖼",
-                    callback_data=f'statistics_choose_service:{ServiceType.DALLE3}'
+                    text="DALL-E 🖼",
+                    callback_data=f'statistics_choose_service:{ServiceType.DALL_E}'
+                )
+            ],
+            [
+                InlineKeyboardButton(
+                    text="Midjourney 🎨",
+                    callback_data=f'statistics_choose_service:{ServiceType.MIDJOURNEY}'
                 )
             ],
             [

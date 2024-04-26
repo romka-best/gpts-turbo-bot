@@ -2,7 +2,7 @@ import random
 from typing import List, Dict
 
 from bot.locales.texts import Texts
-from bot.database.models.common import Currency, Quota, Model
+from bot.database.models.common import Currency, Quota, Model, GPTVersion
 from bot.database.models.package import PackageType, Package
 from bot.database.models.subscription import Subscription, SubscriptionType, SubscriptionPeriod, SubscriptionLimit
 from bot.database.models.user import UserGender
@@ -15,14 +15,16 @@ class English(Texts):
 I'm your personal gateway to the world of artificial intelligence and neural networks. Discover the capabilities of AI:
 ✉️ Communicate with <b>ChatGPT-3.5</b>: ask questions, get answers
 🧠 Explore advanced intelligence with <b>ChatGPT-4.0</b>
-🎨 Create unique images with <b>DALL-E 3</b>
+🖼 Draw beautiful pictures with <b>DALL-E</b>
+🎨 Create unique images with <b>Midjourney</b>
 😜 Try <b>FaceSwap</b> to exchange faces with someone in a photo
 🎵 Compose original melodies with <b>MusicGen</b>
 
 Here's a quick guide to get started:
 ✉️ To receive a text response from <b>ChatGPT-3.5</b>, simply enter your query in the chat
 🧠 To get a text response from <b>ChatGPT-4.0</b>, enter the command /chatgpt, choose ChatGP-4.0 model and then just write your query in the chat
-🎨 To create an image with <b>DALL-E 3</b>, enter the command /dalle3, and then let your imagination run wild with your request
+🖼 To create an image with <b>DALL-E</b>, enter the command /dalle, and then let your imagination run wild with your request
+🎨 To create an image with <b>Midjourney</b>, enter the command /midjourney, and then start creating using your imagination with your request
 😜 To swap faces with someone in a photo with <b>FaceSwap</b>, enter the command /face_swap, then choose images from our unique packages or send your own
 🎵 To create a melody with <b>MusicGen</b>, enter the command /music_gen, and then write a description of the melody
 🔄 To switch between different neural networks, enter the command /mode, and then select the neural network depending on your creative needs
@@ -39,14 +41,15 @@ I'm here to be your co-pilot on this adventure! 🚀
 🤖 <b>Here's what you can explore:</b>
 
 👋 /start - <b>About me</b>: Discover what I can do for you.
-🤖 /mode - <b>Swap neural network models</b> on the fly with — <b>ChatGPT-3.5</b>, <b>ChatGPT-4.0</b>, <b>DALLE-3</b>, <b>FaceSwap</b>, or <b>MusicGen</b>!
+🤖 /mode - <b>Swap neural network models</b> on the fly with — <b>ChatGPT-3.5</b>, <b>ChatGPT-4.0</b>, <b>DALL-E</b>, <b>Midjourney</b>, <b>FaceSwap</b>, or <b>MusicGen</b>!
 💳 /buy - <b>Subscribe or buy individual packages</b>: Get a new level.
 👤 /profile - <b>View your profile</b>: Check your subscription details or usage quota and more.
 🔧 /settings - <b>Customize your experience</b>: Tailor model to fit your needs. There you can also <b>select a digital employee</b> with <b>context-specific chats management</b>
 🌍 /language - <b>Switch languages</b>: Set your preferred language for system interface.
 ℹ️ /info - <b>Get information about AI</b>: Learn for what and why do you need them.
 🧠 /chatgpt - <b>Engage with ChatGPT-3.5 and ChatGPT-4.0</b>: Start chatting in a text-based conversation and getting experience with advanced AI responses.
-🎨 /dalle3 - <b>Create with DALL-E 3</b>: Bring your imaginations to life with images.
+🖼 /dalle - <b>Draw with DALL-E</b>: Turn your ideas into drawings.
+🎨 /midjourney - <b>Create with DALL-E 3</b>: Bring your imaginations to life with images.
 😜 /face_swap - <b>Have fun with FaceSwap</b>: Change faces in photos.
 🎵 /music_gen - <b>Melodies with MusicGen</b>: Create music without copyrights.
 🎁 /bonus - Learn about your bonus balance, invite friends, and <b>exchange bonuses for unique generation packages</b>.
@@ -56,7 +59,7 @@ I'm here to be your co-pilot on this adventure! 🚀
 Just type away or use a command to begin your AI journey! 🌟
 """
     INFO = """
-🤖 <b>Let's check out what each model can do for you:</b>
+🤖 <b>There is what each model can do for you:</b>
 
 ✉️ <b>ChatGPT-3.5: The Versatile Communicator</b>
 - <i>Small Talk to Deep Conversations</i>: Ideal for chatting about anything from daily life to sharing jokes.
@@ -65,37 +68,37 @@ Just type away or use a command to begin your AI journey! 🌟
 - <i>Creative Writer</i>: Need a post, story, or even a song? ChatGPT-3.5 can whip it up in seconds.
 - <i>Travel Buddy</i>: Ask for travel tips, local cuisines, or historical facts about your next destination.
 - <i>Business Helper</i>: Draft emails, create business plans, or brainstorm marketing ideas.
-- <i>Role Play</i>: Engage in creative role-playing scenarios for entertainment or storytelling.
-- <i>Quick Summaries</i>: Summarize long articles or reports into concise text.
 
 🧠 <b>ChatGPT-4.0: The Advanced Intellect</b>
 - <i>In-Depth Analysis</i>: Perfect for detailed research, technical explanations, or exploring hypothetical scenarios.
 - <i>Problem Solver</i>: Get help with advanced math problems, programming bugs, or scientific queries.
 - <i>Language Expert</i>: Translate complex texts or practice conversational skills in various languages.
 - <i>Creative Consultant</i>: Develop plot ideas for your posts, script dialogues, or explore artistic concepts.
-- <i>Health and Wellness</i>: Discuss wellness and mental health topics in-depth.
 - <i>Personalized Recommendations</i>: Get book, movie, or travel recommendations based on your interests.
 
-🎨 <b>DALLE-3: The Creative Genius</b>
+🖼 <b>DALL-E: The Creative Genius</b>
 - <i>Art on Demand</i>: Generate unique art from descriptions – perfect for illustrators or those seeking inspiration.
 - <i>Ad Creator</i>: Produce eye-catching images for advertising or social media content.
 - <i>Educational Tool</i>: Visualize complex concepts for better understanding in education.
 - <i>Interior Design</i>: Get ideas for room layouts or decoration themes.
 - <i>Fashion Design</i>: Create clothing designs or fashion illustrations.
-- <i>Personalized Comics</i>: Create comic strips or cartoon characters from your stories.
-- <i>Product Mockups</i>: Create mockups for product ideas or inventions.
+
+🎨 <b>Midjourney: Navigator of Creativity</b>
+- <i>Art Design</i>: Creating visual masterpieces and abstractions, ideal for artists and designers in search of a unique style.
+- <i>Architectural modeling</i>: Generation of conceptual designs of buildings and space layouts.
+- <i>Educational assistant</i>: Illustrations for educational materials that improve the perception and understanding of complex topics.
+- <i>Interior design</i>: Visualization of interior solutions, from classics to modern trends.
+- <i>Fashion and style</i>: The development of fashionable bows and accessories, experiments with colors and shapes.
 
 🤡 <b>FaceSwap: The Entertainment Master</b>
 - <i>Fun Reimaginations</i>: See how you'd look in different historical eras or as various movie characters.
 - <i>Personalized Greetings</i>: Create unique birthday cards or invitations with personalized images.
-- <i>Role Play</i>: Experiment with different looks for role-playing games or virtual meetings.
 - <i>Memes and Content Creation</i>: Spice up your social media with funny or imaginative face-swapped pictures.
 - <i>Digital Makeovers</i>: Experiment with new haircuts or makeup styles.
 - <i>Celebrity Mashups</i>: Combine your face with celebrities for fun comparisons.
 
 🎶 <b>MusicGen: Your Personal Composer</b>
 <i>Creating Unique Melodies</i>: Turn your ideas into musical pieces of any genre - from classical to pop.
-<i>Music for Every Moment</i>: Specially created compositions for relaxation, study, workouts, or meditation.
 <i>Personalized Soundtracks</i>: Create a soundtrack for your next video project, game, or presentation.
 <i>Exploring Musical Styles</i>: Experiment with different musical genres and sounds to find your unique style.
 <i>Learning and Inspiration</i>: Gain new insights into music theory and the history of genres through music creation.
@@ -240,10 +243,17 @@ Congratulations, you've switched to the <b>ChatGPT-4.0</b> model. This is a real
 
 Start your journey into the future with <b>ChatGPT-4.0</b>! 🎉
 """
-    SWITCHED_TO_DALLE3 = """
-🎨 <b>Welcome to the world of DALLE-3!</b>
+    SWITCHED_TO_DALL_E = """
+🖼 <b>Welcome to the world of DALL-E!</b>
 
-You've switched to the <b>DALLE-3</b> model — your personal AI artist. Now, you can request to have any image drawn, whatever comes to your mind. Just describe your idea in a single message, and <b>DALLE-3</b> will transform it into a visual masterpiece. Note: each new message is processed individually, previous request contexts are not considered
+You've switched to the <b>DALL-E</b> model — your personal AI artist. Now, you can request to have any image drawn, whatever comes to your mind. Just describe your idea in a single message, and <b>DALL-E</b> will transform it into a visual masterpiece. Note: each new message is processed individually, previous request contexts are not considered
+
+Time to create! 🎉
+"""
+    SWITCHED_TO_MIDJOURNEY = """
+🎨 <b>Welcome to the world of Midjourney!</b>
+
+You have successfully switched to the <b>Midjourney</b> model — this is your personal guide to the world of creative visualizations. Now you can instruct her to create any image that you can think of. Just describe your idea in one message, and <b>Midjourney</b> will bring it to life in a unique visual style. Please note that each of your requests is processed individually and is not related to the previous ones.
 
 Time to create! 🎉
 """
@@ -431,8 +441,10 @@ Your chats have switched their unique roles to "Personal Assistant" as your acce
     GPT4_REQUESTS_DESCRIPTION = "Experience GPT4's advanced intelligence for deeper insights and groundbreaking conversations 🧠🌟"
     THEMATIC_CHATS = "💬 Thematic chats"
     THEMATIC_CHATS_DESCRIPTION = "Dive into topics you love with Thematic Chats, guided by AI in a world of tailored discussions 📚🗨️"
-    DALLE3_REQUESTS = "🖼 DALLE3 images"
-    DALLE3_REQUESTS_DESCRIPTION = "Turn ideas into art with DALLE3 – where your imagination becomes stunning visual reality! 🎨🌈"
+    DALL_E_REQUESTS = "🖼 DALL-E images"
+    DALL_E_REQUESTS_DESCRIPTION = "Turn ideas into art with DALL-E – where your imagination becomes stunning visual reality! 🎨🌈"
+    MIDJOURNEY_REQUESTS = "🎨 Midjourney images"
+    MIDJOURNEY_REQUESTS_DESCRIPTION = "Unleash your creativity with Midjourney – transform your thoughts into magnificent visual works of art! 🎨✨"
     FACE_SWAP_REQUESTS = "📷 Images with face replacement"
     FACE_SWAP_REQUESTS_DESCRIPTION = "Enter the playful world of FaceSwap for laughs and surprises in every image! 😂🔄"
     MUSIC_GEN_REQUESTS = "🎵 Seconds of generation of melodies"
@@ -575,6 +587,7 @@ Please try again or contact @roman_danilov 🔧
         subscription_type,
         gender,
         current_model,
+        current_model_version,
         monthly_limits,
         additional_usage_quota,
         renewal_date,
@@ -589,12 +602,14 @@ Please try again or contact @roman_danilov 🔧
         else:
             gender_info = f"Gender: {English.UNSPECIFIED}"
 
-        if current_model == Model.GPT3:
+        if current_model == Model.CHAT_GPT and current_model_version == GPTVersion.V3:
             current_model = English.CHATGPT3
-        elif current_model == Model.GPT4:
+        elif current_model == Model.CHAT_GPT and current_model_version == GPTVersion.V4:
             current_model = English.CHATGPT4
-        elif current_model == Model.DALLE3:
-            current_model = English.DALLE3
+        elif current_model == Model.DALL_E:
+            current_model = English.DALL_E
+        elif current_model == Model.MIDJOURNEY:
+            current_model = English.MIDJOURNEY
         elif current_model == Model.FACE_SWAP:
             current_model = English.FACE_SWAP
         elif current_model == Model.MUSIC_GEN:
@@ -607,22 +622,25 @@ Subscription type: {subscription_type} {emojis[subscription_type]}
 Subscription renewal date: {renewal_date}
 
 {gender_info}
-Currency: RUB
 
 🤖 <b>Current model: {current_model}</b>
 Change model: /mode
 
 ✉️ <b>ChatGPT-3.5</b>
-Requests for month: {monthly_limits[Quota.GPT3]}/{SubscriptionLimit.LIMITS[subscription_type][Quota.GPT3]}
-Additional requests: {additional_usage_quota[Quota.GPT3]}
+Requests for month: {monthly_limits[Quota.CHAT_GPT3]}/{SubscriptionLimit.LIMITS[subscription_type][Quota.CHAT_GPT3]}
+Additional requests: {additional_usage_quota[Quota.CHAT_GPT3]}
 
 🧠 <b>ChatGPT-4.0</b>
-Requests for month: {monthly_limits[Quota.GPT4]}/{SubscriptionLimit.LIMITS[subscription_type][Quota.GPT4]}
-Additional requests: {additional_usage_quota[Quota.GPT4]}
+Requests for month: {monthly_limits[Quota.CHAT_GPT4]}/{SubscriptionLimit.LIMITS[subscription_type][Quota.CHAT_GPT4]}
+Additional requests: {additional_usage_quota[Quota.CHAT_GPT4]}
 
-🖼 <b>DALL-E 3</b>
-Images for month: {monthly_limits[Quota.DALLE3]}/{SubscriptionLimit.LIMITS[subscription_type][Quota.DALLE3]}
-Additional images: {additional_usage_quota[Quota.DALLE3]}
+🖼 <b>DALL-E</b>
+Images for month: {monthly_limits[Quota.DALL_E]}/{SubscriptionLimit.LIMITS[subscription_type][Quota.DALL_E]}
+Additional images: {additional_usage_quota[Quota.DALL_E]}
+
+🎨 <b>Midjourney</b>
+Images for month: {monthly_limits[Quota.MIDJOURNEY]}/{SubscriptionLimit.LIMITS[subscription_type][Quota.MIDJOURNEY]}
+Additional images: {additional_usage_quota[Quota.MIDJOURNEY]}
 
 📷 <b>FaceSwap</b>
 Images for month: {monthly_limits[Quota.FACE_SWAP]}/{SubscriptionLimit.LIMITS[subscription_type][Quota.FACE_SWAP]}
@@ -638,7 +656,7 @@ Additional chats: {additional_usage_quota[Quota.ADDITIONAL_CHATS]}
 🎭 <b>Digital employees in ChatGPT</b>
 Access to a catalog: {'Yes' if additional_usage_quota[Quota.ACCESS_TO_CATALOG] else 'No'}
 
-🎙 <b>Голосовые сообщения</b>
+🎙 <b>Voice messages</b>
 Send and get voice messages: {'Yes' if additional_usage_quota[Quota.VOICE_MESSAGES] else 'No'}
 
 ⚡ <b>Fast answers</b>
@@ -656,11 +674,13 @@ Fast answers: {'Yes' if additional_usage_quota[Quota.FAST_MESSAGES] else 'No'}
         return f"""
 🤖 Ready to supercharge your digital journey? Here's what's on the menu:
 
-- <b>Standard</b> ⭐: For just {prices[SubscriptionType.STANDARD]}, step into the AI playground! Perfect for daily musings, creative bursts, and those "just curious" moments. Chat up a storm with ChatGPT-3.5, conjure images from thin air with DALLE-3, and swap faces faster than you can say "cheese"! 🧀
+- <b>STANDARD</b> ⭐: For just {prices[SubscriptionType.STANDARD]}, step into the AI playground!
 
-- <b>VIP</b> 🔥: Got grander ambitions? {prices[SubscriptionType.VIP]} unlocks deeper dialogues, more complex image creation, and access to a wider array of digital personas. It's the power user's delight, offering a premium lane on the AI highway 🛣️
+- <b>VIP</b> 🔥: Got grander ambitions? {prices[SubscriptionType.VIP]} unlocks deeper dialogues, more complex image creation, and access to a wider array of digital personas!
 
-- <b>Platinum</b> 💎: For the connoisseurs, {prices[SubscriptionType.PLATINUM]} grants you the keys to the AI kingdom! Max out on ChatGPT-4 prompts, create thematic chat rooms, and get exclusive access to the latest AI innovations. It's all you can AI, and then some! 🍽️
+- <b>PLATINUM</b> 💎: For the connoisseurs, {prices[SubscriptionType.PLATINUM]} grants you the keys to the AI kingdom!
+
+P.S. We're in the process of integrating more currency options directly in our bot, but you can visit our payment page and pay in different currencies just right here: https://app.lava.top/en/gptsturbobot
 
 Pick your potion and hit the button below to subscribe:
 """
@@ -696,11 +716,13 @@ Please select the subscription period by clicking on the button:
 🤖 <b>Welcome to the AI shopping spree!</b> 📦
 
 Each button tap unlocks a world of AI wonders:
-🧠 <b>ChatGPT-3.5 & ChatGPT-4.0</b>: Engage in deep, thought-provoking conversations. Your new AI buddies await!
+🧠 <b>ChatGPT</b>: Engage in deep, thought-provoking conversations!
 
-🎨 <b>DALLE-3</b>: Transform ideas into stunning visuals. It's like painting with AI!
+🖼 <b>DALL-E</b>: Transform ideas into stunning visuals!
 
-👤 <b>FaceSwap</b>: Play with identities in images. It's never been this exciting!
+🎨 <b>Midjourney</b>: Turn ideas into incredible realistic images!
+
+👤 <b>FaceSwap</b>: Play with identities in images!
 
 🎵 <b>Harmony with MusicGen</b>: Create unique melodies that will belong only to you!
 
@@ -719,17 +741,20 @@ Hit a button and embark on an extraordinary journey with AI! It's time to redefi
     def get_package_name_and_quantity_by_package_type(package_type: PackageType):
         name = ""
         quantity = ""
-        if package_type == PackageType.GPT3:
+        if package_type == PackageType.CHAT_GPT3:
             name = English.GPT3_REQUESTS
             quantity = "requests"
-        elif package_type == PackageType.GPT4:
+        elif package_type == PackageType.CHAT_GPT4:
             name = English.GPT4_REQUESTS
             quantity = "requests"
         elif package_type == PackageType.CHAT:
             name = English.THEMATIC_CHATS
             quantity = "chats"
-        elif package_type == PackageType.DALLE3:
-            name = English.DALLE3_REQUESTS
+        elif package_type == PackageType.DALL_E:
+            name = English.DALL_E_REQUESTS
+            quantity = "images"
+        elif package_type == PackageType.MIDJOURNEY:
+            name = English.MIDJOURNEY_REQUESTS
             quantity = "images"
         elif package_type == PackageType.FACE_SWAP:
             name = English.FACE_SWAP_REQUESTS
@@ -778,7 +803,7 @@ You've selected the <b>{name}</b> package
             total_sum = f"{total_sum}{Currency.SYMBOLS[currency]}"
 
         if not text:
-            text = "Ваша корзина пуста"
+            text = "Your cart is empty"
 
         return f"""
 🛒 <b>Cart</b>
@@ -845,13 +870,15 @@ Looks like you've got only <b>{available_seconds} seconds</b> left in your arsen
 
     # AI
     @staticmethod
-    def switched(model: Model):
-        if model == Model.GPT3:
+    def switched(model: Model, model_version: str):
+        if model == Model.CHAT_GPT and model_version == GPTVersion.V3:
             return English.SWITCHED_TO_CHATGPT3
-        elif model == Model.GPT4:
+        elif model == Model.CHAT_GPT and model_version == GPTVersion.V4:
             return English.SWITCHED_TO_CHATGPT4
-        elif model == Model.DALLE3:
-            return English.SWITCHED_TO_DALLE3
+        elif model == Model.DALL_E:
+            return English.SWITCHED_TO_DALL_E
+        elif model == Model.MIDJOURNEY:
+            return English.SWITCHED_TO_MIDJOURNEY
         elif model == Model.FACE_SWAP:
             return English.SWITCHED_TO_FACE_SWAP
         elif model == Model.MUSIC_GEN:
@@ -895,7 +922,7 @@ Looks like you've got only <b>{available_seconds} seconds</b> left in your arsen
         return texts
 
     @staticmethod
-    def dalle_recommendations() -> List[str]:
+    def image_recommendations() -> List[str]:
         texts = [
             "Martian cityscape under a pink sky 🪐",
             "Steampunk version of the Taj Mahal 🕌",
@@ -1014,7 +1041,10 @@ Looks like you've got only <b>{available_seconds} seconds</b> left in your arsen
             "Cooking up a visual symphony in the AI kitchen... 🍳🎼"
         ]
 
-        return random.choice(texts)
+        text = random.choice(texts)
+        text += "\n\n⚠️ Generation can take up to 3 minutes"
+
+        return text
 
     @staticmethod
     def processing_request_face_swap():
@@ -1069,9 +1099,9 @@ Looks like you've got only <b>{available_seconds} seconds</b> left in your arsen
     # Settings
     @staticmethod
     def settings(human_model: str, current_model: Model, dalle_cost=1) -> str:
-        if current_model == Model.GPT3 or current_model == Model.GPT4:
-            additional_text = f"\n<b>Version ChatGPT-3.5</b>: {Model.GPT3}\n<b>Version ChatGPT-4.0</b>: {Model.GPT4}"
-        elif current_model == Model.DALLE3:
+        if current_model == Model.CHAT_GPT:
+            additional_text = f"\n<b>Version ChatGPT-3.5</b>: {GPTVersion.V3}\n<b>Version ChatGPT-4.0</b>: {GPTVersion.V4}"
+        elif current_model == Model.DALL_E:
             additional_text = f"\nAt the current settings, 1 request costs: {dalle_cost} 🖼"
         else:
             additional_text = ""

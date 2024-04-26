@@ -5,7 +5,7 @@ from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMar
 from bot.database.models.common import Model
 from bot.database.models.face_swap_package import FaceSwapPackageStatus
 from bot.database.models.generation import GenerationReaction
-from bot.database.models.user import User, UserGender
+from bot.database.models.user import UserGender
 from bot.database.operations.face_swap_package.getters import get_face_swap_packages_by_gender
 from bot.locales.main import get_localization
 
@@ -16,7 +16,7 @@ async def build_recommendations_keyboard(
     gender: UserGender,
 ) -> ReplyKeyboardMarkup:
     buttons = []
-    if current_model == Model.GPT3 or current_model == Model.GPT4:
+    if current_model == Model.CHAT_GPT:
         recommendations = get_localization(language_code).chatgpt_recommendations()
         random.shuffle(recommendations)
         for recommendation in recommendations[:4]:
@@ -25,8 +25,8 @@ async def build_recommendations_keyboard(
                     text=recommendation,
                 )
             ])
-    elif current_model == Model.DALLE3:
-        recommendations = get_localization(language_code).dalle_recommendations()
+    elif current_model == Model.DALL_E or current_model == Model.MIDJOURNEY:
+        recommendations = get_localization(language_code).image_recommendations()
         random.shuffle(recommendations)
         for recommendation in recommendations[:4]:
             buttons.append([

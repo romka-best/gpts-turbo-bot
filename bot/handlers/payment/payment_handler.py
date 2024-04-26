@@ -8,10 +8,11 @@ from aiogram.types import Message, CallbackQuery, LabeledPrice, PreCheckoutQuery
 from bot.config import config
 from bot.database.main import firebase
 from bot.database.models.cart import CartItem
-from bot.database.models.common import PaymentType
+from bot.database.models.common import PaymentType, Model
 from bot.database.models.package import PackageStatus, PackageType, Package
 from bot.database.models.subscription import Subscription, SubscriptionStatus
 from bot.database.models.transaction import TransactionType
+from bot.database.models.user import UserSettings
 from bot.database.operations.cart.getters import get_cart_by_user_id
 from bot.database.operations.cart.updaters import update_cart
 from bot.database.operations.package.getters import get_last_package_by_user_id, get_packages_by_user_id_and_status
@@ -621,6 +622,9 @@ async def successful_payment(message: Message, state: FSMContext):
 
     reply_markup = await build_recommendations_keyboard(user.current_model, user_language_code, user.gender)
     await message.answer(
-        text=get_localization(user_language_code).switched(user.current_model),
+        text=get_localization(user_language_code).switched(
+            user.current_model,
+            user.settings[Model.CHAT_GPT][UserSettings.VERSION],
+        ),
         reply_markup=reply_markup,
     )

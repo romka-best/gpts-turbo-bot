@@ -26,7 +26,7 @@ def create_user_object(
         language_code=telegram_user.language_code,
         is_premium=telegram_user.is_premium or False,
         is_blocked=False,
-        current_model=user_data.get("current_model", Model.GPT3),
+        current_model=user_data.get("current_model", Model.CHAT_GPT),
         currency=user_data.get("currency", Currency.RUB),
         balance=user_data.get("balance", 0),
         subscription_type=user_data.get("subscription_type", SubscriptionType.FREE),
