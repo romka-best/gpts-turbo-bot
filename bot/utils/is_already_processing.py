@@ -13,7 +13,7 @@ async def is_already_processing(message: Message, state: FSMContext, current_tim
     if not is_processing:
         return False
 
-    last_request_time = user_data.get('last_request_time', None)
+    last_request_time = user_data.get('last_request_time', current_time)
     time_elapsed = current_time - last_request_time
     if time_elapsed >= config.LIMIT_PROCESSING_SECONDS:
         await state.update_data(is_processing=False)

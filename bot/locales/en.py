@@ -310,6 +310,9 @@ The adventure continues! 🚀✨
 To start drawing using <b>Midjourney</b>, just type the command /midjourney 🎨
 """
 
+    # Midjourney
+    MIDJOURNEY_ALREADY_CHOSE_UPSCALE = "You've already chosen this image, try a new one 🙂"
+
     # MusicGen
     MUSIC_GEN_INFO = """
 Your musical workshop 🎹
