@@ -301,6 +301,15 @@ The adventure continues! 🚀✨
 """
     IMAGE_SUCCESS = "✨ Here's your image creation! 🎨"
 
+    # Examples
+    CHATGPT4_EXAMPLE_FIRST_PART = "👇 This is how *ChatGPT-4.0* would respond to your request 🧠"
+    CHATGPT4_EXAMPLE_LAST_PART = "To switch to *ChatGPT-4.0*, enter the /chatgpt command and select *ChatGPT-4.0* 🧠"
+    MIDJOURNEY_EXAMPLE = """
+☝️ These are the images that <b>Midjourney</b> would draw for your request
+
+To start drawing using <b>Midjourney</b>, just type the command /midjourney 🎨
+"""
+
     # MusicGen
     MUSIC_GEN_INFO = """
 Your musical workshop 🎹

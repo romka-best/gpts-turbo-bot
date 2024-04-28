@@ -4,7 +4,8 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
 from aiogram.utils.chat_action import ChatActionSender
 
-from bot.database.models.common import Model, Quota, MidjourneyAction
+from bot.database.models.common import Model, Quota, MidjourneyAction, MidjourneyVersion
+from bot.database.models.subscription import SubscriptionType
 from bot.database.models.user import User, UserSettings
 from bot.database.operations.generation.getters import get_generation
 from bot.database.operations.generation.writers import write_generation
@@ -13,11 +14,12 @@ from bot.database.operations.request.writers import write_request
 from bot.database.operations.user.getters import get_user
 from bot.database.operations.user.updaters import update_user
 from bot.helpers.senders.send_message_to_admins import send_message_to_admins
-from bot.helpers.translate_text import translate_text
+from bot.locales.translate_text import translate_text
 from bot.integrations.midjourney import (
     create_midjourney_images,
     create_midjourney_image,
-    create_different_midjourney_image, create_different_midjourney_images,
+    create_different_midjourney_image,
+    create_different_midjourney_images,
 )
 from bot.keyboards.common.common import build_recommendations_keyboard
 from bot.locales.main import get_localization, get_user_language
@@ -97,6 +99,7 @@ async def handle_midjourney(
                         "prompt": prompt,
                         "action": action,
                         "version": version,
+                        "is_suggestion": False,
                     }
                 )
 
@@ -121,6 +124,7 @@ async def handle_midjourney(
                         "prompt": prompt,
                         "action": action,
                         "version": version,
+                        "is_suggestion": False,
                     }
                 )
         except Exception as e:
@@ -180,3 +184,47 @@ async def handle_midjourney_selection(callback_query: CallbackQuery, state: FSMC
         )
 
     await state.clear()
+
+
+async def handle_midjourney_example(user: User, user_language_code: str, prompt: str, message: Message):
+    try:
+        if (
+            user.subscription_type == SubscriptionType.FREE and
+            user.monthly_limits[Quota.DALL_E] + 1 in [1, 5]
+        ):
+            request = await write_request(
+                user_id=user.id,
+                message_id=message.message_id,
+                model=Model.MIDJOURNEY,
+                requested=1,
+                details={
+                    "prompt": prompt,
+                    "action": MidjourneyAction.UPSCALE,
+                    "version": MidjourneyVersion.V6,
+                    "is_suggestion": True,
+                }
+            )
+
+            if user_language_code != 'en':
+                prompt = await translate_text(prompt, user_language_code, 'en')
+            prompt += f" --v {MidjourneyVersion.V6}"
+
+            result_id = await create_midjourney_images(prompt)
+            await write_generation(
+                id=result_id,
+                request_id=request.id,
+                model=Model.MIDJOURNEY,
+                has_error=result_id is None,
+                details={
+                    "prompt": prompt,
+                    "action": MidjourneyAction.IMAGINE,
+                    "version": MidjourneyVersion.V6,
+                    "is_suggestion": True,
+                }
+            )
+    except Exception as e:
+        await send_message_to_admins(
+            bot=message.bot,
+            message=f"#error\n\nALARM! Ошибка у пользователя при попытке отправить пример Midjourney в запросе в DALLE: {user.id}\nИнформация:\n{e}",
+            parse_mode=None,
+        )

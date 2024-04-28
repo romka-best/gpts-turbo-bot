@@ -20,7 +20,7 @@ from bot.database.operations.face_swap_package.updaters import update_face_swap_
 from bot.database.operations.face_swap_package.writers import write_face_swap_package
 from bot.database.operations.generation.writers import write_generation
 from bot.database.operations.request.writers import write_request
-from bot.helpers.translate_text import translate_text
+from bot.locales.translate_text import translate_text
 from bot.integrations.replicateAI import create_face_swap_image
 from bot.keyboards.admin.face_swap import (
     build_manage_face_swap_keyboard,

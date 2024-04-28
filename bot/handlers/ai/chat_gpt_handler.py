@@ -1,3 +1,6 @@
+import asyncio
+from typing import List
+
 import openai
 from aiogram import Router
 from aiogram.exceptions import TelegramBadRequest
@@ -9,6 +12,7 @@ from telegram.constants import ParseMode
 
 from bot.database.main import firebase
 from bot.database.models.common import Quota, Currency, GPTVersion, Model
+from bot.database.models.subscription import SubscriptionType
 from bot.database.models.transaction import ServiceType, TransactionType
 from bot.database.models.user import UserSettings, User
 from bot.database.operations.chat.getters import get_chat
@@ -42,7 +46,11 @@ async def chatgpt(message: Message, state: FSMContext):
     user = await get_user(user_id)
     user_language_code = await get_user_language(user_id, state.storage)
 
-    reply_markup = build_chat_gpt_keyboard(user_language_code, user.current_model, user.settings[Model.CHAT_GPT][UserSettings.VERSION])
+    reply_markup = build_chat_gpt_keyboard(
+        user_language_code,
+        user.current_model,
+        user.settings[Model.CHAT_GPT][UserSettings.VERSION],
+    )
     await message.answer(
         text=get_localization(user_language_code).CHOOSE_CHATGPT_MODEL,
         reply_markup=reply_markup,
@@ -86,7 +94,7 @@ async def handle_chat_gpt_choose_selection(callback_query: CallbackQuery, state:
             new_keyboard.append(new_row)
         await callback_query.message.edit_reply_markup(reply_markup=InlineKeyboardMarkup(inline_keyboard=new_keyboard))
 
-        reply_markup = await build_recommendations_keyboard(user.current_model, user_language_code, user.gender)
+        reply_markup = await build_recommendations_keyboard(Model.CHAT_GPT, user_language_code, user.gender)
         if keyboard_changed:
             user.current_model = Model.CHAT_GPT
             user.settings[Model.CHAT_GPT][UserSettings.VERSION] = chosen_version
@@ -214,6 +222,7 @@ async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_q
                     "output_tokens": response['output_tokens'],
                     "request": text,
                     "answer": message_content,
+                    "is_suggestion": False,
                 },
             )
 
@@ -260,6 +269,18 @@ async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_q
                 await message.reply(
                     text=get_localization(user_language_code).REQUEST_FORBIDDEN_ERROR,
                 )
+            else:
+                await message.answer(
+                    text=get_localization(user_language_code).ERROR,
+                    parse_mode=None,
+                )
+
+                await send_message_to_admins(
+                    bot=message.bot,
+                    message=f"#error\n\nALARM! Ошибка у пользователя при запросе в ChatGPT: {user.id}\n"
+                            f"Информация:\n{e}",
+                    parse_mode=None,
+                )
         except Exception as e:
             await message.answer(
                 text=get_localization(user_language_code).ERROR,
@@ -274,6 +295,16 @@ async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_q
         finally:
             await processing_message.delete()
             await state.update_data(is_processing=False)
+
+    asyncio.create_task(
+        handle_chatgpt4_example(
+            user=user,
+            user_language_code=user_language_code,
+            prompt=text,
+            history=history,
+            message=message,
+        )
+    )
 
 
 @chat_gpt_router.callback_query(lambda c: c.data.startswith('chat_gpt_continue_generation:'))
@@ -299,3 +330,59 @@ async def handle_chat_gpt_continue_generation_choose_selection(callback_query: C
         await callback_query.message.edit_reply_markup(reply_markup=None)
 
     await state.clear()
+
+
+async def handle_chatgpt4_example(user: User, user_language_code: str, prompt: str, history: List, message: Message):
+    try:
+        if (
+            user.current_model == Model.CHAT_GPT and
+            user.settings[user.current_model][UserSettings.VERSION] == GPTVersion.V3 and
+            user.subscription_type == SubscriptionType.FREE and
+            user.monthly_limits[Quota.CHAT_GPT3] + 1 in [1, 50, 90, 100]
+        ):
+            response = await get_response_message(GPTVersion.V4, history)
+            response_message = response['message']
+
+            service = ServiceType.CHAT_GPT4
+            input_price = response['input_tokens'] * PRICE_GPT4_INPUT
+            output_price = response['output_tokens'] * PRICE_GPT4_OUTPUT
+
+            total_price = round(input_price + output_price, 6)
+            message_role, message_content = response_message.role, response_message.content
+            await write_transaction(
+                user_id=user.id,
+                type=TransactionType.EXPENSE,
+                service=service,
+                amount=total_price,
+                currency=Currency.USD,
+                quantity=1,
+                details={
+                    "input_tokens": response['input_tokens'],
+                    "output_tokens": response['output_tokens'],
+                    "request": prompt,
+                    "answer": message_content,
+                    "is_suggestion": True,
+                },
+            )
+
+            header_text = f'{get_localization(user_language_code).CHATGPT4_EXAMPLE_FIRST_PART}\n\n'
+            footer_text = f'\n\n{get_localization(user_language_code).CHATGPT4_EXAMPLE_LAST_PART}'
+            try:
+                await message.reply(
+                    f"{header_text}{message_content}{footer_text}",
+                    parse_mode=ParseMode.MARKDOWN,
+                )
+            except TelegramBadRequest as e:
+                if "can't parse entities" in str(e):
+                    await message.reply(
+                        f"{header_text}{message_content}{footer_text}",
+                        parse_mode=None,
+                    )
+                else:
+                    raise
+    except Exception as e:
+        await send_message_to_admins(
+            bot=message.bot,
+            message=f"#error\n\nALARM! Ошибка у пользователя при попытке отправить пример ChatGPT-4.0 в запросе в ChatGPT-3.5: {user.id}\nИнформация:\n{e}",
+            parse_mode=None,
+        )
