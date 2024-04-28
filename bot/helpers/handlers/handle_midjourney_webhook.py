@@ -86,12 +86,17 @@ async def handle_midjourney_result(
         )
     else:
         generation_error = generation.details.get('error')
-        if generation_error == "banned prompt detected":
+        if "banned prompt detected" in generation_error:
             if not is_suggestion:
                 await bot.send_message(
                     chat_id=user.telegram_chat_id,
                     text=get_localization(user_language_code).REQUEST_FORBIDDEN_ERROR,
                 )
+        elif "You can request another upscale for this image" in generation_error:
+            await bot.send_message(
+                chat_id=user.telegram_chat_id,
+                text=get_localization(user_language_code).MIDJOURNEY_ALREADY_CHOSE_UPSCALE,
+            )
         else:
             if not is_suggestion:
                 await bot.send_message(
