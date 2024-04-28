@@ -8,13 +8,14 @@ from aiogram.types import InputMediaPhoto, URLInputFile
 from bot.helpers.senders.send_message_to_admins import send_message_to_admins
 
 
-async def send_image(bot: Bot, chat_id: str, image: str, reply_markup=None, caption=None):
+async def send_image(bot: Bot, chat_id: str, image: str, reply_markup=None, caption=None, reply_to_message_id=None):
     try:
         await bot.send_photo(
             chat_id=chat_id,
             photo=URLInputFile(image, filename=f'{uuid.uuid4()}', timeout=60),
             reply_markup=reply_markup,
             caption=caption,
+            reply_to_message_id=reply_to_message_id,
         )
     except Exception as e:
         logging.error(f'Error in send_image: {e}')

@@ -10,7 +10,7 @@ from bot.database.operations.request.getters import get_started_requests_by_user
 from bot.database.operations.request.writers import write_request
 from bot.database.operations.user.getters import get_user
 from bot.database.operations.user.updaters import update_user
-from bot.helpers.translate_text import translate_text
+from bot.locales.translate_text import translate_text
 from bot.integrations.replicateAI import create_music_gen_melody
 from bot.keyboards.common.common import build_recommendations_keyboard, build_cancel_keyboard
 from bot.keyboards.ai.music_gen import build_music_gen_keyboard

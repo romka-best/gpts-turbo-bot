@@ -1,3 +1,5 @@
+import asyncio
+
 import openai
 from aiogram import Router
 from aiogram.filters import Command
@@ -11,6 +13,7 @@ from bot.database.models.user import UserSettings, User
 from bot.database.operations.transaction.writers import write_transaction
 from bot.database.operations.user.getters import get_user
 from bot.database.operations.user.updaters import update_user
+from bot.handlers.ai.midjourney_handler import handle_midjourney_example
 from bot.helpers.senders.send_message_to_admins import send_message_to_admins
 from bot.integrations.openAI import get_response_image, get_cost_for_image
 from bot.keyboards.common.common import build_recommendations_keyboard
@@ -132,3 +135,12 @@ async def handle_dall_e(message: Message, state: FSMContext, user: User):
         finally:
             await processing_message.delete()
             await state.update_data(is_processing=False)
+
+    asyncio.create_task(
+        handle_midjourney_example(
+            user=user,
+            user_language_code=user_language_code,
+            prompt=text,
+            message=message,
+        )
+    )

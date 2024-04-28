@@ -6,7 +6,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
 
 from bot.helpers.senders.send_message_to_users import send_message_to_users
-from bot.helpers.translate_text import translate_text
+from bot.locales.translate_text import translate_text
 from bot.keyboards.admin.blast import build_blast_keyboard, build_blast_confirmation_keyboard
 from bot.keyboards.common.common import build_cancel_keyboard
 from bot.locales.main import get_localization, localization_classes, get_user_language

@@ -65,27 +65,39 @@ async def handle_midjourney_result(
     request: Request,
     generation: Generation,
 ):
+    is_suggestion = generation.details.get('is_suggestion', False)
     action_type = generation.details.get('action')
     user_language_code = await get_user_language(user.id, dp.storage)
-    if not generation.has_error:
+    if not generation.has_error and not is_suggestion:
         reply_markup = build_midjourney_keyboard(generation.id) if action_type != MidjourneyAction.UPSCALE \
             else build_reaction_keyboard(generation.id)
         footer_text = f'\n\n🖼 {user.monthly_limits[Quota.MIDJOURNEY] + user.additional_usage_quota[Quota.MIDJOURNEY]}' \
             if user.settings[Model.MIDJOURNEY][UserSettings.SHOW_USAGE_QUOTA] else ''
         caption = f"{get_localization(user_language_code).IMAGE_SUCCESS}{footer_text}"
         await send_image(bot, user.telegram_chat_id, generation.result, reply_markup, caption)
+    elif not generation.has_error and is_suggestion:
+        await send_image(
+            bot,
+            user.telegram_chat_id,
+            generation.result,
+            None,
+            get_localization(user_language_code).MIDJOURNEY_EXAMPLE,
+            request.message_id,
+        )
     else:
         generation_error = generation.details.get('error')
         if generation_error == "banned prompt detected":
-            await bot.send_message(
-                chat_id=user.telegram_chat_id,
-                text=get_localization(user_language_code).REQUEST_FORBIDDEN_ERROR,
-            )
+            if not is_suggestion:
+                await bot.send_message(
+                    chat_id=user.telegram_chat_id,
+                    text=get_localization(user_language_code).REQUEST_FORBIDDEN_ERROR,
+                )
         else:
-            await bot.send_message(
-                chat_id=user.telegram_chat_id,
-                text=get_localization(user_language_code).ERROR,
-            )
+            if not is_suggestion:
+                await bot.send_message(
+                    chat_id=user.telegram_chat_id,
+                    text=get_localization(user_language_code).ERROR,
+                )
             await send_message_to_admins(
                 bot=bot,
                 message=f"#error\n\nALARM! Ошибка у пользователя при запросе в MIDJOURNEY: {user.id}\nИнформация:\n{generation_error}",
@@ -97,9 +109,9 @@ async def handle_midjourney_result(
         "status": request.status
     })
 
-    if not generation.has_error and user.monthly_limits[Quota.MIDJOURNEY] != 0:
+    if not generation.has_error and user.monthly_limits[Quota.MIDJOURNEY] != 0 and not is_suggestion:
         user.monthly_limits[Quota.MIDJOURNEY] -= 1
-    elif not generation.has_error and user.additional_usage_quota[Quota.MIDJOURNEY] != 0:
+    elif not generation.has_error and user.additional_usage_quota[Quota.MIDJOURNEY] != 0 and not is_suggestion:
         user.additional_usage_quota[Quota.MIDJOURNEY] -= 1
 
     update_tasks = [
@@ -113,6 +125,7 @@ async def handle_midjourney_result(
             details={
                 "prompt": generation.details.get('prompt'),
                 "type": generation.details.get('action'),
+                "is_suggestion": generation.details.get('is_suggestion', False),
             }
         ),
         update_user(
@@ -136,4 +149,5 @@ async def handle_midjourney_result(
     )
     await state.clear()
 
-    await bot.delete_message(user.telegram_chat_id, request.message_id)
+    if not is_suggestion:
+        await bot.delete_message(user.telegram_chat_id, request.message_id)

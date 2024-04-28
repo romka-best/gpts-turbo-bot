@@ -44,8 +44,8 @@ from bot.handlers.settings.language_handler import language_router
 from bot.handlers.settings.settings_handler import settings_router
 from bot.helpers.billing.update_daily_expenses import update_daily_expenses
 from bot.helpers.check_unresolved_requests import check_unresolved_requests
-from bot.helpers.handle_midjourney_webhook import handle_midjourney_webhook
-from bot.helpers.handle_replicate_webhook import handle_replicate_webhook
+from bot.helpers.handlers.handle_midjourney_webhook import handle_midjourney_webhook
+from bot.helpers.handlers.handle_replicate_webhook import handle_replicate_webhook
 from bot.helpers.notify_admins_about_error import notify_admins_about_error
 from bot.helpers.senders.send_admin_statistics import send_admin_statistics
 from bot.helpers.setters.set_commands import set_commands

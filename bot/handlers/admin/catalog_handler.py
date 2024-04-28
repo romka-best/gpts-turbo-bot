@@ -7,7 +7,7 @@ from bot.database.main import firebase
 from bot.database.operations.role.getters import get_roles, get_role, get_role_by_name
 from bot.database.operations.role.updaters import update_role
 from bot.database.operations.role.writers import write_role
-from bot.helpers.translate_text import translate_text
+from bot.locales.translate_text import translate_text
 from bot.keyboards.admin.catalog import (
     build_manage_catalog_keyboard,
     build_manage_catalog_create_keyboard,

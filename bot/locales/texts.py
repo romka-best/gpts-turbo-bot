@@ -249,6 +249,11 @@ class Texts(Protocol):
     REACHED_USAGE_LIMIT: str
     IMAGE_SUCCESS: str
 
+    # Examples
+    CHATGPT4_EXAMPLE_FIRST_PART: str
+    CHATGPT4_EXAMPLE_LAST_PART: str
+    MIDJOURNEY_EXAMPLE: str
+
     # MusicGen
     MUSIC_GEN_INFO: str
     MUSIC_GEN_TYPE_SECONDS: str

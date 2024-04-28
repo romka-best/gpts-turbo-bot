@@ -90,9 +90,9 @@ async def handle_voice(message: Message, state: FSMContext):
             return
 
         need_exit = (
-            await is_time_limit_exceeded(message, state, user, current_time) or
+            await is_already_processing(message, state, current_time) or
             await is_messages_limit_exceeded(message, state, user, user_quota) or
-            await is_already_processing(message, state, current_time)
+            await is_time_limit_exceeded(message, state, user, current_time)
         )
         if need_exit:
             return
