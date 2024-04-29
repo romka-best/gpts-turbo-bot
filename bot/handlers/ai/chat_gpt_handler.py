@@ -120,7 +120,7 @@ async def handle_chat_gpt_choose_selection(callback_query: CallbackQuery, state:
     await state.clear()
 
 
-async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_quota: Quota, photo_filename=None):
+async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_quota: Quota, photo_filenames=None):
     if user_quota != Quota.CHAT_GPT3 and user_quota != Quota.CHAT_GPT4:
         raise NotImplemented
 
@@ -133,11 +133,13 @@ async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_q
     if text is None:
         if message.caption:
             text = message.caption
-        else:
+        elif message.text:
             text = message.text
+        else:
+            text = ""
 
-    if photo_filename and user_quota == Quota.CHAT_GPT4:
-        await write_message(user.current_chat_id, "user", user.id, text, True, photo_filename)
+    if photo_filenames and len(photo_filenames) and user_quota == Quota.CHAT_GPT4:
+        await write_message(user.current_chat_id, "user", user.id, text, True, photo_filenames)
     else:
         await write_message(user.current_chat_id, "user", user.id, text)
 
@@ -149,19 +151,19 @@ async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_q
         history = [
                       {
                           'role': 'system',
-                          'content': role.translated_instructions.get(user_language_code, 'en')
+                          'content': role.translated_instructions.get(user_language_code, 'en'),
                       }
                   ] + [
                       {
                           'role': message.sender,
-                          'content': message.content
+                          'content': message.content,
                       } for message in sorted_messages
                   ]
     else:
         history = [
             {
                 'role': 'system',
-                'content': role.translated_instructions.get(user_language_code, 'en')
+                'content': role.translated_instructions.get(user_language_code, 'en'),
             }
         ]
         for sorted_message in sorted_messages:
@@ -172,16 +174,17 @@ async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_q
                     'text': sorted_message.content,
                 })
 
-            if sorted_message.photo_filename:
-                photo_path = f'users/chatgpt4_vision/{user.id}/{sorted_message.photo_filename}'
-                photo = await firebase.bucket.get_blob(photo_path)
-                photo_link = firebase.get_public_url(photo.name)
-                content.append({
-                    'type': 'image_url',
-                    'image_url': {
-                        'url': photo_link,
-                    },
-                })
+            if sorted_message.photo_filenames:
+                for photo_filename in sorted_message.photo_filenames:
+                    photo_path = f'users/chatgpt4_vision/{user.id}/{photo_filename}'
+                    photo = await firebase.bucket.get_blob(photo_path)
+                    photo_link = firebase.get_public_url(photo.name)
+                    content.append({
+                        'type': 'image_url',
+                        'image_url': {
+                            'url': photo_link,
+                        },
+                    })
 
             history.append({
                 'role': sorted_message.sender,
@@ -250,11 +253,32 @@ async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_q
                     if user.settings[user.current_model][UserSettings.SHOW_USAGE_QUOTA] else ''
                 reply_markup = build_chat_gpt_continue_generating_keyboard(user_language_code)
                 try:
-                    await message.reply(
-                        f"{header_text}{message_content}{footer_text}",
-                        reply_markup=reply_markup if response['finish_reason'] == 'length' else None,
-                        parse_mode=ParseMode.MARKDOWN,
-                    )
+                    full_text = f"{header_text}{message_content}{footer_text}"
+                    if len(full_text) <= 4096:
+                        await message.reply(
+                            full_text,
+                            reply_markup=reply_markup if response['finish_reason'] == 'length' else None,
+                            parse_mode=ParseMode.MARKDOWN,
+                        )
+                    elif len(message_content) <= 4096:
+                        await message.reply(
+                            message_content,
+                            reply_markup=reply_markup if response['finish_reason'] == 'length' else None,
+                            parse_mode=ParseMode.MARKDOWN,
+                        )
+                    else:
+                        chunks = split_message(full_text)
+                        for i in range(len(chunks)):
+                            if i == 0:
+                                await message.reply(
+                                    chunks[i],
+                                    parse_mode=None,
+                                )
+                            else:
+                                await message.answer(
+                                    chunks[i],
+                                    parse_mode=None,
+                                )
                 except TelegramBadRequest as e:
                     if "can't parse entities" in str(e):
                         await message.reply(
@@ -338,7 +362,7 @@ async def handle_chatgpt4_example(user: User, user_language_code: str, prompt: s
             user.current_model == Model.CHAT_GPT and
             user.settings[user.current_model][UserSettings.VERSION] == GPTVersion.V3 and
             user.subscription_type == SubscriptionType.FREE and
-            user.monthly_limits[Quota.CHAT_GPT3] + 1 in [1, 50, 90, 100]
+            user.monthly_limits[Quota.CHAT_GPT3] + 1 in [1, 50, 80, 90, 100]
         ):
             response = await get_response_message(GPTVersion.V4, history)
             response_message = response['message']
@@ -368,10 +392,30 @@ async def handle_chatgpt4_example(user: User, user_language_code: str, prompt: s
             header_text = f'{get_localization(user_language_code).CHATGPT4_EXAMPLE_FIRST_PART}\n\n'
             footer_text = f'\n\n{get_localization(user_language_code).CHATGPT4_EXAMPLE_LAST_PART}'
             try:
-                await message.reply(
-                    f"{header_text}{message_content}{footer_text}",
-                    parse_mode=ParseMode.MARKDOWN,
-                )
+                full_text = f"{header_text}{message_content}{footer_text}"
+                if len(full_text) <= 4096:
+                    await message.reply(
+                        full_text,
+                        parse_mode=ParseMode.MARKDOWN,
+                    )
+                elif len(header_text) + len(message_content) <= 4096:
+                    await message.reply(
+                        f"{header_text}{message_content}",
+                        parse_mode=ParseMode.MARKDOWN,
+                    )
+                else:
+                    chunks = split_message(full_text)
+                    for i in range(len(chunks)):
+                        if i == 0:
+                            await message.reply(
+                                chunks[i],
+                                parse_mode=None,
+                            )
+                        else:
+                            await message.answer(
+                                chunks[i],
+                                parse_mode=None,
+                            )
             except TelegramBadRequest as e:
                 if "can't parse entities" in str(e):
                     await message.reply(
@@ -386,3 +430,7 @@ async def handle_chatgpt4_example(user: User, user_language_code: str, prompt: s
             message=f"#error\n\nALARM! Ошибка у пользователя при попытке отправить пример ChatGPT-4.0 в запросе в ChatGPT-3.5: {user.id}\nИнформация:\n{e}",
             parse_mode=None,
         )
+
+
+def split_message(message_content, chunk_size=4096):
+    return [message_content[i:i + chunk_size] for i in range(0, len(message_content), chunk_size)]

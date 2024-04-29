@@ -1,4 +1,6 @@
+import time
 import uuid
+from typing import List
 
 import aiohttp
 from aiogram import Router, F
@@ -29,11 +31,16 @@ from bot.integrations.replicateAI import create_face_swap_image
 from bot.keyboards.admin.catalog import build_manage_catalog_create_role_confirmation_keyboard
 from bot.keyboards.common.common import build_cancel_keyboard
 from bot.locales.main import get_localization, get_user_language
+from bot.middlewares.AlbumMiddleware import AlbumMiddleware
 from bot.states.catalog import Catalog
 from bot.states.face_swap import FaceSwap
 from bot.states.profile import Profile
+from bot.utils.is_already_processing import is_already_processing
+from bot.utils.is_messages_limit_exceeded import is_messages_limit_exceeded
+from bot.utils.is_time_limit_exceeded import is_time_limit_exceeded
 
 photo_router = Router()
+photo_router.message.middleware(AlbumMiddleware())
 
 
 async def handle_photo(message: Message, state: FSMContext, photo_file: File):
@@ -176,17 +183,29 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
         await handle_manage_face_swap(message, str(message.from_user.id), state)
     elif user.current_model == Model.CHAT_GPT:
         if user.settings[user.current_model][UserSettings.VERSION] == GPTVersion.V3:
-            await handle_chatgpt(message, state, user, Quota.CHAT_GPT3)
-        else:
-            photo_data_io = await message.bot.download_file(photo_file.file_path)
-            photo_data = photo_data_io.read()
+            await message.reply(
+                text=get_localization(user_language_code).CHATGPT_PHOTO_FEATURE_FORBIDDEN,
+            )
+            return
 
-            photo_vision_filename = f"{uuid.uuid4()}.jpeg"
-            photo_vision_path = f"users/chatgpt4_vision/{user_id}/{photo_vision_filename}"
-            photo_vision = firebase.bucket.new_blob(photo_vision_path)
-            await photo_vision.upload(photo_data)
+        current_time = time.time()
+        need_exit = (
+            await is_already_processing(message, state, current_time) or
+            await is_messages_limit_exceeded(message, state, user, Quota.CHAT_GPT4) or
+            await is_time_limit_exceeded(message, state, user, current_time)
+        )
+        if need_exit:
+            return
 
-            await handle_chatgpt(message, state, user, Quota.CHAT_GPT4, photo_vision_filename)
+        photo_data_io = await message.bot.download_file(photo_file.file_path)
+        photo_data = photo_data_io.read()
+
+        photo_vision_filename = f"{uuid.uuid4()}.jpeg"
+        photo_vision_path = f"users/chatgpt4_vision/{user_id}/{photo_vision_filename}"
+        photo_vision = firebase.bucket.new_blob(photo_vision_path)
+        await photo_vision.upload(photo_data)
+
+        await handle_chatgpt(message, state, user, Quota.CHAT_GPT4, [photo_vision_filename])
     elif user.current_model == Model.FACE_SWAP:
         quota = user.monthly_limits[Quota.FACE_SWAP] + user.additional_usage_quota[Quota.FACE_SWAP]
         quantity = 1
@@ -228,7 +247,7 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
                     ]
                     response = await get_response_message(GPTVersion.V4, history)
                     response_message = response['message']
-                    if response_message == "YES":
+                    if response_message.content == "YES":
                         result = await create_face_swap_image(background_photo_link, user_photo_link)
                         request = await write_request(
                             user_id=user_id,
@@ -279,7 +298,57 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
                     await state.set_state(Profile.waiting_for_photo)
 
 
+async def handle_album(message: Message, state: FSMContext, album: List[Message]):
+    user_id = str(message.from_user.id)
+    user = await get_user(user_id)
+    user_language_code = await get_user_language(user_id, state.storage)
+
+    if user.current_model == Model.CHAT_GPT:
+        if user.settings[user.current_model][UserSettings.VERSION] == GPTVersion.V3:
+            await message.reply(
+                text=get_localization(user_language_code).CHATGPT_PHOTO_FEATURE_FORBIDDEN,
+            )
+            return
+
+        current_time = time.time()
+        need_exit = (
+            await is_already_processing(message, state, current_time) or
+            await is_messages_limit_exceeded(message, state, user, Quota.CHAT_GPT4) or
+            await is_time_limit_exceeded(message, state, user, current_time)
+        )
+        if need_exit:
+            return
+
+        photo_vision_filenames = []
+        for file in album:
+            if file.photo:
+                photo_file = await message.bot.get_file(message.photo[-1].file_id)
+            elif file.document.mime_type.startswith('image') and file.document.thumbnail:
+                photo_file = await message.bot.get_file(file.document.file_id)
+            else:
+                continue
+
+            photo_data_io = await message.bot.download_file(photo_file.file_path)
+            photo_data = photo_data_io.read()
+
+            photo_vision_filename = f"{uuid.uuid4()}.jpeg"
+            photo_vision_path = f"users/chatgpt4_vision/{user_id}/{photo_vision_filename}"
+            photo_vision = firebase.bucket.new_blob(photo_vision_path)
+            await photo_vision.upload(photo_data)
+
+            photo_vision_filenames.append(photo_vision_filename)
+
+        await handle_chatgpt(message, state, user, Quota.CHAT_GPT4, photo_vision_filenames)
+    else:
+        await message.reply(
+            text=get_localization(user_language_code).ALBUM_FORBIDDEN_ERROR,
+        )
+
+
 @photo_router.message(F.photo)
-async def photo(message: Message, state: FSMContext):
-    photo_file = await message.bot.get_file(message.photo[-1].file_id)
-    await handle_photo(message, state, photo_file)
+async def photo(message: Message, state: FSMContext, album: List[Message]):
+    if len(album):
+        await handle_album(message, state, album)
+    else:
+        photo_file = await message.bot.get_file(message.photo[-1].file_id)
+        await handle_photo(message, state, photo_file)

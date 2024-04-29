@@ -19,7 +19,7 @@ async def get_message(message_id: str) -> Optional[Message]:
             sender_id=message_dict.get('sender_id'),
             content=message_dict.get('content'),
             is_in_context=message_dict.get('is_in_context'),
-            photo_filename=message_dict.get('photo_filename'),
+            photo_filenames=message_dict.get('photo_filenames'),
             created_at=message_dict.get('created_at'),
             edited_at=message_dict.get('edited_at'),
         )
@@ -36,7 +36,7 @@ async def get_messages() -> List[Message]:
             sender_id=message.to_dict().get('sender_id'),
             content=message.to_dict().get('content'),
             is_in_context=message.to_dict().get('is_in_context'),
-            photo_filename=message.to_dict().get('photo_filename'),
+            photo_filenames=message.to_dict().get('photo_filenames'),
             created_at=message.to_dict().get('created_at'),
             edited_at=message.to_dict().get('edited_at'),
         ) async for message in messages
@@ -59,7 +59,7 @@ async def get_messages_by_chat_id(chat_id: str, limit=10, is_in_context=True) ->
             sender_id=message.to_dict().get('sender_id'),
             content=message.to_dict().get('content'),
             is_in_context=message.to_dict().get('is_in_context'),
-            photo_filename=message.to_dict().get('photo_filename'),
+            photo_filenames=message.to_dict().get('photo_filenames'),
             created_at=message.to_dict().get('created_at'),
             edited_at=message.to_dict().get('edited_at'),
         )

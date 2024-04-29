@@ -286,6 +286,7 @@ Please check your text for any forbidden content and try again!
 
 Our goal is safety and respect for every user! 🌟
 """
+    ALBUM_FORBIDDEN_ERROR = "In the current AI model, I can't process multiple photos at once, please send one 🙂"
     ALREADY_MAKE_REQUEST = "You've already made a request. Please wait ⚠️"
     READY_FOR_NEW_REQUEST = "You can ask the next request 😌"
     CONTINUE_GENERATING = "Continue generating"
@@ -308,6 +309,13 @@ The adventure continues! 🚀✨
 ☝️ These are the images that <b>Midjourney</b> would draw for your request
 
 To start drawing using <b>Midjourney</b>, just type the command /midjourney 🎨
+"""
+
+    # ChatGPT
+    CHATGPT_PHOTO_FEATURE_FORBIDDEN = """
+⚠️ Sending photos is only available in version <b>ChatGPT-4.0</b> 🧠
+
+To switch to <b>ChatGPT-4.0</b>, enter the /chatgpt command and select <b>ChatGPT-4.0</b> 🧠
 """
 
     # Midjourney
