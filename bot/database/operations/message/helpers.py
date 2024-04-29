@@ -8,7 +8,7 @@ async def create_message_object(
     sender_id: str,
     content: str,
     is_in_context=True,
-    photo_filename=None,
+    photo_filenames=None,
 ) -> Message:
     message_ref = firebase.db.collection(Message.COLLECTION_NAME).document()
 
@@ -19,5 +19,5 @@ async def create_message_object(
         sender_id=sender_id,
         content=content,
         is_in_context=is_in_context,
-        photo_filename=photo_filename,
+        photo_filenames=photo_filenames,
     )

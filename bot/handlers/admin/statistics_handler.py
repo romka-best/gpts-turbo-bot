@@ -1,3 +1,4 @@
+import calendar
 from datetime import datetime, timezone, timedelta
 
 from aiogram import Router, F
@@ -73,7 +74,7 @@ async def handle_get_statistics(language_code: str, period: str):
         )
         period = start_date.strftime("%d.%m.%Y")
     elif period == "week":
-        start_date = (current_date - timedelta(days=current_date.weekday())).replace(
+        start_date = (current_date - timedelta(days=current_date.weekday() + 7)).replace(
             hour=0,
             minute=0,
             second=0,
@@ -87,15 +88,19 @@ async def handle_get_statistics(language_code: str, period: str):
         )
         period = f"{start_date.strftime('%d.%m.%Y')}-{end_date.strftime('%d.%m.%Y')}"
     elif period == "month":
-        start_date = current_date.replace(
+        first_day_of_last_month = current_date.replace(day=1) - timedelta(days=1)
+        start_date = first_day_of_last_month.replace(
             day=1,
             hour=0,
             minute=0,
             second=0,
             microsecond=0,
         )
-        end_date = start_date + timedelta(days=32)
-        end_date = (end_date - timedelta(days=end_date.day)).replace(
+
+        last_day_of_last_month = start_date + timedelta(
+            days=calendar.monthrange(start_date.year, start_date.month)[1] - 1,
+        )
+        end_date = last_day_of_last_month.replace(
             hour=23,
             minute=59,
             second=59,

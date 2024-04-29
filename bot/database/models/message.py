@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+from typing import List
 
 
 class Message:
@@ -10,7 +11,7 @@ class Message:
     sender_id: str
     content: str
     is_in_context: bool
-    photo_filename: str
+    photo_filenames: List[str]
     created_at: datetime
     edited_at: datetime
 
@@ -22,7 +23,7 @@ class Message:
         sender_id: str,
         content: str,
         is_in_context=True,
-        photo_filename=None,
+        photo_filenames=None,
         created_at=None,
         edited_at=None,
     ):
@@ -32,7 +33,7 @@ class Message:
         self.sender_id = str(sender_id)
         self.content = content
         self.is_in_context = is_in_context
-        self.photo_filename = photo_filename
+        self.photo_filenames = photo_filenames if photo_filenames else []
 
         current_time = datetime.now(timezone.utc)
         self.created_at = created_at if created_at is not None else current_time

@@ -243,6 +243,7 @@ class Texts(Protocol):
     SWITCHED_TO_MUSIC_GEN: str
     ALREADY_SWITCHED_TO_THIS_MODEL: str
     REQUEST_FORBIDDEN_ERROR: str
+    ALBUM_FORBIDDEN_ERROR: str
     ALREADY_MAKE_REQUEST: str
     READY_FOR_NEW_REQUEST: str
     CONTINUE_GENERATING: str
@@ -253,6 +254,9 @@ class Texts(Protocol):
     CHATGPT4_EXAMPLE_FIRST_PART: str
     CHATGPT4_EXAMPLE_LAST_PART: str
     MIDJOURNEY_EXAMPLE: str
+
+    # ChatGPT
+    CHATGPT_PHOTO_FEATURE_FORBIDDEN: str
 
     # Midjourney
     MIDJOURNEY_ALREADY_CHOSE_UPSCALE: str
@@ -590,9 +594,9 @@ class Texts(Protocol):
 2️⃣ <b>{'Активированные' if period == 'всё время' else 'Активные'}:</b> {count_activated_users}
 3️⃣ <b>Перешли по реферальной ссылке:</b> {count_referral_users}
 4️⃣ <b>Языки:</b>
-🇺🇸 - {count_english_users} ({round((count_english_users / count_all_users) * 100, 2)}%)
-🇷🇺 - {count_russian_users} ({round((count_russian_users / count_all_users) * 100, 2)}%)
-🌍 - {count_other_users} ({round((count_other_users / count_all_users) * 100, 2)}%)
+🇺🇸 - {count_english_users} ({round((count_english_users / count_all_users) * 100, 2) if count_all_users else 0}%)
+🇷🇺 - {count_russian_users} ({round((count_russian_users / count_all_users) * 100, 2) if count_all_users else 0}%)
+🌍 - {count_other_users} ({round((count_other_users / count_all_users) * 100, 2) if count_all_users else 0}%)
 5️⃣ <b>Оплатившие хоть раз:</b> {count_paid_users}
 6️⃣ <b>Подписчики:</b>
     - <b>{SubscriptionType.FREE}:</b> {count_subscription_users[SubscriptionType.FREE]}

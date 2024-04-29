@@ -76,7 +76,7 @@ async def handle_mode_selection(callback_query: CallbackQuery, state: FSMContext
         if chosen_model == Model.CHAT_GPT:
             user.settings[Model.CHAT_GPT][UserSettings.VERSION] = chosen_version
         await update_user(user_id, {
-            "current_model": chosen_model,
+            "current_model": user.current_model,
             "settings": user.settings,
         })
         await callback_query.message.edit_reply_markup(reply_markup=InlineKeyboardMarkup(inline_keyboard=new_keyboard))
