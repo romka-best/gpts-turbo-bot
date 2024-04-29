@@ -422,17 +422,6 @@ async def handle_chatgpt4_example(user: User, user_language_code: str, prompt: s
                         f"{header_text}{message_content}{footer_text}",
                         parse_mode=None,
                     )
-                elif "message is too long" in str(e):
-                    if len(message_content) < 4096:
-                        await message.reply(
-                            message_content,
-                            parse_mode=ParseMode.MARKDOWN,
-                        )
-                    else:
-                        await message.reply(
-                            message_content[:4096],
-                            parse_mode=ParseMode.MARKDOWN,
-                        )
                 else:
                     raise
     except Exception as e:

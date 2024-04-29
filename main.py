@@ -51,7 +51,6 @@ from bot.helpers.senders.send_admin_statistics import send_admin_statistics
 from bot.helpers.setters.set_commands import set_commands
 from bot.helpers.setters.set_description import set_description
 from bot.helpers.update_monthly_limits import update_monthly_limits
-from bot.utils.migrate import migrate
 
 WEBHOOK_BOT_PATH = f"/bot/{config.BOT_TOKEN.get_secret_value()}"
 WEBHOOK_REPLICATE_PATH = config.WEBHOOK_REPLICATE_PATH
@@ -110,8 +109,6 @@ async def lifespan(_: FastAPI):
     await set_description(bot)
     await set_commands(bot)
     await firebase.init()
-    await migrate(bot)
-    await send_admin_statistics(bot, 'week')
     yield
     await bot.session.close()
     await storage.close()
