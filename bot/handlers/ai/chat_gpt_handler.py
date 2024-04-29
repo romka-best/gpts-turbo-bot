@@ -274,6 +274,12 @@ async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_q
                                     chunks[i],
                                     parse_mode=None,
                                 )
+                            elif i == len(chunks) - 1:
+                                await message.reply(
+                                    chunks[i],
+                                    reply_markup=reply_markup if response['finish_reason'] == 'length' else None,
+                                    parse_mode=None,
+                                )
                             else:
                                 await message.answer(
                                     chunks[i],
