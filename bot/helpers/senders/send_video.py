@@ -18,6 +18,7 @@ async def send_video(
     reply_markup=None,
     reply_to_message_id=None,
 ):
+    is_okay = True
     try:
         await bot.send_video(
             chat_id=chat_id,
@@ -31,6 +32,7 @@ async def send_video(
         await update_user(chat_id, {
             "is_blocked": True,
         })
+        is_okay = False
     except Exception as e:
         logging.error(f'Error in send_video: {e}')
         await send_message_to_admins(
@@ -39,3 +41,6 @@ async def send_video(
                     f"Информация:\n{e}",
             parse_mode=None,
         )
+        is_okay = False
+
+    return is_okay

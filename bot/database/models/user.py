@@ -8,7 +8,8 @@ from bot.database.models.common import (
     DALLEResolution,
     DALLEQuality,
     DALLEVersion,
-    MidjourneyVersion, SunoSendType,
+    MidjourneyVersion,
+    SunoSendType,
 )
 from bot.database.models.subscription import SubscriptionType, SubscriptionLimit
 
