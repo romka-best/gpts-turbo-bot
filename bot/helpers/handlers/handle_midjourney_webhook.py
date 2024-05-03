@@ -35,10 +35,11 @@ async def handle_midjourney_webhook(bot: Bot, dp: Dispatcher, body: dict):
     generation_error = body.get("status_reason", False)
     generation_result = body.get("result", {})
     if generation_error or not generation_result:
+        generation.status = GenerationStatus.FINISHED
         generation.has_error = True
         generation.details["error"] = generation_error
         await update_generation(generation.id, {
-            "status": GenerationStatus.FINISHED,
+            "status": generation.status,
             "has_error": generation.has_error,
         })
         logging.error(f"Error in midjourney_webhook")
@@ -105,7 +106,7 @@ async def handle_midjourney_result(
                 )
             await send_message_to_admins(
                 bot=bot,
-                message=f"#error\n\nALARM! Ошибка у пользователя при запросе в MIDJOURNEY: {user.id}\nИнформация:\n{generation_error}",
+                message=f"#error\n\nALARM! Ошибка у пользователя при запросе в Midjourney: {user.id}\nИнформация:\n{generation_error}",
                 parse_mode=None,
             )
 

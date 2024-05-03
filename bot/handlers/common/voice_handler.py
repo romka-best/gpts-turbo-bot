@@ -20,6 +20,7 @@ from bot.handlers.ai.dalle_handler import handle_dall_e
 from bot.handlers.ai.face_swap_handler import handle_face_swap
 from bot.handlers.ai.midjourney_handler import handle_midjourney
 from bot.handlers.ai.music_gen_handler import handle_music_gen
+from bot.handlers.ai.suno_handler import handle_suno
 from bot.integrations.openAI import get_response_speech_to_text
 from bot.locales.main import get_localization, get_user_language
 from bot.utils.is_already_processing import is_already_processing
@@ -86,8 +87,10 @@ async def handle_voice(message: Message, state: FSMContext):
             user_quota = Quota.FACE_SWAP
         elif user.current_model == Model.MUSIC_GEN:
             user_quota = Quota.MUSIC_GEN
+        elif user.current_model == Model.SUNO:
+            user_quota = Quota.SUNO
         else:
-            return
+            raise NotImplemented
 
         need_exit = (
             await is_already_processing(message, state, current_time) or
@@ -112,6 +115,11 @@ async def handle_voice(message: Message, state: FSMContext):
             await handle_face_swap(message.bot, str(message.chat.id), state, user_id, text)
         elif user.current_model == Model.MUSIC_GEN:
             await handle_music_gen(message.bot, str(message.chat.id), state, user_id, text)
+        elif user.current_model == Model.SUNO:
+            await handle_suno(message.bot, str(message.chat.id), state, user.id)
+        else:
+            raise NotImplemented
+
         await state.update_data(recognized_text=None)
     else:
         await message.answer(text=get_localization(user_language_code).VOICE_MESSAGES_FORBIDDEN)

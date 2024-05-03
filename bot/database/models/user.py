@@ -9,6 +9,7 @@ from bot.database.models.common import (
     DALLEQuality,
     DALLEVersion,
     MidjourneyVersion,
+    SunoSendType,
 )
 from bot.database.models.subscription import SubscriptionType, SubscriptionLimit
 
@@ -22,6 +23,7 @@ class UserSettings:
     RESOLUTION = 'resolution'
     QUALITY = 'quality'
     VERSION = 'version'
+    SEND_TYPE = 'send_type'
 
 
 class UserGender:
@@ -64,6 +66,7 @@ class User:
         Quota.MIDJOURNEY: 0,
         Quota.FACE_SWAP: 0,
         Quota.MUSIC_GEN: 0,
+        Quota.SUNO: 0,
         Quota.FAST_MESSAGES: False,
         Quota.VOICE_MESSAGES: False,
         Quota.ACCESS_TO_CATALOG: False,
@@ -93,6 +96,10 @@ class User:
         },
         Model.MUSIC_GEN: {
             UserSettings.SHOW_USAGE_QUOTA: True,
+        },
+        Model.SUNO: {
+            UserSettings.SHOW_USAGE_QUOTA: True,
+            UserSettings.SEND_TYPE: SunoSendType.VIDEO,
         },
     }
 

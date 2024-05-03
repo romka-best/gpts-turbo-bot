@@ -2,7 +2,14 @@ from typing import Dict
 
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
-from bot.database.models.common import Model, DALLEResolution, DALLEQuality, MidjourneyVersion, DALLEVersion
+from bot.database.models.common import (
+    Model,
+    DALLEVersion,
+    DALLEResolution,
+    DALLEQuality,
+    MidjourneyVersion,
+    SunoSendType,
+)
 from bot.database.models.user import UserSettings
 from bot.locales.main import get_localization
 
@@ -37,6 +44,12 @@ def build_settings_choose_model_keyboard(language_code: str) -> InlineKeyboardMa
             InlineKeyboardButton(
                 text=get_localization(language_code).MUSIC_GEN,
                 callback_data=f'settings_choose_model:{Model.MUSIC_GEN}'
+            ),
+        ],
+        [
+            InlineKeyboardButton(
+                text=get_localization(language_code).SUNO,
+                callback_data=f'settings_choose_model:{Model.SUNO}'
             ),
         ],
         [
@@ -184,6 +197,28 @@ def build_settings_keyboard(language_code: str, model: Model, settings: Dict) ->
                     text=get_localization(language_code).SHOW_USAGE_QUOTA_IN_MESSAGES + (
                         " ✅" if settings[model][UserSettings.SHOW_USAGE_QUOTA] else " ❌"),
                     callback_data=f'setting:{UserSettings.SHOW_USAGE_QUOTA}:{Model.MUSIC_GEN}'
+                ),
+            ],
+        ]
+    elif model == Model.SUNO:
+        buttons = [
+            [
+                InlineKeyboardButton(
+                    text=get_localization(language_code).SHOW_USAGE_QUOTA_IN_MESSAGES + (
+                        " ✅" if settings[model][UserSettings.SHOW_USAGE_QUOTA] else " ❌"),
+                    callback_data=f'setting:{UserSettings.SHOW_USAGE_QUOTA}:{Model.SUNO}'
+                ),
+            ],
+            [
+                InlineKeyboardButton(
+                    text=get_localization(language_code).AUDIO + (
+                        " ✅" if settings[model][UserSettings.SEND_TYPE] == SunoSendType.AUDIO else ""),
+                    callback_data=f'setting:{SunoSendType.AUDIO}:{Model.SUNO}'
+                ),
+                InlineKeyboardButton(
+                    text=get_localization(language_code).VIDEO + (
+                        " ✅" if settings[model][UserSettings.SEND_TYPE] == SunoSendType.VIDEO else ""),
+                    callback_data=f'setting:{SunoSendType.VIDEO}:{Model.SUNO}'
                 ),
             ],
         ]

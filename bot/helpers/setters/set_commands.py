@@ -60,6 +60,10 @@ commands_en = [
         description="🎵 Switch to MusicGen model",
     ),
     BotCommand(
+        command="suno",
+        description="🎸 Switch to Suno model",
+    ),
+    BotCommand(
         command="bonus",
         description="🎁 Invite friends to get bonus",
     ),
@@ -125,6 +129,10 @@ commands_ru = [
     BotCommand(
         command="music_gen",
         description="🎵 Переключиться на MusicGen модель",
+    ),
+    BotCommand(
+        command="suno",
+        description="🎸 Переключиться на Suno модель",
     ),
     BotCommand(
         command="bonus",

@@ -31,9 +31,15 @@ def build_mode_keyboard(language_code: str, model: Model, model_version: str) ->
                 text=get_localization(language_code).FACE_SWAP + (" ✅" if model == Model.FACE_SWAP else ""),
                 callback_data=f'mode:{Model.FACE_SWAP}'
             ),
+        ],
+        [
             InlineKeyboardButton(
                 text=get_localization(language_code).MUSIC_GEN + (" ✅" if model == Model.MUSIC_GEN else ""),
                 callback_data=f'mode:{Model.MUSIC_GEN}'
+            ),
+            InlineKeyboardButton(
+                text=get_localization(language_code).SUNO + (" ✅" if model == Model.SUNO else ""),
+                callback_data=f'mode:{Model.SUNO}'
             ),
         ],
         [

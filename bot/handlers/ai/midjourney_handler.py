@@ -5,11 +5,15 @@ from aiogram.types import Message, CallbackQuery
 from aiogram.utils.chat_action import ChatActionSender
 
 from bot.database.models.common import Model, Quota, MidjourneyAction, MidjourneyVersion
+from bot.database.models.generation import GenerationStatus
+from bot.database.models.request import RequestStatus
 from bot.database.models.subscription import SubscriptionType
 from bot.database.models.user import User, UserSettings
-from bot.database.operations.generation.getters import get_generation
+from bot.database.operations.generation.getters import get_generation, get_generations_by_request_id
+from bot.database.operations.generation.updaters import update_generation
 from bot.database.operations.generation.writers import write_generation
 from bot.database.operations.request.getters import get_started_requests_by_user_id_and_model
+from bot.database.operations.request.updaters import update_request
 from bot.database.operations.request.writers import write_request
 from bot.database.operations.user.getters import get_user
 from bot.database.operations.user.updaters import update_user
@@ -76,33 +80,33 @@ async def handle_midjourney(
     processing_message = await message.reply(text=get_localization(user_language_code).processing_request_image())
 
     async with ChatActionSender.upload_photo(bot=message.bot, chat_id=message.chat.id):
-        try:
-            quota = user.monthly_limits[Quota.MIDJOURNEY] + user.additional_usage_quota[Quota.MIDJOURNEY]
-            if quota < 1:
-                await message.reply(get_localization(user_language_code).REACHED_USAGE_LIMIT)
-            else:
-                user_not_finished_requests = await get_started_requests_by_user_id_and_model(user.id, Model.MIDJOURNEY)
+        quota = user.monthly_limits[Quota.MIDJOURNEY] + user.additional_usage_quota[Quota.MIDJOURNEY]
+        if quota < 1:
+            await message.reply(get_localization(user_language_code).REACHED_USAGE_LIMIT)
+        else:
+            user_not_finished_requests = await get_started_requests_by_user_id_and_model(user.id, Model.MIDJOURNEY)
 
-                if len(user_not_finished_requests):
-                    await message.reply(
-                        text=get_localization(user_language_code).ALREADY_MAKE_REQUEST,
-                    )
-                    await processing_message.delete()
-                    return
-
-                request = await write_request(
-                    user_id=user.id,
-                    message_id=processing_message.message_id,
-                    model=Model.MIDJOURNEY,
-                    requested=1,
-                    details={
-                        "prompt": prompt,
-                        "action": action,
-                        "version": version,
-                        "is_suggestion": False,
-                    }
+            if len(user_not_finished_requests):
+                await message.reply(
+                    text=get_localization(user_language_code).ALREADY_MAKE_REQUEST,
                 )
+                await processing_message.delete()
+                return
 
+            request = await write_request(
+                user_id=user.id,
+                message_id=processing_message.message_id,
+                model=Model.MIDJOURNEY,
+                requested=1,
+                details={
+                    "prompt": prompt,
+                    "action": action,
+                    "version": version,
+                    "is_suggestion": False,
+                }
+            )
+
+            try:
                 if user_language_code != 'en':
                     prompt = await translate_text(prompt, user_language_code, 'en')
                 prompt += f" --v {version}"
@@ -127,16 +131,33 @@ async def handle_midjourney(
                         "is_suggestion": False,
                     }
                 )
-        except Exception as e:
-            await message.answer(
-                text=get_localization(user_language_code).ERROR,
-                parse_mode=None,
-            )
-            await send_message_to_admins(
-                bot=message.bot,
-                message=f"#error\n\nALARM! Ошибка у пользователя при запросе в MIDJOURNEY: {user.id}\nИнформация:\n{e}",
-                parse_mode=None,
-            )
+            except Exception as e:
+                await message.answer(
+                    text=get_localization(user_language_code).ERROR,
+                    parse_mode=None,
+                )
+                await send_message_to_admins(
+                    bot=message.bot,
+                    message=f"#error\n\nALARM! Ошибка у пользователя при запросе в Midjourney: {user.id}\nИнформация:\n{e}",
+                    parse_mode=None,
+                )
+
+                request.status = RequestStatus.FINISHED
+                await update_request(request.id, {
+                    "status": request.status
+                })
+
+                generations = await get_generations_by_request_id(request.id)
+                for generation in generations:
+                    generation.status = GenerationStatus.FINISHED
+                    generation.has_error = True
+                    await update_generation(
+                        generation.id,
+                        {
+                            "status": generation.status,
+                            "has_error": generation.has_error,
+                        },
+                    )
 
 
 @midjourney_router.callback_query(lambda c: c.data.startswith('midjourney:'))
@@ -187,24 +208,24 @@ async def handle_midjourney_selection(callback_query: CallbackQuery, state: FSMC
 
 
 async def handle_midjourney_example(user: User, user_language_code: str, prompt: str, message: Message):
-    try:
-        if (
-            user.subscription_type == SubscriptionType.FREE and
-            user.monthly_limits[Quota.DALL_E] + 1 in [1, 5]
-        ):
-            request = await write_request(
-                user_id=user.id,
-                message_id=message.message_id,
-                model=Model.MIDJOURNEY,
-                requested=1,
-                details={
-                    "prompt": prompt,
-                    "action": MidjourneyAction.UPSCALE,
-                    "version": MidjourneyVersion.V6,
-                    "is_suggestion": True,
-                }
-            )
+    if (
+        user.subscription_type == SubscriptionType.FREE and
+        user.monthly_limits[Quota.DALL_E] + 1 in [1, 5]
+    ):
+        request = await write_request(
+            user_id=user.id,
+            message_id=message.message_id,
+            model=Model.MIDJOURNEY,
+            requested=1,
+            details={
+                "prompt": prompt,
+                "action": MidjourneyAction.UPSCALE,
+                "version": MidjourneyVersion.V6,
+                "is_suggestion": True,
+            }
+        )
 
+        try:
             if user_language_code != 'en':
                 prompt = await translate_text(prompt, user_language_code, 'en')
             prompt += f" --v {MidjourneyVersion.V6}"
@@ -222,9 +243,26 @@ async def handle_midjourney_example(user: User, user_language_code: str, prompt:
                     "is_suggestion": True,
                 }
             )
-    except Exception as e:
-        await send_message_to_admins(
-            bot=message.bot,
-            message=f"#error\n\nALARM! Ошибка у пользователя при попытке отправить пример Midjourney в запросе в DALLE: {user.id}\nИнформация:\n{e}",
-            parse_mode=None,
-        )
+        except Exception as e:
+            await send_message_to_admins(
+                bot=message.bot,
+                message=f"#error\n\nALARM! Ошибка у пользователя при попытке отправить пример Midjourney в запросе DALL-E: {user.id}\nИнформация:\n{e}",
+                parse_mode=None,
+            )
+
+            request.status = RequestStatus.FINISHED
+            await update_request(request.id, {
+                "status": request.status
+            })
+
+            generations = await get_generations_by_request_id(request.id)
+            for generation in generations:
+                generation.status = GenerationStatus.FINISHED
+                generation.has_error = True
+                await update_generation(
+                    generation.id,
+                    {
+                        "status": generation.status,
+                        "has_error": generation.has_error,
+                    },
+                )

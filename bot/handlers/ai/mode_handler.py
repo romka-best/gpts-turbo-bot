@@ -8,6 +8,7 @@ from bot.database.models.user import UserSettings
 from bot.database.operations.user.getters import get_user
 from bot.database.operations.user.updaters import update_user
 from bot.handlers.ai.face_swap_handler import handle_face_swap
+from bot.handlers.ai.suno_handler import handle_suno
 from bot.keyboards.common.common import build_recommendations_keyboard
 from bot.keyboards.ai.mode import build_mode_keyboard
 from bot.locales.main import get_localization, get_user_language
@@ -93,6 +94,13 @@ async def handle_mode_selection(callback_query: CallbackQuery, state: FSMContext
 
     if chosen_model == Model.FACE_SWAP:
         await handle_face_swap(
+            callback_query.bot,
+            str(callback_query.message.chat.id),
+            state,
+            str(callback_query.from_user.id),
+        )
+    elif chosen_model == Model.SUNO:
+        await handle_suno(
             callback_query.bot,
             str(callback_query.message.chat.id),
             state,

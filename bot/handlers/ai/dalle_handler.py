@@ -129,7 +129,7 @@ async def handle_dall_e(message: Message, state: FSMContext, user: User):
             )
             await send_message_to_admins(
                 bot=message.bot,
-                message=f"#error\n\nALARM! Ошибка у пользователя при запросе в DALLE: {user.id}\nИнформация:\n{e}",
+                message=f"#error\n\nALARM! Ошибка у пользователя при запросе в DALL-E: {user.id}\nИнформация:\n{e}",
                 parse_mode=None,
             )
         finally:

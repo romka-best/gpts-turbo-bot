@@ -14,6 +14,7 @@ class PackageType:
     MIDJOURNEY = "MIDJOURNEY"
     FACE_SWAP = "FACE_SWAP"
     MUSIC_GEN = "MUSIC_GEN"
+    SUNO = "SUNO"
     CHAT = "CHAT"
     ACCESS_TO_CATALOG = "ACCESS_TO_CATALOG"
     VOICE_MESSAGES = "VOICE_MESSAGES"
@@ -102,6 +103,7 @@ class Package:
             PackageType.MIDJOURNEY: '',
             PackageType.FACE_SWAP: '',
             PackageType.MUSIC_GEN: '',
+            PackageType.SUNO: '',
             PackageType.ACCESS_TO_CATALOG: '',
             PackageType.VOICE_MESSAGES: '',
             PackageType.FAST_MESSAGES: '',
@@ -112,9 +114,10 @@ class Package:
             prices[PackageType.CHAT_GPT4] = '5₽'
             prices[PackageType.CHAT] = '50₽'
             prices[PackageType.DALL_E] = '5₽'
-            prices[PackageType.MIDJOURNEY] = '5₽'
+            prices[PackageType.MIDJOURNEY] = '10₽'
             prices[PackageType.FACE_SWAP] = '5₽'
             prices[PackageType.MUSIC_GEN] = '1₽'
+            prices[PackageType.SUNO] = '5₽'
             prices[PackageType.ACCESS_TO_CATALOG] = '50₽'
             prices[PackageType.VOICE_MESSAGES] = '50₽'
             prices[PackageType.FAST_MESSAGES] = '50₽'
@@ -123,9 +126,10 @@ class Package:
             prices[PackageType.CHAT_GPT4] = '0.05€'
             prices[PackageType.CHAT] = '0.5€'
             prices[PackageType.DALL_E] = '0.05€'
-            prices[PackageType.MIDJOURNEY] = '0.05€'
+            prices[PackageType.MIDJOURNEY] = '0.1€'
             prices[PackageType.FACE_SWAP] = '0.05€'
             prices[PackageType.MUSIC_GEN] = '0.01€'
+            prices[PackageType.SUNO] = '0.05€'
             prices[PackageType.ACCESS_TO_CATALOG] = '0.5€'
             prices[PackageType.VOICE_MESSAGES] = '0.5€'
             prices[PackageType.FAST_MESSAGES] = '0.5€'
@@ -134,9 +138,10 @@ class Package:
             prices[PackageType.CHAT_GPT4] = '$0.05'
             prices[PackageType.CHAT] = '$0.5'
             prices[PackageType.DALL_E] = '$0.05'
-            prices[PackageType.MIDJOURNEY] = '$0.05'
+            prices[PackageType.MIDJOURNEY] = '$0.1'
             prices[PackageType.FACE_SWAP] = '$0.05'
             prices[PackageType.MUSIC_GEN] = '$0.01'
+            prices[PackageType.SUNO] = '$0.05'
             prices[PackageType.ACCESS_TO_CATALOG] = '$0.5'
             prices[PackageType.VOICE_MESSAGES] = '$0.5'
             prices[PackageType.FAST_MESSAGES] = '$0.5'
@@ -174,6 +179,9 @@ class Package:
         elif package_type == PackageType.MUSIC_GEN:
             name = localization.MUSIC_GEN_REQUESTS
             description = localization.MUSIC_GEN_REQUESTS_DESCRIPTION
+        elif package_type == PackageType.SUNO:
+            name = localization.SUNO_REQUESTS
+            description = localization.SUNO_REQUESTS_DESCRIPTION
         elif package_type == PackageType.CHAT:
             name = localization.THEMATIC_CHATS
             description = localization.THEMATIC_CHATS_DESCRIPTION
@@ -221,6 +229,9 @@ class Package:
         elif package_type == PackageType.MUSIC_GEN:
             additional_usage_quota[Quota.MUSIC_GEN] += quantity
             service_type = ServiceType.MUSIC_GEN
+        elif package_type == PackageType.SUNO:
+            additional_usage_quota[Quota.SUNO] += quantity
+            service_type = ServiceType.SUNO
         elif package_type == PackageType.CHAT:
             additional_usage_quota[Quota.ADDITIONAL_CHATS] += quantity
             service_type = ServiceType.ADDITIONAL_CHATS

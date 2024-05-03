@@ -10,7 +10,7 @@ from bot.database.models.user import UserGender
 
 class English(Texts):
     START = """
-🤖 <b>Welcome to the future of artificial intelligence with ChatGPTsTurboBot!</b> 🎉
+🤖 <b>Welcome to the future of artificial intelligence with ChatGPTs Turbo AI Bot!</b> 🎉
 
 I'm your personal gateway to the world of artificial intelligence and neural networks. Discover the capabilities of AI:
 ✉️ Communicate with <b>ChatGPT-3.5</b>: ask questions, get answers
@@ -19,6 +19,7 @@ I'm your personal gateway to the world of artificial intelligence and neural net
 🎨 Create unique images with <b>Midjourney</b>
 😜 Try <b>FaceSwap</b> to exchange faces with someone in a photo
 🎵 Compose original melodies with <b>MusicGen</b>
+🎸 Record your own songs with <b>Suno</b>
 
 Here's a quick guide to get started:
 ✉️ To receive a text response from <b>ChatGPT-3.5</b>, simply enter your query in the chat
@@ -27,6 +28,7 @@ Here's a quick guide to get started:
 🎨 To create an image with <b>Midjourney</b>, enter the command /midjourney, and then start creating using your imagination with your request
 😜 To swap faces with someone in a photo with <b>FaceSwap</b>, enter the command /face_swap, then choose images from our unique packages or send your own
 🎵 To create a melody with <b>MusicGen</b>, enter the command /music_gen, and then write a description of the melody
+🎸 To create a song with <b>Suno</b>, enter the command /suno, and then write a description of the song or send your own lyrics
 🔄 To switch between different neural networks, enter the command /mode, and then select the neural network depending on your creative needs
 📊 To check usage information and subscription/purchase details, enter the command /profile
 🔍 To learn more about the capabilities of each AI model, enter the command /info
@@ -52,13 +54,17 @@ I'm here to be your co-pilot on this adventure! 🚀
 🎨 /midjourney - <b>Create with DALL-E 3</b>: Bring your imaginations to life with images.
 😜 /face_swap - <b>Have fun with FaceSwap</b>: Change faces in photos.
 🎵 /music_gen - <b>Melodies with MusicGen</b>: Create music without copyrights.
+🎸 /suno - <b>Songs with Suno</b>: Create your own song with your lyrics and different genres.
 🎁 /bonus - Learn about your bonus balance, invite friends, and <b>exchange bonuses for unique generation packages</b>.
 🔑 /promo_code - <b>Unleash exclusive AI features</b> and special offers with your <b>promo code</b>.
 📡 /feedback - <b>Leave feedback</b>: Help me improve.
 
-Just type away or use a command to begin your AI journey! 🌟
+Just type away a command to begin your AI journey! 🌟
 """
     INFO = """
+🤖 <b>Select the model you want to get information about:</b>
+"""
+    INFO_CHATGPT = """
 🤖 <b>There is what each model can do for you:</b>
 
 ✉️ <b>ChatGPT-3.5: The Versatile Communicator</b>
@@ -75,6 +81,9 @@ Just type away or use a command to begin your AI journey! 🌟
 - <i>Language Expert</i>: Translate complex texts or practice conversational skills in various languages.
 - <i>Creative Consultant</i>: Develop plot ideas for your posts, script dialogues, or explore artistic concepts.
 - <i>Personalized Recommendations</i>: Get book, movie, or travel recommendations based on your interests.
+"""
+    INFO_DALL_E = """
+🤖 <b>There is what the model can do for you:</b>
 
 🖼 <b>DALL-E: The Creative Genius</b>
 - <i>Art on Demand</i>: Generate unique art from descriptions – perfect for illustrators or those seeking inspiration.
@@ -82,6 +91,9 @@ Just type away or use a command to begin your AI journey! 🌟
 - <i>Educational Tool</i>: Visualize complex concepts for better understanding in education.
 - <i>Interior Design</i>: Get ideas for room layouts or decoration themes.
 - <i>Fashion Design</i>: Create clothing designs or fashion illustrations.
+"""
+    INFO_MIDJOURNEY = """
+🤖 <b>There is what the model can do for you:</b>
 
 🎨 <b>Midjourney: Navigator of Creativity</b>
 - <i>Art Design</i>: Creating visual masterpieces and abstractions, ideal for artists and designers in search of a unique style.
@@ -89,6 +101,9 @@ Just type away or use a command to begin your AI journey! 🌟
 - <i>Educational assistant</i>: Illustrations for educational materials that improve the perception and understanding of complex topics.
 - <i>Interior design</i>: Visualization of interior solutions, from classics to modern trends.
 - <i>Fashion and style</i>: The development of fashionable bows and accessories, experiments with colors and shapes.
+"""
+    INFO_FACE_SWAP = """
+🤖 <b>There is what the model can do for you:</b>
 
 🤡 <b>FaceSwap: The Entertainment Master</b>
 - <i>Fun Reimaginations</i>: See how you'd look in different historical eras or as various movie characters.
@@ -96,6 +111,9 @@ Just type away or use a command to begin your AI journey! 🌟
 - <i>Memes and Content Creation</i>: Spice up your social media with funny or imaginative face-swapped pictures.
 - <i>Digital Makeovers</i>: Experiment with new haircuts or makeup styles.
 - <i>Celebrity Mashups</i>: Combine your face with celebrities for fun comparisons.
+"""
+    INFO_MUSIC_GEN = """
+🤖 <b>There is what the model can do for you:</b>
 
 🎶 <b>MusicGen: Your Personal Composer</b>
 <i>Creating Unique Melodies</i>: Turn your ideas into musical pieces of any genre - from classical to pop.
@@ -104,17 +122,28 @@ Just type away or use a command to begin your AI journey! 🌟
 <i>Learning and Inspiration</i>: Gain new insights into music theory and the history of genres through music creation.
 <i>Instant Melody Creation</i>: Just enter a text description or mood, and MusicGen will instantly turn it into music.
 """
+    INFO_SUNO = """
+🤖 <b>There is what the model can do for you:</b>
+
+🎸 <b>Suno: A Pro in Creating Songs</b>
+<i>Text-to-song transformation</i>: Suno turns your text into songs, matching melody and rhythm to your style.
+<i>Personalized songs</i>: Create unique songs for special moments, whether it's a personal gift or a soundtrack for your event.
+<i>Explore musical genres</i>: Discover new musical horizons by experimenting with different styles and sounds.
+<i>Music education and inspiration</i>: Learn about music theory and the history of genres through the practice of composition.
+<i>Instant music creation</i>: Describe your emotions or scenario, and Suno will immediately bring your description to life as a song.
+"""
 
     # Feedback
     FEEDBACK = """
 🌟 <b>Your opinion matters!</b> 🌟
 
-Hey there! We're always looking to improve and your feedback is like gold dust to us. 💬✨
+Hey there! We're always looking to improve and your feedback is like gold dust to us 💬✨
+
 - Love something about our bot? Let us know!
 - Got a feature request? We're all ears!
 - Something bugging you? We're here to squash those bugs 🐞
-Just type your thoughts and hit send. It's that simple! Your insights help us grow and get better every day.
 
+Just type your thoughts and hit send. Your insights help us grow and get better every day.
 And remember, every piece of feedback is a step towards making our bot even more awesome. Can't wait to hear from you! 💌
 """
     FEEDBACK_SUCCESS = """
@@ -122,7 +151,8 @@ And remember, every piece of feedback is a step towards making our bot even more
 
 Thank you for sharing your thoughts! 💌
 Your input is the secret sauce to our success. We're cooking up some improvements and your feedback is the key ingredient 🍳🔑
-Keep an eye out for updates and new features, all inspired by you. Until then, happy chatting! 🚀
+
+Keep an eye out for updates and new features, all inspired by you. We have credited 50 credits to your balance, but in the meantime, happy chatting! 🚀
 
 Your opinion matters a lot to us! 💖
 """
@@ -134,7 +164,7 @@ Your opinion matters a lot to us! 💖
     MALE = "Male 👕"
     FEMALE = "Female 👚"
     SEND_ME_YOUR_PICTURE = """
-📸 <b>Ready for a photo transformation? Here's how to get started!</b>
+📸 <b>Ready for a photo transformation? Send a photo of yours!</b>
 
 👍 <b>Ideal photo guidelines</b>:
 - Clear, high-quality selfie.
@@ -151,7 +181,7 @@ Your opinion matters a lot to us! 💖
 - Videos and animations.
 - Compressed or altered images.
 
-Once you've got the perfect shot, upload your photo and let the magic happen 🌟
+Once you've got the perfect shot, <b>upload your photo</b> and let the magic happen 🌟
     """
     UPLOAD_PHOTO = "Upload photo 📷"
     UPLOADING_PHOTO = "Uploading photo..."
@@ -201,7 +231,7 @@ Looks like you're already part of our exclusive subscriber's club! 🌟
 🕒 <b>Whoops, time's up on this promo code!</b>
 
 Looks like this promo code has hit its expiration date 📆. It's like a Cinderella story, but without the glass slipper 🥿
-But hey, don't lose heart! You can still explore our other magical offers with /buy. There's always something exciting waiting for you in our AI wonderland! 🎩✨
+But hey, don't lose heart! You can still explore our other magical offers with /buy or /bonus. There's always something exciting waiting for you in our AI wonderland! 🎩✨
 
 Stay curious and let the AI adventure continue! 🌟🚀
 """
@@ -217,7 +247,7 @@ Keep your spirits high, and let's keep the AI fun rolling! 🚀🎈
 🚫 <b>Oops, déjà vu!</b>
 
 Looks like you've already used this promo code. It's a one-time magic spell, and it seems you've already cast it! ✨🧙
-No worries, though! You can check out our latest offers with /buy. There's always a new trick up our AI sleeve! 🎉🔮
+No worries, though! You can check out our latest offers with /buy or /bonus. There's always a new trick up our AI sleeve! 🎉🔮
 
 Keep exploring and let the AI surprises continue! 🤖
 """
@@ -271,6 +301,13 @@ You've switched to the <b>MusicGen</b> model — a marvelous world where music i
 
 Let every note tell your story! 🎶
 """
+    SWITCHED_TO_SUNO = """
+🎸 <b>Welcome to the world of Suno!</b>
+
+You've switched to the <b>Suno</b> model — your personal music producer. Here, you can turn your textual descriptions into full-fledged songs. Write a lyrics, specify your desired style, and <b>Suno</b> will craft a unique song for you. From soft ballads to dynamic hits, Suno has the ability to bring your musical vision to life.
+
+It's time to express your emotions through music! 🎶
+"""
     ALREADY_SWITCHED_TO_THIS_MODEL = """
 🔄 <b>Oops, looks like everything stayed the same!</b>
 
@@ -296,6 +333,7 @@ Our goal is safety and respect for every user! 🌟
 Your quota for the current model has just done a Houdini and disappeared! 🎩
 But don't worry, you've got options:
 - Check out /buy for more magical moments, or
+- Invite your friends using /bonus command to get some bonuses, or
 - Switch up the fun with a different AI model using /mode
 
 The adventure continues! 🚀✨
@@ -310,6 +348,11 @@ The adventure continues! 🚀✨
 
 To start drawing using <b>Midjourney</b>, just type the command /midjourney 🎨
 """
+    SUNO_EXAMPLE = """
+☝️ This is the song that <b>Suno</b> would create for your request
+
+To start creating songs using <b>Suno</b>, just type the command /suno 🎸
+"""
 
     # ChatGPT
     CHATGPT_PHOTO_FEATURE_FORBIDDEN = """
@@ -320,6 +363,38 @@ To switch to <b>ChatGPT-4.0</b>, enter the /chatgpt command and select <b>ChatGP
 
     # Midjourney
     MIDJOURNEY_ALREADY_CHOSE_UPSCALE = "You've already chosen this image, try a new one 🙂"
+
+    # Suno
+    SUNO_INFO = """
+🤖 Choose the style for creating your song:
+
+🎹 In <b>simple mode</b>, you only need to describe the theme of the song and the genre.
+🎸 In <b>custom mode</b>, you have the opportunity to use your own lyrics and experiment with genres.
+"""
+    SUNO_SIMPLE_MODE = "🎹 Simple"
+    SUNO_CUSTOM_MODE = "🎸 Custom"
+    SUNO_SIMPLE_MODE_PROMPT = """
+🎶 <b>Song Description</b>
+
+To create your song in simple mode, please describe the theme of the song and the musical genre you desire. This will help the system better understand your expectations and create something truly unique for you.
+
+📝 Write your prompt below and let's start the creative process!
+"""
+    SUNO_CUSTOM_MODE_LYRICS = """
+🎤 <b>Song Lyrics</b>
+
+To create your song in custom mode, you need to provide the lyrics that will be used in the music. This is a crucial element that will give your composition a unique character and a special mood.
+
+✍️ Send the lyrics of your future song right now, and let's create a musical masterpiece together!
+"""
+    SUNO_CUSTOM_MODE_GENRES = """
+🎵 <b>Genre Selection</b>
+
+To ensure your song in custom mode matches your preferences, please specify the genres you'd like to incorporate. The choice of genre significantly influences the style and mood of the composition, so choose carefully.
+
+🔍 List the desired genres separated by commas in your next message, and let's start creating your unique song!
+"""
+    SUNO_TRY_LATER = "I have a heavy load on the server right now 🫨\n\nPlease, try later!"
 
     # MusicGen
     MUSIC_GEN_INFO = """
@@ -367,7 +442,7 @@ Here you are the artist, and settings are your palette. Choose the model you wan
     VOICE_MESSAGES_FORBIDDEN = """
 🎙 <b>Oops! Seems like your voice went into the AI void!</b>
 
-To unlock the magic of voice-to-text, simply wave your wand with /buy.
+To unlock the magic of voice-to-text, simply wave your wand with /buy or /bonus
 
 Let's turn those voice messages into text and keep the conversation flowing! 🌟🔮
 """
@@ -391,6 +466,7 @@ Choose by clicking a button below 👇
     MONTH_1 = "1 month"
     MONTHS_3 = "3 months"
     MONTHS_6 = "6 months"
+    MONTHS_12 = "12 months"
     DISCOUNT = "💸 Discount"
     NO_DISCOUNT = "No discount"
     SUBSCRIPTION = "💳 Subscription"
@@ -418,7 +494,7 @@ Keep unleashing the power of AI and remember, we're here to make your digital dr
 
 Hey there, AI enthusiast! 🌟
 Your subscription has come to an end. But don't worry, the AI journey isn't over yet! 🚀
-You can renew your magic pass with /buy to keep exploring the AI universe or, if you prefer, take a peek for some tailor-made individual packages 🎁
+You can renew your magic pass with /buy or /bonus to keep exploring the AI universe or, if you prefer, take a peek for some tailor-made individual packages 🎁
 
 The AI adventure awaits! Recharge, regroup, and let's continue this exciting journey together. 🤖✨
 """
@@ -427,7 +503,7 @@ The AI adventure awaits! Recharge, regroup, and let's continue this exciting jou
 
 Oops, it looks like your fast messages (or voice messages, catalog access) package has run its course. But don't worry, new opportunities always await beyond the horizon!
 
-🎁 Want to continue? Check out our offers or consider a subscription via /buy. More exciting moments are ahead!
+🎁 Want to continue? Check out our offers or consider a subscription via /buy or /bonus. More exciting moments are ahead!
 
 🚀 Ready for a fresh start? Rejoin and dive back into the world of amazing AI possibilities!
 """
@@ -469,6 +545,8 @@ Your chats have switched their unique roles to "Personal Assistant" as your acce
     FACE_SWAP_REQUESTS_DESCRIPTION = "Enter the playful world of FaceSwap for laughs and surprises in every image! 😂🔄"
     MUSIC_GEN_REQUESTS = "🎵 Seconds of generation of melodies"
     MUSIC_GEN_REQUESTS_DESCRIPTION = "Discover a world where every prompt turns into a unique melody! 🎶✨"
+    SUNO_REQUESTS = "🎸 Suno songs"
+    SUNO_REQUESTS_DESCRIPTION = "Discover a world where every text you write is transformed into a unique song! 🎸✨"
     ACCESS_TO_CATALOG = "🎭 Access to a roles catalog"
     ACCESS_TO_CATALOG_DESCRIPTION = "Unlock a universe of specialized AI assistants with access to our exclusive catalog, where every role is tailored to fit your unique needs and tasks"
     ANSWERS_AND_REQUESTS_WITH_VOICE_MESSAGES = "🎙 Answers and requests with voice messages"
@@ -523,7 +601,7 @@ Once you're all set up, our catalog of AI wonders will be waiting for you – yo
 
 Looks like you've hit the limit for creating new chats. But don't worry, the world of endless chats is just a click away! 🌍✨
 
-Head over to /buy to unlock the power of multiple chats. More chats, more fun! 🎉
+Head over to /buy or /bonus to unlock the power of multiple chats. More chats, more fun! 🎉
 """
     CREATE_CHAT_SUCCESS = "💬 Chat created! 🎉\n👌 Don't forget to switch to a new one using /chats"
     TYPE_CHAT_NAME = "Type your chat name"
@@ -533,14 +611,14 @@ Head over to /buy to unlock the power of multiple chats. More chats, more fun! �
 
 You're currently in your one and only chat universe. It's a cozy place, but why not expand your horizons? 🌌
 
-To hop between multiple thematic chats, just get your pass from /buy. Let the chat-hopping begin! 🐇
+To hop between multiple thematic chats, just get your pass from /buy or /bonus. Let the chat-hopping begin! 🐇
 """
     SWITCH_CHAT_SUCCESS = "Chat successfully switched! 🎉"
     RESET_CHAT = "Reset chat ♻️"
     RESET_CHAT_WARNING = """
 🧹 <b>Chat cleanup incoming!</b> 🚨
 
-You're about to erase all messages and clear the context of this chat. This action is irreversible, and all your conversations will vanish into virtual dust. Are you sure you want to proceed?
+You're about to erase all messages and clear the context of this chat. This action is irreversible, and all your messages will vanish into virtual dust. Are you sure you want to proceed?
 
 ✅ <b>Approve</b> - Yes, let's start with a clean slate.
 ❌ <b>Cancel</b> - No, I still have more to say!
@@ -556,7 +634,7 @@ Now, like a goldfish, I don't remember what was said before 🐠
 
 This is your sole chat kingdom, and a kingdom needs its king or queen! Deleting it would be like canceling your own party. 🎈
 
-How about adding more chats to your realm instead? Check out /buy to build your chat empire! 👑
+How about adding more chats to your realm instead? Check out /buy or /bonus to build your chat empire! 👑
 """
     DELETE_CHAT_SUCCESS = "🗑️ Chat successfully deleted! 🎉"
 
@@ -564,9 +642,9 @@ How about adding more chats to your realm instead? Check out /buy to build your 
     CHOOSE_YOUR_PACKAGE = """
 🌟<b>Let's get creative with your photos!</b>
 
-<b>First step:</b> Choose your adventure! 🚀
+Ready? Let's dive into a world of imagination! 🚀
 
-Ready? Let's dive into a world of imagination! 🌈 Just <b>select a package below</b> and start your photo adventure 👇
+🌈 Send me a photo in which I will replace the face with yours from /profile or just <b>select a package below</b> and start your photo adventure 👇
     """
     GENERATIONS_IN_PACKAGES_ENDED = """
 🎨 <b>Wow, you've used up all your generations in our packages! Your creativity is astounding!</b> 🌟
@@ -601,6 +679,9 @@ Please try again or contact @roman_danilov 🔧
     CLOSE = "Close 🚪"
     CANCEL = "Cancel ❌"
     APPROVE = "Approve ✅"
+    AUDIO = "Audio 🔈"
+    VIDEO = "Video 📹"
+    SKIP = "Skip ⏩️"
 
     @staticmethod
     def profile(
@@ -634,6 +715,8 @@ Please try again or contact @roman_danilov 🔧
             current_model = English.FACE_SWAP
         elif current_model == Model.MUSIC_GEN:
             current_model = English.MUSIC_GEN
+        elif current_model == Model.SUNO:
+            current_model = English.SUNO
 
         return f"""
 <b>Profile</b> 👤
@@ -670,6 +753,10 @@ Additional images: {additional_usage_quota[Quota.FACE_SWAP]}
 Seconds for creating melodies for month: {monthly_limits[Quota.MUSIC_GEN]}/{SubscriptionLimit.LIMITS[subscription_type][Quota.MUSIC_GEN]}
 Additional seconds for creating melodies: {additional_usage_quota[Quota.MUSIC_GEN]}
 
+🎸 <b>Suno</b>
+Songs for month: {monthly_limits[Quota.SUNO]}/{SubscriptionLimit.LIMITS[subscription_type][Quota.SUNO]}
+Additional songs: {additional_usage_quota[Quota.SUNO]}
+
 💬 <b>Thematic chats in ChatGPT</b>
 Additional chats: {additional_usage_quota[Quota.ADDITIONAL_CHATS]}
 
@@ -684,7 +771,7 @@ Fast answers: {'Yes' if additional_usage_quota[Quota.FAST_MESSAGES] else 'No'}
 
 🎁 Invite friends and get bonus: /bonus
 💎 Subscribe or purchase individual packages: /buy
-{f'💸 Discount for the next subscription: {discount}%' if discount > 0 else ''}
+{f'💸 Discount when buying a subscription: {discount}%' if discount > 0 else ''}
 """
 
     @staticmethod
@@ -694,11 +781,11 @@ Fast answers: {'Yes' if additional_usage_quota[Quota.FAST_MESSAGES] else 'No'}
         return f"""
 🤖 Ready to supercharge your digital journey? Here's what's on the menu:
 
-- <b>STANDARD</b> ⭐: For just {prices[SubscriptionType.STANDARD]}, step into the AI playground!
+- <b>STANDARD</b> ⭐: {prices[SubscriptionType.STANDARD]}
 
-- <b>VIP</b> 🔥: Got grander ambitions? {prices[SubscriptionType.VIP]} unlocks deeper dialogues, more complex image creation, and access to a wider array of digital personas!
+- <b>VIP</b> 🔥: {prices[SubscriptionType.VIP]}
 
-- <b>PLATINUM</b> 💎: For the connoisseurs, {prices[SubscriptionType.PLATINUM]} grants you the keys to the AI kingdom!
+- <b>PLATINUM</b> 💎: {prices[SubscriptionType.PLATINUM]}
 
 P.S. We're in the process of integrating more currency options directly in our bot, but you can visit our payment page and pay in different currencies just right here: https://app.lava.top/en/gptsturbobot
 
@@ -721,6 +808,7 @@ Please select the subscription period by clicking on the button:
             SubscriptionPeriod.MONTH1: English.MONTH_1,
             SubscriptionPeriod.MONTHS3: English.MONTHS_3,
             SubscriptionPeriod.MONTHS6: English.MONTHS_6,
+            SubscriptionPeriod.MONTHS12: English.MONTHS_12,
         }
 
     @staticmethod
@@ -731,9 +819,18 @@ Please select the subscription period by clicking on the button:
 
     # Package
     @staticmethod
-    def package():
-        return """
+    def package(currency: Currency):
+        if currency == Currency.USD:
+            balance = f"{Currency.SYMBOLS[currency]}0.01"
+        elif currency == Currency.EUR:
+            balance = f"0.01{Currency.SYMBOLS[currency]}"
+        else:
+            balance = f"1{Currency.SYMBOLS[currency]}"
+
+        return f"""
 🤖 <b>Welcome to the AI shopping spree!</b> 📦
+
+🪙 <b>1 credit = {balance}</b>
 
 Each button tap unlocks a world of AI wonders:
 🧠 <b>ChatGPT</b>: Engage in deep, thought-provoking conversations!
@@ -746,6 +843,8 @@ Each button tap unlocks a world of AI wonders:
 
 🎵 <b>Harmony with MusicGen</b>: Create unique melodies that will belong only to you!
 
+🎸 <b>Creative with Suno</b>: Create original songs with your own lyrics in different genres!
+
 🗣️ <b>Voice Messages</b>: Say it out loud! Chatting with AI has never sounded better
 
 💬 <b>Thematic Chats</b>: Dive into specialized topics and explore dedicated chat realms
@@ -754,7 +853,7 @@ Each button tap unlocks a world of AI wonders:
 
 ⚡ <b>Quick Messages</b>: Fast, efficient, and always on point. AI communication at lightning speed
 
-Hit a button and embark on an extraordinary journey with AI! It's time to redefine what's possible 🌌️
+Hit a button and choose a package:
 """
 
     @staticmethod
@@ -782,6 +881,9 @@ Hit a button and embark on an extraordinary journey with AI! It's time to redefi
         elif package_type == PackageType.MUSIC_GEN:
             name = English.MUSIC_GEN_REQUESTS
             quantity = "seconds"
+        elif package_type == PackageType.SUNO:
+            name = English.SUNO_REQUESTS
+            quantity = "songs"
         elif package_type == PackageType.ACCESS_TO_CATALOG:
             name = English.ACCESS_TO_CATALOG
             quantity = "months"
@@ -860,7 +962,7 @@ Ready to tailor your chat experience? Explore the options below and let the conv
 
 You've got a treasure trove of <b>{total_images} images</b> in your pack, ready to unleash your creativity! 🌟
 
-🌠 <b>Your available generations</b>: {available_images} images. Need more? Explore /buy!
+🌠 <b>Your available generations</b>: {available_images} images. Need more? Explore /buy or /bonus!
 🔍 <b>Used so far</b>: {used_images} images. {'Wow, you are on a roll!' if used_images > 0 else ''}
 🚀 <b>Remaining</b>: {remain_images} images. {'Looks like you have used them all' if remain_images == 0 else 'So much potential'}!
 
@@ -903,6 +1005,8 @@ Looks like you've got only <b>{available_seconds} seconds</b> left in your arsen
             return English.SWITCHED_TO_FACE_SWAP
         elif model == Model.MUSIC_GEN:
             return English.SWITCHED_TO_MUSIC_GEN
+        elif model == Model.SUNO:
+            return English.SWITCHED_TO_SUNO
 
     @staticmethod
     def chatgpt_recommendations() -> List[str]:
@@ -979,7 +1083,7 @@ Looks like you've got only <b>{available_seconds} seconds</b> left in your arsen
         return texts
 
     @staticmethod
-    def music_gen_recommendations() -> List[str]:
+    def music_recommendations() -> List[str]:
         texts = [
             "A pop track with infectious melodies, tropical percussion, and cheerful rhythms, perfect for the beach 🏖",
             "A magnificent orchestral arrangement with powerful beats, epic brass fanfares, creating a cinematic atmosphere worthy of a heroic battle 🎻",
@@ -1092,7 +1196,7 @@ Looks like you've got only <b>{available_seconds} seconds</b> left in your arsen
         return text
 
     @staticmethod
-    def processing_request_music_gen():
+    def processing_request_music():
         texts = [
             "Launching the music generator, hold onto your ears... 🎶👂",
             "Mixing notes like a DJ at a party... 🎧🕺",
@@ -1133,19 +1237,14 @@ Looks like you've got only <b>{available_seconds} seconds</b> left in your arsen
 
     # Bonus
     @staticmethod
-    def bonus(user_id: str, referred_count: int, balance: float, currency: Currency) -> str:
-        if currency == Currency.USD:
-            balance = f"{Currency.SYMBOLS[currency]}{balance}"
-        else:
-            balance = f"{balance}{Currency.SYMBOLS[currency]}"
-
+    def bonus(user_id: str, referred_count: int, balance: float) -> str:
         return f"""
 🎁 <b>Your bonus balance</b>
 
 👤 You've invited: {referred_count}
 💰 Current balance: {balance}
 
-💸 For each invited user, you get 50₽ to your bonus balance
+💸 For each invited user, you get 50 credits 🪙 to your bonus balance
 🌟 Your personal referral link for invitations:
 https://t.me/GPTsTurboBot?start={user_id}
 
@@ -1153,16 +1252,11 @@ Choose how to spend your earnings:
 """
 
     @staticmethod
-    def referral_successful(added_to_balance: float, currency: Currency) -> str:
-        if currency == Currency.USD:
-            added_to_balance = f"{Currency.SYMBOLS[currency]}{added_to_balance}"
-        else:
-            added_to_balance = f"{added_to_balance}{Currency.SYMBOLS[currency]}"
-
+    def referral_successful(added_to_balance: float) -> str:
         return f"""
 🌟 <b>Congratulations! Your referral magic worked!</b> 🌟
 
-Thanks to you, a new user has joined us, and as a token of our appreciation, your balance has been increased by {added_to_balance}! Use them to access exclusive features or to add more generations in the neural networks. 💸
+Thanks to you, a new user has joined us, and as a token of our appreciation, your balance has been increased by {added_to_balance} 🪙! Use them to access exclusive features or to add more generations in the neural networks. 💸
 
 To use the bonus, enter the /bonus command and follow the instructions. Let every invitation bring you not only the joy of communication but also pleasant bonuses!
 """

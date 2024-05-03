@@ -3,8 +3,10 @@ import uuid
 from typing import List
 
 from aiogram import Bot
+from aiogram.exceptions import TelegramForbiddenError
 from aiogram.types import InputMediaPhoto, URLInputFile
 
+from bot.database.operations.user.updaters import update_user
 from bot.helpers.senders.send_message_to_admins import send_message_to_admins
 
 
@@ -17,6 +19,10 @@ async def send_image(bot: Bot, chat_id: str, image: str, reply_markup=None, capt
             caption=caption,
             reply_to_message_id=reply_to_message_id,
         )
+    except TelegramForbiddenError:
+        await update_user(chat_id, {
+            "is_blocked": True,
+        })
     except Exception as e:
         logging.error(f'Error in send_image: {e}')
         await send_message_to_admins(
@@ -33,6 +39,10 @@ async def send_images(bot: Bot, chat_id: str, images: List[str]):
         try:
             media_group = [InputMediaPhoto(media=img) for img in sliced_images]
             await bot.send_media_group(chat_id=chat_id, media=media_group)
+        except TelegramForbiddenError:
+            await update_user(chat_id, {
+                "is_blocked": True,
+            })
         except Exception as e:
             logging.error(f'Error in send_images: {e}')
             for j in range(len(sliced_images)):

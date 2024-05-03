@@ -13,7 +13,15 @@ from aiogram.types import (
 )
 
 from bot.database.main import firebase
-from bot.database.models.common import Quota, DALLEResolution, DALLEQuality, Model, MidjourneyVersion, DALLEVersion
+from bot.database.models.common import (
+    Quota,
+    DALLEVersion,
+    DALLEResolution,
+    DALLEQuality,
+    Model,
+    MidjourneyVersion,
+    SunoSendType,
+)
 from bot.database.models.user import UserSettings
 from bot.database.operations.chat.deleters import delete_chat, reset_chat
 from bot.database.operations.chat.getters import get_chat_by_user_id, get_chats_by_user_id
@@ -73,10 +81,14 @@ async def handle_settings_choose_model_selection(callback_query: CallbackQuery, 
             user.settings[Model.DALL_E][UserSettings.RESOLUTION],
         )
         human_model = get_localization(user_language_code).DALL_E
+    elif chosen_model == Model.MIDJOURNEY:
+        human_model = get_localization(user_language_code).MIDJOURNEY
     elif chosen_model == Model.FACE_SWAP:
         human_model = get_localization(user_language_code).FACE_SWAP
     elif chosen_model == Model.MUSIC_GEN:
         human_model = get_localization(user_language_code).MUSIC_GEN
+    elif chosen_model == Model.SUNO:
+        human_model = get_localization(user_language_code).SUNO
     else:
         human_model = chosen_model
 
@@ -115,9 +127,6 @@ async def handle_setting_selection(callback_query: CallbackQuery, state: FSMCont
     elif chosen_setting == 'manage_catalog':
         await handle_catalog(callback_query.message, user_id, state)
         return
-    elif chosen_setting == MidjourneyVersion.V5 or chosen_setting == MidjourneyVersion.V6:
-        user.settings[Model.MIDJOURNEY][UserSettings.VERSION] = chosen_setting
-        what_changed = UserSettings.VERSION
     elif chosen_setting == DALLEResolution.LOW or chosen_setting == DALLEResolution.MEDIUM or chosen_setting == DALLEResolution.HIGH:
         user.settings[Model.DALL_E][UserSettings.RESOLUTION] = chosen_setting
         what_changed = UserSettings.RESOLUTION
@@ -127,6 +136,12 @@ async def handle_setting_selection(callback_query: CallbackQuery, state: FSMCont
     elif chosen_setting == DALLEVersion.V2 or chosen_setting == DALLEVersion.V3:
         user.settings[Model.DALL_E][UserSettings.VERSION] = chosen_setting
         what_changed = UserSettings.VERSION
+    elif chosen_setting == MidjourneyVersion.V5 or chosen_setting == MidjourneyVersion.V6:
+        user.settings[Model.MIDJOURNEY][UserSettings.VERSION] = chosen_setting
+        what_changed = UserSettings.VERSION
+    elif chosen_setting == SunoSendType.AUDIO or chosen_setting == SunoSendType.VIDEO:
+        user.settings[Model.SUNO][UserSettings.SEND_TYPE] = chosen_setting
+        what_changed = UserSettings.SEND_TYPE
     else:
         user.settings[chosen_model][chosen_setting] = not user.settings[chosen_model][chosen_setting]
         what_changed = chosen_setting
@@ -163,6 +178,12 @@ async def handle_setting_selection(callback_query: CallbackQuery, state: FSMCont
                     keyboard_changed = True
                 elif callback_data == DALLEResolution.LOW or callback_data == DALLEResolution.MEDIUM or callback_data == DALLEResolution.HIGH:
                     text = text.replace(" ✅", "")
+            elif what_changed == UserSettings.SEND_TYPE:
+                if callback_data == chosen_setting and "✅" not in text:
+                    text += " ✅"
+                    keyboard_changed = True
+                elif callback_data == SunoSendType.AUDIO or callback_data == SunoSendType.VIDEO:
+                    text = text.replace(" ✅", "")
             elif (
                 chosen_setting == callback_data and
                 callback_data != DALLEQuality.STANDARD and callback_data != DALLEQuality.HD and
@@ -193,12 +214,17 @@ async def handle_setting_selection(callback_query: CallbackQuery, state: FSMCont
                 user.settings[Model.DALL_E][UserSettings.RESOLUTION],
             )
             human_model = get_localization(user_language_code).DALL_E
+        elif chosen_model == Model.MIDJOURNEY:
+            human_model = get_localization(user_language_code).MIDJOURNEY
         elif chosen_model == Model.FACE_SWAP:
             human_model = get_localization(user_language_code).FACE_SWAP
         elif chosen_model == Model.MUSIC_GEN:
             human_model = get_localization(user_language_code).MUSIC_GEN
+        elif chosen_model == Model.SUNO:
+            human_model = get_localization(user_language_code).SUNO
         else:
             human_model = chosen_model
+
         await callback_query.message.edit_text(
             text=get_localization(user_language_code).settings(human_model, chosen_model, dall_e_cost),
             reply_markup=InlineKeyboardMarkup(inline_keyboard=new_keyboard),

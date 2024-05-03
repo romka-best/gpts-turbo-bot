@@ -30,6 +30,7 @@ from bot.handlers.ai.face_swap_handler import face_swap_router
 from bot.handlers.ai.midjourney_handler import midjourney_router
 from bot.handlers.ai.mode_handler import mode_router
 from bot.handlers.ai.music_gen_handler import music_gen_router
+from bot.handlers.ai.suno_handler import suno_router
 from bot.handlers.common.common_handler import common_router
 from bot.handlers.common.document_handler import document_router
 from bot.handlers.common.feedback_handler import feedback_router
@@ -100,6 +101,7 @@ async def lifespan(_: FastAPI):
         face_swap_router,
         admin_face_swap_router,
         music_gen_router,
+        suno_router,
         document_router,
         photo_router,
         voice_router,

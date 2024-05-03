@@ -31,4 +31,7 @@ async def check_unresolved_requests(bot: Bot):
     await asyncio.gather(*tasks)
 
     if len(tasks):
-        await send_message_to_admins(bot, "⚠️ Внимание!\n\nЯ нашёл генерации, которым больше 30 минут ❗️")
+        await send_message_to_admins(
+            bot,
+            f"⚠️ <b>Внимание!</b>\n\nЯ нашёл генерации, которым больше 30 минут ❗️\n\nКоличество: {len(tasks)}",
+        )
