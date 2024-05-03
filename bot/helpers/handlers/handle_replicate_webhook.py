@@ -35,18 +35,19 @@ async def handle_replicate_webhook(bot: Bot, dp: Dispatcher, prediction: dict):
 
     generation_error, generation_result = prediction.get("error", False), prediction.get("output", {})
     seconds = prediction.get("metrics", {}).get("predict_time")
+
+    generation.status = GenerationStatus.FINISHED
+    generation.seconds = seconds
     if generation_error or not generation_result:
         generation.has_error = True
         await update_generation(generation.id, {
-            "status": GenerationStatus.FINISHED,
+            "status": generation.status,
             "has_error": generation.has_error,
-            "seconds": seconds,
+            "seconds": generation.seconds,
         })
         logging.error(f"Error in replicate_webhook: {prediction.get('logs')}")
     else:
-        generation.status = GenerationStatus.FINISHED
         generation.result = generation_result
-        generation.seconds = seconds
         await update_generation(generation.id, {
             "status": generation.status,
             "result": generation.result,
@@ -71,8 +72,9 @@ async def handle_replicate_face_swap(
     request: Request,
     generation: Generation,
 ):
-    reply_markup = build_reaction_keyboard(generation.id)
-    await send_image(bot, user.telegram_chat_id, generation.result, reply_markup)
+    if generation.result:
+        reply_markup = build_reaction_keyboard(generation.id)
+        await send_image(bot, user.telegram_chat_id, generation.result, reply_markup)
 
     current_count = await dp.storage.redis.incr(request.id)
     if current_count == request.requested and request.status != RequestStatus.FINISHED:
@@ -179,19 +181,20 @@ async def handle_replicate_music_gen(
     prompt = generation.details.get('prompt')
     duration = int(generation.details.get('duration'))
 
-    reply_markup = build_reaction_keyboard(generation.id)
-    caption = f"🎵 {(user.monthly_limits[Quota.MUSIC_GEN] + user.additional_usage_quota[Quota.MUSIC_GEN]) - duration}" \
-        if user.settings[Model.MUSIC_GEN][UserSettings.SHOW_USAGE_QUOTA] \
-        else "🎵"
-    await send_audio(
-        bot,
-        user.telegram_chat_id,
-        generation.result,
-        caption,
-        prompt,
-        duration,
-        reply_markup,
-    )
+    if generation.result:
+        reply_markup = build_reaction_keyboard(generation.id)
+        caption = f"🎵 {(user.monthly_limits[Quota.MUSIC_GEN] + user.additional_usage_quota[Quota.MUSIC_GEN]) - duration}" \
+            if user.settings[Model.MUSIC_GEN][UserSettings.SHOW_USAGE_QUOTA] \
+            else "🎵"
+        await send_audio(
+            bot,
+            user.telegram_chat_id,
+            generation.result,
+            caption,
+            prompt,
+            duration,
+            reply_markup,
+        )
 
     if request.status != RequestStatus.FINISHED:
         request.status = RequestStatus.FINISHED
@@ -199,7 +202,7 @@ async def handle_replicate_music_gen(
             "status": request.status
         })
 
-        quantity_to_delete = duration
+        quantity_to_delete = duration if generation.result and duration else 0
         quantity_deleted = 0
         while quantity_deleted != quantity_to_delete:
             if user.monthly_limits[Quota.MUSIC_GEN] != 0:

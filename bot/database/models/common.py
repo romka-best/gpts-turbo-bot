@@ -6,7 +6,7 @@ class Currency:
     SYMBOLS = {
         RUB: '₽',
         USD: '$',
-        EUR: '€'
+        EUR: '€',
     }
 
 
@@ -16,6 +16,7 @@ class Model:
     MIDJOURNEY = 'midjourney'
     FACE_SWAP = 'face-swap'
     MUSIC_GEN = 'music-gen'
+    SUNO = 'suno'
 
 
 class Quota:
@@ -25,6 +26,7 @@ class Quota:
     MIDJOURNEY = "midjourney"
     FACE_SWAP = "face_swap"
     MUSIC_GEN = "music_gen"
+    SUNO = "suno"
     ADDITIONAL_CHATS = "additional_chats"
     FAST_MESSAGES = "fast_messages"
     VOICE_MESSAGES = "voice_messages"
@@ -58,10 +60,21 @@ class MidjourneyVersion:
 
 
 class MidjourneyAction:
+    PAYMENT = "payment"
     IMAGINE = "imagine"
     UPSCALE = "upscale"
     VARIATION = "variation"
     REROLL = "reroll"
+
+
+class SunoMode:
+    SIMPLE = "SIMPLE"
+    CUSTOM = "CUSTOM"
+
+
+class SunoSendType:
+    VIDEO = "VIDEO"
+    AUDIO = "AUDIO"
 
 
 class PaymentType:

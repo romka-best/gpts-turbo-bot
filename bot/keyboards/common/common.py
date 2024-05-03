@@ -47,8 +47,8 @@ async def build_recommendations_keyboard(
                     )
                 ],
             )
-    elif current_model == Model.MUSIC_GEN:
-        recommendations = get_localization(language_code).music_gen_recommendations()
+    elif current_model == Model.MUSIC_GEN or current_model == Model.SUNO:
+        recommendations = get_localization(language_code).music_recommendations()
         random.shuffle(recommendations)
         for recommendation in recommendations[:4]:
             buttons.append([

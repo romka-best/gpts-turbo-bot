@@ -30,6 +30,7 @@ from bot.handlers.ai.face_swap_handler import face_swap_router
 from bot.handlers.ai.midjourney_handler import midjourney_router
 from bot.handlers.ai.mode_handler import mode_router
 from bot.handlers.ai.music_gen_handler import music_gen_router
+from bot.handlers.ai.suno_handler import suno_router
 from bot.handlers.common.common_handler import common_router
 from bot.handlers.common.document_handler import document_router
 from bot.handlers.common.feedback_handler import feedback_router
@@ -51,6 +52,7 @@ from bot.helpers.senders.send_admin_statistics import send_admin_statistics
 from bot.helpers.setters.set_commands import set_commands
 from bot.helpers.setters.set_description import set_description
 from bot.helpers.update_monthly_limits import update_monthly_limits
+from bot.utils.migrate import migrate
 
 WEBHOOK_BOT_PATH = f"/bot/{config.BOT_TOKEN.get_secret_value()}"
 WEBHOOK_REPLICATE_PATH = config.WEBHOOK_REPLICATE_PATH
@@ -100,6 +102,7 @@ async def lifespan(_: FastAPI):
         face_swap_router,
         admin_face_swap_router,
         music_gen_router,
+        suno_router,
         document_router,
         photo_router,
         voice_router,
@@ -109,6 +112,7 @@ async def lifespan(_: FastAPI):
     await set_description(bot)
     await set_commands(bot)
     await firebase.init()
+    await migrate(bot)
     yield
     await bot.session.close()
     await storage.close()

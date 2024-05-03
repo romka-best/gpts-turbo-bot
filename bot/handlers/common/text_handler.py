@@ -12,6 +12,7 @@ from bot.handlers.ai.dalle_handler import handle_dall_e
 from bot.handlers.ai.face_swap_handler import handle_face_swap
 from bot.handlers.ai.midjourney_handler import handle_midjourney
 from bot.handlers.ai.music_gen_handler import handle_music_gen
+from bot.handlers.ai.suno_handler import handle_suno
 from bot.utils.is_already_processing import is_already_processing
 from bot.utils.is_messages_limit_exceeded import is_messages_limit_exceeded
 from bot.utils.is_time_limit_exceeded import is_time_limit_exceeded
@@ -38,8 +39,11 @@ async def handle_text(message: Message, state: FSMContext):
         user_quota = Quota.FACE_SWAP
     elif user.current_model == Model.MUSIC_GEN:
         user_quota = Quota.MUSIC_GEN
+    elif user.current_model == Model.SUNO:
+        user_quota = Quota.SUNO
     else:
         raise NotImplemented
+
     need_exit = (
         await is_already_processing(message, state, current_time) or
         await is_messages_limit_exceeded(message, state, user, user_quota) or
@@ -59,3 +63,7 @@ async def handle_text(message: Message, state: FSMContext):
         await handle_face_swap(message.bot, str(message.chat.id), state, user.id, message.text)
     elif user.current_model == Model.MUSIC_GEN:
         await handle_music_gen(message.bot, str(message.chat.id), state, user.id, message.text)
+    elif user.current_model == Model.SUNO:
+        await handle_suno(message.bot, str(message.chat.id), state, user.id)
+    else:
+        raise NotImplemented

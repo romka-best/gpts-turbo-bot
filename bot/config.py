@@ -30,6 +30,7 @@ class Settings(BaseSettings):
     OPENAI_API_KEY: SecretStr
     REPLICATE_API_TOKEN: SecretStr
     MIDJOURNEY_API_TOKEN: SecretStr
+    SUNO_TOKEN: SecretStr
 
     model_config = SettingsConfigDict(env_file=str(BASE_DIR / f'.env.{os.getenv("ENVIRONMENT", "testing")}'),
                                       env_file_encoding='utf-8')

@@ -3,7 +3,10 @@ from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
 
+from bot.database.operations.feedback.getters import get_feedbacks_by_user_id
 from bot.database.operations.feedback.writers import write_feedback
+from bot.database.operations.user.getters import get_user
+from bot.database.operations.user.updaters import update_user
 from bot.helpers.senders.send_message_to_admins import send_message_to_admins
 
 from bot.keyboards.common.common import build_cancel_keyboard
@@ -32,6 +35,15 @@ async def feedback(message: Message, state: FSMContext):
 async def feedback_sent(message: Message, state: FSMContext):
     user_id = str(message.from_user.id)
     user_language_code = await get_user_language(user_id, state.storage)
+
+    users_feedbacks = await get_feedbacks_by_user_id(user_id)
+    if len(users_feedbacks) == 0:
+        user = await get_user(user_id)
+        user.balance += 50.00
+
+        await update_user(user_id, {
+            "balance": user.balance,
+        })
 
     await write_feedback(user_id, message.text)
 

@@ -6,7 +6,7 @@ from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
 
-from bot.database.models.common import Model, MidjourneyAction
+from bot.database.models.common import Model, MidjourneyAction, SunoMode
 from bot.database.models.generation import GenerationReaction
 from bot.database.models.subscription import SubscriptionType
 from bot.database.models.transaction import TransactionType, ServiceType
@@ -149,6 +149,7 @@ async def handle_get_statistics(language_code: str, period: str):
         ServiceType.MIDJOURNEY: 0,
         ServiceType.FACE_SWAP: 0,
         ServiceType.MUSIC_GEN: 0,
+        ServiceType.SUNO: 0,
         ServiceType.ADDITIONAL_CHATS: 0,
         ServiceType.ACCESS_TO_CATALOG: 0,
         ServiceType.VOICE_MESSAGES: 0,
@@ -164,6 +165,7 @@ async def handle_get_statistics(language_code: str, period: str):
         ServiceType.MIDJOURNEY: 0,
         ServiceType.FACE_SWAP: 0,
         ServiceType.MUSIC_GEN: [0, 0],
+        ServiceType.SUNO: 0,
         ServiceType.VOICE_MESSAGES: 0,
         ServiceType.SERVER: 0,
         ServiceType.DATABASE: 0,
@@ -179,6 +181,7 @@ async def handle_get_statistics(language_code: str, period: str):
         ServiceType.MIDJOURNEY: 0,
         ServiceType.FACE_SWAP: 0,
         ServiceType.MUSIC_GEN: 0,
+        ServiceType.SUNO: 0,
         ServiceType.ADDITIONAL_CHATS: 0,
         ServiceType.ACCESS_TO_CATALOG: 0,
         ServiceType.VOICE_MESSAGES: 0,
@@ -194,6 +197,7 @@ async def handle_get_statistics(language_code: str, period: str):
         ServiceType.MIDJOURNEY: 0,
         ServiceType.FACE_SWAP: 0,
         ServiceType.MUSIC_GEN: 0,
+        ServiceType.SUNO: 0,
         ServiceType.VOICE_MESSAGES: 0,
         ServiceType.SERVER: 0,
         ServiceType.DATABASE: 0,
@@ -213,6 +217,11 @@ async def handle_get_statistics(language_code: str, period: str):
         'CUSTOM': 0,
         'ALL': 0,
     }
+    count_suno_usage = {
+        SunoMode.SIMPLE: 0,
+        SunoMode.CUSTOM: 0,
+        'ALL': 0,
+    }
     count_reactions = {
         ServiceType.MIDJOURNEY: {
             GenerationReaction.LIKED: 0,
@@ -225,6 +234,11 @@ async def handle_get_statistics(language_code: str, period: str):
             GenerationReaction.NONE: 0,
         },
         ServiceType.MUSIC_GEN: {
+            GenerationReaction.LIKED: 0,
+            GenerationReaction.DISLIKED: 0,
+            GenerationReaction.NONE: 0,
+        },
+        ServiceType.SUNO: {
             GenerationReaction.LIKED: 0,
             GenerationReaction.DISLIKED: 0,
             GenerationReaction.NONE: 0,
@@ -255,7 +269,7 @@ async def handle_get_statistics(language_code: str, period: str):
             count_expense_total_money += transaction.amount
 
             if transaction.service == ServiceType.MIDJOURNEY:
-                midjourney_action = transaction.details.get('type')
+                midjourney_action = transaction.details.get('type', MidjourneyAction.PAYMENT)
                 count_midjourney_usage[midjourney_action] = count_midjourney_usage.get(
                     midjourney_action,
                     0,
@@ -269,6 +283,13 @@ async def handle_get_statistics(language_code: str, period: str):
                     0,
                 ) + len(face_swap_images)
 
+            if transaction.service == ServiceType.SUNO:
+                suno_mode = transaction.details.get('mode', 'Payment')
+                count_suno_usage[suno_mode] = count_suno_usage.get(
+                    suno_mode,
+                    0,
+                ) + 1
+
         activated_users.add(transaction.user_id)
         count_transactions_total += 1
 
@@ -279,6 +300,8 @@ async def handle_get_statistics(language_code: str, period: str):
             count_reactions[ServiceType.FACE_SWAP][generation.reaction] += 1
         elif generation.model == Model.MUSIC_GEN:
             count_reactions[ServiceType.MUSIC_GEN][generation.reaction] += 1
+        elif generation.model == Model.SUNO:
+            count_reactions[ServiceType.SUNO][generation.reaction] += 1
 
     count_all_users = len(users)
     count_activated_users = len(activated_users)
@@ -295,6 +318,7 @@ async def handle_get_statistics(language_code: str, period: str):
     }
     count_midjourney_usage['ALL'] = sum(count_midjourney_usage.values())
     count_face_swap_usage['ALL'] = sum(count_face_swap_usage.values())
+    count_suno_usage['ALL'] = sum(count_suno_usage.values())
     for chat in chats:
         count_chats_usage[chat.role] = count_chats_usage.get(chat.role, 0) + 1
 
@@ -324,6 +348,7 @@ async def handle_get_statistics(language_code: str, period: str):
         count_chats_usage=count_chats_usage,
         count_midjourney_usage=count_midjourney_usage,
         count_face_swap_usage=count_face_swap_usage,
+        count_suno_usage=count_suno_usage,
         count_reactions=count_reactions,
     )
 

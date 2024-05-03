@@ -21,6 +21,8 @@ from bot.database.models.face_swap_package import (
     FaceSwapFileData,
     UsedFaceSwapPackage,
 )
+from bot.database.models.generation import GenerationStatus
+from bot.database.models.request import RequestStatus
 from bot.database.models.user import UserGender, User
 from bot.database.operations.face_swap_package.getters import (
     get_face_swap_package,
@@ -30,11 +32,15 @@ from bot.database.operations.face_swap_package.getters import (
     get_used_face_swap_package_by_user_id_and_package_id,
 )
 from bot.database.operations.face_swap_package.writers import write_used_face_swap_package
+from bot.database.operations.generation.getters import get_generations_by_request_id
+from bot.database.operations.generation.updaters import update_generation
 from bot.database.operations.generation.writers import write_generation
 from bot.database.operations.request.getters import get_started_requests_by_user_id_and_model
+from bot.database.operations.request.updaters import update_request
 from bot.database.operations.request.writers import write_request
 from bot.database.operations.user.getters import get_user
 from bot.database.operations.user.updaters import update_user
+from bot.helpers.senders.send_message_to_admins import send_message_to_admins
 from bot.integrations.replicateAI import create_face_swap_images
 from bot.keyboards.ai.face_swap import (
     build_face_swap_choose_keyboard,
@@ -48,7 +54,7 @@ from bot.states.profile import Profile
 
 face_swap_router = Router()
 
-PRICE_FACE_SWAP = 0.000225
+PRICE_FACE_SWAP = 0.000725
 
 
 def count_active_files(files_list: List[FaceSwapFileData]) -> int:
@@ -68,7 +74,11 @@ async def face_swap(message: Message, state: FSMContext):
     user_language_code = await get_user_language(user_id, state.storage)
 
     if user.current_model == Model.FACE_SWAP:
-        await message.answer(text=get_localization(user_language_code).ALREADY_SWITCHED_TO_THIS_MODEL)
+        reply_markup = await build_recommendations_keyboard(user.current_model, user_language_code, user.gender)
+        await message.answer(
+            text=get_localization(user_language_code).ALREADY_SWITCHED_TO_THIS_MODEL,
+            reply_markup=reply_markup,
+        )
     else:
         user.current_model = Model.FACE_SWAP
         await update_user(user_id, {
@@ -307,60 +317,67 @@ async def face_swap_quantity_handler(message: Message, state: FSMContext, user_i
     )
 
     async with ChatActionSender.upload_photo(bot=message.bot, chat_id=message.chat.id):
-        try:
-            quota = user.monthly_limits[Quota.FACE_SWAP] + user.additional_usage_quota[Quota.FACE_SWAP]
-            quantity = int(chosen_quantity)
-            name = user_data['face_swap_package_name']
-            face_swap_package = await get_face_swap_package_by_name_and_gender(name, user.gender)
-            face_swap_package_quantity = user_data['maximum_quantity']
+        quota = user.monthly_limits[Quota.FACE_SWAP] + user.additional_usage_quota[Quota.FACE_SWAP]
+        quantity = int(chosen_quantity)
+        name = user_data.get('face_swap_package_name')
+        face_swap_package_quantity = user_data.get('maximum_quantity')
+        if not name or not face_swap_package_quantity:
+            await handle_face_swap(message.bot, user.telegram_chat_id, state, user_id)
 
-            if quota < quantity:
-                reply_markup = build_cancel_keyboard(user_language_code)
-                await message.answer(
-                    text=get_localization(user_language_code).face_swap_package_forbidden(quota),
-                    reply_markup=reply_markup,
-                )
-            elif quantity < 1:
-                reply_markup = build_cancel_keyboard(user_language_code)
-                await message.answer(
-                    text=get_localization(user_language_code).FACE_SWAP_MIN_ERROR,
-                    reply_markup=reply_markup,
-                )
-            elif face_swap_package_quantity < quantity:
-                reply_markup = build_cancel_keyboard(user_language_code)
-                await message.answer(
-                    text=get_localization(user_language_code).FACE_SWAP_MAX_ERROR,
-                    reply_markup=reply_markup,
-                )
-            else:
-                user_not_finished_requests = await get_started_requests_by_user_id_and_model(user.id, Model.FACE_SWAP)
+            await processing_message.delete()
+            await message.delete()
+            return
 
-                if len(user_not_finished_requests):
-                    await message.reply(
-                        text=get_localization(user_language_code).ALREADY_MAKE_REQUEST,
-                    )
-                    await processing_message.delete()
-                    return
+        face_swap_package = await get_face_swap_package_by_name_and_gender(name, user.gender)
 
-                user_photo = await firebase.bucket.get_blob(f'users/avatars/{user.id}.jpeg')
-                user_photo_link = firebase.get_public_url(user_photo.name)
-                used_face_swap_package = await get_used_face_swap_package_by_user_id_and_package_id(
-                    user.id,
-                    face_swap_package.id,
+        if quota < quantity:
+            reply_markup = build_cancel_keyboard(user_language_code)
+            await message.answer(
+                text=get_localization(user_language_code).face_swap_package_forbidden(quota),
+                reply_markup=reply_markup,
+            )
+        elif quantity < 1:
+            reply_markup = build_cancel_keyboard(user_language_code)
+            await message.answer(
+                text=get_localization(user_language_code).FACE_SWAP_MIN_ERROR,
+                reply_markup=reply_markup,
+            )
+        elif face_swap_package_quantity < quantity:
+            reply_markup = build_cancel_keyboard(user_language_code)
+            await message.answer(
+                text=get_localization(user_language_code).FACE_SWAP_MAX_ERROR,
+                reply_markup=reply_markup,
+            )
+        else:
+            user_not_finished_requests = await get_started_requests_by_user_id_and_model(user.id, Model.FACE_SWAP)
+
+            if len(user_not_finished_requests):
+                await message.reply(
+                    text=get_localization(user_language_code).ALREADY_MAKE_REQUEST,
                 )
+                await processing_message.delete()
+                return
 
-                request = await write_request(
-                    user_id=user.id,
-                    message_id=processing_message.message_id,
-                    model=Model.FACE_SWAP,
-                    requested=quantity,
-                    details={
-                        "is_test": False,
-                        "face_swap_package_id": face_swap_package.id,
-                        "face_swap_package_name": face_swap_package.name,
-                    },
-                )
+            user_photo = await firebase.bucket.get_blob(f'users/avatars/{user.id}.jpeg')
+            user_photo_link = firebase.get_public_url(user_photo.name)
+            used_face_swap_package = await get_used_face_swap_package_by_user_id_and_package_id(
+                user.id,
+                face_swap_package.id,
+            )
 
+            request = await write_request(
+                user_id=user.id,
+                message_id=processing_message.message_id,
+                model=Model.FACE_SWAP,
+                requested=quantity,
+                details={
+                    "is_test": False,
+                    "face_swap_package_id": face_swap_package.id,
+                    "face_swap_package_name": face_swap_package.name,
+                },
+            )
+
+            try:
                 results, random_names = await generate_face_swap_images(
                     quantity,
                     user.gender.lower(),
@@ -386,19 +403,41 @@ async def face_swap_quantity_handler(message: Message, state: FSMContext, user_i
                 await asyncio.gather(*tasks)
 
                 await state.update_data(maximum_quantity=face_swap_package_quantity - quantity)
-        except KeyError:
-            await handle_face_swap(message.bot, user.telegram_chat_id, state, user_id)
+            except (TypeError, ValueError):
+                reply_markup = build_cancel_keyboard(user_language_code)
+                await message.reply(
+                    text=get_localization(user_language_code).VALUE_ERROR,
+                    reply_markup=reply_markup,
+                )
 
-            await processing_message.delete()
-            await message.delete()
-        except (TypeError, ValueError):
-            reply_markup = build_cancel_keyboard(user_language_code)
-            await message.reply(
-                text=get_localization(user_language_code).VALUE_ERROR,
-                reply_markup=reply_markup,
-            )
+                await processing_message.delete()
+            except Exception as e:
+                await message.answer(
+                    text=get_localization(user_language_code).ERROR,
+                    parse_mode=None,
+                )
+                await send_message_to_admins(
+                    bot=message.bot,
+                    message=f"#error\n\nALARM! Ошибка у пользователя при запросе в FaceSwap: {user.id}\nИнформация:\n{e}",
+                    parse_mode=None,
+                )
 
-            await processing_message.delete()
+                request.status = RequestStatus.FINISHED
+                await update_request(request.id, {
+                    "status": request.status
+                })
+
+                generations = await get_generations_by_request_id(request.id)
+                for generation in generations:
+                    generation.status = GenerationStatus.FINISHED,
+                    generation.has_error = True
+                    await update_generation(
+                        generation.id,
+                        {
+                            "status": generation.status,
+                            "has_error": generation.has_error,
+                        },
+                    )
 
 
 @face_swap_router.message(FaceSwap.waiting_for_face_swap_quantity, ~F.text.startswith('/'))

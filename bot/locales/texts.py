@@ -22,6 +22,12 @@ class Texts(Protocol):
 📣 /blast - <b>Сделать рассылку</b>
 """
     INFO: str
+    INFO_CHATGPT: str
+    INFO_DALL_E: str
+    INFO_MIDJOURNEY: str
+    INFO_FACE_SWAP: str
+    INFO_MUSIC_GEN: str
+    INFO_SUNO: str
 
     # Feedback
     FEEDBACK: str
@@ -233,6 +239,7 @@ class Texts(Protocol):
     MIDJOURNEY = "🎨 Midjourney"
     FACE_SWAP = "📷️ FaceSwap"
     MUSIC_GEN = "🎵 MusicGen"
+    SUNO = "🎸 Suno"
     MODE: str
     CHOOSE_CHATGPT_MODEL: str
     SWITCHED_TO_CHATGPT3: str
@@ -241,6 +248,7 @@ class Texts(Protocol):
     SWITCHED_TO_MIDJOURNEY: str
     SWITCHED_TO_FACE_SWAP: str
     SWITCHED_TO_MUSIC_GEN: str
+    SWITCHED_TO_SUNO: str
     ALREADY_SWITCHED_TO_THIS_MODEL: str
     REQUEST_FORBIDDEN_ERROR: str
     ALBUM_FORBIDDEN_ERROR: str
@@ -254,12 +262,23 @@ class Texts(Protocol):
     CHATGPT4_EXAMPLE_FIRST_PART: str
     CHATGPT4_EXAMPLE_LAST_PART: str
     MIDJOURNEY_EXAMPLE: str
+    SUNO_EXAMPLE: str
 
     # ChatGPT
     CHATGPT_PHOTO_FEATURE_FORBIDDEN: str
 
     # Midjourney
     MIDJOURNEY_ALREADY_CHOSE_UPSCALE: str
+
+    # Suno
+    SUNO_INFO: str
+    SUNO_SIMPLE_MODE: str
+    SUNO_CUSTOM_MODE: str
+    SUNO_SIMPLE_MODE_PROMPT: str
+    SUNO_CUSTOM_MODE_LYRICS: str
+    SUNO_CUSTOM_MODE_GENRES: str
+    SUNO_START_AGAIN: str
+    SUNO_TRY_LATER: str
 
     # MusicGen
     MUSIC_GEN_INFO: str
@@ -288,6 +307,7 @@ class Texts(Protocol):
     MONTH_1: str
     MONTHS_3: str
     MONTHS_6: str
+    MONTHS_12: str
     DISCOUNT: str
     NO_DISCOUNT: str
     SUBSCRIPTION: str
@@ -325,6 +345,8 @@ class Texts(Protocol):
     FACE_SWAP_REQUESTS_DESCRIPTION: str
     MUSIC_GEN_REQUESTS: str
     MUSIC_GEN_REQUESTS_DESCRIPTION: str
+    SUNO_REQUESTS: str
+    SUNO_REQUESTS_DESCRIPTION: str
     ACCESS_TO_CATALOG: str
     ACCESS_TO_CATALOG_DESCRIPTION: str
     ANSWERS_AND_REQUESTS_WITH_VOICE_MESSAGES: str
@@ -539,6 +561,9 @@ class Texts(Protocol):
     CLOSE: str
     CANCEL: str
     APPROVE: str
+    AUDIO: str
+    VIDEO: str
+    SKIP: str
 
     @staticmethod
     def statistics(
@@ -567,6 +592,7 @@ class Texts(Protocol):
         count_chats_usage: Dict,
         count_midjourney_usage: Dict,
         count_face_swap_usage: Dict,
+        count_suno_usage: Dict,
         count_reactions: Dict,
     ) -> str:
         emojis = Subscription.get_emojis()
@@ -585,6 +611,11 @@ class Texts(Protocol):
             if face_swap_key != 'ALL':
                 face_swap_info += f"    - <b>{face_swap_key}:</b> {face_swap_value}"
                 face_swap_info += '\n' if i < len(count_face_swap_usage.items()) - 1 else ''
+        suno_info = ""
+        for i, (suno_key, suno_value) in enumerate(count_suno_usage.items()):
+            if suno_key != 'ALL':
+                suno_info += f"    - <b>{suno_key}:</b> {suno_value}"
+                suno_info += '\n' if i < len(count_suno_usage.items()) - 1 else ''
 
         return f"""
 📈 <b>Статистика за {period} готова!</b>
@@ -614,6 +645,7 @@ class Texts(Protocol):
     - <b>{ServiceType.MIDJOURNEY}:</b> {count_expense_transactions[ServiceType.MIDJOURNEY]}
     - <b>{ServiceType.FACE_SWAP}:</b> {count_expense_transactions[ServiceType.FACE_SWAP]}
     - <b>{ServiceType.MUSIC_GEN}:</b> {count_expense_transactions[ServiceType.MUSIC_GEN][0]} ({count_expense_transactions[ServiceType.MUSIC_GEN][1]})
+    - <b>{ServiceType.SUNO}:</b> {count_expense_transactions[ServiceType.SUNO]}
     - <b>{ServiceType.VOICE_MESSAGES}:</b> {count_expense_transactions[ServiceType.VOICE_MESSAGES]}
     - <b>{ServiceType.SERVER}:</b> {count_expense_transactions[ServiceType.SERVER]}
     - <b>{ServiceType.DATABASE}:</b> {count_expense_transactions[ServiceType.DATABASE]}
@@ -625,6 +657,7 @@ class Texts(Protocol):
     - <b>{ServiceType.MIDJOURNEY}:</b> {count_income_transactions[ServiceType.MIDJOURNEY]}
     - <b>{ServiceType.FACE_SWAP}:</b> {count_income_transactions[ServiceType.FACE_SWAP]}
     - <b>{ServiceType.MUSIC_GEN}:</b> {count_income_transactions[ServiceType.MUSIC_GEN]}
+    - <b>{ServiceType.SUNO}:</b> {count_income_transactions[ServiceType.SUNO]}
     - <b>{ServiceType.ADDITIONAL_CHATS}:</b> {count_income_transactions[ServiceType.ADDITIONAL_CHATS]}
     - <b>{ServiceType.ACCESS_TO_CATALOG}:</b> {count_income_transactions[ServiceType.ACCESS_TO_CATALOG]}
     - <b>{ServiceType.VOICE_MESSAGES}:</b> {count_income_transactions[ServiceType.VOICE_MESSAGES]}
@@ -642,6 +675,7 @@ class Texts(Protocol):
    - <b>{ServiceType.MIDJOURNEY}:</b> {round(count_expense_money[ServiceType.MIDJOURNEY], 2)}$
    - <b>{ServiceType.FACE_SWAP}:</b> {round(count_expense_money[ServiceType.FACE_SWAP], 2)}$
    - <b>{ServiceType.MUSIC_GEN}:</b> {round(count_expense_money[ServiceType.MUSIC_GEN], 2)}$
+   - <b>{ServiceType.SUNO}:</b> {round(count_expense_money[ServiceType.SUNO], 2)}$
    - <b>{ServiceType.VOICE_MESSAGES}:</b> {round(count_expense_money[ServiceType.VOICE_MESSAGES], 2)}$
    - <b>{ServiceType.SERVER}:</b> {round(count_expense_money[ServiceType.SERVER], 2)}$
    - <b>{ServiceType.DATABASE}:</b> {round(count_expense_money[ServiceType.DATABASE], 2)}$
@@ -660,6 +694,7 @@ class Texts(Protocol):
     - <b>{ServiceType.MIDJOURNEY}:</b> {count_income_money[ServiceType.MIDJOURNEY]}₽
     - <b>{ServiceType.FACE_SWAP}:</b> {count_income_money[ServiceType.FACE_SWAP]}₽
     - <b>{ServiceType.MUSIC_GEN}:</b> {count_income_money[ServiceType.MUSIC_GEN]}₽
+    - <b>{ServiceType.SUNO}:</b> {count_income_money[ServiceType.SUNO]}₽
     - <b>{ServiceType.ADDITIONAL_CHATS}:</b> {count_income_money[ServiceType.ADDITIONAL_CHATS]}₽
     - <b>{ServiceType.ACCESS_TO_CATALOG}:</b> {count_income_money[ServiceType.ACCESS_TO_CATALOG]}₽
     - <b>{ServiceType.VOICE_MESSAGES}:</b> {count_income_money[ServiceType.VOICE_MESSAGES]}₽
@@ -677,7 +712,6 @@ class Texts(Protocol):
 🎨 <b>Midjourney</b>
     <b>Генерации:</b>
 {midjourney_info}
-
     - <b>Всего:</b> {count_midjourney_usage['ALL']}
 
     <b>Реакции:</b>
@@ -702,7 +736,17 @@ class Texts(Protocol):
     👎 {count_reactions[ServiceType.MUSIC_GEN][GenerationReaction.DISLIKED]}
     🤷 {count_reactions[ServiceType.MUSIC_GEN][GenerationReaction.NONE]}
 
-🔍 Это всё, что тебе нужно знать о текущем положении дел. Вперёд, к новым достижениям! 🚀
+🎸 <b>Suno</b>
+    <b>Генерации:</b>
+{suno_info}
+    - <b>Всего:</b> {count_suno_usage['ALL']}
+
+    <b>Реакции:</b>
+    👍 {count_reactions[ServiceType.SUNO][GenerationReaction.LIKED]}
+    👎 {count_reactions[ServiceType.SUNO][GenerationReaction.DISLIKED]}
+    🤷 {count_reactions[ServiceType.SUNO][GenerationReaction.NONE]}
+
+🔍 Это всё, что нужно знать о текущем положении дел. Вперёд, к новым достижениям! 🚀
 """
 
     # Blast
@@ -861,7 +905,7 @@ class Texts(Protocol):
 
     # Package
     @staticmethod
-    def package() -> str:
+    def package(currency: Currency) -> str:
         raise NotImplementedError
 
     @staticmethod
@@ -909,7 +953,7 @@ class Texts(Protocol):
         raise NotImplementedError
 
     @staticmethod
-    def music_gen_recommendations() -> List[str]:
+    def music_recommendations() -> List[str]:
         raise NotImplementedError
 
     @staticmethod
@@ -929,7 +973,7 @@ class Texts(Protocol):
         raise NotImplementedError
 
     @staticmethod
-    def processing_request_music_gen() -> str:
+    def processing_request_music() -> str:
         raise NotImplementedError
 
     # Settings
@@ -939,9 +983,9 @@ class Texts(Protocol):
 
     # Bonus
     @staticmethod
-    def bonus(user_id: str, referred_count: int, balance: float, currency: Currency) -> str:
+    def bonus(user_id: str, referred_count: int, balance: float) -> str:
         raise NotImplementedError
 
     @staticmethod
-    def referral_successful(added_to_balance: float, currency: Currency) -> str:
+    def referral_successful(added_to_balance: float) -> str:
         raise NotImplementedError

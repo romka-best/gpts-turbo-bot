@@ -15,6 +15,7 @@ class SubscriptionPeriod:
     MONTH1 = 'MONTH_1'
     MONTHS3 = 'MONTHS_3'
     MONTHS6 = 'MONTHS_6'
+    MONTHS12 = 'MONTHS_12'
 
 
 class SubscriptionStatus:
@@ -33,6 +34,7 @@ class SubscriptionLimit:
             Quota.MIDJOURNEY: 0,
             Quota.FACE_SWAP: 10,
             Quota.MUSIC_GEN: 30,
+            Quota.SUNO: 0,
         },
         SubscriptionType.STANDARD: {
             Quota.CHAT_GPT3: 1000,
@@ -41,6 +43,7 @@ class SubscriptionLimit:
             Quota.MIDJOURNEY: 50,
             Quota.FACE_SWAP: 100,
             Quota.MUSIC_GEN: 300,
+            Quota.SUNO: 50,
         },
         SubscriptionType.VIP: {
             Quota.CHAT_GPT3: 2000,
@@ -49,6 +52,7 @@ class SubscriptionLimit:
             Quota.MIDJOURNEY: 100,
             Quota.FACE_SWAP: 200,
             Quota.MUSIC_GEN: 900,
+            Quota.SUNO: 100,
         },
         SubscriptionType.PLATINUM: {
             Quota.CHAT_GPT3: 3000,
@@ -57,6 +61,7 @@ class SubscriptionLimit:
             Quota.MIDJOURNEY: 200,
             Quota.FACE_SWAP: 400,
             Quota.MUSIC_GEN: 1800,
+            Quota.SUNO: 200,
         }
     }
     ADDITIONAL_QUOTA_LIMITS = {
@@ -67,19 +72,19 @@ class SubscriptionLimit:
             Quota.VOICE_MESSAGES: False,
         },
         SubscriptionType.STANDARD: {
-            Quota.ADDITIONAL_CHATS: 5,
+            Quota.ADDITIONAL_CHATS: 4,
             Quota.ACCESS_TO_CATALOG: True,
             Quota.FAST_MESSAGES: True,
             Quota.VOICE_MESSAGES: True,
         },
         SubscriptionType.VIP: {
-            Quota.ADDITIONAL_CHATS: 10,
+            Quota.ADDITIONAL_CHATS: 9,
             Quota.ACCESS_TO_CATALOG: True,
             Quota.FAST_MESSAGES: True,
             Quota.VOICE_MESSAGES: True,
         },
         SubscriptionType.PLATINUM: {
-            Quota.ADDITIONAL_CHATS: 20,
+            Quota.ADDITIONAL_CHATS: 19,
             Quota.ACCESS_TO_CATALOG: True,
             Quota.FAST_MESSAGES: True,
             Quota.VOICE_MESSAGES: True,
@@ -138,6 +143,8 @@ class Subscription:
             self.end_date = self.start_date + timedelta(days=90)
         elif not end_date and period == SubscriptionPeriod.MONTHS6:
             self.end_date = self.start_date + timedelta(days=180)
+        elif not end_date and period == SubscriptionPeriod.MONTHS12:
+            self.end_date = self.start_date + timedelta(days=365)
         else:
             self.end_date = end_date
 
@@ -191,12 +198,15 @@ class Subscription:
             SubscriptionPeriod.MONTH1: user_discount if user_discount > 0 else 0,
             SubscriptionPeriod.MONTHS3: user_discount if user_discount > 5 else 5,
             SubscriptionPeriod.MONTHS6: user_discount if user_discount > 10 else 10,
+            SubscriptionPeriod.MONTHS12: user_discount if user_discount > 20 else 20,
         }
         price_period = {
             SubscriptionPeriod.MONTH1: 1,
             SubscriptionPeriod.MONTHS3: 3,
             SubscriptionPeriod.MONTHS6: 6,
+            SubscriptionPeriod.MONTHS12: 12,
         }
+
         prices = Subscription.get_prices(currency)
         price_raw = prices[subscription_type]
         price_clear = re.sub(r'[^\d.]', '', price_raw)
@@ -204,4 +214,4 @@ class Subscription:
         price_with_period = price * price_period[subscription_period]
         price_with_discount = price_with_period - (price_with_period * (price_discount[subscription_period] / 100.0))
 
-        return int(price_with_discount)
+        return [int(price_with_period), int(price_with_discount)]

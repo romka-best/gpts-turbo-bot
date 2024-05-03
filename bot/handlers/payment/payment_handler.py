@@ -84,7 +84,7 @@ async def handle_subscribe(message: Message, user_id: str, state: FSMContext):
     user = await get_user(str(user_id))
     user_language_code = await get_user_language(str(user_id), state.storage)
 
-    photo_path = f'payments/subscriptions_{user_language_code}_{user.currency}.png'
+    photo_path = f'payments/subscriptions_{user_language_code}.png'
     photo = await firebase.bucket.get_blob(photo_path)
     photo_link = firebase.get_public_url(photo.name)
 
@@ -113,7 +113,7 @@ async def handle_subscription_selection(callback_query: CallbackQuery, state: FS
 
         caption = get_localization(user_language_code).choose_how_many_months_to_subscribe(subscription_type)
         reply_markup = build_period_of_subscription_keyboard(user_language_code, subscription_type, user.discount)
-        photo_path = f'payments/subscription_{subscription_type.lower()}_{user_language_code}_{user.currency}.png'
+        photo_path = f'payments/subscription_{subscription_type.lower()}_{user_language_code}.png'
         photo = await firebase.bucket.get_blob(photo_path)
         photo_link = firebase.get_public_url(photo.name)
 
@@ -136,13 +136,23 @@ async def handle_period_of_subscription_selection(callback_query: CallbackQuery,
     subscription_type, subscription_period = callback_query.data.split(':')[1], callback_query.data.split(':')[2]
 
     emojis = Subscription.get_emojis()
-    price = Subscription.get_price(user.currency, subscription_type, subscription_period, user.discount)
+    price, price_with_discount = Subscription.get_price(
+        user.currency,
+        subscription_type,
+        subscription_period,
+        user.discount,
+    )
     name = (f"{subscription_type} {emojis[subscription_type]} "
             f"({get_localization(user_language_code).cycles_subscribe()[subscription_period]})")
     description = get_localization(user_language_code).confirmation_subscribe(subscription_type, subscription_period)
-    photo_path = f'payments/subscription_{subscription_type.lower()}_{user_language_code}_{user.currency}.png'
+    photo_path = f'payments/subscription_{subscription_type.lower()}_{user_language_code}.png'
     photo = await firebase.bucket.get_blob(photo_path)
     photo_link = firebase.get_public_url(photo.name)
+
+    prices = [LabeledPrice(label=name, amount=price * 100)]
+    if price != price_with_discount:
+        discount = price - price_with_discount
+        prices.append(LabeledPrice(label=get_localization(user_language_code).DISCOUNT, amount=-discount * 100))
 
     await callback_query.message.reply_invoice(
         title=name,
@@ -150,7 +160,7 @@ async def handle_period_of_subscription_selection(callback_query: CallbackQuery,
         payload=f"{PaymentType.SUBSCRIPTION}:{callback_query.from_user.id}:{subscription_type}:{subscription_period}",
         provider_token=config.YOOKASSA_TOKEN.get_secret_value(),
         currency=f"{user.currency}",
-        prices=[LabeledPrice(label=name, amount=price * 100)],
+        prices=prices,
         photo_url=photo_link,
         photo_width=1024,
         photo_height=768,
@@ -163,11 +173,11 @@ async def handle_package(message: Message, user_id: str, state: FSMContext):
     user = await get_user(user_id)
     user_language_code = await get_user_language(user_id, state.storage)
 
-    photo_path = f'payments/packages_{user_language_code}_{user.currency}.png'
+    photo_path = f'payments/packages_{user_language_code}.png'
     photo = await firebase.bucket.get_blob(photo_path)
     photo_link = firebase.get_public_url(photo.name)
 
-    text = get_localization(user_language_code).package()
+    text = get_localization(user_language_code).package(user.currency)
     reply_markup = build_packages_keyboard(user_language_code)
 
     await message.answer_photo(
@@ -217,13 +227,12 @@ async def handle_package_selection_selection(callback_query: CallbackQuery, stat
 @payment_router.message(Payment.waiting_for_package_quantity, ~F.text.startswith('/'))
 async def quantity_of_package_sent(message: Message, state: FSMContext):
     user_id = str(message.from_user.id)
-    user = await get_user(user_id)
     user_language_code = await get_user_language(user_id, state.storage)
 
     try:
         quantity = int(message.text)
 
-        photo_path = f'payments/packages_{user_language_code}_{user.currency}.png'
+        photo_path = f'payments/packages_{user_language_code}.png'
         photo = await firebase.bucket.get_blob(photo_path)
         photo_link = firebase.get_public_url(photo.name)
 
@@ -293,7 +302,7 @@ async def handle_package_quantity_sent_selection(callback_query: CallbackQuery, 
             name = name_and_description.get('name')
             description = name_and_description.get('description')
 
-            photo_path = f'payments/packages_{user_language_code}_{user.currency}.png'
+            photo_path = f'payments/packages_{user_language_code}.png'
             photo = await firebase.bucket.get_blob(photo_path)
             photo_link = firebase.get_public_url(photo.name)
 
@@ -325,7 +334,7 @@ async def handle_package_add_to_cart_selection(callback_query: CallbackQuery, st
     if action == "go_to_cart":
         cart = await get_cart_by_user_id(user_id)
 
-        photo_path = f'payments/packages_{user_language_code}_{user.currency}.png'
+        photo_path = f'payments/packages_{user_language_code}.png'
         photo = await firebase.bucket.get_blob(photo_path)
         photo_link = firebase.get_public_url(photo.name)
 
@@ -376,7 +385,7 @@ async def handle_package_cart_selection(callback_query: CallbackQuery, state: FS
                 prices.append(LabeledPrice(label=f"{name} ({package_quantity})", amount=price * 100))
                 payload += f":{package_type}:{package_quantity}"
 
-            photo_path = f'payments/packages_{user_language_code}_{user.currency}.png'
+            photo_path = f'payments/packages_{user_language_code}.png'
             photo = await firebase.bucket.get_blob(photo_path)
             photo_link = firebase.get_public_url(photo.name)
 

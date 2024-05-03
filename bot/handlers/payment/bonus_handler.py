@@ -29,11 +29,11 @@ async def bonus(message: Message, state: FSMContext):
     user_language_code = await get_user_language(user_id, state.storage)
     referred_users = await get_users_by_referral(user_id)
 
-    photo_path = f'payments/packages_{user_language_code}_{user.currency}.png'
+    photo_path = f'payments/packages_{user_language_code}.png'
     photo = await firebase.bucket.get_blob(photo_path)
     photo_link = firebase.get_public_url(photo.name)
 
-    text = get_localization(user_language_code).bonus(user_id, len(referred_users), user.balance, user.currency)
+    text = get_localization(user_language_code).bonus(user_id, len(referred_users), user.balance)
     reply_markup = build_bonus_keyboard(user_language_code)
     await message.answer_photo(
         photo=URLInputFile(photo_link, filename=photo_path),
@@ -69,69 +69,62 @@ async def quantity_of_bonus_package_sent(message: Message, state: FSMContext):
         user_data = await state.get_data()
         package_type = user_data['package_type']
         package_quantity = int(message.text)
-        cart_items = [{"package_type": package_type, "quantity": package_quantity}]
-        if not Package.is_above_minimal_price(user.currency, cart_items):
+        price = Package.get_price(user.currency, package_type, package_quantity)
+        if price > user.balance:
             reply_markup = build_cancel_keyboard(user_language_code)
             await message.reply(
-                text=get_localization(user_language_code).MIN_ERROR,
+                text=get_localization(user_language_code).MAX_ERROR,
                 reply_markup=reply_markup,
             )
         else:
-            price = Package.get_price(user.currency, package_type, package_quantity)
-            if price > user.balance:
-                reply_markup = build_cancel_keyboard(user_language_code)
-                await message.reply(
-                    text=get_localization(user_language_code).MAX_ERROR,
-                    reply_markup=reply_markup,
-                )
-            else:
-                user.balance -= price
-                until_at = None
-                if (
-                    package_type == PackageType.VOICE_MESSAGES or
-                    package_type == PackageType.FAST_MESSAGES or
-                    package_type == PackageType.ACCESS_TO_CATALOG
-                ):
-                    current_date = datetime.now(timezone.utc)
-                    until_at = current_date + timedelta(days=30 * package_quantity)
-                package = await write_package(
-                    user_id,
-                    package_type,
-                    PackageStatus.SUCCESS,
-                    user.currency,
-                    0,
-                    package_quantity,
-                    until_at,
-                )
+            user.balance -= price
+            until_at = None
+            if (
+                package_type == PackageType.VOICE_MESSAGES or
+                package_type == PackageType.FAST_MESSAGES or
+                package_type == PackageType.ACCESS_TO_CATALOG
+            ):
+                current_date = datetime.now(timezone.utc)
+                until_at = current_date + timedelta(days=30 * package_quantity)
+            package = await write_package(
+                user_id,
+                package_type,
+                PackageStatus.SUCCESS,
+                user.currency,
+                0,
+                package_quantity,
+                until_at,
+            )
 
-                (
-                    service_type,
-                    user.additional_usage_quota,
-                ) = Package.get_service_type_and_update_quota(
-                    package_type,
-                    user.additional_usage_quota,
-                    package_quantity,
-                )
-                await write_transaction(
-                    user_id=user_id,
-                    type=TransactionType.INCOME,
-                    service=service_type,
-                    amount=0,
-                    currency=user.currency,
-                    quantity=package_quantity,
-                    details={
-                        'package_id': package.id,
-                        'provider_payment_charge_id': "",
-                    },
-                )
-                await update_user(user_id, {
-                    "balance": user.balance,
-                    "additional_usage_quota": user.additional_usage_quota,
-                })
+            (
+                service_type,
+                user.additional_usage_quota,
+            ) = Package.get_service_type_and_update_quota(
+                package_type,
+                user.additional_usage_quota,
+                package_quantity,
+            )
+            await write_transaction(
+                user_id=user_id,
+                type=TransactionType.INCOME,
+                service=service_type,
+                amount=0,
+                currency=user.currency,
+                quantity=package_quantity,
+                details={
+                    'package_id': package.id,
+                    'provider_payment_charge_id': "",
+                    'is_bonus': True,
+                },
+            )
+            await update_user(user_id, {
+                "balance": user.balance,
+                "additional_usage_quota": user.additional_usage_quota,
+            })
 
-                await message.reply(text=get_localization(user_language_code).BONUS_ACTIVATED_SUCCESSFUL)
+            await message.reply(text=get_localization(user_language_code).BONUS_ACTIVATED_SUCCESSFUL)
 
-                await state.clear()
+            await state.clear()
     except (TypeError, ValueError):
         reply_markup = build_cancel_keyboard(user_language_code)
         await message.reply(
