@@ -1,5 +1,6 @@
 from datetime import timedelta
 
+import aiohttp
 from aiogram import Router
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
@@ -67,7 +68,7 @@ async def profile(message: Message, state: FSMContext):
             caption=text,
             reply_markup=reply_markup,
         )
-    except Exception:
+    except aiohttp.ClientResponseError:
         reply_markup = build_profile_keyboard(user_language_code, False, user.gender != UserGender.UNSPECIFIED)
         await message.answer(
             text=text,

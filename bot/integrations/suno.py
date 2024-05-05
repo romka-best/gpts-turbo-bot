@@ -19,7 +19,7 @@ SUNO_API_URL = "https://studio-api.suno.ai"
 SUNO_TOKEN = config.SUNO_TOKEN.get_secret_value()
 
 
-class Client:
+class Suno:
     def __init__(self, cookie: str, session: aiohttp.ClientSession = None) -> None:
         self.headers = {
             "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
@@ -31,32 +31,22 @@ class Client:
     async def __aenter__(self):
         if not self.session:
             self.session = aiohttp.ClientSession()
+
+        self._sid = await self._get_sid()
+        self.songs = Songs(self)
         return self
 
     async def __aexit__(self, exc_type, exc, tb):
         await self.session.close()
 
-    async def request(self, method: str, url: str, **kwargs):
-        async with self.session.request(method, url, headers=self.headers, **kwargs) as response:
-            response.raise_for_status()
-            return await response.json()
-
-
-class Suno(Client):
-    async def __aenter__(self):
-        await super().__aenter__()
-        self._sid = await self._get_sid()
-        self.songs = Songs(self)
-        return self
-
     async def _get_sid(self) -> str:
         url = "https://clerk.suno.com/v1/client?_clerk_js_version=4.72.0"
-        data = await super().request("GET", url)
+        data = await self.request("GET", url)
         return data["response"]["last_active_session_id"]
 
     async def _get_jwt(self) -> str:
         url = f"https://clerk.suno.com/v1/client/sessions/{self._sid}/tokens/api?_clerk_js_version=4.72.0"
-        data = await super().request("POST", url)
+        data = await self.request("POST", url)
         return data["jwt"]
 
     async def _renew(self) -> None:
@@ -65,11 +55,15 @@ class Suno(Client):
 
     async def request(self, method: str, url: str, **kwargs):
         try:
-            return await super().request(method, url, **kwargs)
+            async with self.session.request(method, url, headers=self.headers, **kwargs) as response:
+                response.raise_for_status()
+                return await response.json()
         except aiohttp.ClientResponseError as e:
             if e.status == 401:
                 await self._renew()
-                return await super().request(method, url, **kwargs)
+                async with self.session.request(method, url, headers=self.headers, **kwargs) as response:
+                    response.raise_for_status()
+                    return await response.json()
             raise
 
 
@@ -134,7 +128,11 @@ async def check_song(bot: Bot, storage: BaseStorage, song_id: str):
                 try:
                     clip = await client.songs.get(id=song_id)
                     status = clip.get('status')
-                    if status == 'complete' or status == 'error':
+                    if status == 'complete' and not clip.get('is_video_pending'):
+                        await handle_suno_webhook(bot, storage, clip)
+                        need_to_reset = False
+                        break
+                    elif status == 'error':
                         await handle_suno_webhook(bot, storage, clip)
                         need_to_reset = False
                         break

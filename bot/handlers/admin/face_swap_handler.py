@@ -383,8 +383,10 @@ async def handle_face_swap_manage_edit_picture_selection(callback_query: Callbac
             text=get_localization(user_language_code).processing_request_face_swap()
         )
 
-        async with ChatActionSender.upload_photo(bot=callback_query.message.bot,
-                                                 chat_id=callback_query.message.chat.id):
+        async with ChatActionSender.upload_photo(
+            bot=callback_query.message.bot,
+            chat_id=callback_query.message.chat.id,
+        ):
             user_photo = await firebase.bucket.get_blob(f'users/avatars/{user_id}.jpeg')
             user_photo_link = firebase.get_public_url(user_photo.name)
 

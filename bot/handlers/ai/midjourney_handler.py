@@ -109,6 +109,7 @@ async def handle_midjourney(
             try:
                 if user_language_code != 'en':
                     prompt = await translate_text(prompt, user_language_code, 'en')
+                prompt = prompt.replace("-", "- ")
                 prompt += f" --v {version}"
 
                 if action == MidjourneyAction.UPSCALE:

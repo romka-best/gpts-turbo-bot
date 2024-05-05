@@ -318,7 +318,6 @@ async def face_swap_quantity_handler(message: Message, state: FSMContext, user_i
 
     async with ChatActionSender.upload_photo(bot=message.bot, chat_id=message.chat.id):
         quota = user.monthly_limits[Quota.FACE_SWAP] + user.additional_usage_quota[Quota.FACE_SWAP]
-        quantity = int(chosen_quantity)
         name = user_data.get('face_swap_package_name')
         face_swap_package_quantity = user_data.get('maximum_quantity')
         if not name or not face_swap_package_quantity:
@@ -329,6 +328,18 @@ async def face_swap_quantity_handler(message: Message, state: FSMContext, user_i
             return
 
         face_swap_package = await get_face_swap_package_by_name_and_gender(name, user.gender)
+
+        try:
+            quantity = int(chosen_quantity)
+        except ValueError:
+            reply_markup = build_cancel_keyboard(user_language_code)
+            await message.reply(
+                text=get_localization(user_language_code).VALUE_ERROR,
+                reply_markup=reply_markup,
+            )
+
+            await processing_message.delete()
+            return
 
         if quota < quantity:
             reply_markup = build_cancel_keyboard(user_language_code)
@@ -403,14 +414,6 @@ async def face_swap_quantity_handler(message: Message, state: FSMContext, user_i
                 await asyncio.gather(*tasks)
 
                 await state.update_data(maximum_quantity=face_swap_package_quantity - quantity)
-            except (TypeError, ValueError):
-                reply_markup = build_cancel_keyboard(user_language_code)
-                await message.reply(
-                    text=get_localization(user_language_code).VALUE_ERROR,
-                    reply_markup=reply_markup,
-                )
-
-                await processing_message.delete()
             except Exception as e:
                 await message.answer(
                     text=get_localization(user_language_code).ERROR,

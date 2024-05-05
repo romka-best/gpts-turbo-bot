@@ -59,9 +59,12 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
         try:
             blob = await firebase.bucket.get_blob(blob_path)
             await blob.upload(photo_data)
-        except Exception:
+        except aiohttp.ClientResponseError:
             blob = firebase.bucket.new_blob(blob_path)
             await blob.upload(photo_data)
+
+        blob.bucket = firebase.bucket
+        user_photo_temporary_link = await blob.get_signed_url(3600)
 
         history = [
             {
@@ -74,7 +77,7 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
                     {
                         "type": "image_url",
                         "image_url": {
-                            "url": firebase.get_public_url(blob.name),
+                            "url": user_photo_temporary_link,
                         },
                     },
                 ]
@@ -228,6 +231,9 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
                     await background_photo.upload(photo_data)
                     background_photo_link = firebase.get_public_url(background_path)
 
+                    background_photo.bucket = firebase.bucket
+                    background_photo_temporary_link = await background_photo.get_signed_url(3600)
+
                     history = [
                         {
                             'role': 'user',
@@ -239,7 +245,7 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
                                 {
                                     "type": "image_url",
                                     "image_url": {
-                                        "url": firebase.get_public_url(background_photo.name),
+                                        "url": background_photo_temporary_link,
                                     },
                                 },
                             ]
