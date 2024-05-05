@@ -66,7 +66,7 @@ async def handle_suno_webhook(bot: Bot, storage: BaseStorage, body: dict):
     if generation_result and not is_suggestion:
         reply_markup = build_reaction_keyboard(generation.id)
         if user.settings[Model.SUNO][UserSettings.SEND_TYPE] == SunoSendType.VIDEO and body.get('video_url'):
-            is_okay = await send_video(
+            await send_video(
                 bot,
                 user.telegram_chat_id,
                 body.get('video_url'),
@@ -75,16 +75,6 @@ async def handle_suno_webhook(bot: Bot, storage: BaseStorage, body: dict):
                 int(metadata.get('duration', 0)),
                 reply_markup,
             )
-            if not is_okay:
-                await send_audio(
-                    bot,
-                    user.telegram_chat_id,
-                    generation.result,
-                    hlink(get_localization(user_language_code).VIDEO, body.get('video_url')),
-                    body.get('title', '🎸'),
-                    int(metadata.get('duration', 0)),
-                    reply_markup,
-                )
         elif user.settings[Model.SUNO][UserSettings.SEND_TYPE] == SunoSendType.AUDIO and body.get('video_url'):
             await send_audio(
                 bot,

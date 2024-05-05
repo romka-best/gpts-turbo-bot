@@ -1,7 +1,7 @@
 from aiogram import Router, F
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
-from aiogram.types import Message, CallbackQuery
+from aiogram.types import Message
 
 from bot.database.operations.feedback.getters import get_feedbacks_by_user_id
 from bot.database.operations.feedback.writers import write_feedback
@@ -53,14 +53,5 @@ async def feedback_sent(message: Message, state: FSMContext):
     await send_message_to_admins(message.bot, text)
 
     await message.reply(text=get_localization(user_language_code).FEEDBACK_SUCCESS)
-
-    await state.clear()
-
-
-@feedback_router.callback_query(Feedback.waiting_for_feedback, lambda c: c.data == 'cancel')
-async def handle_exit_selection(callback_query: CallbackQuery, state: FSMContext):
-    await callback_query.answer()
-
-    await callback_query.message.delete()
 
     await state.clear()

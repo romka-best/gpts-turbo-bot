@@ -29,6 +29,7 @@ from bot.keyboards.ai.suno import (
 )
 from bot.keyboards.common.common import build_recommendations_keyboard, build_cancel_keyboard
 from bot.locales.main import get_user_language, get_localization
+from bot.locales.translate_text import translate_text
 from bot.states.suno import Suno
 
 suno_router = Router()
@@ -323,6 +324,8 @@ async def suno_genres_sent(message: Message, state: FSMContext):
             user_data = await state.get_data()
             lyrics = user_data.get('suno_lyrics', '')
             genres = message.text
+            if user_language_code != 'en':
+                genres = await translate_text(genres, user_language_code, 'en')
 
             request = await write_request(
                 user_id=user.id,

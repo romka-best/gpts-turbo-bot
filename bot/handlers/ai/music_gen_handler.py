@@ -113,13 +113,21 @@ async def handle_music_gen_selection(
     async with ChatActionSender.record_voice(bot=message.bot, chat_id=message.chat.id):
         quota = user.monthly_limits[Quota.MUSIC_GEN] + user.additional_usage_quota[Quota.MUSIC_GEN]
         prompt = user_data.get('music_gen_prompt')
-        duration = int(duration)
 
         if not prompt:
             await handle_music_gen(message.bot, user.telegram_chat_id, state, user_id)
 
             await processing_message.delete()
             await message.delete()
+
+        try:
+            duration = int(duration)
+        except ValueError:
+            reply_markup = build_cancel_keyboard(user_language_code)
+            await message.reply(
+                text=get_localization(user_language_code).VALUE_ERROR,
+                reply_markup=reply_markup,
+            )
 
         if quota < duration:
             reply_markup = build_cancel_keyboard(user_language_code)
@@ -163,12 +171,6 @@ async def handle_music_gen_selection(
                         "prompt": prompt,
                         "duration": duration,
                     }
-                )
-            except (TypeError, ValueError):
-                reply_markup = build_cancel_keyboard(user_language_code)
-                await message.reply(
-                    text=get_localization(user_language_code).VALUE_ERROR,
-                    reply_markup=reply_markup,
                 )
             except Exception as e:
                 await message.answer(

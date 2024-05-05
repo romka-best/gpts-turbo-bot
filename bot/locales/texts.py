@@ -618,23 +618,24 @@ class Texts(Protocol):
                 suno_info += '\n' if i < len(count_suno_usage.items()) - 1 else ''
 
         return f"""
+#statistics
+
 📈 <b>Статистика за {period} готова!</b>
 
 👤 <b>Пользователи</b>
 1️⃣ <b>{'Всего пользователей' if period == 'всё время' else 'Новых пользователей'}:</b> {count_all_users}
-2️⃣ <b>{'Активированные' if period == 'всё время' else 'Активные'}:</b> {count_activated_users}
-3️⃣ <b>Перешли по реферальной ссылке:</b> {count_referral_users}
-4️⃣ <b>Языки:</b>
 🇺🇸 - {count_english_users} ({round((count_english_users / count_all_users) * 100, 2) if count_all_users else 0}%)
 🇷🇺 - {count_russian_users} ({round((count_russian_users / count_all_users) * 100, 2) if count_all_users else 0}%)
 🌍 - {count_other_users} ({round((count_other_users / count_all_users) * 100, 2) if count_all_users else 0}%)
-5️⃣ <b>Оплатившие хоть раз:</b> {count_paid_users}
-6️⃣ <b>Подписчики:</b>
+2️⃣ <b>{'Активированные' if period == 'всё время' else 'Активные'}:</b> {count_activated_users}
+3️⃣ <b>Перешли по реферальной ссылке:</b> {count_referral_users}
+4️⃣ <b>Оплатившие хоть раз:</b> {count_paid_users}
+5️⃣ <b>Подписчики:</b>
     - <b>{SubscriptionType.FREE}:</b> {count_subscription_users[SubscriptionType.FREE]}
     - <b>{SubscriptionType.STANDARD} {emojis[SubscriptionType.STANDARD]}:</b> {count_subscription_users[SubscriptionType.STANDARD]}
     - <b>{SubscriptionType.VIP} {emojis[SubscriptionType.VIP]}:</b> {count_subscription_users[SubscriptionType.VIP]}
     - <b>{SubscriptionType.PLATINUM} {emojis[SubscriptionType.PLATINUM]}:</b> {count_subscription_users[SubscriptionType.PLATINUM]}
-7️⃣ <b>Заблокировали бота:</b> {count_blocked_users}
+6️⃣ <b>Заблокировали бота:</b> {count_blocked_users}
 
 💰 <b>Финансы</b>
 1️⃣ <b>Транзакции:</b>
