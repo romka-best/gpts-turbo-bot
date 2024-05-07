@@ -181,7 +181,7 @@ class Subscription:
     @staticmethod
     def get_emojis():
         return {
-            SubscriptionType.FREE: '',
+            SubscriptionType.FREE: '🆓',
             SubscriptionType.STANDARD: '⭐',
             SubscriptionType.VIP: '🔥',
             SubscriptionType.PLATINUM: '💎'

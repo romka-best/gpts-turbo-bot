@@ -13,6 +13,7 @@ from bot.handlers.ai.face_swap_handler import handle_face_swap
 from bot.handlers.ai.midjourney_handler import handle_midjourney
 from bot.handlers.ai.music_gen_handler import handle_music_gen
 from bot.handlers.ai.suno_handler import handle_suno
+from bot.handlers.common.common_handler import handle_help
 from bot.utils.is_already_processing import is_already_processing
 from bot.utils.is_messages_limit_exceeded import is_messages_limit_exceeded
 from bot.utils.is_time_limit_exceeded import is_time_limit_exceeded
@@ -20,7 +21,7 @@ from bot.utils.is_time_limit_exceeded import is_time_limit_exceeded
 text_router = Router()
 
 
-@text_router.message(F.text)
+@text_router.message(F.text, ~F.text.startswith('/'))
 async def handle_text(message: Message, state: FSMContext):
     user = await get_user(str(message.from_user.id))
 
@@ -67,3 +68,8 @@ async def handle_text(message: Message, state: FSMContext):
         await handle_suno(message.bot, str(message.chat.id), state, user.id)
     else:
         raise NotImplemented
+
+
+@text_router.message(F.text, F.text.startswith('/'))
+async def handle_unrecognized_command(message: Message, state: FSMContext):
+    await handle_help(message, state)

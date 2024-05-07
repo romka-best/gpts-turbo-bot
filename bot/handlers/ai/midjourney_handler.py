@@ -160,6 +160,8 @@ async def handle_midjourney(
                         },
                     )
 
+                await processing_message.delete()
+
 
 @midjourney_router.callback_query(lambda c: c.data.startswith('midjourney:'))
 async def handle_midjourney_selection(callback_query: CallbackQuery, state: FSMContext):

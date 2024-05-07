@@ -29,11 +29,19 @@ async def write_user_in_transaction(
     chat_id: str,
     telegram_chat_id: str,
     referred_by: Optional[str],
+    is_referred_by_user=False,
 ) -> User:
     user_ref = firebase.db.collection(User.COLLECTION_NAME).document(str(telegram_user.id))
     user_data = (await user_ref.get()).to_dict() or {}
 
-    created_user = create_user_object(telegram_user, user_data, chat_id, telegram_chat_id, referred_by)
+    created_user = create_user_object(
+        telegram_user,
+        user_data,
+        chat_id,
+        telegram_chat_id,
+        referred_by,
+        is_referred_by_user,
+    )
 
     transaction.set(user_ref, created_user.to_dict())
 

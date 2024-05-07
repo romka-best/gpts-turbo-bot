@@ -115,7 +115,7 @@ async def handle_catalog_manage_create_role_confirmation_selection(callback_quer
         await state.clear()
 
 
-@catalog_router.message(Catalog.waiting_for_system_role_name, ~F.text.startswith('/'))
+@catalog_router.message(Catalog.waiting_for_system_role_name, F.text, ~F.text.startswith('/'))
 async def catalog_manage_create_role_system_name_sent(message: Message, state: FSMContext):
     user_language_code = await get_user_language(str(message.from_user.id), state.storage)
 
@@ -136,7 +136,7 @@ async def catalog_manage_create_role_system_name_sent(message: Message, state: F
         await state.set_state(Catalog.waiting_for_role_name)
 
 
-@catalog_router.message(Catalog.waiting_for_role_name, ~F.text.startswith('/'))
+@catalog_router.message(Catalog.waiting_for_role_name, F.text, ~F.text.startswith('/'))
 async def catalog_manage_create_role_name_sent(message: Message, state: FSMContext):
     user_language_code = await get_user_language(str(message.from_user.id), state.storage)
 
@@ -161,7 +161,7 @@ async def catalog_manage_create_role_name_sent(message: Message, state: FSMConte
     await state.set_state(Catalog.waiting_for_role_description)
 
 
-@catalog_router.message(Catalog.waiting_for_role_description, ~F.text.startswith('/'))
+@catalog_router.message(Catalog.waiting_for_role_description, F.text, ~F.text.startswith('/'))
 async def catalog_manage_create_role_description_sent(message: Message, state: FSMContext):
     user_language_code = await get_user_language(str(message.from_user.id), state.storage)
 
@@ -186,7 +186,7 @@ async def catalog_manage_create_role_description_sent(message: Message, state: F
     await state.set_state(Catalog.waiting_for_role_instruction)
 
 
-@catalog_router.message(Catalog.waiting_for_role_instruction, ~F.text.startswith('/'))
+@catalog_router.message(Catalog.waiting_for_role_instruction, F.text, ~F.text.startswith('/'))
 async def catalog_manage_create_role_instruction_sent(message: Message, state: FSMContext):
     user_language_code = await get_user_language(str(message.from_user.id), state.storage)
 
@@ -261,7 +261,7 @@ async def handle_catalog_manage_edit_selection(callback_query: CallbackQuery, st
         await state.update_data(system_role=system_role, info_type=action)
 
 
-@catalog_router.message(Catalog.waiting_for_new_role_info, ~F.text.startswith('/'))
+@catalog_router.message(Catalog.waiting_for_new_role_info, F.text, ~F.text.startswith('/'))
 async def catalog_manage_edit_role_sent(message: Message, state: FSMContext):
     user_language_code = await get_user_language(str(message.from_user.id), state.storage)
     user_data = await state.get_data()

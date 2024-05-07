@@ -131,14 +131,19 @@ async def suno_prompt_sent(message: Message, state: FSMContext):
     user = await get_user(str(user_id))
     user_language_code = await get_user_language(str(user_id), state.storage)
 
+    prompt = message.text
+    if prompt is None:
+        await message.reply(
+            text=get_localization(user_language_code).SUNO_VALUE_ERROR,
+        )
+        return
+
     processing_message = await message.reply(
         text=get_localization(user_language_code).processing_request_music()
     )
 
     async with ChatActionSender.upload_voice(bot=message.bot, chat_id=message.chat.id):
         quota = user.monthly_limits[Quota.SUNO] + user.additional_usage_quota[Quota.SUNO]
-        prompt = message.text
-
         if quota < 2:
             reply_markup = build_cancel_keyboard(user_language_code)
             await message.answer(
@@ -200,17 +205,23 @@ async def suno_prompt_sent(message: Message, state: FSMContext):
                     await message.answer(
                         text=get_localization(user_language_code).SUNO_TRY_LATER,
                     )
+                elif "Bad Request" in str(e):
+                    await message.answer(
+                        text=get_localization(user_language_code).SUNO_TOO_MANY_WORDS,
+                    )
+
+                    await handle_suno(message.bot, str(message.chat.id), state, user_id)
                 else:
                     await message.answer(
                         text=get_localization(user_language_code).ERROR,
                         parse_mode=None,
                     )
 
-                await send_message_to_admins(
-                    bot=message.bot,
-                    message=f"#error\n\nALARM! Ошибка у пользователя при запросе в Suno: {user.id}\nИнформация:\n{e}",
-                    parse_mode=None,
-                )
+                    await send_message_to_admins(
+                        bot=message.bot,
+                        message=f"#error\n\nALARM! Ошибка у пользователя при запросе в Suno: {user.id}\nИнформация:\n{e}",
+                        parse_mode=None,
+                    )
 
                 request.status = RequestStatus.FINISHED
                 await update_request(request.id, {
@@ -228,6 +239,8 @@ async def suno_prompt_sent(message: Message, state: FSMContext):
                             "has_error": generation.has_error,
                         },
                     )
+
+                await processing_message.delete()
 
 
 @suno_router.callback_query(lambda c: c.data.startswith('suno_custom_mode_lyrics:'))
@@ -263,13 +276,20 @@ async def suno_lyrics_sent(message: Message, state: FSMContext):
     user_id = str(message.from_user.id)
     user_language_code = await get_user_language(str(user_id), state.storage)
 
+    lyrics = message.text
+    if lyrics is None:
+        await message.reply(
+            text=get_localization(user_language_code).SUNO_VALUE_ERROR,
+        )
+        return
+
     reply_markup = build_suno_custom_mode_genres_keyboard(user_language_code)
     await message.reply(
         text=get_localization(user_language_code).SUNO_CUSTOM_MODE_GENRES,
         reply_markup=reply_markup,
     )
 
-    await state.update_data(suno_lyrics=message.text)
+    await state.update_data(suno_lyrics=lyrics)
     await state.set_state(Suno.waiting_for_genres)
 
 
@@ -296,7 +316,16 @@ async def handle_suno_custom_mode_genres_selection(callback_query: CallbackQuery
 async def suno_genres_sent(message: Message, state: FSMContext):
     user_id = str(message.from_user.id)
     user = await get_user(str(user_id))
+    user_data = await state.get_data()
     user_language_code = await get_user_language(str(user_id), state.storage)
+
+    lyrics = user_data.get('suno_lyrics', '')
+    genres = message.text
+    if genres is None:
+        await message.reply(
+            text=get_localization(user_language_code).SUNO_VALUE_ERROR,
+        )
+        return
 
     processing_message = await message.reply(
         text=get_localization(user_language_code).processing_request_music()
@@ -321,53 +350,92 @@ async def suno_genres_sent(message: Message, state: FSMContext):
                 await processing_message.delete()
                 return
 
-            user_data = await state.get_data()
-            lyrics = user_data.get('suno_lyrics', '')
-            genres = message.text
-            if user_language_code != 'en':
-                genres = await translate_text(genres, user_language_code, 'en')
+            try:
+                if user_language_code != 'en':
+                    genres = await translate_text(genres, user_language_code, 'en')
 
-            request = await write_request(
-                user_id=user.id,
-                message_id=processing_message.message_id,
-                model=Model.SUNO,
-                requested=2,
-                details={
-                    "mode": SunoMode.CUSTOM,
-                    "lyrics": lyrics,
-                    "genres": genres,
-                    "is_suggestion": False,
-                },
-            )
+                request = await write_request(
+                    user_id=user.id,
+                    message_id=processing_message.message_id,
+                    model=Model.SUNO,
+                    requested=2,
+                    details={
+                        "mode": SunoMode.CUSTOM,
+                        "lyrics": lyrics,
+                        "genres": genres,
+                        "is_suggestion": False,
+                    },
+                )
 
-            results = await generate_song(lyrics, False, True, genres)
-            tasks = []
-            for (i, result) in enumerate(results):
-                if result is not None:
-                    tasks.append(
-                        write_generation(
-                            id=result,
-                            request_id=request.id,
-                            model=Model.SUNO,
-                            has_error=result is None,
-                            details={
-                                "mode": SunoMode.CUSTOM,
-                                "lyrics": lyrics,
-                                "genres": genres,
-                                "is_suggestion": False,
-                            }
+                results = await generate_song(lyrics, False, True, genres)
+                tasks = []
+                for (i, result) in enumerate(results):
+                    if result is not None:
+                        tasks.append(
+                            write_generation(
+                                id=result,
+                                request_id=request.id,
+                                model=Model.SUNO,
+                                has_error=result is None,
+                                details={
+                                    "mode": SunoMode.CUSTOM,
+                                    "lyrics": lyrics,
+                                    "genres": genres,
+                                    "is_suggestion": False,
+                                }
+                            )
                         )
+
+                        asyncio.create_task(
+                            check_song(
+                                bot=message.bot,
+                                storage=state.storage,
+                                song_id=result,
+                            )
+                        )
+
+                await asyncio.gather(*tasks)
+            except Exception as e:
+                if "Too Many Requests" in str(e):
+                    await message.answer(
+                        text=get_localization(user_language_code).SUNO_TRY_LATER,
+                    )
+                elif "Bad Request" in str(e):
+                    await message.answer(
+                        text=get_localization(user_language_code).SUNO_TOO_MANY_WORDS,
                     )
 
-                    asyncio.create_task(
-                        check_song(
-                            bot=message.bot,
-                            storage=state.storage,
-                            song_id=result,
-                        )
+                    await handle_suno(message.bot, str(message.chat.id), state, user_id)
+                else:
+                    await message.answer(
+                        text=get_localization(user_language_code).ERROR,
+                        parse_mode=None,
                     )
 
-            await asyncio.gather(*tasks)
+                    await send_message_to_admins(
+                        bot=message.bot,
+                        message=f"#error\n\nALARM! Ошибка у пользователя при запросе в Suno: {user.id}\nИнформация:\n{e}",
+                        parse_mode=None,
+                    )
+
+                request.status = RequestStatus.FINISHED
+                await update_request(request.id, {
+                    "status": request.status
+                })
+
+                generations = await get_generations_by_request_id(request.id)
+                for generation in generations:
+                    generation.status = GenerationStatus.FINISHED
+                    generation.has_error = True
+                    await update_generation(
+                        generation.id,
+                        {
+                            "status": generation.status,
+                            "has_error": generation.has_error,
+                        },
+                    )
+
+                await processing_message.delete()
 
 
 async def handle_suno_example(user: User, prompt: str, message: Message, state: FSMContext):

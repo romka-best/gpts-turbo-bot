@@ -46,7 +46,7 @@ async def promo_code(message: Message, state: FSMContext):
     await handle_promo_code(message, str(message.from_user.id), state)
 
 
-@promo_code_router.message(PromoCode.waiting_for_promo_code, ~F.text.startswith('/'))
+@promo_code_router.message(PromoCode.waiting_for_promo_code, F.text, ~F.text.startswith('/'))
 async def promo_code_sent(message: Message, state: FSMContext):
     user_id = str(message.from_user.id)
     user = await get_user(user_id)

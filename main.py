@@ -36,7 +36,9 @@ from bot.handlers.common.document_handler import document_router
 from bot.handlers.common.feedback_handler import feedback_router
 from bot.handlers.common.photo_handler import photo_router
 from bot.handlers.common.profile_handler import profile_router
+from bot.handlers.common.sticker_handler import sticker_router
 from bot.handlers.common.text_handler import text_router
+from bot.handlers.common.video_handler import video_router
 from bot.handlers.common.voice_handler import voice_router
 from bot.handlers.payment.bonus_handler import bonus_router
 from bot.handlers.payment.payment_handler import payment_router
@@ -104,6 +106,8 @@ async def lifespan(_: FastAPI):
         suno_router,
         document_router,
         photo_router,
+        video_router,
+        sticker_router,
         voice_router,
         text_router,
     )
@@ -151,10 +155,10 @@ async def handle_update(update: dict):
             logging.warning(e)
         else:
             logging.exception(f"Error in bot_webhook: {e}")
-            await notify_admins_about_error(bot, telegram_update, e)
+            await notify_admins_about_error(bot, telegram_update, dp, e)
     except Exception as e:
         logging.exception(f"Error in bot_webhook: {e}")
-        await notify_admins_about_error(bot, telegram_update, e)
+        await notify_admins_about_error(bot, telegram_update, dp, e)
 
 
 @app.post(WEBHOOK_REPLICATE_PATH)

@@ -1,3 +1,4 @@
+import random
 from typing import Protocol, Dict, List
 
 from bot.database.models.common import Currency, Model
@@ -32,6 +33,10 @@ class Texts(Protocol):
     # Feedback
     FEEDBACK: str
     FEEDBACK_SUCCESS: str
+    FEEDBACK_ADMIN_APPROVE = "Одобрить ✅"
+    FEEDBACK_ADMIN_DENY = "Отклонить ❌"
+    FEEDBACK_APPROVED: str
+    FEEDBACK_DENIED: str
 
     # Profile
     TELL_ME_YOUR_GENDER: str
@@ -251,7 +256,11 @@ class Texts(Protocol):
     SWITCHED_TO_SUNO: str
     ALREADY_SWITCHED_TO_THIS_MODEL: str
     REQUEST_FORBIDDEN_ERROR: str
+    PHOTO_FORBIDDEN_ERROR: str
     ALBUM_FORBIDDEN_ERROR: str
+    VIDEO_FORBIDDEN_ERROR: str
+    DOCUMENT_FORBIDDEN_ERROR: str
+    STICKER_FORBIDDEN_ERROR: str
     ALREADY_MAKE_REQUEST: str
     READY_FOR_NEW_REQUEST: str
     CONTINUE_GENERATING: str
@@ -279,6 +288,8 @@ class Texts(Protocol):
     SUNO_CUSTOM_MODE_GENRES: str
     SUNO_START_AGAIN: str
     SUNO_TRY_LATER: str
+    SUNO_TOO_MANY_WORDS: str
+    SUNO_VALUE_ERROR: str
 
     # MusicGen
     MUSIC_GEN_INFO: str
@@ -491,6 +502,7 @@ class Texts(Protocol):
     GENERATIONS_IN_PACKAGES_ENDED: str
     FACE_SWAP_MIN_ERROR: str
     FACE_SWAP_MAX_ERROR: str
+    FACE_SWAP_NO_FACE_FOUND_ERROR: str
     FACE_SWAP_MANAGE = """
 🤹‍ <b>Добро пожаловать в царство FaceSwap!</b> 🎭
 
@@ -565,6 +577,8 @@ class Texts(Protocol):
     VIDEO: str
     SKIP: str
 
+    TERMS_LINK: str
+
     @staticmethod
     def statistics(
         period: str,
@@ -631,7 +645,7 @@ class Texts(Protocol):
 3️⃣ <b>Перешли по реферальной ссылке:</b> {count_referral_users}
 4️⃣ <b>Оплатившие хоть раз:</b> {count_paid_users}
 5️⃣ <b>Подписчики:</b>
-    - <b>{SubscriptionType.FREE}:</b> {count_subscription_users[SubscriptionType.FREE]}
+    - <b>{SubscriptionType.FREE} {emojis[SubscriptionType.FREE]}:</b> {count_subscription_users[SubscriptionType.FREE]}
     - <b>{SubscriptionType.STANDARD} {emojis[SubscriptionType.STANDARD]}:</b> {count_subscription_users[SubscriptionType.STANDARD]}
     - <b>{SubscriptionType.VIP} {emojis[SubscriptionType.VIP]}:</b> {count_subscription_users[SubscriptionType.VIP]}
     - <b>{SubscriptionType.PLATINUM} {emojis[SubscriptionType.PLATINUM]}:</b> {count_subscription_users[SubscriptionType.PLATINUM]}
@@ -640,46 +654,46 @@ class Texts(Protocol):
 💰 <b>Финансы</b>
 1️⃣ <b>Транзакции:</b>
     ➖ <b>{TransactionType.EXPENSE}:</b> {count_expense_transactions_total}
-    - <b>{ServiceType.CHAT_GPT3}:</b> {count_expense_transactions[ServiceType.CHAT_GPT3]}
-    - <b>{ServiceType.CHAT_GPT4}:</b> {count_expense_transactions[ServiceType.CHAT_GPT4]}
-    - <b>{ServiceType.DALL_E}:</b> {count_expense_transactions[ServiceType.DALL_E]}
-    - <b>{ServiceType.MIDJOURNEY}:</b> {count_expense_transactions[ServiceType.MIDJOURNEY]}
-    - <b>{ServiceType.FACE_SWAP}:</b> {count_expense_transactions[ServiceType.FACE_SWAP]}
-    - <b>{ServiceType.MUSIC_GEN}:</b> {count_expense_transactions[ServiceType.MUSIC_GEN][0]} ({count_expense_transactions[ServiceType.MUSIC_GEN][1]})
-    - <b>{ServiceType.SUNO}:</b> {count_expense_transactions[ServiceType.SUNO]}
-    - <b>{ServiceType.VOICE_MESSAGES}:</b> {count_expense_transactions[ServiceType.VOICE_MESSAGES]}
-    - <b>{ServiceType.SERVER}:</b> {count_expense_transactions[ServiceType.SERVER]}
-    - <b>{ServiceType.DATABASE}:</b> {count_expense_transactions[ServiceType.DATABASE]}
+    - <b>{Texts.CHATGPT3}:</b> {count_expense_transactions[ServiceType.CHAT_GPT3]}
+    - <b>{Texts.CHATGPT4}:</b> {count_expense_transactions[ServiceType.CHAT_GPT4]}
+    - <b>{Texts.DALL_E}:</b> {count_expense_transactions[ServiceType.DALL_E]}
+    - <b>{Texts.MIDJOURNEY}:</b> {count_expense_transactions[ServiceType.MIDJOURNEY]}
+    - <b>{Texts.FACE_SWAP}:</b> {count_expense_transactions[ServiceType.FACE_SWAP]}
+    - <b>{Texts.MUSIC_GEN}:</b> {count_expense_transactions[ServiceType.MUSIC_GEN][0]} ({count_expense_transactions[ServiceType.MUSIC_GEN][1]})
+    - <b>{Texts.SUNO}:</b> {count_expense_transactions[ServiceType.SUNO]}
+    - <b>Голосовые запросы/ответы 🎙:</b> {count_expense_transactions[ServiceType.VOICE_MESSAGES]}
+    - <b>Сервер 💻:</b> {count_expense_transactions[ServiceType.SERVER]}
+    - <b>База Данных 🗄:</b> {count_expense_transactions[ServiceType.DATABASE]}
 
     ➕ <b>{TransactionType.INCOME}:</b> {count_income_transactions_total}
-    - <b>{ServiceType.CHAT_GPT3}:</b> {count_income_transactions[ServiceType.CHAT_GPT3]}
-    - <b>{ServiceType.CHAT_GPT4}:</b> {count_income_transactions[ServiceType.CHAT_GPT4]}
-    - <b>{ServiceType.DALL_E}:</b> {count_income_transactions[ServiceType.DALL_E]}
-    - <b>{ServiceType.MIDJOURNEY}:</b> {count_income_transactions[ServiceType.MIDJOURNEY]}
-    - <b>{ServiceType.FACE_SWAP}:</b> {count_income_transactions[ServiceType.FACE_SWAP]}
-    - <b>{ServiceType.MUSIC_GEN}:</b> {count_income_transactions[ServiceType.MUSIC_GEN]}
-    - <b>{ServiceType.SUNO}:</b> {count_income_transactions[ServiceType.SUNO]}
-    - <b>{ServiceType.ADDITIONAL_CHATS}:</b> {count_income_transactions[ServiceType.ADDITIONAL_CHATS]}
-    - <b>{ServiceType.ACCESS_TO_CATALOG}:</b> {count_income_transactions[ServiceType.ACCESS_TO_CATALOG]}
-    - <b>{ServiceType.VOICE_MESSAGES}:</b> {count_income_transactions[ServiceType.VOICE_MESSAGES]}
-    - <b>{ServiceType.FAST_MESSAGES}:</b> {count_income_transactions[ServiceType.FAST_MESSAGES]}
-    - <b>{ServiceType.STANDARD}:</b> {count_income_transactions[ServiceType.STANDARD]}
-    - <b>{ServiceType.VIP}:</b> {count_income_transactions[ServiceType.VIP]}
-    - <b>{ServiceType.PLATINUM}:</b> {count_income_transactions[ServiceType.PLATINUM]}
+    - <b>{Texts.CHATGPT3}:</b> {count_income_transactions[ServiceType.CHAT_GPT3]}
+    - <b>{Texts.CHATGPT4}:</b> {count_income_transactions[ServiceType.CHAT_GPT4]}
+    - <b>{Texts.DALL_E}:</b> {count_income_transactions[ServiceType.DALL_E]}
+    - <b>{Texts.MIDJOURNEY}:</b> {count_income_transactions[ServiceType.MIDJOURNEY]}
+    - <b>{Texts.FACE_SWAP}:</b> {count_income_transactions[ServiceType.FACE_SWAP]}
+    - <b>{Texts.MUSIC_GEN}:</b> {count_income_transactions[ServiceType.MUSIC_GEN]}
+    - <b>{Texts.SUNO}:</b> {count_income_transactions[ServiceType.SUNO]}
+    - <b>Дополнительные чаты 💬:</b> {count_income_transactions[ServiceType.ADDITIONAL_CHATS]}
+    - <b>Доступ к каталогу 🎭:</b> {count_income_transactions[ServiceType.ACCESS_TO_CATALOG]}
+    - <b>Голосовые запросы/ответы 🎙:</b> {count_income_transactions[ServiceType.VOICE_MESSAGES]}
+    - <b>Быстрые сообщения ⚡:</b> {count_income_transactions[ServiceType.FAST_MESSAGES]}
+    - <b>{SubscriptionType.STANDARD} {emojis[SubscriptionType.STANDARD]}:</b> {count_income_transactions[ServiceType.STANDARD]}
+    - <b>{SubscriptionType.VIP} {emojis[SubscriptionType.VIP]}:</b> {count_income_transactions[ServiceType.VIP]}
+    - <b>{SubscriptionType.PLATINUM} {emojis[SubscriptionType.PLATINUM]}:</b> {count_income_transactions[ServiceType.PLATINUM]}
 
     - <b>Всего:</b> {count_transactions_total}
 
 2️⃣ <b>Расходы:</b>
-   - <b>{ServiceType.CHAT_GPT3}:</b> {round(count_expense_money[ServiceType.CHAT_GPT3], 2)}$
-   - <b>{ServiceType.CHAT_GPT4}:</b> {round(count_expense_money[ServiceType.CHAT_GPT4], 2)}$
-   - <b>{ServiceType.DALL_E}:</b> {round(count_expense_money[ServiceType.DALL_E], 2)}$
-   - <b>{ServiceType.MIDJOURNEY}:</b> {round(count_expense_money[ServiceType.MIDJOURNEY], 2)}$
-   - <b>{ServiceType.FACE_SWAP}:</b> {round(count_expense_money[ServiceType.FACE_SWAP], 2)}$
-   - <b>{ServiceType.MUSIC_GEN}:</b> {round(count_expense_money[ServiceType.MUSIC_GEN], 2)}$
-   - <b>{ServiceType.SUNO}:</b> {round(count_expense_money[ServiceType.SUNO], 2)}$
-   - <b>{ServiceType.VOICE_MESSAGES}:</b> {round(count_expense_money[ServiceType.VOICE_MESSAGES], 2)}$
-   - <b>{ServiceType.SERVER}:</b> {round(count_expense_money[ServiceType.SERVER], 2)}$
-   - <b>{ServiceType.DATABASE}:</b> {round(count_expense_money[ServiceType.DATABASE], 2)}$
+   - <b>{Texts.CHATGPT3}:</b> {round(count_expense_money[ServiceType.CHAT_GPT3], 2)}$
+   - <b>{Texts.CHATGPT4}:</b> {round(count_expense_money[ServiceType.CHAT_GPT4], 2)}$
+   - <b>{Texts.DALL_E}:</b> {round(count_expense_money[ServiceType.DALL_E], 2)}$
+   - <b>{Texts.MIDJOURNEY}:</b> {round(count_expense_money[ServiceType.MIDJOURNEY], 2)}$
+   - <b>{Texts.FACE_SWAP}:</b> {round(count_expense_money[ServiceType.FACE_SWAP], 2)}$
+   - <b>{Texts.MUSIC_GEN}:</b> {round(count_expense_money[ServiceType.MUSIC_GEN], 2)}$
+   - <b>{Texts.SUNO}:</b> {round(count_expense_money[ServiceType.SUNO], 2)}$
+   - <b>Голосовые запросы/ответы 🎙:</b> {round(count_expense_money[ServiceType.VOICE_MESSAGES], 2)}$
+   - <b>Сервер 💻:</b> {round(count_expense_money[ServiceType.SERVER], 2)}$
+   - <b>База Данных 🗄:</b> {round(count_expense_money[ServiceType.DATABASE], 2)}$
 
    - <b>Всего:</b> {round(count_expense_total_money, 2)}$
 3️⃣ <b>Доходы:</b>
@@ -689,17 +703,17 @@ class Texts(Protocol):
     - <b>{ServiceType.PLATINUM} {emojis[ServiceType.PLATINUM]}:</b> {count_income_money[ServiceType.PLATINUM]}₽
 
     💵 <b>Пакеты:</b> {count_income_packages_total_money}₽
-    - <b>{ServiceType.CHAT_GPT3}:</b> {count_income_money[ServiceType.CHAT_GPT3]}₽
-    - <b>{ServiceType.CHAT_GPT4}:</b> {count_income_money[ServiceType.CHAT_GPT4]}₽
-    - <b>{ServiceType.DALL_E}:</b> {count_income_money[ServiceType.DALL_E]}₽
-    - <b>{ServiceType.MIDJOURNEY}:</b> {count_income_money[ServiceType.MIDJOURNEY]}₽
-    - <b>{ServiceType.FACE_SWAP}:</b> {count_income_money[ServiceType.FACE_SWAP]}₽
-    - <b>{ServiceType.MUSIC_GEN}:</b> {count_income_money[ServiceType.MUSIC_GEN]}₽
-    - <b>{ServiceType.SUNO}:</b> {count_income_money[ServiceType.SUNO]}₽
-    - <b>{ServiceType.ADDITIONAL_CHATS}:</b> {count_income_money[ServiceType.ADDITIONAL_CHATS]}₽
-    - <b>{ServiceType.ACCESS_TO_CATALOG}:</b> {count_income_money[ServiceType.ACCESS_TO_CATALOG]}₽
-    - <b>{ServiceType.VOICE_MESSAGES}:</b> {count_income_money[ServiceType.VOICE_MESSAGES]}₽
-    - <b>{ServiceType.FAST_MESSAGES}:</b> {count_income_money[ServiceType.FAST_MESSAGES]}₽
+    - <b>{Texts.CHATGPT3}:</b> {count_income_money[ServiceType.CHAT_GPT3]}₽
+    - <b>{Texts.CHATGPT4}:</b> {count_income_money[ServiceType.CHAT_GPT4]}₽
+    - <b>{Texts.DALL_E}:</b> {count_income_money[ServiceType.DALL_E]}₽
+    - <b>{Texts.MIDJOURNEY}:</b> {count_income_money[ServiceType.MIDJOURNEY]}₽
+    - <b>{Texts.FACE_SWAP}:</b> {count_income_money[ServiceType.FACE_SWAP]}₽
+    - <b>{Texts.MUSIC_GEN}:</b> {count_income_money[ServiceType.MUSIC_GEN]}₽
+    - <b>{Texts.SUNO}:</b> {count_income_money[ServiceType.SUNO]}₽
+    - <b>Дополнительные чаты 💬:</b> {count_income_money[ServiceType.ADDITIONAL_CHATS]}₽
+    - <b>Доступ к каталогу 🎭:</b> {count_income_money[ServiceType.ACCESS_TO_CATALOG]}₽
+    - <b>Голосовые запросы/ответы 🎙:</b> {count_income_money[ServiceType.VOICE_MESSAGES]}₽
+    - <b>Быстрые сообщения ⚡:</b> {count_income_money[ServiceType.FAST_MESSAGES]}₽
 
     - <b>Всего:</b> {count_income_total_money}₽
 4️⃣ <b>Вал:</b> {round(count_total_money, 2)}₽
@@ -720,7 +734,7 @@ class Texts(Protocol):
     👎 {count_reactions[ServiceType.MIDJOURNEY][GenerationReaction.DISLIKED]}
     🤷 {count_reactions[ServiceType.MIDJOURNEY][GenerationReaction.NONE]}
 
-🎭 <b>FaceSwap</b>
+📷 <b>FaceSwap</b>
     <b>Генерации:</b>
 {face_swap_info}
 
@@ -878,12 +892,13 @@ class Texts(Protocol):
     def profile(
         subscription_type: SubscriptionType,
         gender: UserGender,
-        current_model: str,
+        current_model: Model,
         current_model_version: str,
         monthly_limits,
         additional_usage_quota,
         renewal_date,
         discount: int,
+        credits: float,
     ) -> str:
         raise NotImplementedError
 
@@ -977,6 +992,18 @@ class Texts(Protocol):
     def processing_request_music() -> str:
         raise NotImplementedError
 
+    @staticmethod
+    def processing_statistics() -> str:
+        texts = [
+            "Вызываю кибернетических уток, чтобы ускорить процесс. Кря-кря, и данные у нас! 🦆💻",
+            "Использую тайные заклинания кода, чтобы вызволить вашу статистику из пучины данных. Абракадабра! 🧙‍💾",
+            "Таймер установлен, чайник на плите. Пока я готовлю чай, данные собираются сами! ☕📊",
+            "Подключаюсь к космическим спутникам, чтобы найти нужную статистику. Вот это звёздный поиск! 🛰️✨",
+            "Зову на помощь армию пикселей. Они уже маршируют сквозь строки кода, чтобы доставить вам данные! 🪖🖥️",
+        ]
+
+        return random.choice(texts)
+
     # Settings
     @staticmethod
     def settings(human_model: str, current_model: Model, dall_e_cost=1) -> str:
@@ -984,7 +1011,7 @@ class Texts(Protocol):
 
     # Bonus
     @staticmethod
-    def bonus(user_id: str, referred_count: int, balance: float) -> str:
+    def bonus(user_id: str, balance: float, referred_count: int, feedback_count: int) -> str:
         raise NotImplementedError
 
     @staticmethod

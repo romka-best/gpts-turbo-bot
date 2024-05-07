@@ -53,7 +53,7 @@ async def handle_blast_language_selection(callback_query: CallbackQuery, state: 
     await state.update_data(blast_language=language)
 
 
-@blast_router.message(Blast.waiting_for_blast_letter, ~F.text.startswith('/'))
+@blast_router.message(Blast.waiting_for_blast_letter, F.text, ~F.text.startswith('/'))
 async def blast_letter_sent(message: Message, state: FSMContext):
     user_language_code = await get_user_language(str(message.from_user.id), state.storage)
     user_data = await state.get_data()

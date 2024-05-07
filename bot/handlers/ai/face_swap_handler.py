@@ -312,6 +312,17 @@ async def face_swap_quantity_handler(message: Message, state: FSMContext, user_i
     user_language_code = await get_user_language(str(user_id), state.storage)
     user_data = await state.get_data()
 
+    try:
+        quantity = int(chosen_quantity)
+    except (TypeError, ValueError):
+        reply_markup = build_cancel_keyboard(user_language_code)
+        await message.reply(
+            text=get_localization(user_language_code).VALUE_ERROR,
+            reply_markup=reply_markup,
+        )
+
+        return
+
     processing_message = await message.reply(
         text=get_localization(user_language_code).processing_request_face_swap()
     )
@@ -328,18 +339,6 @@ async def face_swap_quantity_handler(message: Message, state: FSMContext, user_i
             return
 
         face_swap_package = await get_face_swap_package_by_name_and_gender(name, user.gender)
-
-        try:
-            quantity = int(chosen_quantity)
-        except ValueError:
-            reply_markup = build_cancel_keyboard(user_language_code)
-            await message.reply(
-                text=get_localization(user_language_code).VALUE_ERROR,
-                reply_markup=reply_markup,
-            )
-
-            await processing_message.delete()
-            return
 
         if quota < quantity:
             reply_markup = build_cancel_keyboard(user_language_code)

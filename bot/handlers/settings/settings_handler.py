@@ -563,7 +563,7 @@ async def handle_delete_chat_selection(callback_query: CallbackQuery, state: FSM
     await callback_query.message.reply(text=get_localization(user_language_code).DELETE_CHAT_SUCCESS)
 
 
-@settings_router.message(Chats.waiting_for_chat_name, ~F.text.startswith('/'))
+@settings_router.message(Chats.waiting_for_chat_name, F.text, ~F.text.startswith('/'))
 async def chat_name_sent(message: Message, state: FSMContext):
     user_id = str(message.from_user.id)
     user = await get_user(user_id)

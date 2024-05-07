@@ -365,11 +365,17 @@ async def handle_statistics_selection(callback_query: CallbackQuery, state: FSMC
         await handle_write_transaction(callback_query, user_language_code)
         return
 
+    processing_message = await callback_query.message.reply(
+        text=get_localization(user_language_code).processing_statistics()
+    )
+
     text = await handle_get_statistics(user_language_code, period)
     await callback_query.message.answer(
         text=text,
         protect_content=True,
     )
+
+    await processing_message.delete()
 
 
 @statistics_router.callback_query(lambda c: c.data.startswith('statistics_write_transaction:'))

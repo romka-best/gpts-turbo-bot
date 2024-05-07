@@ -33,15 +33,19 @@ async def handle_suno_webhook(bot: Bot, storage: BaseStorage, body: dict):
         return True
 
     generation_status, generation_result = body.get("status", "error"), body.get("audio_url", "")
+    is_suggestion = generation.details.get('is_suggestion', False)
+    metadata = body.get('metadata', {})
 
     generation.status = GenerationStatus.FINISHED
-    if generation_status == 'error' or not generation_result:
+    if generation_status == 'error' or not generation_result or "/None.mp3" in generation_result:
         generation.has_error = True
         await update_generation(generation.id, {
             "status": generation.status,
             "has_error": generation.has_error,
         })
-        logging.error(f"Error in suno_webhook: {body.get('metadata')}")
+
+        error_type, error_message = metadata.get('error_type'), metadata.get('error_message')
+        logging.error(f"Error in suno_webhook: {error_type}: {error_message}")
     else:
         generation.result = generation_result
         new_details = {
@@ -61,28 +65,38 @@ async def handle_suno_webhook(bot: Bot, storage: BaseStorage, body: dict):
     user = await get_user(request.user_id)
     user_language_code = await get_user_language(user.id, storage)
 
-    is_suggestion = generation.details.get('is_suggestion', False)
-    metadata = body.get('metadata', {})
-    if generation_result and not is_suggestion:
+    if generation_result and "/None.mp3" not in generation_result and not is_suggestion:
+        (
+            duration,
+            video_url,
+            audio_url,
+            title,
+        ) = (
+            int(metadata.get('duration', 0)),
+            body.get('video_url'),
+            body.get('audio_url'),
+            body.get('title', '🎸'),
+        )
+
         reply_markup = build_reaction_keyboard(generation.id)
-        if user.settings[Model.SUNO][UserSettings.SEND_TYPE] == SunoSendType.VIDEO and body.get('video_url'):
+        if user.settings[Model.SUNO][UserSettings.SEND_TYPE] == SunoSendType.VIDEO and video_url:
             await send_video(
                 bot,
                 user.telegram_chat_id,
-                body.get('video_url'),
-                hlink(get_localization(user_language_code).AUDIO, body.get('audio_url')),
-                body.get('title', '🎸'),
-                int(metadata.get('duration', 0)),
+                video_url,
+                hlink(get_localization(user_language_code).AUDIO, audio_url),
+                title,
+                duration,
                 reply_markup,
             )
-        elif user.settings[Model.SUNO][UserSettings.SEND_TYPE] == SunoSendType.AUDIO and body.get('video_url'):
+        elif user.settings[Model.SUNO][UserSettings.SEND_TYPE] == SunoSendType.AUDIO and video_url:
             await send_audio(
                 bot,
                 user.telegram_chat_id,
                 generation.result,
-                hlink(get_localization(user_language_code).VIDEO, body.get('video_url')),
-                body.get('title', '🎸'),
-                int(metadata.get('duration', 0)),
+                hlink(get_localization(user_language_code).VIDEO, video_url),
+                title,
+                duration,
                 reply_markup,
             )
         else:
@@ -90,12 +104,12 @@ async def handle_suno_webhook(bot: Bot, storage: BaseStorage, body: dict):
                 bot,
                 user.telegram_chat_id,
                 generation.result,
-                hlink(get_localization(user_language_code).AUDIO, body.get('audio_url')),
-                body.get('title', '🎸'),
-                int(metadata.get('duration', 0)),
+                hlink(get_localization(user_language_code).AUDIO, audio_url),
+                title,
+                duration,
                 reply_markup,
             )
-    elif generation_result and is_suggestion:
+    elif generation_result and "/None.mp3" not in generation_result and is_suggestion:
         asyncio.create_task(
             send_suno_example(
                 bot=bot,
@@ -122,6 +136,15 @@ async def handle_suno_webhook(bot: Bot, storage: BaseStorage, body: dict):
                 success_generations.append(request_generation.result)
 
         total_result = len(success_generations)
+
+        if total_result != len(request_generations):
+            error_type, error_message = metadata.get('error_type'), metadata.get('error_message')
+            if error_type == "moderation_failure":
+                if not is_suggestion:
+                    await bot.send_message(
+                        chat_id=user.telegram_chat_id,
+                        text=get_localization(user_language_code).REQUEST_FORBIDDEN_ERROR,
+                    )
 
         quantity_to_delete = total_result
         quantity_deleted = 0
@@ -168,14 +191,14 @@ async def handle_suno_webhook(bot: Bot, storage: BaseStorage, body: dict):
         await state.clear()
         user_language_code = await get_user_language(str(user.id), state.storage)
 
-        if not is_suggestion:
+        if not is_suggestion and user.current_model == Model.SUNO:
             reply_markup = build_suno_keyboard(user_language_code)
             await bot.send_message(
                 chat_id=user.telegram_chat_id,
                 text=get_localization(user_language_code).SUNO_INFO,
                 reply_markup=reply_markup,
             )
-
+        if not is_suggestion:
             await bot.delete_message(user.telegram_chat_id, request.message_id)
 
     return True

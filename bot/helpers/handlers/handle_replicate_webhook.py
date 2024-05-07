@@ -24,6 +24,7 @@ from bot.handlers.ai.music_gen_handler import PRICE_MUSIC_GEN, handle_music_gen
 from bot.helpers.senders.send_audio import send_audio
 from bot.helpers.senders.send_images import send_image
 from bot.keyboards.common.common import build_reaction_keyboard
+from bot.locales.main import get_user_language, get_localization
 
 
 async def handle_replicate_webhook(bot: Bot, dp: Dispatcher, prediction: dict):
@@ -45,6 +46,7 @@ async def handle_replicate_webhook(bot: Bot, dp: Dispatcher, prediction: dict):
             "has_error": generation.has_error,
             "seconds": generation.seconds,
         })
+
         logging.error(f"Error in replicate_webhook: {prediction.get('logs')}")
     else:
         generation.result = generation_result
@@ -97,6 +99,12 @@ async def handle_replicate_face_swap(
             total_seconds += request_generation.seconds
 
         total_result = len(success_generations)
+        if total_result != len(request_generations):
+            user_language_code = await get_user_language(user.id, dp.storage)
+            await bot.send_message(
+                user.telegram_chat_id,
+                get_localization(user_language_code).FACE_SWAP_NO_FACE_FOUND_ERROR,
+            )
 
         used_face_swap_package = await get_used_face_swap_package(
             generation.details.get("used_face_swap_package_id")
@@ -148,7 +156,11 @@ async def handle_replicate_face_swap(
                     "additional_usage_quota": user.additional_usage_quota
                 }),
             ]
-            if used_face_swap_package and used_face_swap_package_used_images:
+            if (
+                total_result == len(request_generations) and
+                used_face_swap_package and
+                used_face_swap_package_used_images
+            ):
                 update_tasks.append(
                     update_used_face_swap_package(used_face_swap_package.id, {
                         "used_images": used_face_swap_package.used_images + used_face_swap_package_used_images,
@@ -166,7 +178,9 @@ async def handle_replicate_face_swap(
             )
         )
         await state.clear()
-        await handle_face_swap(bot, user.telegram_chat_id, state, user.id)
+
+        if total_result == len(request_generations) and user.current_model == Model.FACE_SWAP:
+            await handle_face_swap(bot, user.telegram_chat_id, state, user.id)
 
         await bot.delete_message(user.telegram_chat_id, request.message_id)
 
@@ -246,6 +260,7 @@ async def handle_replicate_music_gen(
         )
         await state.clear()
 
-        await handle_music_gen(bot, user.telegram_chat_id, state, user.id)
+        if user.current_model == Model.MUSIC_GEN:
+            await handle_music_gen(bot, user.telegram_chat_id, state, user.id)
 
         await bot.delete_message(user.telegram_chat_id, request.message_id)

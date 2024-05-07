@@ -14,6 +14,7 @@ def create_user_object(
     chat_id: str,
     telegram_chat_id: str,
     referred_by: Optional[str],
+    is_referred_by_user=False,
 ) -> User:
     return User(
         id=str(telegram_user.id),
@@ -28,7 +29,7 @@ def create_user_object(
         is_blocked=False,
         current_model=user_data.get("current_model", Model.CHAT_GPT),
         currency=user_data.get("currency", Currency.RUB),
-        balance=user_data.get("balance", 0),
+        balance=user_data.get("balance", 50.00 if is_referred_by_user else 0),
         subscription_type=user_data.get("subscription_type", SubscriptionType.FREE),
         last_subscription_limit_update=user_data.get("last_subscription_limit_update", datetime.now(timezone.utc)),
         monthly_limits=user_data.get("monthly_limits", SubscriptionLimit.LIMITS[SubscriptionType.FREE]),
