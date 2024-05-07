@@ -1,6 +1,6 @@
 import logging
 
-from aiogram.exceptions import TelegramBadRequest
+from aiogram.exceptions import TelegramBadRequest, TelegramForbiddenError
 from aiogram import Bot
 
 from bot.config import config
@@ -14,5 +14,5 @@ async def send_message_to_admins(bot: Bot, message: str, parse_mode='HTML'):
                 text=message,
                 parse_mode=parse_mode,
             )
-        except TelegramBadRequest as error:
+        except (TelegramBadRequest, TelegramForbiddenError) as error:
             logging.error(error)

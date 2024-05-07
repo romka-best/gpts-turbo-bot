@@ -55,6 +55,7 @@ async def profile(message: Message, state: FSMContext):
         user.additional_usage_quota,
         renewal_date.strftime("%d.%m.%Y"),
         user.discount,
+        user.balance,
     )
 
     photo_path = f'users/avatars/{user_id}.jpeg'

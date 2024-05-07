@@ -152,9 +152,23 @@ And remember, every piece of feedback is a step towards making our bot even more
 Thank you for sharing your thoughts! 💌
 Your input is the secret sauce to our success. We're cooking up some improvements and your feedback is the key ingredient 🍳🔑
 
-Keep an eye out for updates and new features, all inspired by you. We have credited 50 credits to your balance, but in the meantime, happy chatting! 🚀
+Keep an eye out for updates and new features, all inspired by you. We will add 50 credits to your balance after the administrators check the content of the feedback, but in the meantime, happy chatting! 🚀
 
 Your opinion matters a lot to us! 💖
+"""
+    FEEDBACK_APPROVED = """
+🌟 <b>Feedback received!</b> 🌟
+
+As a token of appreciation, your balance has increased by 50 credits 🪙! Use them to access exclusive functions or replenish the number of generations in neural networks 💸
+
+To use the bonus, enter the command /bonus and follow the instructions!
+    """
+    FEEDBACK_DENIED = """
+🌟 <b>Feedback received!</b> 🌟
+
+Unfortunately, your feedback was not constructive enough and we cannot increase your bonus balance 😢
+
+But don't worry! You can enter the command /bonus to see the other ways to top up the bonus balance!
 """
 
     # Profile
@@ -323,7 +337,11 @@ Please check your text for any forbidden content and try again!
 
 Our goal is safety and respect for every user! 🌟
 """
+    PHOTO_FORBIDDEN_ERROR = "I don't know how to work with photos in this AI model yet 👀"
     ALBUM_FORBIDDEN_ERROR = "In the current AI model, I can't process multiple photos at once, please send one 🙂"
+    VIDEO_FORBIDDEN_ERROR = "I don't know how to work with videos yet 👀"
+    DOCUMENT_FORBIDDEN_ERROR = "I don't know how to work with such documents yet 👀"
+    STICKER_FORBIDDEN_ERROR = "I don't know how to work with stickers yet 👀"
     ALREADY_MAKE_REQUEST = "You've already made a request. Please wait ⚠️"
     READY_FOR_NEW_REQUEST = "You can ask the next request 😌"
     CONTINUE_GENERATING = "Continue generating"
@@ -366,10 +384,12 @@ To switch to <b>ChatGPT-4.0</b>, enter the /chatgpt command and select <b>ChatGP
 
     # Suno
     SUNO_INFO = """
-🤖 Choose the style for creating your song:
+🤖 <b>Choose the style for creating your song:</b>
 
-🎹 In <b>simple mode</b>, you only need to describe the theme of the song and the genre.
-🎸 In <b>custom mode</b>, you have the opportunity to use your own lyrics and experiment with genres.
+🎹 In <b>simple mode</b>, you only need to describe the theme of the song and the genre
+🎸 In <b>custom mode</b>, you have the opportunity to use your own lyrics and experiment with genres
+
+<b>Suno</b> will create 2 tracks, up to 2 minutes each 🎧
 """
     SUNO_SIMPLE_MODE = "🎹 Simple"
     SUNO_CUSTOM_MODE = "🎸 Custom"
@@ -394,7 +414,10 @@ To ensure your song in custom mode matches your preferences, please specify the 
 
 🔍 List the desired genres separated by commas in your next message, and let's start creating your unique song!
 """
+    SUNO_START_AGAIN = "Start again 🔄"
     SUNO_TRY_LATER = "I have a heavy load on the server right now 🫨\n\nPlease, try later!"
+    SUNO_TOO_MANY_WORDS = "<b>Oh, oh!</b>🚧\n\nAt some steps, you sent too much text 📝\n\nTry again, but with a smaller text, please!"
+    SUNO_VALUE_ERROR = "It doesn't look like a prompt 🧐\n\nPlease enter a different value"
 
     # MusicGen
     MUSIC_GEN_INFO = """
@@ -555,7 +578,13 @@ Your chats have switched their unique roles to "Personal Assistant" as your acce
     FAST_ANSWERS_DESCRIPTION = "Quick Messages feature offers lightning-fast, accurate AI responses, ensuring you're always a step ahead in communication"
     MIN_ERROR = "Oops! It looks like the total sum is below our minimum threshold. Please choose count of packages that meets or exceeds the minimum required. Let's try that again! 🔄"
     MAX_ERROR = "Oops! It looks like the number entered is higher than you can purchase. Please enter a smaller value or one corresponding to your balance. Let's try that again! 🔄"
-    VALUE_ERROR = "Whoops! That doesn't seem like a number. 🤔 Could you please enter a numeric value? Let's give it another go! 🔢"
+    VALUE_ERROR = """
+Whoops! That doesn't seem like a number 🤔
+
+Could you please enter a numeric value?
+
+Let's give it another go! 🔢
+"""
     PACKAGE_SUCCESS = """
 🎉 <b>Cha-Ching! Payment success!</b> 💳
 
@@ -669,6 +698,14 @@ You're asking for more images than we have.
 
 🧐 <b>How about this?</b> Let's try a number within the package limit!
 """
+    FACE_SWAP_NO_FACE_FOUND_ERROR = """
+🚫 <b>Problem with Photo Processing</b>
+
+Unfortunately, we were unable to clearly identify a face in the photo from your /profile
+Please upload a new photo where your face is clearly visible and in good quality via the /profile command.
+
+🔄 After uploading a new photo, please try again. Thank you for your patience!
+"""
 
     ERROR = """
 I've got an unknown error 🤒
@@ -683,6 +720,8 @@ Please try again or contact @roman_danilov 🔧
     VIDEO = "Video 📹"
     SKIP = "Skip ⏩️"
 
+    TERMS_LINK = "https://telegra.ph/Terms-of-Service-in-GPTsTurboBot-05-07"
+
     @staticmethod
     def profile(
         subscription_type,
@@ -693,15 +732,16 @@ Please try again or contact @roman_danilov 🔧
         additional_usage_quota,
         renewal_date,
         discount,
+        credits,
     ) -> str:
         emojis = Subscription.get_emojis()
 
         if gender == UserGender.MALE:
-            gender_info = f"Gender: {English.MALE}"
+            gender_info = f"<b>Gender:</b> {English.MALE}"
         elif gender == UserGender.FEMALE:
-            gender_info = f"Gender: {English.FEMALE}"
+            gender_info = f"<b>Gender:</b> {English.FEMALE}"
         else:
-            gender_info = f"Gender: {English.UNSPECIFIED}"
+            gender_info = f"<b>Gender:</b> {English.UNSPECIFIED}"
 
         if current_model == Model.CHAT_GPT and current_model_version == GPTVersion.V3:
             current_model = English.CHATGPT3
@@ -721,8 +761,8 @@ Please try again or contact @roman_danilov 🔧
         return f"""
 <b>Profile</b> 👤
 
-Subscription type: {subscription_type} {emojis[subscription_type]}
-Subscription renewal date: {renewal_date}
+<b>Subscription type:</b> {subscription_type} {emojis[subscription_type]}
+<b>Subscription renewal date:</b> {renewal_date}
 
 {gender_info}
 
@@ -757,10 +797,10 @@ Additional seconds for creating melodies: {additional_usage_quota[Quota.MUSIC_GE
 Songs for month: {monthly_limits[Quota.SUNO]}/{SubscriptionLimit.LIMITS[subscription_type][Quota.SUNO]}
 Additional songs: {additional_usage_quota[Quota.SUNO]}
 
-💬 <b>Thematic chats in ChatGPT</b>
+💬 <b>Thematic chats</b>
 Additional chats: {additional_usage_quota[Quota.ADDITIONAL_CHATS]}
 
-🎭 <b>Digital employees in ChatGPT</b>
+🎭 <b>Digital employees</b>
 Access to a catalog: {'Yes' if additional_usage_quota[Quota.ACCESS_TO_CATALOG] else 'No'}
 
 🎙 <b>Voice messages</b>
@@ -769,9 +809,11 @@ Send and get voice messages: {'Yes' if additional_usage_quota[Quota.VOICE_MESSAG
 ⚡ <b>Fast answers</b>
 Fast answers: {'Yes' if additional_usage_quota[Quota.FAST_MESSAGES] else 'No'}
 
-🎁 Invite friends and get bonus: /bonus
-💎 Subscribe or purchase individual packages: /buy
-{f'💸 Discount when buying a subscription: {discount}%' if discount > 0 else ''}
+🪙 <b>Quantity of bonus credits:</b> {int(credits)}
+Details: /bonus
+
+💎 <b>Subscribe</b> or <b>purchase individual packages:</b> /buy
+{f'💸 Subscription discount: {discount}%' if discount > 0 else ''}
 """
 
     @staticmethod
@@ -1237,16 +1279,21 @@ Looks like you've got only <b>{available_seconds} seconds</b> left in your arsen
 
     # Bonus
     @staticmethod
-    def bonus(user_id: str, referred_count: int, balance: float) -> str:
+    def bonus(user_id: str, balance: float, referred_count: int, feedback_count: int) -> str:
         return f"""
 🎁 <b>Your bonus balance</b>
 
-👤 You've invited: {referred_count}
-💰 Current balance: {balance}
+💰 Current balance: {int(balance)}
 
-💸 For each invited user, you get 50 credits 🪙 to your bonus balance
-🌟 Your personal referral link for invitations:
-https://t.me/GPTsTurboBot?start={user_id}
+To top up your bonus balance, you can:
+1️⃣ Invite friends:
+    - 💸 For each invited user, you get 50 credits 🪙
+    - 🌟 Your personal referral link for invitations: https://t.me/GPTsTurboBot?start={user_id}
+    - 👤 You've invited: {referred_count}
+2️⃣ Leave feedback:
+    - 💸 For each constructive feedback, you get 50 credits 🪙
+    - 📡 To leave feedback, enter the command /feedback
+    - 💭 You've left : {feedback_count}
 
 Choose how to spend your earnings:
 """
@@ -1256,7 +1303,7 @@ Choose how to spend your earnings:
         return f"""
 🌟 <b>Congratulations! Your referral magic worked!</b> 🌟
 
-Thanks to you, a new user has joined us, and as a token of our appreciation, your balance has been increased by {added_to_balance} 🪙! Use them to access exclusive features or to add more generations in the neural networks. 💸
+Thanks to you, a new user has joined us, and as a token of our appreciation, your and your friend's balance has been increased by {int(added_to_balance)} 🪙! Use them to access exclusive features or to add more generations in the neural networks 💸
 
 To use the bonus, enter the /bonus command and follow the instructions. Let every invitation bring you not only the joy of communication but also pleasant bonuses!
 """

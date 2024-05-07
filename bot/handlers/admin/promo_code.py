@@ -210,7 +210,7 @@ async def handle_create_promo_code_discount_sent(message: Message, state: FSMCon
         )
 
 
-@admin_promo_code_router.message(PromoCode.waiting_for_promo_code_name, ~F.text.startswith('/'))
+@admin_promo_code_router.message(PromoCode.waiting_for_promo_code_name, F.text, ~F.text.startswith('/'))
 async def promo_code_name_sent(message: Message, state: FSMContext):
     user_language_code = await get_user_language(str(message.from_user.id), state.storage)
 

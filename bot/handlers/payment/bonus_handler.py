@@ -8,6 +8,7 @@ from aiogram.types import Message, CallbackQuery, URLInputFile
 from bot.database.main import firebase
 from bot.database.models.package import PackageType, Package, PackageStatus
 from bot.database.models.transaction import TransactionType
+from bot.database.operations.feedback.getters import get_feedbacks_by_user_id
 from bot.database.operations.package.writers import write_package
 from bot.database.operations.transaction.writers import write_transaction
 from bot.database.operations.user.getters import get_user, get_users_by_referral
@@ -28,12 +29,13 @@ async def bonus(message: Message, state: FSMContext):
     user = await get_user(user_id)
     user_language_code = await get_user_language(user_id, state.storage)
     referred_users = await get_users_by_referral(user_id)
+    feedbacks = await get_feedbacks_by_user_id(user_id)
 
     photo_path = f'payments/packages_{user_language_code}.png'
     photo = await firebase.bucket.get_blob(photo_path)
     photo_link = firebase.get_public_url(photo.name)
 
-    text = get_localization(user_language_code).bonus(user_id, len(referred_users), user.balance)
+    text = get_localization(user_language_code).bonus(user_id, user.balance, len(referred_users), len(feedbacks))
     reply_markup = build_bonus_keyboard(user_language_code)
     await message.answer_photo(
         photo=URLInputFile(photo_link, filename=photo_path),

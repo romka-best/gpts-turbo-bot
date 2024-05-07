@@ -106,6 +106,17 @@ async def handle_music_gen_selection(
     user_language_code = await get_user_language(str(user_id), state.storage)
     user_data = await state.get_data()
 
+    try:
+        duration = int(duration)
+    except (TypeError, ValueError):
+        reply_markup = build_cancel_keyboard(user_language_code)
+        await message.reply(
+            text=get_localization(user_language_code).VALUE_ERROR,
+            reply_markup=reply_markup,
+        )
+
+        return
+
     processing_message = await message.reply(
         text=get_localization(user_language_code).processing_request_music(),
     )
@@ -119,15 +130,7 @@ async def handle_music_gen_selection(
 
             await processing_message.delete()
             await message.delete()
-
-        try:
-            duration = int(duration)
-        except ValueError:
-            reply_markup = build_cancel_keyboard(user_language_code)
-            await message.reply(
-                text=get_localization(user_language_code).VALUE_ERROR,
-                reply_markup=reply_markup,
-            )
+            return
 
         if quota < duration:
             reply_markup = build_cancel_keyboard(user_language_code)

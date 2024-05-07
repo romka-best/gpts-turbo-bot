@@ -28,6 +28,7 @@ async def start(message: Message, state: FSMContext):
     user = await get_user(user_id)
     if not user:
         referred_by = None
+        referred_by_user = None
         if len(message.text.split()) > 1:
             referred_by = message.text.split()[1]
             referred_by_user = await get_user(referred_by)
@@ -56,6 +57,7 @@ async def start(message: Message, state: FSMContext):
             str(message.chat.id),
             chat_title,
             referred_by,
+            bool(referred_by_user),
         )
 
         user = await get_user(str(message.from_user.id))
@@ -80,7 +82,7 @@ async def start(message: Message, state: FSMContext):
 
 
 @common_router.message(Command("help"))
-async def help(message: Message, state: FSMContext):
+async def handle_help(message: Message, state: FSMContext):
     await state.clear()
 
     user_id = str(message.from_user.id)
@@ -171,6 +173,16 @@ async def info_selection(callback_query: CallbackQuery, state: FSMContext):
             text=text,
             reply_markup=reply_markup,
         )
+
+
+@common_router.message(Command("terms"))
+async def terms(message: Message, state: FSMContext):
+    await state.clear()
+
+    user_id = str(message.from_user.id)
+    user_language_code = await get_user_language(user_id, state.storage)
+
+    await message.answer(text=get_localization(user_language_code).TERMS_LINK)
 
 
 @common_router.callback_query(lambda c: c.data.startswith('reaction:'))

@@ -97,7 +97,7 @@ async def handle_face_swap_manage_create_selection(callback_query: CallbackQuery
         await state.clear()
 
 
-@admin_face_swap_router.message(FaceSwap.waiting_for_face_swap_system_package_name, ~F.text.startswith('/'))
+@admin_face_swap_router.message(FaceSwap.waiting_for_face_swap_system_package_name, F.text, ~F.text.startswith('/'))
 async def face_swap_manage_system_name_sent(message: Message, state: FSMContext):
     user_language_code = await get_user_language(str(message.from_user.id), state.storage)
 
@@ -125,7 +125,7 @@ async def face_swap_manage_system_name_sent(message: Message, state: FSMContext)
         await state.set_state(FaceSwap.waiting_for_face_swap_package_name)
 
 
-@admin_face_swap_router.message(FaceSwap.waiting_for_face_swap_package_name, ~F.text.startswith('/'))
+@admin_face_swap_router.message(FaceSwap.waiting_for_face_swap_package_name, F.text, ~F.text.startswith('/'))
 async def face_swap_manage_name_sent(message: Message, state: FSMContext):
     user_language_code = await get_user_language(str(message.from_user.id), state.storage)
     user_data = await state.get_data()

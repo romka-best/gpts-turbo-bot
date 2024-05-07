@@ -75,6 +75,10 @@ commands_en = [
         command="feedback",
         description="📡 Give a feedback",
     ),
+    BotCommand(
+        command="terms",
+        description="📄 Terms of Service",
+    ),
 ]
 
 commands_ru = [
@@ -145,6 +149,10 @@ commands_ru = [
     BotCommand(
         command="feedback",
         description="📡 Оставить фидбек",
+    ),
+    BotCommand(
+        command="terms",
+        description="📄 Пользовательское соглашение",
     ),
 ]
 
