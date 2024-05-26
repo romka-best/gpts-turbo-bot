@@ -14,6 +14,7 @@ class Settings(BaseSettings):
     WEBHOOK_MIDJOURNEY_PATH: str
     REDIS_URL: str
 
+    MAX_RETRIES: int = 2
     USER_BATCH_SIZE: int = 500
     LIMIT_BETWEEN_REQUESTS_SECONDS: int = 30
     LIMIT_PROCESSING_SECONDS: int = 60
@@ -29,6 +30,7 @@ class Settings(BaseSettings):
 
     OAUTH_YANDEX_TOKEN: SecretStr
     OPENAI_API_KEY: SecretStr
+    ANTHROPIC_API_KEY: SecretStr
     REPLICATE_API_TOKEN: SecretStr
     MIDJOURNEY_API_TOKEN: SecretStr
     SUNO_TOKEN: SecretStr

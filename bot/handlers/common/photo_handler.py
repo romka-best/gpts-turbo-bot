@@ -10,7 +10,7 @@ from aiogram.types import Message, URLInputFile, File, ReactionTypeEmoji
 from aiogram.utils.chat_action import ChatActionSender
 
 from bot.database.main import firebase
-from bot.database.models.common import Model, Quota, GPTVersion
+from bot.database.models.common import Model, Quota, ChatGPTVersion, ClaudeGPTVersion
 from bot.database.models.face_swap_package import FaceSwapPackageStatus
 from bot.database.models.user import UserSettings
 from bot.database.operations.face_swap_package.getters import (
@@ -23,6 +23,7 @@ from bot.database.operations.request.writers import write_request
 from bot.database.operations.user.getters import get_user
 from bot.handlers.admin.face_swap_handler import handle_manage_face_swap
 from bot.handlers.ai.chat_gpt_handler import handle_chatgpt
+from bot.handlers.ai.claude_handler import handle_claude
 from bot.handlers.ai.face_swap_handler import handle_face_swap
 from bot.integrations.replicateAI import create_face_swap_image
 from bot.keyboards.admin.catalog import build_manage_catalog_create_role_confirmation_keyboard
@@ -127,17 +128,28 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
 
         await message.answer(text=get_localization(user_language_code).FACE_SWAP_MANAGE_EDIT_SUCCESS)
         await handle_manage_face_swap(message, str(message.from_user.id), state)
-    elif user.current_model == Model.CHAT_GPT:
-        if user.settings[user.current_model][UserSettings.VERSION] == GPTVersion.V3:
+    elif user.current_model == Model.CHAT_GPT or user.current_model == Model.CLAUDE:
+        if user.settings[user.current_model][UserSettings.VERSION] == ChatGPTVersion.V3_Turbo:
             await message.reply(
-                text=get_localization(user_language_code).CHATGPT_PHOTO_FEATURE_FORBIDDEN,
+                text=get_localization(user_language_code).PHOTO_FEATURE_FORBIDDEN,
             )
             return
+
+        if user.settings[user.current_model][UserSettings.VERSION] == ChatGPTVersion.V4_Turbo:
+            quota = Quota.CHAT_GPT4_TURBO
+        elif user.settings[user.current_model][UserSettings.VERSION] == ChatGPTVersion.V4_Omni:
+            quota = Quota.CHAT_GPT4_OMNI
+        elif user.settings[user.current_model][UserSettings.VERSION] == ClaudeGPTVersion.V3_Sonnet:
+            quota = Quota.CLAUDE_3_SONNET
+        elif user.settings[user.current_model][UserSettings.VERSION] == ClaudeGPTVersion.V3_Opus:
+            quota = Quota.CLAUDE_3_OPUS
+        else:
+            raise NotImplemented
 
         current_time = time.time()
         need_exit = (
             await is_already_processing(message, state, current_time) or
-            await is_messages_limit_exceeded(message, state, user, Quota.CHAT_GPT4) or
+            await is_messages_limit_exceeded(message, state, user, quota) or
             await is_time_limit_exceeded(message, state, user, current_time)
         )
         if need_exit:
@@ -147,11 +159,14 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
         photo_data = photo_data_io.read()
 
         photo_vision_filename = f"{uuid.uuid4()}.jpeg"
-        photo_vision_path = f"users/chatgpt4_vision/{user_id}/{photo_vision_filename}"
+        photo_vision_path = f"users/vision/{user_id}/{photo_vision_filename}"
         photo_vision = firebase.bucket.new_blob(photo_vision_path)
         await photo_vision.upload(photo_data)
 
-        await handle_chatgpt(message, state, user, Quota.CHAT_GPT4, [photo_vision_filename])
+        if user.current_model == Model.CHAT_GPT:
+            await handle_chatgpt(message, state, user, quota, [photo_vision_filename])
+        elif user.current_model == Model.CLAUDE:
+            await handle_claude(message, state, user, quota, [photo_vision_filename])
     elif user.current_model == Model.FACE_SWAP:
         quota = user.monthly_limits[Quota.FACE_SWAP] + user.additional_usage_quota[Quota.FACE_SWAP]
         quantity = 1
@@ -215,17 +230,28 @@ async def handle_album(message: Message, state: FSMContext, album: List[Message]
     user = await get_user(user_id)
     user_language_code = await get_user_language(user_id, state.storage)
 
-    if user.current_model == Model.CHAT_GPT:
-        if user.settings[user.current_model][UserSettings.VERSION] == GPTVersion.V3:
+    if user.current_model == Model.CHAT_GPT or user.current_model == Model.CLAUDE:
+        if user.settings[user.current_model][UserSettings.VERSION] == ChatGPTVersion.V3_Turbo:
             await message.reply(
-                text=get_localization(user_language_code).CHATGPT_PHOTO_FEATURE_FORBIDDEN,
+                text=get_localization(user_language_code).PHOTO_FEATURE_FORBIDDEN,
             )
             return
+
+        if user.settings[user.current_model][UserSettings.VERSION] == ChatGPTVersion.V4_Turbo:
+            quota = Quota.CHAT_GPT4_TURBO
+        elif user.settings[user.current_model][UserSettings.VERSION] == ChatGPTVersion.V4_Omni:
+            quota = Quota.CHAT_GPT4_OMNI
+        elif user.settings[user.current_model][UserSettings.VERSION] == ClaudeGPTVersion.V3_Sonnet:
+            quota = Quota.CLAUDE_3_SONNET
+        elif user.settings[user.current_model][UserSettings.VERSION] == ClaudeGPTVersion.V3_Opus:
+            quota = Quota.CLAUDE_3_OPUS
+        else:
+            raise NotImplemented
 
         current_time = time.time()
         need_exit = (
             await is_already_processing(message, state, current_time) or
-            await is_messages_limit_exceeded(message, state, user, Quota.CHAT_GPT4) or
+            await is_messages_limit_exceeded(message, state, user, quota) or
             await is_time_limit_exceeded(message, state, user, current_time)
         )
         if need_exit:
@@ -244,13 +270,16 @@ async def handle_album(message: Message, state: FSMContext, album: List[Message]
             photo_data = photo_data_io.read()
 
             photo_vision_filename = f"{uuid.uuid4()}.jpeg"
-            photo_vision_path = f"users/chatgpt4_vision/{user_id}/{photo_vision_filename}"
+            photo_vision_path = f"users/vision/{user_id}/{photo_vision_filename}"
             photo_vision = firebase.bucket.new_blob(photo_vision_path)
             await photo_vision.upload(photo_data)
 
             photo_vision_filenames.append(photo_vision_filename)
 
-        await handle_chatgpt(message, state, user, Quota.CHAT_GPT4, photo_vision_filenames)
+        if user.current_model == Model.CHAT_GPT:
+            await handle_chatgpt(message, state, user, quota, photo_vision_filenames)
+        elif user.current_model == Model.CLAUDE:
+            await handle_claude(message, state, user, quota, photo_vision_filenames)
     elif user.current_model == Model.FACE_SWAP:
         await message.reply(
             text=get_localization(user_language_code).ALBUM_FORBIDDEN_ERROR,

@@ -12,23 +12,25 @@ from bot.database.models.user import UserGender
 class Texts(Protocol):
     START: str
     COMMANDS: str
-    COMMANDS_ADMIN = """
--------------------------
-
-👨‍💻👩‍💻 <b>Команды для админа</b>:
-😇 /create_promo_code - <b>Создать промокод</b>
-📸 /manage_face_swap - <b>Управление контентом в FaceSwap</b>
-🎩 /manage_catalog - <b>Управление ролями в чатах</b>
-📊 /statistics - <b>Просмотр статистики</b>
-📣 /blast - <b>Сделать рассылку</b>
-"""
     INFO: str
+    INFO_TEXT_MODELS: str
+    INFO_IMAGE_MODELS: str
+    INFO_MUSIC_MODELS: str
     INFO_CHATGPT: str
+    INFO_CLAUDE: str
     INFO_DALL_E: str
     INFO_MIDJOURNEY: str
     INFO_FACE_SWAP: str
     INFO_MUSIC_GEN: str
     INFO_SUNO: str
+
+    ADMIN_INFO = "👨‍💻 Выберите действие, админ 👩‍💻"
+    BAN_INFO = "Отправь мне id пользователя, которого вы хотите заблокировать ⛔️"
+    BAN_SUCCESS = "Вы успешно забанили пользователя 📛"
+
+    TEXT_MODELS: str
+    IMAGE_MODELS: str
+    MUSIC_MODELS: str
 
     # Feedback
     FEEDBACK: str
@@ -52,6 +54,9 @@ class Texts(Protocol):
     CHANGE_PHOTO_SUCCESS: str
     CHOOSE_GENDER: str
     CHANGE_GENDER: str
+    OPEN_BONUS_INFO: str
+    OPEN_BUY_SUBSCRIPTIONS_INFO: str
+    OPEN_BUY_PACKAGES_INFO: str
 
     # Language
     LANGUAGE: str
@@ -59,6 +64,10 @@ class Texts(Protocol):
 
     # Bonus
     BONUS_ACTIVATED_SUCCESSFUL: str
+    BONUS_CHOOSE_PACKAGE: str
+    INVITE_FRIEND: str
+    LEAVE_FEEDBACK: str
+    CASH_OUT: str
 
     # Blast
     BLAST_CHOOSE_LANGUAGE = """
@@ -95,9 +104,9 @@ class Texts(Protocol):
 🔑 <b>Время создать магию с промокодами!</b> ✨
 
 Выбери, для чего ты хочешь создать промокод:
-🌠 <b>Подписка</b> - открой доступ к эксклюзивным функциям и контенту.
-🎨 <b>Пакет</b> - добавь специальные возможности для использования AI.
-🪙 <b>Скидка</b> - дай возможность приобрести генерации подешевле.
+🌠 <b>Подписка</b> - открой доступ к эксклюзивным функциям и контенту
+🎨 <b>Пакет</b> - добавь специальные возможности для использования AI
+🪙 <b>Скидка</b> - дай возможность приобрести генерации подешевле
 
 Нажми на нужную кнопку и приступим к созданию! 🚀
 """
@@ -116,7 +125,7 @@ class Texts(Protocol):
 Выбери тип подписки, на который хочешь дать доступ:
 - <b>STANDARD</b> ⭐
 - <b>VIP</b> 🔥
-- <b>PLATINUM</b> 💎
+- <b>PREMIUM</b> 💎
 
 Выбери и нажми, чтобы создать волшебный ключ доступа! ✨
 """
@@ -238,8 +247,13 @@ class Texts(Protocol):
 """
 
     # AI
-    CHATGPT3 = "✉️ ChatGPT-3.5"
-    CHATGPT4 = "🧠 ChatGPT-4.0"
+    CHATGPT = "💭 ChatGPT"
+    CHATGPT3_TURBO = "✉️ ChatGPT-3.5 Turbo"
+    CHATGPT4_TURBO = "🧠 ChatGPT-4.0 Turbo"
+    CHATGPT4_OMNI = "💥 ChatGPT-4.0 Omni"
+    CLAUDE = "📄 Claude"
+    CLAUDE_3_SONNET = "💫 Claude 3 Sonnet"
+    CLAUDE_3_OPUS = "🚀 Claude 3 Opus"
     DALL_E = "🖼️ DALL-E"
     MIDJOURNEY = "🎨 Midjourney"
     FACE_SWAP = "📷️ FaceSwap"
@@ -247,8 +261,12 @@ class Texts(Protocol):
     SUNO = "🎸 Suno"
     MODE: str
     CHOOSE_CHATGPT_MODEL: str
-    SWITCHED_TO_CHATGPT3: str
-    SWITCHED_TO_CHATGPT4: str
+    CHOOSE_CLAUDE_MODEL: str
+    SWITCHED_TO_CHATGPT3_TURBO: str
+    SWITCHED_TO_CHATGPT4_TURBO: str
+    SWITCHED_TO_CHATGPT4_OMNI: str
+    SWITCHED_TO_CLAUDE_3_SONNET: str
+    SWITCHED_TO_CLAUDE_3_OPUS: str
     SWITCHED_TO_DALL_E: str
     SWITCHED_TO_MIDJOURNEY: str
     SWITCHED_TO_FACE_SWAP: str
@@ -268,13 +286,12 @@ class Texts(Protocol):
     IMAGE_SUCCESS: str
 
     # Examples
-    CHATGPT4_EXAMPLE_FIRST_PART: str
-    CHATGPT4_EXAMPLE_LAST_PART: str
+    CHATGPT4_OMNI_EXAMPLE: str
+    CLAUDE_3_OPUS_EXAMPLE: str
     MIDJOURNEY_EXAMPLE: str
     SUNO_EXAMPLE: str
 
-    # ChatGPT
-    CHATGPT_PHOTO_FEATURE_FORBIDDEN: str
+    PHOTO_FEATURE_FORBIDDEN: str
 
     # Midjourney
     MIDJOURNEY_ALREADY_CHOSE_UPSCALE: str
@@ -300,6 +317,7 @@ class Texts(Protocol):
     SECONDS_180: str
 
     # Settings
+    SETTINGS_CHOOSE_MODEL_TYPE: str
     SETTINGS_CHOOSE_MODEL: str
     SHOW_THE_NAME_OF_THE_CHATS: str
     SHOW_THE_NAME_OF_THE_ROLES: str
@@ -346,6 +364,12 @@ class Texts(Protocol):
     GPT3_REQUESTS_DESCRIPTION: str
     GPT4_REQUESTS: str
     GPT4_REQUESTS_DESCRIPTION: str
+    GPT4_OMNI_REQUESTS: str
+    GPT4_OMNI_REQUESTS_DESCRIPTION: str
+    CLAUDE_3_SONNET_REQUESTS: str
+    CLAUDE_3_SONNET_REQUESTS_DESCRIPTION: str
+    CLAUDE_3_OPUS_REQUESTS: str
+    CLAUDE_3_OPUS_REQUESTS_DESCRIPTION: str
     THEMATIC_CHATS: str
     THEMATIC_CHATS_DESCRIPTION: str
     DALL_E_REQUESTS: str
@@ -569,6 +593,8 @@ class Texts(Protocol):
     FACE_SWAP_PRIVATE = "Видно админам 🔒"
 
     ERROR: str
+    NETWORK_ERROR: str
+    CONNECTION_ERROR: str
     BACK: str
     CLOSE: str
     CANCEL: str
@@ -648,14 +674,17 @@ class Texts(Protocol):
     - <b>{SubscriptionType.FREE} {emojis[SubscriptionType.FREE]}:</b> {count_subscription_users[SubscriptionType.FREE]}
     - <b>{SubscriptionType.STANDARD} {emojis[SubscriptionType.STANDARD]}:</b> {count_subscription_users[SubscriptionType.STANDARD]}
     - <b>{SubscriptionType.VIP} {emojis[SubscriptionType.VIP]}:</b> {count_subscription_users[SubscriptionType.VIP]}
-    - <b>{SubscriptionType.PLATINUM} {emojis[SubscriptionType.PLATINUM]}:</b> {count_subscription_users[SubscriptionType.PLATINUM]}
+    - <b>{SubscriptionType.PREMIUM} {emojis[SubscriptionType.PREMIUM]}:</b> {count_subscription_users[SubscriptionType.PREMIUM]}
 6️⃣ <b>Заблокировали бота:</b> {count_blocked_users}
 
 💰 <b>Финансы</b>
 1️⃣ <b>Транзакции:</b>
     ➖ <b>{TransactionType.EXPENSE}:</b> {count_expense_transactions_total}
-    - <b>{Texts.CHATGPT3}:</b> {count_expense_transactions[ServiceType.CHAT_GPT3]}
-    - <b>{Texts.CHATGPT4}:</b> {count_expense_transactions[ServiceType.CHAT_GPT4]}
+    - <b>{Texts.CHATGPT3_TURBO}:</b> {count_expense_transactions[ServiceType.CHAT_GPT3_TURBO]}
+    - <b>{Texts.CHATGPT4_TURBO}:</b> {count_expense_transactions[ServiceType.CHAT_GPT4_TURBO]}
+    - <b>{Texts.CHATGPT4_OMNI}:</b> {count_expense_transactions[ServiceType.CHAT_GPT4_OMNI]}
+    - <b>{Texts.CLAUDE_3_SONNET}:</b> {count_expense_transactions[ServiceType.CLAUDE_3_SONNET]}
+    - <b>{Texts.CLAUDE_3_OPUS}:</b> {count_expense_transactions[ServiceType.CLAUDE_3_OPUS]}
     - <b>{Texts.DALL_E}:</b> {count_expense_transactions[ServiceType.DALL_E]}
     - <b>{Texts.MIDJOURNEY}:</b> {count_expense_transactions[ServiceType.MIDJOURNEY]}
     - <b>{Texts.FACE_SWAP}:</b> {count_expense_transactions[ServiceType.FACE_SWAP]}
@@ -666,8 +695,11 @@ class Texts(Protocol):
     - <b>База Данных 🗄:</b> {count_expense_transactions[ServiceType.DATABASE]}
 
     ➕ <b>{TransactionType.INCOME}:</b> {count_income_transactions_total}
-    - <b>{Texts.CHATGPT3}:</b> {count_income_transactions[ServiceType.CHAT_GPT3]}
-    - <b>{Texts.CHATGPT4}:</b> {count_income_transactions[ServiceType.CHAT_GPT4]}
+    - <b>{Texts.CHATGPT3_TURBO}:</b> {count_income_transactions[ServiceType.CHAT_GPT3_TURBO]}
+    - <b>{Texts.CHATGPT4_TURBO}:</b> {count_income_transactions[ServiceType.CHAT_GPT4_TURBO]}
+    - <b>{Texts.CHATGPT4_OMNI}:</b> {count_income_transactions[ServiceType.CHAT_GPT4_OMNI]}
+    - <b>{Texts.CLAUDE_3_SONNET}:</b> {count_income_transactions[ServiceType.CLAUDE_3_SONNET]}
+    - <b>{Texts.CLAUDE_3_OPUS}:</b> {count_income_transactions[ServiceType.CLAUDE_3_OPUS]}
     - <b>{Texts.DALL_E}:</b> {count_income_transactions[ServiceType.DALL_E]}
     - <b>{Texts.MIDJOURNEY}:</b> {count_income_transactions[ServiceType.MIDJOURNEY]}
     - <b>{Texts.FACE_SWAP}:</b> {count_income_transactions[ServiceType.FACE_SWAP]}
@@ -679,13 +711,16 @@ class Texts(Protocol):
     - <b>Быстрые сообщения ⚡:</b> {count_income_transactions[ServiceType.FAST_MESSAGES]}
     - <b>{SubscriptionType.STANDARD} {emojis[SubscriptionType.STANDARD]}:</b> {count_income_transactions[ServiceType.STANDARD]}
     - <b>{SubscriptionType.VIP} {emojis[SubscriptionType.VIP]}:</b> {count_income_transactions[ServiceType.VIP]}
-    - <b>{SubscriptionType.PLATINUM} {emojis[SubscriptionType.PLATINUM]}:</b> {count_income_transactions[ServiceType.PLATINUM]}
+    - <b>{SubscriptionType.PREMIUM} {emojis[SubscriptionType.PREMIUM]}:</b> {count_income_transactions[ServiceType.PREMIUM]}
 
     - <b>Всего:</b> {count_transactions_total}
 
 2️⃣ <b>Расходы:</b>
-   - <b>{Texts.CHATGPT3}:</b> {round(count_expense_money[ServiceType.CHAT_GPT3], 2)}$
-   - <b>{Texts.CHATGPT4}:</b> {round(count_expense_money[ServiceType.CHAT_GPT4], 2)}$
+   - <b>{Texts.CHATGPT3_TURBO}:</b> {round(count_expense_money[ServiceType.CHAT_GPT3_TURBO], 2)}$
+   - <b>{Texts.CHATGPT4_TURBO}:</b> {round(count_expense_money[ServiceType.CHAT_GPT4_TURBO], 2)}$
+   - <b>{Texts.CHATGPT4_OMNI}:</b> {round(count_expense_money[ServiceType.CHAT_GPT4_OMNI], 2)}$
+   - <b>{Texts.CLAUDE_3_SONNET}:</b> {round(count_expense_money[ServiceType.CLAUDE_3_SONNET], 2)}$
+   - <b>{Texts.CLAUDE_3_OPUS}:</b> {round(count_expense_money[ServiceType.CLAUDE_3_OPUS], 2)}$
    - <b>{Texts.DALL_E}:</b> {round(count_expense_money[ServiceType.DALL_E], 2)}$
    - <b>{Texts.MIDJOURNEY}:</b> {round(count_expense_money[ServiceType.MIDJOURNEY], 2)}$
    - <b>{Texts.FACE_SWAP}:</b> {round(count_expense_money[ServiceType.FACE_SWAP], 2)}$
@@ -700,11 +735,14 @@ class Texts(Protocol):
     💳 <b>Подписки:</b> {count_income_subscriptions_total_money}₽
     - <b>{ServiceType.STANDARD} {emojis[ServiceType.STANDARD]}:</b> {count_income_money[ServiceType.STANDARD]}₽
     - <b>{ServiceType.VIP} {emojis[ServiceType.VIP]}:</b> {count_income_money[ServiceType.VIP]}₽
-    - <b>{ServiceType.PLATINUM} {emojis[ServiceType.PLATINUM]}:</b> {count_income_money[ServiceType.PLATINUM]}₽
+    - <b>{ServiceType.PREMIUM} {emojis[ServiceType.PREMIUM]}:</b> {count_income_money[ServiceType.PREMIUM]}₽
 
     💵 <b>Пакеты:</b> {count_income_packages_total_money}₽
-    - <b>{Texts.CHATGPT3}:</b> {count_income_money[ServiceType.CHAT_GPT3]}₽
-    - <b>{Texts.CHATGPT4}:</b> {count_income_money[ServiceType.CHAT_GPT4]}₽
+    - <b>{Texts.CHATGPT3_TURBO}:</b> {count_income_money[ServiceType.CHAT_GPT3_TURBO]}₽
+    - <b>{Texts.CHATGPT4_TURBO}:</b> {count_income_money[ServiceType.CHAT_GPT4_TURBO]}₽
+    - <b>{Texts.CHATGPT4_OMNI}:</b> {count_income_money[ServiceType.CHAT_GPT4_OMNI]}₽
+    - <b>{Texts.CLAUDE_3_SONNET}:</b> {count_income_money[ServiceType.CLAUDE_3_SONNET]}₽
+    - <b>{Texts.CLAUDE_3_OPUS}:</b> {count_income_money[ServiceType.CLAUDE_3_OPUS]}₽
     - <b>{Texts.DALL_E}:</b> {count_income_money[ServiceType.DALL_E]}₽
     - <b>{Texts.MIDJOURNEY}:</b> {count_income_money[ServiceType.MIDJOURNEY]}₽
     - <b>{Texts.FACE_SWAP}:</b> {count_income_money[ServiceType.FACE_SWAP]}₽
@@ -898,7 +936,7 @@ class Texts(Protocol):
         additional_usage_quota,
         renewal_date,
         discount: int,
-        credits: float,
+        credits: str,
     ) -> str:
         raise NotImplementedError
 
@@ -961,7 +999,7 @@ class Texts(Protocol):
         raise NotImplementedError
 
     @staticmethod
-    def chatgpt_recommendations() -> List[str]:
+    def requests_recommendations() -> List[str]:
         raise NotImplementedError
 
     @staticmethod
@@ -1013,6 +1051,12 @@ class Texts(Protocol):
     @staticmethod
     def bonus(user_id: str, balance: float, referred_count: int, feedback_count: int) -> str:
         raise NotImplementedError
+
+    @staticmethod
+    def referral_link(user_id: str, is_share: bool) -> str:
+        if is_share:
+            return f"https://t.me/share/url?url=https://t.me/GPTsTurboBot?start={user_id}"
+        return f"https://t.me/GPTsTurboBot?start={user_id}"
 
     @staticmethod
     def referral_successful(added_to_balance: float) -> str:

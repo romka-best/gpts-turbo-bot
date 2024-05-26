@@ -1,5 +1,4 @@
 from aiogram import Router, F
-from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery, URLInputFile
 
@@ -7,6 +6,7 @@ from bot.database.main import firebase
 from bot.database.operations.role.getters import get_roles, get_role, get_role_by_name
 from bot.database.operations.role.updaters import update_role
 from bot.database.operations.role.writers import write_role
+from bot.keyboards.admin.admin import build_admin_keyboard
 from bot.locales.translate_text import translate_text
 from bot.keyboards.admin.catalog import (
     build_manage_catalog_keyboard,
@@ -16,29 +16,20 @@ from bot.keyboards.admin.catalog import (
 from bot.keyboards.common.common import build_cancel_keyboard
 from bot.locales.main import get_localization, localization_classes, get_user_language
 from bot.states.catalog import Catalog
-from bot.utils.is_admin import is_admin
 
 catalog_router = Router()
 
 
 async def handle_manage_catalog(message: Message, user_id: str, state: FSMContext):
-    if is_admin(str(message.chat.id)):
-        user_language_code = await get_user_language(str(user_id), state.storage)
+    user_language_code = await get_user_language(str(user_id), state.storage)
 
-        roles = await get_roles()
-        reply_markup = build_manage_catalog_keyboard(user_language_code, roles)
+    roles = await get_roles()
 
-        await message.answer(
-            text=get_localization(user_language_code).CATALOG_MANAGE,
-            reply_markup=reply_markup,
-        )
-
-
-@catalog_router.message(Command("manage_catalog"))
-async def manage_catalog(message: Message, state: FSMContext):
-    await state.clear()
-
-    await handle_manage_catalog(message, str(message.from_user.id), state)
+    reply_markup = build_manage_catalog_keyboard(user_language_code, roles)
+    await message.edit_text(
+        text=get_localization(user_language_code).CATALOG_MANAGE,
+        reply_markup=reply_markup,
+    )
 
 
 @catalog_router.callback_query(lambda c: c.data.startswith('catalog_manage:'))
@@ -49,7 +40,15 @@ async def handle_catalog_manage_selection(callback_query: CallbackQuery, state: 
 
     user_language_code = await get_user_language(str(callback_query.from_user.id), state.storage)
 
-    if action == 'create':
+    if action == 'back':
+        reply_markup = build_admin_keyboard(user_language_code)
+        await callback_query.message.edit_text(
+            text=get_localization(user_language_code).ADMIN_INFO,
+            reply_markup=reply_markup,
+        )
+
+        return
+    elif action == 'create':
         reply_markup = build_manage_catalog_create_keyboard(user_language_code)
         await callback_query.message.edit_text(
             text=get_localization(user_language_code).CATALOG_MANAGE_CREATE,

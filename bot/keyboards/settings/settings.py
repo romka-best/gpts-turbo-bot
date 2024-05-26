@@ -14,42 +14,24 @@ from bot.database.models.user import UserSettings
 from bot.locales.main import get_localization
 
 
-def build_settings_choose_model_keyboard(language_code: str) -> InlineKeyboardMarkup:
+def build_settings_choose_model_type_keyboard(language_code: str) -> InlineKeyboardMarkup:
     buttons = [
         [
             InlineKeyboardButton(
-                text=f"{get_localization(language_code).CHATGPT3} / {get_localization(language_code).CHATGPT4}",
-                callback_data=f'settings_choose_model:{Model.CHAT_GPT}'
+                text=get_localization(language_code).TEXT_MODELS,
+                callback_data=f'settings_choose_model_type:text_models'
             ),
         ],
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).DALL_E,
-                callback_data=f'settings_choose_model:{Model.DALL_E}'
+                text=get_localization(language_code).IMAGE_MODELS,
+                callback_data=f'settings_choose_model_type:image_models'
             ),
         ],
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).MIDJOURNEY,
-                callback_data=f'settings_choose_model:{Model.MIDJOURNEY}'
-            ),
-        ],
-        [
-            InlineKeyboardButton(
-                text=get_localization(language_code).FACE_SWAP,
-                callback_data=f'settings_choose_model:{Model.FACE_SWAP}'
-            ),
-        ],
-        [
-            InlineKeyboardButton(
-                text=get_localization(language_code).MUSIC_GEN,
-                callback_data=f'settings_choose_model:{Model.MUSIC_GEN}'
-            ),
-        ],
-        [
-            InlineKeyboardButton(
-                text=get_localization(language_code).SUNO,
-                callback_data=f'settings_choose_model:{Model.SUNO}'
+                text=get_localization(language_code).MUSIC_MODELS,
+                callback_data=f'settings_choose_model_type:music_models'
             ),
         ],
         [
@@ -63,47 +45,158 @@ def build_settings_choose_model_keyboard(language_code: str) -> InlineKeyboardMa
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
-def build_settings_keyboard(language_code: str, model: Model, settings: Dict) -> InlineKeyboardMarkup:
+def build_settings_choose_text_model_keyboard(language_code: str) -> InlineKeyboardMarkup:
+    buttons = [
+        [
+            InlineKeyboardButton(
+                text=f"{get_localization(language_code).CHATGPT}",
+                callback_data=f'settings_choose_text_model:{Model.CHAT_GPT}'
+            ),
+        ],
+        [
+            InlineKeyboardButton(
+                text=f"{get_localization(language_code).CLAUDE}",
+                callback_data=f'settings_choose_text_model:{Model.CLAUDE}'
+            ),
+        ],
+        [
+            InlineKeyboardButton(
+                text=get_localization(language_code).VOICE_MESSAGES,
+                callback_data=f'settings_choose_text_model:voice_messages'
+            ),
+        ],
+        [
+            InlineKeyboardButton(
+                text=get_localization(language_code).MANAGE_CHATS,
+                callback_data=f'settings_choose_text_model:manage_chats'
+            ),
+        ],
+        [
+            InlineKeyboardButton(
+                text=get_localization(language_code).MANAGE_CATALOG,
+                callback_data=f'settings_choose_text_model:manage_catalog'
+            ),
+        ],
+        [
+            InlineKeyboardButton(
+                text=get_localization(language_code).BACK,
+                callback_data='settings_choose_text_model:back'
+            ),
+        ],
+    ]
+
+    return InlineKeyboardMarkup(inline_keyboard=buttons)
+
+
+def build_settings_choose_image_model_keyboard(language_code: str) -> InlineKeyboardMarkup:
+    buttons = [
+        [
+            InlineKeyboardButton(
+                text=get_localization(language_code).DALL_E,
+                callback_data=f'settings_choose_image_model:{Model.DALL_E}'
+            ),
+        ],
+        [
+            InlineKeyboardButton(
+                text=get_localization(language_code).MIDJOURNEY,
+                callback_data=f'settings_choose_image_model:{Model.MIDJOURNEY}'
+            ),
+        ],
+        [
+            InlineKeyboardButton(
+                text=get_localization(language_code).FACE_SWAP,
+                callback_data=f'settings_choose_image_model:{Model.FACE_SWAP}'
+            ),
+        ],
+        [
+            InlineKeyboardButton(
+                text=get_localization(language_code).BACK,
+                callback_data='settings_choose_image_model:back'
+            ),
+        ],
+    ]
+
+    return InlineKeyboardMarkup(inline_keyboard=buttons)
+
+
+def build_settings_choose_music_model_keyboard(language_code: str) -> InlineKeyboardMarkup:
+    buttons = [
+        [
+            InlineKeyboardButton(
+                text=get_localization(language_code).MUSIC_GEN,
+                callback_data=f'settings_choose_music_model:{Model.MUSIC_GEN}'
+            ),
+        ],
+        [
+            InlineKeyboardButton(
+                text=get_localization(language_code).MIDJOURNEY,
+                callback_data=f'settings_choose_music_model:{Model.SUNO}'
+            ),
+        ],
+        [
+            InlineKeyboardButton(
+                text=get_localization(language_code).BACK,
+                callback_data='settings_choose_music_model:back'
+            ),
+        ],
+    ]
+
+    return InlineKeyboardMarkup(inline_keyboard=buttons)
+
+
+def build_settings_keyboard(language_code: str, model: Model, model_type: str, settings: Dict) -> InlineKeyboardMarkup:
     buttons = []
     if model == Model.CHAT_GPT:
         buttons = [
             [
                 InlineKeyboardButton(
                     text=get_localization(language_code).SHOW_THE_NAME_OF_THE_CHATS + (
-                        " ✅" if settings[model][UserSettings.SHOW_THE_NAME_OF_THE_CHATS] else " ❌"),
+                        " ✅" if settings[model][UserSettings.SHOW_THE_NAME_OF_THE_CHATS] else " ❌"
+                    ),
                     callback_data=f'setting:{UserSettings.SHOW_THE_NAME_OF_THE_CHATS}:{Model.CHAT_GPT}'
                 ),
             ],
             [
                 InlineKeyboardButton(
                     text=get_localization(language_code).SHOW_THE_NAME_OF_THE_ROLES + (
-                        " ✅" if settings[model][UserSettings.SHOW_THE_NAME_OF_THE_ROLES] else " ❌"),
+                        " ✅" if settings[model][UserSettings.SHOW_THE_NAME_OF_THE_ROLES] else " ❌"
+                    ),
                     callback_data=f'setting:{UserSettings.SHOW_THE_NAME_OF_THE_ROLES}:{Model.CHAT_GPT}'
                 ),
             ],
             [
                 InlineKeyboardButton(
                     text=get_localization(language_code).SHOW_USAGE_QUOTA_IN_MESSAGES + (
-                        " ✅" if settings[model][UserSettings.SHOW_USAGE_QUOTA] else " ❌"),
+                        " ✅" if settings[model][UserSettings.SHOW_USAGE_QUOTA] else " ❌"
+                    ),
                     callback_data=f'setting:{UserSettings.SHOW_USAGE_QUOTA}:{Model.CHAT_GPT}'
                 ),
             ],
+        ]
+    elif model == Model.CLAUDE:
+        buttons = [
             [
                 InlineKeyboardButton(
-                    text=get_localization(language_code).VOICE_MESSAGES,
-                    callback_data=f'setting:voice_messages:{Model.CHAT_GPT}'
+                    text=get_localization(language_code).SHOW_THE_NAME_OF_THE_CHATS + (
+                        " ✅" if settings[model][UserSettings.SHOW_THE_NAME_OF_THE_CHATS] else " ❌"
+                    ),
+                    callback_data=f'setting:{UserSettings.SHOW_THE_NAME_OF_THE_CHATS}:{Model.CLAUDE}'
                 ),
             ],
             [
                 InlineKeyboardButton(
-                    text=get_localization(language_code).MANAGE_CHATS,
-                    callback_data=f'setting:manage_chats:{Model.CHAT_GPT}'
+                    text=get_localization(language_code).SHOW_THE_NAME_OF_THE_ROLES + (
+                        " ✅" if settings[model][UserSettings.SHOW_THE_NAME_OF_THE_ROLES] else " ❌"
+                    ),
+                    callback_data=f'setting:{UserSettings.SHOW_THE_NAME_OF_THE_ROLES}:{Model.CLAUDE}'
                 ),
             ],
             [
                 InlineKeyboardButton(
-                    text=get_localization(language_code).MANAGE_CATALOG,
-                    callback_data=f'setting:manage_catalog:{Model.CHAT_GPT}'
+                    text=get_localization(language_code).SHOW_USAGE_QUOTA_IN_MESSAGES + (
+                        " ✅" if settings[model][UserSettings.SHOW_USAGE_QUOTA] else " ❌"
+                    ),
+                    callback_data=f'setting:{UserSettings.SHOW_USAGE_QUOTA}:{Model.CLAUDE}'
                 ),
             ],
         ]
@@ -226,7 +319,7 @@ def build_settings_keyboard(language_code: str, model: Model, settings: Dict) ->
     buttons.append([
         InlineKeyboardButton(
             text=get_localization(language_code).BACK,
-            callback_data='setting:back'
+            callback_data=f'setting:back:{model_type}'
         )
     ], )
 

@@ -4,10 +4,11 @@ from aiogram import Router, F
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
-from bot.database.models.common import Model, Quota, GPTVersion, MidjourneyAction
+from bot.database.models.common import Model, Quota, ChatGPTVersion, MidjourneyAction, ClaudeGPTVersion
 from bot.database.models.user import UserSettings
 from bot.database.operations.user.getters import get_user
 from bot.handlers.ai.chat_gpt_handler import handle_chatgpt
+from bot.handlers.ai.claude_handler import handle_claude
 from bot.handlers.ai.dalle_handler import handle_dall_e
 from bot.handlers.ai.face_swap_handler import handle_face_swap
 from bot.handlers.ai.midjourney_handler import handle_midjourney
@@ -28,10 +29,21 @@ async def handle_text(message: Message, state: FSMContext):
     current_time = time.time()
 
     if user.current_model == Model.CHAT_GPT:
-        if user.settings[user.current_model][UserSettings.VERSION] == GPTVersion.V3:
-            user_quota = Quota.CHAT_GPT3
-        elif user.settings[user.current_model][UserSettings.VERSION] == GPTVersion.V4:
-            user_quota = Quota.CHAT_GPT4
+        if user.settings[user.current_model][UserSettings.VERSION] == ChatGPTVersion.V3_Turbo:
+            user_quota = Quota.CHAT_GPT3_TURBO
+        elif user.settings[user.current_model][UserSettings.VERSION] == ChatGPTVersion.V4_Turbo:
+            user_quota = Quota.CHAT_GPT4_TURBO
+        elif user.settings[user.current_model][UserSettings.VERSION] == ChatGPTVersion.V4_Omni:
+            user_quota = Quota.CHAT_GPT4_OMNI
+        else:
+            raise NotImplemented
+    elif user.current_model == Model.CLAUDE:
+        if user.settings[user.current_model][UserSettings.VERSION] == ClaudeGPTVersion.V3_Sonnet:
+            user_quota = Quota.CLAUDE_3_SONNET
+        elif user.settings[user.current_model][UserSettings.VERSION] == ClaudeGPTVersion.V3_Opus:
+            user_quota = Quota.CLAUDE_3_OPUS
+        else:
+            raise NotImplemented
     elif user.current_model == Model.DALL_E:
         user_quota = Quota.DALL_E
     elif user.current_model == Model.MIDJOURNEY:
@@ -56,6 +68,8 @@ async def handle_text(message: Message, state: FSMContext):
 
     if user.current_model == Model.CHAT_GPT:
         await handle_chatgpt(message, state, user, user_quota)
+    elif user.current_model == Model.CLAUDE:
+        await handle_claude(message, state, user, user_quota)
     elif user.current_model == Model.DALL_E:
         await handle_dall_e(message, state, user)
     elif user.current_model == Model.MIDJOURNEY:

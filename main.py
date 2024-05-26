@@ -6,7 +6,7 @@ from datetime import datetime, timezone, timedelta
 
 import uvicorn
 from aiogram.client.default import DefaultBotProperties
-from aiogram.exceptions import TelegramForbiddenError, TelegramBadRequest
+from aiogram.exceptions import TelegramNetworkError, TelegramForbiddenError, TelegramBadRequest
 from fastapi import FastAPI, BackgroundTasks
 from fastapi.responses import JSONResponse
 from aiogram import Bot, Dispatcher, types
@@ -15,16 +15,19 @@ from aiogram.fsm.storage.redis import RedisStorage
 from aiogram.fsm.strategy import FSMStrategy
 from redis.backoff import FullJitterBackoff
 from redis.retry import Retry
+from redis.exceptions import ConnectionError
 
 from bot.config import config
 from bot.database.main import firebase
-from bot.database.operations.user.updaters import update_user
+from bot.handlers.admin.admin_handler import admin_router
+from bot.handlers.admin.ban_handler import ban_router
 from bot.handlers.admin.blast_handler import blast_router
 from bot.handlers.admin.catalog_handler import catalog_router
 from bot.handlers.admin.face_swap_handler import admin_face_swap_router
 from bot.handlers.admin.promo_code import admin_promo_code_router
 from bot.handlers.admin.statistics_handler import statistics_router
 from bot.handlers.ai.chat_gpt_handler import chat_gpt_router
+from bot.handlers.ai.claude_handler import claude_router
 from bot.handlers.ai.dalle_handler import dall_e_router
 from bot.handlers.ai.face_swap_handler import face_swap_router
 from bot.handlers.ai.midjourney_handler import midjourney_router
@@ -34,6 +37,7 @@ from bot.handlers.ai.suno_handler import suno_router
 from bot.handlers.common.common_handler import common_router
 from bot.handlers.common.document_handler import document_router
 from bot.handlers.common.feedback_handler import feedback_router
+from bot.handlers.common.info_handler import info_router
 from bot.handlers.common.photo_handler import photo_router
 from bot.handlers.common.profile_handler import profile_router
 from bot.handlers.common.sticker_handler import sticker_router
@@ -47,13 +51,18 @@ from bot.handlers.settings.language_handler import language_router
 from bot.handlers.settings.settings_handler import settings_router
 from bot.helpers.billing.update_daily_expenses import update_daily_expenses
 from bot.helpers.check_unresolved_requests import check_unresolved_requests
+from bot.helpers.handlers.handle_connection_error import handle_connection_error
+from bot.helpers.handlers.handle_forbidden_error import handle_forbidden_error
 from bot.helpers.handlers.handle_midjourney_webhook import handle_midjourney_webhook
+from bot.helpers.handlers.handle_network_error import handle_network_error
 from bot.helpers.handlers.handle_replicate_webhook import handle_replicate_webhook
 from bot.helpers.notify_admins_about_error import notify_admins_about_error
 from bot.helpers.senders.send_admin_statistics import send_admin_statistics
 from bot.helpers.setters.set_commands import set_commands
 from bot.helpers.setters.set_description import set_description
 from bot.helpers.update_monthly_limits import update_monthly_limits
+from bot.middlewares.AuthMiddleware import AuthMessageMiddleware, AuthCallbackQueryMiddleware
+from bot.middlewares.LoggingMiddleware import LoggingMessageMiddleware, LoggingCallbackQueryMiddleware
 
 WEBHOOK_BOT_PATH = f"/bot/{config.BOT_TOKEN.get_secret_value()}"
 WEBHOOK_REPLICATE_PATH = config.WEBHOOK_REPLICATE_PATH
@@ -85,6 +94,7 @@ async def lifespan(_: FastAPI):
 
     dp.include_routers(
         common_router,
+        info_router,
         catalog_router,
         feedback_router,
         language_router,
@@ -92,12 +102,15 @@ async def lifespan(_: FastAPI):
         payment_router,
         profile_router,
         promo_code_router,
+        admin_router,
         admin_promo_code_router,
+        ban_router,
         bonus_router,
         blast_router,
         settings_router,
         statistics_router,
         chat_gpt_router,
+        claude_router,
         dall_e_router,
         midjourney_router,
         face_swap_router,
@@ -111,6 +124,11 @@ async def lifespan(_: FastAPI):
         voice_router,
         text_router,
     )
+
+    dp.message.middleware(LoggingMessageMiddleware())
+    dp.callback_query.middleware(LoggingCallbackQueryMiddleware())
+    dp.message.middleware(AuthMessageMiddleware())
+    dp.callback_query.middleware(AuthCallbackQueryMiddleware())
 
     await set_description(bot)
     await set_commands(bot)
@@ -132,22 +150,28 @@ async def bot_webhook(update: dict):
 async def handle_update(update: dict):
     telegram_update = types.Update(**update)
     try:
-        await dp.feed_update(bot=bot, update=telegram_update)
+        for i in range(config.MAX_RETRIES):
+            try:
+                await dp.feed_update(bot=bot, update=telegram_update)
+                break
+            except ConnectionError as e:
+                if i == config.MAX_RETRIES - 1:
+                    raise e
+                continue
+            except TelegramNetworkError as e:
+                if i == config.MAX_RETRIES - 1:
+                    raise e
+                continue
+    except ConnectionError:
+        await handle_connection_error(bot, telegram_update)
+    except TelegramNetworkError:
+        await handle_network_error(bot, telegram_update)
     except TelegramForbiddenError:
-        user_id = None
-        if telegram_update.callback_query and telegram_update.callback_query.from_user.id:
-            user_id = str(telegram_update.callback_query.from_user.id)
-        elif telegram_update.message and telegram_update.message.from_user.id:
-            user_id = str(telegram_update.message.from_user.id)
-
-        if user_id:
-            await update_user(user_id, {
-                "is_blocked": True,
-            })
+        await handle_forbidden_error(telegram_update)
     except TelegramBadRequest as e:
         if e.message.startswith("Bad Request: message can't be deleted for everyone"):
             logging.info(e)
-        elif e.message.startswith("Bad Request: message to reply not found"):
+        elif e.message.startswith("Bad Request: message to be replied not found"):
             logging.warning(e)
         elif e.message.startswith("Bad Request: message to delete not found"):
             logging.warning(e)

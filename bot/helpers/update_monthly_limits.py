@@ -37,8 +37,7 @@ async def update_monthly_limits(bot: Bot):
 
         await batch.commit()
 
-    message = "Updated monthly limits successfully"
-    await send_message_to_admins(bot, f'<b>{message}</b> 🎉')
+    await send_message_to_admins(bot, f'<b>Updated monthly limits successfully</b> 🎉')
 
 
 async def update_user_monthly_limits(bot: Bot, user: User, batch: AsyncWriteBatch):

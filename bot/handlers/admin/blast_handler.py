@@ -1,33 +1,30 @@
 import asyncio
 
 from aiogram import Router, F
-from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
 
 from bot.helpers.senders.send_message_to_users import send_message_to_users
+from bot.keyboards.admin.admin import build_admin_keyboard
 from bot.locales.translate_text import translate_text
 from bot.keyboards.admin.blast import build_blast_keyboard, build_blast_confirmation_keyboard
 from bot.keyboards.common.common import build_cancel_keyboard
 from bot.locales.main import get_localization, localization_classes, get_user_language
 from bot.states.blast import Blast
-from bot.utils.is_admin import is_admin
 
 blast_router = Router()
 
 
-@blast_router.message(Command("blast"))
-async def blast(message: Message, state: FSMContext):
+async def handle_blast(message: Message, user_id: str, state: FSMContext):
     await state.clear()
 
-    if is_admin(str(message.chat.id)):
-        user_language_code = await get_user_language(str(message.chat.id), state.storage)
+    user_language_code = await get_user_language(user_id, state.storage)
 
-        reply_markup = build_blast_keyboard(user_language_code)
-        await message.answer(
-            text=get_localization(user_language_code).BLAST_CHOOSE_LANGUAGE,
-            reply_markup=reply_markup,
-        )
+    reply_markup = build_blast_keyboard(user_language_code)
+    await message.edit_text(
+        text=get_localization(user_language_code).BLAST_CHOOSE_LANGUAGE,
+        reply_markup=reply_markup,
+    )
 
 
 @blast_router.callback_query(lambda c: c.data.startswith('blast:'))
@@ -38,7 +35,15 @@ async def handle_blast_language_selection(callback_query: CallbackQuery, state: 
 
     language = callback_query.data.split(':')[1]
     reply_markup = build_cancel_keyboard(user_language_code)
-    if language == 'all':
+    if language == 'back':
+        reply_markup = build_admin_keyboard(user_language_code)
+        await callback_query.message.edit_text(
+            text=get_localization(user_language_code).ADMIN_INFO,
+            reply_markup=reply_markup,
+        )
+
+        return
+    elif language == 'all':
         await callback_query.message.edit_text(
             text=get_localization(user_language_code).BLAST_WRITE_IN_DEFAULT_LANGUAGE,
             reply_markup=reply_markup,

@@ -16,8 +16,8 @@ async def build_recommendations_keyboard(
     gender: UserGender,
 ) -> ReplyKeyboardMarkup:
     buttons = []
-    if current_model == Model.CHAT_GPT:
-        recommendations = get_localization(language_code).chatgpt_recommendations()
+    if current_model == Model.CHAT_GPT or current_model == Model.CLAUDE:
+        recommendations = get_localization(language_code).requests_recommendations()
         random.shuffle(recommendations)
         for recommendation in recommendations[:4]:
             buttons.append([

@@ -2,7 +2,6 @@ import calendar
 from datetime import datetime, timezone, timedelta
 
 from aiogram import Router, F
-from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
 
@@ -15,9 +14,9 @@ from bot.database.operations.generation.getters import get_generations
 from bot.database.operations.transaction.getters import get_transactions
 from bot.database.operations.transaction.writers import write_transaction
 from bot.database.operations.user.getters import get_users
+from bot.keyboards.admin.admin import build_admin_keyboard
 from bot.keyboards.common.common import build_cancel_keyboard
 from bot.states.statistics import Statistics
-from bot.utils.is_admin import is_admin
 from bot.keyboards.admin.statistics import (
     build_statistics_keyboard,
     build_statistics_write_transaction_keyboard,
@@ -29,22 +28,14 @@ from bot.locales.main import get_localization, get_user_language
 statistics_router = Router()
 
 
-async def handle_statistics(chat_id: str, user_id: str, message: Message, state: FSMContext):
-    if is_admin(chat_id):
-        user_language_code = await get_user_language(str(user_id), state.storage)
+async def handle_statistics(message: Message, user_id: str, state: FSMContext):
+    user_language_code = await get_user_language(str(user_id), state.storage)
 
-        reply_markup = build_statistics_keyboard(user_language_code)
-        await message.answer(
-            text=get_localization(user_language_code).STATISTICS_INFO,
-            reply_markup=reply_markup,
-        )
-
-
-@statistics_router.message(Command("statistics"))
-async def statistics(message: Message, state: FSMContext):
-    await state.clear()
-
-    await handle_statistics(str(message.chat.id), str(message.from_user.id), message, state)
+    reply_markup = build_statistics_keyboard(user_language_code)
+    await message.edit_text(
+        text=get_localization(user_language_code).STATISTICS_INFO,
+        reply_markup=reply_markup,
+    )
 
 
 async def handle_write_transaction(callback_query: CallbackQuery, language_code: str):
@@ -125,7 +116,7 @@ async def handle_get_statistics(language_code: str, period: str):
         SubscriptionType.FREE: 0,
         SubscriptionType.STANDARD: 0,
         SubscriptionType.VIP: 0,
-        SubscriptionType.PLATINUM: 0,
+        SubscriptionType.PREMIUM: 0,
     }
     count_blocked_users = 0
     for user in users:
@@ -143,8 +134,11 @@ async def handle_get_statistics(language_code: str, period: str):
             other_users.add(user.id)
 
     count_income_transactions = {
-        ServiceType.CHAT_GPT3: 0,
-        ServiceType.CHAT_GPT4: 0,
+        ServiceType.CHAT_GPT3_TURBO: 0,
+        ServiceType.CHAT_GPT4_TURBO: 0,
+        ServiceType.CHAT_GPT4_OMNI: 0,
+        ServiceType.CLAUDE_3_SONNET: 0,
+        ServiceType.CLAUDE_3_OPUS: 0,
         ServiceType.DALL_E: 0,
         ServiceType.MIDJOURNEY: 0,
         ServiceType.FACE_SWAP: 0,
@@ -156,11 +150,14 @@ async def handle_get_statistics(language_code: str, period: str):
         ServiceType.FAST_MESSAGES: 0,
         ServiceType.STANDARD: 0,
         ServiceType.VIP: 0,
-        ServiceType.PLATINUM: 0,
+        ServiceType.PREMIUM: 0,
     }
     count_expense_transactions = {
-        ServiceType.CHAT_GPT3: 0,
-        ServiceType.CHAT_GPT4: 0,
+        ServiceType.CHAT_GPT3_TURBO: 0,
+        ServiceType.CHAT_GPT4_TURBO: 0,
+        ServiceType.CHAT_GPT4_OMNI: 0,
+        ServiceType.CLAUDE_3_SONNET: 0,
+        ServiceType.CLAUDE_3_OPUS: 0,
         ServiceType.DALL_E: 0,
         ServiceType.MIDJOURNEY: 0,
         ServiceType.FACE_SWAP: 0,
@@ -175,8 +172,11 @@ async def handle_get_statistics(language_code: str, period: str):
     count_expense_transactions_total = 0
     count_transactions_total = 0
     count_income_money = {
-        ServiceType.CHAT_GPT3: 0,
-        ServiceType.CHAT_GPT4: 0,
+        ServiceType.CHAT_GPT3_TURBO: 0,
+        ServiceType.CHAT_GPT4_TURBO: 0,
+        ServiceType.CHAT_GPT4_OMNI: 0,
+        ServiceType.CLAUDE_3_SONNET: 0,
+        ServiceType.CLAUDE_3_OPUS: 0,
         ServiceType.DALL_E: 0,
         ServiceType.MIDJOURNEY: 0,
         ServiceType.FACE_SWAP: 0,
@@ -188,11 +188,14 @@ async def handle_get_statistics(language_code: str, period: str):
         ServiceType.FAST_MESSAGES: 0,
         ServiceType.STANDARD: 0,
         ServiceType.VIP: 0,
-        ServiceType.PLATINUM: 0,
+        ServiceType.PREMIUM: 0,
     }
     count_expense_money = {
-        ServiceType.CHAT_GPT3: 0,
-        ServiceType.CHAT_GPT4: 0,
+        ServiceType.CHAT_GPT3_TURBO: 0,
+        ServiceType.CHAT_GPT4_TURBO: 0,
+        ServiceType.CHAT_GPT4_OMNI: 0,
+        ServiceType.CLAUDE_3_SONNET: 0,
+        ServiceType.CLAUDE_3_OPUS: 0,
         ServiceType.DALL_E: 0,
         ServiceType.MIDJOURNEY: 0,
         ServiceType.FACE_SWAP: 0,
@@ -252,7 +255,7 @@ async def handle_get_statistics(language_code: str, period: str):
             if (
                 transaction.service == ServiceType.STANDARD or
                 transaction.service == ServiceType.VIP or
-                transaction.service == ServiceType.PLATINUM
+                transaction.service == ServiceType.PREMIUM
             ):
                 count_income_subscriptions_total_money += transaction.amount
             else:
@@ -360,8 +363,15 @@ async def handle_statistics_selection(callback_query: CallbackQuery, state: FSMC
     user_language_code = await get_user_language(str(callback_query.from_user.id), state.storage)
 
     period = callback_query.data.split(':')[1]
+    if period == 'back':
+        reply_markup = build_admin_keyboard(user_language_code)
+        await callback_query.message.edit_text(
+            text=get_localization(user_language_code).ADMIN_INFO,
+            reply_markup=reply_markup,
+        )
 
-    if period == 'write_transaction':
+        return
+    elif period == 'write_transaction':
         await handle_write_transaction(callback_query, user_language_code)
         return
 
@@ -385,13 +395,10 @@ async def handle_statistics_write_transaction_selection(callback_query: Callback
     transaction_type = callback_query.data.split(':')[1]
     if transaction_type == 'back':
         await handle_statistics(
-            str(callback_query.message.chat.id),
-            str(callback_query.from_user.id),
             callback_query.message,
+            str(callback_query.from_user.id),
             state,
         )
-
-        await callback_query.message.delete()
     else:
         user_language_code = await get_user_language(str(callback_query.from_user.id), state.storage)
 

@@ -23,8 +23,8 @@ def build_blast_keyboard(language_code: str) -> InlineKeyboardMarkup:
         ],
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).CLOSE,
-                callback_data='blast:close'
+                text=get_localization(language_code).BACK,
+                callback_data='blast:back'
             ),
         ],
     ]

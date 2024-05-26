@@ -39,8 +39,8 @@ def build_statistics_keyboard(language_code: str) -> InlineKeyboardMarkup:
         ],
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).CLOSE,
-                callback_data='statistics:close'
+                text=get_localization(language_code).BACK,
+                callback_data='statistics:back'
             )
         ]
     ]
@@ -73,8 +73,10 @@ def build_statistics_write_transaction_keyboard(language_code: str) -> InlineKey
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
-def build_statistics_choose_service_keyboard(language_code: str,
-                                             transaction_type: TransactionType) -> InlineKeyboardMarkup:
+def build_statistics_choose_service_keyboard(
+    language_code: str,
+    transaction_type: TransactionType,
+) -> InlineKeyboardMarkup:
     buttons = []
     if transaction_type == TransactionType.INCOME:
         buttons = [
@@ -92,20 +94,38 @@ def build_statistics_choose_service_keyboard(language_code: str,
             ],
             [
                 InlineKeyboardButton(
-                    text="PLATINUM 💎",
-                    callback_data=f'statistics_choose_service:{ServiceType.PLATINUM}'
+                    text="PREMIUM 💎",
+                    callback_data=f'statistics_choose_service:{ServiceType.PREMIUM}'
                 )
             ],
             [
                 InlineKeyboardButton(
-                    text="ChatGPT 3.5 ✉️",
-                    callback_data=f'statistics_choose_service:{ServiceType.CHAT_GPT3}'
+                    text="ChatGPT 3.5 Turbo ✉️",
+                    callback_data=f'statistics_choose_service:{ServiceType.CHAT_GPT3_TURBO}'
                 )
             ],
             [
                 InlineKeyboardButton(
-                    text="ChatGPT 4.0 🧠",
-                    callback_data=f'statistics_choose_service:{ServiceType.CHAT_GPT4}'
+                    text="ChatGPT 4.0 Turbo 🧠",
+                    callback_data=f'statistics_choose_service:{ServiceType.CHAT_GPT4_TURBO}'
+                )
+            ],
+            [
+                InlineKeyboardButton(
+                    text="ChatGPT 4.0 Omni 💥",
+                    callback_data=f'statistics_choose_service:{ServiceType.CHAT_GPT4_OMNI}'
+                )
+            ],
+            [
+                InlineKeyboardButton(
+                    text="Claude 3 Sonnet 💫",
+                    callback_data=f'statistics_choose_service:{ServiceType.CLAUDE_3_SONNET}'
+                )
+            ],
+            [
+                InlineKeyboardButton(
+                    text="Claude 3 Opus 🚀",
+                    callback_data=f'statistics_choose_service:{ServiceType.CLAUDE_3_OPUS}'
                 )
             ],
             [
@@ -173,14 +193,32 @@ def build_statistics_choose_service_keyboard(language_code: str,
         buttons = [
             [
                 InlineKeyboardButton(
-                    text="ChatGPT 3.5 ✉️",
-                    callback_data=f'statistics_choose_service:{ServiceType.CHAT_GPT3}'
+                    text="ChatGPT 3.5 Turbo ✉️",
+                    callback_data=f'statistics_choose_service:{ServiceType.CHAT_GPT3_TURBO}'
                 )
             ],
             [
                 InlineKeyboardButton(
-                    text="ChatGPT 4.0 🧠",
-                    callback_data=f'statistics_choose_service:{ServiceType.CHAT_GPT4}'
+                    text="ChatGPT 4.0 Turbo 🧠",
+                    callback_data=f'statistics_choose_service:{ServiceType.CHAT_GPT4_TURBO}'
+                )
+            ],
+            [
+                InlineKeyboardButton(
+                    text="ChatGPT 4.0 Omni 💥",
+                    callback_data=f'statistics_choose_service:{ServiceType.CHAT_GPT4_OMNI}'
+                )
+            ],
+            [
+                InlineKeyboardButton(
+                    text="Claude 3 Sonnet 💫",
+                    callback_data=f'statistics_choose_service:{ServiceType.CLAUDE_3_SONNET}'
+                )
+            ],
+            [
+                InlineKeyboardButton(
+                    text="Claude 3 Opus 🚀",
+                    callback_data=f'statistics_choose_service:{ServiceType.CLAUDE_3_OPUS}'
                 )
             ],
             [

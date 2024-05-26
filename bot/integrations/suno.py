@@ -40,12 +40,12 @@ class Suno:
         await self.session.close()
 
     async def _get_sid(self) -> str:
-        url = "https://clerk.suno.com/v1/client?_clerk_js_version=4.72.0"
+        url = "https://clerk.suno.com/v1/client?_clerk_js_version=4.73.0"
         data = await self.request("GET", url)
         return data["response"]["last_active_session_id"]
 
     async def _get_jwt(self) -> str:
-        url = f"https://clerk.suno.com/v1/client/sessions/{self._sid}/tokens/api?_clerk_js_version=4.72.0"
+        url = f"https://clerk.suno.com/v1/client/sessions/{self._sid}/tokens/api?_clerk_js_version=4.73.0"
         data = await self.request("POST", url)
         return data["jwt"]
 
@@ -85,7 +85,7 @@ class Songs(APIResource):
     ) -> List:
         url = f"{SUNO_API_URL}/api/generate/v2/"
         payload = {
-            "mv": "chirp-v3-0",
+            "mv": "chirp-v3-5",
             "prompt": prompt if custom else "",
             "gpt_description_prompt": "" if custom else prompt,
             "make_instrumental": instrumental,

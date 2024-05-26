@@ -26,8 +26,8 @@ def build_manage_catalog_keyboard(language_code: str, roles: List[Role]) -> Inli
         ],
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).CLOSE,
-                callback_data='catalog_manage:close'
+                text=get_localization(language_code).BACK,
+                callback_data='catalog_manage:back'
             )
         ]
     ])

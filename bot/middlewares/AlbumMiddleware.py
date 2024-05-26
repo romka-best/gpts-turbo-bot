@@ -13,7 +13,8 @@ class AlbumMiddleware(BaseMiddleware):
     async def __call__(
         self,
         handler: Callable[[Message, Dict[str, Any]], Awaitable[Any]],
-        message: Message, data: Dict[str, Any],
+        message: Message,
+        data: Dict[str, Any],
     ):
         if message.media_group_id:
             if message.media_group_id not in self.albums:

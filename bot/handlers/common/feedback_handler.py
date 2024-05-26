@@ -18,10 +18,14 @@ feedback_router = Router()
 
 
 @feedback_router.message(Command("feedback"))
-async def handle_feedback(message: Message, state: FSMContext):
+async def feedback(message: Message, state: FSMContext):
     await state.clear()
 
-    user_language_code = await get_user_language(str(message.from_user.id), state.storage)
+    await handle_feedback(message, str(message.from_user.id), state)
+
+
+async def handle_feedback(message: Message, user_id: str, state: FSMContext):
+    user_language_code = await get_user_language(user_id, state.storage)
 
     reply_markup = build_cancel_keyboard(user_language_code)
     await message.answer(
@@ -70,7 +74,7 @@ async def handle_manage_feedback(callback_query: CallbackQuery, state: FSMContex
     if action == "approve":
         user = await get_user(user_id)
 
-        user.balance += 50.00
+        user.balance += 25.00
         await update_user(user_id, {
             "balance": user.balance,
         })

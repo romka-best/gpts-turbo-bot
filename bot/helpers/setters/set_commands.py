@@ -21,11 +21,11 @@ commands_en = [
     ),
     BotCommand(
         command="buy",
-        description="💵 Buy a subscription or individual packages",
+        description="💎 Buy a subscription or individual packages",
     ),
     BotCommand(
         command="profile",
-        description="👤 Your profile",
+        description="👤 Profile",
     ),
     BotCommand(
         command="settings",
@@ -44,6 +44,10 @@ commands_en = [
         description="🧠 Switch to ChatGPT model",
     ),
     BotCommand(
+        command="claude",
+        description="💥 Switch to Claude model",
+    ),
+    BotCommand(
         command="dalle",
         description="🖼️ Switch to DALL-E model",
     ),
@@ -53,7 +57,7 @@ commands_en = [
     ),
     BotCommand(
         command="face_swap",
-        description="📷️ Switch to Face Swap model",
+        description="📷️ Switch to FaceSwap model",
     ),
     BotCommand(
         command="music_gen",
@@ -65,7 +69,7 @@ commands_en = [
     ),
     BotCommand(
         command="bonus",
-        description="🎁 Invite friends to get bonus",
+        description="🎁 Bonus balance",
     ),
     BotCommand(
         command="promo_code",
@@ -96,11 +100,11 @@ commands_ru = [
     ),
     BotCommand(
         command="buy",
-        description="💵 Приобрести подписку или индивидуальные пакеты",
+        description="💎 Приобрести подписку или индивидуальные пакеты",
     ),
     BotCommand(
         command="profile",
-        description="👤 Ваш профиль",
+        description="👤 Профиль",
     ),
     BotCommand(
         command="settings",
@@ -116,7 +120,11 @@ commands_ru = [
     ),
     BotCommand(
         command="chatgpt",
-        description="🧠 Переключаться на ChatGPT модель",
+        description="🧠 Переключиться на ChatGPT модель",
+    ),
+    BotCommand(
+        command="claude",
+        description="💥 Переключиться на Claude модель",
     ),
     BotCommand(
         command="dalle",
@@ -128,7 +136,7 @@ commands_ru = [
     ),
     BotCommand(
         command="face_swap",
-        description="📷️ Переключиться на Face Swap модель",
+        description="📷️ Переключиться на FaceSwap модель",
     ),
     BotCommand(
         command="music_gen",
@@ -140,7 +148,7 @@ commands_ru = [
     ),
     BotCommand(
         command="bonus",
-        description="🎁 Пригласить друзей и получить бонус",
+        description="🎁 Бонусный баланс",
     ),
     BotCommand(
         command="promo_code",
@@ -148,7 +156,7 @@ commands_ru = [
     ),
     BotCommand(
         command="feedback",
-        description="📡 Оставить фидбек",
+        description="📡 Оставить обратную связь",
     ),
     BotCommand(
         command="terms",
@@ -157,11 +165,7 @@ commands_ru = [
 ]
 
 commands_admin = commands_ru + [
-    BotCommand(command="create_promo_code", description="😇 Создать промокод"),
-    BotCommand(command="manage_face_swap", description="📸 Управление контентом в Face Swap"),
-    BotCommand(command="manage_catalog", description="🎩 Управление ролями в чатах"),
-    BotCommand(command="statistics", description="📊 Просмотр статистики"),
-    BotCommand(command="blast", description="📣 Сделать рассылку"),
+    BotCommand(command="admin", description="👨‍💻 Админка"),
 ]
 
 

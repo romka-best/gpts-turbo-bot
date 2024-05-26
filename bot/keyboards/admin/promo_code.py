@@ -26,6 +26,12 @@ def build_create_promo_code_keyboard(language_code: str) -> InlineKeyboardMarkup
                 callback_data=f'create_promo_code:{PromoCodeType.DISCOUNT}'
             )
         ],
+        [
+            InlineKeyboardButton(
+                text=get_localization(language_code).BACK,
+                callback_data=f'create_promo_code:back'
+            )
+        ],
     ]
 
     return InlineKeyboardMarkup(inline_keyboard=buttons)
@@ -47,8 +53,8 @@ def build_create_promo_code_subscription_keyboard(language_code: str) -> InlineK
         ],
         [
             InlineKeyboardButton(
-                text=f"{SubscriptionType.PLATINUM} 💎",
-                callback_data=f'create_promo_code_subscription:{SubscriptionType.PLATINUM}'
+                text=f"{SubscriptionType.PREMIUM} 💎",
+                callback_data=f'create_promo_code_subscription:{SubscriptionType.PREMIUM}'
             ),
         ],
         [
@@ -83,6 +89,12 @@ def build_create_promo_code_period_of_subscription_keyboard(
             InlineKeyboardButton(
                 text=f"{get_localization(language_code).MONTHS_6}",
                 callback_data=f'create_promo_code_period_of_subscription:{subscription_type}:{SubscriptionPeriod.MONTHS6}'
+            ),
+        ],
+        [
+            InlineKeyboardButton(
+                text=f"{get_localization(language_code).MONTHS_12}",
+                callback_data=f'create_promo_code_period_of_subscription:{subscription_type}:{SubscriptionPeriod.MONTHS12}'
             ),
         ],
         [

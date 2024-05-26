@@ -47,8 +47,8 @@ def build_subscriptions_keyboard(language_code: str) -> InlineKeyboardMarkup:
         ],
         [
             InlineKeyboardButton(
-                text=f"{SubscriptionType.PLATINUM} 💎",
-                callback_data=f'subscription:{SubscriptionType.PLATINUM}'
+                text=f"{SubscriptionType.PREMIUM} 💎",
+                callback_data=f'subscription:{SubscriptionType.PREMIUM}'
             ),
         ],
         [

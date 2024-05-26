@@ -22,6 +22,24 @@ def build_profile_keyboard(language_code: str, is_photo_uploaded: bool, is_gende
         ],
         [
             InlineKeyboardButton(
+                text=get_localization(language_code).OPEN_BONUS_INFO,
+                callback_data=f'profile:open_bonus_info'
+            ),
+        ],
+        [
+            InlineKeyboardButton(
+                text=get_localization(language_code).OPEN_BUY_SUBSCRIPTIONS_INFO,
+                callback_data=f'profile:open_buy_subscriptions_info'
+            ),
+        ],
+        [
+            InlineKeyboardButton(
+                text=get_localization(language_code).OPEN_BUY_PACKAGES_INFO,
+                callback_data=f'profile:open_buy_packages_info'
+            ),
+        ],
+        [
+            InlineKeyboardButton(
                 text=get_localization(language_code).CLOSE,
                 callback_data=f'profile:close'
             ),

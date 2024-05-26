@@ -2,7 +2,6 @@ import asyncio
 from typing import Dict
 
 from aiogram import Router, F
-from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery, URLInputFile, InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.utils.chat_action import ChatActionSender
@@ -20,6 +19,7 @@ from bot.database.operations.face_swap_package.updaters import update_face_swap_
 from bot.database.operations.face_swap_package.writers import write_face_swap_package
 from bot.database.operations.generation.writers import write_generation
 from bot.database.operations.request.writers import write_request
+from bot.keyboards.admin.admin import build_admin_keyboard
 from bot.locales.translate_text import translate_text
 from bot.integrations.replicateAI import create_face_swap_image
 from bot.keyboards.admin.face_swap import (
@@ -36,27 +36,18 @@ from bot.keyboards.admin.face_swap import (
 from bot.keyboards.common.common import build_cancel_keyboard
 from bot.locales.main import get_localization, localization_classes, get_user_language
 from bot.states.face_swap import FaceSwap
-from bot.utils.is_admin import is_admin
 
 admin_face_swap_router = Router()
 
 
 async def handle_manage_face_swap(message: Message, user_id: str, state: FSMContext):
-    if is_admin(str(message.chat.id)):
-        user_language_code = await get_user_language(str(user_id), state.storage)
+    user_language_code = await get_user_language(str(user_id), state.storage)
 
-        reply_markup = build_manage_face_swap_keyboard(user_language_code)
-        await message.answer(
-            text=get_localization(user_language_code).FACE_SWAP_MANAGE,
-            reply_markup=reply_markup,
-        )
-
-
-@admin_face_swap_router.message(Command("manage_face_swap"))
-async def manage_face_swap(message: Message, state: FSMContext):
-    await state.clear()
-
-    await handle_manage_face_swap(message, str(message.from_user.id), state)
+    reply_markup = build_manage_face_swap_keyboard(user_language_code)
+    await message.edit_text(
+        text=get_localization(user_language_code).FACE_SWAP_MANAGE,
+        reply_markup=reply_markup,
+    )
 
 
 @admin_face_swap_router.callback_query(lambda c: c.data.startswith('fsm:'))
@@ -66,8 +57,15 @@ async def handle_face_swap_manage_selection(callback_query: CallbackQuery, state
     user_language_code = await get_user_language(str(callback_query.from_user.id), state.storage)
 
     action = callback_query.data.split(':')[1]
+    if action == 'back':
+        reply_markup = build_admin_keyboard(user_language_code)
+        await callback_query.message.edit_text(
+            text=get_localization(user_language_code).ADMIN_INFO,
+            reply_markup=reply_markup,
+        )
 
-    if action == 'create':
+        return
+    elif action == 'create':
         reply_markup = build_manage_face_swap_create_keyboard(user_language_code)
         await callback_query.message.edit_text(
             text=get_localization(user_language_code).FACE_SWAP_MANAGE_CREATE,
