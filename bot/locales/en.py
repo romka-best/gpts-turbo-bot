@@ -2,7 +2,7 @@ import random
 from typing import List, Dict
 
 from bot.locales.texts import Texts
-from bot.database.models.common import Currency, Quota, Model, GPTVersion
+from bot.database.models.common import Currency, Quota, Model, ChatGPTVersion, ClaudeGPTVersion
 from bot.database.models.package import PackageType, Package
 from bot.database.models.subscription import Subscription, SubscriptionType, SubscriptionPeriod, SubscriptionLimit
 from bot.database.models.user import UserGender
@@ -13,8 +13,11 @@ class English(Texts):
 🤖 <b>Welcome to the future of artificial intelligence with ChatGPTs Turbo AI Bot!</b> 🎉
 
 I'm your personal gateway to the world of artificial intelligence and neural networks. Discover the capabilities of AI:
-✉️ Communicate with <b>ChatGPT-3.5</b>: ask questions, get answers
-🧠 Explore advanced intelligence with <b>ChatGPT-4.0</b>
+✉️ Communicate with <b>ChatGPT-3.5 Turbo</b>: ask questions, get answers
+🧠 Explore advanced intelligence with <b>ChatGPT-4.0 Turbo</b>
+💥 Unleash the full potential of AI with <b>ChatGPT-4.0 Omni</b>
+💫 The perfect blend of speed and intelligence for business tasks with <b>Claude 3 Sonnet</b>
+🚀 Ultimate power for tackling the most complex challenges with <b>Claude 3 Opus</b>
 🖼 Draw beautiful pictures with <b>DALL-E</b>
 🎨 Create unique images with <b>Midjourney</b>
 😜 Try <b>FaceSwap</b> to exchange faces with someone in a photo
@@ -22,8 +25,8 @@ I'm your personal gateway to the world of artificial intelligence and neural net
 🎸 Record your own songs with <b>Suno</b>
 
 Here's a quick guide to get started:
-✉️ To receive a text response from <b>ChatGPT-3.5</b>, simply enter your query in the chat
-🧠 To get a text response from <b>ChatGPT-4.0</b>, enter the command /chatgpt, choose ChatGP-4.0 model and then just write your query in the chat
+🧠 To get a text response from <b>ChatGPT</b>, enter the command /chatgpt, select the version, and then just type your requests in the chat
+🚀 To get a text response from <b>Claude</b>, enter the command /claude, select the version, and then just type your requests in the chat
 🖼 To create an image with <b>DALL-E</b>, enter the command /dalle, and then let your imagination run wild with your request
 🎨 To create an image with <b>Midjourney</b>, enter the command /midjourney, and then start creating using your imagination with your request
 😜 To swap faces with someone in a photo with <b>FaceSwap</b>, enter the command /face_swap, then choose images from our unique packages or send your own
@@ -43,44 +46,78 @@ I'm here to be your co-pilot on this adventure! 🚀
 🤖 <b>Here's what you can explore:</b>
 
 👋 /start - <b>About me</b>: Discover what I can do for you.
-🤖 /mode - <b>Swap neural network models</b> on the fly with — <b>ChatGPT-3.5</b>, <b>ChatGPT-4.0</b>, <b>DALL-E</b>, <b>Midjourney</b>, <b>FaceSwap</b>, or <b>MusicGen</b>!
-💳 /buy - <b>Subscribe or buy individual packages</b>: Get a new level.
-👤 /profile - <b>View your profile</b>: Check your subscription details or usage quota and more.
+🤖 /mode - <b>Swap neural network models</b> on the fly with — <b>ChatGPT</b>, <b>Claude</b>, <b>DALL-E</b>, <b>Midjourney</b>, <b>FaceSwap</b>, <b>MusicGen</b>, or <b>Suno</b>!
+💳 /buy - <b>Subscribe or buy individual packages</b>: Get a new level
+👤 /profile - <b>View your profile</b>: Check your subscription details or usage quota and more
 🔧 /settings - <b>Customize your experience</b>: Tailor model to fit your needs. There you can also <b>select a digital employee</b> with <b>context-specific chats management</b>
-🌍 /language - <b>Switch languages</b>: Set your preferred language for system interface.
-ℹ️ /info - <b>Get information about AI</b>: Learn for what and why do you need them.
-🧠 /chatgpt - <b>Engage with ChatGPT-3.5 and ChatGPT-4.0</b>: Start chatting in a text-based conversation and getting experience with advanced AI responses.
-🖼 /dalle - <b>Draw with DALL-E</b>: Turn your ideas into drawings.
-🎨 /midjourney - <b>Create with DALL-E 3</b>: Bring your imaginations to life with images.
-😜 /face_swap - <b>Have fun with FaceSwap</b>: Change faces in photos.
-🎵 /music_gen - <b>Melodies with MusicGen</b>: Create music without copyrights.
-🎸 /suno - <b>Songs with Suno</b>: Create your own song with your lyrics and different genres.
-🎁 /bonus - Learn about your bonus balance, invite friends, and <b>exchange bonuses for unique generation packages</b>.
-🔑 /promo_code - <b>Unleash exclusive AI features</b> and special offers with your <b>promo code</b>.
-📡 /feedback - <b>Leave feedback</b>: Help me improve.
+🌍 /language - <b>Switch languages</b>: Set your preferred language for system interface
+ℹ️ /info - <b>Get information about AI</b>: Learn for what and why do you need them
+🧠 /chatgpt - <b>Chat with ChatGPT</b>: Start a text conversation and receive advanced AI responses
+🚀 /claude - <b>Chat with Claude</b>: Begin a discussion and explore the depth of responses from Claude
+🖼 /dalle - <b>Draw with DALL-E</b>: Turn your ideas into drawings
+🎨 /midjourney - <b>Create with DALL-E 3</b>: Bring your imaginations to life with images
+😜 /face_swap - <b>Have fun with FaceSwap</b>: Change faces in photos
+🎵 /music_gen - <b>Melodies with MusicGen</b>: Create music without copyrights
+🎸 /suno - <b>Songs with Suno</b>: Create your own song with your lyrics and different genres
+🎁 /bonus - Learn about your bonus balance and <b>exchange bonuses for unique generation packages</b>
+🔑 /promo_code - <b>Unleash exclusive AI features</b> and special offers with your <b>promo code</b>
+📡 /feedback - <b>Leave feedback</b>: Help me improve
 
 Just type away a command to begin your AI journey! 🌟
 """
     INFO = """
+🤖 <b>Select the models type you want to get information about:</b>
+"""
+    INFO_TEXT_MODELS = """
+🤖 <b>Select the model you want to get information about:</b>
+"""
+    INFO_IMAGE_MODELS = """
+🤖 <b>Select the model you want to get information about:</b>
+"""
+    INFO_MUSIC_MODELS = """
 🤖 <b>Select the model you want to get information about:</b>
 """
     INFO_CHATGPT = """
 🤖 <b>There is what each model can do for you:</b>
 
-✉️ <b>ChatGPT-3.5: The Versatile Communicator</b>
+✉️ <b>ChatGPT-3.5 Turbo: The Versatile Communicator</b>
 - <i>Small Talk to Deep Conversations</i>: Ideal for chatting about anything from daily life to sharing jokes.
 - <i>Educational Assistant</i>: Get help with homework, language learning, or complex topics like coding.
 - <i>Personal Coach</i>: Get motivation, fitness tips, or even meditation guidance.
-- <i>Creative Writer</i>: Need a post, story, or even a song? ChatGPT-3.5 can whip it up in seconds.
+- <i>Creative Writer</i>: Need a post, story, or even a song? ChatGPT-3.5 Turbo can whip it up in seconds.
 - <i>Travel Buddy</i>: Ask for travel tips, local cuisines, or historical facts about your next destination.
 - <i>Business Helper</i>: Draft emails, create business plans, or brainstorm marketing ideas.
 
-🧠 <b>ChatGPT-4.0: The Advanced Intellect</b>
+🧠 <b>ChatGPT-4.0 Turbo: The Advanced Intellect</b>
 - <i>In-Depth Analysis</i>: Perfect for detailed research, technical explanations, or exploring hypothetical scenarios.
 - <i>Problem Solver</i>: Get help with advanced math problems, programming bugs, or scientific queries.
 - <i>Language Expert</i>: Translate complex texts or practice conversational skills in various languages.
 - <i>Creative Consultant</i>: Develop plot ideas for your posts, script dialogues, or explore artistic concepts.
 - <i>Personalized Recommendations</i>: Get book, movie, or travel recommendations based on your interests.
+
+💥 <b>ChatGPT-4.0 Omni: Next-Generation Intelligence</b>
+<i>Detailed Analysis</i>: Perfect for in-depth research, complex technical explanations, or virtual scenario analysis.
+<i>Complex Problem Solving</i>: From mathematical calculations to diagnosing software issues and answering scientific queries.
+<i>Language Mastery</i>: High-level translation and enhancement of conversational skills in various languages.
+<i>Creative Mentor</i>: Inspiring ideas for blogs, scripts, or artistic research.
+<i>Personalized Recommendations</i>: Tailored picks for books, movies, or travel routes based on your preferences.
+"""
+    INFO_CLAUDE = """
+🤖 <b>There is what each model can do for you:</b>
+
+💫 <b>Claude 3 Sonnet: A Balance of Speed and Wisdom</b>
+<i>Multifunctional Analysis</i>: Effective for comprehensive research and technical explanations.
+<i>Problem Solving</i>: Assistance with solving mathematical issues, software bugs, or scientific puzzles.
+<i>Linguistic Expert</i>: A reliable assistant for translating texts and enhancing conversational skills in various languages.
+<i>Creative Advisor</i>: Development of creative ideas for content and artistic projects.
+<i>Personal Guide</i>: Recommendations for cultural content and travel planning tailored to your interests.
+
+🚀 <b>Claude 3 Opus: The Pinnacle of Power and Depth</b>
+<i>Advanced Analysis</i>: Ideal for tackling the most complex research and hypothetical scenarios.
+<i>Problem Solving Expert</i>: Addresses challenging scientific inquiries, technical issues, and mathematical problems.
+<i>Language Mastery</i>: Translations and language practice at a professional level.
+<i>Creative Consultant</i>: Support in developing unique ideas for scripts and art projects.
+<i>Recommendations Concierge</i>: Expert advice on selecting books, movies, and travel plans that match your tastes.
 """
     INFO_DALL_E = """
 🤖 <b>There is what the model can do for you:</b>
@@ -133,6 +170,10 @@ Just type away a command to begin your AI journey! 🌟
 <i>Instant music creation</i>: Describe your emotions or scenario, and Suno will immediately bring your description to life as a song.
 """
 
+    TEXT_MODELS = "🔤 Text models"
+    IMAGE_MODELS = "🧑‍🎨 Image models"
+    MUSIC_MODELS = "🎺 Music models"
+
     # Feedback
     FEEDBACK = """
 🌟 <b>Your opinion matters!</b> 🌟
@@ -152,17 +193,17 @@ And remember, every piece of feedback is a step towards making our bot even more
 Thank you for sharing your thoughts! 💌
 Your input is the secret sauce to our success. We're cooking up some improvements and your feedback is the key ingredient 🍳🔑
 
-Keep an eye out for updates and new features, all inspired by you. We will add 50 credits to your balance after the administrators check the content of the feedback, but in the meantime, happy chatting! 🚀
+Keep an eye out for updates and new features, all inspired by you. We will add 25 credits to your balance after the administrators check the content of the feedback, but in the meantime, happy chatting! 🚀
 
 Your opinion matters a lot to us! 💖
 """
     FEEDBACK_APPROVED = """
 🌟 <b>Feedback received!</b> 🌟
 
-As a token of appreciation, your balance has increased by 50 credits 🪙! Use them to access exclusive functions or replenish the number of generations in neural networks 💸
+As a token of appreciation, your balance has increased by 25 credits 🪙! Use them to access exclusive functions or replenish the number of generations in neural networks 💸
 
 To use the bonus, enter the command /bonus and follow the instructions!
-    """
+"""
     FEEDBACK_DENIED = """
 🌟 <b>Feedback received!</b> 🌟
 
@@ -207,6 +248,10 @@ Once you've got the perfect shot, <b>upload your photo</b> and let the magic hap
     CHOOSE_GENDER = "Choose gender 🚹🚺"
     CHANGE_GENDER = "Change gender 🚹🚺"
 
+    OPEN_BONUS_INFO = "🎁 Open bonus balance"
+    OPEN_BUY_SUBSCRIPTIONS_INFO = "💎 Subscribe"
+    OPEN_BUY_PACKAGES_INFO = "🛍 Purchase individual packages"
+
     # Language
     LANGUAGE = "Language:"
     CHOOSE_LANGUAGE = "Selected language: English 🇺🇸"
@@ -218,6 +263,17 @@ Once you've got the perfect shot, <b>upload your photo</b> and let the magic hap
 Congratulations! You've successfully used your bonus balance. Now, you can dive deeper into the world of artificial intelligence.
 
 Start using your generations right now and discover new horizons with our neural networks! 🚀
+"""
+    BONUS_CHOOSE_PACKAGE = "Choose how to spend your earnings:"
+    INVITE_FRIEND = "👥 Invite a friend"
+    LEAVE_FEEDBACK = "📡 Leave a feedback"
+    CASH_OUT = "🛍 Cash out credits"
+    REFERRAL_SUCCESS = """
+🌟 <b>Congratulations! Your referral magic worked!</b> 🌟
+
+Thanks to you, a new user has joined us, and as a token of our appreciation, your and your friend's balance has been increased by 25 credits 🪙! Use them to access exclusive features or to add more generations in the neural networks 💸
+
+To use the bonus, enter the /bonus command and follow the instructions. Let every invitation bring you not only the joy of communication but also pleasant bonuses!
 """
 
     # Promo code
@@ -273,19 +329,43 @@ To change a model click a button below 👇
     CHOOSE_CHATGPT_MODEL = """
 To choose a ChatGPT model click a button below 👇
 """
-    SWITCHED_TO_CHATGPT3 = """
-🤖 <b>Welcome to the world of ChatGPT-3.5!</b>
-
-You've successfully switched to the <b>ChatGPT-3.5</b> model. Consider this your personal virtual brain, ready to handle all your questions and ideas. Feel free to write anything - from simple queries to complex tasks. And don't worry, your previous conversations are stored in memory, so the context of your dialogue won't be lost
-
-Go ahead, explore the capabilities of <b>ChatGPT-3.5</b>! 🎉
+    CHOOSE_CLAUDE_MODEL = """
+To choose a Claude model click a button below 👇
 """
-    SWITCHED_TO_CHATGPT4 = """
-🚀 <b>Welcome to the world of ChatGPT-4.0!</b>
+    SWITCHED_TO_CHATGPT3_TURBO = """
+🤖 <b>Welcome to the world of ChatGPT-3.5 Turbo!</b>
 
-Congratulations, you've switched to the <b>ChatGPT-4.0</b> model. This is a real breakthrough in the world of neural networks! <b>ChatGPT-4.0</b> offers deeper understanding and expanded capabilities compared to its predecessors. Discover new horizons of communication with AI. Your previous conversations are remembered, and the context history is preserved
+You've successfully switched to the <b>ChatGPT-3.5 Turbo</b> model. Consider this your personal virtual brain, ready to handle all your questions and ideas. Feel free to write anything - from simple queries to complex tasks. And don't worry, your previous conversations are stored in memory, so the context of your dialogue won't be lost
 
-Start your journey into the future with <b>ChatGPT-4.0</b>! 🎉
+Go ahead, explore the capabilities of <b>ChatGPT-3.5 Turbo</b>! 🎉
+"""
+    SWITCHED_TO_CHATGPT4_TURBO = """
+🚀 <b>Welcome to the world of ChatGPT-4.0 Turbo!</b>
+
+Congratulations, you've switched to the <b>ChatGPT-4.0 Turbo</b> model. This is a real breakthrough in the world of neural networks! <b>ChatGPT-4.0 Turbo</b> offers deeper understanding and expanded capabilities compared to its predecessors. Discover new horizons of communication with AI. Your previous conversations are remembered, and the context history is preserved
+
+Start your journey into the future with <b>ChatGPT-4.0 Turbo</b>! 🎉
+"""
+    SWITCHED_TO_CHATGPT4_OMNI = """
+💥 <b>Welcome to a new era with ChatGPT-4.0 Omni!</b>
+
+You have successfully switched to the <b>ChatGPT-4.0 Omni</b> model. This is the pinnacle of artificial intelligence innovation! <b>ChatGPT-4.0 Omni</b> surpasses previous models in depth of understanding and breadth of capabilities. Dive into an enhanced AI interaction experience. Your previous conversation history has been preserved, so we can pick up right where we left off.
+
+Embark on an exciting journey with <b>ChatGPT-4.0 Omni</b>! 🎉
+"""
+    SWITCHED_TO_CLAUDE_3_SONNET = """
+💫 <b>Welcome to the world of Claude 3 Sonnet!</b>
+
+You have successfully switched to the <b>Claude 3 Sonnet</b> model. A master of balanced intelligence and speed! This model is perfectly suited for corporate tasks, combining quick responsiveness with deep analysis. Your experience will be enhanced by the preserved conversation history, allowing you to continue the dialogue without losing context.
+
+Experience a new level of interaction with <b>Claude 3 Sonnet</b>! 🎉
+"""
+    SWITCHED_TO_CLAUDE_3_OPUS = """
+🚀 <b>Welcome to the world of Claude 3 Opus!</b>
+
+You have successfully switched to the <b>Claude 3 Opus</b> model. This is the peak of technological power for the most complex tasks! This model offers unprecedented depth of understanding and the ability to solve the most challenging problems. Your previous conversation history has been preserved, ensuring a seamless continuation of communication.
+
+Prepare for an advanced experience with <b>Claude 3 Opus</b>! 🎉
 """
     SWITCHED_TO_DALL_E = """
 🖼 <b>Welcome to the world of DALL-E!</b>
@@ -359,8 +439,8 @@ The adventure continues! 🚀✨
     IMAGE_SUCCESS = "✨ Here's your image creation! 🎨"
 
     # Examples
-    CHATGPT4_EXAMPLE_FIRST_PART = "👇 This is how *ChatGPT-4.0* would respond to your request 🧠"
-    CHATGPT4_EXAMPLE_LAST_PART = "To switch to *ChatGPT-4.0*, enter the /chatgpt command and select *ChatGPT-4.0* 🧠"
+    CHATGPT4_OMNI_EXAMPLE = "👇 This is how *ChatGPT-4.0 Omni* would respond to your request 💥"
+    CLAUDE_3_OPUS_EXAMPLE = "👇 This is how *Claude 3 Opus* would respond to your request 🚀"
     MIDJOURNEY_EXAMPLE = """
 ☝️ These are the images that <b>Midjourney</b> would draw for your request
 
@@ -372,11 +452,10 @@ To start drawing using <b>Midjourney</b>, just type the command /midjourney 🎨
 To start creating songs using <b>Suno</b>, just type the command /suno 🎸
 """
 
-    # ChatGPT
-    CHATGPT_PHOTO_FEATURE_FORBIDDEN = """
-⚠️ Sending photos is only available in version <b>ChatGPT-4.0</b> 🧠
+    PHOTO_FEATURE_FORBIDDEN = """
+⚠️ Sending photos is only available in models: <b>ChatGPT-4.0</b> and <b>Claude 3</b>
 
-To switch to <b>ChatGPT-4.0</b>, enter the /chatgpt command and select <b>ChatGPT-4.0</b> 🧠
+Use /mode to switch to a model that supports image vision 👀
 """
 
     # Midjourney
@@ -446,13 +525,16 @@ Looks like you're trying to request fewer than 1 second. In the world of creativ
     SECONDS_180 = "🔹 180 seconds"
 
     # Settings
-    SETTINGS_CHOOSE_MODEL = """
+    SETTINGS_CHOOSE_MODEL_TYPE = """
 ⚙️ <b>Welcome to settings!</b> ⚙️
 
 🌍 To change the interface language, enter the command /language
 🤖 To change the model, enter the command /mode
 
-Here you are the artist, and settings are your palette. Choose the model you want to personalize for yourself below 👇
+Here you are the artist, and settings are your palette. Choose the model type you want to personalize for yourself below 👇
+"""
+    SETTINGS_CHOOSE_MODEL = """
+Choose the model you want to personalize for yourself below 👇
 """
     SHOW_THE_NAME_OF_THE_CHATS = "Show the name of the chats"
     SHOW_THE_NAME_OF_THE_ROLES = "Show the name of the roles"
@@ -477,7 +559,7 @@ Let's turn those voice messages into text and keep the conversation flowing! �
 The gates to a world of exclusive opportunities are now open before you! What will it be today?
 
 🌟 <b>Subscription: Your VIP pass to a world of opportunities!</b>
-Gain full access to the entire spectrum of innovative services: from conversations with ChatGPT to creating unique melodies with MusicGen. Use thematic chats to delve into topics of interest and expand your horizons every day. Discover the comfort of quick responses and the uniqueness of personalized images with FaceSwap. All this and much more are waiting for you in our subscriptions: <b>STANDARD</b> ✨, <b>VIP</b> 🔥, or <b>PLATINUM</b> 💎
+Gain full access to the entire spectrum of innovative services: from conversations with ChatGPT to creating unique songs with Suno. Use thematic chats to delve into topics of interest and expand your horizons every day. Discover the comfort of quick responses and the uniqueness of personalized images with FaceSwap. All this and much more are waiting for you in our subscriptions: <b>STANDARD</b> ✨, <b>VIP</b> 🔥, or <b>PREMIUM</b> 💎
 
 🛍 <b>Packages: The perfect solution for specific needs!</b>
 Looking for a targeted solution for a one-time project? Our Package provides the necessary number of requests and services to help you achieve your goals. Choose only what you need for your next creative breakthrough or business task, and pay only for the resources you use
@@ -554,22 +636,28 @@ Your chats have switched their unique roles to "Personal Assistant" as your acce
     ADD_TO_CART_OR_BUY_NOW = "Buy now or add to cart?"
     ADDED_TO_CART = "Added to cart ✅"
     GO_TO_CART_OR_CONTINUE_SHOPPING = "Go to cart or continue shopping?"
-    GPT3_REQUESTS = "✉️ ChatGPT-3.5 requests"
-    GPT3_REQUESTS_DESCRIPTION = "Unleash the power of GPT 3.5 for witty chats, smart advice, and endless fun! 🤖✨"
-    GPT4_REQUESTS = "🧠 ChatGPT-4.0 requests"
-    GPT4_REQUESTS_DESCRIPTION = "Experience GPT4's advanced intelligence for deeper insights and groundbreaking conversations 🧠🌟"
-    THEMATIC_CHATS = "💬 Thematic chats"
-    THEMATIC_CHATS_DESCRIPTION = "Dive into topics you love with Thematic Chats, guided by AI in a world of tailored discussions 📚🗨️"
+    GPT3_REQUESTS = "✉️ ChatGPT-3.5 Turbo requests"
+    GPT3_REQUESTS_DESCRIPTION = "Unleash the power of ChatGPT-3.5 Turbo for witty chats, smart advice, and endless fun! ✉️"
+    GPT4_REQUESTS = "🧠 ChatGPT-4.0 Turbo requests"
+    GPT4_REQUESTS_DESCRIPTION = "Experience ChatGPT-4.0 Turbo advanced intelligence for deeper insights and groundbreaking conversations 🧠"
+    GPT4_OMNI_REQUESTS = "💥 ChatGPT-4.0 Omni requests"
+    GPT4_OMNI_REQUESTS_DESCRIPTION = "Discover new horizons with the intelligence of ChatGPT-4.0 Omni for deeper analyses and innovative dialogues! 💥"
+    CLAUDE_3_SONNET_REQUESTS = "💫 Claude 3 Sonnet requests"
+    CLAUDE_3_SONNET_REQUESTS_DESCRIPTION = "Explore the balance of speed and intelligence with Claude 3 Sonnet for accurate and timely solutions! 💫"
+    CLAUDE_3_OPUS_REQUESTS = "🚀 Claude 3 Opus requests"
+    CLAUDE_3_OPUS_REQUESTS_DESCRIPTION = "Experience the power of Claude 3 Opus to solve the most complex challenges and create profound insights! 🚀"
     DALL_E_REQUESTS = "🖼 DALL-E images"
-    DALL_E_REQUESTS_DESCRIPTION = "Turn ideas into art with DALL-E – where your imagination becomes stunning visual reality! 🎨🌈"
+    DALL_E_REQUESTS_DESCRIPTION = "Turn ideas into art with DALL-E – where your imagination becomes stunning visual reality! 🖼"
     MIDJOURNEY_REQUESTS = "🎨 Midjourney images"
-    MIDJOURNEY_REQUESTS_DESCRIPTION = "Unleash your creativity with Midjourney – transform your thoughts into magnificent visual works of art! 🎨✨"
+    MIDJOURNEY_REQUESTS_DESCRIPTION = "Unleash your creativity with Midjourney – transform your thoughts into magnificent visual works of art! 🎨"
     FACE_SWAP_REQUESTS = "📷 Images with face replacement"
     FACE_SWAP_REQUESTS_DESCRIPTION = "Enter the playful world of FaceSwap for laughs and surprises in every image! 😂🔄"
     MUSIC_GEN_REQUESTS = "🎵 Seconds of generation of melodies"
-    MUSIC_GEN_REQUESTS_DESCRIPTION = "Discover a world where every prompt turns into a unique melody! 🎶✨"
+    MUSIC_GEN_REQUESTS_DESCRIPTION = "Discover a world where every prompt turns into a unique melody! 🎶"
     SUNO_REQUESTS = "🎸 Suno songs"
-    SUNO_REQUESTS_DESCRIPTION = "Discover a world where every text you write is transformed into a unique song! 🎸✨"
+    SUNO_REQUESTS_DESCRIPTION = "Discover a world where every text you write is transformed into a unique song! 🎸"
+    THEMATIC_CHATS = "💬 Thematic chats"
+    THEMATIC_CHATS_DESCRIPTION = "Dive into topics you love with Thematic Chats, guided by AI in a world of tailored discussions 🗨️"
     ACCESS_TO_CATALOG = "🎭 Access to a roles catalog"
     ACCESS_TO_CATALOG_DESCRIPTION = "Unlock a universe of specialized AI assistants with access to our exclusive catalog, where every role is tailored to fit your unique needs and tasks"
     ANSWERS_AND_REQUESTS_WITH_VOICE_MESSAGES = "🎙 Answers and requests with voice messages"
@@ -712,6 +800,16 @@ I've got an unknown error 🤒
 
 Please try again or contact @roman_danilov 🔧
 """
+    NETWORK_ERROR = """
+I lost my connection with Telegram 🤒
+
+Please try again 🥺
+"""
+    CONNECTION_ERROR = """
+I lost my connection with my database 🤒
+
+Please try again 🥺
+"""
     BACK = "Back ◀️"
     CLOSE = "Close 🚪"
     CANCEL = "Cancel ❌"
@@ -743,10 +841,16 @@ Please try again or contact @roman_danilov 🔧
         else:
             gender_info = f"<b>Gender:</b> {English.UNSPECIFIED}"
 
-        if current_model == Model.CHAT_GPT and current_model_version == GPTVersion.V3:
-            current_model = English.CHATGPT3
-        elif current_model == Model.CHAT_GPT and current_model_version == GPTVersion.V4:
-            current_model = English.CHATGPT4
+        if current_model == Model.CHAT_GPT and current_model_version == ChatGPTVersion.V3_Turbo:
+            current_model = English.CHATGPT3_TURBO
+        elif current_model == Model.CHAT_GPT and current_model_version == ChatGPTVersion.V4_Turbo:
+            current_model = English.CHATGPT4_TURBO
+        elif current_model == Model.CHAT_GPT and current_model_version == ChatGPTVersion.V4_Omni:
+            current_model = English.CHATGPT4_OMNI
+        elif current_model == Model.CLAUDE and current_model_version == ClaudeGPTVersion.V3_Sonnet:
+            current_model = English.CLAUDE_3_SONNET
+        elif current_model == Model.CLAUDE and current_model_version == ClaudeGPTVersion.V3_Opus:
+            current_model = English.CLAUDE_3_OPUS
         elif current_model == Model.DALL_E:
             current_model = English.DALL_E
         elif current_model == Model.MIDJOURNEY:
@@ -761,59 +865,55 @@ Please try again or contact @roman_danilov 🔧
         return f"""
 <b>Profile</b> 👤
 
-<b>Subscription type:</b> {subscription_type} {emojis[subscription_type]}
-<b>Subscription renewal date:</b> {renewal_date}
-
-{gender_info}
+---------------------------
 
 🤖 <b>Current model: {current_model}</b>
-Change model: /mode
+{gender_info}
 
-✉️ <b>ChatGPT-3.5</b>
-Requests for month: {monthly_limits[Quota.CHAT_GPT3]}/{SubscriptionLimit.LIMITS[subscription_type][Quota.CHAT_GPT3]}
-Additional requests: {additional_usage_quota[Quota.CHAT_GPT3]}
+---------------------------
 
-🧠 <b>ChatGPT-4.0</b>
-Requests for month: {monthly_limits[Quota.CHAT_GPT4]}/{SubscriptionLimit.LIMITS[subscription_type][Quota.CHAT_GPT4]}
-Additional requests: {additional_usage_quota[Quota.CHAT_GPT4]}
+{emojis[subscription_type]} <b>Subscription type:</b> {subscription_type}
+🗓 <b>Subscription renewal date:</b> {renewal_date}
 
-🖼 <b>DALL-E</b>
-Images for month: {monthly_limits[Quota.DALL_E]}/{SubscriptionLimit.LIMITS[subscription_type][Quota.DALL_E]}
-Additional images: {additional_usage_quota[Quota.DALL_E]}
+Quota:
+━ ✉️ <b>ChatGPT-3.5 Turbo</b>:
+    ┣ {monthly_limits[Quota.CHAT_GPT3_TURBO]}/{SubscriptionLimit.LIMITS[subscription_type][Quota.CHAT_GPT3_TURBO]}
+    ┗ Additional: {additional_usage_quota[Quota.CHAT_GPT3_TURBO]}
+━ 🧠 <b>ChatGPT-4.0 Turbo</b>:
+    ┣ {monthly_limits[Quota.CHAT_GPT4_TURBO]}/{SubscriptionLimit.LIMITS[subscription_type][Quota.CHAT_GPT4_TURBO]}
+    ┗ Additional: {additional_usage_quota[Quota.CHAT_GPT4_TURBO]}
+━ 💥 <b>ChatGPT-4.0 Omni</b>:
+    ┣ {monthly_limits[Quota.CHAT_GPT4_OMNI]}/{SubscriptionLimit.LIMITS[subscription_type][Quota.CHAT_GPT4_OMNI]}
+    ┗ Additional: {additional_usage_quota[Quota.CHAT_GPT4_OMNI]}
+━ 💫 <b>Claude 3 Sonnet</b>:
+    ┣ {monthly_limits[Quota.CLAUDE_3_SONNET]}/{SubscriptionLimit.LIMITS[subscription_type][Quota.CLAUDE_3_SONNET]}
+    ┗ Additional: {additional_usage_quota[Quota.CLAUDE_3_SONNET]}
+━ 🚀 <b>Claude 3 Opus</b>:
+    ┣ {monthly_limits[Quota.CLAUDE_3_OPUS]}/{SubscriptionLimit.LIMITS[subscription_type][Quota.CLAUDE_3_OPUS]}
+    ┗ Additional: {additional_usage_quota[Quota.CLAUDE_3_OPUS]}
+━ 🖼 <b>DALL-E</b>:
+    ┣ {monthly_limits[Quota.DALL_E]}/{SubscriptionLimit.LIMITS[subscription_type][Quota.DALL_E]}
+    ┗ Additional: {additional_usage_quota[Quota.DALL_E]}
+━ 🎨 <b>Midjourney</b>:
+    ┣ {monthly_limits[Quota.MIDJOURNEY]}/{SubscriptionLimit.LIMITS[subscription_type][Quota.MIDJOURNEY]}
+    ┗ Additional: {additional_usage_quota[Quota.MIDJOURNEY]}
+━ 📷 <b>FaceSwap</b>:
+    ┣ {monthly_limits[Quota.FACE_SWAP]}/{SubscriptionLimit.LIMITS[subscription_type][Quota.FACE_SWAP]}
+    ┗ Additional: {additional_usage_quota[Quota.FACE_SWAP]}
+━ 🎵 <b>MusicGen</b>:
+    ┣ {monthly_limits[Quota.MUSIC_GEN]}/{SubscriptionLimit.LIMITS[subscription_type][Quota.MUSIC_GEN]}
+    ┗ Additional: {additional_usage_quota[Quota.MUSIC_GEN]}
+━ 🎸 <b>Suno</b>:
+    ┣ {monthly_limits[Quota.SUNO]}/{SubscriptionLimit.LIMITS[subscription_type][Quota.SUNO]}
+    ┗ Additional: {additional_usage_quota[Quota.SUNO]}
+━ 💬 <b>Thematic chats</b>: {additional_usage_quota[Quota.ADDITIONAL_CHATS]}
+━ 🎭 <b>Access to a catalog with digital employees</b>: {'Yes' if additional_usage_quota[Quota.ACCESS_TO_CATALOG] else 'No'}
+━ 🎙 <b>Voice messages</b>: {'Yes' if additional_usage_quota[Quota.VOICE_MESSAGES] else 'No'}
+━ ⚡ <b>Fast answers</b>: {'Yes' if additional_usage_quota[Quota.FAST_MESSAGES] else 'No'}
 
-🎨 <b>Midjourney</b>
-Images for month: {monthly_limits[Quota.MIDJOURNEY]}/{SubscriptionLimit.LIMITS[subscription_type][Quota.MIDJOURNEY]}
-Additional images: {additional_usage_quota[Quota.MIDJOURNEY]}
+---------------------------
 
-📷 <b>FaceSwap</b>
-Images for month: {monthly_limits[Quota.FACE_SWAP]}/{SubscriptionLimit.LIMITS[subscription_type][Quota.FACE_SWAP]}
-Additional images: {additional_usage_quota[Quota.FACE_SWAP]}
-
-🎵 <b>MusicGen</b>
-Seconds for creating melodies for month: {monthly_limits[Quota.MUSIC_GEN]}/{SubscriptionLimit.LIMITS[subscription_type][Quota.MUSIC_GEN]}
-Additional seconds for creating melodies: {additional_usage_quota[Quota.MUSIC_GEN]}
-
-🎸 <b>Suno</b>
-Songs for month: {monthly_limits[Quota.SUNO]}/{SubscriptionLimit.LIMITS[subscription_type][Quota.SUNO]}
-Additional songs: {additional_usage_quota[Quota.SUNO]}
-
-💬 <b>Thematic chats</b>
-Additional chats: {additional_usage_quota[Quota.ADDITIONAL_CHATS]}
-
-🎭 <b>Digital employees</b>
-Access to a catalog: {'Yes' if additional_usage_quota[Quota.ACCESS_TO_CATALOG] else 'No'}
-
-🎙 <b>Voice messages</b>
-Send and get voice messages: {'Yes' if additional_usage_quota[Quota.VOICE_MESSAGES] else 'No'}
-
-⚡ <b>Fast answers</b>
-Fast answers: {'Yes' if additional_usage_quota[Quota.FAST_MESSAGES] else 'No'}
-
-🪙 <b>Quantity of bonus credits:</b> {int(credits)}
-Details: /bonus
-
-💎 <b>Subscribe</b> or <b>purchase individual packages:</b> /buy
-{f'💸 Subscription discount: {discount}%' if discount > 0 else ''}
+🪙 <b>Quantity of bonus credits:</b> {credits}
 """
 
     @staticmethod
@@ -823,11 +923,9 @@ Details: /bonus
         return f"""
 🤖 Ready to supercharge your digital journey? Here's what's on the menu:
 
-- <b>STANDARD</b> ⭐: {prices[SubscriptionType.STANDARD]}
-
-- <b>VIP</b> 🔥: {prices[SubscriptionType.VIP]}
-
-- <b>PLATINUM</b> 💎: {prices[SubscriptionType.PLATINUM]}
+- <b>STANDARD</b> ⭐: from {prices[SubscriptionType.STANDARD]}
+- <b>VIP</b> 🔥: from {prices[SubscriptionType.VIP]}
+- <b>PREMIUM</b> 💎: from {prices[SubscriptionType.PREMIUM]}
 
 P.S. We're in the process of integrating more currency options directly in our bot, but you can visit our payment page and pay in different currencies just right here: https://app.lava.top/en/gptsturbobot
 
@@ -864,8 +962,6 @@ Please select the subscription period by clicking on the button:
     def package(currency: Currency):
         if currency == Currency.USD:
             balance = f"{Currency.SYMBOLS[currency]}0.01"
-        elif currency == Currency.EUR:
-            balance = f"0.01{Currency.SYMBOLS[currency]}"
         else:
             balance = f"1{Currency.SYMBOLS[currency]}"
 
@@ -876,6 +972,8 @@ Please select the subscription period by clicking on the button:
 
 Each button tap unlocks a world of AI wonders:
 🧠 <b>ChatGPT</b>: Engage in deep, thought-provoking conversations!
+
+🚀 <b>Claude</b>: Engage in dialogues that expand the horizons of thinking!
 
 🖼 <b>DALL-E</b>: Transform ideas into stunning visuals!
 
@@ -902,15 +1000,21 @@ Hit a button and choose a package:
     def get_package_name_and_quantity_by_package_type(package_type: PackageType):
         name = ""
         quantity = ""
-        if package_type == PackageType.CHAT_GPT3:
+        if package_type == PackageType.CHAT_GPT3_TURBO:
             name = English.GPT3_REQUESTS
             quantity = "requests"
-        elif package_type == PackageType.CHAT_GPT4:
+        elif package_type == PackageType.CHAT_GPT4_TURBO:
             name = English.GPT4_REQUESTS
             quantity = "requests"
-        elif package_type == PackageType.CHAT:
-            name = English.THEMATIC_CHATS
-            quantity = "chats"
+        elif package_type == PackageType.CHAT_GPT4_OMNI:
+            name = English.GPT4_OMNI_REQUESTS
+            quantity = "requests"
+        elif package_type == PackageType.CLAUDE_3_SONNET:
+            name = English.CLAUDE_3_SONNET_REQUESTS
+            quantity = "requests"
+        elif package_type == PackageType.CLAUDE_3_OPUS:
+            name = English.CLAUDE_3_OPUS_REQUESTS
+            quantity = "requests"
         elif package_type == PackageType.DALL_E:
             name = English.DALL_E_REQUESTS
             quantity = "images"
@@ -926,6 +1030,9 @@ Hit a button and choose a package:
         elif package_type == PackageType.SUNO:
             name = English.SUNO_REQUESTS
             quantity = "songs"
+        elif package_type == PackageType.CHAT:
+            name = English.THEMATIC_CHATS
+            quantity = "chats"
         elif package_type == PackageType.ACCESS_TO_CATALOG:
             name = English.ACCESS_TO_CATALOG
             quantity = "months"
@@ -1035,10 +1142,16 @@ Looks like you've got only <b>{available_seconds} seconds</b> left in your arsen
     # AI
     @staticmethod
     def switched(model: Model, model_version: str):
-        if model == Model.CHAT_GPT and model_version == GPTVersion.V3:
-            return English.SWITCHED_TO_CHATGPT3
-        elif model == Model.CHAT_GPT and model_version == GPTVersion.V4:
-            return English.SWITCHED_TO_CHATGPT4
+        if model == Model.CHAT_GPT and model_version == ChatGPTVersion.V3_Turbo:
+            return English.SWITCHED_TO_CHATGPT3_TURBO
+        elif model == Model.CHAT_GPT and model_version == ChatGPTVersion.V4_Turbo:
+            return English.SWITCHED_TO_CHATGPT4_TURBO
+        elif model == Model.CHAT_GPT and model_version == ChatGPTVersion.V4_Omni:
+            return English.SWITCHED_TO_CHATGPT4_OMNI
+        elif model == Model.CLAUDE and model_version == ClaudeGPTVersion.V3_Sonnet:
+            return English.SWITCHED_TO_CLAUDE_3_SONNET
+        elif model == Model.CLAUDE and model_version == ClaudeGPTVersion.V3_Opus:
+            return English.SWITCHED_TO_CLAUDE_3_OPUS
         elif model == Model.DALL_E:
             return English.SWITCHED_TO_DALL_E
         elif model == Model.MIDJOURNEY:
@@ -1051,7 +1164,7 @@ Looks like you've got only <b>{available_seconds} seconds</b> left in your arsen
             return English.SWITCHED_TO_SUNO
 
     @staticmethod
-    def chatgpt_recommendations() -> List[str]:
+    def requests_recommendations() -> List[str]:
         texts = [
             "Tell me an interesting fact about space 👩‍🚀",
             "What could be the consequences of global warming? 🌍",
@@ -1266,7 +1379,7 @@ Looks like you've got only <b>{available_seconds} seconds</b> left in your arsen
     @staticmethod
     def settings(human_model: str, current_model: Model, dalle_cost=1) -> str:
         if current_model == Model.CHAT_GPT:
-            additional_text = f"\n<b>Version ChatGPT-3.5</b>: {GPTVersion.V3}\n<b>Version ChatGPT-4.0</b>: {GPTVersion.V4}"
+            additional_text = f"\n<b>Version ChatGPT-3.5</b>: {ChatGPTVersion.V3}\n<b>Version ChatGPT-4.0</b>: {ChatGPTVersion.V4}"
         elif current_model == Model.DALL_E:
             additional_text = f"\nAt the current settings, 1 request costs: {dalle_cost} 🖼"
         else:
@@ -1283,27 +1396,17 @@ Looks like you've got only <b>{available_seconds} seconds</b> left in your arsen
         return f"""
 🎁 <b>Your bonus balance</b>
 
-💰 Current balance: {int(balance)}
+💰 Current balance: {float(balance)}
 
 To top up your bonus balance, you can:
 1️⃣ Invite friends:
-    - 💸 For each invited user, you get 50 credits 🪙
-    - 🌟 Your personal referral link for invitations: https://t.me/GPTsTurboBot?start={user_id}
+    - 💸 For each invited user, you and the invited user will get 25 credits each 🪙
+    - 🌟 Your personal referral link for invitations: {Texts.referral_link(user_id, False)}
     - 👤 You've invited: {referred_count}
 2️⃣ Leave feedback:
-    - 💸 For each constructive feedback, you get 50 credits 🪙
+    - 💸 For each constructive feedback, you get 25 credits 🪙
     - 📡 To leave feedback, enter the command /feedback
-    - 💭 You've left : {feedback_count}
+    - 💭 You've left: {feedback_count}
 
 Choose how to spend your earnings:
-"""
-
-    @staticmethod
-    def referral_successful(added_to_balance: float) -> str:
-        return f"""
-🌟 <b>Congratulations! Your referral magic worked!</b> 🌟
-
-Thanks to you, a new user has joined us, and as a token of our appreciation, your and your friend's balance has been increased by {int(added_to_balance)} 🪙! Use them to access exclusive features or to add more generations in the neural networks 💸
-
-To use the bonus, enter the /bonus command and follow the instructions. Let every invitation bring you not only the joy of communication but also pleasant bonuses!
 """

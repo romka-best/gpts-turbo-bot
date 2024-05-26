@@ -1,17 +1,19 @@
 import asyncio
+import base64
 from typing import List
 
-import openai
+import anthropic
+import httpx
 from aiogram import Router
+from aiogram.enums import ParseMode
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
-from aiogram.types import Message, CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup
+from aiogram.types import Message, CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.utils.chat_action import ChatActionSender
-from telegram.constants import ParseMode
 
 from bot.database.main import firebase
-from bot.database.models.common import Quota, Currency, Model, ChatGPTVersion
+from bot.database.models.common import Model, ClaudeGPTVersion, Quota, Currency
 from bot.database.models.subscription import SubscriptionType
 from bot.database.models.transaction import ServiceType, TransactionType
 from bot.database.models.user import UserSettings, User
@@ -26,42 +28,40 @@ from bot.helpers.creaters.create_new_message_and_update_user import create_new_m
 from bot.helpers.reply_with_voice import reply_with_voice
 from bot.helpers.senders.send_message_to_admins import send_message_to_admins
 from bot.helpers.split_message import split_message
-from bot.integrations.openAI import get_response_message
-from bot.keyboards.ai.chat_gpt import build_chat_gpt_continue_generating_keyboard, build_chat_gpt_keyboard
+from bot.integrations.anthropic import get_response_message
+from bot.keyboards.ai.claude import build_claude_keyboard, build_claude_continue_generating_keyboard
 from bot.keyboards.common.common import build_recommendations_keyboard
-from bot.locales.main import get_localization, get_user_language
+from bot.locales.main import get_user_language, get_localization
 
-chat_gpt_router = Router()
+claude_router = Router()
 
-PRICE_GPT3_INPUT = 0.0000005
-PRICE_GPT3_OUTPUT = 0.0000015
-PRICE_GPT4_INPUT = 0.00001
-PRICE_GPT4_OUTPUT = 0.00003
-PRICE_GPT4_OMNI_INPUT = 0.000005
-PRICE_GPT4_OMNI_OUTPUT = 0.000015
+PRICE_CLAUDE_3_SONNET_INPUT = 0.000003
+PRICE_CLAUDE_3_SONNET_OUTPUT = 0.000015
+PRICE_CLAUDE_3_OPUS_INPUT = 0.000015
+PRICE_CLAUDE_3_OPUS_OUTPUT = 0.000075
 
 
-@chat_gpt_router.message(Command("chatgpt"))
-async def chatgpt(message: Message, state: FSMContext):
+@claude_router.message(Command("claude"))
+async def claude(message: Message, state: FSMContext):
     await state.clear()
 
     user_id = str(message.from_user.id)
     user = await get_user(user_id)
     user_language_code = await get_user_language(user_id, state.storage)
 
-    reply_markup = build_chat_gpt_keyboard(
+    reply_markup = build_claude_keyboard(
         user_language_code,
         user.current_model,
-        user.settings[Model.CHAT_GPT][UserSettings.VERSION],
+        user.settings[Model.CLAUDE][UserSettings.VERSION],
     )
     await message.answer(
-        text=get_localization(user_language_code).CHOOSE_CHATGPT_MODEL,
+        text=get_localization(user_language_code).CHOOSE_CLAUDE_MODEL,
         reply_markup=reply_markup,
     )
 
 
-@chat_gpt_router.callback_query(lambda c: c.data.startswith('chat_gpt:'))
-async def handle_chat_gpt_choose_selection(callback_query: CallbackQuery, state: FSMContext):
+@claude_router.callback_query(lambda c: c.data.startswith('claude:'))
+async def handle_claude_choose_selection(callback_query: CallbackQuery, state: FSMContext):
     await callback_query.answer()
 
     user_id = str(callback_query.from_user.id)
@@ -70,7 +70,7 @@ async def handle_chat_gpt_choose_selection(callback_query: CallbackQuery, state:
 
     chosen_version = callback_query.data.split(':')[1]
 
-    if user.current_model == Model.CHAT_GPT and chosen_version == user.settings[Model.CHAT_GPT][UserSettings.VERSION]:
+    if user.current_model == Model.CLAUDE and chosen_version == user.settings[Model.CLAUDE][UserSettings.VERSION]:
         reply_markup = await build_recommendations_keyboard(user.current_model, user_language_code, user.gender)
         await callback_query.message.answer(
             text=get_localization(user_language_code).ALREADY_SWITCHED_TO_THIS_MODEL,
@@ -97,22 +97,18 @@ async def handle_chat_gpt_choose_selection(callback_query: CallbackQuery, state:
             new_keyboard.append(new_row)
         await callback_query.message.edit_reply_markup(reply_markup=InlineKeyboardMarkup(inline_keyboard=new_keyboard))
 
-        reply_markup = await build_recommendations_keyboard(Model.CHAT_GPT, user_language_code, user.gender)
+        reply_markup = await build_recommendations_keyboard(Model.CLAUDE, user_language_code, user.gender)
         if keyboard_changed:
-            user.current_model = Model.CHAT_GPT
-            user.settings[Model.CHAT_GPT][UserSettings.VERSION] = chosen_version
+            user.current_model = Model.CLAUDE
+            user.settings[Model.CLAUDE][UserSettings.VERSION] = chosen_version
             await update_user(user_id, {
                 "current_model": user.current_model,
                 "settings": user.settings,
             })
 
-            if user.settings[user.current_model][UserSettings.VERSION] == ChatGPTVersion.V3_Turbo:
-                text = get_localization(user_language_code).SWITCHED_TO_CHATGPT3_TURBO
-            elif user.settings[user.current_model][UserSettings.VERSION] == ChatGPTVersion.V4_Turbo:
-                text = get_localization(user_language_code).SWITCHED_TO_CHATGPT4_TURBO
-            else:
-                text = get_localization(user_language_code).SWITCHED_TO_CHATGPT4_OMNI
-
+            text = get_localization(user_language_code).SWITCHED_TO_CLAUDE_3_SONNET \
+                if user.settings[user.current_model][UserSettings.VERSION] == ClaudeGPTVersion.V3_Sonnet \
+                else get_localization(user_language_code).SWITCHED_TO_CLAUDE_3_OPUS
             await callback_query.message.answer(
                 text=text,
                 reply_markup=reply_markup,
@@ -127,8 +123,8 @@ async def handle_chat_gpt_choose_selection(callback_query: CallbackQuery, state:
     await state.clear()
 
 
-async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_quota: Quota, photo_filenames=None):
-    if user_quota != Quota.CHAT_GPT3_TURBO and user_quota != Quota.CHAT_GPT4_TURBO and user_quota != Quota.CHAT_GPT4_OMNI:
+async def handle_claude(message: Message, state: FSMContext, user: User, user_quota: Quota, filenames=None):
+    if user_quota != Quota.CLAUDE_3_SONNET and user_quota != Quota.CLAUDE_3_OPUS:
         raise NotImplemented
 
     await state.update_data(is_processing=True)
@@ -145,10 +141,8 @@ async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_q
         else:
             text = ""
 
-    if photo_filenames and len(photo_filenames) and (
-        user_quota == Quota.CHAT_GPT4_TURBO or user_quota == Quota.CHAT_GPT4_OMNI
-    ):
-        await write_message(user.current_chat_id, "user", user.id, text, True, photo_filenames)
+    if filenames and len(filenames):
+        await write_message(user.current_chat_id, "user", user.id, text, True, filenames)
     else:
         await write_message(user.current_chat_id, "user", user.id, text)
 
@@ -156,49 +150,37 @@ async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_q
     messages = await get_messages_by_chat_id(user.current_chat_id)
     role = await get_role_by_name(chat.role)
     sorted_messages = sorted(messages, key=lambda m: m.created_at)
-    if user_quota == Quota.CHAT_GPT3_TURBO:
-        history = [
-                      {
-                          'role': 'system',
-                          'content': role.translated_instructions.get(user_language_code, 'en'),
-                      }
-                  ] + [
-                      {
-                          'role': message.sender,
-                          'content': message.content,
-                      } for message in sorted_messages
-                  ]
-    else:
-        history = [
-            {
-                'role': 'system',
-                'content': role.translated_instructions.get(user_language_code, 'en'),
-            }
-        ]
-        for sorted_message in sorted_messages:
-            content = []
-            if sorted_message.content:
+    system_prompt = role.translated_instructions.get(user_language_code, 'en')
+    history = []
+    for sorted_message in sorted_messages:
+        content = []
+        if sorted_message.content:
+            content.append({
+                'type': 'text',
+                'text': sorted_message.content,
+            })
+
+        if sorted_message.photo_filenames:
+            for photo_filename in sorted_message.photo_filenames:
+                photo_path = f'users/vision/{user.id}/{photo_filename}'
+                photo = await firebase.bucket.get_blob(photo_path)
+                photo_link = firebase.get_public_url(photo.name)
+
+                image_media_type = "image/jpeg"
+                image_data = base64.b64encode(httpx.get(photo_link).content).decode("utf-8")
                 content.append({
-                    'type': 'text',
-                    'text': sorted_message.content,
+                    'type': 'image',
+                    'source': {
+                        "type": "base64",
+                        "media_type": image_media_type,
+                        "data": image_data,
+                    },
                 })
 
-            if sorted_message.photo_filenames:
-                for photo_filename in sorted_message.photo_filenames:
-                    photo_path = f'users/vision/{user.id}/{photo_filename}'
-                    photo = await firebase.bucket.get_blob(photo_path)
-                    photo_link = firebase.get_public_url(photo.name)
-                    content.append({
-                        'type': 'image_url',
-                        'image_url': {
-                            'url': photo_link,
-                        },
-                    })
-
-            history.append({
-                'role': sorted_message.sender,
-                'content': content,
-            })
+        history.append({
+            'role': sorted_message.sender,
+            'content': content,
+        })
 
     processing_message = await message.reply(text=get_localization(user_language_code).processing_request_text())
 
@@ -209,23 +191,25 @@ async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_q
 
     async with chat_action_sender(bot=message.bot, chat_id=message.chat.id):
         try:
-            response = await get_response_message(user.settings[user.current_model][UserSettings.VERSION], history)
+            history = get_history_without_duplicates(history)
+
+            response = await get_response_message(
+                user.settings[user.current_model][UserSettings.VERSION],
+                system_prompt,
+                history,
+            )
             response_message = response['message']
-            if user_quota == Quota.CHAT_GPT3_TURBO:
-                service = ServiceType.CHAT_GPT3_TURBO
-                input_price = response['input_tokens'] * PRICE_GPT3_INPUT
-                output_price = response['output_tokens'] * PRICE_GPT3_OUTPUT
-            elif user_quota == Quota.CHAT_GPT4_TURBO:
-                service = ServiceType.CHAT_GPT4_TURBO
-                input_price = response['input_tokens'] * PRICE_GPT4_INPUT
-                output_price = response['output_tokens'] * PRICE_GPT4_OUTPUT
-            elif user_quota == Quota.CHAT_GPT4_OMNI:
-                service = ServiceType.CHAT_GPT4_OMNI
-                input_price = response['input_tokens'] * PRICE_GPT4_OMNI_INPUT
-                output_price = response['output_tokens'] * PRICE_GPT4_OMNI_OUTPUT
+            if user_quota == Quota.CLAUDE_3_SONNET:
+                service = ServiceType.CLAUDE_3_SONNET
+                input_price = response['input_tokens'] * PRICE_CLAUDE_3_SONNET_INPUT
+                output_price = response['output_tokens'] * PRICE_CLAUDE_3_SONNET_OUTPUT
+            else:
+                service = ServiceType.CLAUDE_3_OPUS
+                input_price = response['input_tokens'] * PRICE_CLAUDE_3_OPUS_INPUT
+                output_price = response['output_tokens'] * PRICE_CLAUDE_3_OPUS_OUTPUT
 
             total_price = round(input_price + output_price, 6)
-            message_role, message_content = response_message.role, response_message.content
+            message_role, message_content = "assistant", response_message
             await write_transaction(
                 user_id=user.id,
                 type=TransactionType.EXPENSE,
@@ -246,12 +230,12 @@ async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_q
             await create_new_message_and_update_user(transaction, message_role, message_content, user, user_quota)
 
             if user.settings[user.current_model][UserSettings.TURN_ON_VOICE_MESSAGES]:
-                reply_markup = build_chat_gpt_continue_generating_keyboard(user_language_code)
+                reply_markup = build_claude_continue_generating_keyboard(user_language_code)
                 await reply_with_voice(
                     message=message,
                     text=message_content,
                     user_id=user.id,
-                    reply_markup=reply_markup if response['finish_reason'] == 'length' else None,
+                    reply_markup=reply_markup if response['finish_reason'] == 'max_tokens' else None,
                     voice=user.settings[user.current_model][UserSettings.VOICE],
                 )
             else:
@@ -264,19 +248,19 @@ async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_q
                 header_text = f'{chat_info}{role_info}\n' if chat_info or role_info else ''
                 footer_text = f'\n\n✉️ {user.monthly_limits[user_quota] + user.additional_usage_quota[user_quota] + 1}' \
                     if user.settings[user.current_model][UserSettings.SHOW_USAGE_QUOTA] else ''
-                reply_markup = build_chat_gpt_continue_generating_keyboard(user_language_code)
+                reply_markup = build_claude_continue_generating_keyboard(user_language_code)
                 try:
                     full_text = f"{header_text}{message_content}{footer_text}"
                     if len(full_text) <= 4096:
                         await message.reply(
                             full_text,
-                            reply_markup=reply_markup if response['finish_reason'] == 'length' else None,
+                            reply_markup=reply_markup if response['finish_reason'] == 'max_tokens' else None,
                             parse_mode=ParseMode.MARKDOWN,
                         )
                     elif len(message_content) <= 4096:
                         await message.reply(
                             message_content,
-                            reply_markup=reply_markup if response['finish_reason'] == 'length' else None,
+                            reply_markup=reply_markup if response['finish_reason'] == 'max_tokens' else None,
                             parse_mode=ParseMode.MARKDOWN,
                         )
                     else:
@@ -290,7 +274,7 @@ async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_q
                             elif i == len(chunks) - 1:
                                 await message.reply(
                                     chunks[i],
-                                    reply_markup=reply_markup if response['finish_reason'] == 'length' else None,
+                                    reply_markup=reply_markup if response['finish_reason'] == 'max_tokens' else None,
                                     parse_mode=None,
                                 )
                             else:
@@ -302,13 +286,13 @@ async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_q
                     if "can't parse entities" in str(e):
                         await message.reply(
                             f"{header_text}{message_content}{footer_text}",
-                            reply_markup=reply_markup if response['finish_reason'] == 'length' else None,
+                            reply_markup=reply_markup if response['finish_reason'] == 'max_tokens' else None,
                             parse_mode=None,
                         )
                     else:
                         raise
-        except openai.BadRequestError as e:
-            if e.code == 'content_policy_violation':
+        except anthropic.BadRequestError as e:
+            if 'content_policy_violation' in str(e):
                 await message.reply(
                     text=get_localization(user_language_code).REQUEST_FORBIDDEN_ERROR,
                 )
@@ -320,7 +304,7 @@ async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_q
 
                 await send_message_to_admins(
                     bot=message.bot,
-                    message=f"#error\n\nALARM! Ошибка у пользователя при запросе в ChatGPT: {user.id}\n"
+                    message=f"#error\n\nALARM! Ошибка у пользователя при запросе в Claude: {user.id}\n"
                             f"Информация:\n{e}",
                     parse_mode=None,
                 )
@@ -331,7 +315,7 @@ async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_q
             )
             await send_message_to_admins(
                 bot=message.bot,
-                message=f"#error\n\nALARM! Ошибка у пользователя при запросе в ChatGPT: {user.id}\n"
+                message=f"#error\n\nALARM! Ошибка у пользователя при запросе в Claude: {user.id}\n"
                         f"Информация:\n{e}",
                 parse_mode=None,
             )
@@ -340,18 +324,19 @@ async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_q
             await state.update_data(is_processing=False)
 
     asyncio.create_task(
-        handle_chatgpt4_example(
+        handle_claude_3_opus_example(
             user=user,
             user_language_code=user_language_code,
             prompt=text,
+            system_prompt=system_prompt,
             history=history,
             message=message,
         )
     )
 
 
-@chat_gpt_router.callback_query(lambda c: c.data.startswith('chat_gpt_continue_generation:'))
-async def handle_chat_gpt_continue_generation_choose_selection(callback_query: CallbackQuery, state: FSMContext):
+@claude_router.callback_query(lambda c: c.data.startswith('claude_continue_generation:'))
+async def handle_claude_continue_generation_choose_selection(callback_query: CallbackQuery, state: FSMContext):
     await callback_query.answer()
 
     user_id = str(callback_query.from_user.id)
@@ -362,35 +347,40 @@ async def handle_chat_gpt_continue_generation_choose_selection(callback_query: C
 
     if action == 'continue':
         await state.update_data(recognized_text=get_localization(user_language_code).CONTINUE_GENERATING)
-        if user.settings[user.current_model][UserSettings.VERSION] == ChatGPTVersion.V3_Turbo:
-            user_quota = Quota.CHAT_GPT3_TURBO
-        elif user.settings[user.current_model][UserSettings.VERSION] == ChatGPTVersion.V4_Turbo:
-            user_quota = Quota.CHAT_GPT4_TURBO
-        elif user.settings[user.current_model][UserSettings.VERSION] == ChatGPTVersion.V4_Omni:
-            user_quota = Quota.CHAT_GPT4_OMNI
+        if user.settings[user.current_model][UserSettings.VERSION] == ClaudeGPTVersion.V3_Sonnet:
+            user_quota = Quota.CLAUDE_3_SONNET
+        elif user.settings[user.current_model][UserSettings.VERSION] == ClaudeGPTVersion.V3_Opus:
+            user_quota = Quota.CLAUDE_3_OPUS
         else:
             raise NotImplemented
 
-        await handle_chatgpt(callback_query.message, state, user, user_quota)
+        await handle_claude(callback_query.message, state, user, user_quota)
         await callback_query.message.edit_reply_markup(reply_markup=None)
 
     await state.clear()
 
 
-async def handle_chatgpt4_example(user: User, user_language_code: str, prompt: str, history: List, message: Message):
+async def handle_claude_3_opus_example(
+    user: User,
+    user_language_code: str,
+    prompt: str,
+    system_prompt: str,
+    history: List,
+    message: Message,
+):
     try:
         if (
-            user.current_model == Model.CHAT_GPT and
-            user.settings[user.current_model][UserSettings.VERSION] == ChatGPTVersion.V3_Turbo and
+            user.current_model == Model.CLAUDE and
+            user.settings[user.current_model][UserSettings.VERSION] == ClaudeGPTVersion.V3_Sonnet and
             user.subscription_type == SubscriptionType.FREE and
-            user.monthly_limits[Quota.CHAT_GPT3_TURBO] + 1 in [1, 50, 80, 90, 100]
+            user.monthly_limits[Quota.CLAUDE_3_SONNET] + 1 in [1, 10, 20]
         ):
-            response = await get_response_message(ChatGPTVersion.V4_Omni, history)
+            response = await get_response_message(ClaudeGPTVersion.V3_Opus, system_prompt, history)
             response_message = response['message']
 
-            service = ServiceType.CHAT_GPT4_OMNI
-            input_price = response['input_tokens'] * PRICE_GPT4_OMNI_INPUT
-            output_price = response['output_tokens'] * PRICE_GPT4_OMNI_OUTPUT
+            service = ServiceType.CLAUDE_3_OPUS
+            input_price = response['input_tokens'] * PRICE_CLAUDE_3_OPUS_INPUT
+            output_price = response['output_tokens'] * PRICE_CLAUDE_3_OPUS_OUTPUT
 
             total_price = round(input_price + output_price, 6)
             message_role, message_content = response_message.role, response_message.content
@@ -410,7 +400,7 @@ async def handle_chatgpt4_example(user: User, user_language_code: str, prompt: s
                 },
             )
 
-            header_text = f'{get_localization(user_language_code).CHATGPT4_OMNI_EXAMPLE}\n\n'
+            header_text = f'{get_localization(user_language_code).CLAUDE_3_OPUS_EXAMPLE}\n\n'
             try:
                 full_text = f"{header_text}{message_content}"
                 if len(full_text) <= 4096:
@@ -447,6 +437,23 @@ async def handle_chatgpt4_example(user: User, user_language_code: str, prompt: s
     except Exception as e:
         await send_message_to_admins(
             bot=message.bot,
-            message=f"#error\n\nALARM! Ошибка у пользователя при попытке отправить пример ChatGPT-4.0 Omni в запросе в ChatGPT-3.5 Turbo: {user.id}\nИнформация:\n{e}",
+            message=f"#error\n\nALARM! Ошибка у пользователя при попытке отправить пример Claude Opus в запросе в Claude Sonnet: {user.id}\nИнформация:\n{e}",
             parse_mode=None,
         )
+
+
+def get_history_without_duplicates(history: List) -> List:
+    result = []
+    first_user_found = False
+
+    for item in history:
+        if not first_user_found and item['role'] == 'user':
+            first_user_found = True
+
+        if first_user_found:
+            if result and item['role'] == result[-1]['role']:
+                result[-1] = item
+            else:
+                result.append(item)
+
+    return result

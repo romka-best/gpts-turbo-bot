@@ -42,6 +42,8 @@ async def notify_admins_about_error(bot: Bot, telegram_update: Update, dp: Dispa
                     telegram_user,
                     chat_id,
                     chat_title,
+                    None,
+                    False,
                 )
 
                 user = await get_user(str(telegram_user.id))

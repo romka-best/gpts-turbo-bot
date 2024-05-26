@@ -1,17 +1,16 @@
 class Currency:
     RUB = 'RUB'
     USD = 'USD'
-    EUR = 'EUR'
 
     SYMBOLS = {
         RUB: '₽',
         USD: '$',
-        EUR: '€',
     }
 
 
 class Model:
     CHAT_GPT = 'chat-gpt'
+    CLAUDE = 'claude'
     DALL_E = 'dall-e'
     MIDJOURNEY = 'midjourney'
     FACE_SWAP = 'face-swap'
@@ -20,8 +19,11 @@ class Model:
 
 
 class Quota:
-    CHAT_GPT3 = "gpt3"
-    CHAT_GPT4 = "gpt4"
+    CHAT_GPT3_TURBO = "gpt3"
+    CHAT_GPT4_TURBO = "gpt4"
+    CHAT_GPT4_OMNI = "gpt4_omni"
+    CLAUDE_3_SONNET = "claude_3_sonnet"
+    CLAUDE_3_OPUS = "claude_3_opus"
     DALL_E = "dall_e"
     MIDJOURNEY = "midjourney"
     FACE_SWAP = "face_swap"
@@ -33,9 +35,15 @@ class Quota:
     ACCESS_TO_CATALOG = "access_to_catalog"
 
 
-class GPTVersion:
-    V3 = 'gpt-3.5-turbo'
-    V4 = 'gpt-4-turbo'
+class ChatGPTVersion:
+    V3_Turbo = 'gpt-3.5-turbo'
+    V4_Turbo = 'gpt-4-turbo'
+    V4_Omni = 'gpt-4o'
+
+
+class ClaudeGPTVersion:
+    V3_Sonnet = 'claude-3-sonnet-20240229'
+    V3_Opus = 'claude-3-opus-20240229'
 
 
 class DALLEResolution:
@@ -63,7 +71,15 @@ class MidjourneyAction:
     PAYMENT = "payment"
     IMAGINE = "imagine"
     UPSCALE = "upscale"
+    # UPSCALE_TWO = "upscale_2x"
+    # UPSCALE_FOUR = "upscale_4x"
+    # UPSCALE_SUBTLE = "upscale_subtle"
+    # UPSCALE_CREATIVE = "upscale_creative"
     VARIATION = "variation"
+    # VARY_SUBTLE = "vary_subtle"
+    # VARY_STRONG = "vary_strong"
+    # ZOOM_OUT_ONE_AND_HALF = "zoom_out_1.5x"
+    # ZOOM_OUT_TWO = "zoom_out_2x"
     REROLL = "reroll"
 
 

@@ -1,19 +1,33 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
-from bot.database.models.common import Model, GPTVersion
+from bot.database.models.common import Model, ChatGPTVersion
 from bot.locales.main import get_localization
 
 
-def build_chat_gpt_keyboard(language_code: str, model: Model, model_version: GPTVersion) -> InlineKeyboardMarkup:
+def build_chat_gpt_keyboard(language_code: str, model: Model, model_version: ChatGPTVersion) -> InlineKeyboardMarkup:
     buttons = [
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).CHATGPT3 + (" ✅" if model == Model.CHAT_GPT and model_version == GPTVersion.V3 else ""),
-                callback_data=f'chat_gpt:{GPTVersion.V3}'
+                text=get_localization(language_code).CHATGPT3_TURBO + (
+                    " ✅" if model == Model.CHAT_GPT and model_version == ChatGPTVersion.V3_Turbo else ""
+                ),
+                callback_data=f'chat_gpt:{ChatGPTVersion.V3_Turbo}'
             ),
+        ],
+        [
             InlineKeyboardButton(
-                text=get_localization(language_code).CHATGPT4 + (" ✅" if model == Model.CHAT_GPT and model_version == GPTVersion.V4 else ""),
-                callback_data=f'chat_gpt:{GPTVersion.V4}'
+                text=get_localization(language_code).CHATGPT4_TURBO + (
+                    " ✅" if model == Model.CHAT_GPT and model_version == ChatGPTVersion.V4_Turbo else ""
+                ),
+                callback_data=f'chat_gpt:{ChatGPTVersion.V4_Turbo}'
+            ),
+        ],
+        [
+            InlineKeyboardButton(
+                text=get_localization(language_code).CHATGPT4_OMNI + (
+                    " ✅" if model == Model.CHAT_GPT and model_version == ChatGPTVersion.V4_Omni else ""
+                ),
+                callback_data=f'chat_gpt:{ChatGPTVersion.V4_Omni}'
             ),
         ]
     ]

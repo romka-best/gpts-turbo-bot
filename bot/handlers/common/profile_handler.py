@@ -12,6 +12,8 @@ from bot.database.models.user import UserGender, UserSettings
 from bot.database.operations.user.getters import get_user
 from bot.database.operations.user.updaters import update_user
 from bot.handlers.ai.face_swap_handler import handle_face_swap
+from bot.handlers.payment.bonus_handler import handle_bonus
+from bot.handlers.payment.payment_handler import handle_subscribe, handle_package
 from bot.keyboards.common.common import build_cancel_keyboard
 from bot.keyboards.common.profile import build_profile_keyboard, build_profile_gender_keyboard
 from bot.locales.main import get_localization, get_user_language
@@ -55,7 +57,7 @@ async def profile(message: Message, state: FSMContext):
         user.additional_usage_quota,
         renewal_date.strftime("%d.%m.%Y"),
         user.discount,
-        user.balance,
+        ('%f' % user.balance).rstrip('0').rstrip('.'),
     )
 
     photo_path = f'users/avatars/{user_id}.jpeg'
@@ -104,6 +106,12 @@ async def handle_profile_selection(callback_query: CallbackQuery, state: FSMCont
             text=get_localization(user_language_code).TELL_ME_YOUR_GENDER,
             reply_markup=reply_markup,
         )
+    elif action == 'open_bonus_info':
+        await handle_bonus(callback_query.message, str(callback_query.from_user.id), state)
+    elif action == 'open_buy_subscriptions_info':
+        await handle_subscribe(callback_query.message, str(callback_query.from_user.id), state)
+    elif action == 'open_buy_packages_info':
+        await handle_package(callback_query.message, str(callback_query.from_user.id), state)
 
 
 @profile_router.callback_query(lambda c: c.data.startswith('profile_gender:'))

@@ -1,7 +1,6 @@
 from datetime import datetime
 
 from aiogram import Router, F
-from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery, URLInputFile
 
@@ -9,7 +8,7 @@ from bot.database.main import firebase
 from bot.database.models.promo_code import PromoCodeType
 from bot.database.operations.promo_code.getters import get_promo_code_by_name
 from bot.database.operations.promo_code.writers import write_promo_code
-from bot.database.operations.user.getters import get_user
+from bot.keyboards.admin.admin import build_admin_keyboard
 from bot.keyboards.admin.promo_code import (
     build_create_promo_code_keyboard,
     build_create_promo_code_subscription_keyboard,
@@ -20,35 +19,37 @@ from bot.keyboards.admin.promo_code import (
 from bot.keyboards.common.common import build_cancel_keyboard
 from bot.locales.main import get_localization, get_user_language
 from bot.states.promo_code import PromoCode
-from bot.utils.is_admin import is_admin
 
 admin_promo_code_router = Router()
 
 
-@admin_promo_code_router.message(Command("create_promo_code"))
-async def create_promo_code(message: Message, state: FSMContext):
-    await state.clear()
+async def handle_create_promo_code(message: Message, user_id: str, state: FSMContext):
+    user_language_code = await get_user_language(user_id, state.storage)
 
-    if is_admin(str(message.chat.id)):
-        user_language_code = await get_user_language(str(message.from_user.id), state.storage)
-
-        reply_markup = build_create_promo_code_keyboard(user_language_code)
-        await message.answer(
-            text=get_localization(user_language_code).PROMO_CODE_INFO_ADMIN,
-            reply_markup=reply_markup,
-        )
+    reply_markup = build_create_promo_code_keyboard(user_language_code)
+    await message.edit_text(
+        text=get_localization(user_language_code).PROMO_CODE_INFO_ADMIN,
+        reply_markup=reply_markup,
+    )
 
 
 @admin_promo_code_router.callback_query(lambda c: c.data.startswith('create_promo_code:'))
 async def handle_create_promo_code_selection(callback_query: CallbackQuery, state: FSMContext):
     await callback_query.answer()
 
-    user = await get_user(str(callback_query.from_user.id))
     user_language_code = await get_user_language(str(callback_query.from_user.id), state.storage)
 
     promo_code_type = callback_query.data.split(':')[1]
-    if promo_code_type == PromoCodeType.SUBSCRIPTION:
-        photo_path = f'payments/subscriptions_{user_language_code}_{user.currency}.png'
+    if promo_code_type == 'back':
+        reply_markup = build_admin_keyboard(user_language_code)
+        await callback_query.message.edit_text(
+            text=get_localization(user_language_code).ADMIN_INFO,
+            reply_markup=reply_markup,
+        )
+
+        return
+    elif promo_code_type == PromoCodeType.SUBSCRIPTION:
+        photo_path = f'payments/subscriptions_{user_language_code}.png'
         photo = await firebase.bucket.get_blob(photo_path)
         photo_link = firebase.get_public_url(photo.name)
 

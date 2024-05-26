@@ -13,7 +13,8 @@ from bot.database.operations.package.writers import write_package
 from bot.database.operations.transaction.writers import write_transaction
 from bot.database.operations.user.getters import get_user, get_users_by_referral
 from bot.database.operations.user.updaters import update_user
-from bot.keyboards.payment.bonus import build_bonus_keyboard
+from bot.handlers.common.feedback_handler import handle_feedback
+from bot.keyboards.payment.bonus import build_bonus_keyboard, build_bonus_cash_out_keyboard
 from bot.keyboards.common.common import build_cancel_keyboard
 from bot.locales.main import get_localization, get_user_language
 from bot.states.bonus import Bonus
@@ -25,7 +26,10 @@ bonus_router = Router()
 async def bonus(message: Message, state: FSMContext):
     await state.clear()
 
-    user_id = str(message.from_user.id)
+    await handle_bonus(message, str(message.from_user.id), state)
+
+
+async def handle_bonus(message: Message, user_id: str, state: FSMContext):
     user = await get_user(user_id)
     user_language_code = await get_user_language(user_id, state.storage)
     referred_users = await get_users_by_referral(user_id)
@@ -36,7 +40,7 @@ async def bonus(message: Message, state: FSMContext):
     photo_link = firebase.get_public_url(photo.name)
 
     text = get_localization(user_language_code).bonus(user_id, user.balance, len(referred_users), len(feedbacks))
-    reply_markup = build_bonus_keyboard(user_language_code)
+    reply_markup = build_bonus_keyboard(user_language_code, user_id)
     await message.answer_photo(
         photo=URLInputFile(photo_link, filename=photo_path),
         caption=text,
@@ -45,12 +49,43 @@ async def bonus(message: Message, state: FSMContext):
 
 
 @bonus_router.callback_query(lambda c: c.data.startswith('bonus:'))
-async def handle_bonus_package_selection(callback_query: CallbackQuery, state: FSMContext):
+async def handle_bonus_selection(callback_query: CallbackQuery, state: FSMContext):
     await callback_query.answer()
 
-    user_language_code = await get_user_language(str(callback_query.from_user.id), state.storage)
+    action = callback_query.data.split(':')[1]
+    if action == 'leave_feedback':
+        await handle_feedback(callback_query.message, str(callback_query.from_user.id), state)
+    elif action == 'cash_out':
+        user_language_code = await get_user_language(str(callback_query.from_user.id), state.storage)
+
+        reply_markup = build_bonus_cash_out_keyboard(user_language_code)
+        await callback_query.message.edit_caption(
+            caption=get_localization(user_language_code).BONUS_CHOOSE_PACKAGE,
+            reply_markup=reply_markup,
+        )
+
+
+@bonus_router.callback_query(lambda c: c.data.startswith('bonus_cash_out:'))
+async def handle_bonus_cash_out_selection(callback_query: CallbackQuery, state: FSMContext):
+    await callback_query.answer()
+
+    user_id = str(callback_query.from_user.id)
+    user_language_code = await get_user_language(user_id, state.storage)
 
     package_type = callback_query.data.split(':')[1]
+    if package_type == 'back':
+        user = await get_user(user_id)
+        referred_users = await get_users_by_referral(user_id)
+        feedbacks = await get_feedbacks_by_user_id(user_id)
+
+        text = get_localization(user_language_code).bonus(user_id, user.balance, len(referred_users), len(feedbacks))
+        reply_markup = build_bonus_keyboard(user_language_code, user_id)
+        await callback_query.message.edit_caption(
+            caption=text,
+            reply_markup=reply_markup,
+        )
+
+        return
 
     message = get_localization(user_language_code).choose_min(package_type)
 

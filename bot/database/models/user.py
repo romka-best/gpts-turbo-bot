@@ -4,7 +4,8 @@ from bot.database.models.common import (
     Currency,
     Model,
     Quota,
-    GPTVersion,
+    ChatGPTVersion,
+    ClaudeGPTVersion,
     DALLEResolution,
     DALLEQuality,
     DALLEVersion,
@@ -45,6 +46,7 @@ class User:
     gender: UserGender
     is_premium: bool
     is_blocked: bool
+    is_banned: bool
     current_model: Model
     currency: Currency
     balance: float
@@ -59,8 +61,11 @@ class User:
     edited_at: datetime
 
     DEFAULT_ADDITIONAL_USAGE_QUOTA = {
-        Quota.CHAT_GPT3: 0,
-        Quota.CHAT_GPT4: 0,
+        Quota.CHAT_GPT3_TURBO: 0,
+        Quota.CHAT_GPT4_TURBO: 0,
+        Quota.CHAT_GPT4_OMNI: 0,
+        Quota.CLAUDE_3_SONNET: 0,
+        Quota.CLAUDE_3_OPUS: 0,
         Quota.ADDITIONAL_CHATS: 0,
         Quota.DALL_E: 0,
         Quota.MIDJOURNEY: 0,
@@ -76,10 +81,18 @@ class User:
         Model.CHAT_GPT: {
             UserSettings.SHOW_THE_NAME_OF_THE_CHATS: False,
             UserSettings.SHOW_THE_NAME_OF_THE_ROLES: False,
-            UserSettings.SHOW_USAGE_QUOTA: True,
+            UserSettings.SHOW_USAGE_QUOTA: False,
             UserSettings.TURN_ON_VOICE_MESSAGES: False,
             UserSettings.VOICE: 'alloy',
-            UserSettings.VERSION: GPTVersion.V3,
+            UserSettings.VERSION: ChatGPTVersion.V3_Turbo,
+        },
+        Model.CLAUDE: {
+            UserSettings.SHOW_THE_NAME_OF_THE_CHATS: False,
+            UserSettings.SHOW_THE_NAME_OF_THE_ROLES: False,
+            UserSettings.SHOW_USAGE_QUOTA: False,
+            UserSettings.TURN_ON_VOICE_MESSAGES: False,
+            UserSettings.VOICE: 'alloy',
+            UserSettings.VERSION: ClaudeGPTVersion.V3_Sonnet,
         },
         Model.DALL_E: {
             UserSettings.SHOW_USAGE_QUOTA: True,
@@ -115,6 +128,7 @@ class User:
         language_code="en",
         is_premium=False,
         is_blocked=False,
+        is_banned=False,
         current_model=Model.CHAT_GPT,
         currency=Currency.RUB,
         balance=0,
@@ -136,6 +150,7 @@ class User:
         self.language_code = language_code
         self.is_premium = is_premium
         self.is_blocked = is_blocked
+        self.is_banned = is_banned
         self.current_model = current_model
         self.currency = currency
         self.balance = balance

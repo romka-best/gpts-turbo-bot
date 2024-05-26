@@ -8,7 +8,7 @@ class SubscriptionType:
     FREE = 'FREE'
     STANDARD = 'STANDARD'
     VIP = 'VIP'
-    PLATINUM = 'PLATINUM'
+    PREMIUM = 'PREMIUM'
 
 
 class SubscriptionPeriod:
@@ -28,40 +28,52 @@ class SubscriptionStatus:
 class SubscriptionLimit:
     LIMITS = {
         SubscriptionType.FREE: {
-            Quota.CHAT_GPT3: 100,
-            Quota.CHAT_GPT4: 0,
-            Quota.DALL_E: 5,
+            Quota.CHAT_GPT3_TURBO: 100,
+            Quota.CHAT_GPT4_TURBO: 0,
+            Quota.CHAT_GPT4_OMNI: 0,
+            Quota.CLAUDE_3_SONNET: 20,
+            Quota.CLAUDE_3_OPUS: 0,
+            Quota.DALL_E: 3,
             Quota.MIDJOURNEY: 0,
             Quota.FACE_SWAP: 10,
             Quota.MUSIC_GEN: 30,
             Quota.SUNO: 0,
         },
         SubscriptionType.STANDARD: {
-            Quota.CHAT_GPT3: 1000,
-            Quota.CHAT_GPT4: 100,
-            Quota.DALL_E: 50,
-            Quota.MIDJOURNEY: 50,
+            Quota.CHAT_GPT3_TURBO: 1000,
+            Quota.CHAT_GPT4_TURBO: 25,
+            Quota.CHAT_GPT4_OMNI: 25,
+            Quota.CLAUDE_3_SONNET: 250,
+            Quota.CLAUDE_3_OPUS: 25,
+            Quota.DALL_E: 25,
+            Quota.MIDJOURNEY: 10,
             Quota.FACE_SWAP: 100,
             Quota.MUSIC_GEN: 300,
-            Quota.SUNO: 50,
+            Quota.SUNO: 25,
         },
         SubscriptionType.VIP: {
-            Quota.CHAT_GPT3: 2000,
-            Quota.CHAT_GPT4: 200,
-            Quota.DALL_E: 100,
-            Quota.MIDJOURNEY: 100,
-            Quota.FACE_SWAP: 200,
+            Quota.CHAT_GPT3_TURBO: 2000,
+            Quota.CHAT_GPT4_TURBO: 50,
+            Quota.CHAT_GPT4_OMNI: 50,
+            Quota.CLAUDE_3_SONNET: 500,
+            Quota.CLAUDE_3_OPUS: 50,
+            Quota.DALL_E: 50,
+            Quota.MIDJOURNEY: 25,
+            Quota.FACE_SWAP: 250,
             Quota.MUSIC_GEN: 900,
-            Quota.SUNO: 100,
+            Quota.SUNO: 50,
         },
-        SubscriptionType.PLATINUM: {
-            Quota.CHAT_GPT3: 3000,
-            Quota.CHAT_GPT4: 300,
-            Quota.DALL_E: 200,
-            Quota.MIDJOURNEY: 200,
-            Quota.FACE_SWAP: 400,
+        SubscriptionType.PREMIUM: {
+            Quota.CHAT_GPT3_TURBO: 3000,
+            Quota.CHAT_GPT4_TURBO: 100,
+            Quota.CHAT_GPT4_OMNI: 100,
+            Quota.CLAUDE_3_SONNET: 1000,
+            Quota.CLAUDE_3_OPUS: 100,
+            Quota.DALL_E: 100,
+            Quota.MIDJOURNEY: 50,
+            Quota.FACE_SWAP: 500,
             Quota.MUSIC_GEN: 1800,
-            Quota.SUNO: 200,
+            Quota.SUNO: 100,
         }
     }
     ADDITIONAL_QUOTA_LIMITS = {
@@ -83,7 +95,7 @@ class SubscriptionLimit:
             Quota.FAST_MESSAGES: True,
             Quota.VOICE_MESSAGES: True,
         },
-        SubscriptionType.PLATINUM: {
+        SubscriptionType.PREMIUM: {
             Quota.ADDITIONAL_CHATS: 19,
             Quota.ACCESS_TO_CATALOG: True,
             Quota.FAST_MESSAGES: True,
@@ -160,21 +172,17 @@ class Subscription:
         prices = {
             SubscriptionType.STANDARD: '',
             SubscriptionType.VIP: '',
-            SubscriptionType.PLATINUM: ''
+            SubscriptionType.PREMIUM: ''
         }
 
         if currency == Currency.RUB:
             prices[SubscriptionType.STANDARD] = '299₽'
             prices[SubscriptionType.VIP] = '749₽'
-            prices[SubscriptionType.PLATINUM] = '1 999₽'
-        elif currency == Currency.EUR:
-            prices[SubscriptionType.STANDARD] = '2.99€'
-            prices[SubscriptionType.VIP] = '7.49€'
-            prices[SubscriptionType.PLATINUM] = '19.99€'
+            prices[SubscriptionType.PREMIUM] = '1 999₽'
         else:
-            prices[SubscriptionType.STANDARD] = '$2.99'
-            prices[SubscriptionType.VIP] = '$7.49'
-            prices[SubscriptionType.PLATINUM] = '$19.99'
+            prices[SubscriptionType.STANDARD] = '$4.99'
+            prices[SubscriptionType.VIP] = '$9.99'
+            prices[SubscriptionType.PREMIUM] = '$19.99'
 
         return prices
 
@@ -184,7 +192,7 @@ class Subscription:
             SubscriptionType.FREE: '🆓',
             SubscriptionType.STANDARD: '⭐',
             SubscriptionType.VIP: '🔥',
-            SubscriptionType.PLATINUM: '💎'
+            SubscriptionType.PREMIUM: '💎'
         }
 
     @staticmethod

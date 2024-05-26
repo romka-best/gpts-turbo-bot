@@ -8,8 +8,11 @@ from bot.database.models.transaction import ServiceType
 
 
 class PackageType:
-    CHAT_GPT3 = "GPT3"
-    CHAT_GPT4 = "GPT4"
+    CHAT_GPT3_TURBO = "GPT3"
+    CHAT_GPT4_TURBO = "GPT4"
+    CHAT_GPT4_OMNI = "GPT4_OMNI"
+    CLAUDE_3_SONNET = "CLAUDE_3_SONNET"
+    CLAUDE_3_OPUS = "CLAUDE_3_OPUS"
     DALL_E = "DALL_E"
     MIDJOURNEY = "MIDJOURNEY"
     FACE_SWAP = "FACE_SWAP"
@@ -59,7 +62,6 @@ class Package:
     MINIMAL_PRICE = {
         Currency.RUB: 100,
         Currency.USD: 1,
-        Currency.EUR: 1,
     }
 
     def __init__(
@@ -96,8 +98,11 @@ class Package:
     @staticmethod
     def get_prices(currency: Currency):
         prices = {
-            PackageType.CHAT_GPT3: '',
-            PackageType.CHAT_GPT4: '',
+            PackageType.CHAT_GPT3_TURBO: '',
+            PackageType.CHAT_GPT4_TURBO: '',
+            PackageType.CHAT_GPT4_OMNI: '',
+            PackageType.CLAUDE_3_SONNET: '',
+            PackageType.CLAUDE_3_OPUS: '',
             PackageType.CHAT: '',
             PackageType.DALL_E: '',
             PackageType.MIDJOURNEY: '',
@@ -110,38 +115,32 @@ class Package:
         }
 
         if currency == Currency.RUB:
-            prices[PackageType.CHAT_GPT3] = '1₽'
-            prices[PackageType.CHAT_GPT4] = '5₽'
-            prices[PackageType.CHAT] = '50₽'
+            prices[PackageType.CHAT_GPT3_TURBO] = '1₽'
+            prices[PackageType.CHAT_GPT4_TURBO] = '5₽'
+            prices[PackageType.CHAT_GPT4_OMNI] = '2.5₽'
+            prices[PackageType.CLAUDE_3_SONNET] = '2.5₽'
+            prices[PackageType.CLAUDE_3_OPUS] = '5₽'
             prices[PackageType.DALL_E] = '5₽'
             prices[PackageType.MIDJOURNEY] = '10₽'
             prices[PackageType.FACE_SWAP] = '5₽'
             prices[PackageType.MUSIC_GEN] = '1₽'
             prices[PackageType.SUNO] = '5₽'
+            prices[PackageType.CHAT] = '25₽'
             prices[PackageType.ACCESS_TO_CATALOG] = '50₽'
             prices[PackageType.VOICE_MESSAGES] = '50₽'
             prices[PackageType.FAST_MESSAGES] = '50₽'
-        elif currency == Currency.EUR:
-            prices[PackageType.CHAT_GPT3] = '0.01€'
-            prices[PackageType.CHAT_GPT4] = '0.05€'
-            prices[PackageType.CHAT] = '0.5€'
-            prices[PackageType.DALL_E] = '0.05€'
-            prices[PackageType.MIDJOURNEY] = '0.1€'
-            prices[PackageType.FACE_SWAP] = '0.05€'
-            prices[PackageType.MUSIC_GEN] = '0.01€'
-            prices[PackageType.SUNO] = '0.05€'
-            prices[PackageType.ACCESS_TO_CATALOG] = '0.5€'
-            prices[PackageType.VOICE_MESSAGES] = '0.5€'
-            prices[PackageType.FAST_MESSAGES] = '0.5€'
         else:
-            prices[PackageType.CHAT_GPT3] = '$0.01'
-            prices[PackageType.CHAT_GPT4] = '$0.05'
-            prices[PackageType.CHAT] = '$0.5'
+            prices[PackageType.CHAT_GPT3_TURBO] = '$0.01'
+            prices[PackageType.CHAT_GPT4_TURBO] = '$0.05'
+            prices[PackageType.CHAT_GPT4_OMNI] = '$0.025'
+            prices[PackageType.CLAUDE_3_SONNET] = '$0.025'
+            prices[PackageType.CLAUDE_3_OPUS] = '$0.05'
             prices[PackageType.DALL_E] = '$0.05'
             prices[PackageType.MIDJOURNEY] = '$0.1'
             prices[PackageType.FACE_SWAP] = '$0.05'
             prices[PackageType.MUSIC_GEN] = '$0.01'
             prices[PackageType.SUNO] = '$0.05'
+            prices[PackageType.CHAT] = '$0.25'
             prices[PackageType.ACCESS_TO_CATALOG] = '$0.5'
             prices[PackageType.VOICE_MESSAGES] = '$0.5'
             prices[PackageType.FAST_MESSAGES] = '$0.5'
@@ -161,12 +160,21 @@ class Package:
     def get_translate_name_and_description(localization, package_type: str):
         name = None
         description = None
-        if package_type == PackageType.CHAT_GPT3:
+        if package_type == PackageType.CHAT_GPT3_TURBO:
             name = localization.GPT3_REQUESTS
             description = localization.GPT3_REQUESTS_DESCRIPTION
-        elif package_type == PackageType.CHAT_GPT4:
+        elif package_type == PackageType.CHAT_GPT4_TURBO:
             name = localization.GPT4_REQUESTS
             description = localization.GPT4_REQUESTS_DESCRIPTION
+        elif package_type == PackageType.CHAT_GPT4_OMNI:
+            name = localization.GPT4_OMNI_REQUESTS
+            description = localization.GPT4_OMNI_REQUESTS_DESCRIPTION
+        elif package_type == PackageType.CLAUDE_3_SONNET:
+            name = localization.CLAUDE_3_SONNET_REQUESTS
+            description = localization.CLAUDE_3_SONNET_REQUESTS_DESCRIPTION
+        elif package_type == PackageType.CLAUDE_3_OPUS:
+            name = localization.CLAUDE_3_OPUS_REQUESTS
+            description = localization.CLAUDE_3_OPUS_REQUESTS_DESCRIPTION
         elif package_type == PackageType.DALL_E:
             name = localization.DALL_E_REQUESTS
             description = localization.DALL_E_REQUESTS_DESCRIPTION
@@ -211,12 +219,21 @@ class Package:
     @staticmethod
     def get_service_type_and_update_quota(package_type: str, additional_usage_quota: dict, quantity: int):
         service_type = package_type
-        if package_type == PackageType.CHAT_GPT3:
-            additional_usage_quota[Quota.CHAT_GPT3] += quantity
-            service_type = ServiceType.CHAT_GPT3
-        elif package_type == PackageType.CHAT_GPT4:
-            additional_usage_quota[Quota.CHAT_GPT4] += quantity
-            service_type = ServiceType.CHAT_GPT4
+        if package_type == PackageType.CHAT_GPT3_TURBO:
+            additional_usage_quota[Quota.CHAT_GPT3_TURBO] += quantity
+            service_type = ServiceType.CHAT_GPT3_TURBO
+        elif package_type == PackageType.CHAT_GPT4_TURBO:
+            additional_usage_quota[Quota.CHAT_GPT4_TURBO] += quantity
+            service_type = ServiceType.CHAT_GPT4_TURBO
+        elif package_type == PackageType.CHAT_GPT4_OMNI:
+            additional_usage_quota[Quota.CHAT_GPT4_OMNI] += quantity
+            service_type = ServiceType.CHAT_GPT4_OMNI
+        elif package_type == PackageType.CLAUDE_3_SONNET:
+            additional_usage_quota[Quota.CLAUDE_3_SONNET] += quantity
+            service_type = ServiceType.CLAUDE_3_SONNET
+        elif package_type == PackageType.CLAUDE_3_OPUS:
+            additional_usage_quota[Quota.CLAUDE_3_OPUS] += quantity
+            service_type = ServiceType.CLAUDE_3_OPUS
         elif package_type == PackageType.DALL_E:
             additional_usage_quota[Quota.DALL_E] += quantity
             service_type = ServiceType.DALL_E

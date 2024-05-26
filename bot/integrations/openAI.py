@@ -3,20 +3,24 @@ from typing import Dict, BinaryIO, Literal
 import openai
 
 from bot.config import config
-from bot.database.models.common import DALLEResolution, DALLEQuality, GPTVersion, DALLEVersion
+from bot.database.models.common import ChatGPTVersion, DALLEResolution, DALLEQuality, DALLEVersion
 
 client = openai.AsyncOpenAI(api_key=config.OPENAI_API_KEY.get_secret_value())
 
 
-def get_default_max_tokens(model_version: GPTVersion) -> int:
+def get_default_max_tokens(model_version: ChatGPTVersion) -> int:
     base = 1024
-    if model_version == GPTVersion.V3 or model_version == GPTVersion.V4:
+    if model_version == ChatGPTVersion.V3_Turbo:
+        return base * 2
+    elif model_version == ChatGPTVersion.V4_Turbo:
+        return base
+    elif model_version == ChatGPTVersion.V4_Omni:
         return base
 
     return base
 
 
-async def get_response_message(model_version: GPTVersion, history: list) -> Dict:
+async def get_response_message(model_version: ChatGPTVersion, history: list) -> Dict:
     max_tokens = get_default_max_tokens(model_version)
 
     response = await client.chat.completions.create(
@@ -47,7 +51,12 @@ def get_cost_for_image(quality: DALLEQuality, resolution: DALLEResolution):
     return 1
 
 
-async def get_response_image(model_version: DALLEVersion, prompt: str, size: DALLEResolution, quality: DALLEQuality) -> str:
+async def get_response_image(
+    model_version: DALLEVersion,
+    prompt: str,
+    size: DALLEResolution,
+    quality: DALLEQuality,
+) -> str:
     response = await client.images.generate(
         model=model_version,
         prompt=prompt,
