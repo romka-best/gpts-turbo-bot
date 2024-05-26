@@ -314,9 +314,9 @@ async def handle_setting_selection(callback_query: CallbackQuery, state: FSMCont
 
         dall_e_cost = 1
         if chosen_model == Model.CHAT_GPT:
-            human_model = f"{get_localization(user_language_code).CHATGPT}"
+            human_model = get_localization(user_language_code).CHATGPT
         elif chosen_model == Model.CLAUDE:
-            human_model = f"{get_localization(user_language_code).CLAUDE}"
+            human_model = get_localization(user_language_code).CLAUDE
         elif chosen_model == Model.DALL_E:
             dall_e_cost = get_cost_for_image(
                 user.settings[Model.DALL_E][UserSettings.QUALITY],
@@ -367,12 +367,15 @@ async def handle_voice_messages_setting_selection(callback_query: CallbackQuery,
             text=get_localization(user_language_code).SETTINGS_CHOOSE_MODEL,
             reply_markup=reply_markup,
         )
+
         return
     elif (
         chosen_setting == UserSettings.TURN_ON_VOICE_MESSAGES and not user.additional_usage_quota[Quota.VOICE_MESSAGES]
     ):
         user.settings[Model.CHAT_GPT][chosen_setting] = False
+        user.settings[Model.CLAUDE][chosen_setting] = False
         await handle_buy(callback_query.message, user_id, state)
+
         return
     elif chosen_setting == 'listen':
         voices: List[InputMediaAudio] = []
@@ -417,8 +420,11 @@ async def handle_voice_messages_setting_selection(callback_query: CallbackQuery,
     if keyboard_changed:
         if chosen_setting in ["alloy", "echo", "fable", "onyx", "nova", "shimmer"]:
             user.settings[Model.CHAT_GPT][UserSettings.VOICE] = chosen_setting
+            user.settings[Model.CLAUDE][UserSettings.VOICE] = chosen_setting
         else:
-            user.settings[Model.CHAT_GPT][chosen_setting] = not user.settings[Model.CHAT_GPT][chosen_setting]
+            new_setting = not user.settings[Model.CHAT_GPT][chosen_setting]
+            user.settings[Model.CHAT_GPT][chosen_setting] = new_setting
+            user.settings[Model.CLAUDE][chosen_setting] = new_setting
 
         await update_user(
             user_id, {
