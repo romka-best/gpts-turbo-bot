@@ -260,7 +260,9 @@ async def handle_get_statistics(language_code: str, period: str):
                 count_income_subscriptions_total_money += transaction.amount
             else:
                 count_income_packages_total_money += transaction.amount
-            paid_users.add(transaction.user_id)
+
+            if transaction.amount > 0:
+                paid_users.add(transaction.user_id)
         elif transaction.type == TransactionType.EXPENSE:
             count_expense_transactions_total += 1
             if transaction.service == ServiceType.MUSIC_GEN:
@@ -276,7 +278,7 @@ async def handle_get_statistics(language_code: str, period: str):
                 count_midjourney_usage[midjourney_action] = count_midjourney_usage.get(
                     midjourney_action,
                     0,
-                ) + 1
+                ) + transaction.quantity
 
             if transaction.service == ServiceType.FACE_SWAP and transaction.quantity != 0:
                 face_swap_name = transaction.details.get('name', 'UNKNOWN')
@@ -291,7 +293,7 @@ async def handle_get_statistics(language_code: str, period: str):
                 count_suno_usage[suno_mode] = count_suno_usage.get(
                     suno_mode,
                     0,
-                ) + 1
+                ) + transaction.quantity
 
         activated_users.add(transaction.user_id)
         count_transactions_total += 1

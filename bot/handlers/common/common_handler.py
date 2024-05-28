@@ -6,7 +6,7 @@ from aiogram.types import Message, CallbackQuery, ChatMemberUpdated
 from bot.database.main import firebase
 from bot.database.models.generation import Generation
 from bot.database.operations.generation.updaters import update_generation
-from bot.database.operations.user.getters import get_user
+from bot.database.operations.user.getters import get_user, get_users_by_referral
 from bot.database.operations.user.updaters import update_user
 from bot.helpers.initialize_user_for_the_first_time import initialize_user_for_the_first_time
 from bot.helpers.update_monthly_limits import update_user_monthly_limits
@@ -30,18 +30,27 @@ async def start(message: Message, state: FSMContext):
             referred_by = message.text.split()[1]
             referred_by_user = await get_user(referred_by)
             referred_by_user_language_code = await get_user_language(referred_by, state.storage)
-            if referred_by_user:
-                added_to_balance = 25.00
-                referred_by_user.balance += added_to_balance
 
-                await update_user(referred_by_user.id, {
-                    "balance": referred_by_user.balance,
-                })
-                text = get_localization(referred_by_user_language_code).referral_successful(added_to_balance)
-                await message.bot.send_message(
-                    chat_id=referred_by_user.telegram_chat_id,
-                    text=text,
-                )
+            if referred_by_user:
+                referred_users = await get_users_by_referral(user_id)
+                if len(referred_users) > 50:
+                    text = get_localization(referred_by_user_language_code).REFERRAL_LIMIT_ERROR
+                    await message.bot.send_message(
+                        chat_id=referred_by_user.telegram_chat_id,
+                        text=text,
+                    )
+                else:
+                    added_to_balance = 25.00
+                    referred_by_user.balance += added_to_balance
+                    await update_user(referred_by_user.id, {
+                        "balance": referred_by_user.balance,
+                    })
+
+                    text = get_localization(referred_by_user_language_code).REFERRAL_SUCCESS
+                    await message.bot.send_message(
+                        chat_id=referred_by_user.telegram_chat_id,
+                        text=text,
+                    )
 
         language_code = message.from_user.language_code
         await set_user_language(user_id, language_code, state.storage)

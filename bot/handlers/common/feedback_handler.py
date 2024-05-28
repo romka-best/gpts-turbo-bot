@@ -4,6 +4,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
 
 from bot.config import config
+from bot.database.operations.feedback.getters import get_feedbacks_by_user_id
 from bot.database.operations.feedback.writers import write_feedback
 from bot.database.operations.user.getters import get_user
 from bot.database.operations.user.updaters import update_user
@@ -73,16 +74,22 @@ async def handle_manage_feedback(callback_query: CallbackQuery, state: FSMContex
 
     if action == "approve":
         user = await get_user(user_id)
+        feedbacks = await get_feedbacks_by_user_id(user_id)
+        if len(feedbacks) > 5:
+            await callback_query.bot.send_message(
+                user_id,
+                get_localization(user_language_code).FEEDBACK_APPROVED_WITH_LIMIT_ERROR,
+            )
+        else:
+            user.balance += 25.00
+            await update_user(user_id, {
+                "balance": user.balance,
+            })
 
-        user.balance += 25.00
-        await update_user(user_id, {
-            "balance": user.balance,
-        })
-
-        await callback_query.bot.send_message(
-            user_id,
-            get_localization(user_language_code).FEEDBACK_APPROVED,
-        )
+            await callback_query.bot.send_message(
+                user_id,
+                get_localization(user_language_code).FEEDBACK_APPROVED,
+            )
     elif action == "deny":
         await callback_query.bot.send_message(
             user_id,

@@ -37,7 +37,7 @@ def build_admin_keyboard(language_code: str) -> InlineKeyboardMarkup:
         ],
         [
             InlineKeyboardButton(
-                text="⛔️ Забанить пользователя",
+                text="⛔️ Бан/Разбан пользователя",
                 callback_data='admin:ban',
             ),
         ],

@@ -40,12 +40,12 @@ class Suno:
         await self.session.close()
 
     async def _get_sid(self) -> str:
-        url = "https://clerk.suno.com/v1/client?_clerk_js_version=4.73.0"
+        url = "https://clerk.suno.com/v1/client?_clerk_js_version=4.73.2"
         data = await self.request("GET", url)
         return data["response"]["last_active_session_id"]
 
     async def _get_jwt(self) -> str:
-        url = f"https://clerk.suno.com/v1/client/sessions/{self._sid}/tokens/api?_clerk_js_version=4.73.0"
+        url = f"https://clerk.suno.com/v1/client/sessions/{self._sid}/tokens/api?_clerk_js_version=4.73.2"
         data = await self.request("POST", url)
         return data["jwt"]
 

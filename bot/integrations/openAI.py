@@ -10,11 +10,11 @@ client = openai.AsyncOpenAI(api_key=config.OPENAI_API_KEY.get_secret_value())
 
 def get_default_max_tokens(model_version: ChatGPTVersion) -> int:
     base = 1024
-    if model_version == ChatGPTVersion.V3_Turbo:
-        return base * 2
-    elif model_version == ChatGPTVersion.V4_Turbo:
-        return base
-    elif model_version == ChatGPTVersion.V4_Omni:
+    if (
+        model_version == ChatGPTVersion.V3_Turbo or
+        model_version == ChatGPTVersion.V4_Turbo or
+        model_version == ChatGPTVersion.V4_Omni
+    ):
         return base
 
     return base

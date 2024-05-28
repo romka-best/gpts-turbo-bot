@@ -2,6 +2,7 @@ from aiogram import Router, F
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
 
+from bot.database.operations.user.getters import get_user
 from bot.database.operations.user.updaters import update_user
 from bot.keyboards.admin.admin import build_admin_keyboard
 from bot.keyboards.admin.ban import build_ban_keyboard
@@ -50,11 +51,19 @@ async def ban_user_id_sent(message: Message, state: FSMContext):
 
     try:
         user_id = int(message.text)
-        await update_user(str(user_id), {
-            "is_banned": True,
+        user = await get_user(str(user_id))
+
+        user.is_banned = not user.is_banned
+        await update_user(user.id, {
+            "is_banned": user.is_banned,
         })
 
-        await message.reply(text=get_localization(user_language_code).BAN_SUCCESS)
+        if user.is_banned:
+            await message.reply(text=get_localization(user_language_code).BAN_SUCCESS)
+        else:
+            await message.reply(text=get_localization(user_language_code).UNBAN_SUCCESS)
+
+        await state.clear()
     except (TypeError, ValueError):
         reply_markup = build_cancel_keyboard(user_language_code)
         await message.reply(
