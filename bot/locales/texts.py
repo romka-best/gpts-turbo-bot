@@ -25,8 +25,9 @@ class Texts(Protocol):
     INFO_SUNO: str
 
     ADMIN_INFO = "👨‍💻 Выберите действие, админ 👩‍💻"
-    BAN_INFO = "Отправь мне id пользователя, которого вы хотите заблокировать ⛔️"
+    BAN_INFO = "Отправь мне id пользователя, которого вы хотите забанить/разбанить ⛔️"
     BAN_SUCCESS = "Вы успешно забанили пользователя 📛"
+    UNBAN_SUCCESS = "Вы успешно разбанили пользователя 🔥"
 
     TEXT_MODELS: str
     IMAGE_MODELS: str
@@ -38,6 +39,7 @@ class Texts(Protocol):
     FEEDBACK_ADMIN_APPROVE = "Одобрить ✅"
     FEEDBACK_ADMIN_DENY = "Отклонить ❌"
     FEEDBACK_APPROVED: str
+    FEEDBACK_APPROVED_WITH_LIMIT_ERROR: str
     FEEDBACK_DENIED: str
 
     # Profile
@@ -68,6 +70,8 @@ class Texts(Protocol):
     INVITE_FRIEND: str
     LEAVE_FEEDBACK: str
     CASH_OUT: str
+    REFERRAL_SUCCESS: str
+    REFERRAL_LIMIT_ERROR: str
 
     # Blast
     BLAST_CHOOSE_LANGUAGE = """
@@ -1057,7 +1061,3 @@ class Texts(Protocol):
         if is_share:
             return f"https://t.me/share/url?url=https://t.me/GPTsTurboBot?start={user_id}"
         return f"https://t.me/GPTsTurboBot?start={user_id}"
-
-    @staticmethod
-    def referral_successful(added_to_balance: float) -> str:
-        raise NotImplementedError

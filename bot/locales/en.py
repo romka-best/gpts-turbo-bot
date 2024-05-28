@@ -204,6 +204,13 @@ As a token of appreciation, your balance has increased by 25 credits 🪙! Use t
 
 To use the bonus, enter the command /bonus and follow the instructions!
 """
+    FEEDBACK_APPROVED_WITH_LIMIT_ERROR = """
+🌟 <b>Feedback received!</b> 🌟
+
+Thanks to your efforts, we will improve the boat! But, unfortunately, we cannot award you a reward, as the limit of rewards for feedback has been exceeded
+
+Enter the /bonus command to learn about other ways to earn bonus credits. Keep sharing and enjoy every moment here! 🎉
+"""
     FEEDBACK_DENIED = """
 🌟 <b>Feedback received!</b> 🌟
 
@@ -274,6 +281,13 @@ Start using your generations right now and discover new horizons with our neural
 Thanks to you, a new user has joined us, and as a token of our appreciation, your and your friend's balance has been increased by 25 credits 🪙! Use them to access exclusive features or to add more generations in the neural networks 💸
 
 To use the bonus, enter the /bonus command and follow the instructions. Let every invitation bring you not only the joy of communication but also pleasant bonuses!
+"""
+    REFERRAL_LIMIT_ERROR = """
+🌟 <b>Congratulations! Your referral magic worked!</b> 🌟
+
+Thanks to your efforts, a new user has joined us! Unfortunately, we cannot award you a reward, as the limit of rewards for inviting friends has been exceeded
+
+Enter the /bonus command to learn about other ways to earn bonus credits. Keep sharing and enjoy every moment here! 🎉
 """
 
     # Promo code
@@ -664,7 +678,7 @@ Your chats have switched their unique roles to "Personal Assistant" as your acce
     ANSWERS_AND_REQUESTS_WITH_VOICE_MESSAGES_DESCRIPTION = "Experience the ease and convenience of voice communication with our AI: Send and receive voice messages for a more dynamic and expressive interaction"
     FAST_ANSWERS = "⚡ Fast answers"
     FAST_ANSWERS_DESCRIPTION = "Quick Messages feature offers lightning-fast, accurate AI responses, ensuring you're always a step ahead in communication"
-    MIN_ERROR = "Oops! It looks like the total sum is below our minimum threshold. Please choose count of packages that meets or exceeds the minimum required. Let's try that again! 🔄"
+    MIN_ERROR = "Oops! It looks like the total sum is below our minimum threshold, 100₽. Please choose count of packages that meets or exceeds the minimum required. Let's try that again! 🔄"
     MAX_ERROR = "Oops! It looks like the number entered is higher than you can purchase. Please enter a smaller value or one corresponding to your balance. Let's try that again! 🔄"
     VALUE_ERROR = """
 Whoops! That doesn't seem like a number 🤔

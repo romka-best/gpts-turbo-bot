@@ -375,6 +375,8 @@ async def handle_claude_3_opus_example(
             user.subscription_type == SubscriptionType.FREE and
             user.monthly_limits[Quota.CLAUDE_3_SONNET] + 1 in [1, 10, 20]
         ):
+            history = get_history_without_duplicates(history)
+
             response = await get_response_message(ClaudeGPTVersion.V3_Opus, system_prompt, history)
             response_message = response['message']
 
@@ -383,7 +385,7 @@ async def handle_claude_3_opus_example(
             output_price = response['output_tokens'] * PRICE_CLAUDE_3_OPUS_OUTPUT
 
             total_price = round(input_price + output_price, 6)
-            message_role, message_content = response_message.role, response_message.content
+            message_role, message_content = "assistant", response_message
             await write_transaction(
                 user_id=user.id,
                 type=TransactionType.EXPENSE,

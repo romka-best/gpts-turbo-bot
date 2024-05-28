@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime, timezone, timedelta
 
 from aiogram import Router, F
@@ -8,7 +9,7 @@ from aiogram.types import Message, CallbackQuery, LabeledPrice, PreCheckoutQuery
 from bot.config import config
 from bot.database.main import firebase
 from bot.database.models.cart import CartItem
-from bot.database.models.common import PaymentType, Model
+from bot.database.models.common import PaymentType
 from bot.database.models.package import PackageStatus, PackageType, Package
 from bot.database.models.subscription import Subscription, SubscriptionStatus
 from bot.database.models.transaction import TransactionType
@@ -449,7 +450,9 @@ async def pre_checkout(pre_checkout_query: PreCheckoutQuery):
                 pre_checkout_query.total_amount // 100,
             )
             await pre_checkout_query.answer(ok=True)
-        except Exception:
+        except Exception as e:
+            logging.error(f"Error in payment_handler: {e}")
+
             await pre_checkout_query.answer(ok=False)
     elif payment_type == PaymentType.PACKAGE:
         _, user_id, package_type, quantity = pre_checkout_query.invoice_payload.split(':')
@@ -472,7 +475,9 @@ async def pre_checkout(pre_checkout_query: PreCheckoutQuery):
                 until_at,
             )
             await pre_checkout_query.answer(ok=True)
-        except Exception:
+        except Exception as e:
+            logging.error(f"Error in payment_handler: {e}")
+
             await pre_checkout_query.answer(ok=False)
     elif payment_type == PaymentType.CART:
         _, user_id, packages = pre_checkout_query.invoice_payload.split(':', 2)
@@ -506,7 +511,9 @@ async def pre_checkout(pre_checkout_query: PreCheckoutQuery):
                     until_at,
                 )
             await pre_checkout_query.answer(ok=True)
-        except Exception:
+        except Exception as e:
+            logging.error(f"Error in payment_handler: {e}")
+
             await pre_checkout_query.answer(ok=False)
     else:
         await pre_checkout_query.answer(ok=False)
@@ -633,7 +640,7 @@ async def successful_payment(message: Message, state: FSMContext):
     await message.answer(
         text=get_localization(user_language_code).switched(
             user.current_model,
-            user.settings[Model.CHAT_GPT][UserSettings.VERSION],
+            user.settings[user.current_model][UserSettings.VERSION],
         ),
         reply_markup=reply_markup,
     )

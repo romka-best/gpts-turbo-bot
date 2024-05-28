@@ -170,12 +170,16 @@ async def handle_update(update: dict):
         await handle_forbidden_error(telegram_update)
     except TelegramBadRequest as e:
         if e.message.startswith("Bad Request: message can't be deleted for everyone"):
-            logging.info(e)
+            logging.warning(e)
         elif e.message.startswith("Bad Request: message to be replied not found"):
             logging.warning(e)
         elif e.message.startswith("Bad Request: message to delete not found"):
             logging.warning(e)
         elif e.message.startswith("Bad Request: message is not modified"):
+            logging.warning(e)
+        elif e.message.startswith("Bad Request: message to edit not found"):
+            logging.warning(e)
+        elif e.message.startswith("Bad Request: query is too old and response timeout expired or query ID is invalid"):
             logging.warning(e)
         else:
             logging.exception(f"Error in bot_webhook: {e}")
