@@ -9,6 +9,7 @@ async def write_transaction(
     type: TransactionType,
     service: ServiceType,
     amount: float,
+    clear_amount: float,
     currency: Currency,
     quantity=1,
     details=None,
@@ -19,6 +20,7 @@ async def write_transaction(
         type,
         service,
         amount,
+        clear_amount,
         currency,
         quantity,
         details,
@@ -35,6 +37,7 @@ async def write_transaction_in_transaction(
     type: TransactionType,
     service: ServiceType,
     amount: float,
+    clear_amount: float,
     currency: Currency,
     quantity=1,
     details=None,
@@ -45,13 +48,15 @@ async def write_transaction_in_transaction(
         type,
         service,
         amount,
+        clear_amount,
         currency,
         quantity,
         details,
         created_at,
     )
     transaction.set(
-        firebase.db.collection(Transaction.COLLECTION_NAME).document(transaction_object.id), transaction_object.to_dict()
+        firebase.db.collection(Transaction.COLLECTION_NAME).document(transaction_object.id),
+        transaction_object.to_dict(),
     )
 
     return transaction_object

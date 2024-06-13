@@ -7,9 +7,15 @@ from google.cloud.firestore_v1 import AsyncWriteBatch
 
 from bot.config import config
 from bot.database.main import firebase
-from bot.database.models.common import Quota, DEFAULT_ROLE
+from bot.database.models.common import Quota, DEFAULT_ROLE, PaymentMethod, Currency
 from bot.database.models.package import PackageType
-from bot.database.models.subscription import SubscriptionType, SubscriptionStatus, SubscriptionLimit
+from bot.database.models.subscription import (
+    Subscription,
+    SubscriptionType,
+    SubscriptionStatus,
+    SubscriptionLimit,
+    SubscriptionPeriod,
+)
 from bot.database.models.user import User, UserSettings
 from bot.database.operations.chat.getters import get_chats_by_user_id
 from bot.database.operations.chat.updaters import update_chat
@@ -18,6 +24,7 @@ from bot.database.operations.subscription.getters import get_last_subscription_b
 from bot.database.operations.subscription.updaters import update_subscription
 from bot.database.operations.user.getters import get_users
 from bot.database.operations.user.updaters import update_user
+from bot.helpers.billing.create_auto_payment import create_auto_payment
 from bot.helpers.senders.send_message_to_admins import send_message_to_admins
 from bot.locales.main import get_localization
 
@@ -60,7 +67,7 @@ async def update_user_monthly_limits(bot: Bot, user: User, batch: AsyncWriteBatc
 
 
 async def update_user_subscription(bot: Bot, user: User, batch: AsyncWriteBatch):
-    user_ref = firebase.db.collection("users").document(user.id)
+    user_ref = firebase.db.collection(User.COLLECTION_NAME).document(user.id)
     current_date = datetime.now(timezone.utc)
     current_subscription = await get_last_subscription_by_user_id(user.id)
 
@@ -69,22 +76,93 @@ async def update_user_subscription(bot: Bot, user: User, batch: AsyncWriteBatch)
         current_subscription.end_date <= current_date and
         current_subscription.status != SubscriptionStatus.FINISHED
     ):
-        current_subscription.status = SubscriptionStatus.FINISHED
-        user.subscription_type = SubscriptionType.FREE
-        user.monthly_limits = SubscriptionLimit.LIMITS[SubscriptionType.FREE]
+        if current_subscription.provider_auto_payment_charge_id:
+            if current_subscription.payment_method == PaymentMethod.YOOKASSA:
+                payment = await create_auto_payment(
+                    current_subscription.payment_method,
+                    current_subscription.provider_auto_payment_charge_id,
+                    current_subscription.user_id,
+                    get_localization(user.interface_language_code).payment_description_renew_subscription(
+                        current_subscription.user_id,
+                        current_subscription.type,
+                    ),
+                    Subscription.get_price(
+                        Currency.RUB,
+                        current_subscription.type,
+                        SubscriptionPeriod.MONTH1,
+                        0,
+                    )[1],
+                )
+                if not payment:
+                    current_subscription.status = SubscriptionStatus.FINISHED
+                    user.subscription_type = SubscriptionType.FREE
+                    user.monthly_limits = SubscriptionLimit.LIMITS[SubscriptionType.FREE]
 
-        await update_subscription(current_subscription.id, {"status": current_subscription.status})
-        batch.update(user_ref, {
-            "subscription_type": user.subscription_type,
-            "monthly_limits": user.monthly_limits,
-            "last_subscription_limit_update": current_date,
-            "edited_at": current_date,
-        })
+                    await update_subscription(current_subscription.id, {"status": current_subscription.status})
+                    batch.update(user_ref, {
+                        "subscription_type": user.subscription_type,
+                        "monthly_limits": user.monthly_limits,
+                        "last_subscription_limit_update": current_date,
+                        "edited_at": current_date,
+                    })
 
-        await bot.send_message(
-            chat_id=user.telegram_chat_id,
-            text=get_localization(user.language_code).SUBSCRIPTION_END,
-        )
+                    await bot.send_message(
+                        chat_id=user.telegram_chat_id,
+                        text=get_localization(user.interface_language_code).SUBSCRIPTION_END,
+                    )
+                return user
+            elif current_subscription.payment_method == PaymentMethod.PAY_SELECTION:
+                payment = await create_auto_payment(
+                    current_subscription.payment_method,
+                    current_subscription.provider_auto_payment_charge_id,
+                    current_subscription.user_id,
+                    get_localization(user.interface_language_code).payment_description_renew_subscription(
+                        current_subscription.user_id,
+                        current_subscription.type,
+                    ),
+                    Subscription.get_price(
+                        Currency.USD,
+                        current_subscription.type,
+                        SubscriptionPeriod.MONTH1,
+                        0,
+                    )[1],
+                    current_subscription.provider_auto_payment_charge_id,
+                )
+                if not payment:
+                    current_subscription.status = SubscriptionStatus.FINISHED
+                    user.subscription_type = SubscriptionType.FREE
+                    user.monthly_limits = SubscriptionLimit.LIMITS[SubscriptionType.FREE]
+
+                    await update_subscription(current_subscription.id, {"status": current_subscription.status})
+                    batch.update(user_ref, {
+                        "subscription_type": user.subscription_type,
+                        "monthly_limits": user.monthly_limits,
+                        "last_subscription_limit_update": current_date,
+                        "edited_at": current_date,
+                    })
+
+                    await bot.send_message(
+                        chat_id=user.telegram_chat_id,
+                        text=get_localization(user.interface_language_code).SUBSCRIPTION_END,
+                    )
+        else:
+            current_subscription.status = SubscriptionStatus.FINISHED
+            user.subscription_type = SubscriptionType.FREE
+            user.monthly_limits = SubscriptionLimit.LIMITS[SubscriptionType.FREE]
+
+            await update_subscription(current_subscription.id, {"status": current_subscription.status})
+            batch.update(user_ref, {
+                "subscription_type": user.subscription_type,
+                "monthly_limits": user.monthly_limits,
+                "last_subscription_limit_update": current_date,
+                "edited_at": current_date,
+            })
+
+            await bot.send_message(
+                chat_id=user.telegram_chat_id,
+                text=get_localization(user.interface_language_code).SUBSCRIPTION_END,
+            )
+
         return user
 
     is_time_to_update_limits = (current_date - user.last_subscription_limit_update).days >= 30
@@ -96,7 +174,7 @@ async def update_user_subscription(bot: Bot, user: User, batch: AsyncWriteBatch)
         })
         await bot.send_message(
             chat_id=user.telegram_chat_id,
-            text=get_localization(user.language_code).SUBSCRIPTION_RESET,
+            text=get_localization(user.interface_language_code).SUBSCRIPTION_RESET,
         )
 
     return user
@@ -113,7 +191,7 @@ async def update_user_additional_usage_quota(bot: Bot, user: User, had_subscript
             need_update = True
 
     if need_update:
-        user_ref = firebase.db.collection("users").document(user.id)
+        user_ref = firebase.db.collection(User.COLLECTION_NAME).document(user.id)
         current_date = datetime.now(timezone.utc)
 
         packages = await get_packages_by_user_id(user.id)
@@ -144,7 +222,7 @@ async def update_user_additional_usage_quota(bot: Bot, user: User, had_subscript
         if not had_subscription and count_active_packages_before > count_active_packages_after:
             await bot.send_message(
                 chat_id=user.telegram_chat_id,
-                text=get_localization(user.language_code).PACKAGES_END,
+                text=get_localization(user.interface_language_code).PACKAGES_END,
             )
 
 
@@ -162,5 +240,5 @@ async def reset_user_chats(user: User, bot: Bot):
     if need_to_send_message:
         await bot.send_message(
             chat_id=user.telegram_chat_id,
-            text=get_localization(user.language_code).CHATS_RESET,
+            text=get_localization(user.interface_language_code).CHATS_RESET,
         )

@@ -215,6 +215,7 @@ async def handle_claude(message: Message, state: FSMContext, user: User, user_qu
                 type=TransactionType.EXPENSE,
                 service=service,
                 amount=total_price,
+                clear_amount=total_price,
                 currency=Currency.USD,
                 quantity=1,
                 details={
@@ -223,6 +224,7 @@ async def handle_claude(message: Message, state: FSMContext, user: User, user_qu
                     "request": text,
                     "answer": message_content,
                     "is_suggestion": False,
+                    "has_error": False,
                 },
             )
 
@@ -391,6 +393,7 @@ async def handle_claude_3_opus_example(
                 type=TransactionType.EXPENSE,
                 service=service,
                 amount=total_price,
+                clear_amount=total_price,
                 currency=Currency.USD,
                 quantity=1,
                 details={
@@ -399,6 +402,7 @@ async def handle_claude_3_opus_example(
                     "request": prompt,
                     "answer": message_content,
                     "is_suggestion": True,
+                    "has_error": False,
                 },
             )
 

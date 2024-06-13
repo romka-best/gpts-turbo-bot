@@ -6,6 +6,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery, URLInputFile
 
 from bot.database.main import firebase
+from bot.database.models.common import PaymentMethod
 from bot.database.models.package import PackageType, Package, PackageStatus
 from bot.database.models.transaction import TransactionType
 from bot.database.operations.feedback.getters import get_feedbacks_by_user_id
@@ -106,7 +107,7 @@ async def quantity_of_bonus_package_sent(message: Message, state: FSMContext):
         user_data = await state.get_data()
         package_type = user_data['package_type']
         package_quantity = int(message.text)
-        price = Package.get_price(user.currency, package_type, package_quantity)
+        price = Package.get_price(user.currency, package_type, package_quantity, 0)
         if price > user.balance:
             reply_markup = build_cancel_keyboard(user_language_code)
             await message.reply(
@@ -124,12 +125,16 @@ async def quantity_of_bonus_package_sent(message: Message, state: FSMContext):
                 current_date = datetime.now(timezone.utc)
                 until_at = current_date + timedelta(days=30 * package_quantity)
             package = await write_package(
+                None,
                 user_id,
                 package_type,
                 PackageStatus.SUCCESS,
                 user.currency,
                 0,
+                0,
                 package_quantity,
+                PaymentMethod.GIFT,
+                None,
                 until_at,
             )
 
@@ -146,9 +151,11 @@ async def quantity_of_bonus_package_sent(message: Message, state: FSMContext):
                 type=TransactionType.INCOME,
                 service=service_type,
                 amount=0,
+                clear_amount=0,
                 currency=user.currency,
                 quantity=package_quantity,
                 details={
+                    'payment_method': PaymentMethod.GIFT,
                     'package_id': package.id,
                     'provider_payment_charge_id': "",
                     'is_bonus': True,

@@ -1,4 +1,5 @@
-from typing import Optional
+from datetime import datetime
+from typing import Optional, List
 
 from google.cloud.firestore_v1 import FieldFilter
 
@@ -24,7 +25,7 @@ async def get_promo_code_by_name(promo_code_name: str) -> Optional[PromoCode]:
         return PromoCode(**doc.to_dict())
 
 
-async def get_used_promo_code_by_user_id_and_promo_code_id(user_id: str, promo_code_id) -> Optional[UsedPromoCode]:
+async def get_used_promo_code_by_user_id_and_promo_code_id(user_id: str, promo_code_id: str) -> Optional[UsedPromoCode]:
     used_promo_code_stream = firebase.db.collection(UsedPromoCode.COLLECTION_NAME) \
         .where(filter=FieldFilter("user_id", "==", user_id)) \
         .where(filter=FieldFilter("promo_code_id", "==", promo_code_id)) \
@@ -33,3 +34,21 @@ async def get_used_promo_code_by_user_id_and_promo_code_id(user_id: str, promo_c
 
     async for doc in used_promo_code_stream:
         return UsedPromoCode(**doc.to_dict())
+
+
+async def get_used_promo_codes(
+    start_date: Optional[datetime] = None,
+    end_date: Optional[datetime] = None,
+) -> List[UsedPromoCode]:
+    used_promo_code_query = firebase.db.collection(UsedPromoCode.COLLECTION_NAME)
+
+    if start_date:
+        used_promo_code_query = used_promo_code_query.where(filter=FieldFilter("created_at", ">=", start_date))
+    if end_date:
+        used_promo_code_query = used_promo_code_query.where(filter=FieldFilter("created_at", "<=", end_date))
+
+    used_promo_codes = used_promo_code_query.stream()
+
+    return [
+        UsedPromoCode(**used_promo_code.to_dict()) async for used_promo_code in used_promo_codes
+    ]

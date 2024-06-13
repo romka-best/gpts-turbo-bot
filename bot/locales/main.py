@@ -4,6 +4,7 @@ from aiogram.fsm.storage.base import BaseStorage
 
 from . import en, ru
 from .texts import Texts
+from ..database.operations.user.updaters import update_user
 
 localization_classes: Dict[str, Type[Texts]] = {
     'en': en.English,
@@ -17,6 +18,13 @@ async def set_user_language(user_id: str, language_code: str, storage: BaseStora
 
     key = f"user:{user_id}:language"
     await storage.redis.set(key, language_code)
+
+    await update_user(
+        user_id,
+        {
+            "interface_language_code": language_code,
+        }
+    )
 
 
 async def get_user_language(user_id: str, storage: BaseStorage) -> str:

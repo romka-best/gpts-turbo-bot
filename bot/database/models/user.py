@@ -10,7 +10,10 @@ from bot.database.models.common import (
     DALLEQuality,
     DALLEVersion,
     MidjourneyVersion,
+    FaceSwapVersion,
+    MusicGenVersion,
     SunoSendType,
+    SunoVersion,
 )
 from bot.database.models.subscription import SubscriptionType, SubscriptionLimit
 
@@ -43,6 +46,7 @@ class User:
     current_chat_id: str
     telegram_chat_id: str
     language_code: str
+    interface_language_code: str
     gender: UserGender
     is_premium: bool
     is_blocked: bool
@@ -106,13 +110,16 @@ class User:
         },
         Model.FACE_SWAP: {
             UserSettings.SHOW_USAGE_QUOTA: True,
+            UserSettings.VERSION: FaceSwapVersion.LATEST,
         },
         Model.MUSIC_GEN: {
             UserSettings.SHOW_USAGE_QUOTA: True,
+            UserSettings.VERSION: MusicGenVersion.LATEST,
         },
         Model.SUNO: {
             UserSettings.SHOW_USAGE_QUOTA: True,
             UserSettings.SEND_TYPE: SunoSendType.VIDEO,
+            UserSettings.VERSION: SunoVersion.V3_5,
         },
     }
 
@@ -126,6 +133,7 @@ class User:
         telegram_chat_id: str,
         gender=UserGender.UNSPECIFIED,
         language_code="en",
+        interface_language_code="en",
         is_premium=False,
         is_blocked=False,
         is_banned=False,
@@ -148,6 +156,7 @@ class User:
         self.username = username
         self.gender = gender
         self.language_code = language_code
+        self.interface_language_code = interface_language_code
         self.is_premium = is_premium
         self.is_blocked = is_blocked
         self.is_banned = is_banned

@@ -2,9 +2,10 @@ import random
 from typing import List, Dict
 
 from bot.locales.texts import Texts
-from bot.database.models.common import Currency, Quota, Model, ChatGPTVersion, ClaudeGPTVersion
+from bot.database.models.common import Currency, Quota, Model, ChatGPTVersion, ClaudeGPTVersion, PaymentType
 from bot.database.models.package import PackageType, Package
-from bot.database.models.subscription import Subscription, SubscriptionType, SubscriptionPeriod, SubscriptionLimit
+from bot.database.models.subscription import Subscription, SubscriptionType, SubscriptionPeriod, SubscriptionLimit, \
+    SubscriptionStatus
 from bot.database.models.user import UserGender
 
 
@@ -259,6 +260,10 @@ class Russian(Texts):
     OPEN_BONUS_INFO = "🎁 Перейти к бонусному балансу"
     OPEN_BUY_SUBSCRIPTIONS_INFO = "💎 Оформить подписку"
     OPEN_BUY_PACKAGES_INFO = "🛍 Приобрести индивидуальные пакеты"
+    CANCEL_SUBSCRIPTION = "❌ Отменить подписку"
+    CANCEL_SUBSCRIPTION_CONFIRMATION = "❗Вы уверены, что хотите отменить подписку?"
+    CANCEL_SUBSCRIPTION_SUCCESS = "💸 Отмена подписки прошла успешно!"
+    NO_ACTIVE_SUBSCRIPTION = "💸 У вас нет активной подписки"
 
     # Language
     LANGUAGE = "Язык:"
@@ -584,6 +589,18 @@ class Russian(Texts):
 
 Выберите нажав на кнопку ниже 👇
 """
+    CHANGE_CURRENCY = "💱 Изменить валюту"
+    YOOKASSA_PAYMENT_METHOD = "🪆💳 ЮKassa"
+    PAY_SELECTION_PAYMENT_METHOD = "🌍💳 PaySelection"
+    TELEGRAM_STARS_PAYMENT_METHOD = "✈️⭐️ Telegram Stars"
+    CHOOSE_PAYMENT_METHOD = """
+<b>Выберите способ оплаты:</b>
+
+🪆💳 <b>ЮKassa (РФ Карты)</b>
+
+🌍💳 <b>PaySelection (Международные карты)</b>
+"""
+    PROCEED_TO_PAY = "🌐 Перейти к оплате"
 
     # Subscription
     MONTH_1 = "1 месяц"
@@ -682,7 +699,7 @@ class Russian(Texts):
     ANSWERS_AND_REQUESTS_WITH_VOICE_MESSAGES_DESCRIPTION = "Ощутите удобство и простоту голосового общения с нашим AI: отправляйте и получайте голосовые сообщения для более динамичного и выразительного взаимодействия"
     FAST_ANSWERS = "⚡ Быстрые ответы"
     FAST_ANSWERS_DESCRIPTION = "Функция 'Быстрые ответы' предлагает мгновенные, точные ответы AI, обеспечивая ваше преимущество в общении"
-    MIN_ERROR = "Ой! Кажется, сумма меньше нашего минимального порога, 100₽. Пожалуйста, выберите количество пакетов, соответствующее или превышающее минимальную требуемую сумму. Давайте попробуем еще раз! 🔄"
+    MIN_ERROR = "Ой! Кажется, сумма меньше нашего минимального порога. Пожалуйста, выберите количество пакетов, соответствующее или превышающее минимальную требуемую сумму. Давайте попробуем еще раз! 🔄"
     MAX_ERROR = "Ой! Кажется, введенное число выше, чем вы можете приобрести. Пожалуйста, введите значение поменьше или соответствующее вашему балансу. Давайте попробуем еще раз! 🔄"
     VALUE_ERROR = """
 Упс! Похоже, это не число 🤔
@@ -842,16 +859,21 @@ class Russian(Texts):
     @staticmethod
     def profile(
         subscription_type,
+        subscription_status,
         gender,
         current_model,
         current_model_version,
         monthly_limits,
         additional_usage_quota,
         renewal_date,
-        discount,
         credits,
     ) -> str:
         emojis = Subscription.get_emojis()
+
+        if subscription_status == SubscriptionStatus.CANCELED:
+            subscription_info = f"📫 <b>Статус подписки:</b> Отменена. Действует до {renewal_date}"
+        else:
+            subscription_info = "📫 <b>Статус подписки:</b> Активна"
 
         if gender == UserGender.MALE:
             gender_info = f"<b>Пол:</b> {Russian.MALE}"
@@ -893,6 +915,9 @@ class Russian(Texts):
 
 {emojis[subscription_type]} <b>Тип подписки:</b> {subscription_type}
 🗓 <b>Дата обновления подписки:</b> {renewal_date}
+{subscription_info}
+
+---------------------------
 
 Квота:
 ━ ✉️ <b>ChatGPT-3.5 Turbo</b>:
@@ -935,18 +960,23 @@ class Russian(Texts):
 🪙 <b>Бонусный баланс:</b> {credits}
 """
 
+    # Payment
     @staticmethod
-    def subscribe(currency: Currency):
-        prices = Subscription.get_prices(currency)
+    def payment_description_subscription(user_id: str, subscription_type: SubscriptionType):
+        return f"Оплата подписки {subscription_type} для пользователя: {user_id}"
 
+    @staticmethod
+    def payment_description_renew_subscription(user_id: str, subscription_type: SubscriptionType):
+        return f"Обновление подписки {subscription_type} для пользователя: {user_id}"
+
+    @staticmethod
+    def subscribe(currency: Currency, min_prices: Dict):
         return f"""
 🤖 Готовы ускорить своё цифровое путешествие? Вот, что мы предлагаем:
 
-- <b>STANDARD</b> ⭐: от {prices[SubscriptionType.STANDARD]}
-- <b>VIP</b> 🔥: от {prices[SubscriptionType.VIP]}
-- <b>PREMIUM</b> 💎: от {prices[SubscriptionType.PREMIUM]}
-
-P.S. На данный момент оплата в боте доступна только в рублях, так как мы пока находимся в процессе интеграции других валют, но вы можете посетить нашу платежную страницу и произвести оплату в других валютах прямо здесь: https://app.lava.top/ru/gptsturbobot
+- <b>STANDARD</b> ⭐: {min_prices[SubscriptionType.STANDARD]}{Currency.SYMBOLS[currency]}/месяц
+- <b>VIP</b> 🔥: {min_prices[SubscriptionType.VIP]}{Currency.SYMBOLS[currency]}/месяц
+- <b>PREMIUM</b> 💎: {min_prices[SubscriptionType.PREMIUM]}{Currency.SYMBOLS[currency]}/месяц
 
 Выберите свой вариант и нажмите кнопку ниже, чтобы подписаться:
 """
@@ -971,18 +1001,54 @@ P.S. На данный момент оплата в боте доступна т
         }
 
     @staticmethod
-    def confirmation_subscribe(subscription_type: SubscriptionType, subscription_period: SubscriptionPeriod):
-        cycles = Russian.cycles_subscribe()
+    def confirmation_subscribe(subscription_type: SubscriptionType, currency: Currency, price: float):
+        return f"""
+Вы собираетесь активировать подписку {subscription_type} {Subscription.get_emojis()[subscription_type]} за {price}{Currency.SYMBOLS[currency]}/месяц
 
-        return f"Вы собираетесь активировать подписку на {cycles[subscription_period]}."
+❗️Подписку можно отменить в любое время в разделе <b>Профиль 👤</b>
+"""
 
     # Package
     @staticmethod
-    def package(currency: Currency):
+    def payment_description_package(user_id: str, package_name: str, package_quantity: int):
+        return f"Оплата {package_quantity} пакета(-ов) {package_name} для пользователя: {user_id}"
+
+    @staticmethod
+    def payment_description_cart(user_id: str):
+        return f"Оплата пакетов из корзины для пользователя: {user_id}"
+
+    @staticmethod
+    def package(currency: Currency, page: int):
         if currency == Currency.RUB:
             balance = f"1{Currency.SYMBOLS[currency]}"
         else:
             balance = f"{Currency.SYMBOLS[currency]}0.01"
+
+        if page == 0:
+            description = (
+                "🧠 <b>ChatGPT</b>: Погрузитесь в глубокие, заставляющие задуматься разговоры!\n\n"
+                "🚀 <b>Claude</b>: Вступите в диалоги, которые расширяют горизонты мышления!\n\n"
+                "💬 <b>Тематические чаты</b>: Погрузитесь в специализированные темы и исследуйте посвящённые им чаты\n\n"
+                "🎭 <b>Доступ к каталогу ролей</b>: Нужен определённый ассистент? Просмотрите нашу коллекцию и найдите своё идеальное сочетание ИИ"
+            )
+        elif page == 1:
+            description = (
+                "🖼 <b>DALL-E</b>: Превращайте идеи в потрясающие визуализации!\n\n"
+                "🎨 <b>Midjourney</b>: Воплощайте идеи в невероятные реалистичные изображения!\n\n"
+                "👤 <b>FaceSwap</b>: Играйте с идентичностью на изображениях!"
+            )
+        elif page == 2:
+            description = (
+                "🎵 <b>MusicGen</b>: Создавайте уникальные мелодии, которые будут принадлежать только вам!\n\n"
+                "🎸 <b>Suno</b>: Создавайте оригинальные песни с вашим текстом и в разных жанрах!"
+            )
+        elif page == 3:
+            description = (
+                "🗣️ <b>Голосовые сообщения</b>: Говорите вслух! Общение с ИИ ещё никогда не звучало так хорошо\n\n"
+                "⚡ <b>Быстрые сообщения</b>: Быстро, эффективно и всегда точно. Общение с ИИ на скорости молнии"
+            )
+        else:
+            description = ""
 
         return f"""
 🤖 <b>Добро пожаловать в зону покупок!</b> 🛍
@@ -990,27 +1056,7 @@ P.S. На данный момент оплата в боте доступна т
 🪙 <b>1 кредит = {balance}</b>
 
 Каждое нажатие кнопки открывает мир чудес ИИ:
-🧠 <b>ChatGPT</b>: Погрузитесь в глубокие, заставляющие задуматься разговоры!
-
-🚀 <b>Claude</b>: Вступите в диалоги, которые расширяют горизонты мышления!
-
-🖼 <b>DALL-E</b>: Превращайте идеи в потрясающие визуализации!
-
-🎨 <b>Midjourney</b>: Воплощайте идеи в невероятные реалистичные изображения!
-
-👤 <b>FaceSwap</b>: Играйте с идентичностью на изображениях!
-
-🎵 <b>MusicGen</b>: Создавайте уникальные мелодии, которые будут принадлежать только вам!
-
-🎸 <b>Suno</b>: Создавайте оригинальные песни с вашим текстом и в разных жанрах!
-
-🗣️ <b>Голосовые сообщения</b>: Говорите вслух! Общение с ИИ ещё никогда не звучало так хорошо
-
-💬 <b>Тематические чаты</b>: Погрузитесь в специализированные темы и исследуйте посвящённые им чаты
-
-🎭 <b>Доступ к каталогу ролей</b>: Нужен определённый ассистент? Просмотрите нашу коллекцию и найдите своё идеальное сочетание ИИ
-
-⚡ <b>Быстрые сообщения</b>: Быстро, эффективно и всегда точно. Общение с ИИ на скорости молнии
+{description}
 
 Нажмите кнопку, чтобы выбрать пакет:
 """
@@ -1076,7 +1122,7 @@ P.S. На данный момент оплата в боте доступна т
 """
 
     @staticmethod
-    def shopping_cart(currency: Currency, cart_items: List[Dict]):
+    def shopping_cart(currency: Currency, cart_items: List[Dict], discount: int):
         text = ""
         total_sum = 0.0
         for index, cart_item in enumerate(cart_items):
@@ -1085,7 +1131,7 @@ P.S. На данный момент оплата в боте доступна т
             name, quantity = Russian.get_package_name_and_quantity_by_package_type(package_type)
 
             text += f"{index + 1}. {name} ({package_quantity} {quantity})\n"
-            total_sum += Package.get_price(currency, package_type, package_quantity)
+            total_sum += Package.get_price(currency, package_type, package_quantity, discount)
 
         if currency == Currency.USD:
             total_sum = f"{Currency.SYMBOLS[currency]}{total_sum}"
@@ -1101,6 +1147,32 @@ P.S. На данный момент оплата в боте доступна т
 {text}
 
 💳 К оплате: {total_sum}
+"""
+
+    @staticmethod
+    def confirmation_package(package_name: str, package_quantity: int, currency: Currency, price: float) -> str:
+        return f"Вы собираетесь купить {package_quantity} пакет(-ов) <b>{package_name}</b> за {price}{Currency.SYMBOLS[currency]}"
+
+    @staticmethod
+    def confirmation_cart(cart_items: List[Dict], currency: Currency, price: float) -> str:
+        text = ""
+        for index, cart_item in enumerate(cart_items):
+            package_type, package_quantity = cart_item.get("package_type", None), cart_item.get("quantity", 0)
+
+            name, quantity = Russian.get_package_name_and_quantity_by_package_type(package_type)
+
+            text += f"{index + 1}. {name} ({package_quantity} {quantity})\n"
+
+        if currency == Currency.USD:
+            total_sum = f"{Currency.SYMBOLS[currency]}{price}"
+        else:
+            total_sum = f"{price}{Currency.SYMBOLS[currency]}"
+
+        return f"""
+Вы собираетесь купить следующие пакеты из вашей корзины:
+{text}
+
+К оплате {total_sum}
 """
 
     # Chats

@@ -3,7 +3,7 @@ import re
 from datetime import datetime, timezone
 from typing import List, Dict
 
-from bot.database.models.common import Currency, Quota
+from bot.database.models.common import Currency, Quota, PaymentMethod
 from bot.database.models.transaction import ServiceType
 
 
@@ -41,6 +41,7 @@ class PackageStatus:
     SUCCESS = 'SUCCESS'
     WAITING = 'WAITING'
     CANCELED = 'CANCELED'
+    DECLINED = 'DECLINED'
     ERROR = 'ERROR'
 
 
@@ -53,7 +54,9 @@ class Package:
     type: PackageType
     currency: Currency
     amount: float
+    income_amount: float
     quantity: int
+    payment_method: PaymentMethod
     provider_payment_charge_id: str
     until_at: datetime
     created_at: datetime
@@ -72,7 +75,9 @@ class Package:
         status: PackageStatus,
         currency: Currency,
         amount: float,
-        quantity: int,
+        income_amount=0.00,
+        quantity=1,
+        payment_method=PaymentMethod.YOOKASSA,
         provider_payment_charge_id="",
         until_at=None,
         created_at=None,
@@ -84,7 +89,9 @@ class Package:
         self.status = status
         self.currency = currency
         self.amount = amount
+        self.income_amount = income_amount
         self.quantity = quantity
+        self.payment_method = payment_method
         self.provider_payment_charge_id = provider_payment_charge_id
         self.until_at = until_at
 
@@ -148,13 +155,20 @@ class Package:
         return prices
 
     @staticmethod
-    def get_price(currency: Currency, package_type: PackageType, quantity: int):
+    def get_price(
+        currency: Currency,
+        package_type: PackageType,
+        quantity: int,
+        user_discount: int,
+    ):
         prices = Package.get_prices(currency)
         price_raw = prices[package_type]
         price_clear = re.sub(r'[^\d.]', '', price_raw)
         price = float(price_clear) if '.' in price_clear else int(price_clear)
 
-        return int(quantity * price)
+        price_with_discount = price * quantity - (price * quantity * (user_discount / 100.0))
+
+        return price_with_discount
 
     @staticmethod
     def get_translate_name_and_description(localization, package_type: str):

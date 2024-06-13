@@ -39,6 +39,7 @@ class Transaction:
     type: TransactionType
     service: ServiceType
     amount: float
+    clear_amount: float
     currency: Currency
     quantity: int
     details: dict
@@ -52,6 +53,7 @@ class Transaction:
         type: TransactionType,
         service: ServiceType,
         amount: float,
+        clear_amount: float,
         currency: Currency,
         quantity=1,
         details=None,
@@ -63,6 +65,7 @@ class Transaction:
         self.type = type
         self.service = service
         self.amount = amount
+        self.clear_amount = clear_amount
         self.currency = currency
         self.quantity = quantity
         self.details = {} if details is None else details

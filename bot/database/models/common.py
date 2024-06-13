@@ -83,6 +83,14 @@ class MidjourneyAction:
     REROLL = "reroll"
 
 
+class FaceSwapVersion:
+    LATEST = 'LATEST'
+
+
+class MusicGenVersion:
+    LATEST = 'LATEST'
+
+
 class SunoMode:
     SIMPLE = "SIMPLE"
     CUSTOM = "CUSTOM"
@@ -93,10 +101,24 @@ class SunoSendType:
     AUDIO = "AUDIO"
 
 
+class SunoVersion:
+    V3 = 'chirp-v3-0'
+    V3_5 = 'chirp-v3-5'
+
+
 class PaymentType:
     SUBSCRIPTION = 'SUBSCRIPTION'
     PACKAGE = 'PACKAGE'
     CART = 'CART'
+
+
+class PaymentMethod:
+    YOOKASSA = 'YOOKASSA'
+    PAY_SELECTION = 'PAY_SELECTION'
+    STRIPE = 'STRIPE'
+    TELEGRAM_STARS = 'TELEGRAM_STARS'
+    CRYPTO = 'CRYPTO'
+    GIFT = 'GIFT'
 
 
 DEFAULT_ROLE = "PERSONAL_ASSISTANT"

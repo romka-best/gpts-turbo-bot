@@ -4,7 +4,8 @@ from typing import List, Dict
 from bot.locales.texts import Texts
 from bot.database.models.common import Currency, Quota, Model, ChatGPTVersion, ClaudeGPTVersion
 from bot.database.models.package import PackageType, Package
-from bot.database.models.subscription import Subscription, SubscriptionType, SubscriptionPeriod, SubscriptionLimit
+from bot.database.models.subscription import Subscription, SubscriptionType, SubscriptionPeriod, SubscriptionLimit, \
+    SubscriptionStatus
 from bot.database.models.user import UserGender
 
 
@@ -258,6 +259,10 @@ Once you've got the perfect shot, <b>upload your photo</b> and let the magic hap
     OPEN_BONUS_INFO = "🎁 Open bonus balance"
     OPEN_BUY_SUBSCRIPTIONS_INFO = "💎 Subscribe"
     OPEN_BUY_PACKAGES_INFO = "🛍 Purchase individual packages"
+    CANCEL_SUBSCRIPTION = "❌ Cancel subscription"
+    CANCEL_SUBSCRIPTION_CONFIRMATION = "❗Are you sure you want to cancel the subscription?"
+    CANCEL_SUBSCRIPTION_SUCCESS = "💸 Subscription cancellation was successful!"
+    NO_ACTIVE_SUBSCRIPTION = "💸 You don't have an active subscription"
 
     # Language
     LANGUAGE = "Language:"
@@ -580,6 +585,18 @@ Looking for a targeted solution for a one-time project? Our Package provides the
 
 Choose by clicking a button below 👇
 """
+    CHANGE_CURRENCY = "💱 Change currency"
+    YOOKASSA_PAYMENT_METHOD = "🪆💳 YooKassa"
+    PAY_SELECTION_PAYMENT_METHOD = "🌍💳 PaySelection"
+    TELEGRAM_STARS_PAYMENT_METHOD = "✈️⭐️ Telegram Stars"
+    CHOOSE_PAYMENT_METHOD = """
+<b>Choose a payment method:</b>
+
+🪆💳 <b>YooKassa (Russian's Cards)</b>
+
+🌍💳 <b>PaySelection (International Cards)</b>
+"""
+    PROCEED_TO_PAY = "🌐 Proceed to payment"
 
     # Subscription
     MONTH_1 = "1 month"
@@ -678,7 +695,7 @@ Your chats have switched their unique roles to "Personal Assistant" as your acce
     ANSWERS_AND_REQUESTS_WITH_VOICE_MESSAGES_DESCRIPTION = "Experience the ease and convenience of voice communication with our AI: Send and receive voice messages for a more dynamic and expressive interaction"
     FAST_ANSWERS = "⚡ Fast answers"
     FAST_ANSWERS_DESCRIPTION = "Quick Messages feature offers lightning-fast, accurate AI responses, ensuring you're always a step ahead in communication"
-    MIN_ERROR = "Oops! It looks like the total sum is below our minimum threshold, 100₽. Please choose count of packages that meets or exceeds the minimum required. Let's try that again! 🔄"
+    MIN_ERROR = "Oops! It looks like the total sum is below our minimum threshold. Please choose count of packages that meets or exceeds the minimum required. Let's try that again! 🔄"
     MAX_ERROR = "Oops! It looks like the number entered is higher than you can purchase. Please enter a smaller value or one corresponding to your balance. Let's try that again! 🔄"
     VALUE_ERROR = """
 Whoops! That doesn't seem like a number 🤔
@@ -837,16 +854,21 @@ Please try again 🥺
     @staticmethod
     def profile(
         subscription_type,
+        subscription_status,
         gender,
         current_model,
         current_model_version,
         monthly_limits,
         additional_usage_quota,
         renewal_date,
-        discount,
         credits,
     ) -> str:
         emojis = Subscription.get_emojis()
+
+        if subscription_status == SubscriptionStatus.CANCELED:
+            subscription_info = f"📫 <b>Subscription Status:</b> Canceled. Active until {renewal_date}"
+        else:
+            subscription_info = "📫 <b>Subscription Status:</b> Active"
 
         if gender == UserGender.MALE:
             gender_info = f"<b>Gender:</b> {English.MALE}"
@@ -888,6 +910,9 @@ Please try again 🥺
 
 {emojis[subscription_type]} <b>Subscription type:</b> {subscription_type}
 🗓 <b>Subscription renewal date:</b> {renewal_date}
+{subscription_info}
+
+---------------------------
 
 Quota:
 ━ ✉️ <b>ChatGPT-3.5 Turbo</b>:
@@ -930,18 +955,23 @@ Quota:
 🪙 <b>Quantity of bonus credits:</b> {credits}
 """
 
+    # Payment
     @staticmethod
-    def subscribe(currency: Currency):
-        prices = Subscription.get_prices(currency)
+    def payment_description_subscription(user_id: str, subscription_type: SubscriptionType):
+        return f"Paying a subscription {subscription_type} for user: {user_id}"
 
+    @staticmethod
+    def payment_description_renew_subscription(user_id: str, subscription_type: SubscriptionType):
+        return f"Renewing a subscription {subscription_type} for user: {user_id}"
+
+    @staticmethod
+    def subscribe(currency: Currency, min_prices: Dict):
         return f"""
 🤖 Ready to supercharge your digital journey? Here's what's on the menu:
 
-- <b>STANDARD</b> ⭐: from {prices[SubscriptionType.STANDARD]}
-- <b>VIP</b> 🔥: from {prices[SubscriptionType.VIP]}
-- <b>PREMIUM</b> 💎: from {prices[SubscriptionType.PREMIUM]}
-
-P.S. We're in the process of integrating more currency options directly in our bot, but you can visit our payment page and pay in different currencies just right here: https://app.lava.top/en/gptsturbobot
+- <b>STANDARD</b> ⭐: {min_prices[SubscriptionType.STANDARD]}{Currency.SYMBOLS[currency]}/month
+- <b>VIP</b> 🔥: {min_prices[SubscriptionType.VIP]}{Currency.SYMBOLS[currency]}/month
+- <b>PREMIUM</b> 💎: {min_prices[SubscriptionType.PREMIUM]}{Currency.SYMBOLS[currency]}/month
 
 Pick your potion and hit the button below to subscribe:
 """
@@ -966,18 +996,54 @@ Please select the subscription period by clicking on the button:
         }
 
     @staticmethod
-    def confirmation_subscribe(subscription_type: SubscriptionType, subscription_period: SubscriptionPeriod):
-        cycles = English.cycles_subscribe()
+    def confirmation_subscribe(subscription_type: SubscriptionType, currency: Currency, price: float):
+        return f"""
+You're about to activate subscription {subscription_type} {Subscription.get_emojis()[subscription_type]} for {price}{Currency.SYMBOLS[currency]}/month
 
-        return f"You're about to activate your subscription for {cycles[subscription_period]}."
+❗️You can cancel your subscription at any time in <b>Profile 👤</b>
+"""
 
     # Package
     @staticmethod
-    def package(currency: Currency):
+    def payment_description_package(user_id: str, package_name: str, package_quantity: int):
+        return f"Paying {package_quantity} package(-s) {package_name} for user: {user_id}"
+
+    @staticmethod
+    def payment_description_cart(user_id: str):
+        return f"Paying packages from the cart for user: {user_id}"
+
+    @staticmethod
+    def package(currency: Currency, page: int):
         if currency == Currency.USD:
             balance = f"{Currency.SYMBOLS[currency]}0.01"
         else:
             balance = f"1{Currency.SYMBOLS[currency]}"
+
+        if page == 0:
+            description = (
+                "🧠 <b>ChatGPT</b>: Engage in deep, thought-provoking conversations!\n\n"
+                "🚀 <b>Claude</b>: Engage in dialogues that expand the horizons of thinking!\n\n"
+                "💬 <b>Thematic Chats</b>: Dive into specialized topics and explore dedicated chat realms\n\n"
+                "🎭 <b>Role Catalog Access</b>: Need a specific assistant? Browse our collection and find your perfect AI match"
+            )
+        elif page == 1:
+            description = (
+                "🖼 <b>DALL-E</b>: Transform ideas into stunning visuals!\n\n"
+                "🎨 <b>Midjourney</b>: Turn ideas into incredible realistic images!\n\n"
+                "👤 <b>FaceSwap</b>: Play with identities in images!"
+            )
+        elif page == 2:
+            description = (
+                "🎵 <b>Harmony with MusicGen</b>: Create unique melodies that will belong only to you!\n\n"
+                "🎸 <b>Creative with Suno</b>: Create original songs with your own lyrics in different genres!"
+            )
+        elif page == 3:
+            description = (
+                "🗣️ <b>Voice Messages</b>: Say it out loud! Chatting with AI has never sounded better\n\n"
+                "⚡ <b>Quick Messages</b>: Fast, efficient, and always on point. AI communication at lightning speed"
+            )
+        else:
+            description = ""
 
         return f"""
 🤖 <b>Welcome to the AI shopping spree!</b> 📦
@@ -985,27 +1051,7 @@ Please select the subscription period by clicking on the button:
 🪙 <b>1 credit = {balance}</b>
 
 Each button tap unlocks a world of AI wonders:
-🧠 <b>ChatGPT</b>: Engage in deep, thought-provoking conversations!
-
-🚀 <b>Claude</b>: Engage in dialogues that expand the horizons of thinking!
-
-🖼 <b>DALL-E</b>: Transform ideas into stunning visuals!
-
-🎨 <b>Midjourney</b>: Turn ideas into incredible realistic images!
-
-👤 <b>FaceSwap</b>: Play with identities in images!
-
-🎵 <b>Harmony with MusicGen</b>: Create unique melodies that will belong only to you!
-
-🎸 <b>Creative with Suno</b>: Create original songs with your own lyrics in different genres!
-
-🗣️ <b>Voice Messages</b>: Say it out loud! Chatting with AI has never sounded better
-
-💬 <b>Thematic Chats</b>: Dive into specialized topics and explore dedicated chat realms
-
-🎭 <b>Role Catalog Access</b>: Need a specific assistant? Browse our collection and find your perfect AI match
-
-⚡ <b>Quick Messages</b>: Fast, efficient, and always on point. AI communication at lightning speed
+{description}
 
 Hit a button and choose a package:
 """
@@ -1071,7 +1117,7 @@ You've selected the <b>{name}</b> package
 """
 
     @staticmethod
-    def shopping_cart(currency: Currency, cart_items: List[Dict]):
+    def shopping_cart(currency: Currency, cart_items: List[Dict], discount: int):
         text = ""
         total_sum = 0.0
         for index, cart_item in enumerate(cart_items):
@@ -1080,7 +1126,7 @@ You've selected the <b>{name}</b> package
             name, quantity = English.get_package_name_and_quantity_by_package_type(package_type)
 
             text += f"{index + 1}. {name} ({package_quantity} {quantity})\n"
-            total_sum += Package.get_price(currency, package_type, package_quantity)
+            total_sum += Package.get_price(currency, package_type, package_quantity, discount)
 
         if currency == Currency.USD:
             total_sum = f"{Currency.SYMBOLS[currency]}{total_sum}"
@@ -1096,6 +1142,32 @@ You've selected the <b>{name}</b> package
 {text}
 
 💳 Total: {total_sum}
+"""
+
+    @staticmethod
+    def confirmation_package(package_name: str, package_quantity: int, currency: Currency, price: float) -> str:
+        return f"You're about to buy {package_quantity} package(-s) <b>{package_name}</b> for {price}{Currency.SYMBOLS[currency]}"
+
+    @staticmethod
+    def confirmation_cart(cart_items: List[Dict], currency: Currency, price: float) -> str:
+        text = ""
+        for index, cart_item in enumerate(cart_items):
+            package_type, package_quantity = cart_item.get("package_type", None), cart_item.get("quantity", 0)
+
+            name, quantity = English.get_package_name_and_quantity_by_package_type(package_type)
+
+            text += f"{index + 1}. {name} ({package_quantity} {quantity})\n"
+
+        if currency == Currency.USD:
+            total_sum = f"{Currency.SYMBOLS[currency]}{price}"
+        else:
+            total_sum = f"{price}{Currency.SYMBOLS[currency]}"
+
+        return f"""
+You're about to buy next packages from your cart:
+{text}
+
+To pay {total_sum}
 """
 
     # Chats
@@ -1391,11 +1463,11 @@ Looks like you've got only <b>{available_seconds} seconds</b> left in your arsen
 
     # Settings
     @staticmethod
-    def settings(human_model: str, current_model: Model, dalle_cost=1) -> str:
+    def settings(human_model: str, current_model: Model, dall_e_cost=1) -> str:
         if current_model == Model.CHAT_GPT:
-            additional_text = f"\n<b>Version ChatGPT-3.5</b>: {ChatGPTVersion.V3}\n<b>Version ChatGPT-4.0</b>: {ChatGPTVersion.V4}"
+            additional_text = f"\n<b>Version ChatGPT-3.5</b>: {ChatGPTVersion.V3_Turbo}\n<b>Version ChatGPT-4.0</b>: {ChatGPTVersion.V4_Turbo}\n<b>Version ChatGPT-4.0 Omni</b>: {ChatGPTVersion.V4_Omni}"
         elif current_model == Model.DALL_E:
-            additional_text = f"\nAt the current settings, 1 request costs: {dalle_cost} 🖼"
+            additional_text = f"\nAt the current settings, 1 request costs: {dall_e_cost} 🖼"
         else:
             additional_text = ""
 

@@ -20,7 +20,7 @@ from bot.database.models.common import (
     DALLEQuality,
     Model,
     MidjourneyVersion,
-    SunoSendType,
+    SunoSendType, SunoVersion,
 )
 from bot.database.models.user import UserSettings
 from bot.database.operations.chat.deleters import delete_chat, reset_chat
@@ -249,6 +249,9 @@ async def handle_setting_selection(callback_query: CallbackQuery, state: FSMCont
     elif chosen_setting == SunoSendType.AUDIO or chosen_setting == SunoSendType.VIDEO:
         user.settings[Model.SUNO][UserSettings.SEND_TYPE] = chosen_setting
         what_changed = UserSettings.SEND_TYPE
+    elif chosen_setting == SunoVersion.V3 or chosen_setting == SunoVersion.V3_5:
+        user.settings[Model.SUNO][UserSettings.VERSION] = chosen_setting
+        what_changed = UserSettings.VERSION
     else:
         user.settings[chosen_model][chosen_setting] = not user.settings[chosen_model][chosen_setting]
         what_changed = chosen_setting
@@ -271,6 +274,8 @@ async def handle_setting_selection(callback_query: CallbackQuery, state: FSMCont
                     callback_data == MidjourneyVersion.V5 or callback_data == MidjourneyVersion.V6
                 ) or (
                     callback_data == DALLEVersion.V2 or callback_data == DALLEVersion.V3
+                ) or (
+                    callback_data == SunoVersion.V3 or callback_data == SunoVersion.V3_5
                 ):
                     text = text.replace(" ✅", "")
             elif what_changed == UserSettings.QUALITY:

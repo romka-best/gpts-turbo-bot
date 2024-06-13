@@ -110,18 +110,21 @@ async def handle_replicate_face_swap(
             generation.details.get("used_face_swap_package_id")
         )
         if request.details.get("is_test"):
+            total_price = round(PRICE_FACE_SWAP * total_seconds, 6)
             update_tasks = [
                 write_transaction(
                     user_id=user.id,
                     type=TransactionType.EXPENSE,
                     service=ServiceType.FACE_SWAP,
-                    amount=round(PRICE_FACE_SWAP * total_seconds, 6),
+                    amount=total_price,
+                    clear_amount=total_price,
                     currency=Currency.USD,
                     quantity=total_result,
                     details={
                         'name': request.details.get("face_swap_package_name"),
                         'images': success_generations,
                         'seconds': total_seconds,
+                        'has_error': generation.has_error,
                     }),
             ]
         else:
@@ -137,18 +140,21 @@ async def handle_replicate_face_swap(
                 else:
                     break
 
+            total_price = round(PRICE_FACE_SWAP * total_seconds, 6)
             update_tasks = [
                 write_transaction(
                     user_id=user.id,
                     type=TransactionType.EXPENSE,
                     service=ServiceType.FACE_SWAP,
-                    amount=round(PRICE_FACE_SWAP * total_seconds, 6),
+                    amount=total_price,
+                    clear_amount=total_price,
                     currency=Currency.USD,
                     quantity=quantity_to_delete,
                     details={
                         'name': request.details.get("face_swap_package_name", "CUSTOM"),
                         'images': success_generations,
                         'seconds': total_seconds,
+                        'has_error': generation.has_error,
                     }
                 ),
                 update_user(user.id, {
@@ -228,18 +234,21 @@ async def handle_replicate_music_gen(
             else:
                 break
 
+        total_price = round(PRICE_MUSIC_GEN * generation.seconds, 6)
         update_tasks = [
             write_transaction(
                 user_id=user.id,
                 type=TransactionType.EXPENSE,
                 service=ServiceType.MUSIC_GEN,
-                amount=round(PRICE_MUSIC_GEN * generation.seconds, 6),
+                amount=total_price,
+                clear_amount=total_price,
                 currency=Currency.USD,
                 quantity=quantity_to_delete,
                 details={
                     'result': generation.result,
                     'prompt': prompt,
                     'duration': duration,
+                    'has_error': generation.has_error,
                 },
             ),
             update_user(user.id, {

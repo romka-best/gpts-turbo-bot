@@ -8,12 +8,14 @@ from aiogram.types import Message, CallbackQuery, URLInputFile
 
 from bot.database.main import firebase
 from bot.database.models.common import Model
+from bot.database.models.subscription import SubscriptionType
 from bot.database.models.user import UserGender, UserSettings
+from bot.database.operations.subscription.getters import get_last_subscription_by_user_id
 from bot.database.operations.user.getters import get_user
 from bot.database.operations.user.updaters import update_user
 from bot.handlers.ai.face_swap_handler import handle_face_swap
 from bot.handlers.payment.bonus_handler import handle_bonus
-from bot.handlers.payment.payment_handler import handle_subscribe, handle_package
+from bot.handlers.payment.payment_handler import handle_subscribe, handle_package, handle_cancel_subscription
 from bot.keyboards.common.common import build_cancel_keyboard
 from bot.keyboards.common.profile import build_profile_keyboard, build_profile_gender_keyboard
 from bot.locales.main import get_localization, get_user_language
@@ -47,16 +49,17 @@ async def profile(message: Message, state: FSMContext):
             "language_code": telegram_user.language_code,
         })
 
+    subscription = await get_last_subscription_by_user_id(user_id)
     renewal_date = (user.last_subscription_limit_update + timedelta(days=30))
     text = get_localization(user_language_code).profile(
         user.subscription_type,
+        subscription.status,
         user.gender,
         user.current_model,
         user.settings[Model.CHAT_GPT][UserSettings.VERSION],
         user.monthly_limits,
         user.additional_usage_quota,
         renewal_date.strftime("%d.%m.%Y"),
-        user.discount,
         ('%f' % user.balance).rstrip('0').rstrip('.'),
     )
 
@@ -65,14 +68,24 @@ async def profile(message: Message, state: FSMContext):
         photo = await firebase.bucket.get_blob(photo_path)
         photo_link = firebase.get_public_url(photo.name)
 
-        reply_markup = build_profile_keyboard(user_language_code, True, user.gender != UserGender.UNSPECIFIED)
+        reply_markup = build_profile_keyboard(
+            user_language_code,
+            True,
+            user.gender != UserGender.UNSPECIFIED,
+            user.subscription_type != SubscriptionType.FREE,
+        )
         await message.answer_photo(
             photo=URLInputFile(photo_link, filename=photo_path),
             caption=text,
             reply_markup=reply_markup,
         )
     except aiohttp.ClientResponseError:
-        reply_markup = build_profile_keyboard(user_language_code, False, user.gender != UserGender.UNSPECIFIED)
+        reply_markup = build_profile_keyboard(
+            user_language_code,
+            False,
+            user.gender != UserGender.UNSPECIFIED,
+            user.subscription_type != SubscriptionType.FREE,
+        )
         await message.answer(
             text=text,
             reply_markup=reply_markup,
@@ -112,6 +125,8 @@ async def handle_profile_selection(callback_query: CallbackQuery, state: FSMCont
         await handle_subscribe(callback_query.message, str(callback_query.from_user.id), state)
     elif action == 'open_buy_packages_info':
         await handle_package(callback_query.message, str(callback_query.from_user.id), state)
+    elif action == 'cancel_subscription':
+        await handle_cancel_subscription(callback_query.message, str(callback_query.from_user.id), state)
 
 
 @profile_router.callback_query(lambda c: c.data.startswith('profile_gender:'))

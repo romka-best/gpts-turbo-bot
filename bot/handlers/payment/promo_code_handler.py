@@ -6,6 +6,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
 from bot.database.main import firebase
+from bot.database.models.common import PaymentMethod
 from bot.database.models.package import PackageType, PackageStatus
 from bot.database.models.promo_code import PromoCodeType
 from bot.database.models.subscription import SubscriptionType, SubscriptionStatus
@@ -73,11 +74,15 @@ async def promo_code_sent(message: Message, state: FSMContext):
                             SubscriptionStatus.WAITING,
                             user.currency,
                             0,
+                            0,
+                            PaymentMethod.GIFT,
+                            "",
                         )
 
                         transaction = firebase.db.transaction()
                         await create_subscription(
                             transaction,
+                            message.bot,
                             subscription.id,
                             subscription.user_id,
                             "",

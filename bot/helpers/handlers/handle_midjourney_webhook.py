@@ -126,12 +126,14 @@ async def handle_midjourney_result(
             type=TransactionType.EXPENSE,
             service=ServiceType.MIDJOURNEY,
             amount=PRICE_MIDJOURNEY_REQUEST,
+            clear_amount=PRICE_MIDJOURNEY_REQUEST,
             currency=Currency.USD,
             quantity=1,
             details={
                 "prompt": generation.details.get('prompt'),
                 "type": generation.details.get('action'),
                 "is_suggestion": generation.details.get('is_suggestion', False),
+                "has_error": generation.details.get('has_error', False),
             }
         ),
         update_user(

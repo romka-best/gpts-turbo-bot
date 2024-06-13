@@ -4,13 +4,16 @@ from datetime import datetime, timezone, timedelta
 from aiogram import Router, F
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
+from aiogram.utils.chat_action import ChatActionSender
 
-from bot.database.models.common import Model, MidjourneyAction, SunoMode
+from bot.database.models.common import Model, MidjourneyAction, SunoMode, Currency
 from bot.database.models.generation import GenerationReaction
 from bot.database.models.subscription import SubscriptionType
 from bot.database.models.transaction import TransactionType, ServiceType
 from bot.database.operations.chat.getters import get_chats
+from bot.database.operations.feedback.getters import get_feedbacks
 from bot.database.operations.generation.getters import get_generations
+from bot.database.operations.promo_code.getters import get_used_promo_codes
 from bot.database.operations.transaction.getters import get_transactions
 from bot.database.operations.transaction.writers import write_transaction
 from bot.database.operations.user.getters import get_users
@@ -50,6 +53,8 @@ async def handle_get_statistics(language_code: str, period: str):
     current_date = datetime.now(timezone.utc)
     start_date = None
     end_date = None
+    start_date_before = None
+    end_date_before = None
     if period == "day":
         start_date = (current_date - timedelta(days=1)).replace(
             hour=0,
@@ -64,6 +69,9 @@ async def handle_get_statistics(language_code: str, period: str):
             microsecond=999999,
         )
         period = start_date.strftime("%d.%m.%Y")
+
+        start_date_before = start_date - timedelta(days=1)
+        end_date_before = end_date - timedelta(days=1)
     elif period == "week":
         start_date = (current_date - timedelta(days=current_date.weekday() + 7)).replace(
             hour=0,
@@ -78,6 +86,9 @@ async def handle_get_statistics(language_code: str, period: str):
             microsecond=999999,
         )
         period = f"{start_date.strftime('%d.%m.%Y')}-{end_date.strftime('%d.%m.%Y')}"
+
+        start_date_before = start_date - timedelta(days=7)
+        end_date_before = end_date - timedelta(days=7)
     elif period == "month":
         first_day_of_last_month = current_date.replace(day=1) - timedelta(days=1)
         start_date = first_day_of_last_month.replace(
@@ -98,31 +109,93 @@ async def handle_get_statistics(language_code: str, period: str):
             microsecond=999999,
         )
         period = f"{start_date.strftime('%d.%m.%Y')}-{end_date.strftime('%d.%m.%Y')}"
+
+        start_date_before = start_date - timedelta(days=30)
+        end_date_before = end_date - timedelta(days=30)
     else:
         period = "всё время"
 
     users = await get_users(start_date, end_date)
-    transactions = await get_transactions(start_date, end_date)
-    generations = await get_generations(start_date, end_date)
-    chats = await get_chats(start_date, end_date)
+    users_before = await get_users(start_date_before, end_date_before) \
+        if start_date_before and end_date_before \
+        else []
 
+    transactions = await get_transactions(start_date, end_date)
+    transactions_before = await get_transactions(start_date_before, end_date_before) \
+        if start_date_before and end_date_before \
+        else []
+
+    generations = await get_generations(start_date, end_date)
+    generations_before = await get_generations(start_date_before, end_date_before) \
+        if start_date_before and end_date_before \
+        else []
+
+    chats = await get_chats(start_date, end_date)
+    chats_before = await get_chats(start_date_before, end_date_before) \
+        if start_date_before and end_date_before \
+        else []
+
+    feedbacks = await get_feedbacks(start_date, end_date)
+    feedbacks_before = await get_feedbacks(start_date_before, end_date_before) \
+        if start_date_before and end_date_before \
+        else []
+
+    used_promo_codes = await get_used_promo_codes(start_date, end_date)
+    used_promo_codes_before = await get_used_promo_codes(start_date_before, end_date_before) \
+        if start_date_before and end_date_before \
+        else []
+
+    free_users = set()
+    free_users_before = set()
+    standard_users = set()
+    standard_users_before = set()
+    vip_users = set()
+    vip_users_before = set()
+    premium_users = set()
+    premium_users_before = set()
     paid_users = set()
+    paid_users_before = set()
     activated_users = set()
+    activated_users_before = set()
     referral_users = set()
+    referral_users_before = set()
     english_users = set()
+    english_users_before = set()
     russian_users = set()
+    russian_users_before = set()
     other_users = set()
+    other_users_before = set()
     count_subscription_users = {
         SubscriptionType.FREE: 0,
         SubscriptionType.STANDARD: 0,
         SubscriptionType.VIP: 0,
         SubscriptionType.PREMIUM: 0,
     }
+    count_subscription_users_before = {
+        SubscriptionType.FREE: 0,
+        SubscriptionType.STANDARD: 0,
+        SubscriptionType.VIP: 0,
+        SubscriptionType.PREMIUM: 0,
+    }
     count_blocked_users = 0
+    count_blocked_users_before = 0
+    count_banned_users = 0
+    count_banned_users_before = 0
     for user in users:
         count_subscription_users[user.subscription_type] += 1
+        if user.subscription_type == SubscriptionType.FREE:
+            free_users.add(user.id)
+        elif user.subscription_type == SubscriptionType.STANDARD:
+            standard_users.add(user.id)
+        elif user.subscription_type == SubscriptionType.VIP:
+            vip_users.add(user.id)
+        elif user.subscription_type == SubscriptionType.PREMIUM:
+            premium_users.add(user.id)
+
         if user.is_blocked:
             count_blocked_users += 1
+        if user.is_banned:
+            count_banned_users += 1
         if user.referred_by:
             referral_users.add(user.id)
 
@@ -132,45 +205,395 @@ async def handle_get_statistics(language_code: str, period: str):
             russian_users.add(user.id)
         else:
             other_users.add(user.id)
+    for user_before in users_before:
+        count_subscription_users_before[user_before.subscription_type] += 1
+        if user_before.subscription_type == SubscriptionType.FREE:
+            free_users_before.add(user_before.id)
+        elif user_before.subscription_type == SubscriptionType.STANDARD:
+            standard_users_before.add(user_before.id)
+        elif user_before.subscription_type == SubscriptionType.VIP:
+            vip_users_before.add(user_before.id)
+        elif user_before.subscription_type == SubscriptionType.PREMIUM:
+            premium_users_before.add(user_before.id)
+        if user_before.is_blocked:
+            count_blocked_users_before += 1
+        if user_before.is_banned:
+            count_banned_users_before += 1
+        if user_before.referred_by:
+            referral_users_before.add(user_before.id)
 
-    count_income_transactions = {
-        ServiceType.CHAT_GPT3_TURBO: 0,
-        ServiceType.CHAT_GPT4_TURBO: 0,
-        ServiceType.CHAT_GPT4_OMNI: 0,
-        ServiceType.CLAUDE_3_SONNET: 0,
-        ServiceType.CLAUDE_3_OPUS: 0,
-        ServiceType.DALL_E: 0,
-        ServiceType.MIDJOURNEY: 0,
-        ServiceType.FACE_SWAP: 0,
-        ServiceType.MUSIC_GEN: 0,
-        ServiceType.SUNO: 0,
-        ServiceType.ADDITIONAL_CHATS: 0,
-        ServiceType.ACCESS_TO_CATALOG: 0,
-        ServiceType.VOICE_MESSAGES: 0,
-        ServiceType.FAST_MESSAGES: 0,
-        ServiceType.STANDARD: 0,
-        ServiceType.VIP: 0,
-        ServiceType.PREMIUM: 0,
+        if user_before.language_code == 'en':
+            english_users_before.add(user_before.id)
+        elif user_before.language_code == 'ru':
+            russian_users_before.add(user_before.id)
+        else:
+            other_users_before.add(user_before.id)
+
+    count_all_transactions = {
+        ServiceType.CHAT_GPT3_TURBO: {
+            'SUCCESS': 0,
+            'FAIL': 0,
+            'EXAMPLE': 0,
+            'ALL': 0,
+            'AVERAGE_PRICE': 0,
+            'AVERAGE_EXAMPLE_PRICE': 0,
+            'BONUS': 0,
+        },
+        ServiceType.CHAT_GPT4_TURBO: {
+            'SUCCESS': 0,
+            'FAIL': 0,
+            'EXAMPLE': 0,
+            'ALL': 0,
+            'AVERAGE_PRICE': 0,
+            'AVERAGE_EXAMPLE_PRICE': 0,
+            'BONUS': 0,
+        },
+        ServiceType.CHAT_GPT4_OMNI: {
+            'SUCCESS': 0,
+            'FAIL': 0,
+            'EXAMPLE': 0,
+            'ALL': 0,
+            'AVERAGE_PRICE': 0,
+            'AVERAGE_EXAMPLE_PRICE': 0,
+            'BONUS': 0,
+        },
+        ServiceType.CLAUDE_3_SONNET: {
+            'SUCCESS': 0,
+            'FAIL': 0,
+            'EXAMPLE': 0,
+            'ALL': 0,
+            'AVERAGE_PRICE': 0,
+            'AVERAGE_EXAMPLE_PRICE': 0,
+            'BONUS': 0,
+        },
+        ServiceType.CLAUDE_3_OPUS: {
+            'SUCCESS': 0,
+            'FAIL': 0,
+            'EXAMPLE': 0,
+            'ALL': 0,
+            'AVERAGE_PRICE': 0,
+            'AVERAGE_EXAMPLE_PRICE': 0,
+            'BONUS': 0,
+        },
+        ServiceType.DALL_E: {
+            'SUCCESS': 0,
+            'FAIL': 0,
+            'EXAMPLE': 0,
+            'ALL': 0,
+            'AVERAGE_PRICE': 0,
+            'AVERAGE_EXAMPLE_PRICE': 0,
+            'BONUS': 0,
+        },
+        ServiceType.MIDJOURNEY: {
+            'SUCCESS': 0,
+            'FAIL': 0,
+            'EXAMPLE': 0,
+            'ALL': 0,
+            'AVERAGE_PRICE': 0,
+            'AVERAGE_EXAMPLE_PRICE': 0,
+            'BONUS': 0,
+        },
+        ServiceType.FACE_SWAP: {
+            'SUCCESS': 0,
+            'FAIL': 0,
+            'EXAMPLE': 0,
+            'ALL': 0,
+            'AVERAGE_PRICE': 0,
+            'AVERAGE_EXAMPLE_PRICE': 0,
+            'BONUS': 0,
+        },
+        ServiceType.MUSIC_GEN: {
+            'SUCCESS': 0,
+            'FAIL': 0,
+            'EXAMPLE': 0,
+            'ALL': 0,
+            'AVERAGE_PRICE': 0,
+            'AVERAGE_EXAMPLE_PRICE': 0,
+            'BONUS': 0,
+        },
+        ServiceType.SUNO: {
+            'SUCCESS': 0,
+            'FAIL': 0,
+            'EXAMPLE': 0,
+            'ALL': 0,
+            'AVERAGE_PRICE': 0,
+            'AVERAGE_EXAMPLE_PRICE': 0,
+            'BONUS': 0,
+        },
+        ServiceType.ADDITIONAL_CHATS: {
+            'SUCCESS': 0,
+            'FAIL': 0,
+            'EXAMPLE': 0,
+            'ALL': 0,
+            'AVERAGE_PRICE': 0,
+            'AVERAGE_EXAMPLE_PRICE': 0,
+            'BONUS': 0,
+        },
+        ServiceType.ACCESS_TO_CATALOG: {
+            'SUCCESS': 0,
+            'FAIL': 0,
+            'EXAMPLE': 0,
+            'ALL': 0,
+            'AVERAGE_PRICE': 0,
+            'AVERAGE_EXAMPLE_PRICE': 0,
+            'BONUS': 0,
+        },
+        ServiceType.VOICE_MESSAGES: {
+            'SUCCESS': 0,
+            'FAIL': 0,
+            'EXAMPLE': 0,
+            'ALL': 0,
+            'AVERAGE_PRICE': 0,
+            'AVERAGE_EXAMPLE_PRICE': 0,
+            'BONUS': 0,
+        },
+        ServiceType.FAST_MESSAGES: {
+            'SUCCESS': 0,
+            'FAIL': 0,
+            'EXAMPLE': 0,
+            'ALL': 0,
+            'AVERAGE_PRICE': 0,
+            'AVERAGE_EXAMPLE_PRICE': 0,
+            'BONUS': 0,
+        },
+        ServiceType.SERVER: {
+            'SUCCESS': 0,
+            'FAIL': 0,
+            'EXAMPLE': 0,
+            'ALL': 0,
+            'AVERAGE_PRICE': 0,
+            'AVERAGE_EXAMPLE_PRICE': 0,
+            'BONUS': 0,
+        },
+        ServiceType.DATABASE: {
+            'SUCCESS': 0,
+            'FAIL': 0,
+            'EXAMPLE': 0,
+            'ALL': 0,
+            'AVERAGE_PRICE': 0,
+            'AVERAGE_EXAMPLE_PRICE': 0,
+            'BONUS': 0,
+        },
+        ServiceType.STANDARD: {
+            'SUCCESS': 0,
+            'FAIL': 0,
+            'EXAMPLE': 0,
+            'ALL': 0,
+            'AVERAGE_PRICE': 0,
+            'AVERAGE_EXAMPLE_PRICE': 0,
+            'BONUS': 0,
+        },
+        ServiceType.VIP: {
+            'SUCCESS': 0,
+            'FAIL': 0,
+            'EXAMPLE': 0,
+            'ALL': 0,
+            'AVERAGE_PRICE': 0,
+            'AVERAGE_EXAMPLE_PRICE': 0,
+            'BONUS': 0,
+        },
+        ServiceType.PREMIUM: {
+            'SUCCESS': 0,
+            'FAIL': 0,
+            'EXAMPLE': 0,
+            'ALL': 0,
+            'AVERAGE_PRICE': 0,
+            'AVERAGE_EXAMPLE_PRICE': 0,
+            'BONUS': 0,
+        },
+        ServiceType.OTHER: {
+            'SUCCESS': 0,
+            'FAIL': 0,
+            'EXAMPLE': 0,
+            'ALL': 0,
+            'AVERAGE_PRICE': 0,
+            'AVERAGE_EXAMPLE_PRICE': 0,
+            'BONUS': 0,
+        },
     }
-    count_expense_transactions = {
-        ServiceType.CHAT_GPT3_TURBO: 0,
-        ServiceType.CHAT_GPT4_TURBO: 0,
-        ServiceType.CHAT_GPT4_OMNI: 0,
-        ServiceType.CLAUDE_3_SONNET: 0,
-        ServiceType.CLAUDE_3_OPUS: 0,
-        ServiceType.DALL_E: 0,
-        ServiceType.MIDJOURNEY: 0,
-        ServiceType.FACE_SWAP: 0,
-        ServiceType.MUSIC_GEN: [0, 0],
-        ServiceType.SUNO: 0,
-        ServiceType.VOICE_MESSAGES: 0,
-        ServiceType.SERVER: 0,
-        ServiceType.DATABASE: 0,
-        ServiceType.OTHER: 0,
+    count_all_transactions_before = {
+        ServiceType.CHAT_GPT3_TURBO: {
+            'SUCCESS': 0,
+            'FAIL': 0,
+            'EXAMPLE': 0,
+            'ALL': 0,
+            'AVERAGE_PRICE': 0,
+            'AVERAGE_EXAMPLE_PRICE': 0,
+            'BONUS': 0,
+        },
+        ServiceType.CHAT_GPT4_TURBO: {
+            'SUCCESS': 0,
+            'FAIL': 0,
+            'EXAMPLE': 0,
+            'ALL': 0,
+            'AVERAGE_PRICE': 0,
+            'AVERAGE_EXAMPLE_PRICE': 0,
+            'BONUS': 0,
+        },
+        ServiceType.CHAT_GPT4_OMNI: {
+            'SUCCESS': 0,
+            'FAIL': 0,
+            'EXAMPLE': 0,
+            'ALL': 0,
+            'AVERAGE_PRICE': 0,
+            'AVERAGE_EXAMPLE_PRICE': 0,
+            'BONUS': 0,
+        },
+        ServiceType.CLAUDE_3_SONNET: {
+            'SUCCESS': 0,
+            'FAIL': 0,
+            'EXAMPLE': 0,
+            'ALL': 0,
+            'AVERAGE_PRICE': 0,
+            'AVERAGE_EXAMPLE_PRICE': 0,
+            'BONUS': 0,
+        },
+        ServiceType.CLAUDE_3_OPUS: {
+            'SUCCESS': 0,
+            'FAIL': 0,
+            'EXAMPLE': 0,
+            'ALL': 0,
+            'AVERAGE_PRICE': 0,
+            'AVERAGE_EXAMPLE_PRICE': 0,
+            'BONUS': 0,
+        },
+        ServiceType.DALL_E: {
+            'SUCCESS': 0,
+            'FAIL': 0,
+            'EXAMPLE': 0,
+            'ALL': 0,
+            'AVERAGE_PRICE': 0,
+            'AVERAGE_EXAMPLE_PRICE': 0,
+            'BONUS': 0,
+        },
+        ServiceType.MIDJOURNEY: {
+            'SUCCESS': 0,
+            'FAIL': 0,
+            'EXAMPLE': 0,
+            'ALL': 0,
+            'AVERAGE_PRICE': 0,
+            'AVERAGE_EXAMPLE_PRICE': 0,
+            'BONUS': 0,
+        },
+        ServiceType.FACE_SWAP: {
+            'SUCCESS': 0,
+            'FAIL': 0,
+            'EXAMPLE': 0,
+            'ALL': 0,
+            'AVERAGE_PRICE': 0,
+            'AVERAGE_EXAMPLE_PRICE': 0,
+            'BONUS': 0,
+        },
+        ServiceType.MUSIC_GEN: {
+            'SUCCESS': 0,
+            'FAIL': 0,
+            'EXAMPLE': 0,
+            'ALL': 0,
+            'AVERAGE_PRICE': 0,
+            'AVERAGE_EXAMPLE_PRICE': 0,
+            'BONUS': 0,
+        },
+        ServiceType.SUNO: {
+            'SUCCESS': 0,
+            'FAIL': 0,
+            'EXAMPLE': 0,
+            'ALL': 0,
+            'AVERAGE_PRICE': 0,
+            'AVERAGE_EXAMPLE_PRICE': 0,
+            'BONUS': 0,
+        },
+        ServiceType.ADDITIONAL_CHATS: {
+            'SUCCESS': 0,
+            'FAIL': 0,
+            'EXAMPLE': 0,
+            'ALL': 0,
+            'AVERAGE_PRICE': 0,
+            'AVERAGE_EXAMPLE_PRICE': 0,
+            'BONUS': 0,
+        },
+        ServiceType.ACCESS_TO_CATALOG: {
+            'SUCCESS': 0,
+            'FAIL': 0,
+            'EXAMPLE': 0,
+            'ALL': 0,
+            'AVERAGE_PRICE': 0,
+            'AVERAGE_EXAMPLE_PRICE': 0,
+            'BONUS': 0,
+        },
+        ServiceType.VOICE_MESSAGES: {
+            'SUCCESS': 0,
+            'FAIL': 0,
+            'EXAMPLE': 0,
+            'ALL': 0,
+            'AVERAGE_PRICE': 0,
+            'AVERAGE_EXAMPLE_PRICE': 0,
+            'BONUS': 0,
+        },
+        ServiceType.FAST_MESSAGES: {
+            'SUCCESS': 0,
+            'FAIL': 0,
+            'EXAMPLE': 0,
+            'ALL': 0,
+            'AVERAGE_PRICE': 0,
+            'AVERAGE_EXAMPLE_PRICE': 0,
+            'BONUS': 0,
+        },
+        ServiceType.SERVER: {
+            'SUCCESS': 0,
+            'FAIL': 0,
+            'EXAMPLE': 0,
+            'ALL': 0,
+            'AVERAGE_PRICE': 0,
+            'AVERAGE_EXAMPLE_PRICE': 0,
+            'BONUS': 0,
+        },
+        ServiceType.DATABASE: {
+            'SUCCESS': 0,
+            'FAIL': 0,
+            'EXAMPLE': 0,
+            'ALL': 0,
+            'AVERAGE_PRICE': 0,
+            'AVERAGE_EXAMPLE_PRICE': 0,
+            'BONUS': 0,
+        },
+        ServiceType.STANDARD: {
+            'SUCCESS': 0,
+            'FAIL': 0,
+            'EXAMPLE': 0,
+            'ALL': 0,
+            'AVERAGE_PRICE': 0,
+            'AVERAGE_EXAMPLE_PRICE': 0,
+            'BONUS': 0,
+        },
+        ServiceType.VIP: {
+            'SUCCESS': 0,
+            'FAIL': 0,
+            'EXAMPLE': 0,
+            'ALL': 0,
+            'AVERAGE_PRICE': 0,
+            'AVERAGE_EXAMPLE_PRICE': 0,
+            'BONUS': 0,
+        },
+        ServiceType.PREMIUM: {
+            'SUCCESS': 0,
+            'FAIL': 0,
+            'EXAMPLE': 0,
+            'ALL': 0,
+            'AVERAGE_PRICE': 0,
+            'AVERAGE_EXAMPLE_PRICE': 0,
+            'BONUS': 0,
+        },
+        ServiceType.OTHER: {
+            'SUCCESS': 0,
+            'FAIL': 0,
+            'EXAMPLE': 0,
+            'ALL': 0,
+            'AVERAGE_PRICE': 0,
+            'AVERAGE_EXAMPLE_PRICE': 0,
+            'BONUS': 0,
+        },
     }
-    count_income_transactions_total = 0
-    count_expense_transactions_total = 0
-    count_transactions_total = 0
+
     count_income_money = {
         ServiceType.CHAT_GPT3_TURBO: 0,
         ServiceType.CHAT_GPT4_TURBO: 0,
@@ -189,6 +612,29 @@ async def handle_get_statistics(language_code: str, period: str):
         ServiceType.STANDARD: 0,
         ServiceType.VIP: 0,
         ServiceType.PREMIUM: 0,
+        'ALL': 0,
+        'VAL': 0,
+    }
+    count_income_money_before = {
+        ServiceType.CHAT_GPT3_TURBO: 0,
+        ServiceType.CHAT_GPT4_TURBO: 0,
+        ServiceType.CHAT_GPT4_OMNI: 0,
+        ServiceType.CLAUDE_3_SONNET: 0,
+        ServiceType.CLAUDE_3_OPUS: 0,
+        ServiceType.DALL_E: 0,
+        ServiceType.MIDJOURNEY: 0,
+        ServiceType.FACE_SWAP: 0,
+        ServiceType.MUSIC_GEN: 0,
+        ServiceType.SUNO: 0,
+        ServiceType.ADDITIONAL_CHATS: 0,
+        ServiceType.ACCESS_TO_CATALOG: 0,
+        ServiceType.VOICE_MESSAGES: 0,
+        ServiceType.FAST_MESSAGES: 0,
+        ServiceType.STANDARD: 0,
+        ServiceType.VIP: 0,
+        ServiceType.PREMIUM: 0,
+        'ALL': 0,
+        'VAL': 0,
     }
     count_expense_money = {
         ServiceType.CHAT_GPT3_TURBO: 0,
@@ -205,10 +651,33 @@ async def handle_get_statistics(language_code: str, period: str):
         ServiceType.SERVER: 0,
         ServiceType.DATABASE: 0,
         ServiceType.OTHER: 0,
+        SubscriptionType.FREE: 0,
+        SubscriptionType.STANDARD: 0,
+        SubscriptionType.VIP: 0,
+        SubscriptionType.PREMIUM: 0,
+        'ALL': 0,
     }
-    count_income_subscriptions_total_money = 0
-    count_income_packages_total_money = 0
-    count_expense_total_money = 0
+    count_expense_money_before = {
+        ServiceType.CHAT_GPT3_TURBO: 0,
+        ServiceType.CHAT_GPT4_TURBO: 0,
+        ServiceType.CHAT_GPT4_OMNI: 0,
+        ServiceType.CLAUDE_3_SONNET: 0,
+        ServiceType.CLAUDE_3_OPUS: 0,
+        ServiceType.DALL_E: 0,
+        ServiceType.MIDJOURNEY: 0,
+        ServiceType.FACE_SWAP: 0,
+        ServiceType.MUSIC_GEN: 0,
+        ServiceType.SUNO: 0,
+        ServiceType.VOICE_MESSAGES: 0,
+        ServiceType.SERVER: 0,
+        ServiceType.DATABASE: 0,
+        ServiceType.OTHER: 0,
+        SubscriptionType.FREE: 0,
+        SubscriptionType.STANDARD: 0,
+        SubscriptionType.VIP: 0,
+        SubscriptionType.PREMIUM: 0,
+        'ALL': 0,
+    }
     count_midjourney_usage = {
         MidjourneyAction.IMAGINE: 0,
         MidjourneyAction.UPSCALE: 0,
@@ -247,31 +716,72 @@ async def handle_get_statistics(language_code: str, period: str):
             GenerationReaction.NONE: 0,
         },
     }
+    count_reactions_before = {
+        ServiceType.MIDJOURNEY: {
+            GenerationReaction.LIKED: 0,
+            GenerationReaction.DISLIKED: 0,
+            GenerationReaction.NONE: 0,
+        },
+        ServiceType.FACE_SWAP: {
+            GenerationReaction.LIKED: 0,
+            GenerationReaction.DISLIKED: 0,
+            GenerationReaction.NONE: 0,
+        },
+        ServiceType.MUSIC_GEN: {
+            GenerationReaction.LIKED: 0,
+            GenerationReaction.DISLIKED: 0,
+            GenerationReaction.NONE: 0,
+        },
+        ServiceType.SUNO: {
+            GenerationReaction.LIKED: 0,
+            GenerationReaction.DISLIKED: 0,
+            GenerationReaction.NONE: 0,
+        },
+    }
     for transaction in transactions:
         if transaction.type == TransactionType.INCOME:
-            count_income_transactions_total += 1
-            count_income_transactions[transaction.service] += transaction.quantity
-            count_income_money[transaction.service] += transaction.amount
-            if (
-                transaction.service == ServiceType.STANDARD or
-                transaction.service == ServiceType.VIP or
-                transaction.service == ServiceType.PREMIUM
-            ):
-                count_income_subscriptions_total_money += transaction.amount
+            if transaction.currency == Currency.USD:
+                count_income_money[transaction.service] += transaction.clear_amount * 100
+                count_income_money['ALL'] += transaction.clear_amount * 100
             else:
-                count_income_packages_total_money += transaction.amount
+                count_income_money[transaction.service] += transaction.clear_amount
+                count_income_money['ALL'] += transaction.clear_amount
 
-            if transaction.amount > 0:
+            count_all_transactions[transaction.service]['BONUS'] += 1 \
+                if transaction.details.get('is_bonus', False) \
+                else 0
+
+            if transaction.clear_amount > 0:
                 paid_users.add(transaction.user_id)
         elif transaction.type == TransactionType.EXPENSE:
-            count_expense_transactions_total += 1
-            if transaction.service == ServiceType.MUSIC_GEN:
-                count_expense_transactions[transaction.service][0] += transaction.quantity
-                count_expense_transactions[transaction.service][1] += 1
-            else:
-                count_expense_transactions[transaction.service] += transaction.quantity
+            count_all_transactions[transaction.service]['SUCCESS'] += transaction.quantity \
+                if not transaction.details.get('has_error', False) \
+                else 0
+            count_all_transactions[transaction.service]['FAIL'] += transaction.quantity \
+                if transaction.details.get('has_error', False) \
+                else 0
+            count_all_transactions[transaction.service]['EXAMPLE'] += transaction.quantity \
+                if transaction.details.get('is_suggestion', False) \
+                else 0
+            count_all_transactions[transaction.service]['ALL'] += transaction.quantity
+            count_all_transactions[transaction.service]['AVERAGE_PRICE'] += transaction.amount \
+                if not transaction.details.get('is_suggestion', False) \
+                else 0
+            count_all_transactions[transaction.service]['AVERAGE_EXAMPLE_PRICE'] += transaction.amount \
+                if transaction.details.get('is_suggestion', False) \
+                else 0
+
             count_expense_money[transaction.service] += transaction.amount
-            count_expense_total_money += transaction.amount
+            count_expense_money['ALL'] += transaction.amount
+
+            if transaction.user_id in free_users:
+                count_expense_money[SubscriptionType.FREE] += transaction.amount
+            elif transaction.user_id in standard_users:
+                count_expense_money[SubscriptionType.STANDARD] += transaction.amount
+            elif transaction.user_id in vip_users:
+                count_expense_money[SubscriptionType.VIP] += transaction.amount
+            elif transaction.user_id in premium_users:
+                count_expense_money[SubscriptionType.PREMIUM] += transaction.amount
 
             if transaction.service == ServiceType.MIDJOURNEY:
                 midjourney_action = transaction.details.get('type', MidjourneyAction.PAYMENT)
@@ -296,10 +806,115 @@ async def handle_get_statistics(language_code: str, period: str):
                 ) + transaction.quantity
 
         activated_users.add(transaction.user_id)
-        count_transactions_total += 1
+    for service in [
+        ServiceType.CHAT_GPT3_TURBO, ServiceType.CHAT_GPT4_TURBO, ServiceType.CHAT_GPT4_OMNI,
+        ServiceType.CLAUDE_3_SONNET, ServiceType.CLAUDE_3_OPUS,
+        ServiceType.DALL_E, ServiceType.MIDJOURNEY, ServiceType.FACE_SWAP,
+        ServiceType.MUSIC_GEN, ServiceType.SUNO,
+    ]:
+        average_price = count_all_transactions[service]['AVERAGE_PRICE']
+        average_example_price = count_all_transactions[service]['AVERAGE_EXAMPLE_PRICE']
+        successes = count_all_transactions[service]['SUCCESS']
+        fails = count_all_transactions[service]['FAIL']
+        total = successes + fails
+        examples = count_all_transactions[service]['EXAMPLE']
+        count_all_transactions[service]['AVERAGE_PRICE'] = average_price / total \
+            if total > 0 else 0
+        count_all_transactions[service]['AVERAGE_EXAMPLE_PRICE'] = average_example_price / examples \
+            if examples > 0 else 0
+    count_expense_money[SubscriptionType.FREE] = count_expense_money[SubscriptionType.FREE] / len(
+        free_users
+    ) if len(free_users) else 0
+    count_expense_money[SubscriptionType.STANDARD] = count_expense_money[SubscriptionType.STANDARD] / len(
+        standard_users
+    ) if len(standard_users) else 0
+    count_expense_money[SubscriptionType.VIP] = count_expense_money[SubscriptionType.FREE] / len(
+        vip_users
+    ) if len(vip_users) else 0
+    count_expense_money[SubscriptionType.PREMIUM] = count_expense_money[SubscriptionType.FREE] / len(
+        premium_users
+    ) if len(premium_users) else 0
+    for transaction_before in transactions_before:
+        if transaction_before.type == TransactionType.INCOME:
+            if transaction_before.currency == Currency.USD:
+                count_income_money_before[transaction_before.service] += transaction_before.clear_amount * 100
+                count_income_money_before['ALL'] += transaction_before.clear_amount * 100
+            else:
+                count_income_money_before[transaction_before.service] += transaction_before.clear_amount
+                count_income_money_before['ALL'] += transaction_before.clear_amount
+
+            count_all_transactions_before[transaction_before.service]['BONUS'] += 1 \
+                if transaction_before.details.get('is_bonus', False) \
+                else 0
+
+            if transaction_before.clear_amount > 0:
+                paid_users_before.add(transaction_before.user_id)
+        elif transaction_before.type == TransactionType.EXPENSE:
+            count_all_transactions_before[transaction_before.service]['SUCCESS'] += transaction_before.quantity \
+                if not transaction_before.details.get('has_error', False) \
+                else 0
+            count_all_transactions_before[transaction_before.service]['FAIL'] += transaction_before.quantity \
+                if transaction_before.details.get('has_error', False) \
+                else 0
+            count_all_transactions_before[transaction_before.service]['EXAMPLE'] += transaction_before.quantity \
+                if transaction_before.details.get('is_suggestion', False) \
+                else 0
+            count_all_transactions_before[transaction_before.service]['ALL'] += transaction_before.quantity
+            count_all_transactions_before[transaction_before.service]['AVERAGE_PRICE'] += transaction_before.amount \
+                if not transaction_before.details.get('is_suggestion', False) \
+                else 0
+            count_all_transactions_before[transaction_before.service][
+                'AVERAGE_EXAMPLE_PRICE'] += transaction_before.amount \
+                if transaction_before.details.get('is_suggestion', False) \
+                else 0
+
+            count_expense_money_before[transaction_before.service] += transaction_before.amount
+            count_expense_money_before['ALL'] += transaction_before.amount
+
+            if transaction_before.user_id in free_users:
+                count_expense_money_before[SubscriptionType.FREE] += transaction_before.amount
+            elif transaction_before.user_id in standard_users:
+                count_expense_money_before[SubscriptionType.STANDARD] += transaction_before.amount
+            elif transaction_before.user_id in vip_users:
+                count_expense_money_before[SubscriptionType.VIP] += transaction_before.amount
+            elif transaction_before.user_id in premium_users:
+                count_expense_money_before[SubscriptionType.PREMIUM] += transaction_before.amount
+
+        activated_users_before.add(transaction_before.user_id)
+    for service in [
+        ServiceType.CHAT_GPT3_TURBO, ServiceType.CHAT_GPT4_TURBO, ServiceType.CHAT_GPT4_OMNI,
+        ServiceType.CLAUDE_3_SONNET, ServiceType.CLAUDE_3_OPUS,
+        ServiceType.DALL_E, ServiceType.MIDJOURNEY, ServiceType.FACE_SWAP,
+        ServiceType.MUSIC_GEN, ServiceType.SUNO,
+    ]:
+        average_price = count_all_transactions_before[service]['AVERAGE_PRICE']
+        average_example_price = count_all_transactions_before[service]['AVERAGE_EXAMPLE_PRICE']
+        successes = count_all_transactions_before[service]['SUCCESS']
+        fails = count_all_transactions_before[service]['FAIL']
+        total = successes + fails
+        examples = count_all_transactions_before[service]['EXAMPLE']
+        count_all_transactions_before[service]['AVERAGE_PRICE'] = average_price / total \
+            if total > 0 else 0
+        count_all_transactions_before[service]['AVERAGE_EXAMPLE_PRICE'] = average_example_price / examples \
+            if examples > 0 else 0
+    count_expense_money_before[SubscriptionType.FREE] = count_expense_money_before[SubscriptionType.FREE] / len(
+        free_users_before
+    ) if len(free_users_before) else 0
+    count_expense_money_before[SubscriptionType.STANDARD] = count_expense_money_before[SubscriptionType.STANDARD] / len(
+        standard_users_before
+    ) if len(standard_users_before) else 0
+    count_expense_money_before[SubscriptionType.VIP] = count_expense_money_before[SubscriptionType.FREE] / len(
+        vip_users_before
+    ) if len(vip_users_before) else 0
+    count_expense_money_before[SubscriptionType.PREMIUM] = count_expense_money_before[SubscriptionType.FREE] / len(
+        premium_users
+    ) if len(premium_users) else 0
 
     for generation in generations:
-        if generation.model == Model.MIDJOURNEY and generation.details.get('action') == MidjourneyAction.UPSCALE:
+        if (
+            generation.model == Model.MIDJOURNEY and
+            generation.details.get('action') == MidjourneyAction.UPSCALE
+        ):
             count_reactions[ServiceType.MIDJOURNEY][generation.reaction] += 1
         elif generation.model == Model.FACE_SWAP:
             count_reactions[ServiceType.FACE_SWAP][generation.reaction] += 1
@@ -307,55 +922,124 @@ async def handle_get_statistics(language_code: str, period: str):
             count_reactions[ServiceType.MUSIC_GEN][generation.reaction] += 1
         elif generation.model == Model.SUNO:
             count_reactions[ServiceType.SUNO][generation.reaction] += 1
+    for generation_before in generations_before:
+        if (
+            generation_before.model == Model.MIDJOURNEY and
+            generation_before.details.get('action') == MidjourneyAction.UPSCALE
+        ):
+            count_reactions_before[ServiceType.MIDJOURNEY][generation_before.reaction] += 1
+        elif generation_before.model == Model.FACE_SWAP:
+            count_reactions_before[ServiceType.FACE_SWAP][generation_before.reaction] += 1
+        elif generation_before.model == Model.MUSIC_GEN:
+            count_reactions_before[ServiceType.MUSIC_GEN][generation_before.reaction] += 1
+        elif generation_before.model == Model.SUNO:
+            count_reactions_before[ServiceType.SUNO][generation_before.reaction] += 1
 
     count_all_users = len(users)
+    count_all_users_before = len(users_before)
     count_activated_users = len(activated_users)
+    count_activated_users_before = len(activated_users_before)
     count_referral_users = len(referral_users)
+    count_referral_users_before = len(referral_users_before)
     count_english_users = len(english_users)
+    count_english_users_before = len(english_users_before)
     count_russian_users = len(russian_users)
+    count_russian_users_before = len(russian_users_before)
     count_other_users = len(other_users)
+    count_other_users_before = len(other_users_before)
     count_paid_users = len(paid_users)
-    count_income_total_money = count_income_subscriptions_total_money + count_income_packages_total_money
-    total_money = count_income_total_money - count_expense_total_money * 100
+    count_paid_users_before = len(paid_users_before)
+    count_feedbacks = len(feedbacks)
+    count_feedbacks_before = len(feedbacks_before)
+    count_activated_promo_codes = len(used_promo_codes)
+    count_activated_promo_codes_before = len(used_promo_codes_before)
+    count_income_money['VAL'] = count_income_money['ALL'] - count_expense_money['ALL'] * 100
 
     count_chats_usage = {
         'ALL': len(chats),
+    }
+    count_chats_usage_before = {
+        'ALL': len(chats_before),
     }
     count_midjourney_usage['ALL'] = sum(count_midjourney_usage.values())
     count_face_swap_usage['ALL'] = sum(count_face_swap_usage.values())
     count_suno_usage['ALL'] = sum(count_suno_usage.values())
     for chat in chats:
         count_chats_usage[chat.role] = count_chats_usage.get(chat.role, 0) + 1
+    for chat_before in chats_before:
+        count_chats_usage_before[chat_before.role] = count_chats_usage_before.get(chat_before.role, 0) + 1
 
-    return get_localization(language_code).statistics(
-        period=period,
-        count_all_users=count_all_users,
-        count_activated_users=count_activated_users,
-        count_referral_users=count_referral_users,
-        count_english_users=count_english_users,
-        count_russian_users=count_russian_users,
-        count_other_users=count_other_users,
-        count_paid_users=count_paid_users,
-        count_blocked_users=count_blocked_users,
-        count_subscription_users=count_subscription_users,
-        count_income_transactions=count_income_transactions,
-        count_expense_transactions=count_expense_transactions,
-        count_income_transactions_total=count_income_transactions_total,
-        count_expense_transactions_total=count_expense_transactions_total,
-        count_transactions_total=count_transactions_total,
-        count_expense_money=count_expense_money,
-        count_income_money=count_income_money,
-        count_income_subscriptions_total_money=count_income_subscriptions_total_money,
-        count_income_packages_total_money=count_income_packages_total_money,
-        count_income_total_money=count_income_total_money,
-        count_expense_total_money=count_expense_total_money,
-        count_total_money=total_money,
-        count_chats_usage=count_chats_usage,
-        count_midjourney_usage=count_midjourney_usage,
-        count_face_swap_usage=count_face_swap_usage,
-        count_suno_usage=count_suno_usage,
-        count_reactions=count_reactions,
-    )
+    texts = [
+        get_localization(language_code).statistics_users(
+            period=period,
+            count_all_users=count_all_users,
+            count_all_users_before=count_all_users_before,
+            count_activated_users=count_activated_users,
+            count_activated_users_before=count_activated_users_before,
+            count_referral_users=count_referral_users,
+            count_referral_users_before=count_referral_users_before,
+            count_english_users=count_english_users,
+            count_english_users_before=count_english_users_before,
+            count_russian_users=count_russian_users,
+            count_russian_users_before=count_russian_users_before,
+            count_other_users=count_other_users,
+            count_other_users_before=count_other_users_before,
+            count_paid_users=count_paid_users,
+            count_paid_users_before=count_paid_users_before,
+            count_blocked_users=count_blocked_users,
+            count_blocked_users_before=count_blocked_users_before,
+            count_banned_users=count_banned_users,
+            count_banned_users_before=count_banned_users_before,
+            count_subscription_users=count_subscription_users,
+            count_subscription_users_before=count_subscription_users_before,
+        ),
+        get_localization(language_code).statistics_text_models(
+            period=period,
+            count_all_transactions=count_all_transactions,
+            count_all_transactions_before=count_all_transactions_before,
+            count_chats_usage=count_chats_usage,
+            count_chats_usage_before=count_chats_usage_before,
+        ),
+        get_localization(language_code).statistics_image_models(
+            period=period,
+            count_all_transactions=count_all_transactions,
+            count_all_transactions_before=count_all_transactions_before,
+            count_midjourney_usage=count_midjourney_usage,
+            count_face_swap_usage=count_face_swap_usage,
+        ),
+        get_localization(language_code).statistics_music_models(
+            period=period,
+            count_all_transactions=count_all_transactions,
+            count_all_transactions_before=count_all_transactions_before,
+            count_suno_usage=count_suno_usage,
+        ),
+        get_localization(language_code).statistics_reactions(
+            period=period,
+            count_reactions=count_reactions,
+            count_reactions_before=count_reactions_before,
+            count_feedbacks=count_feedbacks,
+            count_feedbacks_before=count_feedbacks_before,
+        ),
+        get_localization(language_code).statistics_bonuses(
+            period=period,
+            count_all_transactions=count_all_transactions,
+            count_all_transactions_before=count_all_transactions_before,
+            count_activated_promo_codes=count_activated_promo_codes,
+            count_activated_promo_codes_before=count_activated_promo_codes_before,
+        ),
+        get_localization(language_code).statistics_expenses(
+            period=period,
+            count_expense_money=count_expense_money,
+            count_expense_money_before=count_expense_money_before,
+        ),
+        get_localization(language_code).statistics_incomes(
+            period=period,
+            count_income_money=count_income_money,
+            count_income_money_before=count_income_money_before,
+        )
+    ]
+
+    return texts
 
 
 @statistics_router.callback_query(lambda c: c.data.startswith('statistics:'))
@@ -381,11 +1065,13 @@ async def handle_statistics_selection(callback_query: CallbackQuery, state: FSMC
         text=get_localization(user_language_code).processing_statistics()
     )
 
-    text = await handle_get_statistics(user_language_code, period)
-    await callback_query.message.answer(
-        text=text,
-        protect_content=True,
-    )
+    async with ChatActionSender.typing(bot=callback_query.bot, chat_id=callback_query.message.chat.id):
+        texts = await handle_get_statistics(user_language_code, period)
+        for text in texts:
+            await callback_query.message.answer(
+                text=text,
+                protect_content=True,
+            )
 
     await processing_message.delete()
 
@@ -524,6 +1210,7 @@ async def statistics_service_date_sent(message: Message, state: FSMContext):
             type=transaction_type,
             service=service_type,
             amount=service_amount,
+            clear_amount=service_amount,
             currency=currency,
             quantity=service_quantity,
             created_at=service_date,
