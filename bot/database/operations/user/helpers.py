@@ -25,7 +25,10 @@ def create_user_object(
         telegram_chat_id=telegram_chat_id,
         gender=user_data.get('gender', UserGender.UNSPECIFIED),
         language_code=telegram_user.language_code,
-        interface_language_code=user_data.get('interface_language_code', telegram_user.language_code),
+        interface_language_code=user_data.get(
+            'interface_language_code',
+            'ru' if telegram_user.language_code == 'ru' else 'en'
+        ),
         is_premium=telegram_user.is_premium or False,
         is_blocked=False,
         is_banned=False,

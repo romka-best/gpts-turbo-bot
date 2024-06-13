@@ -8,7 +8,7 @@ from aiogram.types import Message, CallbackQuery, URLInputFile
 
 from bot.database.main import firebase
 from bot.database.models.common import Model
-from bot.database.models.subscription import SubscriptionType
+from bot.database.models.subscription import SubscriptionType, SubscriptionStatus
 from bot.database.models.user import UserGender, UserSettings
 from bot.database.operations.subscription.getters import get_last_subscription_by_user_id
 from bot.database.operations.user.getters import get_user
@@ -53,7 +53,7 @@ async def profile(message: Message, state: FSMContext):
     renewal_date = (user.last_subscription_limit_update + timedelta(days=30))
     text = get_localization(user_language_code).profile(
         user.subscription_type,
-        subscription.status,
+        subscription.status if subscription.status else SubscriptionStatus.ACTIVE,
         user.gender,
         user.current_model,
         user.settings[Model.CHAT_GPT][UserSettings.VERSION],

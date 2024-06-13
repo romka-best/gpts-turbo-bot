@@ -35,7 +35,7 @@ async def handle_replicate_webhook(bot: Bot, dp: Dispatcher, prediction: dict):
         return True
 
     generation_error, generation_result = prediction.get("error", False), prediction.get("output", {})
-    seconds = prediction.get("metrics", {}).get("predict_time")
+    seconds = prediction.get("metrics", {}).get("predict_time", 0)
 
     generation.status = GenerationStatus.FINISHED
     generation.seconds = seconds
@@ -96,6 +96,7 @@ async def handle_replicate_face_swap(
                 used_face_swap_package_used_images.append(
                     request_generation.details.get('used_face_swap_package_used_image')
                 )
+            print(request_generation.id, request_generation.seconds)
             total_seconds += request_generation.seconds
 
         total_result = len(success_generations)

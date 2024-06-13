@@ -12,7 +12,7 @@ from bot.helpers.initialize_user_for_the_first_time import initialize_user_for_t
 from bot.helpers.update_monthly_limits import update_user_monthly_limits
 from bot.keyboards.common.common import build_recommendations_keyboard
 
-from bot.locales.main import get_localization, get_user_language, set_user_language
+from bot.locales.main import get_localization, get_user_language
 
 common_router = Router()
 
@@ -53,7 +53,7 @@ async def start(message: Message, state: FSMContext):
                     )
 
         language_code = message.from_user.language_code
-        await set_user_language(user_id, language_code, state.storage)
+        await state.storage.redis.set(f"user:{user_id}:language", language_code)
 
         chat_title = get_localization(language_code).DEFAULT_CHAT_TITLE
         transaction = firebase.db.transaction()

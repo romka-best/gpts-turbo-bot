@@ -166,7 +166,7 @@ class Package:
         price_clear = re.sub(r'[^\d.]', '', price_raw)
         price = float(price_clear) if '.' in price_clear else int(price_clear)
 
-        price_with_discount = price * quantity - (price * quantity * (user_discount / 100.0))
+        price_with_discount = round(price * quantity - (price * quantity * (user_discount / 100.0)), 2)
 
         return price_with_discount
 

@@ -231,7 +231,7 @@ class Subscription:
         price_clear = re.sub(r'[^\d.]', '', price_raw)
         price = float(price_clear) if '.' in price_clear else int(price_clear)
         price_with_period = price * price_period[subscription_period]
-        price_with_discount = price_with_period - (price_with_period * (price_discount[subscription_period] / 100.0))
+        price_with_discount = round(price_with_period - (price_with_period * (price_discount[subscription_period] / 100.0)), 2)
 
         return [
             ('%f' % price_with_period).rstrip('0').rstrip('.'),
