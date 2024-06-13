@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Optional, List
 
 from google.cloud.firestore_v1 import FieldFilter, Query
@@ -11,20 +12,7 @@ async def get_package(package_id: str) -> Optional[Package]:
     package = await package_ref.get()
 
     if package.exists:
-        package_dict = package.to_dict()
-        return Package(
-            id=package_dict.get('id'),
-            user_id=package_dict.get('user_id'),
-            type=package_dict.get('type'),
-            status=package_dict.get('status'),
-            currency=package_dict.get('currency'),
-            amount=package_dict.get('amount'),
-            quantity=package_dict.get('quantity'),
-            provider_payment_charge_id=package_dict.get('provider_payment_charge_id'),
-            until_at=package_dict.get('until_at'),
-            created_at=package_dict.get('created_at'),
-            edited_at=package_dict.get('edited_at'),
-        )
+        return Package(**package.to_dict())
 
 
 async def get_last_package_by_user_id(user_id: str) -> Optional[Package]:
@@ -35,42 +23,35 @@ async def get_last_package_by_user_id(user_id: str) -> Optional[Package]:
         .stream()
 
     async for package in package_stream:
-        package_dict = package.to_dict()
-        return Package(
-            id=package_dict.get('id'),
-            user_id=package_dict.get('user_id'),
-            type=package_dict.get('type'),
-            status=package_dict.get('status'),
-            currency=package_dict.get('currency'),
-            amount=package_dict.get('amount'),
-            quantity=package_dict.get('quantity'),
-            provider_payment_charge_id=package_dict.get('provider_payment_charge_id'),
-            until_at=package_dict.get('until_at'),
-            created_at=package_dict.get('created_at'),
-            edited_at=package_dict.get('edited_at'),
-        )
+        return Package(**package.to_dict())
 
 
-async def get_packages() -> List[Package]:
-    packages = firebase.db.collection(Package.COLLECTION_NAME).stream()
+async def get_packages_by_provider_payment_charge_id(provider_payment_charge_id: str) -> List[Package]:
+    packages = firebase.db.collection(Package.COLLECTION_NAME) \
+        .where(filter=FieldFilter("provider_payment_charge_id", "==", provider_payment_charge_id)) \
+        .stream()
 
-    packages = [
-        Package(
-            id=package.to_dict().get('id'),
-            user_id=package.to_dict().get('user_id'),
-            type=package.to_dict().get('type'),
-            status=package.to_dict().get('status'),
-            currency=package.to_dict().get('currency'),
-            amount=package.to_dict().get('amount'),
-            quantity=package.to_dict().get('quantity'),
-            provider_payment_charge_id=package.to_dict().get('provider_payment_charge_id'),
-            until_at=package.to_dict().get('until_at'),
-            created_at=package.to_dict().get('created_at'),
-            edited_at=package.to_dict().get('edited_at'),
-        ) async for package in packages
+    return [
+        Package(**package.to_dict()) async for package in packages
     ]
 
-    return packages
+
+async def get_packages(
+    start_date: Optional[datetime] = None,
+    end_date: Optional[datetime] = None,
+) -> List[Package]:
+    packages_query = firebase.db.collection(Package.COLLECTION_NAME)
+
+    if start_date:
+        packages_query = packages_query.where(filter=FieldFilter("created_at", ">=", start_date))
+    if end_date:
+        packages_query = packages_query.where(filter=FieldFilter("created_at", "<=", end_date))
+
+    packages = packages_query.stream()
+
+    return [
+        Package(**package.to_dict()) async for package in packages
+    ]
 
 
 async def get_packages_by_user_id_and_status(user_id: str, status: PackageStatus) -> List[Package]:
@@ -78,41 +59,18 @@ async def get_packages_by_user_id_and_status(user_id: str, status: PackageStatus
         .where(filter=FieldFilter("user_id", "==", user_id)) \
         .where(filter=FieldFilter("status", "==", status))
 
-    packages = [
-        Package(
-            id=package.to_dict().get('id'),
-            user_id=package.to_dict().get('user_id'),
-            type=package.to_dict().get('type'),
-            status=package.to_dict().get('status'),
-            currency=package.to_dict().get('currency'),
-            amount=package.to_dict().get('amount'),
-            quantity=package.to_dict().get('quantity'),
-            provider_payment_charge_id=package.to_dict().get('provider_payment_charge_id'),
-            until_at=package.to_dict().get('until_at'),
-            created_at=package.to_dict().get('created_at'),
-            edited_at=package.to_dict().get('edited_at'),
-        ) async for package in packages_query.stream()
-    ]
+    packages = packages_query.stream()
 
-    return packages
+    return [
+        Package(**package.to_dict()) async for package in packages
+    ]
 
 
 async def get_packages_by_user_id(user_id: str) -> List[Package]:
     packages_query = firebase.db.collection(Package.COLLECTION_NAME).where(filter=FieldFilter("user_id", "==", user_id))
-    packages = [
-        Package(
-            id=package.to_dict().get('id'),
-            user_id=package.to_dict().get('user_id'),
-            type=package.to_dict().get('type'),
-            status=package.to_dict().get('status'),
-            currency=package.to_dict().get('currency'),
-            amount=package.to_dict().get('amount'),
-            quantity=package.to_dict().get('quantity'),
-            provider_payment_charge_id=package.to_dict().get('provider_payment_charge_id'),
-            until_at=package.to_dict().get('until_at'),
-            created_at=package.to_dict().get('created_at'),
-            edited_at=package.to_dict().get('edited_at'),
-        ) async for package in packages_query.stream()
-    ]
 
-    return packages
+    packages = packages_query.stream()
+
+    return [
+        Package(**package.to_dict()) async for package in packages
+    ]

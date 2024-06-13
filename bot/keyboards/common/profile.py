@@ -4,7 +4,12 @@ from bot.database.models.user import UserGender
 from bot.locales.main import get_localization
 
 
-def build_profile_keyboard(language_code: str, is_photo_uploaded: bool, is_gender_chosen: bool) -> InlineKeyboardMarkup:
+def build_profile_keyboard(
+    language_code: str,
+    is_photo_uploaded: bool,
+    is_gender_chosen: bool,
+    has_active_subscription: bool,
+) -> InlineKeyboardMarkup:
     buttons = [
         [
             InlineKeyboardButton(
@@ -38,13 +43,22 @@ def build_profile_keyboard(language_code: str, is_photo_uploaded: bool, is_gende
                 callback_data=f'profile:open_buy_packages_info'
             ),
         ],
-        [
-            InlineKeyboardButton(
-                text=get_localization(language_code).CLOSE,
-                callback_data=f'profile:close'
-            ),
-        ],
     ]
+
+    if has_active_subscription:
+        buttons.append([
+            InlineKeyboardButton(
+                text=get_localization(language_code).CANCEL_SUBSCRIPTION,
+                callback_data=f'profile:cancel_subscription'
+            )
+        ])
+
+    buttons.append([
+        InlineKeyboardButton(
+            text=get_localization(language_code).CLOSE,
+            callback_data=f'profile:close'
+        ),
+    ])
 
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 

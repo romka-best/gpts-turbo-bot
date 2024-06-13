@@ -231,6 +231,7 @@ async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_q
                 type=TransactionType.EXPENSE,
                 service=service,
                 amount=total_price,
+                clear_amount=total_price,
                 currency=Currency.USD,
                 quantity=1,
                 details={
@@ -239,6 +240,7 @@ async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_q
                     "request": text,
                     "answer": message_content,
                     "is_suggestion": False,
+                    "has_error": False,
                 },
             )
 
@@ -399,6 +401,7 @@ async def handle_chatgpt4_example(user: User, user_language_code: str, prompt: s
                 type=TransactionType.EXPENSE,
                 service=service,
                 amount=total_price,
+                clear_amount=total_price,
                 currency=Currency.USD,
                 quantity=1,
                 details={
@@ -407,6 +410,7 @@ async def handle_chatgpt4_example(user: User, user_language_code: str, prompt: s
                     "request": prompt,
                     "answer": message_content,
                     "is_suggestion": True,
+                    "has_error": False,
                 },
             )
 

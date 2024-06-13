@@ -25,11 +25,15 @@ def create_user_object(
         telegram_chat_id=telegram_chat_id,
         gender=user_data.get('gender', UserGender.UNSPECIFIED),
         language_code=telegram_user.language_code,
+        interface_language_code=user_data.get(
+            'interface_language_code',
+            'ru' if telegram_user.language_code == 'ru' else 'en'
+        ),
         is_premium=telegram_user.is_premium or False,
         is_blocked=False,
         is_banned=False,
         current_model=user_data.get("current_model", Model.CHAT_GPT),
-        currency=user_data.get("currency", Currency.RUB),
+        currency=user_data.get("currency", Currency.RUB if telegram_user.language_code == 'ru' else Currency.USD),
         balance=user_data.get("balance", 25.00 if is_referred_by_user else 0),
         subscription_type=user_data.get("subscription_type", SubscriptionType.FREE),
         last_subscription_limit_update=user_data.get("last_subscription_limit_update", datetime.now(timezone.utc)),

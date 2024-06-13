@@ -55,11 +55,13 @@ async def process_voice_message(bot: Bot, voice: File, user_id: str):
             type=TransactionType.EXPENSE,
             service=ServiceType.VOICE_MESSAGES,
             amount=total_price,
+            clear_amount=total_price,
             currency=Currency.USD,
             quantity=1,
             details={
                 'subtype': 'STT',
                 'text': text,
+                'has_error': False,
             },
         )
 

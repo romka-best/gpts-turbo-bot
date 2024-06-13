@@ -1,5 +1,3 @@
-from datetime import datetime, timezone
-
 from google.cloud import firestore
 
 from bot.database.models.package import Package, PackageStatus
@@ -14,6 +12,7 @@ async def create_package(
     transaction,
     package_id: str,
     user_id: str,
+    income_amount: float,
     provider_payment_charge_id: str,
 ):
     user = await get_user(user_id)
@@ -24,8 +23,8 @@ async def create_package(
         package_id,
         {
             "status": PackageStatus.SUCCESS,
+            "income_amount": income_amount,
             "provider_payment_charge_id": provider_payment_charge_id,
-            "edited_at": datetime.now(timezone.utc),
         },
     )
 

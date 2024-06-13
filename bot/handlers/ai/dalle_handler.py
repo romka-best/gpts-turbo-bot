@@ -99,15 +99,18 @@ async def handle_dall_e(message: Message, state: FSMContext, user: User):
                     "additional_usage_quota": user.additional_usage_quota,
                 },
             )
+            total_price = PRICE_DALL_E * cost
             await write_transaction(
                 user_id=user.id,
                 type=TransactionType.EXPENSE,
                 service=ServiceType.DALL_E,
-                amount=PRICE_DALL_E * cost,
+                amount=total_price,
+                clear_amount=total_price,
                 currency=Currency.USD,
                 quantity=1,
                 details={
                     'text': text,
+                    'has_error': False,
                 },
             )
 

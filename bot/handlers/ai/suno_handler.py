@@ -6,11 +6,11 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
 from aiogram.utils.chat_action import ChatActionSender
 
-from bot.database.models.common import Model, SunoMode, Quota
+from bot.database.models.common import Model, SunoMode, Quota, SunoVersion
 from bot.database.models.generation import GenerationStatus
 from bot.database.models.request import RequestStatus
 from bot.database.models.subscription import SubscriptionType
-from bot.database.models.user import User
+from bot.database.models.user import User, UserSettings
 from bot.database.operations.generation.getters import get_generations_by_request_id
 from bot.database.operations.generation.updaters import update_generation
 from bot.database.operations.generation.writers import write_generation
@@ -173,7 +173,7 @@ async def suno_prompt_sent(message: Message, state: FSMContext):
             )
 
             try:
-                results = await generate_song(prompt)
+                results = await generate_song(user.settings[Model.SUNO][UserSettings.VERSION], prompt)
                 tasks = []
                 for (i, result) in enumerate(results):
                     if result is not None:
@@ -367,7 +367,13 @@ async def suno_genres_sent(message: Message, state: FSMContext):
                     },
                 )
 
-                results = await generate_song(lyrics, False, True, genres)
+                results = await generate_song(
+                    user.settings[Model.SUNO][UserSettings.VERSION],
+                    lyrics,
+                    False,
+                    True,
+                    genres,
+                )
                 tasks = []
                 for (i, result) in enumerate(results):
                     if result is not None:
@@ -456,7 +462,7 @@ async def handle_suno_example(user: User, prompt: str, message: Message, state: 
         )
 
         try:
-            results = await generate_song(prompt)
+            results = await generate_song(SunoVersion.V3_5, prompt)
             tasks = []
             for (i, result) in enumerate(results):
                 if result is not None:

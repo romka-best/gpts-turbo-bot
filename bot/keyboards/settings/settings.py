@@ -8,7 +8,7 @@ from bot.database.models.common import (
     DALLEResolution,
     DALLEQuality,
     MidjourneyVersion,
-    SunoSendType,
+    SunoSendType, SunoVersion,
 )
 from bot.database.models.user import UserSettings
 from bot.locales.main import get_localization
@@ -129,7 +129,7 @@ def build_settings_choose_music_model_keyboard(language_code: str) -> InlineKeyb
         ],
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).MIDJOURNEY,
+                text=get_localization(language_code).SUNO,
                 callback_data=f'settings_choose_music_model:{Model.SUNO}'
             ),
         ],
@@ -312,6 +312,18 @@ def build_settings_keyboard(language_code: str, model: Model, model_type: str, s
                     text=get_localization(language_code).VIDEO + (
                         " ✅" if settings[model][UserSettings.SEND_TYPE] == SunoSendType.VIDEO else ""),
                     callback_data=f'setting:{SunoSendType.VIDEO}:{Model.SUNO}'
+                ),
+            ],
+            [
+                InlineKeyboardButton(
+                    text=SunoVersion.V3 + (
+                        " ✅" if settings[model][UserSettings.VERSION] == SunoVersion.V3 else ""),
+                    callback_data=f'setting:{SunoVersion.V3}:{Model.SUNO}'
+                ),
+                InlineKeyboardButton(
+                    text=SunoVersion.V3_5 + (
+                        " ✅" if settings[model][UserSettings.VERSION] == SunoVersion.V3_5 else ""),
+                    callback_data=f'setting:{SunoVersion.V3_5}:{Model.SUNO}'
                 ),
             ],
         ]

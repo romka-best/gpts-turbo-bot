@@ -25,8 +25,16 @@ class Settings(BaseSettings):
     STORAGE_NAME: SecretStr
     BILLING_TABLE: SecretStr
 
+    BOT_URL: str
     BOT_TOKEN: SecretStr
+
     YOOKASSA_TOKEN: SecretStr
+    YOOKASSA_ACCOUNT_ID: SecretStr
+    YOOKASSA_SECRET_KEY: SecretStr
+
+    PAY_SELECTION_SITE_ID: SecretStr
+    PAY_SELECTION_SECRET_KEY: SecretStr
+    PAY_SELECTION_PUBLIC_KEY: SecretStr
 
     OAUTH_YANDEX_TOKEN: SecretStr
     OPENAI_API_KEY: SecretStr

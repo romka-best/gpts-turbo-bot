@@ -23,6 +23,7 @@ async def get_user(user_id: str) -> Optional[User]:
             telegram_chat_id=user_dict.get('telegram_chat_id'),
             gender=user_dict.get('gender', UserGender.UNSPECIFIED),
             language_code=user_dict.get('language_code'),
+            interface_language_code=user_dict.get('interface_language_code'),
             is_premium=user_dict.get('is_premium', False),
             is_blocked=user_dict.get('is_blocked', False),
             is_banned=user_dict.get('is_banned', False),
@@ -63,6 +64,7 @@ async def get_users(
             telegram_chat_id=user.to_dict().get('telegram_chat_id'),
             gender=user.to_dict().get('gender', UserGender.UNSPECIFIED),
             language_code=user.to_dict().get('language_code'),
+            interface_language_code=user.to_dict().get('interface_language_code'),
             is_premium=user.to_dict().get('is_premium', False),
             is_blocked=user.to_dict().get('is_blocked', False),
             is_banned=user.to_dict().get('is_banned', False),
@@ -97,6 +99,7 @@ async def get_users_by_referral(referred_by: str) -> List[User]:
             telegram_chat_id=user.to_dict().get('telegram_chat_id'),
             gender=user.to_dict().get('gender', UserGender.UNSPECIFIED),
             language_code=user.to_dict().get('language_code'),
+            interface_language_code=user.to_dict().get('interface_language_code'),
             is_premium=user.to_dict().get('is_premium', False),
             is_blocked=user.to_dict().get('is_blocked', False),
             is_banned=user.to_dict().get('is_banned', False),
@@ -118,7 +121,7 @@ async def get_users_by_referral(referred_by: str) -> List[User]:
 
 async def get_users_by_language_code(language_code: str) -> List[User]:
     users_stream = firebase.db.collection(User.COLLECTION_NAME) \
-        .where(filter=FieldFilter("language_code", "==", language_code)) \
+        .where(filter=FieldFilter("interface_language_code", "==", language_code)) \
         .stream()
 
     return [
@@ -131,6 +134,7 @@ async def get_users_by_language_code(language_code: str) -> List[User]:
             telegram_chat_id=user.to_dict().get('telegram_chat_id'),
             gender=user.to_dict().get('gender', UserGender.UNSPECIFIED),
             language_code=user.to_dict().get('language_code'),
+            interface_language_code=user.to_dict().get('interface_language_code'),
             is_premium=user.to_dict().get('is_premium', False),
             is_blocked=user.to_dict().get('is_blocked', False),
             is_banned=user.to_dict().get('is_banned', False),

@@ -7,6 +7,7 @@ from aiogram import Bot
 from aiogram.fsm.storage.base import BaseStorage
 
 from bot.config import config
+from bot.database.models.common import SunoVersion
 from bot.database.models.generation import GenerationStatus
 from bot.database.models.request import RequestStatus
 from bot.database.operations.generation.getters import get_generation
@@ -78,6 +79,7 @@ class APIResource:
 class Songs(APIResource):
     async def generate(
         self,
+        version: SunoVersion,
         prompt: str,
         instrumental: bool = False,
         custom: bool = False,
@@ -85,7 +87,7 @@ class Songs(APIResource):
     ) -> List:
         url = f"{SUNO_API_URL}/api/generate/v2/"
         payload = {
-            "mv": "chirp-v3-5",
+            "mv": version,
             "prompt": prompt if custom else "",
             "gpt_description_prompt": "" if custom else prompt,
             "make_instrumental": instrumental,
@@ -101,6 +103,7 @@ class Songs(APIResource):
 
 
 async def generate_song(
+    version: SunoVersion,
     prompt: str,
     instrumental: bool = False,
     custom: bool = False,
@@ -108,6 +111,7 @@ async def generate_song(
 ) -> List[str]:
     async with Suno(cookie=SUNO_TOKEN) as client:
         clips = await client.songs.generate(
+            version=version,
             prompt=prompt,
             instrumental=instrumental,
             custom=custom,

@@ -23,11 +23,13 @@ async def reply_with_voice(
         type=TransactionType.EXPENSE,
         service=ServiceType.VOICE_MESSAGES,
         amount=total_price,
+        clear_amount=total_price,
         currency=Currency.USD,
         quantity=1,
         details={
             'subtype': 'TTS',
             'text': text,
+            'has_error': False,
         },
     )
 

@@ -165,11 +165,13 @@ async def handle_suno_webhook(bot: Bot, storage: BaseStorage, body: dict):
                 type=TransactionType.EXPENSE,
                 service=ServiceType.SUNO,
                 amount=0,
+                clear_amount=0,
                 currency=Currency.USD,
                 quantity=quantity_to_delete,
                 details={
                     'mode': request.details.get("mode"),
                     'is_suggestion': request.details.get("is_suggestion", False),
+                    'has_error': generation.has_error,
                 }
             ),
             update_user(user.id, {

@@ -1,7 +1,7 @@
 import re
 from datetime import datetime, timedelta, timezone
 
-from bot.database.models.common import Currency, Quota
+from bot.database.models.common import Currency, Quota, PaymentMethod
 
 
 class SubscriptionType:
@@ -22,6 +22,8 @@ class SubscriptionStatus:
     ACTIVE = 'ACTIVE'
     WAITING = 'WAITING'
     FINISHED = 'FINISHED'
+    DECLINED = 'DECLINED'
+    CANCELED = 'CANCELED'
     ERROR = 'ERROR'
 
 
@@ -31,7 +33,7 @@ class SubscriptionLimit:
             Quota.CHAT_GPT3_TURBO: 100,
             Quota.CHAT_GPT4_TURBO: 0,
             Quota.CHAT_GPT4_OMNI: 0,
-            Quota.CLAUDE_3_SONNET: 20,
+            Quota.CLAUDE_3_SONNET: 10,
             Quota.CLAUDE_3_OPUS: 0,
             Quota.DALL_E: 3,
             Quota.MIDJOURNEY: 0,
@@ -41,10 +43,10 @@ class SubscriptionLimit:
         },
         SubscriptionType.STANDARD: {
             Quota.CHAT_GPT3_TURBO: 1000,
-            Quota.CHAT_GPT4_TURBO: 25,
+            Quota.CHAT_GPT4_TURBO: 10,
             Quota.CHAT_GPT4_OMNI: 25,
-            Quota.CLAUDE_3_SONNET: 250,
-            Quota.CLAUDE_3_OPUS: 25,
+            Quota.CLAUDE_3_SONNET: 25,
+            Quota.CLAUDE_3_OPUS: 10,
             Quota.DALL_E: 25,
             Quota.MIDJOURNEY: 10,
             Quota.FACE_SWAP: 100,
@@ -53,10 +55,10 @@ class SubscriptionLimit:
         },
         SubscriptionType.VIP: {
             Quota.CHAT_GPT3_TURBO: 2000,
-            Quota.CHAT_GPT4_TURBO: 50,
+            Quota.CHAT_GPT4_TURBO: 25,
             Quota.CHAT_GPT4_OMNI: 50,
-            Quota.CLAUDE_3_SONNET: 500,
-            Quota.CLAUDE_3_OPUS: 50,
+            Quota.CLAUDE_3_SONNET: 50,
+            Quota.CLAUDE_3_OPUS: 25,
             Quota.DALL_E: 50,
             Quota.MIDJOURNEY: 25,
             Quota.FACE_SWAP: 250,
@@ -65,10 +67,10 @@ class SubscriptionLimit:
         },
         SubscriptionType.PREMIUM: {
             Quota.CHAT_GPT3_TURBO: 3000,
-            Quota.CHAT_GPT4_TURBO: 100,
+            Quota.CHAT_GPT4_TURBO: 50,
             Quota.CHAT_GPT4_OMNI: 100,
-            Quota.CLAUDE_3_SONNET: 1000,
-            Quota.CLAUDE_3_OPUS: 100,
+            Quota.CLAUDE_3_SONNET: 100,
+            Quota.CLAUDE_3_OPUS: 50,
             Quota.DALL_E: 100,
             Quota.MIDJOURNEY: 50,
             Quota.FACE_SWAP: 500,
@@ -118,7 +120,10 @@ class Subscription:
     status: SubscriptionStatus
     currency: Currency
     amount: float
+    income_amount: float
+    payment_method: PaymentMethod
     provider_payment_charge_id: str
+    provider_auto_payment_charge_id: str
     start_date: datetime
     end_date: datetime
     created_at: datetime
@@ -133,7 +138,10 @@ class Subscription:
         status: SubscriptionStatus,
         currency: Currency,
         amount: float,
+        income_amount=0.00,
+        payment_method=PaymentMethod.YOOKASSA,
         provider_payment_charge_id="",
+        provider_auto_payment_charge_id="",
         start_date=None,
         end_date=None,
         created_at=None,
@@ -146,7 +154,10 @@ class Subscription:
         self.status = status
         self.currency = currency
         self.amount = amount
+        self.income_amount = income_amount
+        self.payment_method = payment_method
         self.provider_payment_charge_id = provider_payment_charge_id
+        self.provider_auto_payment_charge_id = provider_auto_payment_charge_id
 
         self.start_date = start_date if start_date is not None else datetime.now(timezone.utc)
         if not end_date and period == SubscriptionPeriod.MONTH1:
@@ -220,6 +231,9 @@ class Subscription:
         price_clear = re.sub(r'[^\d.]', '', price_raw)
         price = float(price_clear) if '.' in price_clear else int(price_clear)
         price_with_period = price * price_period[subscription_period]
-        price_with_discount = price_with_period - (price_with_period * (price_discount[subscription_period] / 100.0))
+        price_with_discount = round(price_with_period - (price_with_period * (price_discount[subscription_period] / 100.0)), 2)
 
-        return [int(price_with_period), int(price_with_discount)]
+        return [
+            ('%f' % price_with_period).rstrip('0').rstrip('.'),
+            ('%f' % price_with_discount).rstrip('0').rstrip('.'),
+        ]
