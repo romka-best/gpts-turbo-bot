@@ -784,7 +784,7 @@ async def handle_payment_method_cart_selection(callback_query: CallbackQuery, st
 
             caption = get_localization(user_language_code).confirmation_cart(
                 cart.items,
-                Currency.RUB,
+                Currency.USD,
                 amount,
             )
             reply_markup = build_payment_keyboard(
@@ -819,7 +819,7 @@ async def handle_payment_method_cart_selection(callback_query: CallbackQuery, st
                     user_id,
                     package_type,
                     PackageStatus.WAITING,
-                    Currency.RUB,
+                    Currency.USD,
                     package_amount,
                     0,
                     int(package_quantity),
@@ -835,7 +835,7 @@ async def handle_cancel_subscription(message: Message, user_id: str, state: FSMC
     user_language_code = await get_user_language(user_id, state.storage)
 
     subscription = await get_last_subscription_by_user_id(user_id)
-    if subscription.status == SubscriptionStatus.ACTIVE:
+    if subscription and subscription.status == SubscriptionStatus.ACTIVE:
         text = get_localization(user_language_code).CANCEL_SUBSCRIPTION_CONFIRMATION
         reply_markup = build_cancel_subscription_keyboard(user_language_code)
     else:

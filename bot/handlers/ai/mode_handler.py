@@ -104,6 +104,7 @@ async def handle_mode_selection(callback_query: CallbackQuery, state: FSMContext
         await callback_query.message.reply(
             text=get_localization(user_language_code).switched(user.current_model, chosen_version),
             reply_markup=reply_markup,
+            message_effect_id="5104841245755180586",
         )
     else:
         await callback_query.message.reply(

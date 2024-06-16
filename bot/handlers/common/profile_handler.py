@@ -53,7 +53,7 @@ async def profile(message: Message, state: FSMContext):
     renewal_date = (user.last_subscription_limit_update + timedelta(days=30))
     text = get_localization(user_language_code).profile(
         user.subscription_type,
-        subscription.status if subscription.status else SubscriptionStatus.ACTIVE,
+        subscription.status if subscription and subscription.status else SubscriptionStatus.ACTIVE,
         user.gender,
         user.current_model,
         user.settings[Model.CHAT_GPT][UserSettings.VERSION],

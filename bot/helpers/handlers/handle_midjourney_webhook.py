@@ -21,7 +21,7 @@ from bot.handlers.ai.midjourney_handler import PRICE_MIDJOURNEY_REQUEST
 from bot.helpers.senders.send_images import send_image
 from bot.helpers.senders.send_message_to_admins import send_message_to_admins
 from bot.keyboards.ai.midjourney import build_midjourney_keyboard
-from bot.keyboards.common.common import build_reaction_keyboard
+from bot.keyboards.common.common import build_reaction_keyboard, build_error_keyboard
 from bot.locales.main import get_localization, get_user_language
 
 
@@ -100,9 +100,11 @@ async def handle_midjourney_result(
             )
         else:
             if not is_suggestion:
+                reply_markup = build_error_keyboard(user_language_code)
                 await bot.send_message(
                     chat_id=user.telegram_chat_id,
                     text=get_localization(user_language_code).ERROR,
+                    reply_markup=reply_markup,
                 )
             await send_message_to_admins(
                 bot=bot,

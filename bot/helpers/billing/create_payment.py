@@ -1,4 +1,5 @@
 import json
+import logging
 import uuid
 from typing import Dict
 
@@ -44,7 +45,7 @@ async def create_payment(
                 "locale": "ru_RU" if language_code == "ru" else "en_US",
             },
             "capture": True,
-            "save_payment_method": is_subscription,
+            # "save_payment_method": is_subscription,
             "description": description,
             "merchant_customer_id": user_id,
         }
@@ -53,8 +54,9 @@ async def create_payment(
             auth=BasicAuth(Configuration.account_id, Configuration.secret_key)
         ) as session:
             async with session.post(url, headers=headers, data=json.dumps(payload)) as response:
+                body = await response.json()
+                logging.info(body)
                 if response.ok:
-                    body = await response.json()
                     return body
     elif payment_method == PaymentMethod.PAY_SELECTION:
         url = f"{PAY_SELECTION_URL}/webpayments/paylink_create"
@@ -90,8 +92,8 @@ async def create_payment(
         async with aiohttp.ClientSession() as session:
             async with session.post(url, headers=request_headers, data=json.dumps(request_body)) as response:
                 body = await response.json()
+                logging.info(body)
                 if response.ok:
-                    body = await response.json()
                     return body
     else:
         raise NotImplementedError

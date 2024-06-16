@@ -21,7 +21,7 @@ from bot.handlers.ai.suno_handler import handle_suno_example
 from bot.helpers.senders.send_message_to_admins import send_message_to_admins
 from bot.locales.translate_text import translate_text
 from bot.integrations.replicateAI import create_music_gen_melody
-from bot.keyboards.common.common import build_recommendations_keyboard, build_cancel_keyboard
+from bot.keyboards.common.common import build_recommendations_keyboard, build_cancel_keyboard, build_error_keyboard
 from bot.keyboards.ai.music_gen import build_music_gen_keyboard
 from bot.locales.main import get_localization, get_user_language
 from bot.states.music_gen import MusicGen
@@ -55,6 +55,7 @@ async def music_gen(message: Message, state: FSMContext):
         await message.answer(
             text=get_localization(user_language_code).SWITCHED_TO_MUSIC_GEN,
             reply_markup=reply_markup,
+            message_effect_id="5104841245755180586",
         )
 
     await handle_music_gen(message.bot, str(message.chat.id), state, user_id)
@@ -176,10 +177,13 @@ async def handle_music_gen_selection(
                     }
                 )
             except Exception as e:
+                reply_markup = build_error_keyboard(user_language_code)
                 await message.answer(
                     text=get_localization(user_language_code).ERROR,
+                    reply_markup=reply_markup,
                     parse_mode=None,
                 )
+
                 await send_message_to_admins(
                     bot=message.bot,
                     message=f"#error\n\nALARM! Ошибка у пользователя при запросе в MusicGen: {user.id}\nИнформация:\n{e}",

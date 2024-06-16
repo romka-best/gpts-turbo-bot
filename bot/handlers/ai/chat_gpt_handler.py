@@ -28,7 +28,7 @@ from bot.helpers.senders.send_message_to_admins import send_message_to_admins
 from bot.helpers.split_message import split_message
 from bot.integrations.openAI import get_response_message
 from bot.keyboards.ai.chat_gpt import build_chat_gpt_continue_generating_keyboard, build_chat_gpt_keyboard
-from bot.keyboards.common.common import build_recommendations_keyboard
+from bot.keyboards.common.common import build_recommendations_keyboard, build_error_keyboard
 from bot.locales.main import get_localization, get_user_language
 
 chat_gpt_router = Router()
@@ -116,6 +116,7 @@ async def handle_chat_gpt_choose_selection(callback_query: CallbackQuery, state:
             await callback_query.message.answer(
                 text=text,
                 reply_markup=reply_markup,
+                message_effect_id="5104841245755180586",
             )
         else:
             text = get_localization(user_language_code).ALREADY_SWITCHED_TO_THIS_MODEL
@@ -315,8 +316,10 @@ async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_q
                     text=get_localization(user_language_code).REQUEST_FORBIDDEN_ERROR,
                 )
             else:
+                reply_markup = build_error_keyboard(user_language_code)
                 await message.answer(
                     text=get_localization(user_language_code).ERROR,
+                    reply_markup=reply_markup,
                     parse_mode=None,
                 )
 
@@ -327,8 +330,10 @@ async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_q
                     parse_mode=None,
                 )
         except Exception as e:
+            reply_markup = build_error_keyboard(user_language_code)
             await message.answer(
                 text=get_localization(user_language_code).ERROR,
+                reply_markup=reply_markup,
                 parse_mode=None,
             )
             await send_message_to_admins(
