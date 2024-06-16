@@ -25,7 +25,7 @@ from bot.integrations.midjourney import (
     create_different_midjourney_image,
     create_different_midjourney_images,
 )
-from bot.keyboards.common.common import build_recommendations_keyboard
+from bot.keyboards.common.common import build_recommendations_keyboard, build_error_keyboard
 from bot.locales.main import get_localization, get_user_language
 
 midjourney_router = Router()
@@ -57,6 +57,7 @@ async def midjourney(message: Message, state: FSMContext):
         await message.answer(
             text=get_localization(user_language_code).SWITCHED_TO_MIDJOURNEY,
             reply_markup=reply_markup,
+            message_effect_id="5104841245755180586",
         )
 
 
@@ -133,10 +134,13 @@ async def handle_midjourney(
                     }
                 )
             except Exception as e:
+                reply_markup = build_error_keyboard(user_language_code)
                 await message.answer(
                     text=get_localization(user_language_code).ERROR,
+                    reply_markup=reply_markup,
                     parse_mode=None,
                 )
+
                 await send_message_to_admins(
                     bot=message.bot,
                     message=f"#error\n\nALARM! Ошибка у пользователя при запросе в Midjourney: {user.id}\nИнформация:\n{e}",

@@ -92,3 +92,17 @@ def build_cancel_keyboard(language_code: str) -> InlineKeyboardMarkup:
     ]
 
     return InlineKeyboardMarkup(inline_keyboard=buttons)
+
+
+def build_error_keyboard(language_code: str) -> InlineKeyboardMarkup:
+    buttons = [
+        [
+            InlineKeyboardButton(
+                text=get_localization(language_code).TECH_SUPPORT,
+                url="https://t.me/roman_danilov",
+                callback_data='error:tech_support'
+            )
+        ]
+    ]
+
+    return InlineKeyboardMarkup(inline_keyboard=buttons)

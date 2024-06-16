@@ -1,4 +1,5 @@
 import json
+import logging
 import uuid
 from typing import Dict
 
@@ -46,8 +47,9 @@ async def create_auto_payment(
             auth=BasicAuth(Configuration.account_id, Configuration.secret_key)
         ) as session:
             async with session.post(url, headers=headers, data=json.dumps(payload)) as response:
+                body = await response.json()
+                logging.info(body)
                 if response.ok:
-                    body = await response.json()
                     return body
     elif payment_method == PaymentMethod.PAY_SELECTION:
         url = f"{PAY_SELECTION_URL}/payments/requests/rebill"
@@ -70,8 +72,9 @@ async def create_auto_payment(
 
         async with aiohttp.ClientSession() as session:
             async with session.post(url, headers=request_headers, data=json.dumps(request_body)) as response:
+                body = await response.json()
+                logging.info(body)
                 if response.ok:
-                    body = await response.json()
                     return body
     else:
         raise NotImplementedError

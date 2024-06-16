@@ -28,7 +28,6 @@ class Settings(BaseSettings):
     BOT_URL: str
     BOT_TOKEN: SecretStr
 
-    YOOKASSA_TOKEN: SecretStr
     YOOKASSA_ACCOUNT_ID: SecretStr
     YOOKASSA_SECRET_KEY: SecretStr
 

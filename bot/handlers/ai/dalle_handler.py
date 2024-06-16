@@ -16,7 +16,7 @@ from bot.database.operations.user.updaters import update_user
 from bot.handlers.ai.midjourney_handler import handle_midjourney_example
 from bot.helpers.senders.send_message_to_admins import send_message_to_admins
 from bot.integrations.openAI import get_response_image, get_cost_for_image
-from bot.keyboards.common.common import build_recommendations_keyboard
+from bot.keyboards.common.common import build_recommendations_keyboard, build_error_keyboard
 from bot.locales.main import get_localization, get_user_language
 
 dall_e_router = Router()
@@ -48,6 +48,7 @@ async def dall_e(message: Message, state: FSMContext):
         await message.answer(
             text=get_localization(user_language_code).SWITCHED_TO_DALL_E,
             reply_markup=reply_markup,
+            message_effect_id="5104841245755180586",
         )
 
 
@@ -126,9 +127,11 @@ async def handle_dall_e(message: Message, state: FSMContext, user: User):
                     text=get_localization(user_language_code).REQUEST_FORBIDDEN_ERROR,
                 )
         except Exception as e:
+            reply_markup = build_error_keyboard(user_language_code)
             await message.answer(
                 text=get_localization(user_language_code).ERROR,
-                parse_mode=None
+                reply_markup=reply_markup,
+                parse_mode=None,
             )
             await send_message_to_admins(
                 bot=message.bot,

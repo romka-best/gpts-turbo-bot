@@ -7,7 +7,7 @@ from bot.database.main import firebase
 from bot.database.operations.user.getters import get_user
 from bot.helpers.initialize_user_for_the_first_time import initialize_user_for_the_first_time
 from bot.helpers.senders.send_message_to_admins import send_message_to_admins
-from bot.keyboards.common.common import build_recommendations_keyboard
+from bot.keyboards.common.common import build_recommendations_keyboard, build_error_keyboard
 from bot.locales.main import get_localization, set_user_language, get_user_language
 
 
@@ -33,7 +33,7 @@ async def notify_admins_about_error(bot: Bot, telegram_update: Update, dp: Dispa
                 else:
                     raise
 
-                await set_user_language(user_id, language_code, dp.storage)
+                await dp.storage.redis.set(f"user:{user_id}:language", language_code)
 
                 chat_title = get_localization(language_code).DEFAULT_CHAT_TITLE
                 transaction = firebase.db.transaction()
@@ -57,10 +57,13 @@ async def notify_admins_about_error(bot: Bot, telegram_update: Update, dp: Dispa
                     reply_markup=reply_markup,
                 )
             else:
+                reply_markup = build_error_keyboard(user.interface_language_code)
                 await bot.send_message(
                     chat_id=user.telegram_chat_id,
                     text=get_localization(user.interface_language_code).ERROR,
+                    reply_markup=reply_markup,
                 )
+
                 await send_message_to_admins(
                     bot=bot,
                     message=f"#error\n\nALARM! Ошибка у пользователя: {user.id}\n"

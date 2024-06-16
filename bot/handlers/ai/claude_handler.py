@@ -30,7 +30,7 @@ from bot.helpers.senders.send_message_to_admins import send_message_to_admins
 from bot.helpers.split_message import split_message
 from bot.integrations.anthropic import get_response_message
 from bot.keyboards.ai.claude import build_claude_keyboard, build_claude_continue_generating_keyboard
-from bot.keyboards.common.common import build_recommendations_keyboard
+from bot.keyboards.common.common import build_recommendations_keyboard, build_error_keyboard
 from bot.locales.main import get_user_language, get_localization
 
 claude_router = Router()
@@ -112,6 +112,7 @@ async def handle_claude_choose_selection(callback_query: CallbackQuery, state: F
             await callback_query.message.answer(
                 text=text,
                 reply_markup=reply_markup,
+                message_effect_id="5104841245755180586",
             )
         else:
             text = get_localization(user_language_code).ALREADY_SWITCHED_TO_THIS_MODEL
@@ -298,9 +299,15 @@ async def handle_claude(message: Message, state: FSMContext, user: User, user_qu
                 await message.reply(
                     text=get_localization(user_language_code).REQUEST_FORBIDDEN_ERROR,
                 )
+            elif 'Overloaded' in str(e):
+                await message.reply(
+                    text=get_localization(user_language_code).SERVER_OVERLOADED_ERROR,
+                )
             else:
+                reply_markup = build_error_keyboard(user_language_code)
                 await message.answer(
                     text=get_localization(user_language_code).ERROR,
+                    reply_markup=reply_markup,
                     parse_mode=None,
                 )
 
@@ -311,10 +318,13 @@ async def handle_claude(message: Message, state: FSMContext, user: User, user_qu
                     parse_mode=None,
                 )
         except Exception as e:
+            reply_markup = build_error_keyboard(user_language_code)
             await message.answer(
                 text=get_localization(user_language_code).ERROR,
+                reply_markup=reply_markup,
                 parse_mode=None,
             )
+
             await send_message_to_admins(
                 bot=message.bot,
                 message=f"#error\n\nALARM! Ошибка у пользователя при запросе в Claude: {user.id}\n"

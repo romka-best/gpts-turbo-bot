@@ -27,7 +27,7 @@ from bot.keyboards.ai.suno import (
     build_suno_custom_mode_lyrics_keyboard,
     build_suno_custom_mode_genres_keyboard,
 )
-from bot.keyboards.common.common import build_recommendations_keyboard, build_cancel_keyboard
+from bot.keyboards.common.common import build_recommendations_keyboard, build_cancel_keyboard, build_error_keyboard
 from bot.locales.main import get_user_language, get_localization
 from bot.locales.translate_text import translate_text
 from bot.states.suno import Suno
@@ -61,6 +61,7 @@ async def suno(message: Message, state: FSMContext):
         await message.answer(
             text=get_localization(user_language_code).SWITCHED_TO_SUNO,
             reply_markup=reply_markup,
+            message_effect_id="5104841245755180586",
         )
 
     await handle_suno(message.bot, str(message.chat.id), state, user_id)
@@ -203,7 +204,7 @@ async def suno_prompt_sent(message: Message, state: FSMContext):
             except Exception as e:
                 if "Too Many Requests" in str(e):
                     await message.answer(
-                        text=get_localization(user_language_code).SUNO_TRY_LATER,
+                        text=get_localization(user_language_code).SERVER_OVERLOADED_ERROR,
                     )
                 elif "Bad Request" in str(e):
                     await message.answer(
@@ -212,8 +213,10 @@ async def suno_prompt_sent(message: Message, state: FSMContext):
 
                     await handle_suno(message.bot, str(message.chat.id), state, user_id)
                 else:
+                    reply_markup = build_error_keyboard(user_language_code)
                     await message.answer(
                         text=get_localization(user_language_code).ERROR,
+                        reply_markup=reply_markup,
                         parse_mode=None,
                     )
 
@@ -404,7 +407,7 @@ async def suno_genres_sent(message: Message, state: FSMContext):
             except Exception as e:
                 if "Too Many Requests" in str(e):
                     await message.answer(
-                        text=get_localization(user_language_code).SUNO_TRY_LATER,
+                        text=get_localization(user_language_code).SERVER_OVERLOADED_ERROR,
                     )
                 elif "Bad Request" in str(e):
                     await message.answer(
@@ -413,8 +416,10 @@ async def suno_genres_sent(message: Message, state: FSMContext):
 
                     await handle_suno(message.bot, str(message.chat.id), state, user_id)
                 else:
+                    reply_markup = build_error_keyboard(user_language_code)
                     await message.answer(
                         text=get_localization(user_language_code).ERROR,
+                        reply_markup=reply_markup,
                         parse_mode=None,
                     )
 

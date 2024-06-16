@@ -96,7 +96,6 @@ async def handle_replicate_face_swap(
                 used_face_swap_package_used_images.append(
                     request_generation.details.get('used_face_swap_package_used_image')
                 )
-            print(request_generation.id, request_generation.seconds)
             total_seconds += request_generation.seconds
 
         total_result = len(success_generations)

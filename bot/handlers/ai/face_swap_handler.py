@@ -46,7 +46,7 @@ from bot.keyboards.ai.face_swap import (
     build_face_swap_choose_keyboard,
     build_face_swap_package_keyboard,
 )
-from bot.keyboards.common.common import build_cancel_keyboard, build_recommendations_keyboard
+from bot.keyboards.common.common import build_cancel_keyboard, build_recommendations_keyboard, build_error_keyboard
 from bot.keyboards.common.profile import build_profile_gender_keyboard
 from bot.locales.main import get_localization, get_user_language
 from bot.states.face_swap import FaceSwap
@@ -54,7 +54,7 @@ from bot.states.profile import Profile
 
 face_swap_router = Router()
 
-PRICE_FACE_SWAP = 0.000725
+PRICE_FACE_SWAP = 0.0014
 
 
 def count_active_files(files_list: List[FaceSwapFileData]) -> int:
@@ -89,6 +89,7 @@ async def face_swap(message: Message, state: FSMContext):
         await message.answer(
             text=get_localization(user_language_code).SWITCHED_TO_FACE_SWAP,
             reply_markup=reply_markup,
+            message_effect_id="5104841245755180586",
         )
 
     await handle_face_swap(message.bot, user.telegram_chat_id, state, user_id)
@@ -414,10 +415,13 @@ async def face_swap_quantity_handler(message: Message, state: FSMContext, user_i
 
                 await state.update_data(maximum_quantity=face_swap_package_quantity - quantity)
             except Exception as e:
+                reply_markup = build_error_keyboard(user_language_code)
                 await message.answer(
                     text=get_localization(user_language_code).ERROR,
+                    reply_markup=reply_markup,
                     parse_mode=None,
                 )
+
                 await send_message_to_admins(
                     bot=message.bot,
                     message=f"#error\n\nALARM! Ошибка у пользователя при запросе в FaceSwap: {user.id}\nИнформация:\n{e}",

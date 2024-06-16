@@ -1,3 +1,4 @@
+import pytz
 from aiogram import Router
 from aiogram.filters import Command, CommandStart, ChatMemberUpdatedFilter, KICKED, MEMBER
 from aiogram.fsm.context import FSMContext
@@ -9,6 +10,7 @@ from bot.database.operations.generation.updaters import update_generation
 from bot.database.operations.user.getters import get_user, get_users_by_referral
 from bot.database.operations.user.updaters import update_user
 from bot.helpers.initialize_user_for_the_first_time import initialize_user_for_the_first_time
+from bot.helpers.senders.send_message_to_admins import send_message_to_admins
 from bot.helpers.update_monthly_limits import update_user_monthly_limits
 from bot.keyboards.common.common import build_recommendations_keyboard
 
@@ -84,6 +86,7 @@ async def start(message: Message, state: FSMContext):
     await message.answer(
         text=greeting,
         reply_markup=reply_markup,
+        message_effect_id="5046509860389126442",
     )
 
 
@@ -91,9 +94,24 @@ async def start(message: Message, state: FSMContext):
     ChatMemberUpdatedFilter(member_status_changed=KICKED)
 )
 async def user_blocked_bot(event: ChatMemberUpdated):
-    await update_user(str(event.from_user.id), {
-        "is_blocked": True,
+    user = await get_user(str(event.from_user.id))
+    user.is_blocked = True
+    await update_user(user.id, {
+        "is_blocked": user.is_blocked,
     })
+
+    created_at_pst = user.created_at.astimezone(pytz.timezone('America/Los_Angeles')).strftime('%d.%m.%Y %H:%M')
+    await send_message_to_admins(
+        bot=event.bot,
+        message=f"#user_status #blocked\n\n"
+                f"🚫 <b>Пользователь заблокировал бота</b>\n\n"
+                f"ℹ️ ID: {user.id}\n"
+                f"🌎 Язык: {user.interface_language_code}\n"
+                f"✈️ Есть премиум: {'Да' if user.is_premium else 'Нет'}\n"
+                f"🤖 Текущая AI модель: {user.current_model}\n"
+                f"🗓 Дата регистрации: {created_at_pst}\n\n"
+                f"Ой, надеюсь пользователь вернётся, а то стало чут-чуть грустненько! 😢",
+    )
 
 
 @common_router.my_chat_member(
@@ -109,6 +127,19 @@ async def user_unblocked_bot(event: ChatMemberUpdated):
     batch = firebase.db.batch()
     await update_user_monthly_limits(event.bot, user, batch)
     await batch.commit()
+
+    created_at_pst = user.created_at.astimezone(pytz.timezone('America/Los_Angeles')).strftime('%d.%m.%Y %H:%M')
+    await send_message_to_admins(
+        bot=event.bot,
+        message=f"#user_status #unblocked\n\n"
+                f"🥳 <b>Пользователь разблокировал бота</b>\n\n"
+                f"ℹ️ ID: {user.id}\n"
+                f"🌎 Язык: {user.interface_language_code}\n"
+                f"✈️ Есть премиум: {'Да' if user.is_premium else 'Нет'}\n"
+                f"🤖 Была AI модель: {user.current_model}\n"
+                f"🗓 Дата регистрации: {created_at_pst}\n\n"
+                f"Ура, пользователь вернулся, мне стало лучше! 😌",
+    )
 
 
 @common_router.message(Command("help"))

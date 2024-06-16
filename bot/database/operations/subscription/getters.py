@@ -4,7 +4,7 @@ from typing import Optional, List
 from google.cloud.firestore_v1 import FieldFilter, Query
 
 from bot.database.main import firebase
-from bot.database.models.subscription import Subscription
+from bot.database.models.subscription import Subscription, SubscriptionStatus
 
 
 async def get_subscription(subscription_id: str) -> Optional[Subscription]:
@@ -18,6 +18,12 @@ async def get_subscription(subscription_id: str) -> Optional[Subscription]:
 async def get_last_subscription_by_user_id(user_id: str) -> Optional[Subscription]:
     subscription_stream = firebase.db.collection(Subscription.COLLECTION_NAME) \
         .where(filter=FieldFilter("user_id", "==", user_id)) \
+        .where(filter=FieldFilter("status", "not-in",
+                                  [
+                                      SubscriptionStatus.WAITING,
+                                      SubscriptionStatus.ERROR,
+                                      SubscriptionStatus.DECLINED,
+                                  ])) \
         .order_by("created_at", direction=Query.DESCENDING) \
         .limit(1) \
         .stream()

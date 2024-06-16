@@ -4,8 +4,13 @@ from typing import List, Dict
 from bot.locales.texts import Texts
 from bot.database.models.common import Currency, Quota, Model, ChatGPTVersion, ClaudeGPTVersion
 from bot.database.models.package import PackageType, Package
-from bot.database.models.subscription import Subscription, SubscriptionType, SubscriptionPeriod, SubscriptionLimit, \
-    SubscriptionStatus
+from bot.database.models.subscription import (
+    Subscription,
+    SubscriptionType,
+    SubscriptionPeriod,
+    SubscriptionLimit,
+    SubscriptionStatus,
+)
 from bot.database.models.user import UserGender
 
 
@@ -441,6 +446,7 @@ Our goal is safety and respect for every user! 🌟
     VIDEO_FORBIDDEN_ERROR = "I don't know how to work with videos yet 👀"
     DOCUMENT_FORBIDDEN_ERROR = "I don't know how to work with such documents yet 👀"
     STICKER_FORBIDDEN_ERROR = "I don't know how to work with stickers yet 👀"
+    SERVER_OVERLOADED_ERROR = "I have a heavy load on the server right now 🫨\n\nPlease, try later!"
     ALREADY_MAKE_REQUEST = "You've already made a request. Please wait ⚠️"
     READY_FOR_NEW_REQUEST = "You can ask the next request 😌"
     CONTINUE_GENERATING = "Continue generating"
@@ -513,7 +519,6 @@ To ensure your song in custom mode matches your preferences, please specify the 
 🔍 List the desired genres separated by commas in your next message, and let's start creating your unique song!
 """
     SUNO_START_AGAIN = "Start again 🔄"
-    SUNO_TRY_LATER = "I have a heavy load on the server right now 🫨\n\nPlease, try later!"
     SUNO_TOO_MANY_WORDS = "<b>Oh, oh!</b>🚧\n\nAt some steps, you sent too much text 📝\n\nTry again, but with a smaller text, please!"
     SUNO_VALUE_ERROR = "It doesn't look like a prompt 🧐\n\nPlease enter a different value"
 
@@ -829,7 +834,7 @@ Please upload a new photo where your face is clearly visible and in good quality
     ERROR = """
 I've got an unknown error 🤒
 
-Please try again or contact @roman_danilov 🔧
+Please try again or contact our tech support:
 """
     NETWORK_ERROR = """
 I lost my connection with Telegram 🤒
@@ -841,6 +846,7 @@ I lost my connection with my database 🤒
 
 Please try again 🥺
 """
+    TECH_SUPPORT = "👨‍💻 Tech Support"
     BACK = "Back ◀️"
     CLOSE = "Close 🚪"
     CANCEL = "Cancel ❌"

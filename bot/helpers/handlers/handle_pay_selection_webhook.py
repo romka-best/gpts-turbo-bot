@@ -85,6 +85,7 @@ async def handle_pay_selection_webhook(request: Dict, bot: Bot, dp: Dispatcher):
                 await bot.send_message(
                     chat_id=subscription.user_id,
                     text=get_localization(user_language_code).SUBSCRIPTION_SUCCESS,
+                    message_effect_id="5044134455711629726",
                 )
 
                 reply_markup = await build_recommendations_keyboard(user.current_model, user_language_code, user.gender)
@@ -95,6 +96,7 @@ async def handle_pay_selection_webhook(request: Dict, bot: Bot, dp: Dispatcher):
                         user.settings[user.current_model][UserSettings.VERSION],
                     ),
                     reply_markup=reply_markup,
+                    message_effect_id="5104841245755180586",
                 )
 
                 await send_message_to_admins(
@@ -243,6 +245,15 @@ async def handle_pay_selection_webhook(request: Dict, bot: Bot, dp: Dispatcher):
                     )
     except Exception as e:
         logging.exception(f"Error in pay_selection_webhook in subscription section: {e}")
+        await send_message_to_admins(
+            bot=bot,
+            message=f"#payment #subscription #error\n\n"
+                    f"🚫 Неизвестная ошибка в блоке оплаты у подписки:\n\n"
+                    f"💱 Метод оплаты: {PaymentMethod.PAY_SELECTION}\n"
+                    f"ℹ️ Информация:\n {e}\n\n"
+                    f"@roman_danilov, посмотришь? 🤨",
+            parse_mode=None,
+        )
 
     try:
         packages = await get_packages_by_provider_payment_charge_id(order_id)
@@ -286,6 +297,7 @@ async def handle_pay_selection_webhook(request: Dict, bot: Bot, dp: Dispatcher):
                 await bot.send_message(
                     chat_id=package.user_id,
                     text=get_localization(user_language_code).PACKAGE_SUCCESS,
+                    message_effect_id="5044134455711629726",
                 )
 
                 reply_markup = await build_recommendations_keyboard(user.current_model, user_language_code, user.gender)
@@ -296,6 +308,7 @@ async def handle_pay_selection_webhook(request: Dict, bot: Bot, dp: Dispatcher):
                         user.settings[user.current_model][UserSettings.VERSION],
                     ),
                     reply_markup=reply_markup,
+                    message_effect_id="5104841245755180586",
                 )
 
                 await send_message_to_admins(
@@ -391,6 +404,7 @@ async def handle_pay_selection_webhook(request: Dict, bot: Bot, dp: Dispatcher):
                 await bot.send_message(
                     chat_id=user.id,
                     text=get_localization(user_language_code).PACKAGES_SUCCESS,
+                    message_effect_id="5044134455711629726",
                 )
 
                 reply_markup = await build_recommendations_keyboard(user.current_model, user_language_code, user.gender)
@@ -401,6 +415,7 @@ async def handle_pay_selection_webhook(request: Dict, bot: Bot, dp: Dispatcher):
                         user.settings[user.current_model][UserSettings.VERSION],
                     ),
                     reply_markup=reply_markup,
+                    message_effect_id="5104841245755180586",
                 )
 
                 await send_message_to_admins(
@@ -442,3 +457,12 @@ async def handle_pay_selection_webhook(request: Dict, bot: Bot, dp: Dispatcher):
                 )
     except Exception as e:
         logging.exception(f"Error in pay_selection_webhook in package section: {e}")
+        await send_message_to_admins(
+            bot=bot,
+            message=f"#payment #package #packages #error\n\n"
+                    f"🚫 Неизвестная ошибка в блоке оплаты у пакета(-ов):\n\n"
+                    f"💱 Метод оплаты: {PaymentMethod.PAY_SELECTION}\n"
+                    f"ℹ️ Информация:\n {e}\n\n"
+                    f"@roman_danilov, посмотришь? 🤨",
+            parse_mode=None,
+        )
