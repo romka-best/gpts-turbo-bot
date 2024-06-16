@@ -1275,7 +1275,7 @@ class Texts(Protocol):
     ┣ 🎭 Доступ к каталогу: {round(count_income_money[ServiceType.ACCESS_TO_CATALOG], 2)}₽ {calculate_percentage_difference(is_all_time, count_income_money[ServiceType.ACCESS_TO_CATALOG], count_income_money_before[ServiceType.ACCESS_TO_CATALOG])}
     ┣ 🎙 Голосовые запросы/ответы: {round(count_income_money[ServiceType.VOICE_MESSAGES], 2)}₽ {calculate_percentage_difference(is_all_time, count_income_money[ServiceType.VOICE_MESSAGES], count_income_money_before[ServiceType.VOICE_MESSAGES])}
     ┣ ⚡ Быстрые сообщения: {round(count_income_money[ServiceType.FAST_MESSAGES], 2)}₽ {calculate_percentage_difference(is_all_time, count_income_money[ServiceType.FAST_MESSAGES], count_income_money_before[ServiceType.FAST_MESSAGES])}
-    ┗ Всего: {count_income_money['PACKAGES_ALL']}₽ {calculate_percentage_difference(is_all_time, count_income_money['PACKAGES_ALL'], count_income_money_before['PACKAGES_ALL'])}
+    ┗ Всего: {round(count_income_money['PACKAGES_ALL'], 2)}₽ {calculate_percentage_difference(is_all_time, count_income_money['PACKAGES_ALL'], count_income_money_before['PACKAGES_ALL'])}
 ━ <b>Средний чек:</b> {round(count_income_money['AVERAGE_PRICE'], 2)}₽ {calculate_percentage_difference(is_all_time, count_income_money['AVERAGE_PRICE'], count_income_money_before['AVERAGE_PRICE'])}
 ━ <b>Всего:</b> {round(count_income_money['ALL'], 2)}₽ {calculate_percentage_difference(is_all_time, count_income_money['ALL'], count_income_money_before['ALL'])}
 ━ <b>Вал:</b> {round(count_income_money['VAL'], 2)}₽ {calculate_percentage_difference(is_all_time, count_income_money['VAL'], count_income_money_before['VAL'])}
