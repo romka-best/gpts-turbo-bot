@@ -6,6 +6,7 @@ from aiogram.types import Message, CallbackQuery, ChatMemberUpdated
 
 from bot.database.main import firebase
 from bot.database.models.generation import Generation
+from bot.database.models.user import UserSettings
 from bot.database.operations.generation.updaters import update_generation
 from bot.database.operations.user.getters import get_user, get_users_by_referral
 from bot.database.operations.user.updaters import update_user
@@ -100,15 +101,21 @@ async def user_blocked_bot(event: ChatMemberUpdated):
         "is_blocked": user.is_blocked,
     })
 
-    created_at_pst = user.created_at.astimezone(pytz.timezone('America/Los_Angeles')).strftime('%d.%m.%Y %H:%M')
+    last_subscription_limit_update_pst = user.last_subscription_limit_update \
+        .astimezone(pytz.timezone('America/Los_Angeles')) \
+        .strftime('%d.%m.%Y %H:%M')
+    created_at_pst = user.created_at \
+        .astimezone(pytz.timezone('America/Los_Angeles')) \
+        .strftime('%d.%m.%Y %H:%M')
     await send_message_to_admins(
         bot=event.bot,
         message=f"#user_status #blocked\n\n"
                 f"🚫 <b>Пользователь заблокировал бота</b>\n\n"
                 f"ℹ️ ID: {user.id}\n"
-                f"🌎 Язык: {user.interface_language_code}\n"
-                f"✈️ Есть премиум: {'Да' if user.is_premium else 'Нет'}\n"
+                f"🌎 Язык: {'Русский 🇷🇺' if user.interface_language_code == 'ru' else 'Английский 🇺🇸'}\n"
                 f"🤖 Текущая AI модель: {user.current_model}\n"
+                f"🌀 Текущая версия AI модели: {user.settings[user.current_model][UserSettings.VERSION]}\n"
+                f"💳 Дата обновления подписки: {last_subscription_limit_update_pst}\n"
                 f"🗓 Дата регистрации: {created_at_pst}\n\n"
                 f"Ой, надеюсь пользователь вернётся, а то стало чут-чуть грустненько! 😢",
     )
@@ -128,15 +135,21 @@ async def user_unblocked_bot(event: ChatMemberUpdated):
     await update_user_monthly_limits(event.bot, user, batch)
     await batch.commit()
 
-    created_at_pst = user.created_at.astimezone(pytz.timezone('America/Los_Angeles')).strftime('%d.%m.%Y %H:%M')
+    last_subscription_limit_update_pst = user.last_subscription_limit_update \
+        .astimezone(pytz.timezone('America/Los_Angeles')) \
+        .strftime('%d.%m.%Y %H:%M')
+    created_at_pst = user.created_at \
+        .astimezone(pytz.timezone('America/Los_Angeles')) \
+        .strftime('%d.%m.%Y %H:%M')
     await send_message_to_admins(
         bot=event.bot,
         message=f"#user_status #unblocked\n\n"
                 f"🥳 <b>Пользователь разблокировал бота</b>\n\n"
                 f"ℹ️ ID: {user.id}\n"
-                f"🌎 Язык: {user.interface_language_code}\n"
-                f"✈️ Есть премиум: {'Да' if user.is_premium else 'Нет'}\n"
+                f"🌎 Язык: {'Русский 🇷🇺' if user.interface_language_code == 'ru' else 'Английский 🇺🇸'}\n"
                 f"🤖 Была AI модель: {user.current_model}\n"
+                f"🌀 Была версия AI модели: {user.settings[user.current_model][UserSettings.VERSION]}\n"
+                f"💳 Дата обновления подписки: {last_subscription_limit_update_pst}\n"
                 f"🗓 Дата регистрации: {created_at_pst}\n\n"
                 f"Ура, пользователь вернулся, мне стало лучше! 😌",
     )

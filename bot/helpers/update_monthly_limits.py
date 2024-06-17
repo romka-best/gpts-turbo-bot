@@ -91,7 +91,7 @@ async def update_user_subscription(bot: Bot, user: User, batch: AsyncWriteBatch)
                         current_subscription.type,
                         SubscriptionPeriod.MONTH1,
                         0,
-                    )[1],
+                    ),
                 )
                 if not payment:
                     current_subscription.status = SubscriptionStatus.FINISHED
@@ -125,7 +125,7 @@ async def update_user_subscription(bot: Bot, user: User, batch: AsyncWriteBatch)
                         current_subscription.type,
                         SubscriptionPeriod.MONTH1,
                         0,
-                    )[1],
+                    ),
                     current_subscription.provider_auto_payment_charge_id,
                 )
                 if not payment:

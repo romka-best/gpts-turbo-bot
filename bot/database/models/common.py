@@ -1,10 +1,12 @@
 class Currency:
     RUB = 'RUB'
     USD = 'USD'
+    XTR = 'XTR'
 
     SYMBOLS = {
         RUB: '₽',
         USD: '$',
+        XTR: '⭐️',
     }
 
 

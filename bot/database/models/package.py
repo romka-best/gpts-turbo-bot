@@ -1,7 +1,6 @@
 import inspect
 import re
 from datetime import datetime, timezone
-from typing import List, Dict
 
 from bot.database.models.common import Currency, Quota, PaymentMethod
 from bot.database.models.transaction import ServiceType
@@ -136,7 +135,7 @@ class Package:
             prices[PackageType.ACCESS_TO_CATALOG] = '50₽'
             prices[PackageType.VOICE_MESSAGES] = '50₽'
             prices[PackageType.FAST_MESSAGES] = '50₽'
-        else:
+        elif currency == Currency.USD:
             prices[PackageType.CHAT_GPT3_TURBO] = '$0.01'
             prices[PackageType.CHAT_GPT4_TURBO] = '$0.05'
             prices[PackageType.CHAT_GPT4_OMNI] = '$0.025'
@@ -151,6 +150,21 @@ class Package:
             prices[PackageType.ACCESS_TO_CATALOG] = '$0.5'
             prices[PackageType.VOICE_MESSAGES] = '$0.5'
             prices[PackageType.FAST_MESSAGES] = '$0.5'
+        else:
+            prices[PackageType.CHAT_GPT3_TURBO] = '1⭐️'
+            prices[PackageType.CHAT_GPT4_TURBO] = '5⭐️'
+            prices[PackageType.CHAT_GPT4_OMNI] = '2.5⭐️'
+            prices[PackageType.CLAUDE_3_SONNET] = '2.5⭐️'
+            prices[PackageType.CLAUDE_3_OPUS] = '5⭐️'
+            prices[PackageType.DALL_E] = '5⭐️'
+            prices[PackageType.MIDJOURNEY] = '10⭐️'
+            prices[PackageType.FACE_SWAP] = '5⭐️'
+            prices[PackageType.MUSIC_GEN] = '1⭐️'
+            prices[PackageType.SUNO] = '5⭐️'
+            prices[PackageType.CHAT] = '25⭐️'
+            prices[PackageType.ACCESS_TO_CATALOG] = '50⭐️'
+            prices[PackageType.VOICE_MESSAGES] = '50⭐️'
+            prices[PackageType.FAST_MESSAGES] = '50⭐️'
 
         return prices
 
@@ -221,14 +235,6 @@ class Package:
             "name": name,
             "description": description,
         }
-
-    @staticmethod
-    def is_above_minimal_price(currency: Currency, cart_items: List[Dict]) -> bool:
-        total_price = 0.0
-        for cart_item in cart_items:
-            total_price += Package.get_price(currency, cart_item.get("package_type"), cart_item.get("quantity", 0))
-
-        return total_price >= Package.MINIMAL_PRICE[currency]
 
     @staticmethod
     def get_service_type_and_update_quota(package_type: str, additional_usage_quota: dict, quantity: int):

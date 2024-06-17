@@ -129,12 +129,12 @@ def build_payment_method_for_subscription_keyboard(
                 callback_data=f'pms:{PaymentMethod.PAY_SELECTION}:{subscription_type}'
             ),
         ],
-        # [
-        #     InlineKeyboardButton(
-        #         text=f"{get_localization(language_code).TELEGRAM_STARS_PAYMENT_METHOD}",
-        #         callback_data=f'pms:{PaymentMethod.TELEGRAM_STARS}:{subscription_type}'
-        #     ),
-        # ],
+        [
+            InlineKeyboardButton(
+                text=f"{get_localization(language_code).TELEGRAM_STARS_PAYMENT_METHOD}",
+                callback_data=f'pms:{PaymentMethod.TELEGRAM_STARS}:{subscription_type}'
+            ),
+        ],
         # [
         #     InlineKeyboardButton(
         #         text=f"{get_localization(language_code).CRYPTO_PAYMENT_METHOD}",
@@ -474,12 +474,12 @@ def build_payment_method_for_package_keyboard(
                 callback_data=f'pmp:{PaymentMethod.PAY_SELECTION}:{package_type}:{package_quantity}'
             ),
         ],
-        # [
-        #     InlineKeyboardButton(
-        #         text=f"{get_localization(language_code).TELEGRAM_STARS_PAYMENT_METHOD}",
-        #         callback_data=f'pmp:{PaymentMethod.TELEGRAM_STARS}:{package_type}:{package_quantity}'
-        #     ),
-        # ],
+        [
+            InlineKeyboardButton(
+                text=f"{get_localization(language_code).TELEGRAM_STARS_PAYMENT_METHOD}",
+                callback_data=f'pmp:{PaymentMethod.TELEGRAM_STARS}:{package_type}:{package_quantity}'
+            ),
+        ],
         # [
         #     InlineKeyboardButton(
         #         text=f"{get_localization(language_code).CRYPTO_PAYMENT_METHOD}",
@@ -511,12 +511,12 @@ def build_payment_method_for_cart_keyboard(language_code: str) -> InlineKeyboard
                 callback_data=f'pmc:{PaymentMethod.PAY_SELECTION}'
             ),
         ],
-        # [
-        #     InlineKeyboardButton(
-        #         text=f"{get_localization(language_code).TELEGRAM_STARS_PAYMENT_METHOD}",
-        #         callback_data=f'pmc:{PaymentMethod.TELEGRAM_STARS}'
-        #     ),
-        # ],
+        [
+            InlineKeyboardButton(
+                text=f"{get_localization(language_code).TELEGRAM_STARS_PAYMENT_METHOD}",
+                callback_data=f'pmc:{PaymentMethod.TELEGRAM_STARS}'
+            ),
+        ],
         # [
         #     InlineKeyboardButton(
         #         text=f"{get_localization(language_code).CRYPTO_PAYMENT_METHOD}",

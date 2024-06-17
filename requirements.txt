@@ -14,7 +14,7 @@ google-cloud-bigquery==3.24.0
 google-cloud-firestore==2.16.0
 google-cloud-storage==2.16.0
 googleapis-common-protos==1.63.1
-gcloud-aio-auth==5.3.1
+gcloud-aio-auth==5.3.2
 gcloud-aio-storage==9.3.0
 grpcio==1.64.1
 idna==3.7

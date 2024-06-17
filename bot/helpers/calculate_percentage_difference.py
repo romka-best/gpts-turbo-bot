@@ -6,11 +6,9 @@ def calculate_percentage_difference(is_all_time: bool, current: Union[int, float
         return ""
     if before == 0:
         if current > 0:
-            percentage_diff = round(100 * current, 2)
-            return f"(+{percentage_diff:.2f}%)" if percentage_diff % 1 else f"(+{int(percentage_diff)}%)"
+            return f"(+∞%)"
         elif current < 0:
-            percentage_diff = round(100 * abs(current), 2)
-            return f"(-{percentage_diff:.2f}%)" if percentage_diff % 1 else f"(-{int(percentage_diff)}%)"
+            return f"(-∞%)"
         else:
             return "(0%)"
 
