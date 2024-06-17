@@ -15,8 +15,10 @@ from bot.database.models.transaction import TransactionType
 from bot.database.models.user import UserSettings
 from bot.database.operations.cart.getters import get_cart_by_user_id
 from bot.database.operations.cart.updaters import update_cart
-from bot.database.operations.package.getters import get_packages_by_user_id_and_status, \
-    get_last_package_with_waiting_payment
+from bot.database.operations.package.getters import (
+    get_packages_by_user_id_and_status,
+    get_last_package_with_waiting_payment,
+)
 from bot.database.operations.package.updaters import update_package
 from bot.database.operations.package.writers import write_package
 from bot.database.operations.subscription.getters import get_last_subscription_by_user_id, \
@@ -1136,13 +1138,12 @@ async def successful_payment(message: Message, state: FSMContext):
                     f"ℹ️ ID: {subscription.id}\n"
                     f"💱 Метод оплаты: {subscription.payment_method}\n"
                     f"💳 Тип подписки: {subscription.type}\n"
-                    f"💰 Сумма: {subscription.amount}{Currency.SYMBOLS[subscription.currency]}\n"
-                    f"💸 Чистая сумма: {subscription.amount}{Currency.SYMBOLS[subscription.currency]}\n\n"
+                    f"💰 Сумма: {subscription.amount}{Currency.SYMBOLS[subscription.currency]}\n\n"
                     f"Продолжаем в том же духе 💪",
         )
     elif payment_type == PaymentType.PACKAGE:
         _, user_id, package_type, package_quantity = payment.invoice_payload.split(':')
-        package = await get_last_package_with_waiting_payment(user_id, package_type, package_quantity)
+        package = await get_last_package_with_waiting_payment(user_id, package_type, int(package_quantity))
 
         transaction = firebase.db.transaction()
         await create_package(
@@ -1181,8 +1182,7 @@ async def successful_payment(message: Message, state: FSMContext):
                     f"💱 Метод оплаты: {package.payment_method}\n"
                     f"💳 Тип пакета: {package.type}\n"
                     f"🔢 Количество: {package.quantity}\n"
-                    f"💰 Сумма: {package.amount}{Currency.SYMBOLS[package.currency]}\n"
-                    f"💸 Чистая сумма: {package.amount}{Currency.SYMBOLS[package.currency]}\n\n"
+                    f"💰 Сумма: {package.amount}{Currency.SYMBOLS[package.currency]}\n\n"
                     f"Продолжаем в том же духе 💪",
         )
     elif payment_type == PaymentType.CART:
@@ -1230,8 +1230,7 @@ async def successful_payment(message: Message, state: FSMContext):
             message=f"#payment #packages #success\n\n"
                     f"🤑 <b>Успешно прошла оплата пакетов у пользователя: {user.id}</b>\n\n"
                     f"💱 Метод оплаты: {PaymentMethod.TELEGRAM_STARS}\n"
-                    f"💰 Сумма: {payment.total_amount}{Currency.SYMBOLS[packages[0].currency]}\n"
-                    f"💸 Чистая сумма: {payment.total_amount}{Currency.SYMBOLS[packages[0].currency]}\n\n"
+                    f"💰 Сумма: {payment.total_amount}{Currency.SYMBOLS[packages[0].currency]}\n\n"
                     f"Продолжаем в том же духе 💪",
         )
 
