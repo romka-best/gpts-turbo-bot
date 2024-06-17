@@ -320,6 +320,12 @@ def build_statistics_choose_currency_keyboard(language_code: str) -> InlineKeybo
         ],
         [
             InlineKeyboardButton(
+                text="Telegram Stars ⭐",
+                callback_data=f'statistics_choose_currency:{Currency.XTR}'
+            )
+        ],
+        [
+            InlineKeyboardButton(
                 text=get_localization(language_code).CANCEL,
                 callback_data='statistics_choose_currency:cancel'
             )

@@ -599,6 +599,8 @@ class Russian(Texts):
 🪆💳 <b>ЮKassa (РФ Карты)</b>
 
 🌍💳 <b>PaySelection (Международные карты)</b>
+
+✈️⭐️ <b>Telegram Stars (Валюта в Telegram)</b>
 """
     PROCEED_TO_PAY = "🌐 Перейти к оплате"
 
@@ -1003,6 +1005,8 @@ class Russian(Texts):
 
     @staticmethod
     def confirmation_subscribe(subscription_type: SubscriptionType, currency: Currency, price: float):
+        if currency == Currency.XTR:
+            return f"Вы собираетесь активировать подписку {subscription_type} {Subscription.get_emojis()[subscription_type]} за {price}{Currency.SYMBOLS[currency]}"
         return f"""
 Вы собираетесь активировать подписку {subscription_type} {Subscription.get_emojis()[subscription_type]} за {price}{Currency.SYMBOLS[currency]}/месяц
 
@@ -1020,10 +1024,10 @@ class Russian(Texts):
 
     @staticmethod
     def package(currency: Currency, page: int):
-        if currency == Currency.RUB:
-            balance = f"1{Currency.SYMBOLS[currency]}"
-        else:
+        if currency == Currency.USD:
             balance = f"{Currency.SYMBOLS[currency]}0.01"
+        else:
+            balance = f"1{Currency.SYMBOLS[currency]}"
 
         if page == 0:
             description = (

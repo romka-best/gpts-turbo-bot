@@ -600,6 +600,8 @@ Choose by clicking a button below 👇
 🪆💳 <b>YooKassa (Russian's Cards)</b>
 
 🌍💳 <b>PaySelection (International Cards)</b>
+
+✈️⭐️ <b>Telegram Stars (Currency in Telegram)</b>
 """
     PROCEED_TO_PAY = "🌐 Proceed to payment"
 
@@ -1003,6 +1005,8 @@ Please select the subscription period by clicking on the button:
 
     @staticmethod
     def confirmation_subscribe(subscription_type: SubscriptionType, currency: Currency, price: float):
+        if currency == Currency.XTR:
+            return f"You're about to activate subscription {subscription_type} {Subscription.get_emojis()[subscription_type]} for {price}{Currency.SYMBOLS[currency]}"
         return f"""
 You're about to activate subscription {subscription_type} {Subscription.get_emojis()[subscription_type]} for {price}{Currency.SYMBOLS[currency]}/month
 

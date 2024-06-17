@@ -190,10 +190,14 @@ class Subscription:
             prices[SubscriptionType.STANDARD] = '299₽'
             prices[SubscriptionType.VIP] = '749₽'
             prices[SubscriptionType.PREMIUM] = '1 999₽'
-        else:
+        elif currency == Currency.USD:
             prices[SubscriptionType.STANDARD] = '$4.99'
             prices[SubscriptionType.VIP] = '$9.99'
             prices[SubscriptionType.PREMIUM] = '$19.99'
+        else:
+            prices[SubscriptionType.STANDARD] = '250⭐️'
+            prices[SubscriptionType.VIP] = '500⭐️'
+            prices[SubscriptionType.PREMIUM] = '1000⭐️'
 
         return prices
 
@@ -232,8 +236,7 @@ class Subscription:
         price = float(price_clear) if '.' in price_clear else int(price_clear)
         price_with_period = price * price_period[subscription_period]
         price_with_discount = round(price_with_period - (price_with_period * (price_discount[subscription_period] / 100.0)), 2)
+        if currency == Currency.XTR:
+            price_with_discount = int(price_with_discount)
 
-        return [
-            ('%f' % price_with_period).rstrip('0').rstrip('.'),
-            ('%f' % price_with_discount).rstrip('0').rstrip('.'),
-        ]
+        return ('%f' % price_with_discount).rstrip('0').rstrip('.')

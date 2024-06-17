@@ -49,6 +49,7 @@ from bot.handlers.payment.payment_handler import payment_router
 from bot.handlers.payment.promo_code_handler import promo_code_router
 from bot.handlers.settings.language_handler import language_router
 from bot.handlers.settings.settings_handler import settings_router
+from bot.helpers.billing.check_waiting_payments import check_waiting_payments
 from bot.helpers.billing.update_daily_expenses import update_daily_expenses
 from bot.helpers.check_unresolved_requests import check_unresolved_requests
 from bot.helpers.handlers.handle_connection_error import handle_connection_error
@@ -223,6 +224,7 @@ async def daily_tasks(background_tasks: BackgroundTasks):
     await update_daily_expenses(yesterday_utc_day)
 
     await check_unresolved_requests(bot)
+    await check_waiting_payments(bot)
 
     background_tasks.add_task(update_monthly_limits, bot)
 

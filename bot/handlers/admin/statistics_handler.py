@@ -110,8 +110,14 @@ async def handle_get_statistics(language_code: str, period: str):
         )
         period = f"{start_date.strftime('%d.%m.%Y')}-{end_date.strftime('%d.%m.%Y')}"
 
-        start_date_before = start_date - timedelta(days=30)
-        end_date_before = end_date - timedelta(days=30)
+        start_date_before = start_date - timedelta(days=calendar.monthrange(start_date.year, start_date.month)[1] - 1)
+        end_date_before = start_date - timedelta(days=1)
+        end_date_before = end_date_before.replace(
+            hour=23,
+            minute=59,
+            second=59,
+            microsecond=999999,
+        )
     else:
         period = "всё время"
 
@@ -861,7 +867,7 @@ async def handle_get_statistics(language_code: str, period: str):
                 ]:
                     count_income_money['PACKAGES_ALL'] += transaction.clear_amount * 100
                 count_income_money['ALL'] += transaction.clear_amount * 100
-            else:
+            elif transaction.currency == Currency.RUB:
                 count_income_money[transaction.service] += transaction.clear_amount
                 if transaction.service in [ServiceType.STANDARD, ServiceType.VIP, ServiceType.PREMIUM]:
                     count_income_money['SUBSCRIPTION_ALL'] += transaction.clear_amount
@@ -877,6 +883,22 @@ async def handle_get_statistics(language_code: str, period: str):
                 ]:
                     count_income_money['PACKAGES_ALL'] += transaction.clear_amount
                 count_income_money['ALL'] += transaction.clear_amount
+            else:
+                count_income_money[transaction.service] += transaction.clear_amount * 2
+                if transaction.service in [ServiceType.STANDARD, ServiceType.VIP, ServiceType.PREMIUM]:
+                    count_income_money['SUBSCRIPTION_ALL'] += transaction.clear_amount * 2
+                elif transaction.service in [
+                    ServiceType.CHAT_GPT3_TURBO, ServiceType.CHAT_GPT4_TURBO, ServiceType.CHAT_GPT4_OMNI,
+                    ServiceType.CLAUDE_3_SONNET, ServiceType.CLAUDE_3_OPUS,
+                    ServiceType.DALL_E, ServiceType.MIDJOURNEY, ServiceType.MIDJOURNEY,
+                    ServiceType.MUSIC_GEN, ServiceType.SUNO,
+                    ServiceType.ADDITIONAL_CHATS,
+                    ServiceType.ACCESS_TO_CATALOG,
+                    ServiceType.VOICE_MESSAGES,
+                    ServiceType.FAST_MESSAGES,
+                ]:
+                    count_income_money['PACKAGES_ALL'] += transaction.clear_amount * 2
+                count_income_money['ALL'] += transaction.clear_amount * 2
 
             count_all_transactions[transaction.service]['BONUS'] += 1 \
                 if transaction.details.get('is_bonus', False) \
@@ -998,7 +1020,7 @@ async def handle_get_statistics(language_code: str, period: str):
                 ]:
                     count_income_money_before['PACKAGES_ALL'] += transaction_before.clear_amount * 100
                 count_income_money_before['ALL'] += transaction_before.clear_amount * 100
-            else:
+            elif transaction_before.currency == Currency.RUB:
                 count_income_money_before[transaction_before.service] += transaction_before.clear_amount
                 if transaction_before.service in [ServiceType.STANDARD, ServiceType.VIP, ServiceType.PREMIUM]:
                     count_income_money_before['SUBSCRIPTION_ALL'] += transaction_before.clear_amount
@@ -1014,6 +1036,22 @@ async def handle_get_statistics(language_code: str, period: str):
                 ]:
                     count_income_money_before['PACKAGES_ALL'] += transaction_before.clear_amount
                 count_income_money_before['ALL'] += transaction_before.clear_amount
+            else:
+                count_income_money_before[transaction_before.service] += transaction_before.clear_amount * 2
+                if transaction_before.service in [ServiceType.STANDARD, ServiceType.VIP, ServiceType.PREMIUM]:
+                    count_income_money_before['SUBSCRIPTION_ALL'] += transaction_before.clear_amount * 2
+                elif transaction_before.service in [
+                    ServiceType.CHAT_GPT3_TURBO, ServiceType.CHAT_GPT4_TURBO, ServiceType.CHAT_GPT4_OMNI,
+                    ServiceType.CLAUDE_3_SONNET, ServiceType.CLAUDE_3_OPUS,
+                    ServiceType.DALL_E, ServiceType.MIDJOURNEY, ServiceType.MIDJOURNEY,
+                    ServiceType.MUSIC_GEN, ServiceType.SUNO,
+                    ServiceType.ADDITIONAL_CHATS,
+                    ServiceType.ACCESS_TO_CATALOG,
+                    ServiceType.VOICE_MESSAGES,
+                    ServiceType.FAST_MESSAGES,
+                ]:
+                    count_income_money_before['PACKAGES_ALL'] += transaction_before.clear_amount * 2
+                count_income_money_before['ALL'] += transaction_before.clear_amount * 2
 
             count_all_transactions_before[transaction_before.service]['BONUS'] += 1 \
                 if transaction_before.details.get('is_bonus', False) \
