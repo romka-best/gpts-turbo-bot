@@ -314,6 +314,10 @@ async def handle_payment_method_subscription_selection(callback_query: CallbackQ
                 caption=caption,
                 reply_markup=reply_markup,
             )
+        # elif payment_method == PaymentMethod.CRYPTO:
+            # Asynchronous Client
+            # Wallet Pay doesn't provide SandBox (required api-key)
+            # https://github.com/xdownedx/WalletPay
         else:
             raise NotImplementedError
 
