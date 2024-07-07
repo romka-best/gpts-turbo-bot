@@ -95,6 +95,9 @@ async def handle_mode_selection(callback_query: CallbackQuery, state: FSMContext
     if keyboard_changed:
         if chosen_model == Model.CHAT_GPT:
             user.settings[Model.CHAT_GPT][UserSettings.VERSION] = chosen_version
+        elif chosen_model == Model.CLAUDE:
+            user.settings[Model.CLAUDE][UserSettings.VERSION] = chosen_version
+
         await update_user(user_id, {
             "current_model": user.current_model,
             "settings": user.settings,

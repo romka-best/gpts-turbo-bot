@@ -453,7 +453,7 @@ async def handle_claude_3_opus_example(
     except Exception as e:
         await send_message_to_admins(
             bot=message.bot,
-            message=f"#error\n\nALARM! Ошибка у пользователя при попытке отправить пример Claude Opus в запросе в Claude Sonnet: {user.id}\nИнформация:\n{e}",
+            message=f"#error\n\nALARM! Ошибка у пользователя при попытке отправить пример Claude Opus в запросе в Claude Sonnet 3.5: {user.id}\nИнформация:\n{e}",
             parse_mode=None,
         )
 

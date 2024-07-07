@@ -1129,7 +1129,6 @@ async def successful_payment(message: Message, state: FSMContext):
 
         await message.answer(
             text=get_localization(user_language_code).SUBSCRIPTION_SUCCESS,
-            message_effect_id="5044134455711629726",
         )
         await send_message_to_admins(
             bot=message.bot,
@@ -1172,7 +1171,6 @@ async def successful_payment(message: Message, state: FSMContext):
 
         await message.answer(
             text=get_localization(user_language_code).PACKAGE_SUCCESS,
-            message_effect_id="5044134455711629726",
         )
         await send_message_to_admins(
             bot=message.bot,
@@ -1223,7 +1221,6 @@ async def successful_payment(message: Message, state: FSMContext):
 
         await message.answer(
             text=get_localization(user_language_code).PACKAGES_SUCCESS,
-            message_effect_id="5044134455711629726",
         )
         await send_message_to_admins(
             bot=message.bot,

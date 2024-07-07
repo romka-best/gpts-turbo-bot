@@ -262,7 +262,7 @@ class Texts(Protocol):
     CHATGPT4_TURBO = "🧠 ChatGPT-4.0 Turbo"
     CHATGPT4_OMNI = "💥 ChatGPT-4.0 Omni"
     CLAUDE = "📄 Claude"
-    CLAUDE_3_SONNET = "💫 Claude 3 Sonnet"
+    CLAUDE_3_SONNET = "💫 Claude 3.5 Sonnet"
     CLAUDE_3_OPUS = "🚀 Claude 3 Opus"
     DALL_E = "🖼️ DALL-E"
     MIDJOURNEY = "🎨 Midjourney"

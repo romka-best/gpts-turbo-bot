@@ -85,7 +85,6 @@ async def handle_pay_selection_webhook(request: Dict, bot: Bot, dp: Dispatcher):
                 await bot.send_message(
                     chat_id=subscription.user_id,
                     text=get_localization(user_language_code).SUBSCRIPTION_SUCCESS,
-                    message_effect_id="5044134455711629726",
                 )
 
                 reply_markup = await build_recommendations_keyboard(user.current_model, user_language_code, user.gender)
@@ -297,7 +296,6 @@ async def handle_pay_selection_webhook(request: Dict, bot: Bot, dp: Dispatcher):
                 await bot.send_message(
                     chat_id=package.user_id,
                     text=get_localization(user_language_code).PACKAGE_SUCCESS,
-                    message_effect_id="5044134455711629726",
                 )
 
                 reply_markup = await build_recommendations_keyboard(user.current_model, user_language_code, user.gender)
@@ -404,7 +402,6 @@ async def handle_pay_selection_webhook(request: Dict, bot: Bot, dp: Dispatcher):
                 await bot.send_message(
                     chat_id=user.id,
                     text=get_localization(user_language_code).PACKAGES_SUCCESS,
-                    message_effect_id="5044134455711629726",
                 )
 
                 reply_markup = await build_recommendations_keyboard(user.current_model, user_language_code, user.gender)
