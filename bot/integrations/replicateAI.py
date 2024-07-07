@@ -27,7 +27,7 @@ async def create_face_swap_image(target_image: str, source_image: str) -> Option
         }
 
         model = await replicate.models.async_get("omniedgeio/face-swap")
-        version = await model.versions.async_get("c2d783366e8d32e6e82c40682fab6b4c23b9c6eff2692c0cf7585fc16c238cfe")
+        version = await model.versions.async_get("39b9d2221e89470cdf6283cbb648427ec8b8ee5542f5323e7c741017acebc0c0")
         prediction = await replicate.predictions.async_create(
             version=version,
             input=input_parameters,
