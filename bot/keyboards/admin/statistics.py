@@ -118,7 +118,7 @@ def build_statistics_choose_service_keyboard(
             ],
             [
                 InlineKeyboardButton(
-                    text="Claude 3 Sonnet 💫",
+                    text="Claude 3.5 Sonnet 💫",
                     callback_data=f'statistics_choose_service:{ServiceType.CLAUDE_3_SONNET}'
                 )
             ],
@@ -211,7 +211,7 @@ def build_statistics_choose_service_keyboard(
             ],
             [
                 InlineKeyboardButton(
-                    text="Claude 3 Sonnet 💫",
+                    text="Claude 3.5 Sonnet 💫",
                     callback_data=f'statistics_choose_service:{ServiceType.CLAUDE_3_SONNET}'
                 )
             ],

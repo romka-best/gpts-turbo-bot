@@ -22,7 +22,7 @@ I'm your personal gateway to the world of artificial intelligence and neural net
 ✉️ Communicate with <b>ChatGPT-3.5 Turbo</b>: ask questions, get answers
 🧠 Explore advanced intelligence with <b>ChatGPT-4.0 Turbo</b>
 💥 Unleash the full potential of AI with <b>ChatGPT-4.0 Omni</b>
-💫 The perfect blend of speed and intelligence for business tasks with <b>Claude 3 Sonnet</b>
+💫 The perfect blend of speed and intelligence for business tasks with <b>Claude 3.5 Sonnet</b>
 🚀 Ultimate power for tackling the most complex challenges with <b>Claude 3 Opus</b>
 🖼 Draw beautiful pictures with <b>DALL-E</b>
 🎨 Create unique images with <b>Midjourney</b>
@@ -111,7 +111,7 @@ Just type away a command to begin your AI journey! 🌟
     INFO_CLAUDE = """
 🤖 <b>There is what each model can do for you:</b>
 
-💫 <b>Claude 3 Sonnet: A Balance of Speed and Wisdom</b>
+💫 <b>Claude 3.5 Sonnet: A Balance of Speed and Wisdom</b>
 <i>Multifunctional Analysis</i>: Effective for comprehensive research and technical explanations.
 <i>Problem Solving</i>: Assistance with solving mathematical issues, software bugs, or scientific puzzles.
 <i>Linguistic Expert</i>: A reliable assistant for translating texts and enhancing conversational skills in various languages.
@@ -378,11 +378,11 @@ You have successfully switched to the <b>ChatGPT-4.0 Omni</b> model. This is the
 Embark on an exciting journey with <b>ChatGPT-4.0 Omni</b>! 🎉
 """
     SWITCHED_TO_CLAUDE_3_SONNET = """
-💫 <b>Welcome to the world of Claude 3 Sonnet!</b>
+💫 <b>Welcome to the world of Claude 3.5 Sonnet!</b>
 
-You have successfully switched to the <b>Claude 3 Sonnet</b> model. A master of balanced intelligence and speed! This model is perfectly suited for corporate tasks, combining quick responsiveness with deep analysis. Your experience will be enhanced by the preserved conversation history, allowing you to continue the dialogue without losing context.
+You have successfully switched to the <b>Claude 3.5 Sonnet</b> model. A master of balanced intelligence and speed! This model is perfectly suited for corporate tasks, combining quick responsiveness with deep analysis. Your experience will be enhanced by the preserved conversation history, allowing you to continue the dialogue without losing context.
 
-Experience a new level of interaction with <b>Claude 3 Sonnet</b>! 🎉
+Experience a new level of interaction with <b>Claude 3.5 Sonnet</b>! 🎉
 """
     SWITCHED_TO_CLAUDE_3_OPUS = """
 🚀 <b>Welcome to the world of Claude 3 Opus!</b>
@@ -680,8 +680,8 @@ Your chats have switched their unique roles to "Personal Assistant" as your acce
     GPT4_REQUESTS_DESCRIPTION = "Experience ChatGPT-4.0 Turbo advanced intelligence for deeper insights and groundbreaking conversations 🧠"
     GPT4_OMNI_REQUESTS = "💥 ChatGPT-4.0 Omni requests"
     GPT4_OMNI_REQUESTS_DESCRIPTION = "Discover new horizons with the intelligence of ChatGPT-4.0 Omni for deeper analyses and innovative dialogues! 💥"
-    CLAUDE_3_SONNET_REQUESTS = "💫 Claude 3 Sonnet requests"
-    CLAUDE_3_SONNET_REQUESTS_DESCRIPTION = "Explore the balance of speed and intelligence with Claude 3 Sonnet for accurate and timely solutions! 💫"
+    CLAUDE_3_SONNET_REQUESTS = "💫 Claude 3.5 Sonnet requests"
+    CLAUDE_3_SONNET_REQUESTS_DESCRIPTION = "Explore the balance of speed and intelligence with Claude 3.5 Sonnet for accurate and timely solutions! 💫"
     CLAUDE_3_OPUS_REQUESTS = "🚀 Claude 3 Opus requests"
     CLAUDE_3_OPUS_REQUESTS_DESCRIPTION = "Experience the power of Claude 3 Opus to solve the most complex challenges and create profound insights! 🚀"
     DALL_E_REQUESTS = "🖼 DALL-E images"
@@ -932,7 +932,7 @@ Quota:
 ━ 💥 <b>ChatGPT-4.0 Omni</b>:
     ┣ {monthly_limits[Quota.CHAT_GPT4_OMNI]}/{SubscriptionLimit.LIMITS[subscription_type][Quota.CHAT_GPT4_OMNI]}
     ┗ Additional: {additional_usage_quota[Quota.CHAT_GPT4_OMNI]}
-━ 💫 <b>Claude 3 Sonnet</b>:
+━ 💫 <b>Claude 3.5 Sonnet</b>:
     ┣ {monthly_limits[Quota.CLAUDE_3_SONNET]}/{SubscriptionLimit.LIMITS[subscription_type][Quota.CLAUDE_3_SONNET]}
     ┗ Additional: {additional_usage_quota[Quota.CLAUDE_3_SONNET]}
 ━ 🚀 <b>Claude 3 Opus</b>:
