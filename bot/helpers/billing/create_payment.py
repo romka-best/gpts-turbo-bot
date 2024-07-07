@@ -45,7 +45,7 @@ async def create_payment(
                 "locale": "ru_RU" if language_code == "ru" else "en_US",
             },
             "capture": True,
-            # "save_payment_method": is_subscription,
+            "save_payment_method": is_subscription,
             "description": description,
             "merchant_customer_id": user_id,
         }

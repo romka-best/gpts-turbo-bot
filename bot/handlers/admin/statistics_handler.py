@@ -1189,6 +1189,7 @@ async def handle_get_statistics(language_code: str, period: str):
         count_income_money_before['ALL'] / count_income_money_before_total
     ) if count_income_money_before_total else 0
     count_income_money['VAL'] = count_income_money['ALL'] - count_expense_money['ALL'] * 100
+    count_income_money_before['VAL'] = count_income_money_before['ALL'] - count_expense_money_before['ALL'] * 100
 
     count_chats_usage = {
         'ALL': len(chats),

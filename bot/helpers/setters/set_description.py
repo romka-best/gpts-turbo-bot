@@ -22,7 +22,7 @@ Access to neural networks and AI:
 ✉️ ChatGPT-3.5 Turbo
 🧠 ChatGPT-4.0 Turbo
 💥 ChatGPT-4.0 Omni
-💫 Claude 3 Sonnet
+💫 Claude 3.5 Sonnet
 🚀 Claude 3 Opus
 🖼 DALL•E
 🎨 Midjourney
@@ -39,7 +39,7 @@ Created by Stanford students 🏫
 ✉️ ChatGPT-3.5 Turbo
 🧠 ChatGPT-4.0 Turbo
 💥 ChatGPT-4.0 Omni
-💫 Claude 3 Sonnet
+💫 Claude 3.5 Sonnet
 🚀 Claude 3 Opus
 🖼 DALL•E
 🎨 Midjourney
