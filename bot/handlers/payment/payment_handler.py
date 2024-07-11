@@ -224,7 +224,7 @@ async def handle_payment_method_subscription_selection(callback_query: CallbackQ
             )
             if amount < 100:
                 await handle_subscribe(callback_query.message, user_id, state)
-                await callback_query.message.answer(get_localization(user_language_code).EXCEED_NOTIFY_PURCHASE)
+                await callback_query.message.answer(get_localization(user_language_code).rebound_msg('RUB'))
             else:
                 payment = await create_payment(
                     payment_method,
@@ -272,7 +272,7 @@ async def handle_payment_method_subscription_selection(callback_query: CallbackQ
             )
             if amount < 1:
                 await handle_subscribe(callback_query.message, user_id, state)
-                await callback_query.message.answer(get_localization(user_language_code).EXCEED_NOTIFY_PURCHASE)
+                await callback_query.message.answer(get_localization(user_language_code).rebound_msg('USD'))
             else:
                 subscription_ref = firebase.db.collection(Subscription.COLLECTION_NAME).document()
                 payment = await create_payment(
@@ -344,7 +344,7 @@ async def handle_period_of_subscription_selection(callback_query: CallbackQuery,
     )
     if int(float(price_with_discount)) < 100:
         await handle_subscribe(callback_query.message, user_id, state)
-        await callback_query.message.answer(get_localization(user_language_code).EXCEED_NOTIFY_PURCHASE)
+        await callback_query.message.answer(get_localization(user_language_code).rebound_msg('STARS'))
     else:
         name = (f"{subscription_type} {emojis[subscription_type]} "
                 f"({get_localization(user_language_code).cycles_subscribe()[subscription_period]})")
@@ -826,7 +826,7 @@ async def handle_payment_method_cart_selection(callback_query: CallbackQuery, st
                 amount += Package.get_price(Currency.RUB, package_type, package_quantity, user.discount)
             if amount < 100:
                 reply_markup = build_package_cart_keyboard(user_language_code)
-                await callback_query.message.edit_caption(caption=get_localization(user_language_code).EXCEED_NOTIFY_BASKET, reply_markup=reply_markup)
+                await callback_query.message.edit_caption(caption=get_localization(user_language_code).rebound_msg('RUB'), reply_markup=reply_markup)
             else:
                 payment = await create_payment(
                     payment_method,
@@ -890,7 +890,7 @@ async def handle_payment_method_cart_selection(callback_query: CallbackQuery, st
                 amount += Package.get_price(Currency.USD, package_type, package_quantity, user.discount)
             if amount < 1:
                 reply_markup = build_package_cart_keyboard(user_language_code)
-                await callback_query.message.edit_caption(caption=get_localization(user_language_code).EXCEED_NOTIFY_BASKET, reply_markup=reply_markup)
+                await callback_query.message.edit_caption(caption=get_localization(user_language_code).rebound_msg('USD'), reply_markup=reply_markup)
             else:
                 package_ref = firebase.db.collection(Package.COLLECTION_NAME).document()
                 payment = await create_payment(
@@ -958,7 +958,7 @@ async def handle_payment_method_cart_selection(callback_query: CallbackQuery, st
                 payload += f":{package_type}:{package_quantity}"
             if int(amount) < 100:
                 reply_markup = build_package_cart_keyboard(user_language_code)
-                await callback_query.message.edit_caption(caption=get_localization(user_language_code).EXCEED_NOTIFY_BASKET, reply_markup=reply_markup)
+                await callback_query.message.edit_caption(caption=get_localization(user_language_code).rebound_msg('STARS'), reply_markup=reply_markup)
             else:
                 photo_path = f'payments/packages_{user_language_code}.png'
                 photo = await firebase.bucket.get_blob(photo_path)

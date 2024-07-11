@@ -857,10 +857,13 @@ Please try again 🥺
     VIDEO = "Video 📹"
     SKIP = "Skip ⏩️"
 
-    EXCEED_NOTIFY_PURCHASE = "😕 Sorry, but to make a purchase, its total amount must exceed 100 rubles/1 dollar/100 Telegram Stars"
-    EXCEED_NOTIFY_BASKET = "😕 Sorry, but to make a purchase, the total amount of the basket must exceed 100 rubles/1 dollar/100 Telegram Stars"
-
     TERMS_LINK = "https://telegra.ph/Terms-of-Service-in-GPTsTurboBot-05-07"
+
+    @staticmethod
+    def rebound_msg(currency):
+        min_sums = {'RUB': 100, 'USD': 1, 'STARS': 100}
+        req = f'😕 Oh-oh...\n\nTo purchase, the total amount must be higher than {min_sums[currency]} {currency}'
+        return req
 
     @staticmethod
     def profile(

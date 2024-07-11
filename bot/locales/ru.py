@@ -857,10 +857,13 @@ class Russian(Texts):
     VIDEO = "Видео 📹"
     SKIP = "Пропустить ⏩️"
 
-    EXCEED_NOTIFY_PURCHASE = "😕 Извините, но чтобы совершить покупку, ее общая сумма должна превышать 100 рублей/1 доллар/100 Telegram Stars"
-    EXCEED_NOTIFY_BASKET = "😕 Извините, но чтобы совершить покупку, общая сумма корзины должна превышать 100 рублей/1 доллар/100 Telegram Stars"
-
     TERMS_LINK = "https://telegra.ph/Polzovatelskoe-soglashenie-v-GPTsTurboBot-05-07"
+
+    @staticmethod
+    def rebound_msg(currency):
+        min_sums = {'RUB': 100, 'USD': 1, 'STARS': 100}
+        req = f'😕 Ох-ох...\n\nДля совершения покупки общая сумма должна быть больше, чем {min_sums[currency]} {currency}'
+        return req
 
     @staticmethod
     def profile(
