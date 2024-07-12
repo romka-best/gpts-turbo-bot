@@ -16,60 +16,35 @@ from bot.database.models.user import UserGender
 
 class English(Texts):
     START = """
-🤖 <b>Welcome to the future of artificial intelligence with ChatGPTs Turbo AI Bot!</b> 🎉
+<b>Welcome to the world of AI!</b> 🎉
 
-I'm your personal gateway to the world of artificial intelligence and neural networks. Discover the capabilities of AI:
-✉️ Communicate with <b>ChatGPT-3.5 Turbo</b>: ask questions, get answers
-🧠 Explore advanced intelligence with <b>ChatGPT-4.0 Turbo</b>
-💥 Unleash the full potential of AI with <b>ChatGPT-4.0 Omni</b>
-💫 The perfect blend of speed and intelligence for business tasks with <b>Claude 3 Sonnet</b>
-🚀 Ultimate power for tackling the most complex challenges with <b>Claude 3 Opus</b>
-🖼 Draw beautiful pictures with <b>DALL-E</b>
-🎨 Create unique images with <b>Midjourney</b>
-😜 Try <b>FaceSwap</b> to exchange faces with someone in a photo
-🎵 Compose original melodies with <b>MusicGen</b>
-🎸 Record your own songs with <b>Suno</b>
+I am your personal assistant in exploring the capabilities of artificial intelligence:
 
-Here's a quick guide to get started:
-🧠 To get a text response from <b>ChatGPT</b>, enter the command /chatgpt, select the version, and then just type your requests in the chat
-🚀 To get a text response from <b>Claude</b>, enter the command /claude, select the version, and then just type your requests in the chat
-🖼 To create an image with <b>DALL-E</b>, enter the command /dalle, and then let your imagination run wild with your request
-🎨 To create an image with <b>Midjourney</b>, enter the command /midjourney, and then start creating using your imagination with your request
-😜 To swap faces with someone in a photo with <b>FaceSwap</b>, enter the command /face_swap, then choose images from our unique packages or send your own
-🎵 To create a melody with <b>MusicGen</b>, enter the command /music_gen, and then write a description of the melody
-🎸 To create a song with <b>Suno</b>, enter the command /suno, and then write a description of the song or send your own lyrics
-🔄 To switch between different neural networks, enter the command /mode, and then select the neural network depending on your creative needs
-📊 To check usage information and subscription/purchase details, enter the command /profile
-🔍 To learn more about the capabilities of each AI model, enter the command /info
-🎭️ To choose a specialized digital assistant in <b>ChatGPT</b> models, enter the command /settings
-💬 To manage thematic chats in <b>ChatGPT</b> models, enter the command /settings
-🔧 To customize AI models to improve your experience, enter the command /settings
+✉️ Chat with <b>ChatGPT</b>, create images with <b>DALL-E</b> and <b>Midjourney</b>
+😜 Change faces in photos using <b>FaceSwap</b>
+🎵 Compose music with <b>MusicGen</b> and <b>Suno</b>
+💫 Utilize powerful AI models for business tasks
 
-And that's not all! Just type /help to see all my magical AI commands available to you.
-I'm here to be your co-pilot on this adventure! 🚀
-"""
+<b>Select your AI model using the /mode command.</b>
+
+Enter /help and /info to learn about all available commands.
+I'm ready to help you discover new horizons of AI! 🚀
+    """
     COMMANDS = """
-🤖 <b>Here's what you can explore:</b>
+<b>Explore the possibilities of AI:</b> 🤖
 
-👋 /start - <b>About me</b>: Discover what I can do for you.
-🤖 /mode - <b>Swap neural network models</b> on the fly with — <b>ChatGPT</b>, <b>Claude</b>, <b>DALL-E</b>, <b>Midjourney</b>, <b>FaceSwap</b>, <b>MusicGen</b>, or <b>Suno</b>!
-💳 /buy - <b>Subscribe or buy individual packages</b>: Get a new level
-👤 /profile - <b>View your profile</b>: Check your subscription details or usage quota and more
-🔧 /settings - <b>Customize your experience</b>: Tailor model to fit your needs. There you can also <b>select a digital employee</b> with <b>context-specific chats management</b>
-🌍 /language - <b>Switch languages</b>: Set your preferred language for system interface
-ℹ️ /info - <b>Get information about AI</b>: Learn for what and why do you need them
-🧠 /chatgpt - <b>Chat with ChatGPT</b>: Start a text conversation and receive advanced AI responses
-🚀 /claude - <b>Chat with Claude</b>: Begin a discussion and explore the depth of responses from Claude
-🖼 /dalle - <b>Draw with DALL-E</b>: Turn your ideas into drawings
-🎨 /midjourney - <b>Create with DALL-E 3</b>: Bring your imaginations to life with images
-😜 /face_swap - <b>Have fun with FaceSwap</b>: Change faces in photos
-🎵 /music_gen - <b>Melodies with MusicGen</b>: Create music without copyrights
-🎸 /suno - <b>Songs with Suno</b>: Create your own song with your lyrics and different genres
-🎁 /bonus - Learn about your bonus balance and <b>exchange bonuses for unique generation packages</b>
-🔑 /promo_code - <b>Unleash exclusive AI features</b> and special offers with your <b>promo code</b>
-📡 /feedback - <b>Leave feedback</b>: Help me improve
+✨ /start - Learn about me and my capabilities
+🤖 /mode - Switch between models: <b>ChatGPT</b>, <b>Claude</b>, <b>DALL-E</b> and others
+💳 /buy - Subscribe or get individual packages
+👤 /profile - Check the details of your account
+🔧 /settings - Customize preferences and manage chats
+🌍 /language - Select your preferred language
+ℹ️ /info - Get information about my models
+🎁 /bonus - Use your bonus balance for generations
+🔑 /promo_code - Unlock exclusive features with promo codes
+📡 /feedback - Help me improve
 
-Just type away a command to begin your AI journey! 🌟
+<b>Try commands like /chatgpt, /face_swap, /dalle, /midjourney and others to start your journey into the world of AI! 🌟</b>
 """
     INFO = """
 🤖 <b>Select the models type you want to get information about:</b>
@@ -84,96 +59,75 @@ Just type away a command to begin your AI journey! 🌟
 🤖 <b>Select the model you want to get information about:</b>
 """
     INFO_CHATGPT = """
-🤖 <b>There is what each model can do for you:</b>
+🤖 <b>Here's what each model can do for you:</b>
 
-✉️ <b>ChatGPT-3.5 Turbo: The Versatile Communicator</b>
-- <i>Small Talk to Deep Conversations</i>: Ideal for chatting about anything from daily life to sharing jokes.
-- <i>Educational Assistant</i>: Get help with homework, language learning, or complex topics like coding.
-- <i>Personal Coach</i>: Get motivation, fitness tips, or even meditation guidance.
-- <i>Creative Writer</i>: Need a post, story, or even a song? ChatGPT-3.5 Turbo can whip it up in seconds.
-- <i>Travel Buddy</i>: Ask for travel tips, local cuisines, or historical facts about your next destination.
-- <i>Business Helper</i>: Draft emails, create business plans, or brainstorm marketing ideas.
+✉️ <b>ChatGPT-3.5 Turbo</b>:
+<i>Ideal for diverse conversations, educational assistance, personal coaching, creative writing, travel, and business support.</i>
 
-🧠 <b>ChatGPT-4.0 Turbo: The Advanced Intellect</b>
-- <i>In-Depth Analysis</i>: Perfect for detailed research, technical explanations, or exploring hypothetical scenarios.
-- <i>Problem Solver</i>: Get help with advanced math problems, programming bugs, or scientific queries.
-- <i>Language Expert</i>: Translate complex texts or practice conversational skills in various languages.
-- <i>Creative Consultant</i>: Develop plot ideas for your posts, script dialogues, or explore artistic concepts.
-- <i>Personalized Recommendations</i>: Get book, movie, or travel recommendations based on your interests.
+🧠 <b>ChatGPT-4.0 Turbo</b>:
+<i>Helps with deep analysis, problem-solving, language expertise, creative consultations, and personalized recommendations.</i>
 
-💥 <b>ChatGPT-4.0 Omni: Next-Generation Intelligence</b>
-<i>Detailed Analysis</i>: Perfect for in-depth research, complex technical explanations, or virtual scenario analysis.
-<i>Complex Problem Solving</i>: From mathematical calculations to diagnosing software issues and answering scientific queries.
-<i>Language Mastery</i>: High-level translation and enhancement of conversational skills in various languages.
-<i>Creative Mentor</i>: Inspiring ideas for blogs, scripts, or artistic research.
-<i>Personalized Recommendations</i>: Tailored picks for books, movies, or travel routes based on your preferences.
+💥 <b>ChatGPT-4.0 Omni</b>:
+<i>Offers thorough analysis, complex task solving, language mastery, creative ideas, and tailored recommendations.</i>
 """
     INFO_CLAUDE = """
-🤖 <b>There is what each model can do for you:</b>
+🤖 <b>Here's what each model can do for you:</b>
 
-💫 <b>Claude 3 Sonnet: A Balance of Speed and Wisdom</b>
-<i>Multifunctional Analysis</i>: Effective for comprehensive research and technical explanations.
-<i>Problem Solving</i>: Assistance with solving mathematical issues, software bugs, or scientific puzzles.
-<i>Linguistic Expert</i>: A reliable assistant for translating texts and enhancing conversational skills in various languages.
-<i>Creative Advisor</i>: Development of creative ideas for content and artistic projects.
-<i>Personal Guide</i>: Recommendations for cultural content and travel planning tailored to your interests.
+🌟 <b>Claude 3 Sonnet:</b>
+Research, problem-solving, language assistance, creative ideas, travel planning.
 
-🚀 <b>Claude 3 Opus: The Pinnacle of Power and Depth</b>
-<i>Advanced Analysis</i>: Ideal for tackling the most complex research and hypothetical scenarios.
-<i>Problem Solving Expert</i>: Addresses challenging scientific inquiries, technical issues, and mathematical problems.
-<i>Language Mastery</i>: Translations and language practice at a professional level.
-<i>Creative Consultant</i>: Support in developing unique ideas for scripts and art projects.
-<i>Recommendations Concierge</i>: Expert advice on selecting books, movies, and travel plans that match your tastes.
+🚀 <b>Claude 3 Opus:</b>
+Complex research, problem-solving, high-level language expertise, support for creative projects, personalized recommendations.
 """
     INFO_DALL_E = """
-🤖 <b>There is what the model can do for you:</b>
+🤖 <b>Here's what the model can do for you:</b>
 
-🖼 <b>DALL-E: The Creative Genius</b>
-- <i>Art on Demand</i>: Generate unique art from descriptions – perfect for illustrators or those seeking inspiration.
-- <i>Ad Creator</i>: Produce eye-catching images for advertising or social media content.
-- <i>Educational Tool</i>: Visualize complex concepts for better understanding in education.
-- <i>Interior Design</i>: Get ideas for room layouts or decoration themes.
-- <i>Fashion Design</i>: Create clothing designs or fashion illustrations.
+🎨 <b>DALL-E: The Creative Genius</b>
+<i>On Demand:</i> Unique images for illustrators and inspiration.
+<i>Advertising:</i> Attractive visuals for social media.
+<i>Education:</i> Visualize concepts for learning.
+<i>Interior:</i> Ideas for room layouts.
+<i>Fashion:</i> Clothing design and fashion illustrations.
 """
     INFO_MIDJOURNEY = """
-🤖 <b>There is what the model can do for you:</b>
+🤖 <b>Here's what the model can do for you:</b>
 
-🎨 <b>Midjourney: Navigator of Creativity</b>
-- <i>Art Design</i>: Creating visual masterpieces and abstractions, ideal for artists and designers in search of a unique style.
-- <i>Architectural modeling</i>: Generation of conceptual designs of buildings and space layouts.
-- <i>Educational assistant</i>: Illustrations for educational materials that improve the perception and understanding of complex topics.
-- <i>Interior design</i>: Visualization of interior solutions, from classics to modern trends.
-- <i>Fashion and style</i>: The development of fashionable bows and accessories, experiments with colors and shapes.
+🎨 <b>Midjourney: The Creative Navigator</b>
+<i>Art Design:</i> Unique masterpieces for artists and designers.
+<i>Architecture:</i> Conceptual building projects and layouts.
+<i>Education:</i> Illustrations for learning.
+<i>Interior Design:</i> Visualization of interiors from classic to modern.
+<i>Fashion and Style:</i> Development of fashionable looks and accessories.
 """
     INFO_FACE_SWAP = """
-🤖 <b>There is what the model can do for you:</b>
+🤖 <b>Here's what the model can do for you:</b>
 
 🤡 <b>FaceSwap: The Entertainment Master</b>
-- <i>Fun Reimaginations</i>: See how you'd look in different historical eras or as various movie characters.
-- <i>Personalized Greetings</i>: Create unique birthday cards or invitations with personalized images.
-- <i>Memes and Content Creation</i>: Spice up your social media with funny or imaginative face-swapped pictures.
-- <i>Digital Makeovers</i>: Experiment with new haircuts or makeup styles.
-- <i>Celebrity Mashups</i>: Combine your face with celebrities for fun comparisons.
+<i>Playful Reimaginings:</i> Historical eras and cinematic characters.
+<i>Personalized Greetings:</i> Unique cards and invitations.
+<i>Memes and Content:</i> Funny photos for social media.
+<i>Digital Makeovers:</i> Experiments with hairstyles and makeup.
+<i>Celebrity Blending:</i> Amusing face comparisons with stars.
 """
     INFO_MUSIC_GEN = """
-🤖 <b>There is what the model can do for you:</b>
+🤖 <b>Here's what the model can do for you:</b>
 
 🎶 <b>MusicGen: Your Personal Composer</b>
-<i>Creating Unique Melodies</i>: Turn your ideas into musical pieces of any genre - from classical to pop.
-<i>Personalized Soundtracks</i>: Create a soundtrack for your next video project, game, or presentation.
-<i>Exploring Musical Styles</i>: Experiment with different musical genres and sounds to find your unique style.
-<i>Learning and Inspiration</i>: Gain new insights into music theory and the history of genres through music creation.
-<i>Instant Melody Creation</i>: Just enter a text description or mood, and MusicGen will instantly turn it into music.
+<i>Unique Melodies:</i> Turn ideas into music of any genre.
+<i>Personalized Soundtracks:</i> Audio tracks for videos, games, and presentations.
+<i>Style Exploration:</i> Experiments with genres and sounds.
+<i>Learning and Inspiration:</i> Gain musical knowledge through creation.
+<i>Instant Melody Generation:</i> Turn text or mood into music.
 """
     INFO_SUNO = """
-🤖 <b>There is what the model can do for you:</b>
+🤖 <b>Here's what the model can do for you:</b>
 
-🎸 <b>Suno: A Pro in Creating Songs</b>
-<i>Text-to-song transformation</i>: Suno turns your text into songs, matching melody and rhythm to your style.
-<i>Personalized songs</i>: Create unique songs for special moments, whether it's a personal gift or a soundtrack for your event.
-<i>Explore musical genres</i>: Discover new musical horizons by experimenting with different styles and sounds.
-<i>Music education and inspiration</i>: Learn about music theory and the history of genres through the practice of composition.
-<i>Instant music creation</i>: Describe your emotions or scenario, and Suno will immediately bring your description to life as a song.
+🎸 <b>Suno: The Song Creation Professional</b>
+<i>Lyrics to Melody:</i> Suno translates your words into melodies in your style.
+<i>Personalized Songs:</i> Unique compositions for special occasions.
+<i>Genre Exploration:</i> Experiments with different music styles.
+<i>Music Education:</i> Learn through hands-on practice.
+<i>Instant Music Creation:</i> Turn emotions into a song.
 """
 
     TEXT_MODELS = "🔤 Text models"
