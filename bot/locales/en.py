@@ -746,15 +746,20 @@ This is your sole chat kingdom, and a kingdom needs its king or queen! Deleting 
 How about adding more chats to your realm instead? Check out /buy or /bonus to build your chat empire! 👑
 """
     DELETE_CHAT_SUCCESS = "🗑️ Chat successfully deleted! 🎉"
-
     # FaceSwap
     CHOOSE_YOUR_PACKAGE = """
-🌟<b>Let's get creative with your photos!</b>
+🌟 <b>Let's create with your photos!</b>
 
-Ready? Let's dive into a world of imagination! 🚀
+🚀 How to get a photo from the internet using <b>pic?</b>
 
-🌈 Send me a photo in which I will replace the face with yours from /profile or just <b>select a package below</b> and start your photo adventure 👇
-    """
+1) In the message line, write <b>"@pic photo from the internet"</b>
+<b>Example</b>: "@pic astronaut".
+2) Without sending the message, preview the photos that will appear in the window <b>above the message line</b>.
+3) Select the photo you like by <b>clicking</b> on it.
+4) <b>Send</b> the selected photo.
+
+🌈 Send me a photo, and I'll replace the face with yours from /profile, <b>choose a package</b> below or use @pic to select a picture from the internet 👇
+"""
     GENERATIONS_IN_PACKAGES_ENDED = """
 🎨 <b>Wow, you've used up all your generations in our packages! Your creativity is astounding!</b> 🌟
 
