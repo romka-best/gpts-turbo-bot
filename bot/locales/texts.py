@@ -1408,6 +1408,10 @@ class Texts(Protocol):
 """
 
     @staticmethod
+    def payment_description_renew_subscription(rebound_msg: str):
+        raise NotImplementedError
+
+    @staticmethod
     def profile(
         subscription_type: SubscriptionType,
         subscription_status: SubscriptionStatus,

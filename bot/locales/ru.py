@@ -860,9 +860,21 @@ class Russian(Texts):
     TERMS_LINK = "https://telegra.ph/Polzovatelskoe-soglashenie-v-GPTsTurboBot-05-07"
 
     @staticmethod
-    def rebound_msg(currency):
-        min_sums = {'RUB': 100, 'USD': 1, 'STARS': 100}
-        req = f'😕 Ох-ох...\n\nДля совершения покупки общая сумма должна быть больше, чем {min_sums[currency]} {currency}'
+    def rebound_msg(currency: str) -> str:
+        currency_mapping = {
+            'XTR': 'STARS',
+        }
+
+        min_sums = {
+            'RUB': 100,
+            'USD': 1,
+            'STARS': 100
+        }
+
+        currency_display = currency_mapping.get(currency, currency)
+        min_sum = min_sums[currency_display]
+
+        req = f'😕 Ох-ох...\n\nДля совершения покупки общая сумма должна быть больше, чем {min_sum} {currency_display}'
         return req
 
     @staticmethod

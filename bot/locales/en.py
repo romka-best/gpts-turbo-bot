@@ -860,9 +860,21 @@ Please try again 🥺
     TERMS_LINK = "https://telegra.ph/Terms-of-Service-in-GPTsTurboBot-05-07"
 
     @staticmethod
-    def rebound_msg(currency):
-        min_sums = {'RUB': 100, 'USD': 1, 'STARS': 100}
-        req = f'😕 Oh-oh...\n\nTo purchase, the total amount must be higher than {min_sums[currency]} {currency}'
+    def rebound_msg(currency: str) -> str:
+        currency_mapping = {
+            'XTR': 'STARS',
+        }
+
+        min_sums = {
+            'RUB': 100,
+            'USD': 1,
+            'STARS': 100
+        }
+
+        currency_display = currency_mapping.get(currency, currency)
+        min_sum = min_sums[currency_display]
+
+        req = f'😕 Oh-oh...\n\nTo purchase, the total amount must be higher than {min_sum} {currency_display}'
         return req
 
     @staticmethod
