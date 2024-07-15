@@ -225,41 +225,45 @@ async def handle_payment_method_subscription_selection(callback_query: CallbackQ
                     user.discount,
                 )
             )
-            payment = await create_payment(
-                payment_method,
-                user_id,
-                get_localization(user_language_code).payment_description_subscription(user_id, subscription_type),
-                amount,
-                user_language_code,
-                True,
-            )
+            if amount < 100:
+                await handle_subscribe(callback_query.message, user_id, state)
+                await callback_query.message.answer(get_localization(user_language_code).rebound_msg(Currency.RUB))
+            else:
+                payment = await create_payment(
+                    payment_method,
+                    user_id,
+                    get_localization(user_language_code).payment_description_subscription(user_id, subscription_type),
+                    amount,
+                    user_language_code,
+                    True,
+                )
 
-            caption = get_localization(user_language_code).confirmation_subscribe(
-                subscription_type,
-                Currency.RUB,
-                amount,
-            )
-            reply_markup = build_payment_keyboard(
-                user_language_code,
-                payment.get('confirmation').get('confirmation_url'),
-            )
-            await callback_query.message.edit_caption(
-                caption=caption,
-                reply_markup=reply_markup,
-            )
+                caption = get_localization(user_language_code).confirmation_subscribe(
+                    subscription_type,
+                    Currency.RUB,
+                    amount,
+                )
+                reply_markup = build_payment_keyboard(
+                    user_language_code,
+                    payment.get('confirmation').get('confirmation_url'),
+                )
+                await callback_query.message.edit_caption(
+                    caption=caption,
+                    reply_markup=reply_markup,
+                )
 
-            await write_subscription(
-                None,
-                user_id,
-                subscription_type,
-                SubscriptionPeriod.MONTH1,
-                SubscriptionStatus.WAITING,
-                Currency.RUB,
-                amount,
-                0,
-                payment_method,
-                payment.get('id'),
-            )
+                await write_subscription(
+                    None,
+                    user_id,
+                    subscription_type,
+                    SubscriptionPeriod.MONTH1,
+                    SubscriptionStatus.WAITING,
+                    Currency.RUB,
+                    amount,
+                    0,
+                    payment_method,
+                    payment.get('id'),
+                )
         elif payment_method == PaymentMethod.PAY_SELECTION:
             amount = float(
                 Subscription.get_price(
@@ -269,43 +273,47 @@ async def handle_payment_method_subscription_selection(callback_query: CallbackQ
                     user.discount,
                 )
             )
-            subscription_ref = firebase.db.collection(Subscription.COLLECTION_NAME).document()
-            payment = await create_payment(
-                payment_method,
-                user_id,
-                get_localization(user_language_code).payment_description_subscription(user_id, subscription_type),
-                amount,
-                user_language_code,
-                True,
-                subscription_ref.id,
-            )
+            if amount < 1:
+                await handle_subscribe(callback_query.message, user_id, state)
+                await callback_query.message.answer(get_localization(user_language_code).rebound_msg(Currency.USD))
+            else:
+                subscription_ref = firebase.db.collection(Subscription.COLLECTION_NAME).document()
+                payment = await create_payment(
+                    payment_method,
+                    user_id,
+                    get_localization(user_language_code).payment_description_subscription(user_id, subscription_type),
+                    amount,
+                    user_language_code,
+                    True,
+                    subscription_ref.id,
+                )
 
-            caption = get_localization(user_language_code).confirmation_subscribe(
-                subscription_type,
-                Currency.USD,
-                amount,
-            )
-            reply_markup = build_payment_keyboard(
-                user_language_code,
-                payment.get('Url'),
-            )
-            await callback_query.message.edit_caption(
-                caption=caption,
-                reply_markup=reply_markup,
-            )
+                caption = get_localization(user_language_code).confirmation_subscribe(
+                    subscription_type,
+                    Currency.USD,
+                    amount,
+                )
+                reply_markup = build_payment_keyboard(
+                    user_language_code,
+                    payment.get('Url'),
+                )
+                await callback_query.message.edit_caption(
+                    caption=caption,
+                    reply_markup=reply_markup,
+                )
 
-            await write_subscription(
-                subscription_ref.id,
-                user_id,
-                subscription_type,
-                SubscriptionPeriod.MONTH1,
-                SubscriptionStatus.WAITING,
-                Currency.USD,
-                amount,
-                0,
-                payment_method,
-                payment.get('Id'),
-            )
+                await write_subscription(
+                    subscription_ref.id,
+                    user_id,
+                    subscription_type,
+                    SubscriptionPeriod.MONTH1,
+                    SubscriptionStatus.WAITING,
+                    Currency.USD,
+                    amount,
+                    0,
+                    payment_method,
+                    payment.get('Id'),
+                )
         elif payment_method == PaymentMethod.TELEGRAM_STARS:
             caption = get_localization(user_language_code).choose_how_many_months_to_subscribe(subscription_type)
             reply_markup = build_period_of_subscription_keyboard(
@@ -337,30 +345,34 @@ async def handle_period_of_subscription_selection(callback_query: CallbackQuery,
         subscription_period,
         user.discount,
     )
-    name = (f"{subscription_type} {emojis[subscription_type]} "
-            f"({get_localization(user_language_code).cycles_subscribe()[subscription_period]})")
-    description = get_localization(user_language_code).confirmation_subscribe(
-        subscription_type,
-        Currency.XTR,
-        price_with_discount,
-    )
-    photo_path = f'payments/subscription_{subscription_type.lower()}_{user_language_code}.png'
-    photo = await firebase.bucket.get_blob(photo_path)
-    photo_link = firebase.get_public_url(photo.name)
+    if int(float(price_with_discount)) < 100:
+        await handle_subscribe(callback_query.message, user_id, state)
+        await callback_query.message.answer(get_localization(user_language_code).rebound_msg(Currency.XTR))
+    else:
+        name = (f"{subscription_type} {emojis[subscription_type]} "
+                f"({get_localization(user_language_code).cycles_subscribe()[subscription_period]})")
+        description = get_localization(user_language_code).confirmation_subscribe(
+            subscription_type,
+            Currency.XTR,
+            price_with_discount,
+        )
+        photo_path = f'payments/subscription_{subscription_type.lower()}_{user_language_code}.png'
+        photo = await firebase.bucket.get_blob(photo_path)
+        photo_link = firebase.get_public_url(photo.name)
 
-    await callback_query.message.reply_invoice(
-        title=name,
-        description=description,
-        payload=f"{PaymentType.SUBSCRIPTION}:{callback_query.from_user.id}:{subscription_type}:{subscription_period}",
-        provider_token="",
-        currency=Currency.XTR,
-        prices=[LabeledPrice(label=name, amount=int(float(price_with_discount)))],
-        photo_url=photo_link,
-        photo_width=1024,
-        photo_height=768,
-    )
+        await callback_query.message.reply_invoice(
+            title=name,
+            description=description,
+            payload=f"{PaymentType.SUBSCRIPTION}:{callback_query.from_user.id}:{subscription_type}:{subscription_period}",
+            provider_token="",
+            currency=Currency.XTR,
+            prices=[LabeledPrice(label=name, amount=int(float(price_with_discount)))],
+            photo_url=photo_link,
+            photo_width=1024,
+            photo_height=768,
+        )
 
-    await callback_query.message.delete()
+        await callback_query.message.delete()
 
 
 async def handle_package(message: Message, user_id: str, state: FSMContext, is_edit=False, page=0):
@@ -815,124 +827,130 @@ async def handle_payment_method_cart_selection(callback_query: CallbackQuery, st
                 package_type, package_quantity = cart_item.get("package_type"), cart_item.get("quantity", 0)
 
                 amount += Package.get_price(Currency.RUB, package_type, package_quantity, user.discount)
-
-            payment = await create_payment(
-                payment_method,
-                user_id,
-                get_localization(user_language_code).payment_description_cart(user_id),
-                amount,
-                user_language_code,
-                False,
-            )
-
-            caption = get_localization(user_language_code).confirmation_cart(
-                cart.items,
-                Currency.RUB,
-                amount,
-            )
-            reply_markup = build_payment_keyboard(
-                user_language_code,
-                payment.get('confirmation').get('confirmation_url'),
-            )
-            await callback_query.message.edit_caption(
-                caption=caption,
-                reply_markup=reply_markup,
-            )
-
-            packages_with_waiting_status = await get_packages_by_user_id_and_status(user_id, PackageStatus.WAITING)
-            for package_with_waiting_status in packages_with_waiting_status:
-                await update_package(package_with_waiting_status.id, {
-                    "status": PackageStatus.CANCELED,
-                })
-
-            for cart_item in cart.items:
-                package_type, package_quantity = cart_item.get("package_type"), cart_item.get("quantity", 0)
-
-                until_at = None
-                if (
-                    package_type == PackageType.VOICE_MESSAGES or
-                    package_type == PackageType.FAST_MESSAGES or
-                    package_type == PackageType.ACCESS_TO_CATALOG
-                ):
-                    current_date = datetime.now(timezone.utc)
-                    until_at = current_date + timedelta(days=30 * package_quantity)
-                package_amount = Package.get_price(Currency.RUB, package_type, package_quantity, user.discount)
-                await write_package(
-                    None,
-                    user_id,
-                    package_type,
-                    PackageStatus.WAITING,
-                    Currency.RUB,
-                    package_amount,
-                    0,
-                    int(package_quantity),
+            if amount < 100:
+                reply_markup = build_package_cart_keyboard(user_language_code)
+                await callback_query.message.edit_caption(caption=get_localization(user_language_code).rebound_msg(Currency.RUB), reply_markup=reply_markup)
+            else:
+                payment = await create_payment(
                     payment_method,
-                    payment.get('id'),
-                    until_at,
+                    user_id,
+                    get_localization(user_language_code).payment_description_cart(user_id),
+                    amount,
+                    user_language_code,
+                    False,
                 )
+
+                caption = get_localization(user_language_code).confirmation_cart(
+                    cart.items,
+                    Currency.RUB,
+                    amount,
+                )
+                reply_markup = build_payment_keyboard(
+                    user_language_code,
+                    payment.get('confirmation').get('confirmation_url'),
+                )
+                await callback_query.message.edit_caption(
+                    caption=caption,
+                    reply_markup=reply_markup,
+                )
+
+                packages_with_waiting_status = await get_packages_by_user_id_and_status(user_id, PackageStatus.WAITING)
+                for package_with_waiting_status in packages_with_waiting_status:
+                    await update_package(package_with_waiting_status.id, {
+                        "status": PackageStatus.CANCELED,
+                    })
+
+                for cart_item in cart.items:
+                    package_type, package_quantity = cart_item.get("package_type"), cart_item.get("quantity", 0)
+
+                    until_at = None
+                    if (
+                        package_type == PackageType.VOICE_MESSAGES or
+                        package_type == PackageType.FAST_MESSAGES or
+                        package_type == PackageType.ACCESS_TO_CATALOG
+                    ):
+                        current_date = datetime.now(timezone.utc)
+                        until_at = current_date + timedelta(days=30 * package_quantity)
+                    package_amount = Package.get_price(Currency.RUB, package_type, package_quantity, user.discount)
+                    await write_package(
+                        None,
+                        user_id,
+                        package_type,
+                        PackageStatus.WAITING,
+                        Currency.RUB,
+                        package_amount,
+                        0,
+                        int(package_quantity),
+                        payment_method,
+                        payment.get('id'),
+                        until_at,
+                    )
         elif payment_method == PaymentMethod.PAY_SELECTION:
             amount = 0
             for cart_item in cart.items:
                 package_type, package_quantity = cart_item.get("package_type"), cart_item.get("quantity", 0)
 
                 amount += Package.get_price(Currency.USD, package_type, package_quantity, user.discount)
-
-            package_ref = firebase.db.collection(Package.COLLECTION_NAME).document()
-            payment = await create_payment(
-                payment_method,
-                user_id,
-                get_localization(user_language_code).payment_description_cart(user_id),
-                amount,
-                user_language_code,
-                False,
-                package_ref.id,
-            )
-
-            caption = get_localization(user_language_code).confirmation_cart(
-                cart.items,
-                Currency.USD,
-                amount,
-            )
-            reply_markup = build_payment_keyboard(
-                user_language_code,
-                payment.get('Url'),
-            )
-            await callback_query.message.edit_caption(
-                caption=caption,
-                reply_markup=reply_markup,
-            )
-
-            packages_with_waiting_status = await get_packages_by_user_id_and_status(user_id, PackageStatus.WAITING)
-            for package_with_waiting_status in packages_with_waiting_status:
-                await update_package(package_with_waiting_status.id, {
-                    "status": PackageStatus.CANCELED,
-                })
-
-            for cart_item in cart.items:
-                package_type, package_quantity = cart_item.get("package_type"), cart_item.get("quantity", 0)
-
-                until_at = None
-                if (
-                    package_type == PackageType.VOICE_MESSAGES or
-                    package_type == PackageType.FAST_MESSAGES or
-                    package_type == PackageType.ACCESS_TO_CATALOG
-                ):
-                    current_date = datetime.now(timezone.utc)
-                    until_at = current_date + timedelta(days=30 * package_quantity)
-                package_amount = Package.get_price(Currency.USD, package_type, package_quantity, user.discount)
-                await write_package(
-                    None,
-                    user_id,
-                    package_type,
-                    PackageStatus.WAITING,
-                    Currency.USD,
-                    package_amount,
-                    0,
-                    int(package_quantity),
+            if amount < 1:
+                reply_markup = build_package_cart_keyboard(user_language_code)
+                await callback_query.message.edit_caption(caption=get_localization(user_language_code).rebound_msg(Currency.USD), reply_markup=reply_markup)
+            else:
+                package_ref = firebase.db.collection(Package.COLLECTION_NAME).document()
+                payment = await create_payment(
                     payment_method,
+                    user_id,
+                    get_localization(user_language_code).payment_description_cart(user_id),
+                    amount,
+                    user_language_code,
+                    False,
                     package_ref.id,
-                    until_at,
                 )
+
+                caption = get_localization(user_language_code).confirmation_cart(
+                    cart.items,
+                    Currency.USD,
+                    amount,
+                )
+                reply_markup = build_payment_keyboard(
+                    user_language_code,
+                    payment.get('Url'),
+                )
+                await callback_query.message.edit_caption(
+                    caption=caption,
+                    reply_markup=reply_markup,
+                )
+
+                packages_with_waiting_status = await get_packages_by_user_id_and_status(user_id, PackageStatus.WAITING)
+                for package_with_waiting_status in packages_with_waiting_status:
+                    await update_package(package_with_waiting_status.id, {
+                        "status": PackageStatus.CANCELED,
+                    })
+
+                for cart_item in cart.items:
+                    package_type, package_quantity = cart_item.get("package_type"), cart_item.get("quantity", 0)
+
+                    until_at = None
+                    if (
+                        package_type == PackageType.VOICE_MESSAGES or
+                        package_type == PackageType.FAST_MESSAGES or
+                        package_type == PackageType.ACCESS_TO_CATALOG
+                    ):
+                        current_date = datetime.now(timezone.utc)
+                        until_at = current_date + timedelta(days=30 * package_quantity)
+                    package_amount = Package.get_price(Currency.USD, package_type, package_quantity, user.discount)
+                    await write_package(
+                        None,
+                        user_id,
+                        package_type,
+                        PackageStatus.WAITING,
+                        Currency.USD,
+                        package_amount,
+                        0,
+                        int(package_quantity),
+                        payment_method,
+                        package_ref.id,
+                        until_at,
+                    )
         elif payment_method == PaymentMethod.TELEGRAM_STARS:
             amount = 0
             payload = f"{PaymentType.CART}:{user.id}"
@@ -941,25 +959,28 @@ async def handle_payment_method_cart_selection(callback_query: CallbackQuery, st
 
                 amount += Package.get_price(Currency.XTR, package_type, package_quantity, 0)
                 payload += f":{package_type}:{package_quantity}"
+            if int(amount) < 100:
+                reply_markup = build_package_cart_keyboard(user_language_code)
+                await callback_query.message.edit_caption(caption=get_localization(user_language_code).rebound_msg(Currency.XTR), reply_markup=reply_markup)
+            else:
+                photo_path = f'payments/packages_{user_language_code}.png'
+                photo = await firebase.bucket.get_blob(photo_path)
+                photo_link = firebase.get_public_url(photo.name)
 
-            photo_path = f'payments/packages_{user_language_code}.png'
-            photo = await firebase.bucket.get_blob(photo_path)
-            photo_link = firebase.get_public_url(photo.name)
+                await callback_query.message.reply_invoice(
+                    title=get_localization(user_language_code).PACKAGES,
+                    description=get_localization(user_language_code).SHOPPING_CART,
+                    payload=payload,
+                    provider_token="",
+                    currency=Currency.XTR,
+                    prices=[LabeledPrice(label=get_localization(user_language_code).SHOPPING_CART, amount=int(amount))],
+                    photo_url=photo_link,
+                    photo_width=1024,
+                    photo_height=768,
+                )
 
-            await callback_query.message.reply_invoice(
-                title=get_localization(user_language_code).PACKAGES,
-                description=get_localization(user_language_code).SHOPPING_CART,
-                payload=payload,
-                provider_token="",
-                currency=Currency.XTR,
-                prices=[LabeledPrice(label=get_localization(user_language_code).SHOPPING_CART, amount=int(amount))],
-                photo_url=photo_link,
-                photo_width=1024,
-                photo_height=768,
-            )
-
-            await callback_query.message.delete()
-            await state.clear()
+                await callback_query.message.delete()
+                await state.clear()
         else:
             raise NotImplementedError
 
