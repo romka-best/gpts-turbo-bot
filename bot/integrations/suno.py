@@ -97,9 +97,9 @@ class Songs(APIResource):
         return data["clips"]
 
     async def get(self, id: str) -> Dict:
-        url = f"{SUNO_API_URL}/api/feed/?ids={id}"
+        url = f"{SUNO_API_URL}/api/feed/v2?ids={id}"
         data = await self.request("GET", url)
-        return data[0]
+        return data['clips'][0]
 
 
 async def generate_song(
