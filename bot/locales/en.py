@@ -860,22 +860,12 @@ Please try again 🥺
     TERMS_LINK = "https://telegra.ph/Terms-of-Service-in-GPTsTurboBot-05-07"
 
     @staticmethod
-    def rebound_msg(currency: str) -> str:
-        currency_mapping = {
-            'XTR': 'STARS',
-        }
+    def purchase_minimal_price(currency: Currency) -> str:
+        return f"""
+😕 Oh-oh...
 
-        min_sums = {
-            'RUB': 100,
-            'USD': 1,
-            'STARS': 100
-        }
-
-        currency_display = currency_mapping.get(currency, currency)
-        min_sum = min_sums[currency_display]
-
-        req = f'😕 Oh-oh...\n\nTo purchase, the total amount must be higher than {min_sum} {currency_display}'
-        return req
+To purchase, the total amount must be equal or higher than {Package.MINIMAL_PRICE[currency]}{Currency.SYMBOLS[currency]}
+"""
 
     @staticmethod
     def profile(
@@ -995,9 +985,9 @@ Quota:
         return f"""
 🤖 Ready to supercharge your digital journey? Here's what's on the menu:
 
-- <b>STANDARD</b> ⭐: {min_prices[SubscriptionType.STANDARD]}{Currency.SYMBOLS[currency]}/month
-- <b>VIP</b> 🔥: {min_prices[SubscriptionType.VIP]}{Currency.SYMBOLS[currency]}/month
-- <b>PREMIUM</b> 💎: {min_prices[SubscriptionType.PREMIUM]}{Currency.SYMBOLS[currency]}/month
+- <b>STANDARD</b> ⭐: {min_prices[SubscriptionType.STANDARD]}{Currency.SYMBOLS[currency]} per month
+- <b>VIP</b> 🔥: {min_prices[SubscriptionType.VIP]}{Currency.SYMBOLS[currency]} per month
+- <b>PREMIUM</b> 💎: {min_prices[SubscriptionType.PREMIUM]}{Currency.SYMBOLS[currency]} per month
 
 Pick your potion and hit the button below to subscribe:
 """

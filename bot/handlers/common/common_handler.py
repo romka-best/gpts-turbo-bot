@@ -5,13 +5,14 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery, ChatMemberUpdated
 
 from bot.database.main import firebase
+from bot.database.models.common import Quota
 from bot.database.models.generation import Generation
 from bot.database.models.user import UserSettings
 from bot.database.operations.generation.updaters import update_generation
 from bot.database.operations.user.getters import get_user, get_users_by_referral
 from bot.database.operations.user.updaters import update_user
 from bot.helpers.initialize_user_for_the_first_time import initialize_user_for_the_first_time
-from bot.helpers.senders.send_message_to_admins import send_message_to_admins
+from bot.helpers.senders.send_message_to_admins_and_developers import send_message_to_admins_and_developers
 from bot.helpers.update_monthly_limits import update_user_monthly_limits
 from bot.keyboards.common.common import build_recommendations_keyboard
 
@@ -27,33 +28,82 @@ async def start(message: Message, state: FSMContext):
     user_id = str(message.from_user.id)
     user = await get_user(user_id)
     if not user:
+        params = message.text.split()
+        default_quota = Quota.CHAT_GPT3_TURBO
+        default_additional_quota = 0
         referred_by = None
         referred_by_user = None
-        if len(message.text.split()) > 1:
-            referred_by = message.text.split()[1]
-            referred_by_user = await get_user(referred_by)
-            referred_by_user_language_code = await get_user_language(referred_by, state.storage)
+        if len(params) > 1:
+            sub_params = params[1].split('_')
+            for sub_param in sub_params:
+                if "-" not in sub_param:
+                    continue
 
-            if referred_by_user:
-                referred_users = await get_users_by_referral(user_id)
-                if len(referred_users) > 50:
-                    text = get_localization(referred_by_user_language_code).REFERRAL_LIMIT_ERROR
-                    await message.bot.send_message(
-                        chat_id=referred_by_user.telegram_chat_id,
-                        text=text,
-                    )
-                else:
-                    added_to_balance = 25.00
-                    referred_by_user.balance += added_to_balance
-                    await update_user(referred_by_user.id, {
-                        "balance": referred_by_user.balance,
-                    })
+                sub_param_key, sub_param_value = sub_param.split('-')
+                if sub_param_key == "referral":
+                    referred_by = message.text.split()[1]
+                    referred_by_user = await get_user(referred_by)
+                    referred_by_user_language_code = await get_user_language(referred_by, state.storage)
 
-                    text = get_localization(referred_by_user_language_code).REFERRAL_SUCCESS
-                    await message.bot.send_message(
-                        chat_id=referred_by_user.telegram_chat_id,
-                        text=text,
-                    )
+                    if referred_by_user:
+                        referred_users = await get_users_by_referral(user_id)
+                        if len(referred_users) > 50:
+                            text = get_localization(referred_by_user_language_code).REFERRAL_LIMIT_ERROR
+                            await message.bot.send_message(
+                                chat_id=referred_by_user.telegram_chat_id,
+                                text=text,
+                            )
+                        else:
+                            added_to_balance = 25.00
+                            referred_by_user.balance += added_to_balance
+                            await update_user(referred_by_user.id, {
+                                "balance": referred_by_user.balance,
+                            })
+
+                            text = get_localization(referred_by_user_language_code).REFERRAL_SUCCESS
+                            await message.bot.send_message(
+                                chat_id=referred_by_user.telegram_chat_id,
+                                text=text,
+                            )
+                elif sub_param_key == "model":
+                    if sub_param_value in [
+                        "chatgpt3turbo",
+                        "claude3sonnet",
+                        "faceswap",
+                        "suno",
+                    ]:
+                        if sub_param_value == "chatgpt3turbo":
+                            default_quota = Quota.CHAT_GPT3_TURBO
+                        elif sub_param_value == "claude_3_sonnet":
+                            default_quota = Quota.CLAUDE_3_SONNET
+                        elif sub_param_value == "faceswap":
+                            default_quota = Quota.FACE_SWAP
+                        elif sub_param_value == "suno":
+                            default_quota = Quota.SUNO
+                        default_additional_quota = 10
+                    elif sub_param_value in [
+                        "chatgpt4turbo",
+                        "chatgpt4omni",
+                        "claude3opus",
+                        "dalle",
+                        "midjourney",
+                    ]:
+                        if sub_param_value == "chatgpt4turbo":
+                            default_quota = Quota.CHAT_GPT4_TURBO
+                        elif sub_param_value == "chatgpt4omni":
+                            default_quota = Quota.CHAT_GPT4_OMNI
+                        elif sub_param_value == "claude3opus":
+                            default_quota = Quota.CLAUDE_3_OPUS
+                        elif sub_param_value == "dalle":
+                            default_quota = Quota.DALL_E
+                        elif sub_param_value == "midjourney":
+                            default_quota = Quota.MIDJOURNEY
+                        default_additional_quota = 5
+                    elif sub_param_value in [
+                        "musicgen",
+                    ]:
+                        default_quota = Quota.MUSIC_GEN
+                        default_additional_quota = 30
 
         language_code = message.from_user.language_code
         await state.storage.redis.set(f"user:{user_id}:language", language_code)
@@ -67,6 +117,8 @@ async def start(message: Message, state: FSMContext):
             chat_title,
             referred_by,
             bool(referred_by_user),
+            default_quota,
+            default_additional_quota,
         )
 
         user = await get_user(str(message.from_user.id))
@@ -107,7 +159,7 @@ async def user_blocked_bot(event: ChatMemberUpdated):
     created_at_pst = user.created_at \
         .astimezone(pytz.timezone('America/Los_Angeles')) \
         .strftime('%d.%m.%Y %H:%M')
-    await send_message_to_admins(
+    await send_message_to_admins_and_developers(
         bot=event.bot,
         message=f"#user_status #blocked\n\n"
                 f"🚫 <b>Пользователь заблокировал бота</b>\n\n"
@@ -141,7 +193,7 @@ async def user_unblocked_bot(event: ChatMemberUpdated):
     created_at_pst = user.created_at \
         .astimezone(pytz.timezone('America/Los_Angeles')) \
         .strftime('%d.%m.%Y %H:%M')
-    await send_message_to_admins(
+    await send_message_to_admins_and_developers(
         bot=event.bot,
         message=f"#user_status #unblocked\n\n"
                 f"🥳 <b>Пользователь разблокировал бота</b>\n\n"

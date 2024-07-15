@@ -19,7 +19,7 @@ from bot.database.operations.request.updaters import update_request
 from bot.database.operations.request.writers import write_request
 from bot.database.operations.user.getters import get_user
 from bot.database.operations.user.updaters import update_user
-from bot.helpers.senders.send_message_to_admins import send_message_to_admins
+from bot.helpers.senders.send_error_info import send_error_info
 from bot.integrations.suno import generate_song, check_song
 from bot.keyboards.ai.suno import (
     build_suno_keyboard,
@@ -220,10 +220,11 @@ async def suno_prompt_sent(message: Message, state: FSMContext):
                         parse_mode=None,
                     )
 
-                    await send_message_to_admins(
+                    await send_error_info(
                         bot=message.bot,
-                        message=f"#error\n\nALARM! Ошибка у пользователя при запросе в Suno: {user.id}\nИнформация:\n{e}",
-                        parse_mode=None,
+                        user_id=user.id,
+                        info=str(e),
+                        hashtags=["suno"],
                     )
 
                 request.status = RequestStatus.FINISHED
@@ -423,10 +424,11 @@ async def suno_genres_sent(message: Message, state: FSMContext):
                         parse_mode=None,
                     )
 
-                    await send_message_to_admins(
+                    await send_error_info(
                         bot=message.bot,
-                        message=f"#error\n\nALARM! Ошибка у пользователя при запросе в Suno: {user.id}\nИнформация:\n{e}",
-                        parse_mode=None,
+                        user_id=user.id,
+                        info=str(e),
+                        hashtags=["suno"],
                     )
 
                 request.status = RequestStatus.FINISHED
@@ -495,10 +497,11 @@ async def handle_suno_example(user: User, prompt: str, message: Message, state: 
 
             await asyncio.gather(*tasks)
         except Exception as e:
-            await send_message_to_admins(
+            await send_error_info(
                 bot=message.bot,
-                message=f"#error\n\nALARM! Ошибка у пользователя при попытке отправить пример Suno в запросе MusicGen: {user.id}\nИнформация:\n{e}",
-                parse_mode=None,
+                user_id=user.id,
+                info=str(e),
+                hashtags=["suno", "example"],
             )
 
             request.status = RequestStatus.FINISHED

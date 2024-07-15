@@ -17,7 +17,7 @@ from bot.database.operations.request.updaters import update_request
 from bot.database.operations.request.writers import write_request
 from bot.database.operations.user.getters import get_user
 from bot.database.operations.user.updaters import update_user
-from bot.helpers.senders.send_message_to_admins import send_message_to_admins
+from bot.helpers.senders.send_error_info import send_error_info
 from bot.locales.translate_text import translate_text
 from bot.integrations.midjourney import (
     create_midjourney_images,
@@ -141,10 +141,11 @@ async def handle_midjourney(
                     parse_mode=None,
                 )
 
-                await send_message_to_admins(
+                await send_error_info(
                     bot=message.bot,
-                    message=f"#error\n\nALARM! Ошибка у пользователя при запросе в Midjourney: {user.id}\nИнформация:\n{e}",
-                    parse_mode=None,
+                    user_id=user.id,
+                    info=str(e),
+                    hashtags=["midjourney"],
                 )
 
                 request.status = RequestStatus.FINISHED
@@ -251,10 +252,11 @@ async def handle_midjourney_example(user: User, user_language_code: str, prompt:
                 }
             )
         except Exception as e:
-            await send_message_to_admins(
+            await send_error_info(
                 bot=message.bot,
-                message=f"#error\n\nALARM! Ошибка у пользователя при попытке отправить пример Midjourney в запросе DALL-E: {user.id}\nИнформация:\n{e}",
-                parse_mode=None,
+                user_id=user.id,
+                info=str(e),
+                hashtags=["midjourney", "example"],
             )
 
             request.status = RequestStatus.FINISHED

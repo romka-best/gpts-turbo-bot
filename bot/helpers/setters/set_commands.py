@@ -173,7 +173,7 @@ async def set_commands(bot: Bot):
     await bot.set_my_commands(commands=commands_en)
     await bot.set_my_commands(commands=commands_ru, language_code='ru')
 
-    for chat_id in config.ADMIN_CHAT_IDS:
+    for chat_id in list(set(id for ids in [config.ADMIN_IDS, config.DEVELOPER_IDS] for id in ids)):
         try:
             await bot.set_my_commands(commands=commands_admin, scope=BotCommandScopeChat(chat_id=chat_id))
         except TelegramBadRequest as error:

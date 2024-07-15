@@ -64,6 +64,7 @@ class Package:
     MINIMAL_PRICE = {
         Currency.RUB: 100,
         Currency.USD: 1,
+        Currency.XTR: 100,
     }
 
     def __init__(

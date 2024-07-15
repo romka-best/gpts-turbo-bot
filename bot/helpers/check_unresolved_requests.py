@@ -6,7 +6,7 @@ from aiogram import Bot
 from bot.database.models.request import RequestStatus
 from bot.database.operations.request.getters import get_started_requests
 from bot.database.operations.request.updaters import update_request
-from bot.helpers.senders.send_message_to_admins import send_message_to_admins
+from bot.helpers.senders.send_message_to_admins_and_developers import send_message_to_admins_and_developers
 
 
 async def check_unresolved_requests(bot: Bot):
@@ -31,7 +31,7 @@ async def check_unresolved_requests(bot: Bot):
     await asyncio.gather(*tasks)
 
     if len(tasks):
-        await send_message_to_admins(
+        await send_message_to_admins_and_developers(
             bot,
             f"⚠️ <b>Внимание!</b>\n\nЯ нашёл генерации, которым больше 30 минут ❗️\n\nКоличество: {len(tasks)}",
         )

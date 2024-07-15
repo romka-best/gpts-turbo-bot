@@ -25,7 +25,8 @@ from bot.database.operations.subscription.updaters import update_subscription
 from bot.database.operations.user.getters import get_users
 from bot.database.operations.user.updaters import update_user
 from bot.helpers.billing.create_auto_payment import create_auto_payment
-from bot.helpers.senders.send_message_to_admins import send_message_to_admins
+from bot.helpers.senders.send_error_info import send_error_info
+from bot.helpers.senders.send_message_to_admins_and_developers import send_message_to_admins_and_developers
 from bot.locales.main import get_localization
 
 
@@ -44,7 +45,7 @@ async def update_monthly_limits(bot: Bot):
 
         await batch.commit()
 
-    await send_message_to_admins(bot, f'<b>Updated monthly limits successfully</b> 🎉')
+    await send_message_to_admins_and_developers(bot, f'<b>Updated monthly limits successfully</b> 🎉')
 
 
 async def update_user_monthly_limits(bot: Bot, user: User, batch: AsyncWriteBatch):
@@ -58,11 +59,11 @@ async def update_user_monthly_limits(bot: Bot, user: User, batch: AsyncWriteBatc
         })
     except Exception as e:
         logging.error(f"Error updating user {user.id}: {e}")
-        await send_message_to_admins(
+        await send_error_info(
             bot=bot,
-            message=f"#error\n\nALARM! Ошибка при обновления пользователя: {user.id}\n"
-                    f"Информация:\n{e}",
-            parse_mode=None,
+            user_id=user.id,
+            info=str(e),
+            hashtags=["user", "update"],
         )
 
 

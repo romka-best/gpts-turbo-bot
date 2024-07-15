@@ -24,7 +24,7 @@ from bot.database.operations.user.getters import get_user
 from bot.database.operations.user.updaters import update_user
 from bot.helpers.creaters.create_new_message_and_update_user import create_new_message_and_update_user
 from bot.helpers.reply_with_voice import reply_with_voice
-from bot.helpers.senders.send_message_to_admins import send_message_to_admins
+from bot.helpers.senders.send_error_info import send_error_info
 from bot.helpers.split_message import split_message
 from bot.integrations.openAI import get_response_message
 from bot.keyboards.ai.chat_gpt import build_chat_gpt_continue_generating_keyboard, build_chat_gpt_keyboard
@@ -323,11 +323,11 @@ async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_q
                     parse_mode=None,
                 )
 
-                await send_message_to_admins(
+                await send_error_info(
                     bot=message.bot,
-                    message=f"#error\n\nALARM! Ошибка у пользователя при запросе в ChatGPT: {user.id}\n"
-                            f"Информация:\n{e}",
-                    parse_mode=None,
+                    user_id=user.id,
+                    info=str(e),
+                    hashtags=["chatgpt"],
                 )
         except Exception as e:
             reply_markup = build_error_keyboard(user_language_code)
@@ -336,11 +336,11 @@ async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_q
                 reply_markup=reply_markup,
                 parse_mode=None,
             )
-            await send_message_to_admins(
+            await send_error_info(
                 bot=message.bot,
-                message=f"#error\n\nALARM! Ошибка у пользователя при запросе в ChatGPT: {user.id}\n"
-                        f"Информация:\n{e}",
-                parse_mode=None,
+                user_id=user.id,
+                info=str(e),
+                hashtags=["chatgpt"],
             )
         finally:
             await processing_message.delete()
@@ -454,8 +454,9 @@ async def handle_chatgpt4_example(user: User, user_language_code: str, prompt: s
                 else:
                     raise
     except Exception as e:
-        await send_message_to_admins(
+        await send_error_info(
             bot=message.bot,
-            message=f"#error\n\nALARM! Ошибка у пользователя при попытке отправить пример ChatGPT-4.0 Omni в запросе в ChatGPT-3.5 Turbo: {user.id}\nИнформация:\n{e}",
-            parse_mode=None,
+            user_id=user.id,
+            info=str(e),
+            hashtags=["chatgpt", "example"],
         )

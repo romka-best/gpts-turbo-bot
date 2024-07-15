@@ -18,8 +18,8 @@ from bot.database.operations.transaction.writers import write_transaction
 from bot.database.operations.user.getters import get_user
 from bot.database.operations.user.updaters import update_user
 from bot.handlers.ai.midjourney_handler import PRICE_MIDJOURNEY_REQUEST
+from bot.helpers.senders.send_error_info import send_error_info
 from bot.helpers.senders.send_images import send_image
-from bot.helpers.senders.send_message_to_admins import send_message_to_admins
 from bot.keyboards.ai.midjourney import build_midjourney_keyboard
 from bot.keyboards.common.common import build_reaction_keyboard, build_error_keyboard
 from bot.locales.main import get_localization, get_user_language
@@ -42,7 +42,7 @@ async def handle_midjourney_webhook(bot: Bot, dp: Dispatcher, body: dict):
             "status": generation.status,
             "has_error": generation.has_error,
         })
-        logging.error(f"Error in midjourney_webhook")
+        logging.error(f"Error in midjourney_webhook: {generation_error}")
     else:
         generation.status = GenerationStatus.FINISHED
         generation.result = generation_result.get("url", "")
@@ -106,10 +106,11 @@ async def handle_midjourney_result(
                     text=get_localization(user_language_code).ERROR,
                     reply_markup=reply_markup,
                 )
-            await send_message_to_admins(
+            await send_error_info(
                 bot=bot,
-                message=f"#error\n\nALARM! Ошибка у пользователя при запросе в Midjourney: {user.id}\nИнформация:\n{generation_error}",
-                parse_mode=None,
+                user_id=user.id,
+                info=str(generation_error),
+                hashtags=["midjourney"],
             )
 
     request.status = RequestStatus.FINISHED

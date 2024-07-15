@@ -27,6 +27,7 @@ class Texts(Protocol):
     INFO_SUNO: str
 
     ADMIN_INFO = "👨‍💻 Выберите действие, админ 👩‍💻"
+    DEVELOPER_INFO = "👨‍💻 Выберите действие, разработчик 👩‍💻"
     BAN_INFO = "Отправь мне id пользователя, которого вы хотите забанить/разбанить ⛔️"
     BAN_SUCCESS = "Вы успешно забанили пользователя 📛"
     UNBAN_SUCCESS = "Вы успешно разбанили пользователя 🔥"
@@ -1408,7 +1409,7 @@ class Texts(Protocol):
 """
 
     @staticmethod
-    def payment_description_renew_subscription(rebound_msg: str):
+    def purchase_minimal_price(currency: Currency):
         raise NotImplementedError
 
     @staticmethod
@@ -1563,5 +1564,5 @@ class Texts(Protocol):
     @staticmethod
     def referral_link(user_id: str, is_share: bool) -> str:
         if is_share:
-            return f"https://t.me/share/url?url=https://t.me/GPTsTurboBot?start={user_id}"
-        return f"https://t.me/GPTsTurboBot?start={user_id}"
+            return f"https://t.me/share/url?url=https://t.me/GPTsTurboBot?start=referral-{user_id}"
+        return f"https://t.me/GPTsTurboBot?start=referral-{user_id}"

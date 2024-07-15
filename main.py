@@ -60,7 +60,7 @@ from bot.helpers.handlers.handle_pay_selection_webhook import handle_pay_selecti
 from bot.helpers.handlers.handle_replicate_webhook import handle_replicate_webhook
 from bot.helpers.handlers.handle_yookassa_webhook import handle_yookassa_webhook
 from bot.helpers.notify_admins_about_error import notify_admins_about_error
-from bot.helpers.senders.send_admin_statistics import send_admin_statistics
+from bot.helpers.senders.send_statistics import send_statistics
 from bot.helpers.setters.set_commands import set_commands
 from bot.helpers.setters.set_description import set_description
 from bot.helpers.update_monthly_limits import update_monthly_limits
@@ -196,12 +196,12 @@ async def handle_update(update: dict):
 
 @app.post(WEBHOOK_YOOKASSA_PATH)
 async def yookassa_webhook(request: dict):
-    await handle_yookassa_webhook(request, bot, dp)
+    asyncio.create_task(handle_yookassa_webhook(request, bot, dp))
 
 
 @app.post(WEBHOOK_PAY_SELECTION_PATH)
 async def pay_selection_webhook(request: dict):
-    await handle_pay_selection_webhook(request, bot, dp)
+    asyncio.create_task(handle_pay_selection_webhook(request, bot, dp))
 
 
 @app.post(WEBHOOK_REPLICATE_PATH)
@@ -229,11 +229,11 @@ async def daily_tasks(background_tasks: BackgroundTasks):
     background_tasks.add_task(update_monthly_limits, bot)
 
     today = datetime.now()
-    background_tasks.add_task(send_admin_statistics, bot, 'day')
+    background_tasks.add_task(send_statistics, bot, 'day')
     if today.weekday() == 0:
-        background_tasks.add_task(send_admin_statistics, bot, 'week')
+        background_tasks.add_task(send_statistics, bot, 'week')
     if today.day == 1:
-        background_tasks.add_task(send_admin_statistics, bot, 'month')
+        background_tasks.add_task(send_statistics, bot, 'month')
 
     return {"code": 200}
 

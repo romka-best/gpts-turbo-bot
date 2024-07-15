@@ -6,9 +6,9 @@ from aiogram.types import Update
 from bot.database.main import firebase
 from bot.database.operations.user.getters import get_user
 from bot.helpers.initialize_user_for_the_first_time import initialize_user_for_the_first_time
-from bot.helpers.senders.send_message_to_admins import send_message_to_admins
+from bot.helpers.senders.send_error_info import send_error_info
 from bot.keyboards.common.common import build_recommendations_keyboard, build_error_keyboard
-from bot.locales.main import get_localization, set_user_language, get_user_language
+from bot.locales.main import get_localization, get_user_language
 
 
 async def notify_admins_about_error(bot: Bot, telegram_update: Update, dp: Dispatcher, e):
@@ -64,18 +64,16 @@ async def notify_admins_about_error(bot: Bot, telegram_update: Update, dp: Dispa
                     reply_markup=reply_markup,
                 )
 
-                await send_message_to_admins(
+                await send_error_info(
                     bot=bot,
-                    message=f"#error\n\nALARM! Ошибка у пользователя: {user.id}\n"
-                            f"Информация:\n{e}",
-                    parse_mode=None,
+                    user_id=user.id,
+                    info=e,
                 )
     except Exception as e:
         logging.exception(f"Error in notify_admins_about_error: {e}")
 
-        await send_message_to_admins(
+        await send_error_info(
             bot=bot,
-            message=f"#error\n\nALARM! ALARM! ALARM! Неизвестная ошибка\n"
-                    f"Информация:\n{e}",
-            parse_mode=None,
+            user_id="UNKNOWN",
+            info=f"Неизвестная ошибка: {e}",
         )

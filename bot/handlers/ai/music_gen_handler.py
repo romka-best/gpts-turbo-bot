@@ -18,7 +18,7 @@ from bot.database.operations.request.writers import write_request
 from bot.database.operations.user.getters import get_user
 from bot.database.operations.user.updaters import update_user
 from bot.handlers.ai.suno_handler import handle_suno_example
-from bot.helpers.senders.send_message_to_admins import send_message_to_admins
+from bot.helpers.senders.send_error_info import send_error_info
 from bot.locales.translate_text import translate_text
 from bot.integrations.replicateAI import create_music_gen_melody
 from bot.keyboards.common.common import build_recommendations_keyboard, build_cancel_keyboard, build_error_keyboard
@@ -184,10 +184,11 @@ async def handle_music_gen_selection(
                     parse_mode=None,
                 )
 
-                await send_message_to_admins(
+                await send_error_info(
                     bot=message.bot,
-                    message=f"#error\n\nALARM! Ошибка у пользователя при запросе в MusicGen: {user.id}\nИнформация:\n{e}",
-                    parse_mode=None,
+                    user_id=user.id,
+                    info=str(e),
+                    hashtags=["music_gen"],
                 )
 
                 request.status = RequestStatus.FINISHED

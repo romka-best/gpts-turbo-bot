@@ -860,22 +860,12 @@ class Russian(Texts):
     TERMS_LINK = "https://telegra.ph/Polzovatelskoe-soglashenie-v-GPTsTurboBot-05-07"
 
     @staticmethod
-    def rebound_msg(currency: str) -> str:
-        currency_mapping = {
-            'XTR': 'STARS',
-        }
+    def purchase_minimal_price(currency: Currency) -> str:
+        return f"""
+😕 Ох-ох...
 
-        min_sums = {
-            'RUB': 100,
-            'USD': 1,
-            'STARS': 100
-        }
-
-        currency_display = currency_mapping.get(currency, currency)
-        min_sum = min_sums[currency_display]
-
-        req = f'😕 Ох-ох...\n\nДля совершения покупки общая сумма должна быть больше, чем {min_sum} {currency_display}'
-        return req
+Для совершения покупки общая сумма должна быть равной или больше, чем {Package.MINIMAL_PRICE[currency]}{Currency.SYMBOLS[currency]}
+"""
 
     @staticmethod
     def profile(
@@ -995,9 +985,9 @@ class Russian(Texts):
         return f"""
 🤖 Готовы ускорить своё цифровое путешествие? Вот, что мы предлагаем:
 
-- <b>STANDARD</b> ⭐: {min_prices[SubscriptionType.STANDARD]}{Currency.SYMBOLS[currency]}/месяц
-- <b>VIP</b> 🔥: {min_prices[SubscriptionType.VIP]}{Currency.SYMBOLS[currency]}/месяц
-- <b>PREMIUM</b> 💎: {min_prices[SubscriptionType.PREMIUM]}{Currency.SYMBOLS[currency]}/месяц
+- <b>STANDARD</b> ⭐: {min_prices[SubscriptionType.STANDARD]}{Currency.SYMBOLS[currency]} в месяц
+- <b>VIP</b> 🔥: {min_prices[SubscriptionType.VIP]}{Currency.SYMBOLS[currency]} в месяц
+- <b>PREMIUM</b> 💎: {min_prices[SubscriptionType.PREMIUM]}{Currency.SYMBOLS[currency]} в месяц
 
 Выберите свой вариант и нажмите кнопку ниже, чтобы подписаться:
 """

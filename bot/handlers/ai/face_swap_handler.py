@@ -40,7 +40,7 @@ from bot.database.operations.request.updaters import update_request
 from bot.database.operations.request.writers import write_request
 from bot.database.operations.user.getters import get_user
 from bot.database.operations.user.updaters import update_user
-from bot.helpers.senders.send_message_to_admins import send_message_to_admins
+from bot.helpers.senders.send_error_info import send_error_info
 from bot.integrations.replicateAI import create_face_swap_images
 from bot.keyboards.ai.face_swap import (
     build_face_swap_choose_keyboard,
@@ -422,10 +422,11 @@ async def face_swap_quantity_handler(message: Message, state: FSMContext, user_i
                     parse_mode=None,
                 )
 
-                await send_message_to_admins(
+                await send_error_info(
                     bot=message.bot,
-                    message=f"#error\n\nALARM! Ошибка у пользователя при запросе в FaceSwap: {user.id}\nИнформация:\n{e}",
-                    parse_mode=None,
+                    user_id=user.id,
+                    info=str(e),
+                    hashtags=["face_swap"],
                 )
 
                 request.status = RequestStatus.FINISHED
