@@ -9,6 +9,7 @@ from bot.keyboards.common.common import build_recommendations_keyboard
 from bot.keyboards.settings.language import build_language_keyboard
 from bot.locales.main import get_localization, get_user_language, set_user_language
 from bot.utils.is_admin import is_admin
+from bot.utils.is_developer import is_developer
 
 language_router = Router()
 
@@ -36,7 +37,7 @@ async def handle_language_selection(callback_query: CallbackQuery, state: FSMCon
     chosen_language = callback_query.data.split(':')[1]
     await set_user_language(user_id, chosen_language, state.storage)
 
-    if not is_admin(str(callback_query.message.chat.id)):
+    if not is_admin(str(callback_query.message.chat.id)) and not is_developer(str(callback_query.message.chat.id)):
         await set_commands_for_user(callback_query.bot, user.telegram_chat_id, chosen_language)
 
     reply_markup = await build_recommendations_keyboard(user.current_model, chosen_language, user.gender)

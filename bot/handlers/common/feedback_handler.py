@@ -8,7 +8,7 @@ from bot.database.operations.feedback.getters import get_feedbacks_by_user_id
 from bot.database.operations.feedback.writers import write_feedback
 from bot.database.operations.user.getters import get_user
 from bot.database.operations.user.updaters import update_user
-from bot.helpers.senders.send_message_to_admins import send_message_to_admins
+from bot.helpers.senders.send_message_to_admins_and_developers import send_message_to_admins_and_developers
 from bot.keyboards.admin.feedback import build_manage_feedback_keyboard
 
 from bot.keyboards.common.common import build_cancel_keyboard
@@ -47,14 +47,14 @@ async def handle_feedback_sent(message: Message, state: FSMContext):
     text = (f"#feedback\n\n"
             f"🚀 <b>Новая обратная связь от пользователя</b>: {user_id} 🚀\n\n"
             f"<code>{message.text}</code>")
-    await send_message_to_admins(
+    await send_message_to_admins_and_developers(
         bot=message.bot,
         message=text,
     )
 
     reply_markup = build_manage_feedback_keyboard(user_language_code, user_id)
     await message.bot.send_message(
-        chat_id=config.MODERATOR_ID,
+        chat_id=config.SUPER_ADMIN_ID,
         text=f"<b>{feedback.id} от {user_id}</b>",
         reply_markup=reply_markup,
     )

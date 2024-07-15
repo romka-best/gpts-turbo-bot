@@ -50,3 +50,34 @@ def build_admin_keyboard(language_code: str) -> InlineKeyboardMarkup:
     ]
 
     return InlineKeyboardMarkup(inline_keyboard=buttons)
+
+
+def build_developer_keyboard(language_code: str) -> InlineKeyboardMarkup:
+    buttons = [
+        [
+            InlineKeyboardButton(
+                text="📸 Управление контентом в FaceSwap",
+                callback_data='developer:manage_face_swap',
+            ),
+        ],
+        [
+            InlineKeyboardButton(
+                text="🎩 Управление ролями в чатах",
+                callback_data='developer:manage_catalog',
+            ),
+        ],
+        [
+            InlineKeyboardButton(
+                text="📊 Статистика",
+                callback_data='developer:statistics',
+            ),
+        ],
+        [
+            InlineKeyboardButton(
+                text=get_localization(language_code).CLOSE,
+                callback_data='developer:close'
+            ),
+        ],
+    ]
+
+    return InlineKeyboardMarkup(inline_keyboard=buttons)

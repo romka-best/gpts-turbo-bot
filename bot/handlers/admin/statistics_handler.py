@@ -27,6 +27,7 @@ from bot.keyboards.admin.statistics import (
     build_statistics_choose_currency_keyboard,
 )
 from bot.locales.main import get_localization, get_user_language
+from bot.utils.is_admin import is_admin
 
 statistics_router = Router()
 
@@ -34,7 +35,7 @@ statistics_router = Router()
 async def handle_statistics(message: Message, user_id: str, state: FSMContext):
     user_language_code = await get_user_language(str(user_id), state.storage)
 
-    reply_markup = build_statistics_keyboard(user_language_code)
+    reply_markup = build_statistics_keyboard(user_language_code, is_admin(str(user_id)))
     await message.edit_text(
         text=get_localization(user_language_code).STATISTICS_INFO,
         reply_markup=reply_markup,

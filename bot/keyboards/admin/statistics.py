@@ -5,7 +5,7 @@ from bot.database.models.transaction import TransactionType, ServiceType
 from bot.locales.main import get_localization
 
 
-def build_statistics_keyboard(language_code: str) -> InlineKeyboardMarkup:
+def build_statistics_keyboard(language_code: str, is_admin: bool) -> InlineKeyboardMarkup:
     buttons = [
         [
             InlineKeyboardButton(
@@ -31,19 +31,22 @@ def build_statistics_keyboard(language_code: str) -> InlineKeyboardMarkup:
                 callback_data=f'statistics:all'
             )
         ],
-        [
+    ]
+
+    if is_admin:
+        buttons.append([
             InlineKeyboardButton(
                 text="Записать транзакцию ➕➖",
                 callback_data=f'statistics:write_transaction'
             )
-        ],
-        [
-            InlineKeyboardButton(
-                text=get_localization(language_code).BACK,
-                callback_data='statistics:back'
-            )
-        ]
-    ]
+        ])
+
+    buttons.append([
+        InlineKeyboardButton(
+            text=get_localization(language_code).BACK,
+            callback_data='statistics:back'
+        )
+    ])
 
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 

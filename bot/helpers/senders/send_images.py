@@ -7,7 +7,7 @@ from aiogram.exceptions import TelegramForbiddenError
 from aiogram.types import InputMediaPhoto, URLInputFile
 
 from bot.database.operations.user.updaters import update_user
-from bot.helpers.senders.send_message_to_admins import send_message_to_admins
+from bot.helpers.senders.send_error_info import send_error_info
 
 
 async def send_image(bot: Bot, chat_id: str, image: str, reply_markup=None, caption=None, reply_to_message_id=None):
@@ -25,11 +25,11 @@ async def send_image(bot: Bot, chat_id: str, image: str, reply_markup=None, capt
         })
     except Exception as e:
         logging.error(f'Error in send_image: {e}')
-        await send_message_to_admins(
+        await send_error_info(
             bot=bot,
-            message=f"#error\n\nALARM! Ошибка при отправке изображения у пользователя: {chat_id}\n"
-                    f"Информация:\n{e}",
-            parse_mode=None,
+            user_id=chat_id,
+            info=str(e),
+            hashtags=["image"],
         )
 
 
@@ -53,9 +53,9 @@ async def send_images(bot: Bot, chat_id: str, images: List[str]):
                     )
                 except Exception as e:
                     logging.error(f'Error in send_images with second try: {e}')
-                    await send_message_to_admins(
+                    await send_error_info(
                         bot=bot,
-                        message=f"#error\n\nALARM! Ошибка при отправке изображения у пользователя: {chat_id}\n"
-                                f"Информация:\n{e}",
-                        parse_mode=None,
+                        user_id=chat_id,
+                        info=str(e),
+                        hashtags=["image"],
                     )

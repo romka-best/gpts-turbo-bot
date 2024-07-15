@@ -5,7 +5,7 @@ from aiogram.exceptions import TelegramForbiddenError
 from aiogram.types import URLInputFile
 
 from bot.database.operations.user.updaters import update_user
-from bot.helpers.senders.send_message_to_admins import send_message_to_admins
+from bot.helpers.senders.send_error_info import send_error_info
 
 
 async def send_video(
@@ -33,9 +33,10 @@ async def send_video(
         })
     except Exception as e:
         logging.error(f'Error in send_video: {e}')
-        await send_message_to_admins(
+
+        await send_error_info(
             bot=bot,
-            message=f"#error\n\nALARM! Ошибка при отправке видео у пользователя: {chat_id}\n"
-                    f"Информация:\n{e}",
-            parse_mode=None,
+            user_id=chat_id,
+            info=str(e),
+            hashtags=["video"]
         )

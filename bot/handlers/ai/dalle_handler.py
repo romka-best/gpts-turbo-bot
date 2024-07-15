@@ -14,7 +14,7 @@ from bot.database.operations.transaction.writers import write_transaction
 from bot.database.operations.user.getters import get_user
 from bot.database.operations.user.updaters import update_user
 from bot.handlers.ai.midjourney_handler import handle_midjourney_example
-from bot.helpers.senders.send_message_to_admins import send_message_to_admins
+from bot.helpers.senders.send_error_info import send_error_info
 from bot.integrations.openAI import get_response_image, get_cost_for_image
 from bot.keyboards.common.common import build_recommendations_keyboard, build_error_keyboard
 from bot.locales.main import get_localization, get_user_language
@@ -133,10 +133,11 @@ async def handle_dall_e(message: Message, state: FSMContext, user: User):
                 reply_markup=reply_markup,
                 parse_mode=None,
             )
-            await send_message_to_admins(
+            await send_error_info(
                 bot=message.bot,
-                message=f"#error\n\nALARM! Ошибка у пользователя при запросе в DALL-E: {user.id}\nИнформация:\n{e}",
-                parse_mode=None,
+                user_id=user.id,
+                info=str(e),
+                hashtags=["dalle"],
             )
         finally:
             await processing_message.delete()

@@ -11,7 +11,7 @@ from bot.database.operations.generation.updaters import update_generation
 from bot.database.operations.user.getters import get_user, get_users_by_referral
 from bot.database.operations.user.updaters import update_user
 from bot.helpers.initialize_user_for_the_first_time import initialize_user_for_the_first_time
-from bot.helpers.senders.send_message_to_admins import send_message_to_admins
+from bot.helpers.senders.send_message_to_admins_and_developers import send_message_to_admins_and_developers
 from bot.helpers.update_monthly_limits import update_user_monthly_limits
 from bot.keyboards.common.common import build_recommendations_keyboard
 
@@ -107,7 +107,7 @@ async def user_blocked_bot(event: ChatMemberUpdated):
     created_at_pst = user.created_at \
         .astimezone(pytz.timezone('America/Los_Angeles')) \
         .strftime('%d.%m.%Y %H:%M')
-    await send_message_to_admins(
+    await send_message_to_admins_and_developers(
         bot=event.bot,
         message=f"#user_status #blocked\n\n"
                 f"🚫 <b>Пользователь заблокировал бота</b>\n\n"
@@ -141,7 +141,7 @@ async def user_unblocked_bot(event: ChatMemberUpdated):
     created_at_pst = user.created_at \
         .astimezone(pytz.timezone('America/Los_Angeles')) \
         .strftime('%d.%m.%Y %H:%M')
-    await send_message_to_admins(
+    await send_message_to_admins_and_developers(
         bot=event.bot,
         message=f"#user_status #unblocked\n\n"
                 f"🥳 <b>Пользователь разблокировал бота</b>\n\n"
