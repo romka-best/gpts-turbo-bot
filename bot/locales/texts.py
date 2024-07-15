@@ -1409,7 +1409,7 @@ class Texts(Protocol):
 """
 
     @staticmethod
-    def payment_description_renew_subscription(rebound_msg: str):
+    def purchase_minimal_price(currency: Currency):
         raise NotImplementedError
 
     @staticmethod
