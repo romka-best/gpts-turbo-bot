@@ -532,17 +532,15 @@ Let's turn those voice messages into text and keep the conversation flowing! �
 
     # Payment
     BUY = """
-🚀 <b>Welcome to the wonder store!</b> 🛍
+🚀 <b>Welcome to the Store of Wonders!</b> 🛍
 
-The gates to a world of exclusive opportunities are now open before you! What will it be today?
+🌟 <b>Subscriptions: Your VIP Access to Innovations!</b>
+Full access to services: from ChatGPT to unique songs. Thematic chats, fast answers, personalized images. Choose <b>STANDARD</b> ✨, <b>VIP</b> 🔥 or <b>PREMIUM</b> 💎.
 
-🌟 <b>Subscription: Your VIP pass to a world of opportunities!</b>
-Gain full access to the entire spectrum of innovative services: from conversations with ChatGPT to creating unique songs with Suno. Use thematic chats to delve into topics of interest and expand your horizons every day. Discover the comfort of quick responses and the uniqueness of personalized images with FaceSwap. All this and much more are waiting for you in our subscriptions: <b>STANDARD</b> ✨, <b>VIP</b> 🔥, or <b>PREMIUM</b> 💎
+🛍 <b>Packages: The Solution for Your Needs!</b>
+Targeted number of requests and services. Pay only for what you use.
 
-🛍 <b>Packages: The perfect solution for specific needs!</b>
-Looking for a targeted solution for a one-time project? Our Package provides the necessary number of requests and services to help you achieve your goals. Choose only what you need for your next creative breakthrough or business task, and pay only for the resources you use
-
-Choose by clicking a button below 👇
+Click the button below to make your choice 👇
 """
     CHANGE_CURRENCY = "💱 Change currency"
     YOOKASSA_PAYMENT_METHOD = "🪆💳 YooKassa"
