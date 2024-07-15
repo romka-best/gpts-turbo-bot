@@ -1560,5 +1560,5 @@ class Texts(Protocol):
     @staticmethod
     def referral_link(user_id: str, is_share: bool) -> str:
         if is_share:
-            return f"https://t.me/share/url?url=https://t.me/GPTsTurboBot?start={user_id}"
-        return f"https://t.me/GPTsTurboBot?start={user_id}"
+            return f"https://t.me/share/url?url=https://t.me/GPTsTurboBot?start=referral-{user_id}"
+        return f"https://t.me/GPTsTurboBot?start=referral-{user_id}"
