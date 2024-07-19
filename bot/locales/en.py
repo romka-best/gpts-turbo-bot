@@ -19,7 +19,7 @@ class English(Texts):
 🤖 <b>Welcome to the future of artificial intelligence with ChatGPTs Turbo AI Bot!</b> 🎉
 
 I'm your personal gateway to the world of artificial intelligence and neural networks. Discover the capabilities of AI:
-✉️ Communicate with <b>ChatGPT-3.5 Turbo</b>: ask questions, get answers
+✉️ Communicate free with <b>ChatGPT-4.0 Omni Mini</b>: ask questions, get answers
 🧠 Explore advanced intelligence with <b>ChatGPT-4.0 Turbo</b>
 💥 Unleash the full potential of AI with <b>ChatGPT-4.0 Omni</b>
 💫 The perfect blend of speed and intelligence for business tasks with <b>Claude 3.5 Sonnet</b>
@@ -86,11 +86,11 @@ Just type away a command to begin your AI journey! 🌟
     INFO_CHATGPT = """
 🤖 <b>There is what each model can do for you:</b>
 
-✉️ <b>ChatGPT-3.5 Turbo: The Versatile Communicator</b>
+✉️ <b>ChatGPT-4.0 Omni Mini: The Versatile Communicator</b>
 - <i>Small Talk to Deep Conversations</i>: Ideal for chatting about anything from daily life to sharing jokes.
 - <i>Educational Assistant</i>: Get help with homework, language learning, or complex topics like coding.
 - <i>Personal Coach</i>: Get motivation, fitness tips, or even meditation guidance.
-- <i>Creative Writer</i>: Need a post, story, or even a song? ChatGPT-3.5 Turbo can whip it up in seconds.
+- <i>Creative Writer</i>: Need a post, story, or even a song? ChatGPT-4.0 Omni Mini can whip it up in seconds.
 - <i>Travel Buddy</i>: Ask for travel tips, local cuisines, or historical facts about your next destination.
 - <i>Business Helper</i>: Draft emails, create business plans, or brainstorm marketing ideas.
 
@@ -356,12 +356,12 @@ To choose a ChatGPT model click a button below 👇
     CHOOSE_CLAUDE_MODEL = """
 To choose a Claude model click a button below 👇
 """
-    SWITCHED_TO_CHATGPT3_TURBO = """
-🤖 <b>Welcome to the world of ChatGPT-3.5 Turbo!</b>
+    SWITCHED_TO_CHATGPT4_OMNI_MINI = """
+🤖 <b>Welcome to the world of ChatGPT-4.0 Omni Mini!</b>
 
-You've successfully switched to the <b>ChatGPT-3.5 Turbo</b> model. Consider this your personal virtual brain, ready to handle all your questions and ideas. Feel free to write anything - from simple queries to complex tasks. And don't worry, your previous conversations are stored in memory, so the context of your dialogue won't be lost
+You've successfully switched to the <b>ChatGPT-4.0 Omni Mini</b> model. Consider this your personal virtual brain, ready to handle all your questions and ideas. Feel free to write anything - from simple queries to complex tasks. And don't worry, your previous conversations are stored in memory, so the context of your dialogue won't be lost
 
-Go ahead, explore the capabilities of <b>ChatGPT-3.5 Turbo</b>! 🎉
+Go ahead, explore the capabilities of <b>ChatGPT-4.0 Omni Mini</b>! 🎉
 """
     SWITCHED_TO_CHATGPT4_TURBO = """
 🚀 <b>Welcome to the world of ChatGPT-4.0 Turbo!</b>
@@ -674,8 +674,8 @@ Your chats have switched their unique roles to "Personal Assistant" as your acce
     ADD_TO_CART_OR_BUY_NOW = "Buy now or add to cart?"
     ADDED_TO_CART = "Added to cart ✅"
     GO_TO_CART_OR_CONTINUE_SHOPPING = "Go to cart or continue shopping?"
-    GPT3_REQUESTS = "✉️ ChatGPT-3.5 Turbo requests"
-    GPT3_REQUESTS_DESCRIPTION = "Unleash the power of ChatGPT-3.5 Turbo for witty chats, smart advice, and endless fun! ✉️"
+    GPT4_OMNI_MINI_REQUESTS = "✉️ ChatGPT-4.0 Omni Mini requests"
+    GPT4_OMNI_MINI_REQUESTS_DESCRIPTION = "Unleash the power of ChatGPT-4.0 Omni Mini for witty chats, smart advice, and endless fun! ✉️"
     GPT4_REQUESTS = "🧠 ChatGPT-4.0 Turbo requests"
     GPT4_REQUESTS_DESCRIPTION = "Experience ChatGPT-4.0 Turbo advanced intelligence for deeper insights and groundbreaking conversations 🧠"
     GPT4_OMNI_REQUESTS = "💥 ChatGPT-4.0 Omni requests"
@@ -893,8 +893,8 @@ To purchase, the total amount must be equal or higher than {Package.MINIMAL_PRIC
         else:
             gender_info = f"<b>Gender:</b> {English.UNSPECIFIED}"
 
-        if current_model == Model.CHAT_GPT and current_model_version == ChatGPTVersion.V3_Turbo:
-            current_model = English.CHATGPT3_TURBO
+        if current_model == Model.CHAT_GPT and current_model_version == ChatGPTVersion.V4_Omni_Mini:
+            current_model = English.CHATGPT4_OMNI_MINI
         elif current_model == Model.CHAT_GPT and current_model_version == ChatGPTVersion.V4_Turbo:
             current_model = English.CHATGPT4_TURBO
         elif current_model == Model.CHAT_GPT and current_model_version == ChatGPTVersion.V4_Omni:
@@ -931,9 +931,9 @@ To purchase, the total amount must be equal or higher than {Package.MINIMAL_PRIC
 ---------------------------
 
 Quota:
-━ ✉️ <b>ChatGPT-3.5 Turbo</b>:
-    ┣ {monthly_limits[Quota.CHAT_GPT3_TURBO]}/{SubscriptionLimit.LIMITS[subscription_type][Quota.CHAT_GPT3_TURBO]}
-    ┗ Additional: {additional_usage_quota[Quota.CHAT_GPT3_TURBO]}
+━ ✉️ <b>ChatGPT-4.0 Omni Mini</b>:
+    ┣ {monthly_limits[Quota.CHAT_GPT4_OMNI_MINI]}/{SubscriptionLimit.LIMITS[subscription_type][Quota.CHAT_GPT4_OMNI_MINI]}
+    ┗ Additional: {additional_usage_quota[Quota.CHAT_GPT4_OMNI_MINI]}
 ━ 🧠 <b>ChatGPT-4.0 Turbo</b>:
     ┣ {monthly_limits[Quota.CHAT_GPT4_TURBO]}/{SubscriptionLimit.LIMITS[subscription_type][Quota.CHAT_GPT4_TURBO]}
     ┗ Additional: {additional_usage_quota[Quota.CHAT_GPT4_TURBO]}
@@ -1078,8 +1078,8 @@ Hit a button and choose a package:
     def get_package_name_and_quantity_by_package_type(package_type: PackageType):
         name = ""
         quantity = ""
-        if package_type == PackageType.CHAT_GPT3_TURBO:
-            name = English.GPT3_REQUESTS
+        if package_type == PackageType.CHAT_GPT4_OMNI_MINI:
+            name = English.GPT4_OMNI_MINI_REQUESTS
             quantity = "requests"
         elif package_type == PackageType.CHAT_GPT4_TURBO:
             name = English.GPT4_REQUESTS
@@ -1246,8 +1246,8 @@ Looks like you've got only <b>{available_seconds} seconds</b> left in your arsen
     # AI
     @staticmethod
     def switched(model: Model, model_version: str):
-        if model == Model.CHAT_GPT and model_version == ChatGPTVersion.V3_Turbo:
-            return English.SWITCHED_TO_CHATGPT3_TURBO
+        if model == Model.CHAT_GPT and model_version == ChatGPTVersion.V4_Omni_Mini:
+            return English.SWITCHED_TO_CHATGPT4_OMNI_MINI
         elif model == Model.CHAT_GPT and model_version == ChatGPTVersion.V4_Turbo:
             return English.SWITCHED_TO_CHATGPT4_TURBO
         elif model == Model.CHAT_GPT and model_version == ChatGPTVersion.V4_Omni:
@@ -1483,7 +1483,7 @@ Looks like you've got only <b>{available_seconds} seconds</b> left in your arsen
     @staticmethod
     def settings(human_model: str, current_model: Model, dall_e_cost=1) -> str:
         if current_model == Model.CHAT_GPT:
-            additional_text = f"\n<b>Version ChatGPT-3.5</b>: {ChatGPTVersion.V3_Turbo}\n<b>Version ChatGPT-4.0</b>: {ChatGPTVersion.V4_Turbo}\n<b>Version ChatGPT-4.0 Omni</b>: {ChatGPTVersion.V4_Omni}"
+            additional_text = f"\n<b>Version ChatGPT-4.0 Omni Mini</b>: {ChatGPTVersion.V4_Omni_Mini}\n<b>Version ChatGPT-4.0</b>: {ChatGPTVersion.V4_Turbo}\n<b>Version ChatGPT-4.0 Omni</b>: {ChatGPTVersion.V4_Omni}"
         elif current_model == Model.DALL_E:
             additional_text = f"\nAt the current settings, 1 request costs: {dall_e_cost} 🖼"
         else:

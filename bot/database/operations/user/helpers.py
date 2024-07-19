@@ -15,13 +15,13 @@ def create_user_object(
     telegram_chat_id: str,
     referred_by: Optional[str],
     is_referred_by_user=False,
-    quota=Quota.CHAT_GPT3_TURBO,
+    quota=Quota.CHAT_GPT4_OMNI_MINI,
     additional_quota=0,
 ) -> User:
     default_model = Model.CHAT_GPT
     default_additional_quota = User.DEFAULT_ADDITIONAL_USAGE_QUOTA
     default_additional_quota[quota] = additional_quota
-    if quota in [Quota.CHAT_GPT3_TURBO, Quota.CHAT_GPT4_TURBO, Quota.CHAT_GPT4_OMNI]:
+    if quota in [Quota.CHAT_GPT4_OMNI_MINI, Quota.CHAT_GPT4_TURBO, Quota.CHAT_GPT4_OMNI]:
         default_model = Model.CHAT_GPT
     elif quota in [Quota.CLAUDE_3_SONNET, Quota.CLAUDE_3_OPUS]:
         default_model = Model.CLAUDE

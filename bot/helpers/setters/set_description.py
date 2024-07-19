@@ -19,7 +19,7 @@ async def set_description(bot: Bot):
     await bot.set_my_description(
         description="""
 Access to neural networks and AI:
-✉️ ChatGPT-3.5 Turbo
+✉️ ChatGPT-4.0 Omni Mini
 🧠 ChatGPT-4.0 Turbo
 💥 ChatGPT-4.0 Omni
 💫 Claude 3.5 Sonnet
@@ -36,7 +36,7 @@ Created by Stanford students 🏫
     await bot.set_my_description(
         description="""
 Доступ к нейронным сетям и ИИ:
-✉️ ChatGPT-3.5 Turbo
+✉️ ChatGPT-4.0 Omni Mini
 🧠 ChatGPT-4.0 Turbo
 💥 ChatGPT-4.0 Omni
 💫 Claude 3.5 Sonnet

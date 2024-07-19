@@ -229,6 +229,13 @@ async def handle_get_statistics(language_code: str, period: str):
             'ALL': 0,
             'BONUS': 0,
         },
+        ServiceType.CHAT_GPT4_OMNI_MINI: {
+            'SUCCESS': 0,
+            'FAIL': 0,
+            'EXAMPLE': 0,
+            'ALL': 0,
+            'BONUS': 0,
+        },
         ServiceType.CHAT_GPT4_TURBO: {
             'SUCCESS': 0,
             'FAIL': 0,
@@ -365,6 +372,13 @@ async def handle_get_statistics(language_code: str, period: str):
     }
     count_all_transactions_before = {
         ServiceType.CHAT_GPT3_TURBO: {
+            'SUCCESS': 0,
+            'FAIL': 0,
+            'EXAMPLE': 0,
+            'ALL': 0,
+            'BONUS': 0,
+        },
+        ServiceType.CHAT_GPT4_OMNI_MINI: {
             'SUCCESS': 0,
             'FAIL': 0,
             'EXAMPLE': 0,
@@ -508,6 +522,7 @@ async def handle_get_statistics(language_code: str, period: str):
 
     count_income_money = {
         ServiceType.CHAT_GPT3_TURBO: 0,
+        ServiceType.CHAT_GPT4_OMNI_MINI: 0,
         ServiceType.CHAT_GPT4_TURBO: 0,
         ServiceType.CHAT_GPT4_OMNI: 0,
         ServiceType.CLAUDE_3_SONNET: 0,
@@ -532,6 +547,7 @@ async def handle_get_statistics(language_code: str, period: str):
     }
     count_income_money_before = {
         ServiceType.CHAT_GPT3_TURBO: 0,
+        ServiceType.CHAT_GPT4_OMNI_MINI: 0,
         ServiceType.CHAT_GPT4_TURBO: 0,
         ServiceType.CHAT_GPT4_OMNI: 0,
         ServiceType.CLAUDE_3_SONNET: 0,
@@ -558,6 +574,12 @@ async def handle_get_statistics(language_code: str, period: str):
     count_income_money_before_total = 0
     count_expense_money = {
         ServiceType.CHAT_GPT3_TURBO: {
+            'AVERAGE_EXAMPLE_PRICE': 0,
+            'EXAMPLE_ALL': 0,
+            'AVERAGE_PRICE': 0,
+            'ALL': 0,
+        },
+        ServiceType.CHAT_GPT4_OMNI_MINI: {
             'AVERAGE_EXAMPLE_PRICE': 0,
             'EXAMPLE_ALL': 0,
             'AVERAGE_PRICE': 0,
@@ -669,6 +691,12 @@ async def handle_get_statistics(language_code: str, period: str):
     }
     count_expense_money_before = {
         ServiceType.CHAT_GPT3_TURBO: {
+            'AVERAGE_EXAMPLE_PRICE': 0,
+            'EXAMPLE_ALL': 0,
+            'AVERAGE_PRICE': 0,
+            'ALL': 0,
+        },
+        ServiceType.CHAT_GPT4_OMNI_MINI: {
             'AVERAGE_EXAMPLE_PRICE': 0,
             'EXAMPLE_ALL': 0,
             'AVERAGE_PRICE': 0,
@@ -857,7 +885,10 @@ async def handle_get_statistics(language_code: str, period: str):
                 if transaction.service in [ServiceType.STANDARD, ServiceType.VIP, ServiceType.PREMIUM]:
                     count_income_money['SUBSCRIPTION_ALL'] += transaction.clear_amount * 100
                 elif transaction.service in [
-                    ServiceType.CHAT_GPT3_TURBO, ServiceType.CHAT_GPT4_TURBO, ServiceType.CHAT_GPT4_OMNI,
+                    ServiceType.CHAT_GPT3_TURBO,
+                    ServiceType.CHAT_GPT4_OMNI_MINI,
+                    ServiceType.CHAT_GPT4_TURBO,
+                    ServiceType.CHAT_GPT4_OMNI,
                     ServiceType.CLAUDE_3_SONNET, ServiceType.CLAUDE_3_OPUS,
                     ServiceType.DALL_E, ServiceType.MIDJOURNEY, ServiceType.MIDJOURNEY,
                     ServiceType.MUSIC_GEN, ServiceType.SUNO,
@@ -873,7 +904,10 @@ async def handle_get_statistics(language_code: str, period: str):
                 if transaction.service in [ServiceType.STANDARD, ServiceType.VIP, ServiceType.PREMIUM]:
                     count_income_money['SUBSCRIPTION_ALL'] += transaction.clear_amount
                 elif transaction.service in [
-                    ServiceType.CHAT_GPT3_TURBO, ServiceType.CHAT_GPT4_TURBO, ServiceType.CHAT_GPT4_OMNI,
+                    ServiceType.CHAT_GPT3_TURBO,
+                    ServiceType.CHAT_GPT4_OMNI_MINI,
+                    ServiceType.CHAT_GPT4_TURBO,
+                    ServiceType.CHAT_GPT4_OMNI,
                     ServiceType.CLAUDE_3_SONNET, ServiceType.CLAUDE_3_OPUS,
                     ServiceType.DALL_E, ServiceType.MIDJOURNEY, ServiceType.MIDJOURNEY,
                     ServiceType.MUSIC_GEN, ServiceType.SUNO,
@@ -889,7 +923,10 @@ async def handle_get_statistics(language_code: str, period: str):
                 if transaction.service in [ServiceType.STANDARD, ServiceType.VIP, ServiceType.PREMIUM]:
                     count_income_money['SUBSCRIPTION_ALL'] += transaction.clear_amount * 2
                 elif transaction.service in [
-                    ServiceType.CHAT_GPT3_TURBO, ServiceType.CHAT_GPT4_TURBO, ServiceType.CHAT_GPT4_OMNI,
+                    ServiceType.CHAT_GPT3_TURBO,
+                    ServiceType.CHAT_GPT4_OMNI_MINI,
+                    ServiceType.CHAT_GPT4_TURBO,
+                    ServiceType.CHAT_GPT4_OMNI,
                     ServiceType.CLAUDE_3_SONNET, ServiceType.CLAUDE_3_OPUS,
                     ServiceType.DALL_E, ServiceType.MIDJOURNEY, ServiceType.MIDJOURNEY,
                     ServiceType.MUSIC_GEN, ServiceType.SUNO,
@@ -973,7 +1010,10 @@ async def handle_get_statistics(language_code: str, period: str):
             premium_users.add(transaction_user.id)
         activated_users.add(transaction.user_id)
     for service in [
-        ServiceType.CHAT_GPT3_TURBO, ServiceType.CHAT_GPT4_TURBO, ServiceType.CHAT_GPT4_OMNI,
+        ServiceType.CHAT_GPT3_TURBO,
+        ServiceType.CHAT_GPT4_OMNI_MINI,
+        ServiceType.CHAT_GPT4_TURBO,
+        ServiceType.CHAT_GPT4_OMNI,
         ServiceType.CLAUDE_3_SONNET, ServiceType.CLAUDE_3_OPUS,
         ServiceType.DALL_E, ServiceType.MIDJOURNEY, ServiceType.FACE_SWAP,
         ServiceType.MUSIC_GEN, ServiceType.SUNO,
@@ -1010,7 +1050,10 @@ async def handle_get_statistics(language_code: str, period: str):
                 if transaction_before.service in [ServiceType.STANDARD, ServiceType.VIP, ServiceType.PREMIUM]:
                     count_income_money_before['SUBSCRIPTION_ALL'] += transaction_before.clear_amount * 100
                 elif transaction_before.service in [
-                    ServiceType.CHAT_GPT3_TURBO, ServiceType.CHAT_GPT4_TURBO, ServiceType.CHAT_GPT4_OMNI,
+                    ServiceType.CHAT_GPT3_TURBO,
+                    ServiceType.CHAT_GPT4_OMNI_MINI,
+                    ServiceType.CHAT_GPT4_TURBO,
+                    ServiceType.CHAT_GPT4_OMNI,
                     ServiceType.CLAUDE_3_SONNET, ServiceType.CLAUDE_3_OPUS,
                     ServiceType.DALL_E, ServiceType.MIDJOURNEY, ServiceType.MIDJOURNEY,
                     ServiceType.MUSIC_GEN, ServiceType.SUNO,
@@ -1026,7 +1069,10 @@ async def handle_get_statistics(language_code: str, period: str):
                 if transaction_before.service in [ServiceType.STANDARD, ServiceType.VIP, ServiceType.PREMIUM]:
                     count_income_money_before['SUBSCRIPTION_ALL'] += transaction_before.clear_amount
                 elif transaction_before.service in [
-                    ServiceType.CHAT_GPT3_TURBO, ServiceType.CHAT_GPT4_TURBO, ServiceType.CHAT_GPT4_OMNI,
+                    ServiceType.CHAT_GPT3_TURBO,
+                    ServiceType.CHAT_GPT4_OMNI_MINI,
+                    ServiceType.CHAT_GPT4_TURBO,
+                    ServiceType.CHAT_GPT4_OMNI,
                     ServiceType.CLAUDE_3_SONNET, ServiceType.CLAUDE_3_OPUS,
                     ServiceType.DALL_E, ServiceType.MIDJOURNEY, ServiceType.MIDJOURNEY,
                     ServiceType.MUSIC_GEN, ServiceType.SUNO,
@@ -1042,7 +1088,10 @@ async def handle_get_statistics(language_code: str, period: str):
                 if transaction_before.service in [ServiceType.STANDARD, ServiceType.VIP, ServiceType.PREMIUM]:
                     count_income_money_before['SUBSCRIPTION_ALL'] += transaction_before.clear_amount * 2
                 elif transaction_before.service in [
-                    ServiceType.CHAT_GPT3_TURBO, ServiceType.CHAT_GPT4_TURBO, ServiceType.CHAT_GPT4_OMNI,
+                    ServiceType.CHAT_GPT3_TURBO,
+                    ServiceType.CHAT_GPT4_OMNI_MINI,
+                    ServiceType.CHAT_GPT4_TURBO,
+                    ServiceType.CHAT_GPT4_OMNI,
                     ServiceType.CLAUDE_3_SONNET, ServiceType.CLAUDE_3_OPUS,
                     ServiceType.DALL_E, ServiceType.MIDJOURNEY, ServiceType.MIDJOURNEY,
                     ServiceType.MUSIC_GEN, ServiceType.SUNO,
@@ -1104,7 +1153,10 @@ async def handle_get_statistics(language_code: str, period: str):
             premium_users_before.add(transaction_before_user.id)
         activated_users_before.add(transaction_before.user_id)
     for service_before in [
-        ServiceType.CHAT_GPT3_TURBO, ServiceType.CHAT_GPT4_TURBO, ServiceType.CHAT_GPT4_OMNI,
+        ServiceType.CHAT_GPT3_TURBO,
+        ServiceType.CHAT_GPT4_OMNI_MINI,
+        ServiceType.CHAT_GPT4_TURBO,
+        ServiceType.CHAT_GPT4_OMNI,
         ServiceType.CLAUDE_3_SONNET, ServiceType.CLAUDE_3_OPUS,
         ServiceType.DALL_E, ServiceType.MIDJOURNEY, ServiceType.FACE_SWAP,
         ServiceType.MUSIC_GEN, ServiceType.SUNO,

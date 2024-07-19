@@ -21,9 +21,9 @@ class Model:
 
 
 class Quota:
-    CHAT_GPT3_TURBO = "gpt3"
     CHAT_GPT4_TURBO = "gpt4"
     CHAT_GPT4_OMNI = "gpt4_omni"
+    CHAT_GPT4_OMNI_MINI = "gpt4_omni_mini"
     CLAUDE_3_SONNET = "claude_3_sonnet"
     CLAUDE_3_OPUS = "claude_3_opus"
     DALL_E = "dall_e"
@@ -38,9 +38,9 @@ class Quota:
 
 
 class ChatGPTVersion:
-    V3_Turbo = 'gpt-3.5-turbo'
     V4_Turbo = 'gpt-4-turbo'
     V4_Omni = 'gpt-4o'
+    V4_Omni_Mini = 'gpt-4o-mini'
 
 
 class ClaudeGPTVersion:

@@ -30,7 +30,7 @@ class SubscriptionStatus:
 class SubscriptionLimit:
     LIMITS = {
         SubscriptionType.FREE: {
-            Quota.CHAT_GPT3_TURBO: 100,
+            Quota.CHAT_GPT4_OMNI_MINI: 100,
             Quota.CHAT_GPT4_TURBO: 0,
             Quota.CHAT_GPT4_OMNI: 0,
             Quota.CLAUDE_3_SONNET: 0,
@@ -42,7 +42,7 @@ class SubscriptionLimit:
             Quota.SUNO: 0,
         },
         SubscriptionType.STANDARD: {
-            Quota.CHAT_GPT3_TURBO: 1000,
+            Quota.CHAT_GPT4_OMNI_MINI: 1000,
             Quota.CHAT_GPT4_TURBO: 10,
             Quota.CHAT_GPT4_OMNI: 25,
             Quota.CLAUDE_3_SONNET: 25,
@@ -54,7 +54,7 @@ class SubscriptionLimit:
             Quota.SUNO: 25,
         },
         SubscriptionType.VIP: {
-            Quota.CHAT_GPT3_TURBO: 2000,
+            Quota.CHAT_GPT4_OMNI_MINI: 2000,
             Quota.CHAT_GPT4_TURBO: 25,
             Quota.CHAT_GPT4_OMNI: 50,
             Quota.CLAUDE_3_SONNET: 50,
@@ -66,7 +66,7 @@ class SubscriptionLimit:
             Quota.SUNO: 50,
         },
         SubscriptionType.PREMIUM: {
-            Quota.CHAT_GPT3_TURBO: 3000,
+            Quota.CHAT_GPT4_OMNI_MINI: 3000,
             Quota.CHAT_GPT4_TURBO: 50,
             Quota.CHAT_GPT4_OMNI: 100,
             Quota.CLAUDE_3_SONNET: 100,

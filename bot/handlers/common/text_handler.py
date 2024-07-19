@@ -29,8 +29,8 @@ async def handle_text(message: Message, state: FSMContext):
     current_time = time.time()
 
     if user.current_model == Model.CHAT_GPT:
-        if user.settings[user.current_model][UserSettings.VERSION] == ChatGPTVersion.V3_Turbo:
-            user_quota = Quota.CHAT_GPT3_TURBO
+        if user.settings[user.current_model][UserSettings.VERSION] == ChatGPTVersion.V4_Omni_Mini:
+            user_quota = Quota.CHAT_GPT4_OMNI_MINI
         elif user.settings[user.current_model][UserSettings.VERSION] == ChatGPTVersion.V4_Turbo:
             user_quota = Quota.CHAT_GPT4_TURBO
         elif user.settings[user.current_model][UserSettings.VERSION] == ChatGPTVersion.V4_Omni:

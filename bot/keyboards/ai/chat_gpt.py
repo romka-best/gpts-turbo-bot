@@ -8,10 +8,10 @@ def build_chat_gpt_keyboard(language_code: str, model: Model, model_version: Cha
     buttons = [
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).CHATGPT3_TURBO + (
-                    " ✅" if model == Model.CHAT_GPT and model_version == ChatGPTVersion.V3_Turbo else ""
+                text=get_localization(language_code).CHATGPT4_OMNI_MINI + (
+                    " ✅" if model == Model.CHAT_GPT and model_version == ChatGPTVersion.V4_Omni_Mini else ""
                 ),
-                callback_data=f'chat_gpt:{ChatGPTVersion.V3_Turbo}'
+                callback_data=f'chat_gpt:{ChatGPTVersion.V4_Omni_Mini}'
             ),
         ],
         [
