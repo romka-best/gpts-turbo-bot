@@ -29,7 +29,7 @@ async def start(message: Message, state: FSMContext):
     user = await get_user(user_id)
     if not user:
         params = message.text.split()
-        default_quota = Quota.CHAT_GPT3_TURBO
+        default_quota = Quota.CHAT_GPT4_OMNI_MINI
         default_additional_quota = 0
         referred_by = None
         referred_by_user = None
@@ -41,7 +41,7 @@ async def start(message: Message, state: FSMContext):
 
                 sub_param_key, sub_param_value = sub_param.split('-')
                 if sub_param_key == "referral":
-                    referred_by = message.text.split()[1]
+                    referred_by = sub_param_value
                     referred_by_user = await get_user(referred_by)
                     referred_by_user_language_code = await get_user_language(referred_by, state.storage)
 
@@ -67,14 +67,14 @@ async def start(message: Message, state: FSMContext):
                             )
                 elif sub_param_key == "model":
                     if sub_param_value in [
-                        "chatgpt3turbo",
+                        "chatgpt4omnimini",
                         "claude3sonnet",
                         "faceswap",
                         "suno",
                     ]:
-                        if sub_param_value == "chatgpt3turbo":
-                            default_quota = Quota.CHAT_GPT3_TURBO
-                        elif sub_param_value == "claude_3_sonnet":
+                        if sub_param_value == "chatgpt4omnimini":
+                            default_quota = Quota.CHAT_GPT4_OMNI_MINI
+                        elif sub_param_value == "claude3sonnet":
                             default_quota = Quota.CLAUDE_3_SONNET
                         elif sub_param_value == "faceswap":
                             default_quota = Quota.FACE_SWAP
@@ -98,7 +98,7 @@ async def start(message: Message, state: FSMContext):
                             default_quota = Quota.DALL_E
                         elif sub_param_value == "midjourney":
                             default_quota = Quota.MIDJOURNEY
-                        default_additional_quota = 5
+                        default_additional_quota = 3
                     elif sub_param_value in [
                         "musicgen",
                     ]:

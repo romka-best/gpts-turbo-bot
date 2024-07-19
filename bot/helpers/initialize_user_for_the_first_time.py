@@ -17,7 +17,7 @@ async def initialize_user_for_the_first_time(
     title: str,
     referred_by: Optional[str],
     is_referred_by_user=False,
-    quota=Quota.CHAT_GPT3_TURBO,
+    quota=Quota.CHAT_GPT4_OMNI_MINI,
     additional_quota=0,
 ):
     await write_cart_in_transaction(transaction, str(telegram_user.id), [])

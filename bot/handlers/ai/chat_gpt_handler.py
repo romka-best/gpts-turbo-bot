@@ -33,8 +33,8 @@ from bot.locales.main import get_localization, get_user_language
 
 chat_gpt_router = Router()
 
-PRICE_GPT3_INPUT = 0.0000005
-PRICE_GPT3_OUTPUT = 0.0000015
+PRICE_GPT4_OMNI_MINI_INPUT = 0.00000015
+PRICE_GPT4_OMNI_MINI_OUTPUT = 0.0000006
 PRICE_GPT4_INPUT = 0.00001
 PRICE_GPT4_OUTPUT = 0.00003
 PRICE_GPT4_OMNI_INPUT = 0.000005
@@ -106,8 +106,8 @@ async def handle_chat_gpt_choose_selection(callback_query: CallbackQuery, state:
                 "settings": user.settings,
             })
 
-            if user.settings[user.current_model][UserSettings.VERSION] == ChatGPTVersion.V3_Turbo:
-                text = get_localization(user_language_code).SWITCHED_TO_CHATGPT3_TURBO
+            if user.settings[user.current_model][UserSettings.VERSION] == ChatGPTVersion.V4_Omni_Mini:
+                text = get_localization(user_language_code).SWITCHED_TO_CHATGPT4_OMNI_MINI
             elif user.settings[user.current_model][UserSettings.VERSION] == ChatGPTVersion.V4_Turbo:
                 text = get_localization(user_language_code).SWITCHED_TO_CHATGPT4_TURBO
             else:
@@ -129,7 +129,7 @@ async def handle_chat_gpt_choose_selection(callback_query: CallbackQuery, state:
 
 
 async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_quota: Quota, photo_filenames=None):
-    if user_quota != Quota.CHAT_GPT3_TURBO and user_quota != Quota.CHAT_GPT4_TURBO and user_quota != Quota.CHAT_GPT4_OMNI:
+    if user_quota != Quota.CHAT_GPT4_OMNI_MINI and user_quota != Quota.CHAT_GPT4_TURBO and user_quota != Quota.CHAT_GPT4_OMNI:
         raise NotImplemented
 
     await state.update_data(is_processing=True)
@@ -146,9 +146,7 @@ async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_q
         else:
             text = ""
 
-    if photo_filenames and len(photo_filenames) and (
-        user_quota == Quota.CHAT_GPT4_TURBO or user_quota == Quota.CHAT_GPT4_OMNI
-    ):
+    if photo_filenames and len(photo_filenames):
         await write_message(user.current_chat_id, "user", user.id, text, True, photo_filenames)
     else:
         await write_message(user.current_chat_id, "user", user.id, text)
@@ -157,49 +155,36 @@ async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_q
     messages = await get_messages_by_chat_id(user.current_chat_id)
     role = await get_role_by_name(chat.role)
     sorted_messages = sorted(messages, key=lambda m: m.created_at)
-    if user_quota == Quota.CHAT_GPT3_TURBO:
-        history = [
-                      {
-                          'role': 'system',
-                          'content': role.translated_instructions.get(user_language_code, 'en'),
-                      }
-                  ] + [
-                      {
-                          'role': message.sender,
-                          'content': message.content,
-                      } for message in sorted_messages
-                  ]
-    else:
-        history = [
-            {
-                'role': 'system',
-                'content': role.translated_instructions.get(user_language_code, 'en'),
-            }
-        ]
-        for sorted_message in sorted_messages:
-            content = []
-            if sorted_message.content:
+    history = [
+        {
+            'role': 'system',
+            'content': role.translated_instructions.get(user_language_code, 'en'),
+        }
+    ]
+    for sorted_message in sorted_messages:
+        content = []
+        if sorted_message.content:
+            content.append({
+                'type': 'text',
+                'text': sorted_message.content,
+            })
+
+        if sorted_message.photo_filenames:
+            for photo_filename in sorted_message.photo_filenames:
+                photo_path = f'users/vision/{user.id}/{photo_filename}'
+                photo = await firebase.bucket.get_blob(photo_path)
+                photo_link = firebase.get_public_url(photo.name)
                 content.append({
-                    'type': 'text',
-                    'text': sorted_message.content,
+                    'type': 'image_url',
+                    'image_url': {
+                        'url': photo_link,
+                    },
                 })
 
-            if sorted_message.photo_filenames:
-                for photo_filename in sorted_message.photo_filenames:
-                    photo_path = f'users/vision/{user.id}/{photo_filename}'
-                    photo = await firebase.bucket.get_blob(photo_path)
-                    photo_link = firebase.get_public_url(photo.name)
-                    content.append({
-                        'type': 'image_url',
-                        'image_url': {
-                            'url': photo_link,
-                        },
-                    })
-
-            history.append({
-                'role': sorted_message.sender,
-                'content': content,
-            })
+        history.append({
+            'role': sorted_message.sender,
+            'content': content,
+        })
 
     processing_message = await message.reply(text=get_localization(user_language_code).processing_request_text())
 
@@ -212,10 +197,10 @@ async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_q
         try:
             response = await get_response_message(user.settings[user.current_model][UserSettings.VERSION], history)
             response_message = response['message']
-            if user_quota == Quota.CHAT_GPT3_TURBO:
-                service = ServiceType.CHAT_GPT3_TURBO
-                input_price = response['input_tokens'] * PRICE_GPT3_INPUT
-                output_price = response['output_tokens'] * PRICE_GPT3_OUTPUT
+            if user_quota == Quota.CHAT_GPT4_OMNI_MINI:
+                service = ServiceType.CHAT_GPT4_OMNI_MINI
+                input_price = response['input_tokens'] * PRICE_GPT4_OMNI_MINI_INPUT
+                output_price = response['output_tokens'] * PRICE_GPT4_OMNI_MINI_OUTPUT
             elif user_quota == Quota.CHAT_GPT4_TURBO:
                 service = ServiceType.CHAT_GPT4_TURBO
                 input_price = response['input_tokens'] * PRICE_GPT4_INPUT
@@ -369,8 +354,8 @@ async def handle_chat_gpt_continue_generation_choose_selection(callback_query: C
 
     if action == 'continue':
         await state.update_data(recognized_text=get_localization(user_language_code).CONTINUE_GENERATING)
-        if user.settings[user.current_model][UserSettings.VERSION] == ChatGPTVersion.V3_Turbo:
-            user_quota = Quota.CHAT_GPT3_TURBO
+        if user.settings[user.current_model][UserSettings.VERSION] == ChatGPTVersion.V4_Omni_Mini:
+            user_quota = Quota.CHAT_GPT4_OMNI_MINI
         elif user.settings[user.current_model][UserSettings.VERSION] == ChatGPTVersion.V4_Turbo:
             user_quota = Quota.CHAT_GPT4_TURBO
         elif user.settings[user.current_model][UserSettings.VERSION] == ChatGPTVersion.V4_Omni:
@@ -388,9 +373,9 @@ async def handle_chatgpt4_example(user: User, user_language_code: str, prompt: s
     try:
         if (
             user.current_model == Model.CHAT_GPT and
-            user.settings[user.current_model][UserSettings.VERSION] == ChatGPTVersion.V3_Turbo and
+            user.settings[user.current_model][UserSettings.VERSION] == ChatGPTVersion.V4_Omni_Mini and
             user.subscription_type == SubscriptionType.FREE and
-            user.monthly_limits[Quota.CHAT_GPT3_TURBO] + 1 in [1, 50, 80, 90, 100]
+            user.monthly_limits[Quota.CHAT_GPT4_OMNI_MINI] + 1 in [1, 50, 80, 90, 100]
         ):
             response = await get_response_message(ChatGPTVersion.V4_Omni, history)
             response_message = response['message']

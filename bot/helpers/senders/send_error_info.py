@@ -6,8 +6,11 @@ from bot.helpers.senders.send_message_to_admins_and_developers import send_messa
 
 
 async def send_error_info(bot: Bot, user_id: str, info: str, hashtags: List[str] = None):
+    if hashtags is None:
+        hashtags = []
+
     message = f"""
-#error {" #".join(hashtags)}
+#error {'#' if len(hashtags) > 0 else ''}{" #".join(hashtags)}
 
 ALARM! Ошибка у пользователя: {user_id}
 Информация:

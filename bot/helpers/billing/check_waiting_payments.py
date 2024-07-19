@@ -5,8 +5,8 @@ from aiogram import Bot
 
 from bot.database.models.common import Currency
 from bot.database.models.subscription import SubscriptionStatus
-from bot.database.operations.request.updaters import update_request
 from bot.database.operations.subscription.getters import get_subscriptions_by_status
+from bot.database.operations.subscription.updaters import update_subscription
 from bot.helpers.senders.send_message_to_admins_and_developers import send_message_to_admins_and_developers
 
 
@@ -24,7 +24,7 @@ async def check_waiting_payments(bot: Bot):
         status = SubscriptionStatus.DECLINED
         not_finished_subscription.status = status
         tasks.append(
-            update_request(
+            update_subscription(
                 not_finished_subscription.id,
                 {
                     "status": not_finished_subscription.status,

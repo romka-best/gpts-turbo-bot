@@ -109,6 +109,12 @@ def build_statistics_choose_service_keyboard(
             ],
             [
                 InlineKeyboardButton(
+                    text="ChatGPT 4.0 Omni Mini ✉️",
+                    callback_data=f'statistics_choose_service:{ServiceType.CHAT_GPT4_OMNI_MINI}'
+                )
+            ],
+            [
+                InlineKeyboardButton(
                     text="ChatGPT 4.0 Turbo 🧠",
                     callback_data=f'statistics_choose_service:{ServiceType.CHAT_GPT4_TURBO}'
                 )
@@ -198,6 +204,12 @@ def build_statistics_choose_service_keyboard(
                 InlineKeyboardButton(
                     text="ChatGPT 3.5 Turbo ✉️",
                     callback_data=f'statistics_choose_service:{ServiceType.CHAT_GPT3_TURBO}'
+                )
+            ],
+            [
+                InlineKeyboardButton(
+                    text="ChatGPT 4.0 Omni Mini ✉️",
+                    callback_data=f'statistics_choose_service:{ServiceType.CHAT_GPT4_OMNI_MINI}'
                 )
             ],
             [

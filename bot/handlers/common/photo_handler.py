@@ -129,13 +129,9 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
         await message.answer(text=get_localization(user_language_code).FACE_SWAP_MANAGE_EDIT_SUCCESS)
         await handle_manage_face_swap(message, str(message.from_user.id), state)
     elif user.current_model == Model.CHAT_GPT or user.current_model == Model.CLAUDE:
-        if user.settings[user.current_model][UserSettings.VERSION] == ChatGPTVersion.V3_Turbo:
-            await message.reply(
-                text=get_localization(user_language_code).PHOTO_FEATURE_FORBIDDEN,
-            )
-            return
-
-        if user.settings[user.current_model][UserSettings.VERSION] == ChatGPTVersion.V4_Turbo:
+        if user.settings[user.current_model][UserSettings.VERSION] == ChatGPTVersion.V4_Omni_Mini:
+            quota = Quota.CHAT_GPT4_OMNI_MINI
+        elif user.settings[user.current_model][UserSettings.VERSION] == ChatGPTVersion.V4_Turbo:
             quota = Quota.CHAT_GPT4_TURBO
         elif user.settings[user.current_model][UserSettings.VERSION] == ChatGPTVersion.V4_Omni:
             quota = Quota.CHAT_GPT4_OMNI
@@ -231,13 +227,9 @@ async def handle_album(message: Message, state: FSMContext, album: List[Message]
     user_language_code = await get_user_language(user_id, state.storage)
 
     if user.current_model == Model.CHAT_GPT or user.current_model == Model.CLAUDE:
-        if user.settings[user.current_model][UserSettings.VERSION] == ChatGPTVersion.V3_Turbo:
-            await message.reply(
-                text=get_localization(user_language_code).PHOTO_FEATURE_FORBIDDEN,
-            )
-            return
-
-        if user.settings[user.current_model][UserSettings.VERSION] == ChatGPTVersion.V4_Turbo:
+        if user.settings[user.current_model][UserSettings.VERSION] == ChatGPTVersion.V4_Omni_Mini:
+            quota = Quota.CHAT_GPT4_OMNI_MINI
+        elif user.settings[user.current_model][UserSettings.VERSION] == ChatGPTVersion.V4_Turbo:
             quota = Quota.CHAT_GPT4_TURBO
         elif user.settings[user.current_model][UserSettings.VERSION] == ChatGPTVersion.V4_Omni:
             quota = Quota.CHAT_GPT4_OMNI

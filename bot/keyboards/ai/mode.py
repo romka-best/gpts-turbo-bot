@@ -17,10 +17,10 @@ def build_mode_keyboard(language_code: str, model: Model, model_version: str, pa
                 ],
                 [
                     InlineKeyboardButton(
-                        text=get_localization(language_code).CHATGPT3_TURBO + (
-                            " ✅" if model == Model.CHAT_GPT and model_version == ChatGPTVersion.V3_Turbo else ""
+                        text=get_localization(language_code).CHATGPT4_OMNI_MINI + (
+                            " ✅" if model == Model.CHAT_GPT and model_version == ChatGPTVersion.V4_Omni_Mini else ""
                         ),
-                        callback_data=f'mode:{Model.CHAT_GPT}:{ChatGPTVersion.V3_Turbo}'
+                        callback_data=f'mode:{Model.CHAT_GPT}:{ChatGPTVersion.V4_Omni_Mini}'
                     ),
                 ],
                 [

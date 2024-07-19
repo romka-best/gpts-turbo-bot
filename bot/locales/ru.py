@@ -15,7 +15,7 @@ class Russian(Texts):
 
 Я – ваш личный портал в мир искусственного интеллекта и нейросетей.
 Откройте для себя возможности ИИ:
-✉️ Общайтесь с <b>ChatGPT-3.5 Turbo</b>: задавайте вопросы, получайте ответы
+✉️ Общайтесь бесплатно с <b>ChatGPT-4.0 Omni Mini</b>: задавайте вопросы, получайте ответы
 🧠 Исследуйте продвинутый уровень интеллекта с <b>ChatGPT-4.0 Turbo</b>
 💥 Максимум возможностей ИИ с <b>ChatGPT-4.0 Omni</b>
 💫 Идеальное сочетание скорости и интеллекта для бизнес-задач с <b>Claude 3.5 Sonnet</b>
@@ -82,11 +82,11 @@ class Russian(Texts):
     INFO_CHATGPT = """
 🤖 <b>Вот, что каждая модель может сделать для вас:</b>
 
-✉️ <b>ChatGPT-3.5 Turbo: Всесторонний коммуникатор</b>
+✉️ <b>ChatGPT-4.0 Omni Mini: Всесторонний коммуникатор</b>
 - <i>От обычного разговора до глубоких бесед</i>: Идеален для чата на любую тему, от повседневной жизни до шуток.
 - <i>Образовательный ассистент</i>: Помощь в выполнении домашних заданий, изучении языков или сложных тем, таких как программирование.
 - <i>Личный тренер</i>: Мотивация, советы по фитнесу или даже руководство по медитации.
-- <i>Творческий писатель</i>: Нужен пост, история или даже песня? ChatGPT-3.5 Turbo создаст это за секунды.
+- <i>Творческий писатель</i>: Нужен пост, история или даже песня? ChatGPT-4.0 Omni Mini создаст это за секунды.
 - <i>Путешественник</i>: Спросите советы по путешествиям, местные кухни или исторические факты о вашем следующем направлении.
 - <i>Бизнес-помощник</i>: Написание электронных писем, бизнес-планов или идей для маркетинга.
 
@@ -355,12 +355,12 @@ class Russian(Texts):
     CHOOSE_CLAUDE_MODEL = """
 Для выбора Claude модели нажмите на кнопку ниже 👇
 """
-    SWITCHED_TO_CHATGPT3_TURBO = """
-✉️ <b>Добро пожаловать в мир ChatGPT-3.5 Turbo!</b>
+    SWITCHED_TO_CHATGPT4_OMNI_MINI = """
+✉️ <b>Добро пожаловать в мир ChatGPT-4.0 Omni Mini!</b>
 
-Вы успешно переключились на модель <b>ChatGPT-3.5 Turbo</b>. Это ваш персональный виртуальный мозг, готовый обрабатывать все ваши вопросы и идеи. Пишите что угодно - от простых вопросов до сложных задач. И не волнуйтесь, ваши предыдущие разговоры сохранены в памяти, так что контекст вашего диалога не потеряется
+Вы успешно переключились на модель <b>ChatGPT-4.0 Omni Mini</b>. Это ваш персональный виртуальный мозг, готовый обрабатывать все ваши вопросы и идеи. Пишите что угодно - от простых вопросов до сложных задач. И не волнуйтесь, ваши предыдущие разговоры сохранены в памяти, так что контекст вашего диалога не потеряется
 
-Вперёд, исследуйте возможности <b>ChatGPT-3.5 Turbo</b>! 🎉
+Вперёд, исследуйте возможности <b>ChatGPT-4.0 Omni Mini</b>! 🎉
 """
     SWITCHED_TO_CHATGPT4_TURBO = """
 🧠 <b>Добро пожаловать в мир ChatGPT-4.0 Turbo!</b>
@@ -673,8 +673,8 @@ class Russian(Texts):
     ADD_TO_CART_OR_BUY_NOW = "Приобрести сразу или добавить в корзину?"
     ADDED_TO_CART = "Добавлено в корзину ✅"
     GO_TO_CART_OR_CONTINUE_SHOPPING = "Перейти к корзине или продолжить покупки?"
-    GPT3_REQUESTS = "✉️ ChatGPT-3.5 Turbo запросы"
-    GPT3_REQUESTS_DESCRIPTION = "Разбудите мощь ChatGPT-3.5 Turbo для остроумных бесед, умных советов и бесконечного веселья! ✉️"
+    GPT4_OMNI_MINI_REQUESTS = "✉️ ChatGPT-4.0 Omni Mini запросы"
+    GPT4_OMNI_MINI_REQUESTS_DESCRIPTION = "Разбудите мощь ChatGPT-4.0 Omni Mini для остроумных бесед, умных советов и бесконечного веселья! ✉️"
     GPT4_REQUESTS = "🧠 ChatGPT-4.0 Turbo запросы"
     GPT4_REQUESTS_DESCRIPTION = "Исследуйте продвинутый интеллект ChatGPT-4.0 Turbo для более глубоких открытий и прорывных бесед! 🧠"
     GPT4_OMNI_REQUESTS = "💥 ChatGPT-4.0 Omni запросы"
@@ -893,8 +893,8 @@ class Russian(Texts):
         else:
             gender_info = f"<b>Пол:</b> {Russian.UNSPECIFIED}"
 
-        if current_model == Model.CHAT_GPT and current_model_version == ChatGPTVersion.V3_Turbo:
-            current_model = Russian.CHATGPT3_TURBO
+        if current_model == Model.CHAT_GPT and current_model_version == ChatGPTVersion.V4_Omni_Mini:
+            current_model = Russian.CHATGPT4_OMNI_MINI
         elif current_model == Model.CHAT_GPT and current_model_version == ChatGPTVersion.V4_Turbo:
             current_model = Russian.CHATGPT4_TURBO
         elif current_model == Model.CHAT_GPT and current_model_version == ChatGPTVersion.V4_Omni:
@@ -931,9 +931,9 @@ class Russian(Texts):
 ---------------------------
 
 Квота:
-━ ✉️ <b>ChatGPT-3.5 Turbo</b>:
-    ┣ {monthly_limits[Quota.CHAT_GPT3_TURBO]}/{SubscriptionLimit.LIMITS[subscription_type][Quota.CHAT_GPT3_TURBO]}
-    ┗ Дополнительная: {additional_usage_quota[Quota.CHAT_GPT3_TURBO]}
+━ ✉️ <b>ChatGPT-4.0 Omni Mini</b>:
+    ┣ {monthly_limits[Quota.CHAT_GPT4_OMNI_MINI]}/{SubscriptionLimit.LIMITS[subscription_type][Quota.CHAT_GPT4_OMNI_MINI]}
+    ┗ Дополнительная: {additional_usage_quota[Quota.CHAT_GPT4_OMNI_MINI]}
 ━ 🧠 <b>ChatGPT-4.0 Turbo</b>:
     ┣ {monthly_limits[Quota.CHAT_GPT4_TURBO]}/{SubscriptionLimit.LIMITS[subscription_type][Quota.CHAT_GPT4_TURBO]}
     ┗ Дополнительная: {additional_usage_quota[Quota.CHAT_GPT4_TURBO]}
@@ -1078,8 +1078,8 @@ class Russian(Texts):
     def get_package_name_and_quantity_by_package_type(package_type: PackageType):
         name = ""
         quantity = ""
-        if package_type == PackageType.CHAT_GPT3_TURBO:
-            name = Russian.GPT3_REQUESTS
+        if package_type == PackageType.CHAT_GPT4_OMNI_MINI:
+            name = Russian.GPT4_OMNI_MINI_REQUESTS
             quantity = "запросов"
         elif package_type == PackageType.CHAT_GPT4_TURBO:
             name = Russian.GPT4_REQUESTS
@@ -1246,8 +1246,8 @@ class Russian(Texts):
     # AI
     @staticmethod
     def switched(model: Model, model_version: str):
-        if model == Model.CHAT_GPT and model_version == ChatGPTVersion.V3_Turbo:
-            return Russian.SWITCHED_TO_CHATGPT3_TURBO
+        if model == Model.CHAT_GPT and model_version == ChatGPTVersion.V4_Omni_Mini:
+            return Russian.SWITCHED_TO_CHATGPT4_OMNI_MINI
         elif model == Model.CHAT_GPT and model_version == ChatGPTVersion.V4_Turbo:
             return Russian.SWITCHED_TO_CHATGPT4_TURBO
         elif model == Model.CHAT_GPT and model_version == ChatGPTVersion.V4_Omni:
@@ -1483,7 +1483,7 @@ class Russian(Texts):
     @staticmethod
     def settings(human_model: str, current_model: Model, dall_e_cost=1) -> str:
         if current_model == Model.CHAT_GPT:
-            additional_text = f"\n<b>Версия ChatGPT-3.5 Turbo</b>: {ChatGPTVersion.V3_Turbo}\n<b>Версия ChatGPT-4.0 Turbo</b>: {ChatGPTVersion.V4_Turbo}\n<b>Версия ChatGPT-4.0 Omni</b>: {ChatGPTVersion.V4_Omni}"
+            additional_text = f"\n<b>Версия ChatGPT-4.0 Omni Mini</b>: {ChatGPTVersion.V4_Omni_Mini}\n<b>Версия ChatGPT-4.0 Turbo</b>: {ChatGPTVersion.V4_Turbo}\n<b>Версия ChatGPT-4.0 Omni</b>: {ChatGPTVersion.V4_Omni}"
         elif current_model == Model.DALL_E:
             additional_text = f"\nПри текущих настройках 1 запрос стоит: {dall_e_cost} 🖼"
         else:

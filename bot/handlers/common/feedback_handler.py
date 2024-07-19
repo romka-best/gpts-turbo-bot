@@ -75,7 +75,7 @@ async def handle_manage_feedback(callback_query: CallbackQuery, state: FSMContex
     if action == "approve":
         user = await get_user(user_id)
         feedbacks = await get_feedbacks_by_user_id(user_id)
-        if len(feedbacks) > 5:
+        if len(feedbacks) > 4:
             await callback_query.bot.send_message(
                 user_id,
                 get_localization(user_language_code).FEEDBACK_APPROVED_WITH_LIMIT_ERROR,

@@ -204,7 +204,7 @@ def build_packages_keyboard(language_code: str, page=0) -> InlineKeyboardMarkup:
         ])
         for package_type in PackageType.get_class_attributes_in_order():
             if package_type in {
-                PackageType.CHAT_GPT3_TURBO,
+                PackageType.CHAT_GPT4_OMNI_MINI,
                 PackageType.CHAT_GPT4_TURBO,
                 PackageType.CHAT_GPT4_OMNI,
                 PackageType.CLAUDE_3_SONNET,

@@ -7,7 +7,7 @@ from bot.database.models.transaction import ServiceType
 
 
 class PackageType:
-    CHAT_GPT3_TURBO = "GPT3"
+    CHAT_GPT4_OMNI_MINI = "GPT4_OMNI_MINI"
     CHAT_GPT4_TURBO = "GPT4"
     CHAT_GPT4_OMNI = "GPT4_OMNI"
     CLAUDE_3_SONNET = "CLAUDE_3_SONNET"
@@ -105,7 +105,7 @@ class Package:
     @staticmethod
     def get_prices(currency: Currency):
         prices = {
-            PackageType.CHAT_GPT3_TURBO: '',
+            PackageType.CHAT_GPT4_OMNI_MINI: '',
             PackageType.CHAT_GPT4_TURBO: '',
             PackageType.CHAT_GPT4_OMNI: '',
             PackageType.CLAUDE_3_SONNET: '',
@@ -122,7 +122,7 @@ class Package:
         }
 
         if currency == Currency.RUB:
-            prices[PackageType.CHAT_GPT3_TURBO] = '1₽'
+            prices[PackageType.CHAT_GPT4_OMNI_MINI] = '1₽'
             prices[PackageType.CHAT_GPT4_TURBO] = '5₽'
             prices[PackageType.CHAT_GPT4_OMNI] = '2.5₽'
             prices[PackageType.CLAUDE_3_SONNET] = '2.5₽'
@@ -137,7 +137,7 @@ class Package:
             prices[PackageType.VOICE_MESSAGES] = '50₽'
             prices[PackageType.FAST_MESSAGES] = '50₽'
         elif currency == Currency.USD:
-            prices[PackageType.CHAT_GPT3_TURBO] = '$0.01'
+            prices[PackageType.CHAT_GPT4_OMNI_MINI] = '$0.01'
             prices[PackageType.CHAT_GPT4_TURBO] = '$0.05'
             prices[PackageType.CHAT_GPT4_OMNI] = '$0.025'
             prices[PackageType.CLAUDE_3_SONNET] = '$0.025'
@@ -152,7 +152,7 @@ class Package:
             prices[PackageType.VOICE_MESSAGES] = '$0.5'
             prices[PackageType.FAST_MESSAGES] = '$0.5'
         else:
-            prices[PackageType.CHAT_GPT3_TURBO] = '1⭐️'
+            prices[PackageType.CHAT_GPT4_OMNI_MINI] = '1⭐'
             prices[PackageType.CHAT_GPT4_TURBO] = '5⭐️'
             prices[PackageType.CHAT_GPT4_OMNI] = '2.5⭐️'
             prices[PackageType.CLAUDE_3_SONNET] = '2.5⭐️'
@@ -189,9 +189,9 @@ class Package:
     def get_translate_name_and_description(localization, package_type: str):
         name = None
         description = None
-        if package_type == PackageType.CHAT_GPT3_TURBO:
-            name = localization.GPT3_REQUESTS
-            description = localization.GPT3_REQUESTS_DESCRIPTION
+        if package_type == PackageType.CHAT_GPT4_OMNI_MINI:
+            name = localization.GPT4_OMNI_MINI_REQUESTS
+            description = localization.GPT4_OMNI_REQUESTS_DESCRIPTION
         elif package_type == PackageType.CHAT_GPT4_TURBO:
             name = localization.GPT4_REQUESTS
             description = localization.GPT4_REQUESTS_DESCRIPTION
@@ -240,9 +240,9 @@ class Package:
     @staticmethod
     def get_service_type_and_update_quota(package_type: str, additional_usage_quota: dict, quantity: int):
         service_type = package_type
-        if package_type == PackageType.CHAT_GPT3_TURBO:
-            additional_usage_quota[Quota.CHAT_GPT3_TURBO] += quantity
-            service_type = ServiceType.CHAT_GPT3_TURBO
+        if package_type == PackageType.CHAT_GPT4_OMNI_MINI:
+            additional_usage_quota[Quota.CHAT_GPT4_OMNI_MINI] += quantity
+            service_type = ServiceType.CHAT_GPT4_OMNI_MINI
         elif package_type == PackageType.CHAT_GPT4_TURBO:
             additional_usage_quota[Quota.CHAT_GPT4_TURBO] += quantity
             service_type = ServiceType.CHAT_GPT4_TURBO

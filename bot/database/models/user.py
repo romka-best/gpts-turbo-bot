@@ -65,7 +65,7 @@ class User:
     edited_at: datetime
 
     DEFAULT_ADDITIONAL_USAGE_QUOTA = {
-        Quota.CHAT_GPT3_TURBO: 0,
+        Quota.CHAT_GPT4_OMNI_MINI: 0,
         Quota.CHAT_GPT4_TURBO: 0,
         Quota.CHAT_GPT4_OMNI: 0,
         Quota.CLAUDE_3_SONNET: 0,
@@ -88,7 +88,7 @@ class User:
             UserSettings.SHOW_USAGE_QUOTA: False,
             UserSettings.TURN_ON_VOICE_MESSAGES: False,
             UserSettings.VOICE: 'alloy',
-            UserSettings.VERSION: ChatGPTVersion.V3_Turbo,
+            UserSettings.VERSION: ChatGPTVersion.V4_Omni_Mini,
         },
         Model.CLAUDE: {
             UserSettings.SHOW_THE_NAME_OF_THE_CHATS: False,

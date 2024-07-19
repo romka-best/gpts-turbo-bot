@@ -1,6 +1,6 @@
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
-from bot.database.models.common import Model, ChatGPTVersion, ClaudeGPTVersion
+from bot.database.models.common import Model
 from bot.locales.main import get_localization
 
 
