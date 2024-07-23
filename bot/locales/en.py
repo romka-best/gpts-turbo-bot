@@ -36,6 +36,7 @@ Here's a quick guide to get started:
 🖼 To create an image with <b>DALL-E</b>, enter the command /dalle, and then let your imagination run wild with your request
 🎨 To create an image with <b>Midjourney</b>, enter the command /midjourney, and then start creating using your imagination with your request
 😜 To swap faces with someone in a photo with <b>FaceSwap</b>, enter the command /face_swap, then choose images from our unique packages or send your own
+✨ To improve photo with <b>Gfpgan</b>, enter the command /gfpgan, then send image that you want to make better
 🎵 To create a melody with <b>MusicGen</b>, enter the command /music_gen, and then write a description of the melody
 🎸 To create a song with <b>Suno</b>, enter the command /suno, and then write a description of the song or send your own lyrics
 🔄 To switch between different neural networks, enter the command /mode, and then select the neural network depending on your creative needs
@@ -63,6 +64,7 @@ I'm here to be your co-pilot on this adventure! 🚀
 🖼 /dalle - <b>Draw with DALL-E</b>: Turn your ideas into drawings
 🎨 /midjourney - <b>Create with DALL-E 3</b>: Bring your imaginations to life with images
 😜 /face_swap - <b>Have fun with FaceSwap</b>: Change faces in photos
+✨ /gfpgan - <b>Increase photos with Gfpgan</b>: Increase photo quality
 🎵 /music_gen - <b>Melodies with MusicGen</b>: Create music without copyrights
 🎸 /suno - <b>Songs with Suno</b>: Create your own song with your lyrics and different genres
 🎁 /bonus - Learn about your bonus balance and <b>exchange bonuses for unique generation packages</b>
@@ -154,6 +156,16 @@ Just type away a command to begin your AI journey! 🌟
 - <i>Memes and Content Creation</i>: Spice up your social media with funny or imaginative face-swapped pictures.
 - <i>Digital Makeovers</i>: Experiment with new haircuts or makeup styles.
 - <i>Celebrity Mashups</i>: Combine your face with celebrities for fun comparisons.
+"""
+    INFO_GFPGAN = """
+🤖 <b>Here's what the model can do for you:</b>
+
+🎨 <b>GFPGAN: Restoration Master</b>
+- <i>Restoring old photos</i>: Turn damaged or degraded pictures into vibrant and clear images.
+- <i>Enhancing quality</i>: Improve the resolution and detail of your photos to make them look new.
+- <i>Preserving historical heritage</i>: Restore family archives and historical documents to preserve them for future generations.
+- <i>Smoothing and noise reduction</i>: Remove digital artifacts and noise to make your shots look professional.
+- <i>Personalized projects</i>: Create photobooks, collages, and other projects with enhanced images for special events and memorable moments.
 """
     INFO_MUSIC_GEN = """
 🤖 <b>There is what the model can do for you:</b>
@@ -411,6 +423,13 @@ Time to create! 🎉
 You've switched to the <b>FaceSwap</b> model — where faces switch places as if by magic. Here, you can choose images from our unique packages or send your own photo. Want to see yourself in the guise of a celebrity or a movie character? Just select or send the desired image, and let <b>FaceSwap</b> work its magic
 
 Your new face awaits! 🎉
+"""
+    SWITCHED_TO_GFPGAN = """
+✨ <b>Welcome to the World of GFPGAN!</b>
+
+You have successfully switched to the <b>GFPGAN</b> model — a place where old and degraded images are restored to their former glory. Want to see your old photos brought back to life with stunning clarity? Simply send me the photo, and let <b>GFPGAN</b> work its magic.
+
+Your restored memories await you! 🎉
 """
     SWITCHED_TO_MUSIC_GEN = """
 🎵 <b>Welcome to the world of MusicGen!</b>
@@ -690,6 +709,8 @@ Your chats have switched their unique roles to "Personal Assistant" as your acce
     MIDJOURNEY_REQUESTS_DESCRIPTION = "Unleash your creativity with Midjourney – transform your thoughts into magnificent visual works of art! 🎨"
     FACE_SWAP_REQUESTS = "📷 Images with face replacement"
     FACE_SWAP_REQUESTS_DESCRIPTION = "Enter the playful world of FaceSwap for laughs and surprises in every image! 😂🔄"
+    GFPGAN_REQUESTS = "✨ Images with replacement"
+    GFPGAN_REQUESTS_DESCRIPTION = "Start restoring old images or failed photos ✨"
     MUSIC_GEN_REQUESTS = "🎵 Seconds of generation of melodies"
     MUSIC_GEN_REQUESTS_DESCRIPTION = "Discover a world where every prompt turns into a unique melody! 🎶"
     SUNO_REQUESTS = "🎸 Suno songs"
@@ -832,6 +853,14 @@ Please upload a new photo where your face is clearly visible and in good quality
 
 🔄 After uploading a new photo, please try again. Thank you for your patience!
 """
+    # GFPGAN
+    GFPGAN_START = """
+    🌟 <b>Let's restore the beauty of your photos!</b>
+
+    Ready? Let's dive into the world of restoration! 🚀
+
+    🌈 Send me the photo you want to enhance, and start your restoration journey 👇
+"""
 
     ERROR = """
 I've got an unknown error 🤒
@@ -901,6 +930,8 @@ Please try again 🥺
             current_model = English.MIDJOURNEY
         elif current_model == Model.FACE_SWAP:
             current_model = English.FACE_SWAP
+        elif current_model == Model.GFPGAN:
+            current_model = English.GFPGAN
         elif current_model == Model.MUSIC_GEN:
             current_model = English.MUSIC_GEN
         elif current_model == Model.SUNO:
@@ -947,6 +978,9 @@ Quota:
 ━ 📷 <b>FaceSwap</b>:
     ┣ {monthly_limits[Quota.FACE_SWAP]}/{SubscriptionLimit.LIMITS[subscription_type][Quota.FACE_SWAP]}
     ┗ Additional: {additional_usage_quota[Quota.FACE_SWAP]}
+━ ✨ <b>GFPGAN</b>:
+    ┣ {monthly_limits[Quota.GFPGAN]}/{SubscriptionLimit.LIMITS[subscription_type][Quota.GFPGAN]}
+    ┗ Additional: {additional_usage_quota[Quota.GFPGAN]}
 ━ 🎵 <b>MusicGen</b>:
     ┣ {monthly_limits[Quota.MUSIC_GEN]}/{SubscriptionLimit.LIMITS[subscription_type][Quota.MUSIC_GEN]}
     ┗ Additional: {additional_usage_quota[Quota.MUSIC_GEN]}
@@ -1040,7 +1074,8 @@ You're about to activate subscription {subscription_type} {Subscription.get_emoj
             description = (
                 "🖼 <b>DALL-E</b>: Transform ideas into stunning visuals!\n\n"
                 "🎨 <b>Midjourney</b>: Turn ideas into incredible realistic images!\n\n"
-                "👤 <b>FaceSwap</b>: Play with identities in images!"
+                "👤 <b>FaceSwap</b>: Play with identities in images!\n\n"
+                "✨ <b>GFPGAN</b>: Restore and enhance your photos!"
             )
         elif page == 2:
             description = (
@@ -1094,6 +1129,9 @@ Hit a button and choose a package:
         elif package_type == PackageType.FACE_SWAP:
             name = English.FACE_SWAP_REQUESTS
             quantity = "generations"
+        elif package_type == PackageType.GFPGAN:
+            name = English.GFPGAN_REQUESTS
+            quantity = "images"
         elif package_type == PackageType.MUSIC_GEN:
             name = English.MUSIC_GEN_REQUESTS
             quantity = "seconds"
@@ -1224,6 +1262,17 @@ Looks like you've got only <b>{available_images} generations</b> left in your ar
 💡 <b>Pro Tip</b>: Sometimes, less is more! Try a smaller number, or give /buy a whirl for unlimited possibilities!
 """
 
+    # GFPGAN
+    @staticmethod
+    def gfpgan_forbidden(available_images: int) -> str:
+        return f"""
+🔔 <b>Oops, a little hiccup!</b> 🚧
+
+Looks like you've got only <b>{available_images} generations</b> left in your arsenal.
+
+💡 <b>Pro Tip</b>: Sometimes, less is more! Try a smaller number, or give /buy a whirl for unlimited possibilities!
+"""
+
     # MusicGen
     @staticmethod
     def music_gen_forbidden(available_seconds: int):
@@ -1254,6 +1303,8 @@ Looks like you've got only <b>{available_seconds} seconds</b> left in your arsen
             return English.SWITCHED_TO_MIDJOURNEY
         elif model == Model.FACE_SWAP:
             return English.SWITCHED_TO_FACE_SWAP
+        elif model == Model.GFPGAN:
+            return English.SWITCHED_TO_GFPGAN
         elif model == Model.MUSIC_GEN:
             return English.SWITCHED_TO_MUSIC_GEN
         elif model == Model.SUNO:
@@ -1443,6 +1494,31 @@ Looks like you've got only <b>{available_seconds} seconds</b> left in your arsen
 
         text = random.choice(texts)
         text += "\n\n⚠️ Generation can take up to 5 minutes"
+
+        return text
+
+    @staticmethod
+    def processing_request_gfpgan():
+        texts = [
+            "Diving into the dimension of image restoration... 🌌🖼️",
+            "Restoring images like a digital restorer... 🧑‍🎨🖌️",
+            "Enhancing photos faster than a camera flash... 📸⚡",
+            "Awakening the magic of image restoration... ✨📷",
+            "Performing pixel alchemy, bringing back clarity... 🧙‍🔬",
+            "Starting the image enhancement machine... 🤖🛠️",
+            "Brewing an elixir for photo restoration... 🧪📸",
+            "Creating wonders in the world of image restoration... 🧚‍🖼️",
+            "Conducting a symphony of pixels... 🎼🖥️",
+            "Shaping new details in my digital art studio... 🎨👩‍🎨",
+            "Brewing a cauldron of image restoration magic... 🧙‍🔮",
+            "Building images like a great architect... 🏗️👷‍",
+            "Embarking on a mystical quest for perfect restoration... 🗺️🔍",
+            "Launching a rocket of photo enhancements... 🚀📷",
+            "Setting off on a galactic journey of image restoration... 🌌🌟"
+        ]
+
+        text = random.choice(texts)
+        text += "\n\n⚠️ Generation can take up to 2 minutes"
 
         return text
 

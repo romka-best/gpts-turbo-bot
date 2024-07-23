@@ -30,6 +30,7 @@ from bot.handlers.ai.chat_gpt_handler import chat_gpt_router
 from bot.handlers.ai.claude_handler import claude_router
 from bot.handlers.ai.dalle_handler import dall_e_router
 from bot.handlers.ai.face_swap_handler import face_swap_router
+from bot.handlers.ai.gfpgan_handler import gfpgan_router
 from bot.handlers.ai.midjourney_handler import midjourney_router
 from bot.handlers.ai.mode_handler import mode_router
 from bot.handlers.ai.music_gen_handler import music_gen_router
@@ -119,6 +120,7 @@ async def lifespan(_: FastAPI):
         dall_e_router,
         midjourney_router,
         face_swap_router,
+        gfpgan_router,
         admin_face_swap_router,
         music_gen_router,
         suno_router,

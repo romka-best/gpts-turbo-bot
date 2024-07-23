@@ -25,7 +25,7 @@ from bot.handlers.admin.face_swap_handler import handle_manage_face_swap
 from bot.handlers.ai.chat_gpt_handler import handle_chatgpt
 from bot.handlers.ai.claude_handler import handle_claude
 from bot.handlers.ai.face_swap_handler import handle_face_swap
-from bot.integrations.replicateAI import create_face_swap_image
+from bot.integrations.replicateAI import create_face_swap_image, improve_quality_of_photo_gfpgan
 from bot.keyboards.admin.catalog import build_manage_catalog_create_role_confirmation_keyboard
 from bot.keyboards.common.common import build_cancel_keyboard
 from bot.locales.main import get_localization, get_user_language
@@ -219,6 +219,44 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
                         reply_markup=reply_markup
                     )
                     await state.set_state(Profile.waiting_for_photo)
+    elif user.current_model == Model.GFPGAN:
+        quota = user.monthly_limits[Quota.GFPGAN] + user.additional_usage_quota[Quota.GFPGAN]
+        quantity = 1
+        if quota < quantity:
+            await message.answer(text=get_localization(user_language_code).gfpgan_forbidden(quota))
+        else:
+            processing_message = await message.reply(
+                text=get_localization(user_language_code).processing_request_gfpgan()
+            )
+            async with ChatActionSender.upload_photo(bot=message.bot, chat_id=message.chat.id):
+                try:
+                    photo_data_io = await message.bot.download_file(photo_file.file_path)
+                    photo_data = photo_data_io.read()
+                    await message.answer(
+                        text=f"{photo_data}"
+                    )
+                    result = await improve_quality_of_photo_gfpgan(photo_data_io)
+                    request = await write_request(
+                        user_id=user_id,
+                        message_id=processing_message.message_id,
+                        model=Model.GFPGAN,
+                        requested=1,
+                        details={
+                            "is_test": False,
+                        }
+                    )
+                    await write_generation(
+                        id=result,
+                        request_id=request.id,
+                        model=Model.GFPGAN,
+                        has_error=result is None
+                    )
+
+                    await state.clear()
+                except Exception as e:
+                    await message.answer(
+                        text=f"Error: {e}"
+                    )
     else:
         await message.reply(
             text=get_localization(user_language_code).PHOTO_FORBIDDEN_ERROR,

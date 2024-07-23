@@ -23,6 +23,7 @@ class Texts(Protocol):
     INFO_DALL_E: str
     INFO_MIDJOURNEY: str
     INFO_FACE_SWAP: str
+    GFPGAN_START: str
     INFO_MUSIC_GEN: str
     INFO_SUNO: str
 
@@ -267,6 +268,7 @@ class Texts(Protocol):
     DALL_E = "🖼️ DALL-E"
     MIDJOURNEY = "🎨 Midjourney"
     FACE_SWAP = "📷️ FaceSwap"
+    GFPGAN = "✨ GFPGAN"
     MUSIC_GEN = "🎵 MusicGen"
     SUNO = "🎸 Suno"
     MODE: str
@@ -280,6 +282,7 @@ class Texts(Protocol):
     SWITCHED_TO_DALL_E: str
     SWITCHED_TO_MIDJOURNEY: str
     SWITCHED_TO_FACE_SWAP: str
+    SWITCHED_TO_GFPGAN: str
     SWITCHED_TO_MUSIC_GEN: str
     SWITCHED_TO_SUNO: str
     ALREADY_SWITCHED_TO_THIS_MODEL: str
@@ -395,6 +398,8 @@ class Texts(Protocol):
     MIDJOURNEY_REQUESTS_DESCRIPTION: str
     FACE_SWAP_REQUESTS: str
     FACE_SWAP_REQUESTS_DESCRIPTION: str
+    GFPGAN_REQUESTS: str
+    GFPGAN_REQUESTS_DESCRIPTION: str
     MUSIC_GEN_REQUESTS: str
     MUSIC_GEN_REQUESTS_DESCRIPTION: str
     SUNO_REQUESTS: str
@@ -1492,6 +1497,11 @@ class Texts(Protocol):
     def face_swap_package_forbidden(available_images: int) -> str:
         raise NotImplementedError
 
+    # GFPGAN
+    @staticmethod
+    def gfpgan_forbidden(available_images: int) -> str:
+        raise NotImplementedError
+
     # MusicGen
     @staticmethod
     def music_gen_forbidden(available_seconds: int) -> str:
@@ -1528,6 +1538,10 @@ class Texts(Protocol):
 
     @staticmethod
     def processing_request_face_swap() -> str:
+        raise NotImplementedError
+
+    @staticmethod
+    def processing_request_gfpgan() -> str:
         raise NotImplementedError
 
     @staticmethod

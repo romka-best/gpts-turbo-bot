@@ -146,6 +146,10 @@ def build_statistics_choose_service_keyboard(
                     callback_data=f'statistics_choose_service:{ServiceType.FACE_SWAP}'
                 )
             ],
+                InlineKeyboardButton(
+                    text="GFPGAN ✨",
+                    callback_data=f'statistics_choose_service:{ServiceType.GFPGAN}'
+                )
             [
                 InlineKeyboardButton(
                     text="MusicGen 🎵",

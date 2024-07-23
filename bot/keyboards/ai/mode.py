@@ -98,6 +98,12 @@ def build_mode_keyboard(language_code: str, model: Model, model_version: str, pa
             ],
             [
                 InlineKeyboardButton(
+                    text=get_localization(language_code).GFPGAN + (" ✅" if model == Model.GFPGAN else ""),
+                    callback_data=f'mode:{Model.GFPGAN}'
+                )
+            ],
+            [
+                InlineKeyboardButton(
                     text="⬅️",
                     callback_data="mode:back:0"
                 ),

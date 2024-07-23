@@ -16,6 +16,7 @@ class Model:
     DALL_E = 'dall-e'
     MIDJOURNEY = 'midjourney'
     FACE_SWAP = 'face-swap'
+    GFPGAN = 'gfpgan'
     MUSIC_GEN = 'music-gen'
     SUNO = 'suno'
 
@@ -29,6 +30,7 @@ class Quota:
     DALL_E = "dall_e"
     MIDJOURNEY = "midjourney"
     FACE_SWAP = "face_swap"
+    GFPGAN = "gfpgan"
     MUSIC_GEN = "music_gen"
     SUNO = "suno"
     ADDITIONAL_CHATS = "additional_chats"
@@ -86,6 +88,10 @@ class MidjourneyAction:
 
 
 class FaceSwapVersion:
+    LATEST = 'LATEST'
+
+
+class GFPGANVersion:
     LATEST = 'LATEST'
 
 

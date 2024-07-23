@@ -63,3 +63,23 @@ async def create_music_gen_melody(prompt: str, duration: int) -> Optional[str]:
     except Exception as e:
         error_trace = traceback.format_exc()
         logging.error(f'Error in create_music_gen_melody: {e}\n{error_trace}')
+
+
+async def improve_quality_of_photo_gfpgan(source_img) -> Optional[str]:
+    try:
+        input_parameters = {
+            "img": source_img
+        }
+
+        model = await replicate.models.async_get("tencentarc/gfpgan")
+        version = await model.versions.async_get("0fbacf7afc6c144e5be9767cff80f25aff23e52b0708f17e20f9879b2f21516c")
+        prediction = await replicate.predictions.async_create(
+            version=version,
+            input=input_parameters,
+            webhook=WEBHOOK_REPLICATE_URL,
+            webhook_events_filter=["completed"],
+        )
+        return prediction.id
+    except Exception as e:
+        error_trace = traceback.format_exc()
+        logging.error(f'Error in improve_quality_of_photo_gfpgan: {e}\n{error_trace}')

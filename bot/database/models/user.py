@@ -13,7 +13,7 @@ from bot.database.models.common import (
     FaceSwapVersion,
     MusicGenVersion,
     SunoSendType,
-    SunoVersion,
+    SunoVersion, GFPGANVersion,
 )
 from bot.database.models.subscription import SubscriptionType, SubscriptionLimit
 
@@ -74,6 +74,7 @@ class User:
         Quota.DALL_E: 0,
         Quota.MIDJOURNEY: 0,
         Quota.FACE_SWAP: 0,
+        Quota.GFPGAN: 0,
         Quota.MUSIC_GEN: 0,
         Quota.SUNO: 0,
         Quota.FAST_MESSAGES: False,
@@ -111,6 +112,10 @@ class User:
         Model.FACE_SWAP: {
             UserSettings.SHOW_USAGE_QUOTA: True,
             UserSettings.VERSION: FaceSwapVersion.LATEST,
+        },
+        Model.GFPGAN: {
+            UserSettings.SHOW_USAGE_QUOTA: True,
+            UserSettings.VERSION: GFPGANVersion.LATEST,
         },
         Model.MUSIC_GEN: {
             UserSettings.SHOW_USAGE_QUOTA: True,

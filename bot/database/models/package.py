@@ -15,6 +15,7 @@ class PackageType:
     DALL_E = "DALL_E"
     MIDJOURNEY = "MIDJOURNEY"
     FACE_SWAP = "FACE_SWAP"
+    GFPGAN = "GFPGAN"
     MUSIC_GEN = "MUSIC_GEN"
     SUNO = "SUNO"
     CHAT = "CHAT"
@@ -113,6 +114,7 @@ class Package:
             PackageType.DALL_E: '',
             PackageType.MIDJOURNEY: '',
             PackageType.FACE_SWAP: '',
+            PackageType.GFPGAN: '',
             PackageType.MUSIC_GEN: '',
             PackageType.SUNO: '',
             PackageType.ACCESS_TO_CATALOG: '',
@@ -129,6 +131,9 @@ class Package:
             prices[PackageType.DALL_E] = '5₽'
             prices[PackageType.MIDJOURNEY] = '10₽'
             prices[PackageType.FACE_SWAP] = '5₽'
+            # TODO
+            prices[PackageType.GFPGAN] = '5₽'
+
             prices[PackageType.MUSIC_GEN] = '1₽'
             prices[PackageType.SUNO] = '5₽'
             prices[PackageType.CHAT] = '25₽'
@@ -144,6 +149,9 @@ class Package:
             prices[PackageType.DALL_E] = '$0.05'
             prices[PackageType.MIDJOURNEY] = '$0.1'
             prices[PackageType.FACE_SWAP] = '$0.05'
+            # TODO
+            prices[PackageType.GFPGAN] = '$0.05'
+
             prices[PackageType.MUSIC_GEN] = '$0.01'
             prices[PackageType.SUNO] = '$0.05'
             prices[PackageType.CHAT] = '$0.25'
@@ -159,6 +167,9 @@ class Package:
             prices[PackageType.DALL_E] = '5⭐️'
             prices[PackageType.MIDJOURNEY] = '10⭐️'
             prices[PackageType.FACE_SWAP] = '5⭐️'
+            # TODO
+            prices[PackageType.GFPGAN] = '5⭐'
+
             prices[PackageType.MUSIC_GEN] = '1⭐️'
             prices[PackageType.SUNO] = '5⭐️'
             prices[PackageType.CHAT] = '25⭐️'
@@ -212,6 +223,9 @@ class Package:
         elif package_type == PackageType.FACE_SWAP:
             name = localization.FACE_SWAP_REQUESTS
             description = localization.FACE_SWAP_REQUESTS_DESCRIPTION
+        elif package_type == PackageType.GFPGAN:
+            name = localization.GFPGAN_REQUESTS
+            description = localization.GFPGAN_REQUESTS_DESCRIPTION
         elif package_type == PackageType.MUSIC_GEN:
             name = localization.MUSIC_GEN_REQUESTS
             description = localization.MUSIC_GEN_REQUESTS_DESCRIPTION
@@ -263,6 +277,9 @@ class Package:
         elif package_type == PackageType.FACE_SWAP:
             additional_usage_quota[Quota.FACE_SWAP] += quantity
             service_type = ServiceType.FACE_SWAP
+        elif package_type == PackageType.GFPGAN:
+            additional_usage_quota[Quota.GFPGAN] += quantity
+            service_type = ServiceType.GFPGAN
         elif package_type == PackageType.MUSIC_GEN:
             additional_usage_quota[Quota.MUSIC_GEN] += quantity
             service_type = ServiceType.MUSIC_GEN
