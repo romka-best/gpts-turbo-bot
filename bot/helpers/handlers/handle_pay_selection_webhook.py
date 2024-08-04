@@ -49,7 +49,7 @@ async def handle_pay_selection_webhook(request: Dict, bot: Bot, dp: Dispatcher):
 
     try:
         subscription = await get_subscription(order_id)
-        if subscription:
+        if subscription is not None:
             user = await get_user(subscription.user_id)
             if event == 'Payment':
                 transaction = firebase.db.transaction()
@@ -142,8 +142,8 @@ async def handle_pay_selection_webhook(request: Dict, bot: Bot, dp: Dispatcher):
                 )
         else:
             old_subscription = await get_subscription_by_provider_auto_payment_charge_id(order_id)
-            if old_subscription:
-                user = await get_user(subscription.user_id)
+            if old_subscription is not None:
+                user = await get_user(old_subscription.user_id)
                 if event == 'Payment':
                     transaction = firebase.db.transaction()
                     await update_subscription(old_subscription.id, {"status": SubscriptionStatus.FINISHED})
@@ -169,24 +169,24 @@ async def handle_pay_selection_webhook(request: Dict, bot: Bot, dp: Dispatcher):
                         order_id,
                     )
                     await write_transaction(
-                        user_id=subscription.user_id,
+                        user_id=new_subscription.user_id,
                         type=TransactionType.INCOME,
-                        service=subscription.type,
-                        amount=subscription.amount,
+                        service=new_subscription.type,
+                        amount=new_subscription.amount,
                         clear_amount=float(clear_amount),
-                        currency=subscription.currency,
+                        currency=new_subscription.currency,
                         quantity=1,
                         details={
                             'payment_method': PaymentMethod.PAY_SELECTION,
-                            'subscription_id': subscription.id,
+                            'subscription_id': new_subscription.id,
                             'provider_payment_charge_id': order_id,
                             'provider_auto_payment_charge_id': order_id,
                         },
                     )
 
-                    user_language_code = await get_user_language(subscription.user_id, dp.storage)
+                    user_language_code = await get_user_language(new_subscription.user_id, dp.storage)
                     await bot.send_message(
-                        chat_id=subscription.user_id,
+                        chat_id=new_subscription.user_id,
                         text=get_localization(user_language_code).SUBSCRIPTION_RESET,
                     )
 
