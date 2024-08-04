@@ -37,7 +37,7 @@ async def handle_yookassa_webhook(request: Dict, bot: Bot, dp: Dispatcher):
 
     try:
         subscription = await get_subscription_by_provider_payment_charge_id(payment.id)
-        if subscription:
+        if subscription is not None:
             user = await get_user(subscription.user_id)
             if payment.status == 'succeeded':
                 transaction = firebase.db.transaction()
@@ -130,8 +130,8 @@ async def handle_yookassa_webhook(request: Dict, bot: Bot, dp: Dispatcher):
                 )
         else:
             old_subscription = await get_subscription_by_provider_auto_payment_charge_id(payment.payment_method.id)
-            if old_subscription:
-                user = await get_user(subscription.user_id)
+            if old_subscription is not None:
+                user = await get_user(old_subscription.user_id)
                 if payment.status == 'succeeded':
                     transaction = firebase.db.transaction()
                     await update_subscription(old_subscription.id, {"status": SubscriptionStatus.FINISHED})
@@ -157,24 +157,24 @@ async def handle_yookassa_webhook(request: Dict, bot: Bot, dp: Dispatcher):
                         payment.payment_method.id if payment.payment_method.saved else "",
                     )
                     await write_transaction(
-                        user_id=subscription.user_id,
+                        user_id=new_subscription.user_id,
                         type=TransactionType.INCOME,
-                        service=subscription.type,
-                        amount=subscription.amount,
+                        service=new_subscription.type,
+                        amount=new_subscription.amount,
                         clear_amount=float(payment.income_amount.value),
-                        currency=subscription.currency,
+                        currency=new_subscription.currency,
                         quantity=1,
                         details={
                             'payment_method': PaymentMethod.YOOKASSA,
-                            'subscription_id': subscription.id,
+                            'subscription_id': new_subscription.id,
                             'provider_payment_charge_id': payment.id,
                             'provider_auto_payment_charge_id': payment.payment_method.id if payment.payment_method.saved else "",
                         },
                     )
 
-                    user_language_code = await get_user_language(subscription.user_id, dp.storage)
+                    user_language_code = await get_user_language(new_subscription.user_id, dp.storage)
                     await bot.send_message(
-                        chat_id=subscription.user_id,
+                        chat_id=new_subscription.user_id,
                         text=get_localization(user_language_code).SUBSCRIPTION_RESET,
                     )
 

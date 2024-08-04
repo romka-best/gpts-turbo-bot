@@ -1,3 +1,4 @@
+import asyncio
 import logging
 
 from aiogram import Bot
@@ -12,13 +13,8 @@ async def send_message_to_users(bot: Bot, language_code: str, message: str):
     for user in users:
         try:
             if not user.is_blocked:
-                await bot.send_message(
-                    chat_id=user.telegram_chat_id,
-                    text=message,
-                )
+                asyncio.create_task(bot.send_message(chat_id=user.telegram_chat_id, text=message))
         except TelegramForbiddenError:
-            await update_user(user.id, {
-                "is_blocked": True,
-            })
+            asyncio.create_task(update_user(user.id, {"is_blocked": True}))
         except TelegramBadRequest as error:
             logging.error(error)

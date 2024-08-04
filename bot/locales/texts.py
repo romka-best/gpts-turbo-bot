@@ -1,12 +1,11 @@
 import random
-import statistics
 from typing import Protocol, Dict, List
 
 from bot.database.models.common import Currency, Model
 from bot.database.models.generation import GenerationReaction
 from bot.database.models.package import PackageType
-from bot.database.models.subscription import Subscription, SubscriptionType, SubscriptionPeriod, SubscriptionStatus
-from bot.database.models.transaction import TransactionType, ServiceType
+from bot.database.models.subscription import Subscription, SubscriptionType, SubscriptionStatus
+from bot.database.models.transaction import ServiceType
 from bot.database.models.user import UserGender
 from bot.helpers.calculate_percentage_difference import calculate_percentage_difference
 

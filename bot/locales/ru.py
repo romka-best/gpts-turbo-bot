@@ -2,10 +2,15 @@ import random
 from typing import List, Dict
 
 from bot.locales.texts import Texts
-from bot.database.models.common import Currency, Quota, Model, ChatGPTVersion, ClaudeGPTVersion, PaymentType
+from bot.database.models.common import Currency, Quota, Model, ChatGPTVersion, ClaudeGPTVersion
 from bot.database.models.package import PackageType, Package
-from bot.database.models.subscription import Subscription, SubscriptionType, SubscriptionPeriod, SubscriptionLimit, \
-    SubscriptionStatus
+from bot.database.models.subscription import (
+    Subscription,
+    SubscriptionType,
+    SubscriptionPeriod,
+    SubscriptionLimit,
+    SubscriptionStatus,
+)
 from bot.database.models.user import UserGender
 
 
