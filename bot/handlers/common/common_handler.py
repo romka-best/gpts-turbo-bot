@@ -46,12 +46,6 @@ async def start(message: Message, state: FSMContext):
                     referred_by_user_language_code = await get_user_language(referred_by, state.storage)
 
                     if referred_by_user:
-                        added_to_balance = 25.00
-                        referred_by_user.balance += added_to_balance
-                        await update_user(referred_by_user.id, {
-                            "balance": referred_by_user.balance,
-                        })
-
                         referred_users = await get_users_by_referral(referred_by_user.id)
                         if len(referred_users) > 50:
                             text = get_localization(referred_by_user_language_code).REFERRAL_LIMIT_ERROR
@@ -60,6 +54,12 @@ async def start(message: Message, state: FSMContext):
                                 text=text,
                             )
                         else:
+                            added_to_balance = 25.00
+                            referred_by_user.balance += added_to_balance
+                            await update_user(referred_by_user.id, {
+                                "balance": referred_by_user.balance,
+                            })
+
                             text = get_localization(referred_by_user_language_code).REFERRAL_SUCCESS
                             await message.bot.send_message(
                                 chat_id=referred_by_user.telegram_chat_id,
