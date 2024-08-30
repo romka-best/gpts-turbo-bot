@@ -114,12 +114,16 @@ async def promo_code_sent(message: Message, state: FSMContext):
                         until_at = current_date + timedelta(days=30 * int(package_quantity))
 
                     package = await write_package(
+                        None,
                         user_id,
                         package_type,
                         PackageStatus.SUCCESS,
                         user.currency,
                         0,
+                        0,
                         int(package_quantity),
+                        PaymentMethod.GIFT,
+                        None,
                         until_at,
                     )
 
