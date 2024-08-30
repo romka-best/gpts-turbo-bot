@@ -132,6 +132,7 @@ async def promo_code_sent(message: Message, state: FSMContext):
                         transaction,
                         package.id,
                         package.user_id,
+                        0,
                         "",
                     )
 
