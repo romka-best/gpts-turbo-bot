@@ -22,12 +22,12 @@ async def create_face_swap_images(images: List[Dict]):
 async def create_face_swap_image(target_image: str, source_image: str) -> Optional[str]:
     try:
         input_parameters = {
-            "target_image": target_image,
+            "input_image": target_image,
             "swap_image": source_image,
         }
 
-        model = await replicate.models.async_get("omniedgeio/face-swap")
-        version = await model.versions.async_get("39b9d2221e89470cdf6283cbb648427ec8b8ee5542f5323e7c741017acebc0c0")
+        model = await replicate.models.async_get("codeplugtech/face-swap")
+        version = await model.versions.async_get("278a81e7ebb22db98bcba54de985d22cc1abeead2754eb1f2af717247be69b34")
         prediction = await replicate.predictions.async_create(
             version=version,
             input=input_parameters,

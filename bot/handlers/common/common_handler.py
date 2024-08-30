@@ -46,7 +46,7 @@ async def start(message: Message, state: FSMContext):
                     referred_by_user_language_code = await get_user_language(referred_by, state.storage)
 
                     if referred_by_user:
-                        referred_users = await get_users_by_referral(user_id)
+                        referred_users = await get_users_by_referral(referred_by_user.id)
                         if len(referred_users) > 50:
                             text = get_localization(referred_by_user_language_code).REFERRAL_LIMIT_ERROR
                             await message.bot.send_message(
