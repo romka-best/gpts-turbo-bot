@@ -144,7 +144,7 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
             quota = Quota.GEMINI_1_PRO
         else:
             raise NotImplemented(
-                f'USER QUOTA IS NOT IMPLEMENTED: {user.settings[user.current_model][UserSettings.VERSION]}'
+                f'User quota is not implemented: {user.settings[user.current_model][UserSettings.VERSION]}'
             )
 
         current_time = time.time()
@@ -248,7 +248,7 @@ async def handle_album(message: Message, state: FSMContext, album: List[Message]
             quota = Quota.GEMINI_1_PRO
         else:
             raise NotImplemented(
-                f'USER QUOTA IS NOT IMPLEMENTED: {user.settings[user.current_model][UserSettings.VERSION]}'
+                f'User quota is not implemented: {user.settings[user.current_model][UserSettings.VERSION]}'
             )
 
         current_time = time.time()

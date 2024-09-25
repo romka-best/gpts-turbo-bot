@@ -1,4 +1,5 @@
 import asyncio
+from datetime import datetime, timezone
 from typing import List
 
 import openai
@@ -125,7 +126,7 @@ async def handle_chat_gpt_choose_selection(callback_query: CallbackQuery, state:
 
 async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_quota: Quota, photo_filenames=None):
     if user_quota != Quota.CHAT_GPT4_OMNI_MINI and user_quota != Quota.CHAT_GPT4_OMNI:
-        raise NotImplemented(f'USER QUOTA IS NOT IMPLEMENTED: {user_quota}')
+        raise NotImplemented(f'User quota is not implemented: {user_quota}')
 
     await state.update_data(is_processing=True)
 
@@ -188,7 +189,7 @@ async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_q
     else:
         chat_action_sender = ChatActionSender.typing
 
-    async with ((chat_action_sender(bot=message.bot, chat_id=message.chat.id))):
+    async with chat_action_sender(bot=message.bot, chat_id=message.chat.id):
         try:
             response = await get_response_message(user.settings[user.current_model][UserSettings.VERSION], history)
             response_message = response['message']
@@ -316,7 +317,8 @@ async def handle_chat_gpt_continue_generation_choose_selection(callback_query: C
             user_quota = Quota.CHAT_GPT4_OMNI
         else:
             raise NotImplemented(
-                f'USER QUOTA IS NOT IMPLEMENTED: {user.settings[user.current_model][UserSettings.VERSION]}')
+                f'User quota is not implemented: {user.settings[user.current_model][UserSettings.VERSION]}'
+            )
 
         await handle_chatgpt(callback_query.message, state, user, user_quota)
         await callback_query.message.edit_reply_markup(reply_markup=None)
@@ -326,11 +328,13 @@ async def handle_chat_gpt_continue_generation_choose_selection(callback_query: C
 
 async def handle_chatgpt4_example(user: User, user_language_code: str, prompt: str, history: List, message: Message):
     try:
+        current_date = datetime.now(timezone.utc)
         if (
             user.subscription_type == SubscriptionType.FREE and
             user.current_model == Model.CHAT_GPT and
             user.settings[user.current_model][UserSettings.SHOW_EXAMPLES] and
-            user.daily_limits[Quota.CHAT_GPT4_OMNI_MINI] + 1 in [1, 10]
+            user.daily_limits[Quota.CHAT_GPT4_OMNI_MINI] + 1 in [1, 10] and
+            (current_date - user.last_subscription_limit_update).days <= 3
         ):
             response = await get_response_message(ChatGPTVersion.V4_Omni, history)
             response_message = response['message']

@@ -1,4 +1,5 @@
 import asyncio
+from datetime import datetime, timezone
 from io import BytesIO
 from typing import List
 
@@ -287,11 +288,13 @@ async def handle_gemini_1_pro_example(
     message: Message,
 ):
     try:
+        current_date = datetime.now(timezone.utc)
         if (
             user.subscription_type == SubscriptionType.FREE and
             user.current_model == Model.GEMINI and
             user.settings[user.current_model][UserSettings.SHOW_EXAMPLES] and
-            user.daily_limits[Quota.GEMINI_1_FLASH] + 1 in [1, 10]
+            user.daily_limits[Quota.GEMINI_1_FLASH] + 1 in [1, 10] and
+            (current_date - user.last_subscription_limit_update).days <= 3
         ):
             response = await get_response_message(
                 model_version=GeminiGPTVersion.V1_Pro,

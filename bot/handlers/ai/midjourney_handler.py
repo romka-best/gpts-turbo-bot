@@ -1,3 +1,5 @@
+from datetime import datetime, timezone
+
 from aiogram import Router
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
@@ -217,11 +219,13 @@ async def handle_midjourney_selection(callback_query: CallbackQuery, state: FSMC
 
 
 async def handle_midjourney_example(user: User, user_language_code: str, prompt: str, message: Message):
+    current_date = datetime.now(timezone.utc)
     if (
         user.subscription_type == SubscriptionType.FREE and
         (user.current_model == Model.DALL_E or user.current_model == Model.STABLE_DIFFUSION) and
         user.settings[user.current_model][UserSettings.SHOW_EXAMPLES] and
-        (user.daily_limits[Quota.DALL_E] + 1 in [1] or user.daily_limits[Quota.STABLE_DIFFUSION] + 1 in [1])
+        (user.daily_limits[Quota.DALL_E] + 1 in [1] or user.daily_limits[Quota.STABLE_DIFFUSION] + 1 in [1]) and
+        (current_date - user.last_subscription_limit_update).days <= 3
     ):
         request = await write_request(
             user_id=user.id,

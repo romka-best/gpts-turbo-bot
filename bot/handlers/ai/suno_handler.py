@@ -1,4 +1,5 @@
 import asyncio
+from datetime import datetime, timezone
 
 from aiogram import Router, Bot, F
 from aiogram.filters import Command
@@ -453,11 +454,13 @@ async def suno_genres_sent(message: Message, state: FSMContext):
 
 
 async def handle_suno_example(user: User, prompt: str, message: Message, state: FSMContext):
+    current_date = datetime.now(timezone.utc)
     if (
         user.subscription_type == SubscriptionType.FREE and
         user.current_model == Model.MUSIC_GEN and
         user.settings[user.current_model][UserSettings.SHOW_EXAMPLES] and
-        user.daily_limits[Quota.MUSIC_GEN] in [1]
+        user.daily_limits[Quota.MUSIC_GEN] in [1] and
+        (current_date - user.last_subscription_limit_update).days <= 3
     ):
         request = await write_request(
             user_id=user.id,

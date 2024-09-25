@@ -710,6 +710,14 @@ Looks like you're trying to request fewer than 1 second. In the world of creativ
 
 🌟 <b>Tip</b>: Type a number greater than 0 to start the magic. Let's unleash those creative ideas!
 """
+    MUSIC_GEN_MAX_ERROR = """
+🤨 <b>Hold on there, partner!</b>
+
+Кажется, вы хотите запросить больше 5 минут, я пока не умею генерировать больше!
+Looks like you're trying to request more than 5 minutes, I can't generate more yet!
+
+🌟 <b>Tip</b>: Type a number less than 300 to start the magic. Let's unleash those creative ideas!
+"""
     SECONDS_30 = "🔹 30 seconds"
     SECONDS_60 = "🔹 60 seconds (1 minute)"
     SECONDS_180 = "🔹 180 seconds (3 minutes)"

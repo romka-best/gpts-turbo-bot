@@ -1,5 +1,6 @@
 import asyncio
 import base64
+from datetime import datetime, timezone
 from typing import List
 
 import anthropic
@@ -345,11 +346,13 @@ async def handle_claude_3_opus_example(
     message: Message,
 ):
     try:
+        current_date = datetime.now(timezone.utc)
         if (
             user.subscription_type == SubscriptionType.FREE and
             user.current_model == Model.CLAUDE and
             user.settings[user.current_model][UserSettings.SHOW_EXAMPLES] and
-            user.daily_limits[Quota.CLAUDE_3_SONNET] + 1 in [1, 10]
+            user.daily_limits[Quota.CLAUDE_3_SONNET] + 1 in [1, 10] and
+            (current_date - user.last_subscription_limit_update).days <= 3
         ):
             history = get_history_without_duplicates(history)
 
