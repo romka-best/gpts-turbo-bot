@@ -2,7 +2,7 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 from bot.database.models.package import Package, PackageType
 from bot.database.models.promo_code import PromoCodeType
-from bot.database.models.subscription import SubscriptionType, SubscriptionPeriod
+from bot.database.models.subscription import Subscription, SubscriptionType, SubscriptionPeriod
 from bot.locales.main import get_localization
 
 
@@ -38,23 +38,37 @@ def build_create_promo_code_keyboard(language_code: str) -> InlineKeyboardMarkup
 
 
 def build_create_promo_code_subscription_keyboard(language_code: str) -> InlineKeyboardMarkup:
+    emojis = Subscription.get_emojis()
+
     buttons = [
         [
             InlineKeyboardButton(
-                text=f"{SubscriptionType.STANDARD} ⭐",
+                text=f'{SubscriptionType.MINI} {emojis[SubscriptionType.MINI]}',
+                callback_data=f'create_promo_code_subscription:{SubscriptionType.MINI}'
+            ),
+        ],
+        [
+            InlineKeyboardButton(
+                text=f'{SubscriptionType.STANDARD} {emojis[SubscriptionType.STANDARD]}',
                 callback_data=f'create_promo_code_subscription:{SubscriptionType.STANDARD}'
             ),
         ],
         [
             InlineKeyboardButton(
-                text=f"{SubscriptionType.VIP} 🔥",
+                text=f'{SubscriptionType.VIP} {emojis[SubscriptionType.VIP]}',
                 callback_data=f'create_promo_code_subscription:{SubscriptionType.VIP}'
             ),
         ],
         [
             InlineKeyboardButton(
-                text=f"{SubscriptionType.PREMIUM} 💎",
+                text=f'{SubscriptionType.PREMIUM} {emojis[SubscriptionType.PREMIUM]}',
                 callback_data=f'create_promo_code_subscription:{SubscriptionType.PREMIUM}'
+            ),
+        ],
+        [
+            InlineKeyboardButton(
+                text=f'{SubscriptionType.UNLIMITED} {emojis[SubscriptionType.UNLIMITED]}',
+                callback_data=f'create_promo_code_subscription:{SubscriptionType.UNLIMITED}'
             ),
         ],
         [
@@ -75,25 +89,25 @@ def build_create_promo_code_period_of_subscription_keyboard(
     buttons = [
         [
             InlineKeyboardButton(
-                text=f"{get_localization(language_code).MONTH_1}",
+                text=f'{get_localization(language_code).MONTH_1}',
                 callback_data=f'create_promo_code_period_of_subscription:{subscription_type}:{SubscriptionPeriod.MONTH1}'
             ),
         ],
         [
             InlineKeyboardButton(
-                text=f"{get_localization(language_code).MONTHS_3}",
+                text=f'{get_localization(language_code).MONTHS_3}',
                 callback_data=f'create_promo_code_period_of_subscription:{subscription_type}:{SubscriptionPeriod.MONTHS3}'
             ),
         ],
         [
             InlineKeyboardButton(
-                text=f"{get_localization(language_code).MONTHS_6}",
+                text=f'{get_localization(language_code).MONTHS_6}',
                 callback_data=f'create_promo_code_period_of_subscription:{subscription_type}:{SubscriptionPeriod.MONTHS6}'
             ),
         ],
         [
             InlineKeyboardButton(
-                text=f"{get_localization(language_code).MONTHS_12}",
+                text=f'{get_localization(language_code).MONTHS_12}',
                 callback_data=f'create_promo_code_period_of_subscription:{subscription_type}:{SubscriptionPeriod.MONTHS12}'
             ),
         ],
@@ -138,19 +152,19 @@ def build_create_promo_code_discount_keyboard(language_code: str):
     buttons = [
         [
             InlineKeyboardButton(
-                text=f"5%",
+                text=f'5%',
                 callback_data=f'create_promo_code_discount:5'
             ),
         ],
         [
             InlineKeyboardButton(
-                text=f"10%",
+                text=f'10%',
                 callback_data=f'create_promo_code_discount:10'
             ),
         ],
         [
             InlineKeyboardButton(
-                text=f"20%",
+                text=f'20%',
                 callback_data=f'create_promo_code_discount:20'
             ),
         ],

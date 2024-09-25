@@ -5,7 +5,7 @@ from aiogram.types import Update
 
 from bot.database.main import firebase
 from bot.database.operations.user.getters import get_user
-from bot.helpers.initialize_user_for_the_first_time import initialize_user_for_the_first_time
+from bot.database.operations.user.initialize_user_for_the_first_time import initialize_user_for_the_first_time
 from bot.helpers.senders.send_error_info import send_error_info
 from bot.keyboards.common.common import build_recommendations_keyboard, build_error_keyboard
 from bot.locales.main import get_localization, get_user_language
@@ -33,7 +33,7 @@ async def notify_admins_about_error(bot: Bot, telegram_update: Update, dp: Dispa
                 else:
                     raise
 
-                await dp.storage.redis.set(f"user:{user_id}:language", language_code)
+                await dp.storage.redis.set(f'user:{user_id}:language', language_code)
 
                 chat_title = get_localization(language_code).DEFAULT_CHAT_TITLE
                 transaction = firebase.db.transaction()
@@ -70,10 +70,10 @@ async def notify_admins_about_error(bot: Bot, telegram_update: Update, dp: Dispa
                     info=e,
                 )
     except Exception as e:
-        logging.exception(f"Error in notify_admins_about_error: {e}")
+        logging.exception(f'Error in notify_admins_about_error: {e}')
 
         await send_error_info(
             bot=bot,
-            user_id="UNKNOWN",
-            info=f"Неизвестная ошибка: {e}",
+            user_id='UNKNOWN',
+            info=f'Неизвестная ошибка: {e}',
         )

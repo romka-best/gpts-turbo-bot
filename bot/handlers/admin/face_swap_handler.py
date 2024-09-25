@@ -335,20 +335,20 @@ async def handle_face_swap_manage_edit_package_change_status_selection(
         new_row = []
         for button in row:
             text = button.text
-            callback_data = button.callback_data.split(":", 1)[1]
+            callback_data = button.callback_data.split(':', 1)[1]
 
             if callback_data == status:
-                if "✅" not in text:
-                    text += " ✅"
+                if '✅' not in text:
+                    text += ' ✅'
                     keyboard_changed = True
             else:
-                text = text.replace(" ✅", "")
+                text = text.replace(' ✅', '')
             new_row.append(InlineKeyboardButton(text=text, callback_data=button.callback_data))
         new_keyboard.append(new_row)
 
     if keyboard_changed:
         await update_face_swap_package(user_data['face_swap_package_id'], {
-            "status": status
+            'status': status
         })
         await callback_query.message.edit_reply_markup(reply_markup=InlineKeyboardMarkup(inline_keyboard=new_keyboard))
 
@@ -398,9 +398,9 @@ async def handle_face_swap_manage_edit_picture_selection(callback_query: Callbac
                 model=Model.FACE_SWAP,
                 requested=1,
                 details={
-                    "is_test": True,
-                    "face_swap_package_id": face_swap_package.id,
-                    "face_swap_package_name": face_swap_package.name,
+                    'is_test': True,
+                    'face_swap_package_id': face_swap_package.id,
+                    'face_swap_package_name': face_swap_package.name,
                 },
             )
 
@@ -443,19 +443,19 @@ async def handle_face_swap_manage_edit_picture_change_status_selection(
         new_row = []
         for button in row:
             text = button.text
-            callback_data = button.callback_data.split(":", 1)[1]
+            callback_data = button.callback_data.split(':', 1)[1]
 
             if callback_data == status:
-                if "✅" not in text:
-                    text += " ✅"
+                if '✅' not in text:
+                    text += ' ✅'
                     keyboard_changed = True
             else:
-                text = text.replace(" ✅", "")
+                text = text.replace(' ✅', '')
             new_row.append(InlineKeyboardButton(text=text, callback_data=button.callback_data))
         new_keyboard.append(new_row)
 
     if keyboard_changed:
         await update_face_swap_package(user_data['face_swap_package_id'], {
-            "files": face_swap_package.files
+            'files': face_swap_package.files
         })
         await callback_query.message.edit_reply_markup(reply_markup=InlineKeyboardMarkup(inline_keyboard=new_keyboard))

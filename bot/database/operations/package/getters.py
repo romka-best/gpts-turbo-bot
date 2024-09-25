@@ -21,11 +21,11 @@ async def get_last_package_with_waiting_payment(
     package_quantity: int,
 ) -> Optional[Package]:
     package_stream = firebase.db.collection(Package.COLLECTION_NAME) \
-        .where(filter=FieldFilter("user_id", "==", user_id)) \
-        .where(filter=FieldFilter("status", "==", PackageStatus.WAITING)) \
-        .where(filter=FieldFilter("type", "==", package_type)) \
-        .where(filter=FieldFilter("quantity", "==", package_quantity)) \
-        .order_by("created_at", direction=Query.DESCENDING) \
+        .where(filter=FieldFilter('user_id', '==', user_id)) \
+        .where(filter=FieldFilter('status', '==', PackageStatus.WAITING)) \
+        .where(filter=FieldFilter('type', '==', package_type)) \
+        .where(filter=FieldFilter('quantity', '==', package_quantity)) \
+        .order_by('created_at', direction=Query.DESCENDING) \
         .limit(1) \
         .stream()
 
@@ -35,7 +35,7 @@ async def get_last_package_with_waiting_payment(
 
 async def get_packages_by_provider_payment_charge_id(provider_payment_charge_id: str) -> List[Package]:
     packages = firebase.db.collection(Package.COLLECTION_NAME) \
-        .where(filter=FieldFilter("provider_payment_charge_id", "==", provider_payment_charge_id)) \
+        .where(filter=FieldFilter('provider_payment_charge_id', '==', provider_payment_charge_id)) \
         .stream()
 
     return [
@@ -50,9 +50,9 @@ async def get_packages(
     packages_query = firebase.db.collection(Package.COLLECTION_NAME)
 
     if start_date:
-        packages_query = packages_query.where(filter=FieldFilter("created_at", ">=", start_date))
+        packages_query = packages_query.where(filter=FieldFilter('created_at', '>=', start_date))
     if end_date:
-        packages_query = packages_query.where(filter=FieldFilter("created_at", "<=", end_date))
+        packages_query = packages_query.where(filter=FieldFilter('created_at', '<=', end_date))
 
     packages = packages_query.stream()
 
@@ -63,8 +63,8 @@ async def get_packages(
 
 async def get_packages_by_user_id_and_status(user_id: str, status: PackageStatus) -> List[Package]:
     packages_query = firebase.db.collection(Package.COLLECTION_NAME) \
-        .where(filter=FieldFilter("user_id", "==", user_id)) \
-        .where(filter=FieldFilter("status", "==", status))
+        .where(filter=FieldFilter('user_id', '==', user_id)) \
+        .where(filter=FieldFilter('status', '==', status))
 
     packages = packages_query.stream()
 
@@ -74,7 +74,7 @@ async def get_packages_by_user_id_and_status(user_id: str, status: PackageStatus
 
 
 async def get_packages_by_user_id(user_id: str) -> List[Package]:
-    packages_query = firebase.db.collection(Package.COLLECTION_NAME).where(filter=FieldFilter("user_id", "==", user_id))
+    packages_query = firebase.db.collection(Package.COLLECTION_NAME).where(filter=FieldFilter('user_id', '==', user_id))
 
     packages = packages_query.stream()
 

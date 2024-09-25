@@ -51,6 +51,12 @@ def build_info_text_models_keyboard(language_code: str) -> InlineKeyboardMarkup:
         ],
         [
             InlineKeyboardButton(
+                text=get_localization(language_code).GEMINI,
+                callback_data=f'info_text_models:{Model.GEMINI}'
+            ),
+        ],
+        [
+            InlineKeyboardButton(
                 text=get_localization(language_code).BACK,
                 callback_data='info_text_models:back'
             ),
@@ -72,6 +78,12 @@ def build_info_image_models_keyboard(language_code: str) -> InlineKeyboardMarkup
             InlineKeyboardButton(
                 text=get_localization(language_code).MIDJOURNEY,
                 callback_data=f'info_image_models:{Model.MIDJOURNEY}'
+            ),
+        ],
+        [
+            InlineKeyboardButton(
+                text=get_localization(language_code).STABLE_DIFFUSION,
+                callback_data=f'info_image_models:{Model.STABLE_DIFFUSION}'
             ),
         ],
         [

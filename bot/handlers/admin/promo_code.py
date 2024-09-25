@@ -241,7 +241,7 @@ async def promo_code_date_sent(message: Message, state: FSMContext):
 
     try:
         user_data = await state.get_data()
-        promo_code_until_date = datetime.strptime(message.text, "%d.%m.%Y")
+        promo_code_until_date = datetime.strptime(message.text, '%d.%m.%Y')
         promo_code_name = user_data['promo_code_name']
         promo_code_type = user_data['promo_code_type']
         details = {}

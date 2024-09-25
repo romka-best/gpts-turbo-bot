@@ -3,13 +3,12 @@ from typing import List
 
 import openai
 from aiogram import Router
-from aiogram.exceptions import TelegramBadRequest
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.utils.chat_action import ChatActionSender
-from telegram.constants import ParseMode
 
+from bot.config import config, MessageEffect
 from bot.database.main import firebase
 from bot.database.models.common import Quota, Currency, Model, ChatGPTVersion
 from bot.database.models.subscription import SubscriptionType
@@ -25,7 +24,7 @@ from bot.database.operations.user.updaters import update_user
 from bot.helpers.creaters.create_new_message_and_update_user import create_new_message_and_update_user
 from bot.helpers.reply_with_voice import reply_with_voice
 from bot.helpers.senders.send_error_info import send_error_info
-from bot.helpers.split_message import split_message
+from bot.helpers.senders.send_ai_message import send_ai_message
 from bot.integrations.openAI import get_response_message
 from bot.keyboards.ai.chat_gpt import build_chat_gpt_continue_generating_keyboard, build_chat_gpt_keyboard
 from bot.keyboards.common.common import build_recommendations_keyboard, build_error_keyboard
@@ -35,13 +34,11 @@ chat_gpt_router = Router()
 
 PRICE_GPT4_OMNI_MINI_INPUT = 0.00000015
 PRICE_GPT4_OMNI_MINI_OUTPUT = 0.0000006
-PRICE_GPT4_INPUT = 0.00001
-PRICE_GPT4_OUTPUT = 0.00003
 PRICE_GPT4_OMNI_INPUT = 0.000005
 PRICE_GPT4_OMNI_OUTPUT = 0.000015
 
 
-@chat_gpt_router.message(Command("chatgpt"))
+@chat_gpt_router.message(Command('chatgpt'))
 async def chatgpt(message: Message, state: FSMContext):
     await state.clear()
 
@@ -85,14 +82,14 @@ async def handle_chat_gpt_choose_selection(callback_query: CallbackQuery, state:
             new_row = []
             for button in row:
                 text = button.text
-                callback_data = button.callback_data.split(":", 1)[1]
+                callback_data = button.callback_data.split(':', 1)[1]
 
                 if callback_data == chosen_version:
-                    if "✅" not in text:
-                        text += " ✅"
+                    if '✅' not in text:
+                        text += ' ✅'
                         keyboard_changed = True
                 else:
-                    text = text.replace(" ✅", "")
+                    text = text.replace(' ✅', '')
                 new_row.append(InlineKeyboardButton(text=text, callback_data=button.callback_data))
             new_keyboard.append(new_row)
         await callback_query.message.edit_reply_markup(reply_markup=InlineKeyboardMarkup(inline_keyboard=new_keyboard))
@@ -102,21 +99,19 @@ async def handle_chat_gpt_choose_selection(callback_query: CallbackQuery, state:
             user.current_model = Model.CHAT_GPT
             user.settings[Model.CHAT_GPT][UserSettings.VERSION] = chosen_version
             await update_user(user_id, {
-                "current_model": user.current_model,
-                "settings": user.settings,
+                'current_model': user.current_model,
+                'settings': user.settings,
             })
 
             if user.settings[user.current_model][UserSettings.VERSION] == ChatGPTVersion.V4_Omni_Mini:
                 text = get_localization(user_language_code).SWITCHED_TO_CHATGPT4_OMNI_MINI
-            elif user.settings[user.current_model][UserSettings.VERSION] == ChatGPTVersion.V4_Turbo:
-                text = get_localization(user_language_code).SWITCHED_TO_CHATGPT4_TURBO
             else:
                 text = get_localization(user_language_code).SWITCHED_TO_CHATGPT4_OMNI
 
             await callback_query.message.answer(
                 text=text,
                 reply_markup=reply_markup,
-                message_effect_id="5104841245755180586",
+                message_effect_id=config.MESSAGE_EFFECTS.get(MessageEffect.FIRE),
             )
         else:
             text = get_localization(user_language_code).ALREADY_SWITCHED_TO_THIS_MODEL
@@ -129,8 +124,8 @@ async def handle_chat_gpt_choose_selection(callback_query: CallbackQuery, state:
 
 
 async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_quota: Quota, photo_filenames=None):
-    if user_quota != Quota.CHAT_GPT4_OMNI_MINI and user_quota != Quota.CHAT_GPT4_TURBO and user_quota != Quota.CHAT_GPT4_OMNI:
-        raise NotImplemented
+    if user_quota != Quota.CHAT_GPT4_OMNI_MINI and user_quota != Quota.CHAT_GPT4_OMNI:
+        raise NotImplemented(f'USER QUOTA IS NOT IMPLEMENTED: {user_quota}')
 
     await state.update_data(is_processing=True)
 
@@ -144,12 +139,12 @@ async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_q
         elif message.text:
             text = message.text
         else:
-            text = ""
+            text = ''
 
     if photo_filenames and len(photo_filenames):
-        await write_message(user.current_chat_id, "user", user.id, text, True, photo_filenames)
+        await write_message(user.current_chat_id, 'user', user.id, text, True, photo_filenames)
     else:
-        await write_message(user.current_chat_id, "user", user.id, text)
+        await write_message(user.current_chat_id, 'user', user.id, text)
 
     chat = await get_chat(user.current_chat_id)
     messages = await get_messages_by_chat_id(user.current_chat_id)
@@ -193,7 +188,7 @@ async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_q
     else:
         chat_action_sender = ChatActionSender.typing
 
-    async with chat_action_sender(bot=message.bot, chat_id=message.chat.id):
+    async with ((chat_action_sender(bot=message.bot, chat_id=message.chat.id))):
         try:
             response = await get_response_message(user.settings[user.current_model][UserSettings.VERSION], history)
             response_message = response['message']
@@ -201,10 +196,6 @@ async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_q
                 service = ServiceType.CHAT_GPT4_OMNI_MINI
                 input_price = response['input_tokens'] * PRICE_GPT4_OMNI_MINI_INPUT
                 output_price = response['output_tokens'] * PRICE_GPT4_OMNI_MINI_OUTPUT
-            elif user_quota == Quota.CHAT_GPT4_TURBO:
-                service = ServiceType.CHAT_GPT4_TURBO
-                input_price = response['input_tokens'] * PRICE_GPT4_INPUT
-                output_price = response['output_tokens'] * PRICE_GPT4_OUTPUT
             elif user_quota == Quota.CHAT_GPT4_OMNI:
                 service = ServiceType.CHAT_GPT4_OMNI
                 input_price = response['input_tokens'] * PRICE_GPT4_OMNI_INPUT
@@ -221,12 +212,12 @@ async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_q
                 currency=Currency.USD,
                 quantity=1,
                 details={
-                    "input_tokens": response['input_tokens'],
-                    "output_tokens": response['output_tokens'],
-                    "request": text,
-                    "answer": message_content,
-                    "is_suggestion": False,
-                    "has_error": False,
+                    'input_tokens': response['input_tokens'],
+                    'output_tokens': response['output_tokens'],
+                    'request': text,
+                    'answer': message_content,
+                    'is_suggestion': False,
+                    'has_error': False,
                 },
             )
 
@@ -250,51 +241,16 @@ async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_q
                     user.settings[user.current_model][UserSettings.SHOW_THE_NAME_OF_THE_ROLES]
                 ) else ''
                 header_text = f'{chat_info}{role_info}\n' if chat_info or role_info else ''
-                footer_text = f'\n\n✉️ {user.monthly_limits[user_quota] + user.additional_usage_quota[user_quota] + 1}' \
-                    if user.settings[user.current_model][UserSettings.SHOW_USAGE_QUOTA] else ''
+                footer_text = f'\n\n✉️ {user.daily_limits[user_quota] + user.additional_usage_quota[user_quota] + 1}' \
+                    if user.settings[user.current_model][UserSettings.SHOW_USAGE_QUOTA] and \
+                       user.daily_limits[user_quota] != float('inf') else ''
                 reply_markup = build_chat_gpt_continue_generating_keyboard(user_language_code)
-                try:
-                    full_text = f"{header_text}{message_content}{footer_text}"
-                    if len(full_text) <= 4096:
-                        await message.reply(
-                            full_text,
-                            reply_markup=reply_markup if response['finish_reason'] == 'length' else None,
-                            parse_mode=ParseMode.MARKDOWN,
-                        )
-                    elif len(message_content) <= 4096:
-                        await message.reply(
-                            message_content,
-                            reply_markup=reply_markup if response['finish_reason'] == 'length' else None,
-                            parse_mode=ParseMode.MARKDOWN,
-                        )
-                    else:
-                        chunks = split_message(full_text)
-                        for i in range(len(chunks)):
-                            if i == 0:
-                                await message.reply(
-                                    chunks[i],
-                                    parse_mode=None,
-                                )
-                            elif i == len(chunks) - 1:
-                                await message.reply(
-                                    chunks[i],
-                                    reply_markup=reply_markup if response['finish_reason'] == 'length' else None,
-                                    parse_mode=None,
-                                )
-                            else:
-                                await message.answer(
-                                    chunks[i],
-                                    parse_mode=None,
-                                )
-                except TelegramBadRequest as e:
-                    if "can't parse entities" in str(e):
-                        await message.reply(
-                            f"{header_text}{message_content}{footer_text}",
-                            reply_markup=reply_markup if response['finish_reason'] == 'length' else None,
-                            parse_mode=None,
-                        )
-                    else:
-                        raise
+                full_text = f"{header_text}{message_content}{footer_text}"
+                await send_ai_message(
+                    message=message,
+                    text=full_text,
+                    reply_markup=reply_markup if response['finish_reason'] == 'length' else None,
+                )
         except openai.BadRequestError as e:
             if e.code == 'content_policy_violation':
                 await message.reply(
@@ -312,7 +268,7 @@ async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_q
                     bot=message.bot,
                     user_id=user.id,
                     info=str(e),
-                    hashtags=["chatgpt"],
+                    hashtags=['chatgpt'],
                 )
         except Exception as e:
             reply_markup = build_error_keyboard(user_language_code)
@@ -325,7 +281,7 @@ async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_q
                 bot=message.bot,
                 user_id=user.id,
                 info=str(e),
-                hashtags=["chatgpt"],
+                hashtags=['chatgpt'],
             )
         finally:
             await processing_message.delete()
@@ -356,12 +312,11 @@ async def handle_chat_gpt_continue_generation_choose_selection(callback_query: C
         await state.update_data(recognized_text=get_localization(user_language_code).CONTINUE_GENERATING)
         if user.settings[user.current_model][UserSettings.VERSION] == ChatGPTVersion.V4_Omni_Mini:
             user_quota = Quota.CHAT_GPT4_OMNI_MINI
-        elif user.settings[user.current_model][UserSettings.VERSION] == ChatGPTVersion.V4_Turbo:
-            user_quota = Quota.CHAT_GPT4_TURBO
         elif user.settings[user.current_model][UserSettings.VERSION] == ChatGPTVersion.V4_Omni:
             user_quota = Quota.CHAT_GPT4_OMNI
         else:
-            raise NotImplemented
+            raise NotImplemented(
+                f'USER QUOTA IS NOT IMPLEMENTED: {user.settings[user.current_model][UserSettings.VERSION]}')
 
         await handle_chatgpt(callback_query.message, state, user, user_quota)
         await callback_query.message.edit_reply_markup(reply_markup=None)
@@ -372,10 +327,10 @@ async def handle_chat_gpt_continue_generation_choose_selection(callback_query: C
 async def handle_chatgpt4_example(user: User, user_language_code: str, prompt: str, history: List, message: Message):
     try:
         if (
-            user.current_model == Model.CHAT_GPT and
-            user.settings[user.current_model][UserSettings.VERSION] == ChatGPTVersion.V4_Omni_Mini and
             user.subscription_type == SubscriptionType.FREE and
-            user.monthly_limits[Quota.CHAT_GPT4_OMNI_MINI] + 1 in [1, 50, 80, 90, 100]
+            user.current_model == Model.CHAT_GPT and
+            user.settings[user.current_model][UserSettings.SHOW_EXAMPLES] and
+            user.daily_limits[Quota.CHAT_GPT4_OMNI_MINI] + 1 in [1, 10]
         ):
             response = await get_response_message(ChatGPTVersion.V4_Omni, history)
             response_message = response['message']
@@ -395,53 +350,25 @@ async def handle_chatgpt4_example(user: User, user_language_code: str, prompt: s
                 currency=Currency.USD,
                 quantity=1,
                 details={
-                    "input_tokens": response['input_tokens'],
-                    "output_tokens": response['output_tokens'],
-                    "request": prompt,
-                    "answer": message_content,
-                    "is_suggestion": True,
-                    "has_error": False,
+                    'input_tokens': response['input_tokens'],
+                    'output_tokens': response['output_tokens'],
+                    'request': prompt,
+                    'answer': message_content,
+                    'is_suggestion': True,
+                    'has_error': False,
                 },
             )
 
             header_text = f'{get_localization(user_language_code).CHATGPT4_OMNI_EXAMPLE}\n\n'
-            try:
-                full_text = f"{header_text}{message_content}"
-                if len(full_text) <= 4096:
-                    await message.reply(
-                        full_text,
-                        parse_mode=ParseMode.MARKDOWN,
-                    )
-                elif len(header_text) + len(message_content) <= 4096:
-                    await message.reply(
-                        f"{header_text}{message_content}",
-                        parse_mode=ParseMode.MARKDOWN,
-                    )
-                else:
-                    chunks = split_message(full_text)
-                    for i in range(len(chunks)):
-                        if i == 0:
-                            await message.reply(
-                                chunks[i],
-                                parse_mode=None,
-                            )
-                        else:
-                            await message.answer(
-                                chunks[i],
-                                parse_mode=None,
-                            )
-            except TelegramBadRequest as e:
-                if "can't parse entities" in str(e):
-                    await message.reply(
-                        f"{header_text}{message_content}",
-                        parse_mode=None,
-                    )
-                else:
-                    raise
+            full_text = f'{header_text}{message_content}'
+            await send_ai_message(
+                message=message,
+                text=full_text,
+            )
     except Exception as e:
         await send_error_info(
             bot=message.bot,
             user_id=user.id,
             info=str(e),
-            hashtags=["chatgpt", "example"],
+            hashtags=['chatgpt', 'example'],
         )

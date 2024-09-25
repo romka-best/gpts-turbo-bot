@@ -16,7 +16,7 @@ class FaceSwapFileData(TypedDict):
 
 
 class FaceSwapPackage:
-    COLLECTION_NAME = "face_swap_packages"
+    COLLECTION_NAME = 'face_swap_packages'
 
     id: str
     name: str
@@ -54,7 +54,7 @@ class FaceSwapPackage:
 
 
 class UsedFaceSwapPackage:
-    COLLECTION_NAME = "used_face_swap_packages"
+    COLLECTION_NAME = 'used_face_swap_packages'
 
     id: str
     user_id: str

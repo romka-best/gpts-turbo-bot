@@ -42,7 +42,7 @@ async def handle_promo_code(message: Message, user_id: str, state: FSMContext):
     await state.set_state(PromoCode.waiting_for_promo_code)
 
 
-@promo_code_router.message(Command("promo_code"))
+@promo_code_router.message(Command('promo_code'))
 async def promo_code(message: Message, state: FSMContext):
     await handle_promo_code(message, str(message.from_user.id), state)
 
@@ -68,6 +68,7 @@ async def promo_code_sent(message: Message, state: FSMContext):
                 if typed_promo_code.type == PromoCodeType.SUBSCRIPTION:
                     if user.subscription_type == SubscriptionType.FREE:
                         subscription = await write_subscription(
+                            None,
                             user_id,
                             typed_promo_code.details['subscription_type'],
                             typed_promo_code.details['subscription_period'],
@@ -76,7 +77,7 @@ async def promo_code_sent(message: Message, state: FSMContext):
                             0,
                             0,
                             PaymentMethod.GIFT,
-                            "",
+                            '',
                         )
 
                         transaction = firebase.db.transaction()
@@ -85,7 +86,9 @@ async def promo_code_sent(message: Message, state: FSMContext):
                             message.bot,
                             subscription.id,
                             subscription.user_id,
-                            "",
+                            0,
+                            '',
+                            '',
                         )
 
                         await write_used_promo_code(user_id, typed_promo_code.id)
@@ -133,7 +136,7 @@ async def promo_code_sent(message: Message, state: FSMContext):
                         package.id,
                         package.user_id,
                         0,
-                        "",
+                        '',
                     )
 
                     await write_used_promo_code(user_id, typed_promo_code.id)
@@ -145,7 +148,7 @@ async def promo_code_sent(message: Message, state: FSMContext):
                 elif typed_promo_code.type == PromoCodeType.DISCOUNT:
                     discount = int(typed_promo_code.details['discount'])
                     await update_user(user_id, {
-                        "discount": discount,
+                        'discount': discount,
                     })
 
                     await write_used_promo_code(user_id, typed_promo_code.id)

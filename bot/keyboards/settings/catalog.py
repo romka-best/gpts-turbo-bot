@@ -13,7 +13,7 @@ def build_catalog_keyboard(language_code: str, current_role: str, roles: List[Ro
             [
                 InlineKeyboardButton(
                     text=role.translated_names.get(language_code, role.name) + (
-                        " ✅" if current_role == role.name else " ❌"
+                        ' ✅' if current_role == role.name else ' ❌'
                     ),
                     callback_data=f'catalog:{role.name}'
                 )

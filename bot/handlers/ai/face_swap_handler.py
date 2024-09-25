@@ -13,6 +13,7 @@ from aiogram.types import (
 )
 from aiogram.utils.chat_action import ChatActionSender
 
+from bot.config import config, MessageEffect
 from bot.database.main import firebase
 from bot.database.models.common import Quota, Model
 from bot.database.models.face_swap_package import (
@@ -65,7 +66,7 @@ def count_active_files(files_list: List[FaceSwapFileData]) -> int:
     return active_count
 
 
-@face_swap_router.message(Command("face_swap"))
+@face_swap_router.message(Command('face_swap'))
 async def face_swap(message: Message, state: FSMContext):
     await state.clear()
 
@@ -82,14 +83,14 @@ async def face_swap(message: Message, state: FSMContext):
     else:
         user.current_model = Model.FACE_SWAP
         await update_user(user_id, {
-            "current_model": user.current_model,
+            'current_model': user.current_model,
         })
 
         reply_markup = await build_recommendations_keyboard(user.current_model, user_language_code, user.gender)
         await message.answer(
             text=get_localization(user_language_code).SWITCHED_TO_FACE_SWAP,
             reply_markup=reply_markup,
-            message_effect_id="5104841245755180586",
+            message_effect_id=config.MESSAGE_EFFECTS.get(MessageEffect.FIRE),
         )
 
     await handle_face_swap(message.bot, user.telegram_chat_id, state, user_id)
@@ -174,7 +175,7 @@ async def handle_face_swap_choose_selection(
     state: FSMContext,
 ):
     user_language_code = await get_user_language(user.id, state.storage)
-    user_available_images = user.monthly_limits[Quota.FACE_SWAP] + user.additional_usage_quota[Quota.FACE_SWAP]
+    user_available_images = user.daily_limits[Quota.FACE_SWAP] + user.additional_usage_quota[Quota.FACE_SWAP]
 
     face_swap_package = await get_face_swap_package_by_name_and_gender(package_name, user.gender)
     used_face_swap_package = await get_used_face_swap_package_by_user_id_and_package_id(user.id, face_swap_package.id)
@@ -329,7 +330,7 @@ async def face_swap_quantity_handler(message: Message, state: FSMContext, user_i
     )
 
     async with ChatActionSender.upload_photo(bot=message.bot, chat_id=message.chat.id):
-        quota = user.monthly_limits[Quota.FACE_SWAP] + user.additional_usage_quota[Quota.FACE_SWAP]
+        quota = user.daily_limits[Quota.FACE_SWAP] + user.additional_usage_quota[Quota.FACE_SWAP]
         name = user_data.get('face_swap_package_name')
         face_swap_package_quantity = user_data.get('maximum_quantity')
         if not name or not face_swap_package_quantity:
@@ -382,9 +383,9 @@ async def face_swap_quantity_handler(message: Message, state: FSMContext, user_i
                 model=Model.FACE_SWAP,
                 requested=quantity,
                 details={
-                    "is_test": False,
-                    "face_swap_package_id": face_swap_package.id,
-                    "face_swap_package_name": face_swap_package.name,
+                    'is_test': False,
+                    'face_swap_package_id': face_swap_package.id,
+                    'face_swap_package_name': face_swap_package.name,
                 },
             )
 
@@ -406,8 +407,8 @@ async def face_swap_quantity_handler(message: Message, state: FSMContext, user_i
                                 model=Model.FACE_SWAP,
                                 has_error=result is None,
                                 details={
-                                    "used_face_swap_package_id": used_face_swap_package.id,
-                                    "used_face_swap_package_used_image": random_names[i],
+                                    'used_face_swap_package_id': used_face_swap_package.id,
+                                    'used_face_swap_package_used_image': random_names[i],
                                 }
                             )
                         )
@@ -426,12 +427,12 @@ async def face_swap_quantity_handler(message: Message, state: FSMContext, user_i
                     bot=message.bot,
                     user_id=user.id,
                     info=str(e),
-                    hashtags=["face_swap"],
+                    hashtags=['face_swap'],
                 )
 
                 request.status = RequestStatus.FINISHED
                 await update_request(request.id, {
-                    "status": request.status
+                    'status': request.status
                 })
 
                 generations = await get_generations_by_request_id(request.id)
@@ -441,8 +442,8 @@ async def face_swap_quantity_handler(message: Message, state: FSMContext, user_i
                     await update_generation(
                         generation.id,
                         {
-                            "status": generation.status,
-                            "has_error": generation.has_error,
+                            'status': generation.status,
+                            'has_error': generation.has_error,
                         },
                     )
 

@@ -2,6 +2,7 @@ import random
 from typing import Protocol, Dict, List
 
 from bot.database.models.common import Currency, Model
+from bot.database.models.feedback import FeedbackStatus
 from bot.database.models.generation import GenerationReaction
 from bot.database.models.package import PackageType
 from bot.database.models.subscription import Subscription, SubscriptionType, SubscriptionStatus
@@ -12,21 +13,28 @@ from bot.helpers.calculate_percentage_difference import calculate_percentage_dif
 
 class Texts(Protocol):
     START: str
+    START_QUICK_GUIDE: str
+    START_ADDITIONAL_FEATURES: str
+    QUICK_GUIDE: str
+    ADDITIONAL_FEATURES: str
+
     COMMANDS: str
     INFO: str
     INFO_TEXT_MODELS: str
     INFO_IMAGE_MODELS: str
     INFO_MUSIC_MODELS: str
+    INFO_VIDEO_MODELS: str
     INFO_CHATGPT: str
     INFO_CLAUDE: str
+    INFO_GEMINI: str
     INFO_DALL_E: str
     INFO_MIDJOURNEY: str
+    INFO_STABLE_DIFFUSION: str
     INFO_FACE_SWAP: str
     INFO_MUSIC_GEN: str
     INFO_SUNO: str
 
     ADMIN_INFO = "👨‍💻 Выберите действие, админ 👩‍💻"
-    DEVELOPER_INFO = "👨‍💻 Выберите действие, разработчик 👩‍💻"
     BAN_INFO = "Отправь мне id пользователя, которого вы хотите забанить/разбанить ⛔️"
     BAN_SUCCESS = "Вы успешно забанили пользователя 📛"
     UNBAN_SUCCESS = "Вы успешно разбанили пользователя 🔥"
@@ -34,6 +42,7 @@ class Texts(Protocol):
     TEXT_MODELS: str
     IMAGE_MODELS: str
     MUSIC_MODELS: str
+    VIDEO_MODELS: str
 
     # Feedback
     FEEDBACK: str
@@ -75,6 +84,30 @@ class Texts(Protocol):
     BONUS_CHOOSE_PACKAGE: str
     INVITE_FRIEND: str
     LEAVE_FEEDBACK: str
+    PLAY: str
+    PLAY_GAME: str
+    PLAY_GAME_CHOOSE: str
+    PLAY_BOWLING_GAME: str
+    PLAY_BOWLING_GAME_DESCRIPTION: str
+    PLAY_SOCCER_GAME: str
+    PLAY_SOCCER_GAME_DESCRIPTION: str
+    PLAY_BASKETBALL_GAME: str
+    PLAY_BASKETBALL_GAME_DESCRIPTION: str
+    PLAY_DARTS_GAME: str
+    PLAY_DARTS_GAME_DESCRIPTION: str
+    PLAY_DICE_GAME: str
+    PLAY_DICE_GAME_CHOOSE: str
+    PLAY_DICE_GAME_CHOOSE_1 = "🎲 1️⃣"
+    PLAY_DICE_GAME_CHOOSE_2 = "🎲 2️⃣"
+    PLAY_DICE_GAME_CHOOSE_3 = "🎲 3️⃣"
+    PLAY_DICE_GAME_CHOOSE_4 = "🎲 4️⃣"
+    PLAY_DICE_GAME_CHOOSE_5 = "🎲 5️⃣"
+    PLAY_DICE_GAME_CHOOSE_6 = "🎲 6️⃣"
+    PLAY_CASINO_GAME: str
+    PLAY_CASINO_GAME_DESCRIPTION: str
+    PLAY_GAME_WON: str
+    PLAY_GAME_LOST: str
+    PLAY_GAME_REACHED_LIMIT: str
     CASH_OUT: str
     REFERRAL_SUCCESS: str
     REFERRAL_LIMIT_ERROR: str
@@ -133,9 +166,11 @@ class Texts(Protocol):
 🌟 <b>Выбираем подписку для промокода!</b> 🎁
 
 Выбери тип подписки, на который хочешь дать доступ:
+- <b>MINI</b> 🍬
 - <b>STANDARD</b> ⭐
 - <b>VIP</b> 🔥
 - <b>PREMIUM</b> 💎
+- <b>UNLIMITED</b> 🚀
 
 Выбери и нажми, чтобы создать волшебный ключ доступа! ✨
 """
@@ -264,22 +299,29 @@ class Texts(Protocol):
     CHATGPT4_OMNI = "💥 ChatGPT-4.0 Omni"
     CLAUDE = "📄 Claude"
     CLAUDE_3_SONNET = "💫 Claude 3.5 Sonnet"
-    CLAUDE_3_OPUS = "🚀 Claude 3 Opus"
+    CLAUDE_3_OPUS = "🚀 Claude 3.0 Opus"
+    GEMINI = "✨ Gemini"
+    GEMINI_1_FLASH = "🏎 Gemini 1.5 Flash"
+    GEMINI_1_PRO = "💼 Gemini 1.5 Pro"
     DALL_E = "🖼️ DALL-E"
     MIDJOURNEY = "🎨 Midjourney"
+    STABLE_DIFFUSION = "🎆 Stable Diffusion"
     FACE_SWAP = "📷️ FaceSwap"
     MUSIC_GEN = "🎵 MusicGen"
     SUNO = "🎸 Suno"
     MODE: str
     CHOOSE_CHATGPT_MODEL: str
     CHOOSE_CLAUDE_MODEL: str
+    CHOOSE_GEMINI_MODEL: str
     SWITCHED_TO_CHATGPT4_OMNI_MINI: str
-    SWITCHED_TO_CHATGPT4_TURBO: str
     SWITCHED_TO_CHATGPT4_OMNI: str
     SWITCHED_TO_CLAUDE_3_SONNET: str
     SWITCHED_TO_CLAUDE_3_OPUS: str
+    SWITCHED_TO_GEMINI_1_FLASH: str
+    SWITCHED_TO_GEMINI_1_PRO: str
     SWITCHED_TO_DALL_E: str
     SWITCHED_TO_MIDJOURNEY: str
+    SWITCHED_TO_STABLE_DIFFUSION: str
     SWITCHED_TO_FACE_SWAP: str
     SWITCHED_TO_MUSIC_GEN: str
     SWITCHED_TO_SUNO: str
@@ -300,6 +342,7 @@ class Texts(Protocol):
     # Examples
     CHATGPT4_OMNI_EXAMPLE: str
     CLAUDE_3_OPUS_EXAMPLE: str
+    GEMINI_1_PRO_EXAMPLE: str
     MIDJOURNEY_EXAMPLE: str
     SUNO_EXAMPLE: str
 
@@ -323,9 +366,12 @@ class Texts(Protocol):
     MUSIC_GEN_INFO: str
     MUSIC_GEN_TYPE_SECONDS: str
     MUSIC_GEN_MIN_ERROR: str
+    MUSIC_GEN_MAX_ERROR: str
     SECONDS_30: str
     SECONDS_60: str
     SECONDS_180: str
+    SECONDS_240: str
+    SECONDS_300: str
 
     # Settings
     SETTINGS_CHOOSE_MODEL_TYPE: str
@@ -378,8 +424,6 @@ class Texts(Protocol):
     ADD_TO_CART_OR_BUY_NOW: str
     ADDED_TO_CART: str
     GO_TO_CART_OR_CONTINUE_SHOPPING: str
-    GPT4_REQUESTS: str
-    GPT4_REQUESTS_DESCRIPTION: str
     GPT4_OMNI_REQUESTS: str
     GPT4_OMNI_REQUESTS_DESCRIPTION: str
     GPT4_OMNI_MINI_REQUESTS: str
@@ -388,12 +432,18 @@ class Texts(Protocol):
     CLAUDE_3_SONNET_REQUESTS_DESCRIPTION: str
     CLAUDE_3_OPUS_REQUESTS: str
     CLAUDE_3_OPUS_REQUESTS_DESCRIPTION: str
+    GEMINI_1_FLASH_REQUESTS: str
+    GEMINI_1_FLASH_REQUESTS_DESCRIPTION: str
+    GEMINI_1_PRO_REQUESTS: str
+    GEMINI_1_PRO_REQUESTS_DESCRIPTION: str
     THEMATIC_CHATS: str
     THEMATIC_CHATS_DESCRIPTION: str
     DALL_E_REQUESTS: str
     DALL_E_REQUESTS_DESCRIPTION: str
     MIDJOURNEY_REQUESTS: str
     MIDJOURNEY_REQUESTS_DESCRIPTION: str
+    STABLE_DIFFUSION_REQUESTS: str
+    STABLE_DIFFUSION_REQUESTS_DESCRIPTION: str
     FACE_SWAP_REQUESTS: str
     FACE_SWAP_REQUESTS_DESCRIPTION: str
     MUSIC_GEN_REQUESTS: str
@@ -666,9 +716,11 @@ class Texts(Protocol):
 ━ 4️⃣ <b>Покупатели:</b> {count_paid_users} {calculate_percentage_difference(is_all_time, count_paid_users, count_paid_users_before)}
 ━ 5️⃣ <b>Подписчики:</b>
     ┣ <b>{SubscriptionType.FREE} {emojis[SubscriptionType.FREE]}:</b> {count_subscription_users[SubscriptionType.FREE]} {calculate_percentage_difference(is_all_time, count_subscription_users[SubscriptionType.FREE], count_subscription_users_before[SubscriptionType.FREE])}
+    ┣ <b>{SubscriptionType.MINI} {emojis[SubscriptionType.MINI]}:</b> {count_subscription_users[SubscriptionType.MINI]} {calculate_percentage_difference(is_all_time, count_subscription_users[SubscriptionType.MINI], count_subscription_users_before[SubscriptionType.MINI])}
     ┣ <b>{SubscriptionType.STANDARD} {emojis[SubscriptionType.STANDARD]}:</b> {count_subscription_users[SubscriptionType.STANDARD]} {calculate_percentage_difference(is_all_time, count_subscription_users[SubscriptionType.STANDARD], count_subscription_users_before[SubscriptionType.STANDARD])}
     ┣ <b>{SubscriptionType.VIP} {emojis[SubscriptionType.VIP]}:</b> {count_subscription_users[SubscriptionType.VIP]} {calculate_percentage_difference(is_all_time, count_subscription_users[SubscriptionType.VIP], count_subscription_users_before[SubscriptionType.VIP])}
-    ┗ <b>{SubscriptionType.PREMIUM} {emojis[SubscriptionType.PREMIUM]}:</b> {count_subscription_users[SubscriptionType.PREMIUM]} {calculate_percentage_difference(is_all_time, count_subscription_users[SubscriptionType.PREMIUM], count_subscription_users_before[SubscriptionType.PREMIUM])}
+    ┣ <b>{SubscriptionType.PREMIUM} {emojis[SubscriptionType.PREMIUM]}:</b> {count_subscription_users[SubscriptionType.PREMIUM]} {calculate_percentage_difference(is_all_time, count_subscription_users[SubscriptionType.PREMIUM], count_subscription_users_before[SubscriptionType.PREMIUM])}
+    ┗ <b>{SubscriptionType.UNLIMITED} {emojis[SubscriptionType.UNLIMITED]}:</b> {count_subscription_users[SubscriptionType.UNLIMITED]} {calculate_percentage_difference(is_all_time, count_subscription_users[SubscriptionType.UNLIMITED], count_subscription_users_before[SubscriptionType.UNLIMITED])}
 ━ 6️⃣ <b>Заблокировали бота:</b> {count_blocked_users} {calculate_percentage_difference(is_all_time, count_blocked_users, count_blocked_users_before)}
 ━ 7️⃣ <b>Забанено пользователей:</b> {count_banned_users} {calculate_percentage_difference(is_all_time, count_banned_users, count_banned_users_before)}
 
@@ -698,6 +750,8 @@ class Texts(Protocol):
                 count_all_transactions[ServiceType.CHAT_GPT4_OMNI]['SUCCESS'],
                 count_all_transactions[ServiceType.CLAUDE_3_SONNET]['SUCCESS'],
                 count_all_transactions[ServiceType.CLAUDE_3_OPUS]['SUCCESS'],
+                count_all_transactions[ServiceType.GEMINI_1_FLASH]['SUCCESS'],
+                count_all_transactions[ServiceType.GEMINI_1_PRO]['SUCCESS'],
             ],
         )
         all_fail_requests = sum(
@@ -707,6 +761,8 @@ class Texts(Protocol):
                 count_all_transactions[ServiceType.CHAT_GPT4_OMNI]['FAIL'],
                 count_all_transactions[ServiceType.CLAUDE_3_SONNET]['FAIL'],
                 count_all_transactions[ServiceType.CLAUDE_3_OPUS]['FAIL'],
+                count_all_transactions[ServiceType.GEMINI_1_FLASH]['FAIL'],
+                count_all_transactions[ServiceType.GEMINI_1_PRO]['FAIL'],
             ],
         )
         all_example_requests = sum(
@@ -716,6 +772,8 @@ class Texts(Protocol):
                 count_all_transactions[ServiceType.CHAT_GPT4_OMNI]['EXAMPLE'],
                 count_all_transactions[ServiceType.CLAUDE_3_SONNET]['EXAMPLE'],
                 count_all_transactions[ServiceType.CLAUDE_3_OPUS]['EXAMPLE'],
+                count_all_transactions[ServiceType.GEMINI_1_FLASH]['EXAMPLE'],
+                count_all_transactions[ServiceType.GEMINI_1_PRO]['EXAMPLE'],
             ],
         )
         all_requests = sum(
@@ -725,6 +783,8 @@ class Texts(Protocol):
                 count_all_transactions[ServiceType.CHAT_GPT4_OMNI]['ALL'],
                 count_all_transactions[ServiceType.CLAUDE_3_SONNET]['ALL'],
                 count_all_transactions[ServiceType.CLAUDE_3_OPUS]['ALL'],
+                count_all_transactions[ServiceType.GEMINI_1_FLASH]['ALL'],
+                count_all_transactions[ServiceType.GEMINI_1_PRO]['ALL'],
             ],
         )
         all_success_requests_before = sum(
@@ -734,6 +794,8 @@ class Texts(Protocol):
                 count_all_transactions_before[ServiceType.CHAT_GPT4_OMNI]['SUCCESS'],
                 count_all_transactions_before[ServiceType.CLAUDE_3_SONNET]['SUCCESS'],
                 count_all_transactions_before[ServiceType.CLAUDE_3_OPUS]['SUCCESS'],
+                count_all_transactions_before[ServiceType.GEMINI_1_FLASH]['SUCCESS'],
+                count_all_transactions_before[ServiceType.GEMINI_1_PRO]['SUCCESS'],
             ],
         )
         all_fail_requests_before = sum(
@@ -743,6 +805,8 @@ class Texts(Protocol):
                 count_all_transactions_before[ServiceType.CHAT_GPT4_OMNI]['FAIL'],
                 count_all_transactions_before[ServiceType.CLAUDE_3_SONNET]['FAIL'],
                 count_all_transactions_before[ServiceType.CLAUDE_3_OPUS]['FAIL'],
+                count_all_transactions_before[ServiceType.GEMINI_1_FLASH]['FAIL'],
+                count_all_transactions_before[ServiceType.GEMINI_1_PRO]['FAIL'],
             ],
         )
         all_example_requests_before = sum(
@@ -752,6 +816,8 @@ class Texts(Protocol):
                 count_all_transactions_before[ServiceType.CHAT_GPT4_OMNI]['EXAMPLE'],
                 count_all_transactions_before[ServiceType.CLAUDE_3_SONNET]['EXAMPLE'],
                 count_all_transactions_before[ServiceType.CLAUDE_3_OPUS]['EXAMPLE'],
+                count_all_transactions_before[ServiceType.GEMINI_1_FLASH]['EXAMPLE'],
+                count_all_transactions_before[ServiceType.GEMINI_1_PRO]['EXAMPLE'],
             ],
         )
         all_requests_before = sum(
@@ -761,6 +827,8 @@ class Texts(Protocol):
                 count_all_transactions_before[ServiceType.CHAT_GPT4_OMNI]['ALL'],
                 count_all_transactions_before[ServiceType.CLAUDE_3_SONNET]['ALL'],
                 count_all_transactions_before[ServiceType.CLAUDE_3_OPUS]['ALL'],
+                count_all_transactions_before[ServiceType.GEMINI_1_FLASH]['ALL'],
+                count_all_transactions_before[ServiceType.GEMINI_1_PRO]['ALL'],
             ],
         )
 
@@ -800,7 +868,17 @@ class Texts(Protocol):
     ┣ ❌ С ошибкой: {count_all_transactions[ServiceType.CLAUDE_3_OPUS]['FAIL']} {calculate_percentage_difference(is_all_time, count_all_transactions[ServiceType.CLAUDE_3_OPUS]['FAIL'], count_all_transactions_before[ServiceType.CLAUDE_3_OPUS]['FAIL'])}
     ┣ 🚀 Примеров: {count_all_transactions[ServiceType.CLAUDE_3_OPUS]['EXAMPLE']} {calculate_percentage_difference(is_all_time, count_all_transactions[ServiceType.CLAUDE_3_OPUS]['EXAMPLE'], count_all_transactions_before[ServiceType.CLAUDE_3_OPUS]['EXAMPLE'])}
     ┗ 📝 Всего: {count_all_transactions[ServiceType.CLAUDE_3_OPUS]['ALL']} {calculate_percentage_difference(is_all_time, count_all_transactions[ServiceType.CLAUDE_3_OPUS]['ALL'], count_all_transactions_before[ServiceType.CLAUDE_3_OPUS]['ALL'])}
-━ 7️⃣ <b>Резюме:</b>
+━ 7️⃣ <b>{Texts.GEMINI_1_FLASH}:</b>
+    ┣ ✅ Удачных: {count_all_transactions[ServiceType.GEMINI_1_FLASH]['SUCCESS']} {calculate_percentage_difference(is_all_time, count_all_transactions[ServiceType.GEMINI_1_FLASH]['SUCCESS'], count_all_transactions_before[ServiceType.GEMINI_1_FLASH]['SUCCESS'])}
+    ┣ ❌ С ошибкой: {count_all_transactions[ServiceType.GEMINI_1_FLASH]['FAIL']} {calculate_percentage_difference(is_all_time, count_all_transactions[ServiceType.GEMINI_1_FLASH]['FAIL'], count_all_transactions_before[ServiceType.GEMINI_1_FLASH]['FAIL'])}
+    ┣ 🚀 Примеров: {count_all_transactions[ServiceType.GEMINI_1_FLASH]['EXAMPLE']} {calculate_percentage_difference(is_all_time, count_all_transactions[ServiceType.GEMINI_1_FLASH]['EXAMPLE'], count_all_transactions_before[ServiceType.GEMINI_1_FLASH]['EXAMPLE'])}
+    ┗ 📝 Всего: {count_all_transactions[ServiceType.GEMINI_1_FLASH]['ALL']} {calculate_percentage_difference(is_all_time, count_all_transactions[ServiceType.GEMINI_1_FLASH]['ALL'], count_all_transactions_before[ServiceType.GEMINI_1_FLASH]['ALL'])}
+━ 8️⃣ <b>{Texts.GEMINI_1_PRO}:</b>
+    ┣ ✅ Удачных: {count_all_transactions[ServiceType.GEMINI_1_PRO]['SUCCESS']} {calculate_percentage_difference(is_all_time, count_all_transactions[ServiceType.GEMINI_1_PRO]['SUCCESS'], count_all_transactions_before[ServiceType.GEMINI_1_PRO]['SUCCESS'])}
+    ┣ ❌ С ошибкой: {count_all_transactions[ServiceType.GEMINI_1_PRO]['FAIL']} {calculate_percentage_difference(is_all_time, count_all_transactions[ServiceType.GEMINI_1_PRO]['FAIL'], count_all_transactions_before[ServiceType.GEMINI_1_PRO]['FAIL'])}
+    ┣ 🚀 Примеров: {count_all_transactions[ServiceType.GEMINI_1_PRO]['EXAMPLE']} {calculate_percentage_difference(is_all_time, count_all_transactions[ServiceType.GEMINI_1_PRO]['EXAMPLE'], count_all_transactions_before[ServiceType.GEMINI_1_PRO]['EXAMPLE'])}
+    ┗ 📝 Всего: {count_all_transactions[ServiceType.GEMINI_1_PRO]['ALL']} {calculate_percentage_difference(is_all_time, count_all_transactions[ServiceType.GEMINI_1_PRO]['ALL'], count_all_transactions_before[ServiceType.GEMINI_1_PRO]['ALL'])}
+━ 9️⃣ <b>Резюме:</b>
     ┣ ✅ Удачных: {all_success_requests} {calculate_percentage_difference(is_all_time, all_success_requests, all_success_requests_before)}
     ┣ ❌ С ошибкой: {all_fail_requests} {calculate_percentage_difference(is_all_time, all_fail_requests, all_fail_requests_before)}
     ┣ 🚀 Примеров: {all_example_requests} {calculate_percentage_difference(is_all_time, all_example_requests, all_example_requests_before)}
@@ -841,6 +919,7 @@ class Texts(Protocol):
             [
                 count_all_transactions[ServiceType.DALL_E]['SUCCESS'],
                 count_all_transactions[ServiceType.MIDJOURNEY]['SUCCESS'],
+                count_all_transactions[ServiceType.STABLE_DIFFUSION]['SUCCESS'],
                 count_all_transactions[ServiceType.FACE_SWAP]['SUCCESS'],
             ],
         )
@@ -848,6 +927,7 @@ class Texts(Protocol):
             [
                 count_all_transactions[ServiceType.DALL_E]['FAIL'],
                 count_all_transactions[ServiceType.MIDJOURNEY]['FAIL'],
+                count_all_transactions[ServiceType.STABLE_DIFFUSION]['FAIL'],
                 count_all_transactions[ServiceType.FACE_SWAP]['FAIL'],
             ],
         )
@@ -855,6 +935,7 @@ class Texts(Protocol):
             [
                 count_all_transactions[ServiceType.DALL_E]['EXAMPLE'],
                 count_all_transactions[ServiceType.MIDJOURNEY]['EXAMPLE'],
+                count_all_transactions[ServiceType.STABLE_DIFFUSION]['EXAMPLE'],
                 count_all_transactions[ServiceType.FACE_SWAP]['EXAMPLE'],
             ],
         )
@@ -862,6 +943,7 @@ class Texts(Protocol):
             [
                 count_all_transactions[ServiceType.DALL_E]['ALL'],
                 count_all_transactions[ServiceType.MIDJOURNEY]['ALL'],
+                count_all_transactions[ServiceType.STABLE_DIFFUSION]['ALL'],
                 count_all_transactions[ServiceType.FACE_SWAP]['ALL'],
             ],
         )
@@ -869,6 +951,7 @@ class Texts(Protocol):
             [
                 count_all_transactions_before[ServiceType.DALL_E]['SUCCESS'],
                 count_all_transactions_before[ServiceType.MIDJOURNEY]['SUCCESS'],
+                count_all_transactions_before[ServiceType.STABLE_DIFFUSION]['SUCCESS'],
                 count_all_transactions_before[ServiceType.FACE_SWAP]['SUCCESS'],
             ],
         )
@@ -876,6 +959,7 @@ class Texts(Protocol):
             [
                 count_all_transactions_before[ServiceType.DALL_E]['FAIL'],
                 count_all_transactions_before[ServiceType.MIDJOURNEY]['FAIL'],
+                count_all_transactions_before[ServiceType.STABLE_DIFFUSION]['FAIL'],
                 count_all_transactions_before[ServiceType.FACE_SWAP]['FAIL'],
             ],
         )
@@ -883,6 +967,7 @@ class Texts(Protocol):
             [
                 count_all_transactions_before[ServiceType.DALL_E]['EXAMPLE'],
                 count_all_transactions_before[ServiceType.MIDJOURNEY]['EXAMPLE'],
+                count_all_transactions_before[ServiceType.STABLE_DIFFUSION]['EXAMPLE'],
                 count_all_transactions_before[ServiceType.FACE_SWAP]['EXAMPLE'],
             ],
         )
@@ -890,6 +975,7 @@ class Texts(Protocol):
             [
                 count_all_transactions_before[ServiceType.DALL_E]['ALL'],
                 count_all_transactions_before[ServiceType.MIDJOURNEY]['ALL'],
+                count_all_transactions_before[ServiceType.STABLE_DIFFUSION]['ALL'],
                 count_all_transactions_before[ServiceType.FACE_SWAP]['ALL'],
             ],
         )
@@ -913,7 +999,12 @@ class Texts(Protocol):
 
     <b>Генерации:</b>
 {midjourney_info}
-━ 3️⃣ <b>{Texts.FACE_SWAP}:</b>
+━ 3️⃣ <b>{Texts.STABLE_DIFFUSION}:</b>
+    ┣ ✅ Удачных: {count_all_transactions[ServiceType.STABLE_DIFFUSION]['SUCCESS']} {calculate_percentage_difference(is_all_time, count_all_transactions[ServiceType.STABLE_DIFFUSION]['SUCCESS'], count_all_transactions_before[ServiceType.STABLE_DIFFUSION]['SUCCESS'])}
+    ┣ ❌ С ошибкой: {count_all_transactions[ServiceType.STABLE_DIFFUSION]['FAIL']} {calculate_percentage_difference(is_all_time, count_all_transactions[ServiceType.STABLE_DIFFUSION]['FAIL'], count_all_transactions_before[ServiceType.STABLE_DIFFUSION]['FAIL'])}
+    ┣ 🚀 Примеров: {count_all_transactions[ServiceType.STABLE_DIFFUSION]['EXAMPLE']} {calculate_percentage_difference(is_all_time, count_all_transactions[ServiceType.STABLE_DIFFUSION]['EXAMPLE'], count_all_transactions_before[ServiceType.STABLE_DIFFUSION]['EXAMPLE'])}
+    ┗ 📝 Всего: {count_all_transactions[ServiceType.STABLE_DIFFUSION]['ALL']} {calculate_percentage_difference(is_all_time, count_all_transactions[ServiceType.STABLE_DIFFUSION]['ALL'], count_all_transactions_before[ServiceType.STABLE_DIFFUSION]['ALL'])}
+━ 4️⃣ <b>{Texts.FACE_SWAP}:</b>
     ┣ ✅ Удачных: {count_all_transactions[ServiceType.FACE_SWAP]['SUCCESS']} {calculate_percentage_difference(is_all_time, count_all_transactions[ServiceType.FACE_SWAP]['SUCCESS'], count_all_transactions_before[ServiceType.FACE_SWAP]['SUCCESS'])}
     ┣ ❌ С ошибкой: {count_all_transactions[ServiceType.FACE_SWAP]['FAIL']} {calculate_percentage_difference(is_all_time, count_all_transactions[ServiceType.FACE_SWAP]['FAIL'], count_all_transactions_before[ServiceType.FACE_SWAP]['FAIL'])}
     ┣ 🚀 Примеров: {count_all_transactions[ServiceType.FACE_SWAP]['EXAMPLE']} {calculate_percentage_difference(is_all_time, count_all_transactions[ServiceType.FACE_SWAP]['EXAMPLE'], count_all_transactions_before[ServiceType.FACE_SWAP]['EXAMPLE'])}
@@ -921,7 +1012,7 @@ class Texts(Protocol):
 
     <b>Генерации:</b>
 {face_swap_info}
-━ 4️⃣ <b>Резюме:</b>
+━ 5️⃣ <b>Резюме:</b>
     ┣ ✅ Удачных: {all_success_requests} {calculate_percentage_difference(is_all_time, all_success_requests, all_success_requests_before)}
     ┣ ❌ С ошибкой: {all_fail_requests} {calculate_percentage_difference(is_all_time, all_fail_requests, all_fail_requests_before)}
     ┣ 🚀 Примеров: {all_example_requests} {calculate_percentage_difference(is_all_time, all_example_requests, all_example_requests_before)}
@@ -1027,14 +1118,15 @@ class Texts(Protocol):
         period: str,
         count_reactions: Dict,
         count_reactions_before: Dict,
-        count_feedbacks: int,
-        count_feedbacks_before: int,
+        count_feedbacks: Dict,
+        count_feedbacks_before: Dict,
     ):
         is_all_time = period == 'всё время'
 
         all_liked = sum(
             [
                 count_reactions[ServiceType.MIDJOURNEY][GenerationReaction.LIKED],
+                count_reactions[ServiceType.STABLE_DIFFUSION][GenerationReaction.LIKED],
                 count_reactions[ServiceType.FACE_SWAP][GenerationReaction.LIKED],
                 count_reactions[ServiceType.MUSIC_GEN][GenerationReaction.LIKED],
                 count_reactions[ServiceType.SUNO][GenerationReaction.LIKED],
@@ -1043,6 +1135,7 @@ class Texts(Protocol):
         all_disliked = sum(
             [
                 count_reactions[ServiceType.MIDJOURNEY][GenerationReaction.DISLIKED],
+                count_reactions[ServiceType.STABLE_DIFFUSION][GenerationReaction.DISLIKED],
                 count_reactions[ServiceType.FACE_SWAP][GenerationReaction.DISLIKED],
                 count_reactions[ServiceType.MUSIC_GEN][GenerationReaction.DISLIKED],
                 count_reactions[ServiceType.SUNO][GenerationReaction.DISLIKED],
@@ -1051,6 +1144,7 @@ class Texts(Protocol):
         all_none = sum(
             [
                 count_reactions[ServiceType.MIDJOURNEY][GenerationReaction.NONE],
+                count_reactions[ServiceType.STABLE_DIFFUSION][GenerationReaction.NONE],
                 count_reactions[ServiceType.FACE_SWAP][GenerationReaction.NONE],
                 count_reactions[ServiceType.MUSIC_GEN][GenerationReaction.NONE],
                 count_reactions[ServiceType.SUNO][GenerationReaction.NONE],
@@ -1060,6 +1154,7 @@ class Texts(Protocol):
         all_liked_before = sum(
             [
                 count_reactions_before[ServiceType.MIDJOURNEY][GenerationReaction.LIKED],
+                count_reactions_before[ServiceType.STABLE_DIFFUSION][GenerationReaction.LIKED],
                 count_reactions_before[ServiceType.FACE_SWAP][GenerationReaction.LIKED],
                 count_reactions_before[ServiceType.MUSIC_GEN][GenerationReaction.LIKED],
                 count_reactions_before[ServiceType.SUNO][GenerationReaction.LIKED],
@@ -1068,6 +1163,7 @@ class Texts(Protocol):
         all_disliked_before = sum(
             [
                 count_reactions_before[ServiceType.MIDJOURNEY][GenerationReaction.DISLIKED],
+                count_reactions_before[ServiceType.STABLE_DIFFUSION][GenerationReaction.DISLIKED],
                 count_reactions_before[ServiceType.FACE_SWAP][GenerationReaction.DISLIKED],
                 count_reactions_before[ServiceType.MUSIC_GEN][GenerationReaction.DISLIKED],
                 count_reactions_before[ServiceType.SUNO][GenerationReaction.DISLIKED],
@@ -1076,9 +1172,23 @@ class Texts(Protocol):
         all_none_before = sum(
             [
                 count_reactions_before[ServiceType.MIDJOURNEY][GenerationReaction.NONE],
+                count_reactions_before[ServiceType.STABLE_DIFFUSION][GenerationReaction.NONE],
                 count_reactions_before[ServiceType.FACE_SWAP][GenerationReaction.NONE],
                 count_reactions_before[ServiceType.MUSIC_GEN][GenerationReaction.NONE],
                 count_reactions_before[ServiceType.SUNO][GenerationReaction.NONE],
+            ]
+        )
+
+        all_feedbacks = sum(
+            [
+                count_feedbacks[FeedbackStatus.APPROVED],
+                count_feedbacks[FeedbackStatus.DENIED],
+            ]
+        )
+        all_feedbacks_before = sum(
+            [
+                count_feedbacks_before[FeedbackStatus.APPROVED],
+                count_feedbacks_before[FeedbackStatus.DENIED],
             ]
         )
 
@@ -1092,25 +1202,31 @@ class Texts(Protocol):
     ┣ 👍 {count_reactions[ServiceType.MIDJOURNEY][GenerationReaction.LIKED]} {calculate_percentage_difference(is_all_time, count_reactions[ServiceType.MIDJOURNEY][GenerationReaction.LIKED], count_reactions_before[ServiceType.MIDJOURNEY][GenerationReaction.LIKED])}
     ┣ 👎 {count_reactions[ServiceType.MIDJOURNEY][GenerationReaction.DISLIKED]} {calculate_percentage_difference(is_all_time, count_reactions[ServiceType.MIDJOURNEY][GenerationReaction.DISLIKED], count_reactions_before[ServiceType.MIDJOURNEY][GenerationReaction.DISLIKED])}
     ┗ 🤷 {count_reactions[ServiceType.MIDJOURNEY][GenerationReaction.NONE]} {calculate_percentage_difference(is_all_time, count_reactions[ServiceType.MIDJOURNEY][GenerationReaction.NONE], count_reactions_before[ServiceType.MIDJOURNEY][GenerationReaction.NONE])}
-━ 2️⃣ <b>{Texts.FACE_SWAP}:</b>
+━ 2️⃣ <b>{Texts.STABLE_DIFFUSION}:</b>
+    ┣ 👍 {count_reactions[ServiceType.STABLE_DIFFUSION][GenerationReaction.LIKED]} {calculate_percentage_difference(is_all_time, count_reactions[ServiceType.STABLE_DIFFUSION][GenerationReaction.LIKED], count_reactions_before[ServiceType.STABLE_DIFFUSION][GenerationReaction.LIKED])}
+    ┣ 👎 {count_reactions[ServiceType.STABLE_DIFFUSION][GenerationReaction.DISLIKED]} {calculate_percentage_difference(is_all_time, count_reactions[ServiceType.STABLE_DIFFUSION][GenerationReaction.DISLIKED], count_reactions_before[ServiceType.STABLE_DIFFUSION][GenerationReaction.DISLIKED])}
+    ┗ 🤷 {count_reactions[ServiceType.STABLE_DIFFUSION][GenerationReaction.NONE]} {calculate_percentage_difference(is_all_time, count_reactions[ServiceType.STABLE_DIFFUSION][GenerationReaction.NONE], count_reactions_before[ServiceType.STABLE_DIFFUSION][GenerationReaction.NONE])}
+━ 3️⃣ <b>{Texts.FACE_SWAP}:</b>
     ┣ 👍 {count_reactions[ServiceType.FACE_SWAP][GenerationReaction.LIKED]} {calculate_percentage_difference(is_all_time, count_reactions[ServiceType.FACE_SWAP][GenerationReaction.LIKED], count_reactions_before[ServiceType.FACE_SWAP][GenerationReaction.LIKED])}
     ┣ 👎 {count_reactions[ServiceType.FACE_SWAP][GenerationReaction.DISLIKED]} {calculate_percentage_difference(is_all_time, count_reactions[ServiceType.FACE_SWAP][GenerationReaction.DISLIKED], count_reactions_before[ServiceType.FACE_SWAP][GenerationReaction.DISLIKED])}
     ┗ 🤷 {count_reactions[ServiceType.FACE_SWAP][GenerationReaction.NONE]} {calculate_percentage_difference(is_all_time, count_reactions[ServiceType.FACE_SWAP][GenerationReaction.NONE], count_reactions_before[ServiceType.FACE_SWAP][GenerationReaction.NONE])}
-━ 3️⃣ <b>{Texts.MUSIC_GEN}:</b>
+━ 4️⃣ <b>{Texts.MUSIC_GEN}:</b>
     ┣ 👍 {count_reactions[ServiceType.MUSIC_GEN][GenerationReaction.LIKED]} {calculate_percentage_difference(is_all_time, count_reactions[ServiceType.MUSIC_GEN][GenerationReaction.LIKED], count_reactions_before[ServiceType.MUSIC_GEN][GenerationReaction.LIKED])}
     ┣ 👎 {count_reactions[ServiceType.MUSIC_GEN][GenerationReaction.DISLIKED]} {calculate_percentage_difference(is_all_time, count_reactions[ServiceType.MUSIC_GEN][GenerationReaction.DISLIKED], count_reactions_before[ServiceType.MUSIC_GEN][GenerationReaction.DISLIKED])}
     ┗ 🤷 {count_reactions[ServiceType.MUSIC_GEN][GenerationReaction.NONE]} {calculate_percentage_difference(is_all_time, count_reactions[ServiceType.MUSIC_GEN][GenerationReaction.NONE], count_reactions_before[ServiceType.MUSIC_GEN][GenerationReaction.NONE])}
-━ 4️⃣ <b>{Texts.SUNO}:</b>
+━ 5️⃣ <b>{Texts.SUNO}:</b>
     ┣ 👍 {count_reactions[ServiceType.SUNO][GenerationReaction.LIKED]} {calculate_percentage_difference(is_all_time, count_reactions[ServiceType.SUNO][GenerationReaction.LIKED], count_reactions_before[ServiceType.SUNO][GenerationReaction.LIKED])}
     ┣ 👎 {count_reactions[ServiceType.SUNO][GenerationReaction.DISLIKED]} {calculate_percentage_difference(is_all_time, count_reactions[ServiceType.SUNO][GenerationReaction.DISLIKED], count_reactions_before[ServiceType.SUNO][GenerationReaction.DISLIKED])}
     ┗ 🤷 {count_reactions[ServiceType.SUNO][GenerationReaction.NONE]} {calculate_percentage_difference(is_all_time, count_reactions[ServiceType.SUNO][GenerationReaction.NONE], count_reactions_before[ServiceType.SUNO][GenerationReaction.NONE])}
-━ 5️⃣ <b>Резюме:</b>
+━ 6️⃣ <b>Резюме:</b>
     ┣ 👍 {all_liked} {calculate_percentage_difference(is_all_time, all_liked, all_liked_before)}
     ┣ 👎 {all_disliked} {calculate_percentage_difference(is_all_time, all_disliked, all_disliked_before)}
     ┗ 🤷 {all_none} {calculate_percentage_difference(is_all_time, all_none, all_none_before)}
 
 📡 <b>Обратная связь</b>
-━ 1️⃣ <b>Количество:</b> {count_feedbacks} {calculate_percentage_difference(is_all_time, count_feedbacks, count_feedbacks_before)}
+━ 1️⃣ <b>Одобрено:</b> {count_feedbacks[FeedbackStatus.APPROVED]} {calculate_percentage_difference(is_all_time, count_feedbacks[FeedbackStatus.APPROVED], count_feedbacks_before[FeedbackStatus.APPROVED])}
+━ 2️⃣ <b>Отклонено:</b> {count_feedbacks[FeedbackStatus.DENIED]} {calculate_percentage_difference(is_all_time, count_feedbacks[FeedbackStatus.DENIED], count_feedbacks_before[FeedbackStatus.DENIED])}
+━ 3️⃣ <b>Всего:</b> {all_feedbacks} {calculate_percentage_difference(is_all_time, all_feedbacks, all_feedbacks_before)}
 
 🔍 Это всё, что нужно знать о реакциях и обратной связи на данный момент 🚀
 """
@@ -1136,6 +1252,7 @@ class Texts(Protocol):
 ━ 1️⃣ <b>Кредитов приобретено:</b>
     ┣ 👤 За приглашения друзей: {count_credits['INVITE_FRIENDS']} {calculate_percentage_difference(is_all_time, count_credits['INVITE_FRIENDS'], count_credits_before['INVITE_FRIENDS'])}
     ┣ 📡 За обратную связь: {count_credits['LEAVE_FEEDBACKS']} {calculate_percentage_difference(is_all_time, count_credits['LEAVE_FEEDBACKS'], count_credits_before['LEAVE_FEEDBACKS'])}
+    ┣ 🎮 За игры: {count_credits['PLAY_GAMES']} {calculate_percentage_difference(is_all_time, count_credits['PLAY_GAMES'], count_credits_before['PLAY_GAMES'])}
     ┗ 🪙 Всего: {count_credits['ALL']} {calculate_percentage_difference(is_all_time, count_credits['ALL'], count_credits_before['ALL'])}
 ━ 2️⃣ <b>Кредитов потрачено на:</b>
     ┣ {Texts.CHATGPT3_TURBO}: {count_all_transactions[ServiceType.CHAT_GPT3_TURBO]['BONUS']} {calculate_percentage_difference(is_all_time, count_all_transactions[ServiceType.CHAT_GPT3_TURBO]['BONUS'], count_all_transactions_before[ServiceType.CHAT_GPT3_TURBO]['BONUS'])}
@@ -1144,8 +1261,11 @@ class Texts(Protocol):
     ┣ {Texts.CHATGPT4_OMNI}: {count_all_transactions[ServiceType.CHAT_GPT4_OMNI]['BONUS']} {calculate_percentage_difference(is_all_time, count_all_transactions[ServiceType.CHAT_GPT4_OMNI]['BONUS'], count_all_transactions_before[ServiceType.CHAT_GPT4_OMNI]['BONUS'])}
     ┣ {Texts.CLAUDE_3_SONNET}: {count_all_transactions[ServiceType.CLAUDE_3_SONNET]['BONUS']} {calculate_percentage_difference(is_all_time, count_all_transactions[ServiceType.CLAUDE_3_SONNET]['BONUS'], count_all_transactions_before[ServiceType.CLAUDE_3_SONNET]['BONUS'])}
     ┣ {Texts.CLAUDE_3_OPUS}: {count_all_transactions[ServiceType.CLAUDE_3_OPUS]['BONUS']} {calculate_percentage_difference(is_all_time, count_all_transactions[ServiceType.CLAUDE_3_OPUS]['BONUS'], count_all_transactions_before[ServiceType.CLAUDE_3_OPUS]['BONUS'])}
+    ┣ {Texts.GEMINI_1_FLASH}: {count_all_transactions[ServiceType.GEMINI_1_FLASH]['BONUS']} {calculate_percentage_difference(is_all_time, count_all_transactions[ServiceType.GEMINI_1_FLASH]['BONUS'], count_all_transactions_before[ServiceType.GEMINI_1_FLASH]['BONUS'])}
+    ┣ {Texts.GEMINI_1_PRO}: {count_all_transactions[ServiceType.GEMINI_1_PRO]['BONUS']} {calculate_percentage_difference(is_all_time, count_all_transactions[ServiceType.GEMINI_1_PRO]['BONUS'], count_all_transactions_before[ServiceType.GEMINI_1_PRO]['BONUS'])}
     ┣ {Texts.DALL_E}: {count_all_transactions[ServiceType.DALL_E]['BONUS']} {calculate_percentage_difference(is_all_time, count_all_transactions[ServiceType.DALL_E]['BONUS'], count_all_transactions_before[ServiceType.DALL_E]['BONUS'])}
     ┣ {Texts.MIDJOURNEY}: {count_all_transactions[ServiceType.MIDJOURNEY]['BONUS']} {calculate_percentage_difference(is_all_time, count_all_transactions[ServiceType.MIDJOURNEY]['BONUS'], count_all_transactions_before[ServiceType.MIDJOURNEY]['BONUS'])}
+    ┣ {Texts.STABLE_DIFFUSION}: {count_all_transactions[ServiceType.STABLE_DIFFUSION]['BONUS']} {calculate_percentage_difference(is_all_time, count_all_transactions[ServiceType.STABLE_DIFFUSION]['BONUS'], count_all_transactions_before[ServiceType.STABLE_DIFFUSION]['BONUS'])}
     ┣ {Texts.FACE_SWAP}: {count_all_transactions[ServiceType.FACE_SWAP]['BONUS']} {calculate_percentage_difference(is_all_time, count_all_transactions[ServiceType.FACE_SWAP]['BONUS'], count_all_transactions_before[ServiceType.FACE_SWAP]['BONUS'])}
     ┣ {Texts.MUSIC_GEN}: {count_all_transactions[ServiceType.MUSIC_GEN]['BONUS']} {calculate_percentage_difference(is_all_time, count_all_transactions[ServiceType.MUSIC_GEN]['BONUS'], count_all_transactions_before[ServiceType.MUSIC_GEN]['BONUS'])}
     ┣ {Texts.SUNO}: {count_all_transactions[ServiceType.SUNO]['BONUS']} {calculate_percentage_difference(is_all_time, count_all_transactions[ServiceType.SUNO]['BONUS'], count_all_transactions_before[ServiceType.SUNO]['BONUS'])}
@@ -1205,6 +1325,16 @@ class Texts(Protocol):
         ┣ 🚀 Всего за примеры: ${round(count_expense_money[ServiceType.CLAUDE_3_OPUS]['EXAMPLE_ALL'], 2)} {calculate_percentage_difference(is_all_time, count_expense_money[ServiceType.CLAUDE_3_OPUS]['EXAMPLE_ALL'], count_expense_money_before[ServiceType.CLAUDE_3_OPUS]['EXAMPLE_ALL'])}
         ┣ 💸 Средняя цена запроса: ${round(count_expense_money[ServiceType.CLAUDE_3_OPUS]['AVERAGE_PRICE'], 2)} {calculate_percentage_difference(is_all_time, count_expense_money[ServiceType.CLAUDE_3_OPUS]['AVERAGE_PRICE'], count_expense_money_before[ServiceType.CLAUDE_3_OPUS]['AVERAGE_PRICE'])}
         ┗ 💰 Всего: ${round(count_expense_money[ServiceType.CLAUDE_3_OPUS]['ALL'], 2)} {calculate_percentage_difference(is_all_time, count_expense_money[ServiceType.CLAUDE_3_OPUS]['ALL'], count_expense_money_before[ServiceType.CLAUDE_3_OPUS]['ALL'])}
+    ┣ {Texts.GEMINI_1_FLASH}:
+        ┣ 🎁 Средняя цена примера: ${round(count_expense_money[ServiceType.GEMINI_1_FLASH]['AVERAGE_EXAMPLE_PRICE'], 2)} {calculate_percentage_difference(is_all_time, count_expense_money[ServiceType.GEMINI_1_FLASH]['AVERAGE_EXAMPLE_PRICE'], count_expense_money_before[ServiceType.GEMINI_1_FLASH]['AVERAGE_EXAMPLE_PRICE'])}
+        ┣ 🚀 Всего за примеры: ${round(count_expense_money[ServiceType.GEMINI_1_FLASH]['EXAMPLE_ALL'], 2)} {calculate_percentage_difference(is_all_time, count_expense_money[ServiceType.GEMINI_1_FLASH]['EXAMPLE_ALL'], count_expense_money_before[ServiceType.GEMINI_1_FLASH]['EXAMPLE_ALL'])}
+        ┣ 💸 Средняя цена запроса: ${round(count_expense_money[ServiceType.GEMINI_1_FLASH]['AVERAGE_PRICE'], 2)} {calculate_percentage_difference(is_all_time, count_expense_money[ServiceType.GEMINI_1_FLASH]['AVERAGE_PRICE'], count_expense_money_before[ServiceType.GEMINI_1_FLASH]['AVERAGE_PRICE'])}
+        ┗ 💰 Всего: ${round(count_expense_money[ServiceType.GEMINI_1_FLASH]['ALL'], 2)} {calculate_percentage_difference(is_all_time, count_expense_money[ServiceType.GEMINI_1_FLASH]['ALL'], count_expense_money_before[ServiceType.GEMINI_1_FLASH]['ALL'])}
+    ┣ {Texts.GEMINI_1_PRO}:
+        ┣ 🎁 Средняя цена примера: ${round(count_expense_money[ServiceType.GEMINI_1_PRO]['AVERAGE_EXAMPLE_PRICE'], 2)} {calculate_percentage_difference(is_all_time, count_expense_money[ServiceType.GEMINI_1_PRO]['AVERAGE_EXAMPLE_PRICE'], count_expense_money_before[ServiceType.GEMINI_1_PRO]['AVERAGE_EXAMPLE_PRICE'])}
+        ┣ 🚀 Всего за примеры: ${round(count_expense_money[ServiceType.GEMINI_1_PRO]['EXAMPLE_ALL'], 2)} {calculate_percentage_difference(is_all_time, count_expense_money[ServiceType.GEMINI_1_PRO]['EXAMPLE_ALL'], count_expense_money_before[ServiceType.GEMINI_1_PRO]['EXAMPLE_ALL'])}
+        ┣ 💸 Средняя цена запроса: ${round(count_expense_money[ServiceType.GEMINI_1_PRO]['AVERAGE_PRICE'], 2)} {calculate_percentage_difference(is_all_time, count_expense_money[ServiceType.GEMINI_1_PRO]['AVERAGE_PRICE'], count_expense_money_before[ServiceType.GEMINI_1_PRO]['AVERAGE_PRICE'])}
+        ┗ 💰 Всего: ${round(count_expense_money[ServiceType.GEMINI_1_PRO]['ALL'], 2)} {calculate_percentage_difference(is_all_time, count_expense_money[ServiceType.GEMINI_1_PRO]['ALL'], count_expense_money_before[ServiceType.GEMINI_1_PRO]['ALL'])}
     ┣ {Texts.DALL_E}:
         ┣ 🎁 Средняя цена примера: ${round(count_expense_money[ServiceType.DALL_E]['AVERAGE_EXAMPLE_PRICE'], 2)} {calculate_percentage_difference(is_all_time, count_expense_money[ServiceType.DALL_E]['AVERAGE_EXAMPLE_PRICE'], count_expense_money_before[ServiceType.DALL_E]['AVERAGE_EXAMPLE_PRICE'])}
         ┣ 🚀 Всего за примеры: ${round(count_expense_money[ServiceType.DALL_E]['EXAMPLE_ALL'], 2)} {calculate_percentage_difference(is_all_time, count_expense_money[ServiceType.DALL_E]['EXAMPLE_ALL'], count_expense_money_before[ServiceType.DALL_E]['EXAMPLE_ALL'])}
@@ -1215,6 +1345,11 @@ class Texts(Protocol):
         ┣ 🚀 Всего за примеры: ${round(count_expense_money[ServiceType.MIDJOURNEY]['EXAMPLE_ALL'], 2)} {calculate_percentage_difference(is_all_time, count_expense_money[ServiceType.MIDJOURNEY]['EXAMPLE_ALL'], count_expense_money_before[ServiceType.MIDJOURNEY]['EXAMPLE_ALL'])}
         ┣ 💸 Средняя цена запроса: ${round(count_expense_money[ServiceType.MIDJOURNEY]['AVERAGE_PRICE'], 2)} {calculate_percentage_difference(is_all_time, count_expense_money[ServiceType.MIDJOURNEY]['AVERAGE_PRICE'], count_expense_money_before[ServiceType.MIDJOURNEY]['AVERAGE_PRICE'])}
         ┗ 💰 Всего: ${round(count_expense_money[ServiceType.MIDJOURNEY]['ALL'], 2)} {calculate_percentage_difference(is_all_time, count_expense_money[ServiceType.MIDJOURNEY]['ALL'], count_expense_money_before[ServiceType.MIDJOURNEY]['ALL'])}
+    ┣ {Texts.STABLE_DIFFUSION}:
+        ┣ 🎁 Средняя цена примера: ${round(count_expense_money[ServiceType.STABLE_DIFFUSION]['AVERAGE_EXAMPLE_PRICE'], 2)} {calculate_percentage_difference(is_all_time, count_expense_money[ServiceType.STABLE_DIFFUSION]['AVERAGE_EXAMPLE_PRICE'], count_expense_money_before[ServiceType.STABLE_DIFFUSION]['AVERAGE_EXAMPLE_PRICE'])}
+        ┣ 🚀 Всего за примеры: ${round(count_expense_money[ServiceType.STABLE_DIFFUSION]['EXAMPLE_ALL'], 2)} {calculate_percentage_difference(is_all_time, count_expense_money[ServiceType.STABLE_DIFFUSION]['EXAMPLE_ALL'], count_expense_money_before[ServiceType.STABLE_DIFFUSION]['EXAMPLE_ALL'])}
+        ┣ 💸 Средняя цена запроса: ${round(count_expense_money[ServiceType.STABLE_DIFFUSION]['AVERAGE_PRICE'], 2)} {calculate_percentage_difference(is_all_time, count_expense_money[ServiceType.STABLE_DIFFUSION]['AVERAGE_PRICE'], count_expense_money_before[ServiceType.STABLE_DIFFUSION]['AVERAGE_PRICE'])}
+        ┗ 💰 Всего: ${round(count_expense_money[ServiceType.STABLE_DIFFUSION]['ALL'], 2)} {calculate_percentage_difference(is_all_time, count_expense_money[ServiceType.STABLE_DIFFUSION]['ALL'], count_expense_money_before[ServiceType.STABLE_DIFFUSION]['ALL'])}
     ┣ {Texts.FACE_SWAP}:
         ┣ 🎁 Средняя цена примера: ${round(count_expense_money[ServiceType.FACE_SWAP]['AVERAGE_EXAMPLE_PRICE'], 2)} {calculate_percentage_difference(is_all_time, count_expense_money[ServiceType.FACE_SWAP]['AVERAGE_EXAMPLE_PRICE'], count_expense_money_before[ServiceType.FACE_SWAP]['AVERAGE_EXAMPLE_PRICE'])}
         ┣ 🚀 Всего за примеры: ${round(count_expense_money[ServiceType.FACE_SWAP]['EXAMPLE_ALL'], 2)} {calculate_percentage_difference(is_all_time, count_expense_money[ServiceType.FACE_SWAP]['EXAMPLE_ALL'], count_expense_money_before[ServiceType.FACE_SWAP]['EXAMPLE_ALL'])}
@@ -1238,15 +1373,21 @@ class Texts(Protocol):
     ┣ <b>{SubscriptionType.FREE} {emojis[SubscriptionType.FREE]}:</b>
         ┣ 💸 Средняя цена подписчика: ${round(count_expense_money[SubscriptionType.FREE]['AVERAGE_PRICE'], 2)} {calculate_percentage_difference(is_all_time, count_expense_money[SubscriptionType.FREE]['AVERAGE_PRICE'], count_expense_money_before[SubscriptionType.FREE]['AVERAGE_PRICE'])}
         ┗ 💰 Всего: ${round(count_expense_money[SubscriptionType.FREE]['ALL'], 2)} {calculate_percentage_difference(is_all_time, count_expense_money[SubscriptionType.FREE]['ALL'], count_expense_money_before[SubscriptionType.FREE]['ALL'])}
+    ┣ <b>{SubscriptionType.MINI} {emojis[SubscriptionType.MINI]}:</b>
+        ┣ 💸 Средняя цена подписчика: ${round(count_expense_money[SubscriptionType.MINI]['AVERAGE_PRICE'], 2)} {calculate_percentage_difference(is_all_time, count_expense_money[SubscriptionType.MINI]['AVERAGE_PRICE'], count_expense_money_before[SubscriptionType.MINI]['AVERAGE_PRICE'])}
+        ┗ 💰 Всего: ${round(count_expense_money[SubscriptionType.MINI]['ALL'], 2)} {calculate_percentage_difference(is_all_time, count_expense_money[SubscriptionType.MINI]['ALL'], count_expense_money_before[SubscriptionType.MINI]['ALL'])}
     ┣ <b>{SubscriptionType.STANDARD} {emojis[SubscriptionType.STANDARD]}:</b>
         ┣ 💸 Средняя цена подписчика: ${round(count_expense_money[SubscriptionType.STANDARD]['AVERAGE_PRICE'], 2)} {calculate_percentage_difference(is_all_time, count_expense_money[SubscriptionType.STANDARD]['AVERAGE_PRICE'], count_expense_money_before[SubscriptionType.STANDARD]['AVERAGE_PRICE'])}
         ┗ 💰 Всего: ${round(count_expense_money[SubscriptionType.STANDARD]['ALL'], 2)} {calculate_percentage_difference(is_all_time, count_expense_money[SubscriptionType.STANDARD]['ALL'], count_expense_money_before[SubscriptionType.STANDARD]['ALL'])}
     ┣ <b>{SubscriptionType.VIP} {emojis[SubscriptionType.VIP]}:</b>
         ┣ 💸 Средняя цена подписчика: ${round(count_expense_money[SubscriptionType.VIP]['AVERAGE_PRICE'], 2)} {calculate_percentage_difference(is_all_time, count_expense_money[SubscriptionType.VIP]['AVERAGE_PRICE'], count_expense_money_before[SubscriptionType.VIP]['AVERAGE_PRICE'])}
         ┗ 💰 Всего: ${round(count_expense_money[SubscriptionType.VIP]['ALL'], 2)} {calculate_percentage_difference(is_all_time, count_expense_money[SubscriptionType.VIP]['ALL'], count_expense_money_before[SubscriptionType.VIP]['ALL'])}
-    ┗ <b>{SubscriptionType.PREMIUM} {emojis[SubscriptionType.PREMIUM]}:</b>
+    ┣ <b>{SubscriptionType.PREMIUM} {emojis[SubscriptionType.PREMIUM]}:</b>
         ┣ 💸 Средняя цена подписчика: ${round(count_expense_money[SubscriptionType.PREMIUM]['AVERAGE_PRICE'], 2)} {calculate_percentage_difference(is_all_time, count_expense_money[SubscriptionType.PREMIUM]['AVERAGE_PRICE'], count_expense_money_before[SubscriptionType.PREMIUM]['AVERAGE_PRICE'])}
         ┗ 💰 Всего: ${round(count_expense_money[SubscriptionType.PREMIUM]['ALL'], 2)} {calculate_percentage_difference(is_all_time, count_expense_money[SubscriptionType.PREMIUM]['ALL'], count_expense_money_before[SubscriptionType.PREMIUM]['ALL'])}
+    ┗ <b>{SubscriptionType.UNLIMITED} {emojis[SubscriptionType.UNLIMITED]}:</b>
+        ┣ 💸 Средняя цена подписчика: ${round(count_expense_money[SubscriptionType.UNLIMITED]['AVERAGE_PRICE'], 2)} {calculate_percentage_difference(is_all_time, count_expense_money[SubscriptionType.UNLIMITED]['AVERAGE_PRICE'], count_expense_money_before[SubscriptionType.UNLIMITED]['AVERAGE_PRICE'])}
+        ┗ 💰 Всего: ${round(count_expense_money[SubscriptionType.UNLIMITED]['ALL'], 2)} {calculate_percentage_difference(is_all_time, count_expense_money[SubscriptionType.UNLIMITED]['ALL'], count_expense_money_before[SubscriptionType.UNLIMITED]['ALL'])}
 ━ <b>Всего:</b> ${round(count_expense_money['ALL'], 2)} {calculate_percentage_difference(is_all_time, count_expense_money['ALL'], count_expense_money_before['ALL'])}
 
 🔍 Это всё, что нужно знать о расходах на данный момент 🚀
@@ -1268,9 +1409,11 @@ class Texts(Protocol):
 
 📈 <b>Доходы</b>
 ━ 1️⃣ <b>Подписки:</b>
+    ┣ {ServiceType.MINI} {emojis[ServiceType.MINI]}: {round(count_income_money[ServiceType.MINI], 2)}₽ {calculate_percentage_difference(is_all_time, count_income_money[ServiceType.MINI], count_income_money_before[ServiceType.MINI])}
     ┣ {ServiceType.STANDARD} {emojis[ServiceType.STANDARD]}: {round(count_income_money[ServiceType.STANDARD], 2)}₽ {calculate_percentage_difference(is_all_time, count_income_money[ServiceType.STANDARD], count_income_money_before[ServiceType.STANDARD])}
     ┣ {ServiceType.VIP} {emojis[ServiceType.VIP]}: {round(count_income_money[ServiceType.VIP], 2)}₽ {calculate_percentage_difference(is_all_time, count_income_money[ServiceType.VIP], count_income_money_before[ServiceType.VIP])}
     ┣ {ServiceType.PREMIUM} {emojis[ServiceType.PREMIUM]}: {round(count_income_money[ServiceType.PREMIUM], 2)}₽ {calculate_percentage_difference(is_all_time, count_income_money[ServiceType.PREMIUM], count_income_money_before[ServiceType.PREMIUM])}
+    ┣ {ServiceType.UNLIMITED} {emojis[ServiceType.UNLIMITED]}: {round(count_income_money[ServiceType.UNLIMITED], 2)}₽ {calculate_percentage_difference(is_all_time, count_income_money[ServiceType.UNLIMITED], count_income_money_before[ServiceType.UNLIMITED])}
     ┗ Всего: {round(count_income_money['SUBSCRIPTION_ALL'], 2)}₽ {calculate_percentage_difference(is_all_time, count_income_money['SUBSCRIPTION_ALL'], count_income_money_before['SUBSCRIPTION_ALL'])}
 ━ 2️⃣ <b>Пакеты:</b>
     ┣ {Texts.CHATGPT3_TURBO}: {round(count_income_money[ServiceType.CHAT_GPT3_TURBO], 2)}₽ {calculate_percentage_difference(is_all_time, count_income_money[ServiceType.CHAT_GPT3_TURBO], count_income_money_before[ServiceType.CHAT_GPT3_TURBO])}
@@ -1279,8 +1422,11 @@ class Texts(Protocol):
     ┣ {Texts.CHATGPT4_OMNI}: {round(count_income_money[ServiceType.CHAT_GPT4_OMNI], 2)}₽ {calculate_percentage_difference(is_all_time, count_income_money[ServiceType.CHAT_GPT4_OMNI], count_income_money_before[ServiceType.CHAT_GPT4_OMNI])}
     ┣ {Texts.CLAUDE_3_SONNET}: {round(count_income_money[ServiceType.CLAUDE_3_SONNET], 2)}₽ {calculate_percentage_difference(is_all_time, count_income_money[ServiceType.CLAUDE_3_SONNET], count_income_money_before[ServiceType.CLAUDE_3_SONNET])}
     ┣ {Texts.CLAUDE_3_OPUS}: {round(count_income_money[ServiceType.CLAUDE_3_OPUS], 2)}₽ {calculate_percentage_difference(is_all_time, count_income_money[ServiceType.CLAUDE_3_OPUS], count_income_money_before[ServiceType.CLAUDE_3_OPUS])}
+    ┣ {Texts.GEMINI_1_FLASH}: {round(count_income_money[ServiceType.GEMINI_1_FLASH], 2)}₽ {calculate_percentage_difference(is_all_time, count_income_money[ServiceType.GEMINI_1_FLASH], count_income_money_before[ServiceType.GEMINI_1_FLASH])}
+    ┣ {Texts.GEMINI_1_PRO}: {round(count_income_money[ServiceType.GEMINI_1_PRO], 2)}₽ {calculate_percentage_difference(is_all_time, count_income_money[ServiceType.GEMINI_1_PRO], count_income_money_before[ServiceType.GEMINI_1_PRO])}
     ┣ {Texts.DALL_E}: {round(count_income_money[ServiceType.DALL_E], 2)}₽ {calculate_percentage_difference(is_all_time, count_income_money[ServiceType.DALL_E], count_income_money_before[ServiceType.DALL_E])}
     ┣ {Texts.MIDJOURNEY}: {round(count_income_money[ServiceType.MIDJOURNEY], 2)}₽ {calculate_percentage_difference(is_all_time, count_income_money[ServiceType.MIDJOURNEY], count_income_money_before[ServiceType.MIDJOURNEY])}
+    ┣ {Texts.STABLE_DIFFUSION}: {round(count_income_money[ServiceType.STABLE_DIFFUSION], 2)}₽ {calculate_percentage_difference(is_all_time, count_income_money[ServiceType.STABLE_DIFFUSION], count_income_money_before[ServiceType.STABLE_DIFFUSION])}
     ┣ {Texts.FACE_SWAP}: {round(count_income_money[ServiceType.FACE_SWAP], 2)}₽ {calculate_percentage_difference(is_all_time, count_income_money[ServiceType.FACE_SWAP], count_income_money_before[ServiceType.FACE_SWAP])}
     ┣ {Texts.MUSIC_GEN}: {round(count_income_money[ServiceType.MUSIC_GEN], 2)}₽ {calculate_percentage_difference(is_all_time, count_income_money[ServiceType.MUSIC_GEN], count_income_money_before[ServiceType.MUSIC_GEN])}
     ┣ {Texts.SUNO}: {round(count_income_money[ServiceType.SUNO], 2)}₽ {calculate_percentage_difference(is_all_time, count_income_money[ServiceType.SUNO], count_income_money_before[ServiceType.SUNO])}
@@ -1431,10 +1577,11 @@ class Texts(Protocol):
         gender: UserGender,
         current_model: Model,
         current_model_version: str,
-        monthly_limits,
+        daily_limits,
         additional_usage_quota,
         renewal_date,
-        credits: str,
+        hours_before_limit_update: int,
+        minutes_before_limit_update: int,
     ) -> str:
         raise NotImplementedError
 
@@ -1570,7 +1717,7 @@ class Texts(Protocol):
 
     # Bonus
     @staticmethod
-    def bonus(user_id: str, balance: float, referred_count: int, feedback_count: int) -> str:
+    def bonus(user_id: str, balance: float, referred_count: int, feedback_count: int, play_count: int) -> str:
         raise NotImplementedError
 
     @staticmethod

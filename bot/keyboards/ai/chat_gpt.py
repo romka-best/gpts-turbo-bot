@@ -9,23 +9,15 @@ def build_chat_gpt_keyboard(language_code: str, model: Model, model_version: Cha
         [
             InlineKeyboardButton(
                 text=get_localization(language_code).CHATGPT4_OMNI_MINI + (
-                    " ✅" if model == Model.CHAT_GPT and model_version == ChatGPTVersion.V4_Omni_Mini else ""
+                    ' ✅' if model == Model.CHAT_GPT and model_version == ChatGPTVersion.V4_Omni_Mini else ''
                 ),
                 callback_data=f'chat_gpt:{ChatGPTVersion.V4_Omni_Mini}'
             ),
         ],
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).CHATGPT4_TURBO + (
-                    " ✅" if model == Model.CHAT_GPT and model_version == ChatGPTVersion.V4_Turbo else ""
-                ),
-                callback_data=f'chat_gpt:{ChatGPTVersion.V4_Turbo}'
-            ),
-        ],
-        [
-            InlineKeyboardButton(
                 text=get_localization(language_code).CHATGPT4_OMNI + (
-                    " ✅" if model == Model.CHAT_GPT and model_version == ChatGPTVersion.V4_Omni else ""
+                    ' ✅' if model == Model.CHAT_GPT and model_version == ChatGPTVersion.V4_Omni else ''
                 ),
                 callback_data=f'chat_gpt:{ChatGPTVersion.V4_Omni}'
             ),

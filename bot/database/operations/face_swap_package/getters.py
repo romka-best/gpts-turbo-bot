@@ -21,8 +21,8 @@ async def get_face_swap_package_by_name_and_gender(
     gender: UserGender,
 ) -> Optional[FaceSwapPackage]:
     face_swap_package_stream = firebase.db.collection(FaceSwapPackage.COLLECTION_NAME) \
-        .where(filter=FieldFilter("name", "==", name)) \
-        .where(filter=FieldFilter("gender", "==", gender)) \
+        .where(filter=FieldFilter('name', '==', name)) \
+        .where(filter=FieldFilter('gender', '==', gender)) \
         .limit(1) \
         .stream()
 
@@ -37,11 +37,11 @@ async def get_face_swap_packages(
     face_swap_packages_query = firebase.db.collection(FaceSwapPackage.COLLECTION_NAME)
 
     if start_date:
-        face_swap_packages_query = face_swap_packages_query.where(filter=FieldFilter("created_at", ">=", start_date))
+        face_swap_packages_query = face_swap_packages_query.where(filter=FieldFilter('created_at', '>=', start_date))
     if end_date:
-        face_swap_packages_query = face_swap_packages_query.where(filter=FieldFilter("created_at", "<=", end_date))
+        face_swap_packages_query = face_swap_packages_query.where(filter=FieldFilter('created_at', '<=', end_date))
 
-    face_swap_packages = face_swap_packages_query.order_by("created_at", direction=Query.ASCENDING).stream()
+    face_swap_packages = face_swap_packages_query.order_by('created_at', direction=Query.ASCENDING).stream()
     return [
         FaceSwapPackage(**face_swap_package.to_dict()) async for face_swap_package in face_swap_packages
     ]
@@ -54,16 +54,16 @@ async def get_face_swap_packages_by_gender(
     status: Optional[FaceSwapPackageStatus] = None
 ) -> List[FaceSwapPackage]:
     face_swap_packages_query = firebase.db.collection(FaceSwapPackage.COLLECTION_NAME) \
-        .where(filter=FieldFilter("gender", "==", gender))
+        .where(filter=FieldFilter('gender', '==', gender))
 
     if start_date:
-        face_swap_packages_query = face_swap_packages_query.where(filter=FieldFilter("created_at", ">=", start_date))
+        face_swap_packages_query = face_swap_packages_query.where(filter=FieldFilter('created_at', '>=', start_date))
     if end_date:
-        face_swap_packages_query = face_swap_packages_query.where(filter=FieldFilter("created_at", "<=", end_date))
+        face_swap_packages_query = face_swap_packages_query.where(filter=FieldFilter('created_at', '<=', end_date))
     if status:
-        face_swap_packages_query = face_swap_packages_query.where(filter=FieldFilter("status", "==", status))
+        face_swap_packages_query = face_swap_packages_query.where(filter=FieldFilter('status', '==', status))
 
-    face_swap_packages = face_swap_packages_query.order_by("created_at", direction=Query.ASCENDING).stream()
+    face_swap_packages = face_swap_packages_query.order_by('created_at', direction=Query.ASCENDING).stream()
     return [
         FaceSwapPackage(**face_swap_package.to_dict()) async for face_swap_package in face_swap_packages
     ]
@@ -84,8 +84,8 @@ async def get_used_face_swap_package_by_user_id_and_package_id(
     package_id: str,
 ) -> Optional[UsedFaceSwapPackage]:
     used_face_swap_package_stream = firebase.db.collection(UsedFaceSwapPackage.COLLECTION_NAME) \
-        .where(filter=FieldFilter("user_id", "==", user_id)) \
-        .where(filter=FieldFilter("package_id", "==", package_id)) \
+        .where(filter=FieldFilter('user_id', '==', user_id)) \
+        .where(filter=FieldFilter('package_id', '==', package_id)) \
         .limit(1) \
         .stream()
 
@@ -95,8 +95,8 @@ async def get_used_face_swap_package_by_user_id_and_package_id(
 
 async def get_used_face_swap_packages_by_user_id(user_id: str) -> List[UsedFaceSwapPackage]:
     used_face_swap_packages_stream = firebase.db.collection(UsedFaceSwapPackage.COLLECTION_NAME) \
-        .where(filter=FieldFilter("user_id", "==", user_id)) \
-        .order_by("created_at", direction=Query.DESCENDING) \
+        .where(filter=FieldFilter('user_id', '==', user_id)) \
+        .order_by('created_at', direction=Query.DESCENDING) \
         .stream()
     used_face_swap_packages = [
         UsedFaceSwapPackage(
@@ -115,11 +115,11 @@ async def get_used_face_swap_packages(
 
     if start_date:
         used_face_swap_packages_query = used_face_swap_packages_query.where(
-            filter=FieldFilter("created_at", ">=", start_date)
+            filter=FieldFilter('created_at', '>=', start_date)
         )
     if end_date:
         used_face_swap_packages_query = used_face_swap_packages_query.where(
-            filter=FieldFilter("created_at", "<=", end_date)
+            filter=FieldFilter('created_at', '<=', end_date)
         )
 
     used_face_swap_packages = used_face_swap_packages_query.stream()

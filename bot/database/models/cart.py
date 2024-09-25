@@ -29,7 +29,7 @@ class CartItem:
 
 
 class Cart:
-    COLLECTION_NAME = "carts"
+    COLLECTION_NAME = 'carts'
 
     id: str
     user_id: str

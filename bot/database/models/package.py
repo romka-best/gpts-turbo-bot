@@ -7,20 +7,22 @@ from bot.database.models.transaction import ServiceType
 
 
 class PackageType:
-    CHAT_GPT4_OMNI_MINI = "GPT4_OMNI_MINI"
-    CHAT_GPT4_TURBO = "GPT4"
-    CHAT_GPT4_OMNI = "GPT4_OMNI"
-    CLAUDE_3_SONNET = "CLAUDE_3_SONNET"
-    CLAUDE_3_OPUS = "CLAUDE_3_OPUS"
-    DALL_E = "DALL_E"
-    MIDJOURNEY = "MIDJOURNEY"
-    FACE_SWAP = "FACE_SWAP"
-    MUSIC_GEN = "MUSIC_GEN"
-    SUNO = "SUNO"
-    CHAT = "CHAT"
-    ACCESS_TO_CATALOG = "ACCESS_TO_CATALOG"
-    VOICE_MESSAGES = "VOICE_MESSAGES"
-    FAST_MESSAGES = "FAST_MESSAGES"
+    CHAT_GPT4_OMNI_MINI = 'GPT4_OMNI_MINI'
+    CHAT_GPT4_OMNI = 'GPT4_OMNI'
+    CLAUDE_3_SONNET = 'CLAUDE_3_SONNET'
+    CLAUDE_3_OPUS = 'CLAUDE_3_OPUS'
+    GEMINI_1_FLASH = 'GEMINI_1_FLASH'
+    GEMINI_1_PRO = 'GEMINI_1_PRO'
+    DALL_E = 'DALL_E'
+    MIDJOURNEY = 'MIDJOURNEY'
+    STABLE_DIFFUSION = 'STABLE_DIFFUSION'
+    FACE_SWAP = 'FACE_SWAP'
+    MUSIC_GEN = 'MUSIC_GEN'
+    SUNO = 'SUNO'
+    CHAT = 'CHAT'
+    ACCESS_TO_CATALOG = 'ACCESS_TO_CATALOG'
+    VOICE_MESSAGES = 'VOICE_MESSAGES'
+    FAST_MESSAGES = 'FAST_MESSAGES'
 
     @staticmethod
     def get_class_attributes_in_order():
@@ -45,7 +47,7 @@ class PackageStatus:
 
 
 class Package:
-    COLLECTION_NAME = "packages"
+    COLLECTION_NAME = 'packages'
 
     id: str
     user_id: str
@@ -61,12 +63,6 @@ class Package:
     created_at: datetime
     edited_at: datetime
 
-    MINIMAL_PRICE = {
-        Currency.RUB: 100,
-        Currency.USD: 1,
-        Currency.XTR: 100,
-    }
-
     def __init__(
         self,
         id: str,
@@ -78,7 +74,7 @@ class Package:
         income_amount=0.00,
         quantity=1,
         payment_method=PaymentMethod.YOOKASSA,
-        provider_payment_charge_id="",
+        provider_payment_charge_id='',
         until_at=None,
         created_at=None,
         edited_at=None,
@@ -106,13 +102,15 @@ class Package:
     def get_prices(currency: Currency):
         prices = {
             PackageType.CHAT_GPT4_OMNI_MINI: '',
-            PackageType.CHAT_GPT4_TURBO: '',
             PackageType.CHAT_GPT4_OMNI: '',
             PackageType.CLAUDE_3_SONNET: '',
             PackageType.CLAUDE_3_OPUS: '',
+            PackageType.GEMINI_1_FLASH: '',
+            PackageType.GEMINI_1_PRO: '',
             PackageType.CHAT: '',
             PackageType.DALL_E: '',
             PackageType.MIDJOURNEY: '',
+            PackageType.STABLE_DIFFUSION: '',
             PackageType.FACE_SWAP: '',
             PackageType.MUSIC_GEN: '',
             PackageType.SUNO: '',
@@ -122,50 +120,56 @@ class Package:
         }
 
         if currency == Currency.RUB:
-            prices[PackageType.CHAT_GPT4_OMNI_MINI] = '1₽'
-            prices[PackageType.CHAT_GPT4_TURBO] = '5₽'
-            prices[PackageType.CHAT_GPT4_OMNI] = '2.5₽'
-            prices[PackageType.CLAUDE_3_SONNET] = '2.5₽'
-            prices[PackageType.CLAUDE_3_OPUS] = '5₽'
-            prices[PackageType.DALL_E] = '5₽'
-            prices[PackageType.MIDJOURNEY] = '10₽'
-            prices[PackageType.FACE_SWAP] = '5₽'
-            prices[PackageType.MUSIC_GEN] = '1₽'
-            prices[PackageType.SUNO] = '5₽'
-            prices[PackageType.CHAT] = '25₽'
-            prices[PackageType.ACCESS_TO_CATALOG] = '50₽'
-            prices[PackageType.VOICE_MESSAGES] = '50₽'
-            prices[PackageType.FAST_MESSAGES] = '50₽'
+            prices[PackageType.CHAT_GPT4_OMNI_MINI] = '2₽'
+            prices[PackageType.CHAT_GPT4_OMNI] = '8₽'
+            prices[PackageType.CLAUDE_3_SONNET] = '2₽'
+            prices[PackageType.CLAUDE_3_OPUS] = '8₽'
+            prices[PackageType.GEMINI_1_FLASH] = '2₽'
+            prices[PackageType.GEMINI_1_PRO] = '8₽'
+            prices[PackageType.DALL_E] = '8₽'
+            prices[PackageType.MIDJOURNEY] = '8₽'
+            prices[PackageType.STABLE_DIFFUSION] = '8₽'
+            prices[PackageType.FACE_SWAP] = '8₽'
+            prices[PackageType.MUSIC_GEN] = '8₽'
+            prices[PackageType.SUNO] = '8₽'
+            prices[PackageType.CHAT] = '20₽'
+            prices[PackageType.ACCESS_TO_CATALOG] = '40₽'
+            prices[PackageType.VOICE_MESSAGES] = '40₽'
+            prices[PackageType.FAST_MESSAGES] = '40₽'
         elif currency == Currency.USD:
-            prices[PackageType.CHAT_GPT4_OMNI_MINI] = '$0.01'
-            prices[PackageType.CHAT_GPT4_TURBO] = '$0.05'
-            prices[PackageType.CHAT_GPT4_OMNI] = '$0.025'
-            prices[PackageType.CLAUDE_3_SONNET] = '$0.025'
-            prices[PackageType.CLAUDE_3_OPUS] = '$0.05'
-            prices[PackageType.DALL_E] = '$0.05'
-            prices[PackageType.MIDJOURNEY] = '$0.1'
-            prices[PackageType.FACE_SWAP] = '$0.05'
-            prices[PackageType.MUSIC_GEN] = '$0.01'
-            prices[PackageType.SUNO] = '$0.05'
-            prices[PackageType.CHAT] = '$0.25'
-            prices[PackageType.ACCESS_TO_CATALOG] = '$0.5'
-            prices[PackageType.VOICE_MESSAGES] = '$0.5'
-            prices[PackageType.FAST_MESSAGES] = '$0.5'
+            prices[PackageType.CHAT_GPT4_OMNI_MINI] = '$0.02'
+            prices[PackageType.CHAT_GPT4_OMNI] = '$0.08'
+            prices[PackageType.CLAUDE_3_SONNET] = '$0.02'
+            prices[PackageType.CLAUDE_3_OPUS] = '$0.08'
+            prices[PackageType.GEMINI_1_FLASH] = '$0.02'
+            prices[PackageType.GEMINI_1_PRO] = '$0.08'
+            prices[PackageType.DALL_E] = '$0.08'
+            prices[PackageType.MIDJOURNEY] = '$0.08'
+            prices[PackageType.STABLE_DIFFUSION] = '$0.08'
+            prices[PackageType.FACE_SWAP] = '$0.08'
+            prices[PackageType.MUSIC_GEN] = '$0.08'
+            prices[PackageType.SUNO] = '$0.08'
+            prices[PackageType.CHAT] = '$0.2'
+            prices[PackageType.ACCESS_TO_CATALOG] = '$0.4'
+            prices[PackageType.VOICE_MESSAGES] = '$0.4'
+            prices[PackageType.FAST_MESSAGES] = '$0.4'
         else:
-            prices[PackageType.CHAT_GPT4_OMNI_MINI] = '1⭐'
-            prices[PackageType.CHAT_GPT4_TURBO] = '5⭐️'
-            prices[PackageType.CHAT_GPT4_OMNI] = '2.5⭐️'
-            prices[PackageType.CLAUDE_3_SONNET] = '2.5⭐️'
-            prices[PackageType.CLAUDE_3_OPUS] = '5⭐️'
-            prices[PackageType.DALL_E] = '5⭐️'
-            prices[PackageType.MIDJOURNEY] = '10⭐️'
-            prices[PackageType.FACE_SWAP] = '5⭐️'
-            prices[PackageType.MUSIC_GEN] = '1⭐️'
-            prices[PackageType.SUNO] = '5⭐️'
-            prices[PackageType.CHAT] = '25⭐️'
-            prices[PackageType.ACCESS_TO_CATALOG] = '50⭐️'
-            prices[PackageType.VOICE_MESSAGES] = '50⭐️'
-            prices[PackageType.FAST_MESSAGES] = '50⭐️'
+            prices[PackageType.CHAT_GPT4_OMNI_MINI] = '2⭐'
+            prices[PackageType.CHAT_GPT4_OMNI] = '8⭐️'
+            prices[PackageType.CLAUDE_3_SONNET] = '2⭐'
+            prices[PackageType.CLAUDE_3_OPUS] = '8⭐️'
+            prices[PackageType.GEMINI_1_FLASH] = '2⭐'
+            prices[PackageType.GEMINI_1_PRO] = '8⭐️'
+            prices[PackageType.DALL_E] = '8⭐️'
+            prices[PackageType.MIDJOURNEY] = '8⭐️'
+            prices[PackageType.STABLE_DIFFUSION] = '8⭐️'
+            prices[PackageType.FACE_SWAP] = '8⭐️'
+            prices[PackageType.MUSIC_GEN] = '8⭐️'
+            prices[PackageType.SUNO] = '8⭐️'
+            prices[PackageType.CHAT] = '20⭐️'
+            prices[PackageType.ACCESS_TO_CATALOG] = '40⭐️'
+            prices[PackageType.VOICE_MESSAGES] = '40⭐️'
+            prices[PackageType.FAST_MESSAGES] = '40⭐️'
 
         return prices
 
@@ -192,9 +196,6 @@ class Package:
         if package_type == PackageType.CHAT_GPT4_OMNI_MINI:
             name = localization.GPT4_OMNI_MINI_REQUESTS
             description = localization.GPT4_OMNI_REQUESTS_DESCRIPTION
-        elif package_type == PackageType.CHAT_GPT4_TURBO:
-            name = localization.GPT4_REQUESTS
-            description = localization.GPT4_REQUESTS_DESCRIPTION
         elif package_type == PackageType.CHAT_GPT4_OMNI:
             name = localization.GPT4_OMNI_REQUESTS
             description = localization.GPT4_OMNI_REQUESTS_DESCRIPTION
@@ -204,12 +205,21 @@ class Package:
         elif package_type == PackageType.CLAUDE_3_OPUS:
             name = localization.CLAUDE_3_OPUS_REQUESTS
             description = localization.CLAUDE_3_OPUS_REQUESTS_DESCRIPTION
+        elif package_type == PackageType.GEMINI_1_FLASH:
+            name = localization.GEMINI_1_FLASH_REQUESTS
+            description = localization.GEMINI_1_FLASH_REQUESTS_DESCRIPTION
+        elif package_type == PackageType.GEMINI_1_PRO:
+            name = localization.GEMINI_1_PRO_REQUESTS
+            description = localization.GEMINI_1_PRO_REQUESTS_DESCRIPTION
         elif package_type == PackageType.DALL_E:
             name = localization.DALL_E_REQUESTS
             description = localization.DALL_E_REQUESTS_DESCRIPTION
         elif package_type == PackageType.MIDJOURNEY:
             name = localization.MIDJOURNEY_REQUESTS
             description = localization.MIDJOURNEY_REQUESTS_DESCRIPTION
+        elif package_type == PackageType.STABLE_DIFFUSION:
+            name = localization.STABLE_DIFFUSION_REQUESTS
+            description = localization.STABLE_DIFFUSION_REQUESTS_DESCRIPTION
         elif package_type == PackageType.FACE_SWAP:
             name = localization.FACE_SWAP_REQUESTS
             description = localization.FACE_SWAP_REQUESTS_DESCRIPTION
@@ -233,8 +243,8 @@ class Package:
             description = localization.FAST_ANSWERS_DESCRIPTION
 
         return {
-            "name": name,
-            "description": description,
+            'name': name,
+            'description': description,
         }
 
     @staticmethod
@@ -243,9 +253,6 @@ class Package:
         if package_type == PackageType.CHAT_GPT4_OMNI_MINI:
             additional_usage_quota[Quota.CHAT_GPT4_OMNI_MINI] += quantity
             service_type = ServiceType.CHAT_GPT4_OMNI_MINI
-        elif package_type == PackageType.CHAT_GPT4_TURBO:
-            additional_usage_quota[Quota.CHAT_GPT4_TURBO] += quantity
-            service_type = ServiceType.CHAT_GPT4_TURBO
         elif package_type == PackageType.CHAT_GPT4_OMNI:
             additional_usage_quota[Quota.CHAT_GPT4_OMNI] += quantity
             service_type = ServiceType.CHAT_GPT4_OMNI
@@ -255,12 +262,21 @@ class Package:
         elif package_type == PackageType.CLAUDE_3_OPUS:
             additional_usage_quota[Quota.CLAUDE_3_OPUS] += quantity
             service_type = ServiceType.CLAUDE_3_OPUS
+        elif package_type == PackageType.GEMINI_1_FLASH:
+            additional_usage_quota[Quota.GEMINI_1_FLASH] += quantity
+            service_type = ServiceType.GEMINI_1_FLASH
+        elif package_type == PackageType.GEMINI_1_PRO:
+            additional_usage_quota[Quota.GEMINI_1_PRO] += quantity
+            service_type = ServiceType.GEMINI_1_PRO
         elif package_type == PackageType.DALL_E:
             additional_usage_quota[Quota.DALL_E] += quantity
             service_type = ServiceType.DALL_E
         elif package_type == PackageType.MIDJOURNEY:
             additional_usage_quota[Quota.MIDJOURNEY] += quantity
             service_type = ServiceType.MIDJOURNEY
+        elif package_type == PackageType.STABLE_DIFFUSION:
+            additional_usage_quota[Quota.STABLE_DIFFUSION] += quantity
+            service_type = ServiceType.STABLE_DIFFUSION
         elif package_type == PackageType.FACE_SWAP:
             additional_usage_quota[Quota.FACE_SWAP] += quantity
             service_type = ServiceType.FACE_SWAP

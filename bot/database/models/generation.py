@@ -4,18 +4,18 @@ from bot.database.models.common import Model
 
 
 class GenerationStatus:
-    STARTED = "STARTED"
-    FINISHED = "FINISHED"
+    STARTED = 'STARTED'
+    FINISHED = 'FINISHED'
 
 
 class GenerationReaction:
-    NONE = "NONE"
-    LIKED = "LIKED"
-    DISLIKED = "DISLIKED"
+    NONE = 'NONE'
+    LIKED = 'LIKED'
+    DISLIKED = 'DISLIKED'
 
 
 class Generation:
-    COLLECTION_NAME = "generations"
+    COLLECTION_NAME = 'generations'
 
     id: str
     request_id: str
@@ -34,7 +34,7 @@ class Generation:
         id: str,
         request_id: str,
         model: Model,
-        result="",
+        result='',
         has_error=False,
         status=GenerationStatus.STARTED,
         reaction=GenerationReaction.NONE,

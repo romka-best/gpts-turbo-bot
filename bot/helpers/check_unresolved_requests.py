@@ -22,8 +22,8 @@ async def check_unresolved_requests(bot: Bot):
             update_request(
                 not_finished_request.id,
                 {
-                    "status": RequestStatus.FINISHED,
-                    "details": not_finished_request.details,
+                    'status': RequestStatus.FINISHED,
+                    'details': not_finished_request.details,
                 }
             )
         )
@@ -33,5 +33,5 @@ async def check_unresolved_requests(bot: Bot):
     if len(tasks):
         await send_message_to_admins_and_developers(
             bot,
-            f"⚠️ <b>Внимание!</b>\n\nЯ нашёл генерации, которым больше 30 минут ❗️\n\nКоличество: {len(tasks)}",
+            f'⚠️ <b>Внимание!</b>\n\nЯ нашёл генерации, которым больше 30 минут ❗️\n\nКоличество: {len(tasks)}',
         )

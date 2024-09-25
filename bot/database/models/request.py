@@ -4,12 +4,12 @@ from bot.database.models.common import Model
 
 
 class RequestStatus:
-    STARTED = "STARTED"
-    FINISHED = "FINISHED"
+    STARTED = 'STARTED'
+    FINISHED = 'FINISHED'
 
 
 class Request:
-    COLLECTION_NAME = "requests"
+    COLLECTION_NAME = 'requests'
 
     id: str
     user_id: str

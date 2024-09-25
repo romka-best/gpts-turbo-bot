@@ -12,5 +12,5 @@ async def handle_forbidden_error(telegram_update: Update):
 
     if user_id:
         await update_user(user_id, {
-            "is_blocked": True,
+            'is_blocked': True,
         })

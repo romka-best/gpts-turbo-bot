@@ -56,7 +56,7 @@ from bot.states.chats import Chats
 settings_router = Router()
 
 
-@settings_router.message(Command("settings"))
+@settings_router.message(Command('settings'))
 async def settings_choose_model(message: Message, state: FSMContext):
     await state.clear()
 
@@ -128,7 +128,7 @@ async def handle_settings_choose_model_type_selection(callback_query: CallbackQu
     else:
         human_model = chosen_model
 
-    reply_markup = build_settings_keyboard(user_language_code, chosen_model, "text", user.settings)
+    reply_markup = build_settings_keyboard(user_language_code, chosen_model, 'text', user.settings)
     await callback_query.message.edit_text(
         text=get_localization(user_language_code).settings(human_model, chosen_model),
         reply_markup=reply_markup,
@@ -165,7 +165,7 @@ async def handle_settings_choose_model_type_selection(callback_query: CallbackQu
     else:
         human_model = chosen_model
 
-    reply_markup = build_settings_keyboard(user_language_code, chosen_model, "image", user.settings)
+    reply_markup = build_settings_keyboard(user_language_code, chosen_model, 'image', user.settings)
     await callback_query.message.edit_text(
         text=get_localization(user_language_code).settings(human_model, chosen_model, dall_e_cost),
         reply_markup=reply_markup,
@@ -195,7 +195,7 @@ async def handle_settings_choose_model_type_selection(callback_query: CallbackQu
     else:
         human_model = chosen_model
 
-    reply_markup = build_settings_keyboard(user_language_code, chosen_model, "music", user.settings)
+    reply_markup = build_settings_keyboard(user_language_code, chosen_model, 'music', user.settings)
     await callback_query.message.edit_text(
         text=get_localization(user_language_code).settings(human_model, chosen_model),
         reply_markup=reply_markup,
@@ -265,11 +265,11 @@ async def handle_setting_selection(callback_query: CallbackQuery, state: FSMCont
         new_row = []
         for button in row:
             text = button.text
-            callback_data = button.callback_data.split(":")[1]
+            callback_data = button.callback_data.split(':')[1]
 
             if what_changed == UserSettings.VERSION:
-                if callback_data == chosen_setting and "✅" not in text:
-                    text += " ✅"
+                if callback_data == chosen_setting and '✅' not in text:
+                    text += ' ✅'
                     keyboard_changed = True
                 elif (
                     callback_data == MidjourneyVersion.V5 or callback_data == MidjourneyVersion.V6
@@ -278,35 +278,35 @@ async def handle_setting_selection(callback_query: CallbackQuery, state: FSMCont
                 ) or (
                     callback_data == SunoVersion.V3 or callback_data == SunoVersion.V3_5
                 ):
-                    text = text.replace(" ✅", "")
+                    text = text.replace(' ✅', '')
             elif what_changed == UserSettings.QUALITY:
-                if callback_data == chosen_setting and "✅" not in text:
-                    text += " ✅"
+                if callback_data == chosen_setting and '✅' not in text:
+                    text += ' ✅'
                     keyboard_changed = True
                 elif callback_data == DALLEQuality.STANDARD or callback_data == DALLEQuality.HD:
-                    text = text.replace(" ✅", "")
+                    text = text.replace(' ✅', '')
             elif what_changed == UserSettings.RESOLUTION:
-                if callback_data == chosen_setting and "✅" not in text:
-                    text += " ✅"
+                if callback_data == chosen_setting and '✅' not in text:
+                    text += ' ✅'
                     keyboard_changed = True
                 elif callback_data == DALLEResolution.LOW or callback_data == DALLEResolution.MEDIUM or callback_data == DALLEResolution.HIGH:
-                    text = text.replace(" ✅", "")
+                    text = text.replace(' ✅', '')
             elif what_changed == UserSettings.SEND_TYPE:
-                if callback_data == chosen_setting and "✅" not in text:
-                    text += " ✅"
+                if callback_data == chosen_setting and '✅' not in text:
+                    text += ' ✅'
                     keyboard_changed = True
                 elif callback_data == SunoSendType.AUDIO or callback_data == SunoSendType.VIDEO:
-                    text = text.replace(" ✅", "")
+                    text = text.replace(' ✅', '')
             elif (
                 chosen_setting == callback_data and
                 callback_data != DALLEQuality.STANDARD and callback_data != DALLEQuality.HD and
                 callback_data != DALLEResolution.LOW and callback_data != DALLEResolution.MEDIUM and callback_data != DALLEResolution.HIGH
             ):
-                if "✅" in text:
-                    text = text.replace(" ✅", " ❌")
+                if '✅' in text:
+                    text = text.replace(' ✅', ' ❌')
                     keyboard_changed = True
                 else:
-                    text = text.replace(" ❌", " ✅")
+                    text = text.replace(' ❌', ' ✅')
                     keyboard_changed = True
             new_row.append(InlineKeyboardButton(text=text, callback_data=button.callback_data))
         new_keyboard.append(new_row)
@@ -314,7 +314,7 @@ async def handle_setting_selection(callback_query: CallbackQuery, state: FSMCont
     if keyboard_changed:
         await update_user(
             user_id, {
-                "settings": user.settings,
+                'settings': user.settings,
             },
         )
 
@@ -386,9 +386,9 @@ async def handle_voice_messages_setting_selection(callback_query: CallbackQuery,
     elif chosen_setting == 'listen':
         voices: List[InputMediaAudio] = []
         voices_path = f'voices/{user_language_code}'
-        for voice_name in ["alloy", "echo", "nova", "shimmer", "fable", "onyx"]:
-            voice_filename = f"{voice_name}.mp3"
-            voice = await firebase.bucket.get_blob(f"{voices_path}/{voice_filename}")
+        for voice_name in ['alloy', 'echo', 'nova', 'shimmer', 'fable', 'onyx']:
+            voice_filename = f'{voice_name}.mp3'
+            voice = await firebase.bucket.get_blob(f'{voices_path}/{voice_filename}')
             voice_link = firebase.get_public_url(voice.name)
             voices.append(InputMediaAudio(media=voice_link, title=voice_name))
 
@@ -405,26 +405,26 @@ async def handle_voice_messages_setting_selection(callback_query: CallbackQuery,
         new_row = []
         for button in row:
             text = button.text
-            callback_data = button.callback_data.split(":", 1)[1]
+            callback_data = button.callback_data.split(':', 1)[1]
 
             if callback_data == chosen_setting and chosen_setting == UserSettings.TURN_ON_VOICE_MESSAGES:
-                if "✅" in text:
-                    text = text.replace(" ✅", " ❌")
+                if '✅' in text:
+                    text = text.replace(' ✅', ' ❌')
                     keyboard_changed = True
                 else:
-                    text = text.replace(" ❌", " ✅")
+                    text = text.replace(' ❌', ' ✅')
                     keyboard_changed = True
             elif callback_data == chosen_setting:
-                if "✅" not in text:
-                    text += " ✅"
+                if '✅' not in text:
+                    text += ' ✅'
                     keyboard_changed = True
             elif chosen_setting != UserSettings.TURN_ON_VOICE_MESSAGES:
-                text = text.replace(" ✅", "")
+                text = text.replace(' ✅', '')
             new_row.append(InlineKeyboardButton(text=text, callback_data=button.callback_data))
         new_keyboard.append(new_row)
 
     if keyboard_changed:
-        if chosen_setting in ["alloy", "echo", "fable", "onyx", "nova", "shimmer"]:
+        if chosen_setting in ['alloy', 'echo', 'fable', 'onyx', 'nova', 'shimmer']:
             user.settings[Model.CHAT_GPT][UserSettings.VOICE] = chosen_setting
             user.settings[Model.CLAUDE][UserSettings.VOICE] = chosen_setting
         else:
@@ -434,7 +434,7 @@ async def handle_voice_messages_setting_selection(callback_query: CallbackQuery,
 
         await update_user(
             user_id, {
-                "settings": user.settings,
+                'settings': user.settings,
             },
         )
 
@@ -491,21 +491,21 @@ async def handle_catalog_selection(callback_query: CallbackQuery, state: FSMCont
             new_row = []
             for button in row:
                 text = button.text
-                callback_data = button.callback_data.split(":", 1)[1]
+                callback_data = button.callback_data.split(':', 1)[1]
 
                 if callback_data == role_name:
-                    if "❌" in text:
-                        text = text.replace(" ❌", " ✅")
+                    if '❌' in text:
+                        text = text.replace(' ❌', ' ✅')
                         keyboard_changed = True
                 else:
-                    text = text.replace(" ✅", " ❌")
+                    text = text.replace(' ✅', ' ❌')
                 new_row.append(InlineKeyboardButton(text=text, callback_data=button.callback_data))
             new_keyboard.append(new_row)
 
         if keyboard_changed:
             current_chat = await get_chat_by_user_id(user_id)
             await update_chat(current_chat.id, {
-                "role": role_name,
+                'role': role_name,
             })
 
             await callback_query.message.edit_reply_markup(
@@ -555,9 +555,9 @@ async def handle_chat_selection(callback_query: CallbackQuery, state: FSMContext
         return
     elif action == 'show':
         all_chats = await get_chats_by_user_id(user_id)
-        text = ""
+        text = ''
         for count, chat in enumerate(all_chats):
-            text += f"\n{count + 1}. <b>{chat.title}</b>"
+            text += f'\n{count + 1}. <b>{chat.title}</b>'
 
         await callback_query.message.answer(text=text)
     elif action == 'create':
@@ -624,20 +624,20 @@ async def handle_switch_chat_selection(callback_query: CallbackQuery, state: FSM
         new_row = []
         for button in row:
             text = button.text
-            callback_data = button.callback_data.split(":", 1)[1]
+            callback_data = button.callback_data.split(':', 1)[1]
 
             if callback_data == chat_id:
-                if "❌" in text:
-                    text = text.replace(" ❌", " ✅")
+                if '❌' in text:
+                    text = text.replace(' ❌', ' ✅')
                     keyboard_changed = True
             else:
-                text = text.replace(" ✅", " ❌")
+                text = text.replace(' ✅', ' ❌')
             new_row.append(InlineKeyboardButton(text=text, callback_data=button.callback_data))
         new_keyboard.append(new_row)
 
     if keyboard_changed:
         await update_user(user_id, {
-            "current_chat_id": chat_id
+            'current_chat_id': chat_id
         })
 
         await callback_query.message.edit_reply_markup(
@@ -666,7 +666,7 @@ async def handle_delete_chat_selection(callback_query: CallbackQuery, state: FSM
         new_row = []
         for button in row:
             text = button.text
-            callback_data = button.callback_data.split(":", 1)[1]
+            callback_data = button.callback_data.split(':', 1)[1]
 
             if callback_data != chat_id:
                 new_row.append(InlineKeyboardButton(text=text, callback_data=button.callback_data))

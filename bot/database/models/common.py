@@ -13,32 +13,35 @@ class Currency:
 class Model:
     CHAT_GPT = 'chat-gpt'
     CLAUDE = 'claude'
+    GEMINI = 'gemini'
     DALL_E = 'dall-e'
     MIDJOURNEY = 'midjourney'
+    STABLE_DIFFUSION = 'stable-diffusion'
     FACE_SWAP = 'face-swap'
     MUSIC_GEN = 'music-gen'
     SUNO = 'suno'
 
 
 class Quota:
-    CHAT_GPT4_TURBO = "gpt4"
-    CHAT_GPT4_OMNI = "gpt4_omni"
-    CHAT_GPT4_OMNI_MINI = "gpt4_omni_mini"
-    CLAUDE_3_SONNET = "claude_3_sonnet"
-    CLAUDE_3_OPUS = "claude_3_opus"
-    DALL_E = "dall_e"
-    MIDJOURNEY = "midjourney"
-    FACE_SWAP = "face_swap"
-    MUSIC_GEN = "music_gen"
-    SUNO = "suno"
-    ADDITIONAL_CHATS = "additional_chats"
-    FAST_MESSAGES = "fast_messages"
-    VOICE_MESSAGES = "voice_messages"
-    ACCESS_TO_CATALOG = "access_to_catalog"
+    CHAT_GPT4_OMNI = 'gpt4_omni'
+    CHAT_GPT4_OMNI_MINI = 'gpt4_omni_mini'
+    CLAUDE_3_SONNET = 'claude_3_sonnet'
+    CLAUDE_3_OPUS = 'claude_3_opus'
+    GEMINI_1_FLASH = 'gemini_1_flash'
+    GEMINI_1_PRO = 'gemini_1_pro'
+    DALL_E = 'dall_e'
+    MIDJOURNEY = 'midjourney'
+    STABLE_DIFFUSION = 'stable_diffusion'
+    FACE_SWAP = 'face_swap'
+    MUSIC_GEN = 'music_gen'
+    SUNO = 'suno'
+    ADDITIONAL_CHATS = 'additional_chats'
+    FAST_MESSAGES = 'fast_messages'
+    VOICE_MESSAGES = 'voice_messages'
+    ACCESS_TO_CATALOG = 'access_to_catalog'
 
 
 class ChatGPTVersion:
-    V4_Turbo = 'gpt-4-turbo'
     V4_Omni = 'gpt-4o'
     V4_Omni_Mini = 'gpt-4o-mini'
 
@@ -46,6 +49,11 @@ class ChatGPTVersion:
 class ClaudeGPTVersion:
     V3_Sonnet = 'claude-3-5-sonnet-20240620'
     V3_Opus = 'claude-3-opus-20240229'
+
+
+class GeminiGPTVersion:
+    V1_Flash = 'gemini-1.5-flash'
+    V1_Pro = 'gemini-1.5-pro'
 
 
 class DALLEResolution:
@@ -66,23 +74,27 @@ class DALLEVersion:
 
 class MidjourneyVersion:
     V5 = '5.2'
-    V6 = '6.0'
+    V6 = '6.1'
 
 
 class MidjourneyAction:
-    PAYMENT = "payment"
-    IMAGINE = "imagine"
-    UPSCALE = "upscale"
-    # UPSCALE_TWO = "upscale_2x"
-    # UPSCALE_FOUR = "upscale_4x"
-    # UPSCALE_SUBTLE = "upscale_subtle"
-    # UPSCALE_CREATIVE = "upscale_creative"
-    VARIATION = "variation"
-    # VARY_SUBTLE = "vary_subtle"
-    # VARY_STRONG = "vary_strong"
-    # ZOOM_OUT_ONE_AND_HALF = "zoom_out_1.5x"
-    # ZOOM_OUT_TWO = "zoom_out_2x"
-    REROLL = "reroll"
+    PAYMENT = 'payment'
+    IMAGINE = 'imagine'
+    UPSCALE = 'upscale'
+    # UPSCALE_TWO = 'upscale_2x'
+    # UPSCALE_FOUR = 'upscale_4x'
+    # UPSCALE_SUBTLE = 'upscale_subtle'
+    # UPSCALE_CREATIVE = 'upscale_creative'
+    VARIATION = 'variation'
+    # VARY_SUBTLE = 'vary_subtle'
+    # VARY_STRONG = 'vary_strong'
+    # ZOOM_OUT_ONE_AND_HALF = 'zoom_out_1.5x'
+    # ZOOM_OUT_TWO = 'zoom_out_2x'
+    REROLL = 'reroll'
+
+
+class StableDiffusionVersion:
+    LATEST = 'LATEST'
 
 
 class FaceSwapVersion:
@@ -94,13 +106,13 @@ class MusicGenVersion:
 
 
 class SunoMode:
-    SIMPLE = "SIMPLE"
-    CUSTOM = "CUSTOM"
+    SIMPLE = 'SIMPLE'
+    CUSTOM = 'CUSTOM'
 
 
 class SunoSendType:
-    VIDEO = "VIDEO"
-    AUDIO = "AUDIO"
+    VIDEO = 'VIDEO'
+    AUDIO = 'AUDIO'
 
 
 class SunoVersion:
@@ -123,4 +135,4 @@ class PaymentMethod:
     GIFT = 'GIFT'
 
 
-DEFAULT_ROLE = "PERSONAL_ASSISTANT"
+DEFAULT_ROLE = 'PERSONAL_ASSISTANT'

@@ -3,6 +3,7 @@ from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup
 
+from bot.config import config, MessageEffect
 from bot.database.models.common import Model
 from bot.database.models.user import UserSettings
 from bot.database.operations.user.getters import get_user
@@ -16,7 +17,7 @@ from bot.locales.main import get_localization, get_user_language
 mode_router = Router()
 
 
-@mode_router.message(Command("mode"))
+@mode_router.message(Command('mode'))
 async def mode(message: Message, state: FSMContext):
     await state.clear()
 
@@ -31,8 +32,10 @@ async def handle_mode(message: Message, state: FSMContext, user_id: str, is_edit
         user_language_code,
         user.current_model,
         user.settings[user.current_model][UserSettings.VERSION]
-        if user.current_model == Model.CHAT_GPT or user.current_model == Model.CLAUDE
-        else "",
+        if user.current_model == Model.CHAT_GPT or
+           user.current_model == Model.CLAUDE or
+           user.current_model == Model.GEMINI
+        else '',
         page,
     )
 
@@ -53,10 +56,10 @@ async def handle_mode_selection(callback_query: CallbackQuery, state: FSMContext
     await callback_query.answer()
 
     chosen_model = callback_query.data.split(':')[1]
-    chosen_version = ""
-    if chosen_model == "text" or chosen_model == "page":
+    chosen_version = ''
+    if chosen_model == 'text' or chosen_model == 'page':
         return
-    elif chosen_model == "next" or chosen_model == "back":
+    elif chosen_model == 'next' or chosen_model == 'back':
         page = int(callback_query.data.split(':')[2])
         await handle_mode(callback_query.message, state, str(callback_query.from_user.id), True, page)
 
@@ -72,17 +75,17 @@ async def handle_mode_selection(callback_query: CallbackQuery, state: FSMContext
         new_row = []
         for button in row:
             text = button.text
-            callback_data = button.callback_data.split(":", 1)[1]
+            callback_data = button.callback_data.split(':', 1)[1]
 
             if (
                 (callback_data.startswith(chosen_model) and callback_data.endswith(chosen_version)) or
                 callback_data == chosen_model
             ):
-                if "✅" not in text:
-                    text += " ✅"
+                if '✅' not in text:
+                    text += ' ✅'
                     keyboard_changed = True
             else:
-                text = text.replace(" ✅", "")
+                text = text.replace(' ✅', '')
             new_row.append(InlineKeyboardButton(text=text, callback_data=button.callback_data))
         new_keyboard.append(new_row)
 
@@ -99,15 +102,15 @@ async def handle_mode_selection(callback_query: CallbackQuery, state: FSMContext
             user.settings[Model.CLAUDE][UserSettings.VERSION] = chosen_version
 
         await update_user(user_id, {
-            "current_model": user.current_model,
-            "settings": user.settings,
+            'current_model': user.current_model,
+            'settings': user.settings,
         })
         await callback_query.message.edit_reply_markup(reply_markup=InlineKeyboardMarkup(inline_keyboard=new_keyboard))
 
         await callback_query.message.reply(
             text=get_localization(user_language_code).switched(user.current_model, chosen_version),
             reply_markup=reply_markup,
-            message_effect_id="5104841245755180586",
+            message_effect_id=config.MESSAGE_EFFECTS.get(MessageEffect.FIRE),
         )
     else:
         await callback_query.message.reply(

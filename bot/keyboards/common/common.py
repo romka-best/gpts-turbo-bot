@@ -10,13 +10,45 @@ from bot.database.operations.face_swap_package.getters import get_face_swap_pack
 from bot.locales.main import get_localization
 
 
+def build_start_keyboard(language_code: str) -> InlineKeyboardMarkup:
+    buttons = [
+        [
+            InlineKeyboardButton(
+                text=get_localization(language_code).START_QUICK_GUIDE,
+                callback_data='start:quick_guide'
+            )
+        ],
+        [
+            InlineKeyboardButton(
+                text=get_localization(language_code).START_ADDITIONAL_FEATURES,
+                callback_data='start:additional_features'
+            )
+        ],
+    ]
+
+    return InlineKeyboardMarkup(inline_keyboard=buttons)
+
+
+def build_start_chosen_keyboard(language_code: str) -> InlineKeyboardMarkup:
+    buttons = [
+        [
+            InlineKeyboardButton(
+                text=get_localization(language_code).BACK,
+                callback_data='start:back'
+            )
+        ],
+    ]
+
+    return InlineKeyboardMarkup(inline_keyboard=buttons)
+
+
 async def build_recommendations_keyboard(
     current_model: Model,
     language_code: str,
     gender: UserGender,
 ) -> ReplyKeyboardMarkup:
     buttons = []
-    if current_model == Model.CHAT_GPT or current_model == Model.CLAUDE:
+    if current_model == Model.CHAT_GPT or current_model == Model.CLAUDE or current_model == Model.GEMINI:
         recommendations = get_localization(language_code).requests_recommendations()
         random.shuffle(recommendations)
         for recommendation in recommendations[:4]:
@@ -25,7 +57,7 @@ async def build_recommendations_keyboard(
                     text=recommendation,
                 )
             ])
-    elif current_model == Model.DALL_E or current_model == Model.MIDJOURNEY:
+    elif current_model == Model.DALL_E or current_model == Model.MIDJOURNEY or current_model == Model.STABLE_DIFFUSION:
         recommendations = get_localization(language_code).image_recommendations()
         random.shuffle(recommendations)
         for recommendation in recommendations[:4]:
@@ -68,11 +100,11 @@ def build_reaction_keyboard(generation_id: str) -> InlineKeyboardMarkup:
     buttons = [
         [
             InlineKeyboardButton(
-                text="👍",
+                text='👍',
                 callback_data=f'reaction:{GenerationReaction.LIKED}:{generation_id}'
             ),
             InlineKeyboardButton(
-                text="👎",
+                text='👎',
                 callback_data=f'reaction:{GenerationReaction.DISLIKED}:{generation_id}'
             ),
         ],
@@ -99,7 +131,7 @@ def build_error_keyboard(language_code: str) -> InlineKeyboardMarkup:
         [
             InlineKeyboardButton(
                 text=get_localization(language_code).TECH_SUPPORT,
-                url="https://t.me/roman_danilov",
+                url='https://t.me/roman_danilov',
                 callback_data='error:tech_support'
             )
         ]

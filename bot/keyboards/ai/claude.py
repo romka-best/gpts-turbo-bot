@@ -9,7 +9,7 @@ def build_claude_keyboard(language_code: str, model: Model, model_version: Claud
         [
             InlineKeyboardButton(
                 text=get_localization(language_code).CLAUDE_3_SONNET + (
-                    " ✅" if model == Model.CLAUDE and model_version == ClaudeGPTVersion.V3_Sonnet else ""
+                    ' ✅' if model == Model.CLAUDE and model_version == ClaudeGPTVersion.V3_Sonnet else ''
                 ),
                 callback_data=f'claude:{ClaudeGPTVersion.V3_Sonnet}'
             ),
@@ -17,7 +17,7 @@ def build_claude_keyboard(language_code: str, model: Model, model_version: Claud
         [
             InlineKeyboardButton(
                 text=get_localization(language_code).CLAUDE_3_OPUS + (
-                    " ✅" if model == Model.CLAUDE and model_version == ClaudeGPTVersion.V3_Opus else ""
+                    ' ✅' if model == Model.CLAUDE and model_version == ClaudeGPTVersion.V3_Opus else ''
                 ),
                 callback_data=f'claude:{ClaudeGPTVersion.V3_Opus}'
             ),

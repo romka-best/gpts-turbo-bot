@@ -14,7 +14,7 @@ from bot.utils.is_developer import is_developer
 language_router = Router()
 
 
-@language_router.message(Command("language"))
+@language_router.message(Command('language'))
 async def language(message: Message, state: FSMContext):
     await state.clear()
 

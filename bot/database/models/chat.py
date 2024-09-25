@@ -4,7 +4,7 @@ from bot.database.models.common import DEFAULT_ROLE
 
 
 class Chat:
-    COLLECTION_NAME = "chats"
+    COLLECTION_NAME = 'chats'
 
     id: str
     user_id: str

@@ -10,7 +10,7 @@ async def write_generation(
     id: Optional[str],
     request_id: str,
     model: Model,
-    result="",
+    result='',
     has_error=False,
     status=GenerationStatus.STARTED,
     reaction=GenerationReaction.NONE,

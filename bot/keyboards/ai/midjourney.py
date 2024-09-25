@@ -8,43 +8,43 @@ def build_midjourney_keyboard(hash_id: str) -> InlineKeyboardMarkup:
     buttons = [
         [
             InlineKeyboardButton(
-                text="U1",
+                text='U1',
                 callback_data=f'midjourney:u1:{hash_id}'
             ),
             InlineKeyboardButton(
-                text="U2",
+                text='U2',
                 callback_data=f'midjourney:u2:{hash_id}'
             ),
             InlineKeyboardButton(
-                text="U3",
+                text='U3',
                 callback_data=f'midjourney:u3:{hash_id}'
             ),
             InlineKeyboardButton(
-                text="U4",
+                text='U4',
                 callback_data=f'midjourney:u4:{hash_id}'
             ),
         ],
         [
             InlineKeyboardButton(
-                text="V1",
+                text='V1',
                 callback_data=f'midjourney:v1:{hash_id}'
             ),
             InlineKeyboardButton(
-                text="V2",
+                text='V2',
                 callback_data=f'midjourney:v2:{hash_id}'
             ),
             InlineKeyboardButton(
-                text="V3",
+                text='V3',
                 callback_data=f'midjourney:v3:{hash_id}'
             ),
             InlineKeyboardButton(
-                text="V4",
+                text='V4',
                 callback_data=f'midjourney:v4:{hash_id}'
             ),
         ],
         [
             InlineKeyboardButton(
-                text="🔄",
+                text='🔄',
                 callback_data=f'midjourney:again:{hash_id}'
             ),
         ],
@@ -111,19 +111,19 @@ def build_midjourney_keyboard(hash_id: str) -> InlineKeyboardMarkup:
 #             ],
 #             [
 #                 InlineKeyboardButton(
-#                     text="⬅️",
+#                     text='⬅️',
 #                     callback_data=f'midjourney_image:left:{hash_id}'
 #                 ),
 #                 InlineKeyboardButton(
-#                     text="⬆️",
+#                     text='⬆️',
 #                     callback_data=f'midjourney_image:top:{hash_id}'
 #                 ),
 #                 InlineKeyboardButton(
-#                     text="➡️",
+#                     text='➡️',
 #                     callback_data=f'midjourney_image:right:{hash_id}'
 #                 ),
 #                 InlineKeyboardButton(
-#                     text="⬇️",
+#                     text='⬇️',
 #                     callback_data=f'midjourney_image:down:{hash_id}'
 #                 ),
 #             ]

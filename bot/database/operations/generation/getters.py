@@ -22,9 +22,9 @@ async def get_generations(
     generations_query = firebase.db.collection(Generation.COLLECTION_NAME)
 
     if start_date:
-        generations_query = generations_query.where(filter=FieldFilter("created_at", ">=", start_date))
+        generations_query = generations_query.where(filter=FieldFilter('created_at', '>=', start_date))
     if end_date:
-        generations_query = generations_query.where(filter=FieldFilter("created_at", "<=", end_date))
+        generations_query = generations_query.where(filter=FieldFilter('created_at', '<=', end_date))
 
     generations_stream = generations_query.stream()
     generations = [Generation(**generation.to_dict()) async for generation in generations_stream]
@@ -34,8 +34,8 @@ async def get_generations(
 
 async def get_generations_by_request_id(request_id: str) -> List[Generation]:
     generations_stream = firebase.db.collection(Generation.COLLECTION_NAME) \
-        .where(filter=FieldFilter("request_id", "==", request_id)) \
-        .order_by("created_at", direction=Query.DESCENDING) \
+        .where(filter=FieldFilter('request_id', '==', request_id)) \
+        .order_by('created_at', direction=Query.DESCENDING) \
         .stream()
     generations = [Generation(**generation.to_dict()) async for generation in generations_stream]
 

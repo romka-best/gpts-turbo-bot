@@ -6,6 +6,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
 from aiogram.utils.chat_action import ChatActionSender
 
+from bot.config import config, MessageEffect
 from bot.database.models.common import Model, Quota
 from bot.database.models.generation import GenerationStatus
 from bot.database.models.request import RequestStatus
@@ -31,7 +32,7 @@ music_gen_router = Router()
 PRICE_MUSIC_GEN = 0.00115
 
 
-@music_gen_router.message(Command("music_gen"))
+@music_gen_router.message(Command('music_gen'))
 async def music_gen(message: Message, state: FSMContext):
     await state.clear()
 
@@ -48,14 +49,14 @@ async def music_gen(message: Message, state: FSMContext):
     else:
         user.current_model = Model.MUSIC_GEN
         await update_user(user_id, {
-            "current_model": user.current_model,
+            'current_model': user.current_model,
         })
 
         reply_markup = await build_recommendations_keyboard(user.current_model, user_language_code, user.gender)
         await message.answer(
             text=get_localization(user_language_code).SWITCHED_TO_MUSIC_GEN,
             reply_markup=reply_markup,
-            message_effect_id="5104841245755180586",
+            message_effect_id=config.MESSAGE_EFFECTS.get(MessageEffect.FIRE),
         )
 
     await handle_music_gen(message.bot, str(message.chat.id), state, user_id)
@@ -123,7 +124,7 @@ async def handle_music_gen_selection(
     )
 
     async with ChatActionSender.record_voice(bot=message.bot, chat_id=message.chat.id):
-        quota = user.monthly_limits[Quota.MUSIC_GEN] + user.additional_usage_quota[Quota.MUSIC_GEN]
+        quota = user.daily_limits[Quota.MUSIC_GEN] + user.additional_usage_quota[Quota.MUSIC_GEN]
         prompt = user_data.get('music_gen_prompt')
 
         if not prompt:
@@ -133,7 +134,7 @@ async def handle_music_gen_selection(
             await message.delete()
             return
 
-        if quota < duration:
+        if quota < 1:
             reply_markup = build_cancel_keyboard(user_language_code)
             await message.reply(
                 text=get_localization(user_language_code).music_gen_forbidden(quota),
@@ -143,6 +144,12 @@ async def handle_music_gen_selection(
             reply_markup = build_cancel_keyboard(user_language_code)
             await message.reply(
                 text=get_localization(user_language_code).MUSIC_GEN_MIN_ERROR,
+                reply_markup=reply_markup,
+            )
+        elif duration > 300:
+            reply_markup = build_cancel_keyboard(user_language_code)
+            await message.reply(
+                text=get_localization(user_language_code).MUSIC_GEN_MAX_ERROR,
                 reply_markup=reply_markup,
             )
         else:
@@ -172,8 +179,8 @@ async def handle_music_gen_selection(
                     model=Model.MUSIC_GEN,
                     has_error=result_id is None,
                     details={
-                        "prompt": prompt,
-                        "duration": duration,
+                        'prompt': prompt,
+                        'duration': duration,
                     }
                 )
             except Exception as e:
@@ -188,12 +195,12 @@ async def handle_music_gen_selection(
                     bot=message.bot,
                     user_id=user.id,
                     info=str(e),
-                    hashtags=["music_gen"],
+                    hashtags=['music_gen'],
                 )
 
                 request.status = RequestStatus.FINISHED
                 await update_request(request.id, {
-                    "status": request.status
+                    'status': request.status
                 })
 
                 generations = await get_generations_by_request_id(request.id)
@@ -203,8 +210,8 @@ async def handle_music_gen_selection(
                     await update_generation(
                         generation.id,
                         {
-                            "status": generation.status,
-                            "has_error": generation.has_error,
+                            'status': generation.status,
+                            'has_error': generation.has_error,
                         },
                     )
 

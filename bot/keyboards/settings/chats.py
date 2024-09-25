@@ -67,8 +67,8 @@ def build_switch_chat_keyboard(language_code: str, current_chat_id: str, chats: 
     for chat in chats:
         buttons.append([
             InlineKeyboardButton(
-                text=f"{chat.title}" + (" ✅" if current_chat_id == chat.id else " ❌"),
-                callback_data=f"switch_chat:{chat.id}"
+                text=f'{chat.title}' + (' ✅' if current_chat_id == chat.id else ' ❌'),
+                callback_data=f'switch_chat:{chat.id}'
             )
         ])
     buttons.append([
@@ -88,7 +88,7 @@ def build_delete_chat_keyboard(language_code: str, current_chat_id: str, chats: 
             buttons.append([
                 InlineKeyboardButton(
                     text=chat.title,
-                    callback_data=f"delete_chat:{chat.id}"
+                    callback_data=f'delete_chat:{chat.id}'
                 )
             ])
     buttons.append([

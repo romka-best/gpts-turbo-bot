@@ -27,20 +27,20 @@ async def check_waiting_payments(bot: Bot):
             update_subscription(
                 not_finished_subscription.id,
                 {
-                    "status": not_finished_subscription.status,
+                    'status': not_finished_subscription.status,
                 }
             )
         )
 
         await send_message_to_admins_and_developers(
             bot=bot,
-            message=f"#payment #subscription #declined\n\n"
-                    f"❌ <b>Отмена оплаты подписки у пользователя: {not_finished_subscription.user_id}</b>\n\n"
-                    f"ℹ️ ID: {not_finished_subscription.id}\n"
-                    f"💱 Метод оплаты: {not_finished_subscription.payment_method}\n"
-                    f"💳 Тип подписки: {not_finished_subscription.type}\n"
-                    f"💰 Сумма: {not_finished_subscription.amount}{Currency.SYMBOLS[not_finished_subscription.currency]}\n\n"
-                    f"Грустно, но что поделать 🤷",
+            message=f'#payment #subscription #declined\n\n'
+                    f'❌ <b>Отмена оплаты подписки у пользователя: {not_finished_subscription.user_id}</b>\n\n'
+                    f'ℹ️ ID: {not_finished_subscription.id}\n'
+                    f'💱 Метод оплаты: {not_finished_subscription.payment_method}\n'
+                    f'💳 Тип подписки: {not_finished_subscription.type}\n'
+                    f'💰 Сумма: {not_finished_subscription.amount}{Currency.SYMBOLS[not_finished_subscription.currency]}\n\n'
+                    f'Грустно, но что поделать 🤷',
         )
 
     await asyncio.gather(*tasks)

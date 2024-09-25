@@ -55,7 +55,7 @@ async def ban_user_id_sent(message: Message, state: FSMContext):
 
         user.is_banned = not user.is_banned
         await update_user(user.id, {
-            "is_banned": user.is_banned,
+            'is_banned': user.is_banned,
         })
 
         if user.is_banned:

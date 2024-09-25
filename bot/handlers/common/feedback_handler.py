@@ -4,7 +4,9 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
 
 from bot.config import config
-from bot.database.operations.feedback.getters import get_feedbacks_by_user_id
+from bot.database.models.feedback import FeedbackStatus
+from bot.database.operations.feedback.getters import get_count_of_approved_feedbacks_by_user_id
+from bot.database.operations.feedback.updaters import update_feedback
 from bot.database.operations.feedback.writers import write_feedback
 from bot.database.operations.user.getters import get_user
 from bot.database.operations.user.updaters import update_user
@@ -18,7 +20,7 @@ from bot.states.feedback import Feedback
 feedback_router = Router()
 
 
-@feedback_router.message(Command("feedback"))
+@feedback_router.message(Command('feedback'))
 async def feedback(message: Message, state: FSMContext):
     await state.clear()
 
@@ -44,18 +46,18 @@ async def handle_feedback_sent(message: Message, state: FSMContext):
 
     feedback = await write_feedback(user_id, message.text)
 
-    text = (f"#feedback\n\n"
-            f"🚀 <b>Новая обратная связь от пользователя</b>: {user_id} 🚀\n\n"
-            f"<code>{message.text}</code>")
+    text = (f'#feedback\n\n'
+            f'🚀 <b>Новая обратная связь от пользователя</b>: {user_id} 🚀\n\n'
+            f'<code>{message.text}</code>')
     await send_message_to_admins_and_developers(
         bot=message.bot,
         message=text,
     )
 
-    reply_markup = build_manage_feedback_keyboard(user_language_code, user_id)
+    reply_markup = build_manage_feedback_keyboard(user_language_code, user_id, feedback.id)
     await message.bot.send_message(
         chat_id=config.SUPER_ADMIN_ID,
-        text=f"<b>{feedback.id} от {user_id}</b>",
+        text=f'<b>{feedback.id} from {user_id}</b>',
         reply_markup=reply_markup,
     )
 
@@ -64,18 +66,20 @@ async def handle_feedback_sent(message: Message, state: FSMContext):
     await state.clear()
 
 
-@feedback_router.callback_query(lambda c: c.data.startswith('manage_feedback:'))
+@feedback_router.callback_query(lambda c: c.data.startswith('mf:'))
 async def handle_manage_feedback(callback_query: CallbackQuery, state: FSMContext):
     await callback_query.answer()
 
     action = callback_query.data.split(':')[1]
     user_id = callback_query.data.split(':')[2]
+    feedback_id = callback_query.data.split(':')[3]
     user_language_code = await get_user_language(user_id, state.storage)
 
-    if action == "approve":
+    status = FeedbackStatus.WAITING
+    if action == 'approve':
         user = await get_user(user_id)
-        feedbacks = await get_feedbacks_by_user_id(user_id)
-        if len(feedbacks) > 4:
+        count_of_feedbacks = await get_count_of_approved_feedbacks_by_user_id(user_id)
+        if count_of_feedbacks > 4:
             await callback_query.bot.send_message(
                 user_id,
                 get_localization(user_language_code).FEEDBACK_APPROVED_WITH_LIMIT_ERROR,
@@ -83,20 +87,26 @@ async def handle_manage_feedback(callback_query: CallbackQuery, state: FSMContex
         else:
             user.balance += 25.00
             await update_user(user_id, {
-                "balance": user.balance,
+                'balance': user.balance,
             })
 
             await callback_query.bot.send_message(
                 user_id,
                 get_localization(user_language_code).FEEDBACK_APPROVED,
             )
-    elif action == "deny":
+        status = FeedbackStatus.APPROVED
+    elif action == 'deny':
         await callback_query.bot.send_message(
             user_id,
             get_localization(user_language_code).FEEDBACK_DENIED,
         )
+        status = FeedbackStatus.DENIED
 
-    new_text = f"<b>{callback_query.message.text}</b>\n\n<b>Статус:</b> {'Одобрена ✅' if action == 'approve' else 'Отклонена ❌'}"
+    await update_feedback(feedback_id, {
+        'status': status,
+    })
+
+    new_text = f'<b>{callback_query.message.text}</b>\n\n<b>Status:</b> {"Approved ✅" if action == "approve" else "Denied ❌"}'
     await callback_query.message.edit_text(
         text=new_text,
         reply_markup=None,

@@ -16,7 +16,7 @@ from bot.locales.main import get_user_language, get_localization
 info_router = Router()
 
 
-@info_router.message(Command("info"))
+@info_router.message(Command('info'))
 async def info(message: Message, state: FSMContext):
     await state.clear()
 
@@ -39,19 +39,19 @@ async def info_selection(callback_query: CallbackQuery, state: FSMContext):
     user_language_code = await get_user_language(user_id, state.storage)
 
     models_type = callback_query.data.split(':')[1]
-    if models_type == "text":
+    if models_type == 'text':
         reply_keyboard = build_info_text_models_keyboard(user_language_code)
         await callback_query.message.edit_text(
             text=get_localization(user_language_code).INFO_TEXT_MODELS,
             reply_markup=reply_keyboard,
         )
-    elif models_type == "image":
+    elif models_type == 'image':
         reply_keyboard = build_info_image_models_keyboard(user_language_code)
         await callback_query.message.edit_text(
             text=get_localization(user_language_code).INFO_IMAGE_MODELS,
             reply_markup=reply_keyboard,
         )
-    elif models_type == "music":
+    elif models_type == 'music':
         reply_keyboard = build_info_music_models_keyboard(user_language_code)
         await callback_query.message.edit_text(
             text=get_localization(user_language_code).INFO_MUSIC_MODELS,
@@ -69,7 +69,7 @@ async def info_text_models_selection(callback_query: CallbackQuery, state: FSMCo
     user_language_code = await get_user_language(user_id, state.storage)
 
     model = callback_query.data.split(':')[1]
-    reply_keyboard = build_info_chosen_model_keyboard(user_language_code, "text")
+    reply_keyboard = build_info_chosen_model_keyboard(user_language_code, 'text')
     if model == Model.CHAT_GPT:
         await callback_query.message.edit_text(
             text=get_localization(user_language_code).INFO_CHATGPT,
@@ -78,6 +78,11 @@ async def info_text_models_selection(callback_query: CallbackQuery, state: FSMCo
     elif model == Model.CLAUDE:
         await callback_query.message.edit_text(
             text=get_localization(user_language_code).INFO_CLAUDE,
+            reply_markup=reply_keyboard,
+        )
+    elif model == Model.GEMINI:
+        await callback_query.message.edit_text(
+            text=get_localization(user_language_code).INFO_GEMINI,
             reply_markup=reply_keyboard,
         )
     else:
@@ -97,7 +102,7 @@ async def info_image_models_selection(callback_query: CallbackQuery, state: FSMC
     user_language_code = await get_user_language(user_id, state.storage)
 
     model = callback_query.data.split(':')[1]
-    reply_keyboard = build_info_chosen_model_keyboard(user_language_code, "image")
+    reply_keyboard = build_info_chosen_model_keyboard(user_language_code, 'image')
     if model == Model.DALL_E:
         await callback_query.message.edit_text(
             text=get_localization(user_language_code).INFO_DALL_E,
@@ -106,6 +111,11 @@ async def info_image_models_selection(callback_query: CallbackQuery, state: FSMC
     elif model == Model.MIDJOURNEY:
         await callback_query.message.edit_text(
             text=get_localization(user_language_code).INFO_MIDJOURNEY,
+            reply_markup=reply_keyboard,
+        )
+    elif model == Model.STABLE_DIFFUSION:
+        await callback_query.message.edit_text(
+            text=get_localization(user_language_code).INFO_STABLE_DIFFUSION,
             reply_markup=reply_keyboard,
         )
     elif model == Model.FACE_SWAP:
@@ -130,7 +140,7 @@ async def info_music_models_selection(callback_query: CallbackQuery, state: FSMC
     user_language_code = await get_user_language(user_id, state.storage)
 
     model = callback_query.data.split(':')[1]
-    reply_keyboard = build_info_chosen_model_keyboard(user_language_code, "music")
+    reply_keyboard = build_info_chosen_model_keyboard(user_language_code, 'music')
     if model == Model.MUSIC_GEN:
         await callback_query.message.edit_text(
             text=get_localization(user_language_code).INFO_MUSIC_GEN,

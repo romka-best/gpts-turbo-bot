@@ -6,10 +6,12 @@ from bot.database.models.common import (
     Quota,
     ChatGPTVersion,
     ClaudeGPTVersion,
+    GeminiGPTVersion,
     DALLEResolution,
     DALLEQuality,
     DALLEVersion,
     MidjourneyVersion,
+    StableDiffusionVersion,
     FaceSwapVersion,
     MusicGenVersion,
     SunoSendType,
@@ -22,6 +24,7 @@ class UserSettings:
     SHOW_THE_NAME_OF_THE_CHATS = 'show_the_name_of_the_chats'
     SHOW_THE_NAME_OF_THE_ROLES = 'show_the_name_of_the_roles'
     SHOW_USAGE_QUOTA = 'show_usage_quota'
+    SHOW_EXAMPLES = 'show_examples'
     TURN_ON_VOICE_MESSAGES = 'turn_on_voice_messages'
     VOICE = 'voice'
     RESOLUTION = 'resolution'
@@ -37,7 +40,7 @@ class UserGender:
 
 
 class User:
-    COLLECTION_NAME = "users"
+    COLLECTION_NAME = 'users'
 
     id: str
     first_name: str
@@ -56,7 +59,7 @@ class User:
     balance: float
     subscription_type: SubscriptionType
     last_subscription_limit_update: datetime
-    monthly_limits: dict
+    daily_limits: dict
     additional_usage_quota: dict
     settings: dict
     referred_by: str
@@ -66,13 +69,15 @@ class User:
 
     DEFAULT_ADDITIONAL_USAGE_QUOTA = {
         Quota.CHAT_GPT4_OMNI_MINI: 0,
-        Quota.CHAT_GPT4_TURBO: 0,
         Quota.CHAT_GPT4_OMNI: 0,
         Quota.CLAUDE_3_SONNET: 0,
         Quota.CLAUDE_3_OPUS: 0,
+        Quota.GEMINI_1_FLASH: 0,
+        Quota.GEMINI_1_PRO: 0,
         Quota.ADDITIONAL_CHATS: 0,
         Quota.DALL_E: 0,
         Quota.MIDJOURNEY: 0,
+        Quota.STABLE_DIFFUSION: 0,
         Quota.FACE_SWAP: 0,
         Quota.MUSIC_GEN: 0,
         Quota.SUNO: 0,
@@ -89,6 +94,7 @@ class User:
             UserSettings.TURN_ON_VOICE_MESSAGES: False,
             UserSettings.VOICE: 'alloy',
             UserSettings.VERSION: ChatGPTVersion.V4_Omni_Mini,
+            UserSettings.SHOW_EXAMPLES: True,
         },
         Model.CLAUDE: {
             UserSettings.SHOW_THE_NAME_OF_THE_CHATS: False,
@@ -97,29 +103,49 @@ class User:
             UserSettings.TURN_ON_VOICE_MESSAGES: False,
             UserSettings.VOICE: 'alloy',
             UserSettings.VERSION: ClaudeGPTVersion.V3_Sonnet,
+            UserSettings.SHOW_EXAMPLES: True,
+        },
+        Model.GEMINI: {
+            UserSettings.SHOW_THE_NAME_OF_THE_CHATS: False,
+            UserSettings.SHOW_THE_NAME_OF_THE_ROLES: False,
+            UserSettings.SHOW_USAGE_QUOTA: False,
+            UserSettings.TURN_ON_VOICE_MESSAGES: False,
+            UserSettings.VOICE: 'alloy',
+            UserSettings.VERSION: GeminiGPTVersion.V1_Flash,
+            UserSettings.SHOW_EXAMPLES: True,
         },
         Model.DALL_E: {
             UserSettings.SHOW_USAGE_QUOTA: True,
             UserSettings.RESOLUTION: DALLEResolution.LOW,
             UserSettings.QUALITY: DALLEQuality.STANDARD,
             UserSettings.VERSION: DALLEVersion.V3,
+            UserSettings.SHOW_EXAMPLES: True,
         },
         Model.MIDJOURNEY: {
             UserSettings.SHOW_USAGE_QUOTA: True,
             UserSettings.VERSION: MidjourneyVersion.V6,
+            UserSettings.SHOW_EXAMPLES: False,
+        },
+        Model.STABLE_DIFFUSION: {
+            UserSettings.SHOW_USAGE_QUOTA: True,
+            UserSettings.VERSION: StableDiffusionVersion.LATEST,
+            UserSettings.SHOW_EXAMPLES: False,
         },
         Model.FACE_SWAP: {
             UserSettings.SHOW_USAGE_QUOTA: True,
             UserSettings.VERSION: FaceSwapVersion.LATEST,
+            UserSettings.SHOW_EXAMPLES: False,
         },
         Model.MUSIC_GEN: {
             UserSettings.SHOW_USAGE_QUOTA: True,
             UserSettings.VERSION: MusicGenVersion.LATEST,
+            UserSettings.SHOW_EXAMPLES: True,
         },
         Model.SUNO: {
             UserSettings.SHOW_USAGE_QUOTA: True,
             UserSettings.SEND_TYPE: SunoSendType.VIDEO,
             UserSettings.VERSION: SunoVersion.V3_5,
+            UserSettings.SHOW_EXAMPLES: False,
         },
     }
 
@@ -132,8 +158,8 @@ class User:
         current_chat_id: str,
         telegram_chat_id: str,
         gender=UserGender.UNSPECIFIED,
-        language_code="en",
-        interface_language_code="en",
+        language_code='en',
+        interface_language_code='en',
         is_premium=False,
         is_blocked=False,
         is_banned=False,
@@ -142,13 +168,14 @@ class User:
         balance=0,
         subscription_type=SubscriptionType.FREE,
         last_subscription_limit_update=None,
-        monthly_limits=None,
+        daily_limits=None,
         additional_usage_quota=None,
         settings=None,
         referred_by=None,
         discount=0,
         created_at=None,
         edited_at=None,
+        **kwargs,
     ):
         self.id = str(id)
         self.first_name = first_name
@@ -166,7 +193,7 @@ class User:
         self.subscription_type = subscription_type
         self.current_chat_id = str(current_chat_id)
         self.telegram_chat_id = str(telegram_chat_id)
-        self.monthly_limits = monthly_limits if monthly_limits is not None \
+        self.daily_limits = daily_limits if daily_limits is not None \
             else SubscriptionLimit
         self.additional_usage_quota = additional_usage_quota if additional_usage_quota is not None \
             else self.DEFAULT_ADDITIONAL_USAGE_QUOTA
