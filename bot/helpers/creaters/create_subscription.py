@@ -32,21 +32,21 @@ async def create_subscription(
 
     subscription.status = SubscriptionStatus.ACTIVE
     await update_subscription_in_transaction(transaction, subscription_id, {
-        "status": subscription.status,
-        "provider_payment_charge_id": provider_payment_charge_id,
-        "provider_auto_payment_charge_id": provider_auto_payment_charge_id,
-        "income_amount": income_amount,
+        'status': subscription.status,
+        'provider_payment_charge_id': provider_payment_charge_id,
+        'provider_auto_payment_charge_id': provider_auto_payment_charge_id,
+        'income_amount': income_amount,
     })
 
-    user.monthly_limits.update(SubscriptionLimit.LIMITS[subscription.type])
+    user.daily_limits.update(SubscriptionLimit.LIMITS[subscription.type])
     for key, value in SubscriptionLimit.ADDITIONAL_QUOTA_LIMITS[subscription.type].items():
         if key in user.additional_usage_quota and key == Quota.ADDITIONAL_CHATS:
             user.additional_usage_quota[key] += value
         else:
             user.additional_usage_quota[key] = value
     await update_user_in_transaction(transaction, user_id, {
-        "subscription_type": subscription.type,
-        "monthly_limits": user.monthly_limits,
-        "additional_usage_quota": user.additional_usage_quota,
-        "last_subscription_limit_update": datetime.now(timezone.utc),
+        'subscription_type': subscription.type,
+        'daily_limits': user.daily_limits,
+        'additional_usage_quota': user.additional_usage_quota,
+        'last_subscription_limit_update': datetime.now(timezone.utc),
     })

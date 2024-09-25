@@ -1,6 +1,6 @@
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
-from bot.database.models.common import Model, ChatGPTVersion, ClaudeGPTVersion
+from bot.database.models.common import Model, ChatGPTVersion, ClaudeGPTVersion, GeminiGPTVersion
 from bot.locales.main import get_localization
 
 
@@ -18,23 +18,15 @@ def build_mode_keyboard(language_code: str, model: Model, model_version: str, pa
                 [
                     InlineKeyboardButton(
                         text=get_localization(language_code).CHATGPT4_OMNI_MINI + (
-                            " ✅" if model == Model.CHAT_GPT and model_version == ChatGPTVersion.V4_Omni_Mini else ""
+                            ' ✅' if model == Model.CHAT_GPT and model_version == ChatGPTVersion.V4_Omni_Mini else ''
                         ),
                         callback_data=f'mode:{Model.CHAT_GPT}:{ChatGPTVersion.V4_Omni_Mini}'
                     ),
                 ],
                 [
                     InlineKeyboardButton(
-                        text=get_localization(language_code).CHATGPT4_TURBO + (
-                            " ✅" if model == Model.CHAT_GPT and model_version == ChatGPTVersion.V4_Turbo else ""
-                        ),
-                        callback_data=f'mode:{Model.CHAT_GPT}:{ChatGPTVersion.V4_Turbo}'
-                    ),
-                ],
-                [
-                    InlineKeyboardButton(
                         text=get_localization(language_code).CHATGPT4_OMNI + (
-                            " ✅" if model == Model.CHAT_GPT and model_version == ChatGPTVersion.V4_Omni else ""
+                            ' ✅' if model == Model.CHAT_GPT and model_version == ChatGPTVersion.V4_Omni else ''
                         ),
                         callback_data=f'mode:{Model.CHAT_GPT}:{ChatGPTVersion.V4_Omni}'
                     ),
@@ -42,7 +34,7 @@ def build_mode_keyboard(language_code: str, model: Model, model_version: str, pa
                 [
                     InlineKeyboardButton(
                         text=get_localization(language_code).CLAUDE_3_SONNET + (
-                            " ✅" if model == Model.CLAUDE and model_version == ClaudeGPTVersion.V3_Sonnet else ""
+                            ' ✅' if model == Model.CLAUDE and model_version == ClaudeGPTVersion.V3_Sonnet else ''
                         ),
                         callback_data=f'mode:{Model.CLAUDE}:{ClaudeGPTVersion.V3_Sonnet}'
                     ),
@@ -50,22 +42,37 @@ def build_mode_keyboard(language_code: str, model: Model, model_version: str, pa
                 [
                     InlineKeyboardButton(
                         text=get_localization(language_code).CLAUDE_3_OPUS + (
-                            " ✅" if model == Model.CLAUDE and model_version == ClaudeGPTVersion.V3_Opus else ""),
+                            ' ✅' if model == Model.CLAUDE and model_version == ClaudeGPTVersion.V3_Opus else ''),
                         callback_data=f'mode:{Model.CLAUDE}:{ClaudeGPTVersion.V3_Opus}'
                     ),
                 ],
                 [
                     InlineKeyboardButton(
-                        text="⬅️",
-                        callback_data="mode:back:2"
+                        text=get_localization(language_code).GEMINI_1_FLASH + (
+                            ' ✅' if model == Model.GEMINI and model_version == GeminiGPTVersion.V1_Flash else ''
+                        ),
+                        callback_data=f'mode:{Model.GEMINI}:{GeminiGPTVersion.V1_Flash}'
+                    ),
+                ],
+                [
+                    InlineKeyboardButton(
+                        text=get_localization(language_code).GEMINI_1_PRO + (
+                            ' ✅' if model == Model.GEMINI and model_version == GeminiGPTVersion.V1_Pro else ''),
+                        callback_data=f'mode:{Model.GEMINI}:{GeminiGPTVersion.V1_Pro}'
+                    ),
+                ],
+                [
+                    InlineKeyboardButton(
+                        text='⬅️',
+                        callback_data='mode:back:2'
                     ),
                     InlineKeyboardButton(
-                        text="1/3",
-                        callback_data="mode:page:0"
+                        text='1/3',
+                        callback_data='mode:page:0'
                     ),
                     InlineKeyboardButton(
-                        text="➡️",
-                        callback_data="mode:next:1"
+                        text='➡️',
+                        callback_data='mode:next:1'
                     ),
                 ]
             ]
@@ -80,34 +87,40 @@ def build_mode_keyboard(language_code: str, model: Model, model_version: str, pa
             ],
             [
                 InlineKeyboardButton(
-                    text=get_localization(language_code).DALL_E + (" ✅" if model == Model.DALL_E else ""),
+                    text=get_localization(language_code).DALL_E + (' ✅' if model == Model.DALL_E else ''),
                     callback_data=f'mode:{Model.DALL_E}'
                 ),
             ],
             [
                 InlineKeyboardButton(
-                    text=get_localization(language_code).MIDJOURNEY + (" ✅" if model == Model.MIDJOURNEY else ""),
+                    text=get_localization(language_code).MIDJOURNEY + (' ✅' if model == Model.MIDJOURNEY else ''),
                     callback_data=f'mode:{Model.MIDJOURNEY}'
                 ),
             ],
             [
                 InlineKeyboardButton(
-                    text=get_localization(language_code).FACE_SWAP + (" ✅" if model == Model.FACE_SWAP else ""),
+                    text=get_localization(language_code).STABLE_DIFFUSION + (' ✅' if model == Model.STABLE_DIFFUSION else ''),
+                    callback_data=f'mode:{Model.STABLE_DIFFUSION}'
+                ),
+            ],
+            [
+                InlineKeyboardButton(
+                    text=get_localization(language_code).FACE_SWAP + (' ✅' if model == Model.FACE_SWAP else ''),
                     callback_data=f'mode:{Model.FACE_SWAP}'
                 ),
             ],
             [
                 InlineKeyboardButton(
-                    text="⬅️",
-                    callback_data="mode:back:0"
+                    text='⬅️',
+                    callback_data='mode:back:0'
                 ),
                 InlineKeyboardButton(
-                    text="2/3",
-                    callback_data="mode:page:1"
+                    text='2/3',
+                    callback_data='mode:page:1'
                 ),
                 InlineKeyboardButton(
-                    text="➡️",
-                    callback_data="mode:next:2"
+                    text='➡️',
+                    callback_data='mode:next:2'
                 ),
             ]
         ])
@@ -121,28 +134,28 @@ def build_mode_keyboard(language_code: str, model: Model, model_version: str, pa
             ],
             [
                 InlineKeyboardButton(
-                    text=get_localization(language_code).MUSIC_GEN + (" ✅" if model == Model.MUSIC_GEN else ""),
+                    text=get_localization(language_code).MUSIC_GEN + (' ✅' if model == Model.MUSIC_GEN else ''),
                     callback_data=f'mode:{Model.MUSIC_GEN}'
                 ),
             ],
             [
                 InlineKeyboardButton(
-                    text=get_localization(language_code).SUNO + (" ✅" if model == Model.SUNO else ""),
+                    text=get_localization(language_code).SUNO + (' ✅' if model == Model.SUNO else ''),
                     callback_data=f'mode:{Model.SUNO}'
                 ),
             ],
             [
                 InlineKeyboardButton(
-                    text="⬅️",
-                    callback_data="mode:back:1"
+                    text='⬅️',
+                    callback_data='mode:back:1'
                 ),
                 InlineKeyboardButton(
-                    text="3/3",
-                    callback_data="mode:page:2"
+                    text='3/3',
+                    callback_data='mode:page:2'
                 ),
                 InlineKeyboardButton(
-                    text="➡️",
-                    callback_data="mode:next:0"
+                    text='➡️',
+                    callback_data='mode:next:0'
                 ),
             ]
         ])

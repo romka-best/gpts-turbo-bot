@@ -4,13 +4,13 @@ from aiogram import Bot
 async def set_description(bot: Bot):
     await bot.set_my_short_description(
         short_description="""
-🤖 Access to AI models: ChatGPT, Claude, DALL•E, Midjourney, FaceSwap, MusicGen, Suno
+🤖 Access to AI: ChatGPT | Claude | Gemini | DALL•E | Midjourney | Stable Diffusion | Suno
 🛟 Support: @roman_danilov
 """,
     )
     await bot.set_my_short_description(
         short_description="""
-🤖 Доступ к ИИ моделям: ChatGPT, Claude, DALL•E, Midjourney, FaceSwap, MusicGen, Suno
+🤖 Доступ к ИИ: ChatGPT | Claude | Gemini | DALL•E | Midjourney | Stable Diffusion | Suno
 🛟 Поддержка: @roman_danilov
 """,
         language_code='ru',
@@ -20,34 +20,38 @@ async def set_description(bot: Bot):
         description="""
 Access to neural networks and AI:
 ✉️ ChatGPT-4.0 Omni Mini
-🧠 ChatGPT-4.0 Turbo
 💥 ChatGPT-4.0 Omni
 💫 Claude 3.5 Sonnet
-🚀 Claude 3 Opus
-🖼 DALL•E
-🎨 Midjourney
+🚀 Claude 3.0 Opus
+🏎 Gemini 1.5 Flash
+💼 Gemini 1.5 Pro
+🖼 DALL•E 3
+🎨 Midjourney 6.1
+🎆 Stable Diffusion 2.1
 😜 FaceSwap
 🎵 MusicGen
-🎸 Suno
+🎸 Suno 3.5
 
-Created by Stanford students 🏫
+Created with the support of Stanford students 🏫
 """,
     )
     await bot.set_my_description(
         description="""
 Доступ к нейронным сетям и ИИ:
 ✉️ ChatGPT-4.0 Omni Mini
-🧠 ChatGPT-4.0 Turbo
 💥 ChatGPT-4.0 Omni
 💫 Claude 3.5 Sonnet
-🚀 Claude 3 Opus
-🖼 DALL•E
-🎨 Midjourney
+🚀 Claude 3.0 Opus
+🏎 Gemini 1.5 Flash
+💼 Gemini 1.5 Pro
+🖼 DALL•E 3
+🎨 Midjourney 6.1
+🎆 Stable Diffusion 2.1
 😜 FaceSwap
 🎵 MusicGen
-🎸 Suno
+🎸 Suno 3.5
 
-Создан студентами Stanford 🏫
+Создан при поддержке студентов из Stanford 🏫
 """,
         language_code='ru',
     )

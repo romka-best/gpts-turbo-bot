@@ -17,14 +17,14 @@ async def get_subscription(subscription_id: str) -> Optional[Subscription]:
 
 async def get_last_subscription_by_user_id(user_id: str) -> Optional[Subscription]:
     subscription_stream = firebase.db.collection(Subscription.COLLECTION_NAME) \
-        .where(filter=FieldFilter("user_id", "==", user_id)) \
-        .where(filter=FieldFilter("status", "not-in",
+        .where(filter=FieldFilter('user_id', '==', user_id)) \
+        .where(filter=FieldFilter('status', 'not-in',
                                   [
                                       SubscriptionStatus.WAITING,
                                       SubscriptionStatus.ERROR,
                                       SubscriptionStatus.DECLINED,
                                   ])) \
-        .order_by("created_at", direction=Query.DESCENDING) \
+        .order_by('created_at', direction=Query.DESCENDING) \
         .limit(1) \
         .stream()
 
@@ -38,11 +38,11 @@ async def get_last_subscription_with_waiting_payment(
     subscription_period: SubscriptionPeriod,
 ) -> Optional[Subscription]:
     subscription_stream = firebase.db.collection(Subscription.COLLECTION_NAME) \
-        .where(filter=FieldFilter("user_id", "==", user_id)) \
-        .where(filter=FieldFilter("status", "==", SubscriptionStatus.WAITING)) \
-        .where(filter=FieldFilter("type", "==", subscription_type)) \
-        .where(filter=FieldFilter("period", "==", subscription_period)) \
-        .order_by("created_at", direction=Query.DESCENDING) \
+        .where(filter=FieldFilter('user_id', '==', user_id)) \
+        .where(filter=FieldFilter('status', '==', SubscriptionStatus.WAITING)) \
+        .where(filter=FieldFilter('type', '==', subscription_type)) \
+        .where(filter=FieldFilter('period', '==', subscription_period)) \
+        .order_by('created_at', direction=Query.DESCENDING) \
         .limit(1) \
         .stream()
 
@@ -52,7 +52,7 @@ async def get_last_subscription_with_waiting_payment(
 
 async def get_subscriptions_by_user_id(user_id: str) -> List[Subscription]:
     subscriptions = firebase.db.collection(Subscription.COLLECTION_NAME) \
-        .where(filter=FieldFilter("user_id", "==", user_id)) \
+        .where(filter=FieldFilter('user_id', '==', user_id)) \
         .stream()
 
     return [
@@ -62,7 +62,7 @@ async def get_subscriptions_by_user_id(user_id: str) -> List[Subscription]:
 
 async def get_subscription_by_provider_payment_charge_id(provider_payment_charge_id: str) -> Optional[Subscription]:
     subscription_stream = firebase.db.collection(Subscription.COLLECTION_NAME) \
-        .where(filter=FieldFilter("provider_payment_charge_id", "==", provider_payment_charge_id)) \
+        .where(filter=FieldFilter('provider_payment_charge_id', '==', provider_payment_charge_id)) \
         .limit(1) \
         .stream()
 
@@ -74,7 +74,7 @@ async def get_subscription_by_provider_auto_payment_charge_id(
     provider_auto_payment_charge_id: str,
 ) -> Optional[Subscription]:
     subscription_stream = firebase.db.collection(Subscription.COLLECTION_NAME) \
-        .where(filter=FieldFilter("provider_auto_payment_charge_id", "==", provider_auto_payment_charge_id)) \
+        .where(filter=FieldFilter('provider_auto_payment_charge_id', '==', provider_auto_payment_charge_id)) \
         .limit(1) \
         .stream()
 
@@ -89,9 +89,9 @@ async def get_subscriptions(
     subscriptions_query = firebase.db.collection(Subscription.COLLECTION_NAME)
 
     if start_date:
-        subscriptions_query = subscriptions_query.where(filter=FieldFilter("created_at", ">=", start_date))
+        subscriptions_query = subscriptions_query.where(filter=FieldFilter('created_at', '>=', start_date))
     if end_date:
-        subscriptions_query = subscriptions_query.where(filter=FieldFilter("created_at", "<=", end_date))
+        subscriptions_query = subscriptions_query.where(filter=FieldFilter('created_at', '<=', end_date))
 
     subscriptions = subscriptions_query.stream()
 
@@ -106,12 +106,12 @@ async def get_subscriptions_by_status(
     status: SubscriptionStatus = None,
 ) -> List[Subscription]:
     subscriptions_query = firebase.db.collection(Subscription.COLLECTION_NAME) \
-        .where(filter=FieldFilter("status", "==", status))
+        .where(filter=FieldFilter('status', '==', status))
 
     if start_date:
-        subscriptions_query = subscriptions_query.where(filter=FieldFilter("created_at", ">=", start_date))
+        subscriptions_query = subscriptions_query.where(filter=FieldFilter('created_at', '>=', start_date))
     if end_date:
-        subscriptions_query = subscriptions_query.where(filter=FieldFilter("created_at", "<=", end_date))
+        subscriptions_query = subscriptions_query.where(filter=FieldFilter('created_at', '<=', end_date))
 
     subscriptions = subscriptions_query.stream()
 

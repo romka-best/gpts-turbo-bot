@@ -32,40 +32,40 @@ async def handle_suno_webhook(bot: Bot, storage: BaseStorage, body: dict):
     elif generation.status == GenerationStatus.FINISHED:
         return True
 
-    generation_status, generation_result = body.get("status", "error"), body.get("audio_url", "")
+    generation_status, generation_result = body.get('status', 'error'), body.get('audio_url', '')
     is_suggestion = generation.details.get('is_suggestion', False)
     metadata = body.get('metadata', {})
 
     generation.status = GenerationStatus.FINISHED
-    if generation_status == 'error' or not generation_result or "/None.mp3" in generation_result:
+    if generation_status == 'error' or not generation_result or '/None.mp3' in generation_result:
         generation.has_error = True
         await update_generation(generation.id, {
-            "status": generation.status,
-            "has_error": generation.has_error,
+            'status': generation.status,
+            'has_error': generation.has_error,
         })
 
         error_type, error_message = metadata.get('error_type'), metadata.get('error_message')
-        logging.error(f"Error in suno_webhook: {error_type}: {error_message}")
+        logging.error(f'Error in suno_webhook: {error_type}: {error_message}')
     else:
         generation.result = generation_result
         new_details = {
-            "title": body.get('title'),
-            "audio_url": body.get('audio_url'),
-            "video_url": body.get('video_url'),
-            "image_url": body.get('image_large_url'),
+            'title': body.get('title'),
+            'audio_url': body.get('audio_url'),
+            'video_url': body.get('video_url'),
+            'image_url': body.get('image_large_url'),
         }
         generation.details = {**generation.details, **new_details}
         await update_generation(generation.id, {
-            "status": generation.status,
-            "result": generation.result,
-            "details": generation.details,
+            'status': generation.status,
+            'result': generation.result,
+            'details': generation.details,
         })
 
     request = await get_request(generation.request_id)
     user = await get_user(request.user_id)
     user_language_code = await get_user_language(user.id, storage)
 
-    if generation_result and "/None.mp3" not in generation_result and not is_suggestion:
+    if generation_result and '/None.mp3' not in generation_result and not is_suggestion:
         (
             duration,
             video_url,
@@ -109,7 +109,7 @@ async def handle_suno_webhook(bot: Bot, storage: BaseStorage, body: dict):
                 duration,
                 reply_markup,
             )
-    elif generation_result and "/None.mp3" not in generation_result and is_suggestion:
+    elif generation_result and '/None.mp3' not in generation_result and is_suggestion:
         asyncio.create_task(
             send_suno_example(
                 bot=bot,
@@ -126,7 +126,7 @@ async def handle_suno_webhook(bot: Bot, storage: BaseStorage, body: dict):
     if current_count == request.requested and request.status != RequestStatus.FINISHED:
         request.status = RequestStatus.FINISHED
         await update_request(request.id, {
-            "status": request.status
+            'status': request.status
         })
 
         request_generations = await get_generations_by_request_id(request.id)
@@ -139,7 +139,7 @@ async def handle_suno_webhook(bot: Bot, storage: BaseStorage, body: dict):
 
         if total_result != len(request_generations):
             error_type, error_message = metadata.get('error_type'), metadata.get('error_message')
-            if error_type == "moderation_failure":
+            if error_type == 'moderation_failure':
                 if not is_suggestion:
                     await bot.send_message(
                         chat_id=user.telegram_chat_id,
@@ -150,8 +150,8 @@ async def handle_suno_webhook(bot: Bot, storage: BaseStorage, body: dict):
         quantity_deleted = 0
         if not is_suggestion:
             while quantity_deleted != quantity_to_delete:
-                if user.monthly_limits[Quota.SUNO] != 0:
-                    user.monthly_limits[Quota.SUNO] -= 1
+                if user.daily_limits[Quota.SUNO] != 0:
+                    user.daily_limits[Quota.SUNO] -= 1
                     quantity_deleted += 1
                 elif user.additional_usage_quota[Quota.SUNO] != 0:
                     user.additional_usage_quota[Quota.SUNO] -= 1
@@ -169,14 +169,14 @@ async def handle_suno_webhook(bot: Bot, storage: BaseStorage, body: dict):
                 currency=Currency.USD,
                 quantity=quantity_to_delete,
                 details={
-                    'mode': request.details.get("mode"),
-                    'is_suggestion': request.details.get("is_suggestion", False),
+                    'mode': request.details.get('mode'),
+                    'is_suggestion': request.details.get('is_suggestion', False),
                     'has_error': generation.has_error,
                 }
             ),
             update_user(user.id, {
-                "monthly_limits": user.monthly_limits,
-                "additional_usage_quota": user.additional_usage_quota
+                'daily_limits': user.daily_limits,
+                'additional_usage_quota': user.additional_usage_quota
             }),
         ]
 

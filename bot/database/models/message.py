@@ -3,7 +3,7 @@ from typing import List
 
 
 class Message:
-    COLLECTION_NAME = "messages"
+    COLLECTION_NAME = 'messages'
 
     id: str
     chat_id: str

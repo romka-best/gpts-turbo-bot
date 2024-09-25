@@ -7,17 +7,17 @@ def build_blast_keyboard(language_code: str) -> InlineKeyboardMarkup:
     buttons = [
         [
             InlineKeyboardButton(
-                text="🇺🇸 English",
+                text='🇺🇸 English',
                 callback_data='blast:en',
             ),
             InlineKeyboardButton(
-                text="🇷🇺 Русский",
+                text='🇷🇺 Русский',
                 callback_data='blast:ru',
             ),
         ],
         [
             InlineKeyboardButton(
-                text="🌍 Для всех",
+                text='🌍 Для всех',
                 callback_data='blast:all',
             ),
         ],

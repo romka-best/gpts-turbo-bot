@@ -29,13 +29,21 @@ async def send_audio(
         )
     except TelegramForbiddenError:
         await update_user(chat_id, {
-            "is_blocked": True,
+            'is_blocked': True,
         })
     except Exception as e:
         logging.error(f'Error in send_audio: {e}')
+
+        await bot.send_message(
+            chat_id=chat_id,
+            reply_markup=reply_markup,
+            text=result,
+            reply_to_message_id=reply_to_message_id,
+        )
+
         await send_error_info(
             bot=bot,
             user_id=chat_id,
             info=str(e),
-            hashtags=["audio"]
+            hashtags=['audio']
         )

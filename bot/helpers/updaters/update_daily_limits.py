@@ -30,40 +30,37 @@ from bot.helpers.senders.send_message_to_admins_and_developers import send_messa
 from bot.locales.main import get_localization
 
 
-async def update_monthly_limits(bot: Bot):
-    all_users = await get_users()
+async def update_daily_limits(bot: Bot):
+    all_users = await get_users(is_blocked=False)
 
     for i in range(0, len(all_users), config.USER_BATCH_SIZE):
         batch = firebase.db.batch()
         user_batch = all_users[i:i + config.USER_BATCH_SIZE]
 
         for user in user_batch:
-            if user.is_blocked:
-                continue
-
-            await update_user_monthly_limits(bot, user, batch)
+            await update_user_daily_limits(bot, user, batch)
 
         await batch.commit()
 
-    await send_message_to_admins_and_developers(bot, f'<b>Updated monthly limits successfully</b> 🎉')
+    await send_message_to_admins_and_developers(bot, f'<b>Updated daily limits successfully</b> 🎉')
 
 
-async def update_user_monthly_limits(bot: Bot, user: User, batch: AsyncWriteBatch):
+async def update_user_daily_limits(bot: Bot, user: User, batch: AsyncWriteBatch):
     try:
         had_subscription = user.subscription_type != SubscriptionType.FREE
         user = await update_user_subscription(bot, user, batch)
         await update_user_additional_usage_quota(bot, user, had_subscription, batch)
     except TelegramForbiddenError:
         await update_user(user.id, {
-            "is_blocked": True,
+            'is_blocked': True,
         })
     except Exception as e:
-        logging.error(f"Error updating user {user.id}: {e}")
+        logging.error(f'Error updating user {user.id}: {e}')
         await send_error_info(
             bot=bot,
             user_id=user.id,
             info=str(e),
-            hashtags=["user", "update"],
+            hashtags=['user', 'update'],
         )
 
 
@@ -97,14 +94,14 @@ async def update_user_subscription(bot: Bot, user: User, batch: AsyncWriteBatch)
                 if not payment:
                     current_subscription.status = SubscriptionStatus.FINISHED
                     user.subscription_type = SubscriptionType.FREE
-                    user.monthly_limits = SubscriptionLimit.LIMITS[SubscriptionType.FREE]
+                    user.daily_limits = SubscriptionLimit.LIMITS[SubscriptionType.FREE]
 
-                    await update_subscription(current_subscription.id, {"status": current_subscription.status})
+                    await update_subscription(current_subscription.id, {'status': current_subscription.status})
                     batch.update(user_ref, {
-                        "subscription_type": user.subscription_type,
-                        "monthly_limits": user.monthly_limits,
-                        "last_subscription_limit_update": current_date,
-                        "edited_at": current_date,
+                        'subscription_type': user.subscription_type,
+                        'daily_limits': user.daily_limits,
+                        'last_subscription_limit_update': current_date,
+                        'edited_at': current_date,
                     })
 
                     await bot.send_message(
@@ -132,14 +129,14 @@ async def update_user_subscription(bot: Bot, user: User, batch: AsyncWriteBatch)
                 if not payment:
                     current_subscription.status = SubscriptionStatus.FINISHED
                     user.subscription_type = SubscriptionType.FREE
-                    user.monthly_limits = SubscriptionLimit.LIMITS[SubscriptionType.FREE]
+                    user.daily_limits = SubscriptionLimit.LIMITS[SubscriptionType.FREE]
 
-                    await update_subscription(current_subscription.id, {"status": current_subscription.status})
+                    await update_subscription(current_subscription.id, {'status': current_subscription.status})
                     batch.update(user_ref, {
-                        "subscription_type": user.subscription_type,
-                        "monthly_limits": user.monthly_limits,
-                        "last_subscription_limit_update": current_date,
-                        "edited_at": current_date,
+                        'subscription_type': user.subscription_type,
+                        'daily_limits': user.daily_limits,
+                        'last_subscription_limit_update': current_date,
+                        'edited_at': current_date,
                     })
 
                     await bot.send_message(
@@ -149,14 +146,14 @@ async def update_user_subscription(bot: Bot, user: User, batch: AsyncWriteBatch)
         else:
             current_subscription.status = SubscriptionStatus.FINISHED
             user.subscription_type = SubscriptionType.FREE
-            user.monthly_limits = SubscriptionLimit.LIMITS[SubscriptionType.FREE]
+            user.daily_limits = SubscriptionLimit.LIMITS[SubscriptionType.FREE]
 
-            await update_subscription(current_subscription.id, {"status": current_subscription.status})
+            await update_subscription(current_subscription.id, {'status': current_subscription.status})
             batch.update(user_ref, {
-                "subscription_type": user.subscription_type,
-                "monthly_limits": user.monthly_limits,
-                "last_subscription_limit_update": current_date,
-                "edited_at": current_date,
+                'subscription_type': user.subscription_type,
+                'daily_limits': user.daily_limits,
+                'last_subscription_limit_update': current_date,
+                'edited_at': current_date,
             })
 
             await bot.send_message(
@@ -166,17 +163,10 @@ async def update_user_subscription(bot: Bot, user: User, batch: AsyncWriteBatch)
 
         return user
 
-    is_time_to_update_limits = (current_date - user.last_subscription_limit_update).days >= 30
-    if is_time_to_update_limits:
-        batch.update(user_ref, {
-            "monthly_limits": SubscriptionLimit.LIMITS[user.subscription_type],
-            "last_subscription_limit_update": current_date,
-            "edited_at": current_date,
-        })
-        await bot.send_message(
-            chat_id=user.telegram_chat_id,
-            text=get_localization(user.interface_language_code).SUBSCRIPTION_RESET,
-        )
+    batch.update(user_ref, {
+        'daily_limits': SubscriptionLimit.LIMITS[user.subscription_type],
+        'edited_at': current_date,
+    })
 
     return user
 
@@ -215,9 +205,9 @@ async def update_user_additional_usage_quota(bot: Bot, user: User, had_subscript
             await reset_user_chats(user, bot)
 
         batch.update(user_ref, {
-            "additional_usage_quota": user.additional_usage_quota,
-            "settings": user.settings,
-            "edited_at": current_date,
+            'additional_usage_quota': user.additional_usage_quota,
+            'settings': user.settings,
+            'edited_at': current_date,
         })
 
         if not had_subscription and count_active_packages_before > count_active_packages_after:
@@ -234,7 +224,7 @@ async def reset_user_chats(user: User, bot: Bot):
     for chat in chats:
         if chat.role != DEFAULT_ROLE:
             await update_chat(chat.id, {
-                "role": DEFAULT_ROLE,
+                'role': DEFAULT_ROLE,
             })
             need_to_send_message = True
 

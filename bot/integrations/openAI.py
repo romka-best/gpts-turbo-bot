@@ -12,7 +12,6 @@ def get_default_max_tokens(model_version: ChatGPTVersion) -> int:
     base = 1024
     if (
         model_version == ChatGPTVersion.V4_Omni_Mini or
-        model_version == ChatGPTVersion.V4_Turbo or
         model_version == ChatGPTVersion.V4_Omni
     ):
         return base
@@ -30,10 +29,10 @@ async def get_response_message(model_version: ChatGPTVersion, history: list) -> 
     )
 
     return {
-        "finish_reason": response.choices[0].finish_reason,
-        "message": response.choices[0].message,
-        "input_tokens": response.usage.prompt_tokens,
-        "output_tokens": response.usage.completion_tokens
+        'finish_reason': response.choices[0].finish_reason,
+        'message': response.choices[0].message,
+        'input_tokens': response.usage.prompt_tokens,
+        'output_tokens': response.usage.completion_tokens,
     }
 
 
@@ -70,19 +69,19 @@ async def get_response_image(
 
 async def get_response_speech_to_text(audio_file: BinaryIO) -> str:
     response = await client.audio.transcriptions.create(
-        model="whisper-1",
-        file=audio_file
+        model='whisper-1',
+        file=audio_file,
     )
 
     return response.text
 
 
-async def get_response_text_to_speech(text: str, voice: Literal["alloy", "echo", "fable", "onyx", "nova", "shimmer"]):
+async def get_response_text_to_speech(text: str, voice: Literal['alloy', 'echo', 'fable', 'onyx', 'nova', 'shimmer']):
     response = await client.audio.speech.create(
-        model="tts-1",
+        model='tts-1',
         voice=voice,
-        response_format="opus",
-        input=text
+        response_format='opus',
+        input=text,
     )
 
     return response

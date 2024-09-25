@@ -16,15 +16,15 @@ from bot.database.operations.request.getters import get_request
 from bot.database.operations.request.updaters import update_request
 from bot.helpers.handlers.handle_suno_webhook import handle_suno_webhook
 
-SUNO_API_URL = "https://studio-api.suno.ai"
+SUNO_API_URL = 'https://studio-api.suno.ai'
 SUNO_TOKEN = config.SUNO_TOKEN.get_secret_value()
 
 
 class Suno:
     def __init__(self, cookie: str, session: aiohttp.ClientSession = None) -> None:
         self.headers = {
-            "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
-            "cookie": cookie,
+            'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36',
+            'cookie': cookie,
         }
         self.session = session
         self._sid = None
@@ -41,18 +41,18 @@ class Suno:
         await self.session.close()
 
     async def _get_sid(self) -> str:
-        url = "https://clerk.suno.com/v1/client?_clerk_js_version=4.73.3"
-        data = await self.request("GET", url)
-        return data["response"]["last_active_session_id"]
+        url = 'https://clerk.suno.com/v1/client?_clerk_js_version=4.73.3'
+        data = await self.request('GET', url)
+        return data['response']['last_active_session_id']
 
     async def _get_jwt(self) -> str:
-        url = f"https://clerk.suno.com/v1/client/sessions/{self._sid}/tokens/api?_clerk_js_version=4.73.3"
-        data = await self.request("POST", url)
-        return data["jwt"]
+        url = f'https://clerk.suno.com/v1/client/sessions/{self._sid}/tokens/api?_clerk_js_version=4.73.3'
+        data = await self.request('POST', url)
+        return data['jwt']
 
     async def _renew(self) -> None:
         jwt = await self._get_jwt()
-        self.headers["Authorization"] = f"Bearer {jwt}"
+        self.headers['Authorization'] = f'Bearer {jwt}'
 
     async def request(self, method: str, url: str, **kwargs):
         try:
@@ -83,22 +83,22 @@ class Songs(APIResource):
         prompt: str,
         instrumental: bool = False,
         custom: bool = False,
-        tags: str = ""
+        tags: str = ''
     ) -> List:
-        url = f"{SUNO_API_URL}/api/generate/v2/"
+        url = f'{SUNO_API_URL}/api/generate/v2/'
         payload = {
-            "mv": version,
-            "prompt": prompt if custom else "",
-            "gpt_description_prompt": "" if custom else prompt,
-            "make_instrumental": instrumental,
-            "tags": tags if custom else "",
+            'mv': version,
+            'prompt': prompt if custom else '',
+            'gpt_description_prompt': '' if custom else prompt,
+            'make_instrumental': instrumental,
+            'tags': tags if custom else '',
         }
-        data = await self.request("POST", url, json=payload)
-        return data["clips"]
+        data = await self.request('POST', url, json=payload)
+        return data['clips']
 
     async def get(self, id: str) -> Dict:
-        url = f"{SUNO_API_URL}/api/feed/v2?ids={id}"
-        data = await self.request("GET", url)
+        url = f'{SUNO_API_URL}/api/feed/v2?ids={id}'
+        data = await self.request('GET', url)
         return data['clips'][0]
 
 
@@ -107,7 +107,7 @@ async def generate_song(
     prompt: str,
     instrumental: bool = False,
     custom: bool = False,
-    tags: str = ""
+    tags: str = ''
 ) -> List[str]:
     async with Suno(cookie=SUNO_TOKEN) as client:
         clips = await client.songs.generate(
@@ -148,13 +148,13 @@ async def check_song(bot: Bot, storage: BaseStorage, song_id: str):
             if need_to_reset:
                 generation = await get_generation(song_id)
                 await update_generation(generation.id, {
-                    "status": GenerationStatus.FINISHED,
-                    "has_error": True,
+                    'status': GenerationStatus.FINISHED,
+                    'has_error': True,
                 })
 
                 request = await get_request(generation.request_id)
                 await update_request(request.id, {
-                    "status": RequestStatus.FINISHED
+                    'status': RequestStatus.FINISHED
                 })
 
 

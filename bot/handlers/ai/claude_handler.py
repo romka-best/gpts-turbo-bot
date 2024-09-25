@@ -1,17 +1,17 @@
 import asyncio
 import base64
+from datetime import datetime, timezone
 from typing import List
 
 import anthropic
 import httpx
 from aiogram import Router
-from aiogram.enums import ParseMode
-from aiogram.exceptions import TelegramBadRequest
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.utils.chat_action import ChatActionSender
 
+from bot.config import config, MessageEffect
 from bot.database.main import firebase
 from bot.database.models.common import Model, ClaudeGPTVersion, Quota, Currency
 from bot.database.models.subscription import SubscriptionType
@@ -27,7 +27,7 @@ from bot.database.operations.user.updaters import update_user
 from bot.helpers.creaters.create_new_message_and_update_user import create_new_message_and_update_user
 from bot.helpers.reply_with_voice import reply_with_voice
 from bot.helpers.senders.send_error_info import send_error_info
-from bot.helpers.split_message import split_message
+from bot.helpers.senders.send_ai_message import send_ai_message
 from bot.integrations.anthropic import get_response_message
 from bot.keyboards.ai.claude import build_claude_keyboard, build_claude_continue_generating_keyboard
 from bot.keyboards.common.common import build_recommendations_keyboard, build_error_keyboard
@@ -41,7 +41,7 @@ PRICE_CLAUDE_3_OPUS_INPUT = 0.000015
 PRICE_CLAUDE_3_OPUS_OUTPUT = 0.000075
 
 
-@claude_router.message(Command("claude"))
+@claude_router.message(Command('claude'))
 async def claude(message: Message, state: FSMContext):
     await state.clear()
 
@@ -85,14 +85,14 @@ async def handle_claude_choose_selection(callback_query: CallbackQuery, state: F
             new_row = []
             for button in row:
                 text = button.text
-                callback_data = button.callback_data.split(":", 1)[1]
+                callback_data = button.callback_data.split(':', 1)[1]
 
                 if callback_data == chosen_version:
-                    if "✅" not in text:
-                        text += " ✅"
+                    if '✅' not in text:
+                        text += ' ✅'
                         keyboard_changed = True
                 else:
-                    text = text.replace(" ✅", "")
+                    text = text.replace(' ✅', '')
                 new_row.append(InlineKeyboardButton(text=text, callback_data=button.callback_data))
             new_keyboard.append(new_row)
         await callback_query.message.edit_reply_markup(reply_markup=InlineKeyboardMarkup(inline_keyboard=new_keyboard))
@@ -102,8 +102,8 @@ async def handle_claude_choose_selection(callback_query: CallbackQuery, state: F
             user.current_model = Model.CLAUDE
             user.settings[Model.CLAUDE][UserSettings.VERSION] = chosen_version
             await update_user(user_id, {
-                "current_model": user.current_model,
-                "settings": user.settings,
+                'current_model': user.current_model,
+                'settings': user.settings,
             })
 
             text = get_localization(user_language_code).SWITCHED_TO_CLAUDE_3_SONNET \
@@ -112,7 +112,7 @@ async def handle_claude_choose_selection(callback_query: CallbackQuery, state: F
             await callback_query.message.answer(
                 text=text,
                 reply_markup=reply_markup,
-                message_effect_id="5104841245755180586",
+                message_effect_id=config.MESSAGE_EFFECTS.get(MessageEffect.FIRE),
             )
         else:
             text = get_localization(user_language_code).ALREADY_SWITCHED_TO_THIS_MODEL
@@ -126,7 +126,7 @@ async def handle_claude_choose_selection(callback_query: CallbackQuery, state: F
 
 async def handle_claude(message: Message, state: FSMContext, user: User, user_quota: Quota, filenames=None):
     if user_quota != Quota.CLAUDE_3_SONNET and user_quota != Quota.CLAUDE_3_OPUS:
-        raise NotImplemented
+        raise NotImplemented(f'User quota is not implemented: {user_quota}')
 
     await state.update_data(is_processing=True)
 
@@ -140,12 +140,12 @@ async def handle_claude(message: Message, state: FSMContext, user: User, user_qu
         elif message.text:
             text = message.text
         else:
-            text = ""
+            text = ''
 
     if filenames and len(filenames):
-        await write_message(user.current_chat_id, "user", user.id, text, True, filenames)
+        await write_message(user.current_chat_id, 'user', user.id, text, True, filenames)
     else:
-        await write_message(user.current_chat_id, "user", user.id, text)
+        await write_message(user.current_chat_id, 'user', user.id, text)
 
     chat = await get_chat(user.current_chat_id)
     messages = await get_messages_by_chat_id(user.current_chat_id)
@@ -167,14 +167,14 @@ async def handle_claude(message: Message, state: FSMContext, user: User, user_qu
                 photo = await firebase.bucket.get_blob(photo_path)
                 photo_link = firebase.get_public_url(photo.name)
 
-                image_media_type = "image/jpeg"
-                image_data = base64.b64encode(httpx.get(photo_link).content).decode("utf-8")
+                image_media_type = 'image/jpeg'
+                image_data = base64.b64encode(httpx.get(photo_link).content).decode('utf-8')
                 content.append({
                     'type': 'image',
                     'source': {
-                        "type": "base64",
-                        "media_type": image_media_type,
-                        "data": image_data,
+                        'type': 'base64',
+                        'media_type': image_media_type,
+                        'data': image_data,
                     },
                 })
 
@@ -210,7 +210,7 @@ async def handle_claude(message: Message, state: FSMContext, user: User, user_qu
                 output_price = response['output_tokens'] * PRICE_CLAUDE_3_OPUS_OUTPUT
 
             total_price = round(input_price + output_price, 6)
-            message_role, message_content = "assistant", response_message
+            message_role, message_content = 'assistant', response_message
             await write_transaction(
                 user_id=user.id,
                 type=TransactionType.EXPENSE,
@@ -220,12 +220,12 @@ async def handle_claude(message: Message, state: FSMContext, user: User, user_qu
                 currency=Currency.USD,
                 quantity=1,
                 details={
-                    "input_tokens": response['input_tokens'],
-                    "output_tokens": response['output_tokens'],
-                    "request": text,
-                    "answer": message_content,
-                    "is_suggestion": False,
-                    "has_error": False,
+                    'input_tokens': response['input_tokens'],
+                    'output_tokens': response['output_tokens'],
+                    'request': text,
+                    'answer': message_content,
+                    'is_suggestion': False,
+                    'has_error': False,
                 },
             )
 
@@ -249,57 +249,22 @@ async def handle_claude(message: Message, state: FSMContext, user: User, user_qu
                     user.settings[user.current_model][UserSettings.SHOW_THE_NAME_OF_THE_ROLES]
                 ) else ''
                 header_text = f'{chat_info}{role_info}\n' if chat_info or role_info else ''
-                footer_text = f'\n\n✉️ {user.monthly_limits[user_quota] + user.additional_usage_quota[user_quota] + 1}' \
-                    if user.settings[user.current_model][UserSettings.SHOW_USAGE_QUOTA] else ''
+                footer_text = f'\n\n✉️ {user.daily_limits[user_quota] + user.additional_usage_quota[user_quota] + 1}' \
+                    if user.settings[user.current_model][UserSettings.SHOW_USAGE_QUOTA] and \
+                       user.daily_limits[user_quota] != float('inf') else ''
                 reply_markup = build_claude_continue_generating_keyboard(user_language_code)
-                try:
-                    full_text = f"{header_text}{message_content}{footer_text}"
-                    if len(full_text) <= 4096:
-                        await message.reply(
-                            full_text,
-                            reply_markup=reply_markup if response['finish_reason'] == 'max_tokens' else None,
-                            parse_mode=ParseMode.MARKDOWN,
-                        )
-                    elif len(message_content) <= 4096:
-                        await message.reply(
-                            message_content,
-                            reply_markup=reply_markup if response['finish_reason'] == 'max_tokens' else None,
-                            parse_mode=ParseMode.MARKDOWN,
-                        )
-                    else:
-                        chunks = split_message(full_text)
-                        for i in range(len(chunks)):
-                            if i == 0:
-                                await message.reply(
-                                    chunks[i],
-                                    parse_mode=None,
-                                )
-                            elif i == len(chunks) - 1:
-                                await message.reply(
-                                    chunks[i],
-                                    reply_markup=reply_markup if response['finish_reason'] == 'max_tokens' else None,
-                                    parse_mode=None,
-                                )
-                            else:
-                                await message.answer(
-                                    chunks[i],
-                                    parse_mode=None,
-                                )
-                except TelegramBadRequest as e:
-                    if "can't parse entities" in str(e):
-                        await message.reply(
-                            f"{header_text}{message_content}{footer_text}",
-                            reply_markup=reply_markup if response['finish_reason'] == 'max_tokens' else None,
-                            parse_mode=None,
-                        )
-                    else:
-                        raise
+                full_text = f'{header_text}{message_content}{footer_text}'
+                await send_ai_message(
+                    message=message,
+                    text=full_text,
+                    reply_markup=reply_markup if response['finish_reason'] == 'max_tokens' else None,
+                )
         except anthropic.BadRequestError as e:
-            if 'content_policy_violation' in str(e):
+            if 'Output blocked by content filtering policy' in str(e.message):
                 await message.reply(
                     text=get_localization(user_language_code).REQUEST_FORBIDDEN_ERROR,
                 )
-            elif 'Overloaded' in str(e):
+            elif 'Overloaded' in str(e.message):
                 await message.reply(
                     text=get_localization(user_language_code).SERVER_OVERLOADED_ERROR,
                 )
@@ -315,7 +280,7 @@ async def handle_claude(message: Message, state: FSMContext, user: User, user_qu
                     bot=message.bot,
                     user_id=user.id,
                     info=str(e),
-                    hashtags=["claude"],
+                    hashtags=['claude'],
                 )
         except Exception as e:
             reply_markup = build_error_keyboard(user_language_code)
@@ -329,7 +294,7 @@ async def handle_claude(message: Message, state: FSMContext, user: User, user_qu
                 bot=message.bot,
                 user_id=user.id,
                 info=str(e),
-                hashtags=["claude"],
+                hashtags=['claude'],
             )
         finally:
             await processing_message.delete()
@@ -381,11 +346,13 @@ async def handle_claude_3_opus_example(
     message: Message,
 ):
     try:
+        current_date = datetime.now(timezone.utc)
         if (
-            user.current_model == Model.CLAUDE and
-            user.settings[user.current_model][UserSettings.VERSION] == ClaudeGPTVersion.V3_Sonnet and
             user.subscription_type == SubscriptionType.FREE and
-            user.monthly_limits[Quota.CLAUDE_3_SONNET] + 1 in [1, 10, 20]
+            user.current_model == Model.CLAUDE and
+            user.settings[user.current_model][UserSettings.SHOW_EXAMPLES] and
+            user.daily_limits[Quota.CLAUDE_3_SONNET] + 1 in [1, 10] and
+            (current_date - user.last_subscription_limit_update).days <= 3
         ):
             history = get_history_without_duplicates(history)
 
@@ -397,7 +364,7 @@ async def handle_claude_3_opus_example(
             output_price = response['output_tokens'] * PRICE_CLAUDE_3_OPUS_OUTPUT
 
             total_price = round(input_price + output_price, 6)
-            message_role, message_content = "assistant", response_message
+            message_role, message_content = 'assistant', response_message
             await write_transaction(
                 user_id=user.id,
                 type=TransactionType.EXPENSE,
@@ -407,55 +374,27 @@ async def handle_claude_3_opus_example(
                 currency=Currency.USD,
                 quantity=1,
                 details={
-                    "input_tokens": response['input_tokens'],
-                    "output_tokens": response['output_tokens'],
-                    "request": prompt,
-                    "answer": message_content,
-                    "is_suggestion": True,
-                    "has_error": False,
+                    'input_tokens': response['input_tokens'],
+                    'output_tokens': response['output_tokens'],
+                    'request': prompt,
+                    'answer': message_content,
+                    'is_suggestion': True,
+                    'has_error': False,
                 },
             )
 
             header_text = f'{get_localization(user_language_code).CLAUDE_3_OPUS_EXAMPLE}\n\n'
-            try:
-                full_text = f"{header_text}{message_content}"
-                if len(full_text) <= 4096:
-                    await message.reply(
-                        full_text,
-                        parse_mode=ParseMode.MARKDOWN,
-                    )
-                elif len(header_text) + len(message_content) <= 4096:
-                    await message.reply(
-                        f"{header_text}{message_content}",
-                        parse_mode=ParseMode.MARKDOWN,
-                    )
-                else:
-                    chunks = split_message(full_text)
-                    for i in range(len(chunks)):
-                        if i == 0:
-                            await message.reply(
-                                chunks[i],
-                                parse_mode=None,
-                            )
-                        else:
-                            await message.answer(
-                                chunks[i],
-                                parse_mode=None,
-                            )
-            except TelegramBadRequest as e:
-                if "can't parse entities" in str(e):
-                    await message.reply(
-                        f"{header_text}{message_content}",
-                        parse_mode=None,
-                    )
-                else:
-                    raise
+            full_text = f'{header_text}{message_content}'
+            await send_ai_message(
+                message=message,
+                text=full_text,
+            )
     except Exception as e:
         await send_error_info(
             bot=message.bot,
             user_id=user.id,
             info=str(e),
-            hashtags=["claude", "example"],
+            hashtags=['claude', 'example'],
         )
 
 

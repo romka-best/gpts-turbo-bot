@@ -16,7 +16,6 @@ async def write_user_in_transaction(
     referred_by: Optional[str],
     is_referred_by_user=False,
     quota=Quota.CHAT_GPT4_OMNI_MINI,
-    additional_quota=0,
 ) -> User:
     user_ref = firebase.db.collection(User.COLLECTION_NAME).document(str(telegram_user.id))
     user_data = (await user_ref.get()).to_dict() or {}
@@ -29,7 +28,6 @@ async def write_user_in_transaction(
         referred_by,
         is_referred_by_user,
         quota,
-        additional_quota,
     )
 
     transaction.set(user_ref, created_user.to_dict())

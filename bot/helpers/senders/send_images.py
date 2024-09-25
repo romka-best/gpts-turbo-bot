@@ -21,15 +21,23 @@ async def send_image(bot: Bot, chat_id: str, image: str, reply_markup=None, capt
         )
     except TelegramForbiddenError:
         await update_user(chat_id, {
-            "is_blocked": True,
+            'is_blocked': True,
         })
     except Exception as e:
         logging.error(f'Error in send_image: {e}')
+
+        await bot.send_message(
+            chat_id=chat_id,
+            reply_markup=reply_markup,
+            text=image,
+            reply_to_message_id=reply_to_message_id,
+        )
+
         await send_error_info(
             bot=bot,
             user_id=chat_id,
             info=str(e),
-            hashtags=["image"],
+            hashtags=['image'],
         )
 
 
@@ -41,7 +49,7 @@ async def send_images(bot: Bot, chat_id: str, images: List[str]):
             await bot.send_media_group(chat_id=chat_id, media=media_group)
         except TelegramForbiddenError:
             await update_user(chat_id, {
-                "is_blocked": True,
+                'is_blocked': True,
             })
         except Exception as e:
             logging.error(f'Error in send_images: {e}')
@@ -57,5 +65,5 @@ async def send_images(bot: Bot, chat_id: str, images: List[str]):
                         bot=bot,
                         user_id=chat_id,
                         info=str(e),
-                        hashtags=["image"],
+                        hashtags=['image'],
                     )

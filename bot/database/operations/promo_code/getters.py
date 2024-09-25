@@ -17,7 +17,7 @@ async def get_promo_code(promo_code_id: str) -> Optional[PromoCode]:
 
 async def get_promo_code_by_name(promo_code_name: str) -> Optional[PromoCode]:
     promo_code_stream = firebase.db.collection(PromoCode.COLLECTION_NAME) \
-        .where(filter=FieldFilter("name", "==", promo_code_name)) \
+        .where(filter=FieldFilter('name', '==', promo_code_name)) \
         .limit(1) \
         .stream()
 
@@ -27,8 +27,8 @@ async def get_promo_code_by_name(promo_code_name: str) -> Optional[PromoCode]:
 
 async def get_used_promo_code_by_user_id_and_promo_code_id(user_id: str, promo_code_id: str) -> Optional[UsedPromoCode]:
     used_promo_code_stream = firebase.db.collection(UsedPromoCode.COLLECTION_NAME) \
-        .where(filter=FieldFilter("user_id", "==", user_id)) \
-        .where(filter=FieldFilter("promo_code_id", "==", promo_code_id)) \
+        .where(filter=FieldFilter('user_id', '==', user_id)) \
+        .where(filter=FieldFilter('promo_code_id', '==', promo_code_id)) \
         .limit(1) \
         .stream()
 
@@ -43,9 +43,9 @@ async def get_used_promo_codes(
     used_promo_code_query = firebase.db.collection(UsedPromoCode.COLLECTION_NAME)
 
     if start_date:
-        used_promo_code_query = used_promo_code_query.where(filter=FieldFilter("created_at", ">=", start_date))
+        used_promo_code_query = used_promo_code_query.where(filter=FieldFilter('created_at', '>=', start_date))
     if end_date:
-        used_promo_code_query = used_promo_code_query.where(filter=FieldFilter("created_at", "<=", end_date))
+        used_promo_code_query = used_promo_code_query.where(filter=FieldFilter('created_at', '<=', end_date))
 
     used_promo_codes = used_promo_code_query.stream()
 

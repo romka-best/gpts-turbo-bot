@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import timedelta, datetime, timezone
 
 import aiohttp
 from aiogram import Router
@@ -24,7 +24,7 @@ from bot.states.profile import Profile
 profile_router = Router()
 
 
-@profile_router.message(Command("profile"))
+@profile_router.message(Command('profile'))
 async def profile(message: Message, state: FSMContext):
     await state.clear()
 
@@ -42,25 +42,38 @@ async def profile(message: Message, state: FSMContext):
         user.language_code != telegram_user.language_code
     ):
         await update_user(user_id, {
-            "first_name": telegram_user.first_name,
-            "last_name": telegram_user.last_name or "",
-            "username": telegram_user.username,
-            "is_premium": telegram_user.is_premium or False,
-            "language_code": telegram_user.language_code,
+            'first_name': telegram_user.first_name,
+            'last_name': telegram_user.last_name or '',
+            'username': telegram_user.username,
+            'is_premium': telegram_user.is_premium or False,
+            'language_code': telegram_user.language_code,
         })
 
     subscription = await get_last_subscription_by_user_id(user_id)
     renewal_date = (user.last_subscription_limit_update + timedelta(days=30))
+
+    current_date = datetime.now(timezone.utc)
+    update_date = datetime(
+        current_date.year,
+        current_date.month,
+        current_date.day,
+        tzinfo=timezone.utc
+    ) + timedelta(days=1)
+    time_left = update_date - current_date
+    hours, remainder = divmod(time_left.seconds, 3600)
+    minutes = remainder // 60
+
     text = get_localization(user_language_code).profile(
         user.subscription_type,
         subscription.status if subscription and subscription.status else SubscriptionStatus.ACTIVE,
         user.gender,
         user.current_model,
         user.settings[Model.CHAT_GPT][UserSettings.VERSION],
-        user.monthly_limits,
+        user.daily_limits,
         user.additional_usage_quota,
-        renewal_date.strftime("%d.%m.%Y"),
-        ('%f' % user.balance).rstrip('0').rstrip('.'),
+        renewal_date.strftime('%d.%m.%Y'),
+        hours,
+        minutes,
     )
 
     photo_path = f'users/avatars/{user_id}.jpeg'
@@ -141,14 +154,14 @@ async def handle_profile_gender_selection(callback_query: CallbackQuery, state: 
     if user.gender != gender:
         user.gender = gender
         await update_user(user.id, {
-            "gender": user.gender,
+            'gender': user.gender,
         })
 
     text_your_gender = get_localization(user_language_code).YOUR_GENDER
     text_gender_male = get_localization(user_language_code).MALE
     text_gender_female = get_localization(user_language_code).FEMALE
     await callback_query.message.edit_text(
-        f"{text_your_gender} {text_gender_male if user.gender == UserGender.MALE else text_gender_female}"
+        f'{text_your_gender} {text_gender_male if user.gender == UserGender.MALE else text_gender_female}'
     )
 
     if user.current_model == Model.FACE_SWAP:

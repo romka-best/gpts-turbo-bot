@@ -3,7 +3,7 @@ from typing import Dict
 
 
 class Role:
-    COLLECTION_NAME = "roles"
+    COLLECTION_NAME = 'roles'
 
     id: str
     name: str

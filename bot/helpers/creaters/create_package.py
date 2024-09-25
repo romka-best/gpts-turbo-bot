@@ -22,9 +22,9 @@ async def create_package(
         transaction,
         package_id,
         {
-            "status": PackageStatus.SUCCESS,
-            "income_amount": income_amount,
-            "provider_payment_charge_id": provider_payment_charge_id,
+            'status': PackageStatus.SUCCESS,
+            'income_amount': income_amount,
+            'provider_payment_charge_id': provider_payment_charge_id,
         },
     )
 
@@ -35,5 +35,5 @@ async def create_package(
     )
 
     await update_user_in_transaction(transaction, user_id, {
-        "additional_usage_quota": user.additional_usage_quota
+        'additional_usage_quota': user.additional_usage_quota
     })

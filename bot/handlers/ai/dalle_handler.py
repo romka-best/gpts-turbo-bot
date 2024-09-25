@@ -7,6 +7,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 from aiogram.utils.chat_action import ChatActionSender
 
+from bot.config import config, MessageEffect
 from bot.database.models.common import Quota, Currency, Model
 from bot.database.models.transaction import TransactionType, ServiceType
 from bot.database.models.user import UserSettings, User
@@ -15,6 +16,7 @@ from bot.database.operations.user.getters import get_user
 from bot.database.operations.user.updaters import update_user
 from bot.handlers.ai.midjourney_handler import handle_midjourney_example
 from bot.helpers.senders.send_error_info import send_error_info
+from bot.helpers.updaters.update_user_usage_quota import update_user_usage_quota
 from bot.integrations.openAI import get_response_image, get_cost_for_image
 from bot.keyboards.common.common import build_recommendations_keyboard, build_error_keyboard
 from bot.locales.main import get_localization, get_user_language
@@ -24,7 +26,7 @@ dall_e_router = Router()
 PRICE_DALL_E = 0.040
 
 
-@dall_e_router.message(Command("dalle"))
+@dall_e_router.message(Command('dalle'))
 async def dall_e(message: Message, state: FSMContext):
     await state.clear()
 
@@ -41,14 +43,14 @@ async def dall_e(message: Message, state: FSMContext):
     else:
         user.current_model = Model.DALL_E
         await update_user(user_id, {
-            "current_model": user.current_model,
+            'current_model': user.current_model,
         })
 
         reply_markup = await build_recommendations_keyboard(user.current_model, user_language_code, user.gender)
         await message.answer(
             text=get_localization(user_language_code).SWITCHED_TO_DALL_E,
             reply_markup=reply_markup,
-            message_effect_id="5104841245755180586",
+            message_effect_id=config.MESSAGE_EFFECTS.get(MessageEffect.FIRE),
         )
 
 
@@ -66,7 +68,7 @@ async def handle_dall_e(message: Message, state: FSMContext, user: User):
 
     async with ChatActionSender.upload_photo(bot=message.bot, chat_id=message.chat.id):
         try:
-            maximum_generations = user.monthly_limits[Quota.DALL_E] + user.additional_usage_quota[Quota.DALL_E]
+            maximum_generations = user.daily_limits[Quota.DALL_E] + user.additional_usage_quota[Quota.DALL_E]
             model_version = user.settings[Model.DALL_E][UserSettings.VERSION]
             resolution = user.settings[Model.DALL_E][UserSettings.RESOLUTION]
             quality = user.settings[Model.DALL_E][UserSettings.QUALITY]
@@ -82,24 +84,8 @@ async def handle_dall_e(message: Message, state: FSMContext, user: User):
                 quality,
             )
 
-            quantity_to_delete = cost
-            quantity_deleted = 0
-            while quantity_deleted != quantity_to_delete:
-                if user.monthly_limits[Quota.DALL_E] != 0:
-                    user.monthly_limits[Quota.DALL_E] -= 1
-                    quantity_deleted += 1
-                elif user.additional_usage_quota[Quota.DALL_E] != 0:
-                    user.additional_usage_quota[Quota.DALL_E] -= 1
-                    quantity_deleted += 1
-                else:
-                    break
+            await update_user_usage_quota(user, Quota.DALL_E, cost)
 
-            await update_user(
-                user.id, {
-                    "monthly_limits": user.monthly_limits,
-                    "additional_usage_quota": user.additional_usage_quota,
-                },
-            )
             total_price = PRICE_DALL_E * cost
             await write_transaction(
                 user_id=user.id,
@@ -115,10 +101,11 @@ async def handle_dall_e(message: Message, state: FSMContext, user: User):
                 },
             )
 
-            footer_text = f'\n\n🖼 {user.monthly_limits[Quota.DALL_E] + user.additional_usage_quota[Quota.DALL_E] + 1}' \
-                if user.settings[user.current_model][UserSettings.SHOW_USAGE_QUOTA] else ''
+            footer_text = f'\n\n🖼 {user.daily_limits[Quota.DALL_E] + user.additional_usage_quota[Quota.DALL_E] + 1}' \
+                if user.settings[user.current_model][UserSettings.SHOW_USAGE_QUOTA] and \
+                   user.daily_limits[Quota.DALL_E] != float('inf') else ''
             await message.reply_photo(
-                caption=f"{get_localization(user_language_code).IMAGE_SUCCESS}{footer_text}",
+                caption=f'{get_localization(user_language_code).IMAGE_SUCCESS}{footer_text}',
                 photo=response_url,
             )
         except openai.BadRequestError as e:
@@ -137,7 +124,7 @@ async def handle_dall_e(message: Message, state: FSMContext, user: User):
                 bot=message.bot,
                 user_id=user.id,
                 info=str(e),
-                hashtags=["dalle"],
+                hashtags=['dalle'],
             )
         finally:
             await processing_message.delete()

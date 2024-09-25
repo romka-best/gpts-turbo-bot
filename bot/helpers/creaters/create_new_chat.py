@@ -12,5 +12,5 @@ async def create_new_chat(transaction, user: User, telegram_chat_id: str, title:
 
     user.additional_usage_quota[Quota.ADDITIONAL_CHATS] -= 1
     await update_user_in_transaction(transaction, user.id, {
-        "additional_usage_quota": user.additional_usage_quota,
+        'additional_usage_quota': user.additional_usage_quota,
     })

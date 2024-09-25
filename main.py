@@ -30,9 +30,11 @@ from bot.handlers.ai.chat_gpt_handler import chat_gpt_router
 from bot.handlers.ai.claude_handler import claude_router
 from bot.handlers.ai.dalle_handler import dall_e_router
 from bot.handlers.ai.face_swap_handler import face_swap_router
+from bot.handlers.ai.gemini_handler import gemini_router
 from bot.handlers.ai.midjourney_handler import midjourney_router
 from bot.handlers.ai.mode_handler import mode_router
 from bot.handlers.ai.music_gen_handler import music_gen_router
+from bot.handlers.ai.stable_diffusion_handler import stable_diffusion_router
 from bot.handlers.ai.suno_handler import suno_router
 from bot.handlers.common.common_handler import common_router
 from bot.handlers.common.document_handler import document_router
@@ -63,13 +65,13 @@ from bot.helpers.notify_admins_about_error import notify_admins_about_error
 from bot.helpers.senders.send_statistics import send_statistics
 from bot.helpers.setters.set_commands import set_commands
 from bot.helpers.setters.set_description import set_description
-from bot.helpers.update_monthly_limits import update_monthly_limits
+from bot.helpers.updaters.update_daily_limits import update_daily_limits
 from bot.middlewares.AuthMiddleware import AuthMessageMiddleware, AuthCallbackQueryMiddleware
 from bot.middlewares.LoggingMiddleware import LoggingMessageMiddleware, LoggingCallbackQueryMiddleware
 
-WEBHOOK_BOT_PATH = f"/bot/{config.BOT_TOKEN.get_secret_value()}"
-WEBHOOK_YOOKASSA_PATH = "/payment/yookassa"
-WEBHOOK_PAY_SELECTION_PATH = "/payment/pay-selection"
+WEBHOOK_BOT_PATH = f'/bot/{config.BOT_TOKEN.get_secret_value()}'
+WEBHOOK_YOOKASSA_PATH = '/payment/yookassa'
+WEBHOOK_PAY_SELECTION_PATH = '/payment/pay-selection'
 WEBHOOK_REPLICATE_PATH = config.WEBHOOK_REPLICATE_PATH
 WEBHOOK_MIDJOURNEY_PATH = config.WEBHOOK_MIDJOURNEY_PATH
 
@@ -116,8 +118,10 @@ async def lifespan(_: FastAPI):
         statistics_router,
         chat_gpt_router,
         claude_router,
+        gemini_router,
         dall_e_router,
         midjourney_router,
+        stable_diffusion_router,
         face_swap_router,
         admin_face_swap_router,
         music_gen_router,
@@ -174,23 +178,23 @@ async def handle_update(update: dict):
     except TelegramForbiddenError:
         await handle_forbidden_error(telegram_update)
     except TelegramBadRequest as e:
-        if e.message.startswith("Bad Request: message can't be deleted for everyone"):
+        if e.message.startswith('Bad Request: message can\'t be deleted for everyone'):
             logging.warning(e)
-        elif e.message.startswith("Bad Request: message to be replied not found"):
+        elif e.message.startswith('Bad Request: message to be replied not found'):
             logging.warning(e)
-        elif e.message.startswith("Bad Request: message to delete not found"):
+        elif e.message.startswith('Bad Request: message to delete not found'):
             logging.warning(e)
-        elif e.message.startswith("Bad Request: message is not modified"):
+        elif e.message.startswith('Bad Request: message is not modified'):
             logging.warning(e)
-        elif e.message.startswith("Bad Request: message to edit not found"):
+        elif e.message.startswith('Bad Request: message to edit not found'):
             logging.warning(e)
-        elif e.message.startswith("Bad Request: query is too old and response timeout expired or query ID is invalid"):
+        elif e.message.startswith('Bad Request: query is too old and response timeout expired or query ID is invalid'):
             logging.warning(e)
         else:
-            logging.exception(f"Error in bot_webhook: {e}")
+            logging.exception(f'Error in bot_webhook: {e}')
             await notify_admins_about_error(bot, telegram_update, dp, e)
     except Exception as e:
-        logging.exception(f"Error in bot_webhook: {e}")
+        logging.exception(f'Error in bot_webhook: {e}')
         await notify_admins_about_error(bot, telegram_update, dp, e)
 
 
@@ -218,7 +222,7 @@ async def midjourney_webhook(body: dict):
         return JSONResponse(content={}, status_code=500)
 
 
-@app.get("/run-daily-tasks")
+@app.get('/run-daily-tasks')
 async def daily_tasks(background_tasks: BackgroundTasks):
     yesterday_utc_day = datetime.now(timezone.utc) - timedelta(days=1)
     await update_daily_expenses(yesterday_utc_day)
@@ -226,7 +230,7 @@ async def daily_tasks(background_tasks: BackgroundTasks):
     await check_unresolved_requests(bot)
     await check_waiting_payments(bot)
 
-    background_tasks.add_task(update_monthly_limits, bot)
+    background_tasks.add_task(update_daily_limits, bot)
 
     today = datetime.now()
     background_tasks.add_task(send_statistics, bot, 'day')
@@ -235,9 +239,9 @@ async def daily_tasks(background_tasks: BackgroundTasks):
     if today.day == 1:
         background_tasks.add_task(send_statistics, bot, 'month')
 
-    return {"code": 200}
+    return {'code': 200}
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
-    uvicorn.run(app, host="0.0.0.0", port=os.getenv("PORT", 8080))
+    uvicorn.run(app, host='0.0.0.0', port=os.getenv('PORT', 8080))

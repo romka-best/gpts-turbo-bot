@@ -3,16 +3,16 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from bot.locales.main import get_localization
 
 
-def build_manage_feedback_keyboard(language_code: str, user_id: str) -> InlineKeyboardMarkup:
+def build_manage_feedback_keyboard(language_code: str, user_id: str, feedback_id: str) -> InlineKeyboardMarkup:
     buttons = [
         [
             InlineKeyboardButton(
                 text=get_localization(language_code).FEEDBACK_ADMIN_APPROVE,
-                callback_data=f'manage_feedback:approve:{user_id}'
+                callback_data=f'mf:approve:{user_id}:{feedback_id}'
             ),
             InlineKeyboardButton(
                 text=get_localization(language_code).FEEDBACK_ADMIN_DENY,
-                callback_data=f'manage_feedback:deny:{user_id}'
+                callback_data=f'mf:deny:{user_id}:{feedback_id}'
             ),
         ],
     ]

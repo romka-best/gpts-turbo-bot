@@ -46,9 +46,9 @@ async def get_transactions_by_service_and_created_time(
     )
 
     transaction_stream = firebase.db.collection(Transaction.COLLECTION_NAME) \
-        .where(filter=FieldFilter("service", "==", service)) \
-        .where(filter=FieldFilter("created_at", ">=", start_date)) \
-        .where(filter=FieldFilter("created_at", "<=", end_date)) \
+        .where(filter=FieldFilter('service', '==', service)) \
+        .where(filter=FieldFilter('created_at', '>=', start_date)) \
+        .where(filter=FieldFilter('created_at', '<=', end_date)) \
         .stream()
 
     transactions = [
@@ -77,9 +77,9 @@ async def get_transactions(
     transactions_query = firebase.db.collection(Transaction.COLLECTION_NAME)
 
     if start_date:
-        transactions_query = transactions_query.where(filter=FieldFilter("created_at", ">=", start_date))
+        transactions_query = transactions_query.where(filter=FieldFilter('created_at', '>=', start_date))
     if end_date:
-        transactions_query = transactions_query.where(filter=FieldFilter("created_at", "<=", end_date))
+        transactions_query = transactions_query.where(filter=FieldFilter('created_at', '<=', end_date))
 
     transactions = transactions_query.stream()
     return [

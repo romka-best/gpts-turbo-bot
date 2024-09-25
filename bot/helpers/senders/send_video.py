@@ -29,14 +29,21 @@ async def send_video(
         )
     except TelegramForbiddenError:
         await update_user(chat_id, {
-            "is_blocked": True,
+            'is_blocked': True,
         })
     except Exception as e:
         logging.error(f'Error in send_video: {e}')
+
+        await bot.send_message(
+            chat_id=chat_id,
+            reply_markup=reply_markup,
+            text=result,
+            reply_to_message_id=reply_to_message_id,
+        )
 
         await send_error_info(
             bot=bot,
             user_id=chat_id,
             info=str(e),
-            hashtags=["video"]
+            hashtags=['video']
         )

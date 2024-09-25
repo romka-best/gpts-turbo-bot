@@ -97,8 +97,8 @@ def build_manage_face_swap_edit_choose_package_keyboard(
     for package in packages:
         buttons.append([
             InlineKeyboardButton(
-                text=f"{package.name} ({package.translated_names.get(language_code, package.name)})",
-                callback_data=f"fsm_edit_choose_package:{package.name}"
+                text=f'{package.name} ({package.translated_names.get(language_code, package.name)})',
+                callback_data=f'fsm_edit_choose_package:{package.name}'
             )
         ])
 
@@ -150,7 +150,7 @@ def build_manage_face_swap_edit_package_change_status_keyboard(
         [
             InlineKeyboardButton(
                 text=get_localization(language_code).FACE_SWAP_PUBLIC + (
-                    " ✅" if current_status == FaceSwapPackageStatus.PUBLIC else ""
+                    ' ✅' if current_status == FaceSwapPackageStatus.PUBLIC else ''
                 ),
                 callback_data=f'fsm_edit_package_change_status:{FaceSwapPackageStatus.PUBLIC}'
             )
@@ -158,7 +158,7 @@ def build_manage_face_swap_edit_package_change_status_keyboard(
         [
             InlineKeyboardButton(
                 text=get_localization(language_code).FACE_SWAP_PRIVATE + (
-                    " ✅" if current_status == FaceSwapPackageStatus.PRIVATE else ""
+                    ' ✅' if current_status == FaceSwapPackageStatus.PRIVATE else ''
                 ),
                 callback_data=f'fsm_edit_package_change_status:{FaceSwapPackageStatus.PRIVATE}'
             )
@@ -201,7 +201,7 @@ def build_manage_face_swap_edit_picture_change_status_keyboard(
         [
             InlineKeyboardButton(
                 text=get_localization(language_code).FACE_SWAP_PUBLIC + (
-                    " ✅" if current_status == FaceSwapPackageStatus.PUBLIC else ""
+                    ' ✅' if current_status == FaceSwapPackageStatus.PUBLIC else ''
                 ),
                 callback_data=f'fsm_edit_picture_change_status:{FaceSwapPackageStatus.PUBLIC}'
             )
@@ -209,7 +209,7 @@ def build_manage_face_swap_edit_picture_change_status_keyboard(
         [
             InlineKeyboardButton(
                 text=get_localization(language_code).FACE_SWAP_PRIVATE + (
-                    " ✅" if current_status == FaceSwapPackageStatus.PRIVATE else ""
+                    ' ✅' if current_status == FaceSwapPackageStatus.PRIVATE else ''
                 ),
                 callback_data=f'fsm_edit_picture_change_status:{FaceSwapPackageStatus.PRIVATE}'
             )

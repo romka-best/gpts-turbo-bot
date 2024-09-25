@@ -7,11 +7,11 @@ def build_language_keyboard(language_code: str) -> InlineKeyboardMarkup:
     buttons = [
         [
             InlineKeyboardButton(
-                text="🇺🇸 English",
+                text='🇺🇸 English',
                 callback_data='language:en',
             ),
             InlineKeyboardButton(
-                text="🇷🇺 Русский",
+                text='🇷🇺 Русский',
                 callback_data='language:ru',
             ),
         ],

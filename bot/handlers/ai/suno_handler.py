@@ -1,4 +1,5 @@
 import asyncio
+from datetime import datetime, timezone
 
 from aiogram import Router, Bot, F
 from aiogram.filters import Command
@@ -6,6 +7,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
 from aiogram.utils.chat_action import ChatActionSender
 
+from bot.config import config, MessageEffect
 from bot.database.models.common import Model, SunoMode, Quota, SunoVersion
 from bot.database.models.generation import GenerationStatus
 from bot.database.models.request import RequestStatus
@@ -37,7 +39,7 @@ suno_router = Router()
 PRICE_SUNO = 0
 
 
-@suno_router.message(Command("suno"))
+@suno_router.message(Command('suno'))
 async def suno(message: Message, state: FSMContext):
     await state.clear()
 
@@ -54,14 +56,14 @@ async def suno(message: Message, state: FSMContext):
     else:
         user.current_model = Model.SUNO
         await update_user(user_id, {
-            "current_model": user.current_model,
+            'current_model': user.current_model,
         })
 
         reply_markup = await build_recommendations_keyboard(user.current_model, user_language_code, user.gender)
         await message.answer(
             text=get_localization(user_language_code).SWITCHED_TO_SUNO,
             reply_markup=reply_markup,
-            message_effect_id="5104841245755180586",
+            message_effect_id=config.MESSAGE_EFFECTS.get(MessageEffect.FIRE),
         )
 
     await handle_suno(message.bot, str(message.chat.id), state, user_id)
@@ -144,7 +146,7 @@ async def suno_prompt_sent(message: Message, state: FSMContext):
     )
 
     async with ChatActionSender.upload_voice(bot=message.bot, chat_id=message.chat.id):
-        quota = user.monthly_limits[Quota.SUNO] + user.additional_usage_quota[Quota.SUNO]
+        quota = user.daily_limits[Quota.SUNO] + user.additional_usage_quota[Quota.SUNO]
         if quota < 2:
             reply_markup = build_cancel_keyboard(user_language_code)
             await message.answer(
@@ -167,9 +169,9 @@ async def suno_prompt_sent(message: Message, state: FSMContext):
                 model=Model.SUNO,
                 requested=2,
                 details={
-                    "mode": SunoMode.SIMPLE,
-                    "prompt": prompt,
-                    "is_suggestion": False,
+                    'mode': SunoMode.SIMPLE,
+                    'prompt': prompt,
+                    'is_suggestion': False,
                 },
             )
 
@@ -185,9 +187,9 @@ async def suno_prompt_sent(message: Message, state: FSMContext):
                                 model=Model.SUNO,
                                 has_error=result is None,
                                 details={
-                                    "mode": SunoMode.SIMPLE,
-                                    "prompt": prompt,
-                                    "is_suggestion": False,
+                                    'mode': SunoMode.SIMPLE,
+                                    'prompt': prompt,
+                                    'is_suggestion': False,
                                 }
                             )
                         )
@@ -202,11 +204,11 @@ async def suno_prompt_sent(message: Message, state: FSMContext):
 
                 await asyncio.gather(*tasks)
             except Exception as e:
-                if "Too Many Requests" in str(e):
+                if 'Too Many Requests' in str(e):
                     await message.answer(
                         text=get_localization(user_language_code).SERVER_OVERLOADED_ERROR,
                     )
-                elif "Bad Request" in str(e):
+                elif 'Bad Request' in str(e):
                     await message.answer(
                         text=get_localization(user_language_code).SUNO_TOO_MANY_WORDS,
                     )
@@ -224,12 +226,12 @@ async def suno_prompt_sent(message: Message, state: FSMContext):
                         bot=message.bot,
                         user_id=user.id,
                         info=str(e),
-                        hashtags=["suno"],
+                        hashtags=['suno'],
                     )
 
                 request.status = RequestStatus.FINISHED
                 await update_request(request.id, {
-                    "status": request.status
+                    'status': request.status
                 })
 
                 generations = await get_generations_by_request_id(request.id)
@@ -239,8 +241,8 @@ async def suno_prompt_sent(message: Message, state: FSMContext):
                     await update_generation(
                         generation.id,
                         {
-                            "status": generation.status,
-                            "has_error": generation.has_error,
+                            'status': generation.status,
+                            'has_error': generation.has_error,
                         },
                     )
 
@@ -263,7 +265,7 @@ async def handle_suno_custom_mode_lyrics_selection(callback_query: CallbackQuery
             reply_markup=reply_markup,
         )
 
-        await state.update_data(suno_lyrics="")
+        await state.update_data(suno_lyrics='')
         await state.set_state(Suno.waiting_for_genres)
     elif action == 'back':
         reply_markup = build_suno_keyboard(user_language_code)
@@ -336,7 +338,7 @@ async def suno_genres_sent(message: Message, state: FSMContext):
     )
 
     async with ChatActionSender.upload_voice(bot=message.bot, chat_id=message.chat.id):
-        quota = user.monthly_limits[Quota.SUNO] + user.additional_usage_quota[Quota.SUNO]
+        quota = user.daily_limits[Quota.SUNO] + user.additional_usage_quota[Quota.SUNO]
 
         if quota < 2:
             reply_markup = build_cancel_keyboard(user_language_code)
@@ -364,10 +366,10 @@ async def suno_genres_sent(message: Message, state: FSMContext):
                     model=Model.SUNO,
                     requested=2,
                     details={
-                        "mode": SunoMode.CUSTOM,
-                        "lyrics": lyrics,
-                        "genres": genres,
-                        "is_suggestion": False,
+                        'mode': SunoMode.CUSTOM,
+                        'lyrics': lyrics,
+                        'genres': genres,
+                        'is_suggestion': False,
                     },
                 )
 
@@ -388,10 +390,10 @@ async def suno_genres_sent(message: Message, state: FSMContext):
                                 model=Model.SUNO,
                                 has_error=result is None,
                                 details={
-                                    "mode": SunoMode.CUSTOM,
-                                    "lyrics": lyrics,
-                                    "genres": genres,
-                                    "is_suggestion": False,
+                                    'mode': SunoMode.CUSTOM,
+                                    'lyrics': lyrics,
+                                    'genres': genres,
+                                    'is_suggestion': False,
                                 }
                             )
                         )
@@ -406,11 +408,11 @@ async def suno_genres_sent(message: Message, state: FSMContext):
 
                 await asyncio.gather(*tasks)
             except Exception as e:
-                if "Too Many Requests" in str(e):
+                if 'Too Many Requests' in str(e):
                     await message.answer(
                         text=get_localization(user_language_code).SERVER_OVERLOADED_ERROR,
                     )
-                elif "Bad Request" in str(e):
+                elif 'Bad Request' in str(e):
                     await message.answer(
                         text=get_localization(user_language_code).SUNO_TOO_MANY_WORDS,
                     )
@@ -428,12 +430,12 @@ async def suno_genres_sent(message: Message, state: FSMContext):
                         bot=message.bot,
                         user_id=user.id,
                         info=str(e),
-                        hashtags=["suno"],
+                        hashtags=['suno'],
                     )
 
                 request.status = RequestStatus.FINISHED
                 await update_request(request.id, {
-                    "status": request.status
+                    'status': request.status
                 })
 
                 generations = await get_generations_by_request_id(request.id)
@@ -443,8 +445,8 @@ async def suno_genres_sent(message: Message, state: FSMContext):
                     await update_generation(
                         generation.id,
                         {
-                            "status": generation.status,
-                            "has_error": generation.has_error,
+                            'status': generation.status,
+                            'has_error': generation.has_error,
                         },
                     )
 
@@ -452,9 +454,13 @@ async def suno_genres_sent(message: Message, state: FSMContext):
 
 
 async def handle_suno_example(user: User, prompt: str, message: Message, state: FSMContext):
+    current_date = datetime.now(timezone.utc)
     if (
         user.subscription_type == SubscriptionType.FREE and
-        user.monthly_limits[Quota.MUSIC_GEN] == 30
+        user.current_model == Model.MUSIC_GEN and
+        user.settings[user.current_model][UserSettings.SHOW_EXAMPLES] and
+        user.daily_limits[Quota.MUSIC_GEN] in [1] and
+        (current_date - user.last_subscription_limit_update).days <= 3
     ):
         request = await write_request(
             user_id=user.id,
@@ -462,9 +468,9 @@ async def handle_suno_example(user: User, prompt: str, message: Message, state: 
             model=Model.SUNO,
             requested=2,
             details={
-                "mode": SunoMode.SIMPLE,
-                "prompt": prompt,
-                "is_suggestion": True,
+                'mode': SunoMode.SIMPLE,
+                'prompt': prompt,
+                'is_suggestion': True,
             },
         )
 
@@ -480,9 +486,9 @@ async def handle_suno_example(user: User, prompt: str, message: Message, state: 
                             model=Model.SUNO,
                             has_error=result is None,
                             details={
-                                "mode": SunoMode.SIMPLE,
-                                "prompt": prompt,
-                                "is_suggestion": True,
+                                'mode': SunoMode.SIMPLE,
+                                'prompt': prompt,
+                                'is_suggestion': True,
                             }
                         )
                     )
@@ -501,12 +507,12 @@ async def handle_suno_example(user: User, prompt: str, message: Message, state: 
                 bot=message.bot,
                 user_id=user.id,
                 info=str(e),
-                hashtags=["suno", "example"],
+                hashtags=['suno', 'example'],
             )
 
             request.status = RequestStatus.FINISHED
             await update_request(request.id, {
-                "status": request.status
+                'status': request.status
             })
 
             generations = await get_generations_by_request_id(request.id)
@@ -516,7 +522,7 @@ async def handle_suno_example(user: User, prompt: str, message: Message, state: 
                 await update_generation(
                     generation.id,
                     {
-                        "status": generation.status,
-                        "has_error": generation.has_error,
+                        'status': generation.status,
+                        'has_error': generation.has_error,
                     },
                 )

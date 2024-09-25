@@ -23,10 +23,10 @@ async def get_started_requests(
     requests_query = firebase.db.collection(Request.COLLECTION_NAME)
 
     if start_date:
-        requests_query = requests_query.where(filter=FieldFilter("created_at", ">=", start_date))
+        requests_query = requests_query.where(filter=FieldFilter('created_at', '>=', start_date))
     if end_date:
-        requests_query = requests_query.where(filter=FieldFilter("created_at", "<=", end_date))
-    requests_query = requests_query.where(filter=FieldFilter("status", "==", RequestStatus.STARTED))
+        requests_query = requests_query.where(filter=FieldFilter('created_at', '<=', end_date))
+    requests_query = requests_query.where(filter=FieldFilter('status', '==', RequestStatus.STARTED))
 
     requests = [Request(**request.to_dict()) async for request in requests_query.stream()]
 
@@ -35,9 +35,9 @@ async def get_started_requests(
 
 async def get_started_requests_by_user_id_and_model(user_id: str, model: Model) -> List[Request]:
     requests_stream = firebase.db.collection(Request.COLLECTION_NAME) \
-        .where(filter=FieldFilter("user_id", "==", user_id)) \
-        .where(filter=FieldFilter("status", "==", RequestStatus.STARTED)) \
-        .where(filter=FieldFilter("model", "==", model)) \
+        .where(filter=FieldFilter('user_id', '==', user_id)) \
+        .where(filter=FieldFilter('status', '==', RequestStatus.STARTED)) \
+        .where(filter=FieldFilter('model', '==', model)) \
         .stream()
 
     requests = [Request(**request.to_dict()) async for request in requests_stream]

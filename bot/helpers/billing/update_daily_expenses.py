@@ -43,24 +43,24 @@ GROUP BY
         service = row['service']
         expense = row['total_cost']
         if (
-            service == "Cloud Run" or
-            service == "App Engine" or
-            service == "Compute Engine" or
-            service == "Cloud Logging" or
-            service == "Cloud Scheduler" or
-            service == "Networking"
+            service == 'Cloud Run' or
+            service == 'App Engine' or
+            service == 'Compute Engine' or
+            service == 'Cloud Logging' or
+            service == 'Cloud Scheduler' or
+            service == 'Networking'
         ):
             server_expenses += expense
         elif (
-            service == "BigQuery" or
-            service == "Cloud Memorystore for Redis" or
-            service == "Cloud Storage"
+            service == 'BigQuery' or
+            service == 'Cloud Memorystore for Redis' or
+            service == 'Cloud Storage'
         ):
             database_expenses += expense
 
     if need_count_server_expenses:
         await write_transaction(
-            user_id="354543567",
+            user_id=config.SUPER_ADMIN_ID,
             type=TransactionType.EXPENSE,
             service=ServiceType.SERVER,
             amount=server_expenses,
@@ -71,7 +71,7 @@ GROUP BY
         )
     if need_count_server_expenses:
         await write_transaction(
-            user_id="354543567",
+            user_id=config.SUPER_ADMIN_ID,
             type=TransactionType.EXPENSE,
             service=ServiceType.DATABASE,
             amount=database_expenses,

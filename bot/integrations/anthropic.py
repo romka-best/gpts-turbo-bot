@@ -27,8 +27,8 @@ async def get_response_message(model_version: ClaudeGPTVersion, system_prompt: s
     )
 
     return {
-        "finish_reason": response.stop_reason,
-        "message": response.content[0].text,
-        "input_tokens": response.usage.input_tokens,
-        "output_tokens": response.usage.output_tokens
+        'finish_reason': response.stop_reason,
+        'message': response.content[0].text,
+        'input_tokens': response.usage.input_tokens,
+        'output_tokens': response.usage.output_tokens
     }

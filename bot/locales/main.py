@@ -16,19 +16,19 @@ async def set_user_language(user_id: str, language_code: str, storage: BaseStora
     if language_code not in localization_classes.keys():
         language_code = 'en'
 
-    key = f"user:{user_id}:language"
+    key = f'user:{user_id}:language'
     await storage.redis.set(key, language_code)
 
     await update_user(
         user_id,
         {
-            "interface_language_code": language_code,
+            'interface_language_code': language_code,
         }
     )
 
 
 async def get_user_language(user_id: str, storage: BaseStorage) -> str:
-    key = f"user:{user_id}:language"
+    key = f'user:{user_id}:language'
     language_code = await storage.redis.get(key)
     if language_code is not None:
         language_code = language_code.decode()

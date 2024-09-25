@@ -1,9 +1,12 @@
+from datetime import datetime, timezone
+
 from aiogram import Router
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
 from aiogram.utils.chat_action import ChatActionSender
 
+from bot.config import config, MessageEffect
 from bot.database.models.common import Model, Quota, MidjourneyAction, MidjourneyVersion
 from bot.database.models.generation import GenerationStatus
 from bot.database.models.request import RequestStatus
@@ -33,7 +36,7 @@ midjourney_router = Router()
 PRICE_MIDJOURNEY_REQUEST = 0.04
 
 
-@midjourney_router.message(Command("midjourney"))
+@midjourney_router.message(Command('midjourney'))
 async def midjourney(message: Message, state: FSMContext):
     await state.clear()
 
@@ -50,14 +53,14 @@ async def midjourney(message: Message, state: FSMContext):
     else:
         user.current_model = Model.MIDJOURNEY
         await update_user(user_id, {
-            "current_model": user.current_model,
+            'current_model': user.current_model,
         })
 
         reply_markup = await build_recommendations_keyboard(user.current_model, user_language_code, user.gender)
         await message.answer(
             text=get_localization(user_language_code).SWITCHED_TO_MIDJOURNEY,
             reply_markup=reply_markup,
-            message_effect_id="5104841245755180586",
+            message_effect_id=config.MESSAGE_EFFECTS.get(MessageEffect.FIRE),
         )
 
 
@@ -67,7 +70,7 @@ async def handle_midjourney(
     user: User,
     prompt: str,
     action: MidjourneyAction,
-    hash_id="",
+    hash_id='',
     choice=0,
 ):
     await state.update_data(is_processing=True)
@@ -81,7 +84,7 @@ async def handle_midjourney(
     processing_message = await message.reply(text=get_localization(user_language_code).processing_request_image())
 
     async with ChatActionSender.upload_photo(bot=message.bot, chat_id=message.chat.id):
-        quota = user.monthly_limits[Quota.MIDJOURNEY] + user.additional_usage_quota[Quota.MIDJOURNEY]
+        quota = user.daily_limits[Quota.MIDJOURNEY] + user.additional_usage_quota[Quota.MIDJOURNEY]
         if quota < 1:
             await message.reply(get_localization(user_language_code).REACHED_USAGE_LIMIT)
         else:
@@ -100,18 +103,18 @@ async def handle_midjourney(
                 model=Model.MIDJOURNEY,
                 requested=1,
                 details={
-                    "prompt": prompt,
-                    "action": action,
-                    "version": version,
-                    "is_suggestion": False,
+                    'prompt': prompt,
+                    'action': action,
+                    'version': version,
+                    'is_suggestion': False,
                 }
             )
 
             try:
                 if user_language_code != 'en':
                     prompt = await translate_text(prompt, user_language_code, 'en')
-                prompt = prompt.replace("-", "- ")
-                prompt += f" --v {version}"
+                prompt = prompt.replace('-', '- ')
+                prompt += f' --v {version}'
 
                 if action == MidjourneyAction.UPSCALE:
                     result_id = await create_midjourney_image(hash_id, choice)
@@ -127,10 +130,10 @@ async def handle_midjourney(
                     model=Model.MIDJOURNEY,
                     has_error=result_id is None,
                     details={
-                        "prompt": prompt,
-                        "action": action,
-                        "version": version,
-                        "is_suggestion": False,
+                        'prompt': prompt,
+                        'action': action,
+                        'version': version,
+                        'is_suggestion': False,
                     }
                 )
             except Exception as e:
@@ -145,12 +148,12 @@ async def handle_midjourney(
                     bot=message.bot,
                     user_id=user.id,
                     info=str(e),
-                    hashtags=["midjourney"],
+                    hashtags=['midjourney'],
                 )
 
                 request.status = RequestStatus.FINISHED
                 await update_request(request.id, {
-                    "status": request.status
+                    'status': request.status
                 })
 
                 generations = await get_generations_by_request_id(request.id)
@@ -160,8 +163,8 @@ async def handle_midjourney(
                     await update_generation(
                         generation.id,
                         {
-                            "status": generation.status,
-                            "has_error": generation.has_error,
+                            'status': generation.status,
+                            'has_error': generation.has_error,
                         },
                     )
 
@@ -180,7 +183,7 @@ async def handle_midjourney_selection(callback_query: CallbackQuery, state: FSMC
 
     generation = await get_generation(hash_id)
 
-    if action.startswith("u"):
+    if action.startswith('u'):
         choice = int(action[1:])
         await handle_midjourney(
             callback_query.message,
@@ -191,7 +194,7 @@ async def handle_midjourney_selection(callback_query: CallbackQuery, state: FSMC
             hash_id,
             choice,
         )
-    elif action.startswith("v"):
+    elif action.startswith('v'):
         choice = int(action[1:])
         await handle_midjourney(
             callback_query.message,
@@ -202,7 +205,7 @@ async def handle_midjourney_selection(callback_query: CallbackQuery, state: FSMC
             hash_id,
             choice,
         )
-    elif action == "again":
+    elif action == 'again':
         await handle_midjourney(
             callback_query.message,
             state,
@@ -216,9 +219,13 @@ async def handle_midjourney_selection(callback_query: CallbackQuery, state: FSMC
 
 
 async def handle_midjourney_example(user: User, user_language_code: str, prompt: str, message: Message):
+    current_date = datetime.now(timezone.utc)
     if (
         user.subscription_type == SubscriptionType.FREE and
-        user.monthly_limits[Quota.DALL_E] + 1 in [1, 5]
+        (user.current_model == Model.DALL_E or user.current_model == Model.STABLE_DIFFUSION) and
+        user.settings[user.current_model][UserSettings.SHOW_EXAMPLES] and
+        (user.daily_limits[Quota.DALL_E] + 1 in [1] or user.daily_limits[Quota.STABLE_DIFFUSION] + 1 in [1]) and
+        (current_date - user.last_subscription_limit_update).days <= 3
     ):
         request = await write_request(
             user_id=user.id,
@@ -226,17 +233,17 @@ async def handle_midjourney_example(user: User, user_language_code: str, prompt:
             model=Model.MIDJOURNEY,
             requested=1,
             details={
-                "prompt": prompt,
-                "action": MidjourneyAction.UPSCALE,
-                "version": MidjourneyVersion.V6,
-                "is_suggestion": True,
+                'prompt': prompt,
+                'action': MidjourneyAction.UPSCALE,
+                'version': MidjourneyVersion.V6,
+                'is_suggestion': True,
             }
         )
 
         try:
             if user_language_code != 'en':
                 prompt = await translate_text(prompt, user_language_code, 'en')
-            prompt += f" --v {MidjourneyVersion.V6}"
+            prompt += f' --v {MidjourneyVersion.V6}'
 
             result_id = await create_midjourney_images(prompt)
             await write_generation(
@@ -245,10 +252,10 @@ async def handle_midjourney_example(user: User, user_language_code: str, prompt:
                 model=Model.MIDJOURNEY,
                 has_error=result_id is None,
                 details={
-                    "prompt": prompt,
-                    "action": MidjourneyAction.IMAGINE,
-                    "version": MidjourneyVersion.V6,
-                    "is_suggestion": True,
+                    'prompt': prompt,
+                    'action': MidjourneyAction.IMAGINE,
+                    'version': MidjourneyVersion.V6,
+                    'is_suggestion': True,
                 }
             )
         except Exception as e:
@@ -256,12 +263,12 @@ async def handle_midjourney_example(user: User, user_language_code: str, prompt:
                 bot=message.bot,
                 user_id=user.id,
                 info=str(e),
-                hashtags=["midjourney", "example"],
+                hashtags=['midjourney', 'example'],
             )
 
             request.status = RequestStatus.FINISHED
             await update_request(request.id, {
-                "status": request.status
+                'status': request.status
             })
 
             generations = await get_generations_by_request_id(request.id)
@@ -271,7 +278,7 @@ async def handle_midjourney_example(user: User, user_language_code: str, prompt:
                 await update_generation(
                     generation.id,
                     {
-                        "status": generation.status,
-                        "has_error": generation.has_error,
+                        'status': generation.status,
+                        'has_error': generation.has_error,
                     },
                 )

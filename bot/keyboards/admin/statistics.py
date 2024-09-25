@@ -1,6 +1,7 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 from bot.database.models.common import Currency
+from bot.database.models.subscription import Subscription, SubscriptionType
 from bot.database.models.transaction import TransactionType, ServiceType
 from bot.locales.main import get_localization
 
@@ -9,25 +10,25 @@ def build_statistics_keyboard(language_code: str, is_admin: bool) -> InlineKeybo
     buttons = [
         [
             InlineKeyboardButton(
-                text="За день 📅",
+                text='За день 📅',
                 callback_data=f'statistics:day'
             )
         ],
         [
             InlineKeyboardButton(
-                text="За неделю 📆",
+                text='За неделю 📆',
                 callback_data=f'statistics:week'
             )
         ],
         [
             InlineKeyboardButton(
-                text="За месяц 🗓️",
+                text='За месяц 🗓️',
                 callback_data=f'statistics:month'
             )
         ],
         [
             InlineKeyboardButton(
-                text="За всё время ⏳",
+                text='За всё время ⏳',
                 callback_data=f'statistics:all'
             )
         ],
@@ -36,7 +37,7 @@ def build_statistics_keyboard(language_code: str, is_admin: bool) -> InlineKeybo
     if is_admin:
         buttons.append([
             InlineKeyboardButton(
-                text="Записать транзакцию ➕➖",
+                text='Записать транзакцию ➕➖',
                 callback_data=f'statistics:write_transaction'
             )
         ])
@@ -55,13 +56,13 @@ def build_statistics_write_transaction_keyboard(language_code: str) -> InlineKey
     buttons = [
         [
             InlineKeyboardButton(
-                text="Записать доход 📈",
+                text='Записать доход 📈',
                 callback_data=f'statistics_write_transaction:{TransactionType.INCOME}'
             )
         ],
         [
             InlineKeyboardButton(
-                text="Записать расход 📉",
+                text='Записать расход 📉',
                 callback_data=f'statistics_write_transaction:{TransactionType.EXPENSE}'
             )
         ],
@@ -82,118 +83,149 @@ def build_statistics_choose_service_keyboard(
 ) -> InlineKeyboardMarkup:
     buttons = []
     if transaction_type == TransactionType.INCOME:
+        emojis = Subscription.get_emojis()
         buttons = [
             [
                 InlineKeyboardButton(
-                    text="STANDARD ⭐️",
+                    text=f'{SubscriptionType.MINI} {emojis[SubscriptionType.MINI]}',
                     callback_data=f'statistics_choose_service:{ServiceType.STANDARD}'
                 )
             ],
             [
                 InlineKeyboardButton(
-                    text="VIP 🔥",
+                    text=f'{SubscriptionType.STANDARD} {emojis[SubscriptionType.STANDARD]}',
+                    callback_data=f'statistics_choose_service:{ServiceType.STANDARD}'
+                )
+            ],
+            [
+                InlineKeyboardButton(
+                    text=f'{SubscriptionType.VIP} {emojis[SubscriptionType.VIP]}',
                     callback_data=f'statistics_choose_service:{ServiceType.VIP}'
                 )
             ],
             [
                 InlineKeyboardButton(
-                    text="PREMIUM 💎",
+                    text=f'{SubscriptionType.PREMIUM} {emojis[SubscriptionType.PREMIUM]}',
                     callback_data=f'statistics_choose_service:{ServiceType.PREMIUM}'
                 )
             ],
             [
                 InlineKeyboardButton(
-                    text="ChatGPT 3.5 Turbo ✉️",
+                    text=f'{SubscriptionType.UNLIMITED} {emojis[SubscriptionType.UNLIMITED]}',
+                    callback_data=f'statistics_choose_service:{ServiceType.UNLIMITED}'
+                )
+            ],
+            [
+                InlineKeyboardButton(
+                    text=get_localization(language_code).CHATGPT3_TURBO,
                     callback_data=f'statistics_choose_service:{ServiceType.CHAT_GPT3_TURBO}'
                 )
             ],
             [
                 InlineKeyboardButton(
-                    text="ChatGPT 4.0 Omni Mini ✉️",
+                    text=get_localization(language_code).CHATGPT4_OMNI_MINI,
                     callback_data=f'statistics_choose_service:{ServiceType.CHAT_GPT4_OMNI_MINI}'
                 )
             ],
             [
                 InlineKeyboardButton(
-                    text="ChatGPT 4.0 Turbo 🧠",
+                    text=get_localization(language_code).CHATGPT4_TURBO,
                     callback_data=f'statistics_choose_service:{ServiceType.CHAT_GPT4_TURBO}'
                 )
             ],
             [
                 InlineKeyboardButton(
-                    text="ChatGPT 4.0 Omni 💥",
+                    text=get_localization(language_code).CHATGPT4_OMNI,
                     callback_data=f'statistics_choose_service:{ServiceType.CHAT_GPT4_OMNI}'
                 )
             ],
             [
                 InlineKeyboardButton(
-                    text="Claude 3.5 Sonnet 💫",
+                    text=get_localization(language_code).CLAUDE_3_SONNET,
                     callback_data=f'statistics_choose_service:{ServiceType.CLAUDE_3_SONNET}'
                 )
             ],
             [
                 InlineKeyboardButton(
-                    text="Claude 3 Opus 🚀",
+                    text=get_localization(language_code).CLAUDE_3_OPUS,
                     callback_data=f'statistics_choose_service:{ServiceType.CLAUDE_3_OPUS}'
                 )
             ],
             [
                 InlineKeyboardButton(
-                    text="DALL-E 🖼",
+                    text=get_localization(language_code).GEMINI_1_FLASH,
+                    callback_data=f'statistics_choose_service:{ServiceType.GEMINI_1_FLASH}'
+                )
+            ],
+            [
+                InlineKeyboardButton(
+                    text=get_localization(language_code).GEMINI_1_PRO,
+                    callback_data=f'statistics_choose_service:{ServiceType.GEMINI_1_PRO}'
+                )
+            ],
+            [
+                InlineKeyboardButton(
+                    text=get_localization(language_code).DALL_E,
                     callback_data=f'statistics_choose_service:{ServiceType.DALL_E}'
                 )
             ],
             [
                 InlineKeyboardButton(
-                    text="Midjourney 🎨",
+                    text=get_localization(language_code).MIDJOURNEY,
                     callback_data=f'statistics_choose_service:{ServiceType.MIDJOURNEY}'
                 )
             ],
             [
                 InlineKeyboardButton(
-                    text="FaceSwap 📷",
+                    text=get_localization(language_code).STABLE_DIFFUSION,
+                    callback_data=f'statistics_choose_service:{ServiceType.STABLE_DIFFUSION}'
+                )
+            ],
+            [
+                InlineKeyboardButton(
+                    text=get_localization(language_code).FACE_SWAP,
                     callback_data=f'statistics_choose_service:{ServiceType.FACE_SWAP}'
                 )
             ],
             [
                 InlineKeyboardButton(
-                    text="MusicGen 🎵",
+                    text=get_localization(language_code).MUSIC_GEN,
                     callback_data=f'statistics_choose_service:{ServiceType.MUSIC_GEN}'
                 )
             ],
             [
                 InlineKeyboardButton(
-                    text="Suno 🎸",
+                    text=get_localization(language_code).SUNO,
                     callback_data=f'statistics_choose_service:{ServiceType.SUNO}'
                 )
             ],
             [
                 InlineKeyboardButton(
-                    text="Additional chats 💬",
+                    text=get_localization(language_code).THEMATIC_CHATS,
                     callback_data=f'statistics_choose_service:{ServiceType.ADDITIONAL_CHATS}'
                 )
             ],
             [
                 InlineKeyboardButton(
-                    text="Fast messages ⚡",
+                    text=get_localization(language_code).FAST_ANSWERS,
                     callback_data=f'statistics_choose_service:{ServiceType.FAST_MESSAGES}'
                 )
             ],
             [
                 InlineKeyboardButton(
-                    text="Voice messages 🎙",
+                    text=get_localization(language_code).VOICE_MESSAGES,
                     callback_data=f'statistics_choose_service:{ServiceType.VOICE_MESSAGES}'
                 )
             ],
             [
                 InlineKeyboardButton(
-                    text="Access to catalog 🎭",
+                    text=get_localization(language_code).ACCESS_TO_CATALOG,
                     callback_data=f'statistics_choose_service:{ServiceType.ACCESS_TO_CATALOG}'
                 )
             ],
             [
                 InlineKeyboardButton(
-                    text="Other 🤷",
+                    text='Other 🤷',
                     callback_data=f'statistics_choose_service:{ServiceType.OTHER}'
                 )
             ],
@@ -202,109 +234,127 @@ def build_statistics_choose_service_keyboard(
         buttons = [
             [
                 InlineKeyboardButton(
-                    text="ChatGPT 3.5 Turbo ✉️",
+                    text=get_localization(language_code).CHATGPT3_TURBO,
                     callback_data=f'statistics_choose_service:{ServiceType.CHAT_GPT3_TURBO}'
                 )
             ],
             [
                 InlineKeyboardButton(
-                    text="ChatGPT 4.0 Omni Mini ✉️",
+                    text=get_localization(language_code).CHATGPT4_OMNI_MINI,
                     callback_data=f'statistics_choose_service:{ServiceType.CHAT_GPT4_OMNI_MINI}'
                 )
             ],
             [
                 InlineKeyboardButton(
-                    text="ChatGPT 4.0 Turbo 🧠",
+                    text=get_localization(language_code).CHATGPT4_TURBO,
                     callback_data=f'statistics_choose_service:{ServiceType.CHAT_GPT4_TURBO}'
                 )
             ],
             [
                 InlineKeyboardButton(
-                    text="ChatGPT 4.0 Omni 💥",
+                    text=get_localization(language_code).CHATGPT4_OMNI,
                     callback_data=f'statistics_choose_service:{ServiceType.CHAT_GPT4_OMNI}'
                 )
             ],
             [
                 InlineKeyboardButton(
-                    text="Claude 3.5 Sonnet 💫",
+                    text=get_localization(language_code).CLAUDE_3_SONNET,
                     callback_data=f'statistics_choose_service:{ServiceType.CLAUDE_3_SONNET}'
                 )
             ],
             [
                 InlineKeyboardButton(
-                    text="Claude 3 Opus 🚀",
+                    text=get_localization(language_code).CLAUDE_3_OPUS,
                     callback_data=f'statistics_choose_service:{ServiceType.CLAUDE_3_OPUS}'
                 )
             ],
             [
                 InlineKeyboardButton(
-                    text="DALL-E 🖼",
+                    text=get_localization(language_code).GEMINI_1_FLASH,
+                    callback_data=f'statistics_choose_service:{ServiceType.CLAUDE_3_SONNET}'
+                )
+            ],
+            [
+                InlineKeyboardButton(
+                    text=get_localization(language_code).GEMINI_1_PRO,
+                    callback_data=f'statistics_choose_service:{ServiceType.CLAUDE_3_OPUS}'
+                )
+            ],
+            [
+                InlineKeyboardButton(
+                    text=get_localization(language_code).DALL_E,
                     callback_data=f'statistics_choose_service:{ServiceType.DALL_E}'
                 )
             ],
             [
                 InlineKeyboardButton(
-                    text="Midjourney 🎨",
+                    text=get_localization(language_code).MIDJOURNEY,
                     callback_data=f'statistics_choose_service:{ServiceType.MIDJOURNEY}'
                 )
             ],
             [
                 InlineKeyboardButton(
-                    text="FaceSwap 📷",
+                    text=get_localization(language_code).STABLE_DIFFUSION,
+                    callback_data=f'statistics_choose_service:{ServiceType.STABLE_DIFFUSION}'
+                )
+            ],
+            [
+                InlineKeyboardButton(
+                    text=get_localization(language_code).FACE_SWAP,
                     callback_data=f'statistics_choose_service:{ServiceType.FACE_SWAP}'
                 )
             ],
             [
                 InlineKeyboardButton(
-                    text="MusicGen 🎵",
+                    text=get_localization(language_code).MUSIC_GEN,
                     callback_data=f'statistics_choose_service:{ServiceType.MUSIC_GEN}'
                 )
             ],
             [
                 InlineKeyboardButton(
-                    text="Suno 🎸",
+                    text=get_localization(language_code).SUNO,
                     callback_data=f'statistics_choose_service:{ServiceType.SUNO}'
                 )
             ],
             [
                 InlineKeyboardButton(
-                    text="Additional chats 💬",
+                    text=get_localization(language_code).THEMATIC_CHATS,
                     callback_data=f'statistics_choose_service:{ServiceType.ADDITIONAL_CHATS}'
                 )
             ],
             [
                 InlineKeyboardButton(
-                    text="Fast messages ⚡",
+                    text=get_localization(language_code).FAST_ANSWERS,
                     callback_data=f'statistics_choose_service:{ServiceType.FAST_MESSAGES}'
                 )
             ],
             [
                 InlineKeyboardButton(
-                    text="Voice messages 🎙",
+                    text=get_localization(language_code).VOICE_MESSAGES,
                     callback_data=f'statistics_choose_service:{ServiceType.VOICE_MESSAGES}'
                 )
             ],
             [
                 InlineKeyboardButton(
-                    text="Access to catalog 🎭",
+                    text=get_localization(language_code).ACCESS_TO_CATALOG,
                     callback_data=f'statistics_choose_service:{ServiceType.ACCESS_TO_CATALOG}'
                 )
             ],
             [
                 InlineKeyboardButton(
-                    text="Server 💻",
+                    text='Server 💻',
                     callback_data=f'statistics_choose_service:{ServiceType.SERVER}'
                 )
             ],
             [
                 InlineKeyboardButton(
-                    text="Database 🗄",
+                    text='Database 🗄',
                     callback_data=f'statistics_choose_service:{ServiceType.DATABASE}'
                 )
             ],
             [
                 InlineKeyboardButton(
-                    text="Other 🤷",
+                    text='Other 🤷',
                     callback_data=f'statistics_choose_service:{ServiceType.OTHER}'
                 )
             ],
@@ -323,19 +373,19 @@ def build_statistics_choose_currency_keyboard(language_code: str) -> InlineKeybo
     buttons = [
         [
             InlineKeyboardButton(
-                text="Рубли ₽",
+                text='RUB ₽',
                 callback_data=f'statistics_choose_currency:{Currency.RUB}'
             )
         ],
         [
             InlineKeyboardButton(
-                text="Доллары $",
+                text='USD $',
                 callback_data=f'statistics_choose_currency:{Currency.USD}'
             )
         ],
         [
             InlineKeyboardButton(
-                text="Telegram Stars ⭐",
+                text='Telegram Stars ⭐',
                 callback_data=f'statistics_choose_currency:{Currency.XTR}'
             )
         ],
