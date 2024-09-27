@@ -81,18 +81,25 @@ async def handle_midjourney(
     prompt = user_data.get('recognized_text', prompt)
     version = user.settings[Model.MIDJOURNEY][UserSettings.VERSION]
 
-    processing_message = await message.reply(text=get_localization(user_language_code).processing_request_image())
+    processing_message = await message.reply(
+        text=get_localization(user_language_code).processing_request_image(),
+        allow_sending_without_reply=True,
+    )
 
     async with ChatActionSender.upload_photo(bot=message.bot, chat_id=message.chat.id):
         quota = user.daily_limits[Quota.MIDJOURNEY] + user.additional_usage_quota[Quota.MIDJOURNEY]
         if quota < 1:
-            await message.reply(get_localization(user_language_code).REACHED_USAGE_LIMIT)
+            await message.reply(
+                text=get_localization(user_language_code).REACHED_USAGE_LIMIT,
+                allow_sending_without_reply=True,
+            )
         else:
             user_not_finished_requests = await get_started_requests_by_user_id_and_model(user.id, Model.MIDJOURNEY)
 
             if len(user_not_finished_requests):
                 await message.reply(
                     text=get_localization(user_language_code).ALREADY_MAKE_REQUEST,
+                    allow_sending_without_reply=True,
                 )
                 await processing_message.delete()
                 return

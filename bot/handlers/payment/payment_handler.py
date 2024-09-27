@@ -510,6 +510,7 @@ async def quantity_of_package_sent(message: Message, state: FSMContext):
         await message.reply(
             text=get_localization(user_language_code).VALUE_ERROR,
             reply_markup=reply_markup,
+            allow_sending_without_reply=True,
         )
 
 

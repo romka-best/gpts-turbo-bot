@@ -61,7 +61,10 @@ async def handle_feedback_sent(message: Message, state: FSMContext):
         reply_markup=reply_markup,
     )
 
-    await message.reply(text=get_localization(user_language_code).FEEDBACK_SUCCESS)
+    await message.reply(
+        text=get_localization(user_language_code).FEEDBACK_SUCCESS,
+        allow_sending_without_reply=True,
+    )
 
     await state.clear()
 

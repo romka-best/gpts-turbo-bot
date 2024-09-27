@@ -183,7 +183,10 @@ async def handle_claude(message: Message, state: FSMContext, user: User, user_qu
             'content': content,
         })
 
-    processing_message = await message.reply(text=get_localization(user_language_code).processing_request_text())
+    processing_message = await message.reply(
+        text=get_localization(user_language_code).processing_request_text(),
+        allow_sending_without_reply=True,
+    )
 
     if user.settings[user.current_model][UserSettings.TURN_ON_VOICE_MESSAGES]:
         chat_action_sender = ChatActionSender.record_voice
@@ -263,10 +266,12 @@ async def handle_claude(message: Message, state: FSMContext, user: User, user_qu
             if 'Output blocked by content filtering policy' in str(e.message):
                 await message.reply(
                     text=get_localization(user_language_code).REQUEST_FORBIDDEN_ERROR,
+                    allow_sending_without_reply=True,
                 )
             elif 'Overloaded' in str(e.message):
                 await message.reply(
                     text=get_localization(user_language_code).SERVER_OVERLOADED_ERROR,
+                    allow_sending_without_reply=True,
                 )
             else:
                 reply_markup = build_error_keyboard(user_language_code)

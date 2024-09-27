@@ -115,12 +115,14 @@ async def handle_music_gen_selection(
         await message.reply(
             text=get_localization(user_language_code).VALUE_ERROR,
             reply_markup=reply_markup,
+            allow_sending_without_reply=True,
         )
 
         return
 
     processing_message = await message.reply(
         text=get_localization(user_language_code).processing_request_music(),
+        allow_sending_without_reply=True,
     )
 
     async with ChatActionSender.record_voice(bot=message.bot, chat_id=message.chat.id):
@@ -139,18 +141,21 @@ async def handle_music_gen_selection(
             await message.reply(
                 text=get_localization(user_language_code).music_gen_forbidden(quota),
                 reply_markup=reply_markup,
+                allow_sending_without_reply=True,
             )
         elif duration < 1:
             reply_markup = build_cancel_keyboard(user_language_code)
             await message.reply(
                 text=get_localization(user_language_code).MUSIC_GEN_MIN_ERROR,
                 reply_markup=reply_markup,
+                allow_sending_without_reply=True,
             )
         elif duration > 300:
             reply_markup = build_cancel_keyboard(user_language_code)
             await message.reply(
                 text=get_localization(user_language_code).MUSIC_GEN_MAX_ERROR,
                 reply_markup=reply_markup,
+                allow_sending_without_reply=True,
             )
         else:
             user_not_finished_requests = await get_started_requests_by_user_id_and_model(user.id, Model.MUSIC_GEN)
@@ -158,6 +163,7 @@ async def handle_music_gen_selection(
             if len(user_not_finished_requests):
                 await message.reply(
                     text=get_localization(user_language_code).ALREADY_MAKE_REQUEST,
+                    allow_sending_without_reply=True,
                 )
                 await processing_message.delete()
                 return

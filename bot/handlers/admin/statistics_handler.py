@@ -1625,7 +1625,8 @@ async def handle_statistics_selection(callback_query: CallbackQuery, state: FSMC
         return
 
     processing_message = await callback_query.message.reply(
-        text=get_localization(user_language_code).processing_statistics()
+        text=get_localization(user_language_code).processing_statistics(),
+        allow_sending_without_reply=True,
     )
 
     async with ChatActionSender.typing(bot=callback_query.bot, chat_id=callback_query.message.chat.id):
@@ -1722,6 +1723,7 @@ async def statistics_service_quantity_sent(message: Message, state: FSMContext):
         await message.reply(
             text=get_localization(user_language_code).VALUE_ERROR,
             reply_markup=reply_markup,
+            allow_sending_without_reply=True,
         )
 
 
@@ -1751,6 +1753,7 @@ async def statistics_service_amount_sent(message: Message, state: FSMContext):
         await message.reply(
             text=get_localization(user_language_code).VALUE_ERROR,
             reply_markup=reply_markup,
+            allow_sending_without_reply=True,
         )
 
 
@@ -1786,4 +1789,5 @@ async def statistics_service_date_sent(message: Message, state: FSMContext):
         await message.reply(
             text=get_localization(user_language_code).STATISTICS_SERVICE_DATE_VALUE_ERROR,
             reply_markup=reply_markup,
+            allow_sending_without_reply=True,
         )

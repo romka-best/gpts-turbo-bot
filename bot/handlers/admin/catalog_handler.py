@@ -290,7 +290,10 @@ async def catalog_manage_edit_role_sent(message: Message, state: FSMContext):
         'translated_instructions': role.translated_instructions,
     })
 
-    await message.reply(text=get_localization(user_language_code).CATALOG_MANAGE_EDIT_SUCCESS)
+    await message.reply(
+        text=get_localization(user_language_code).CATALOG_MANAGE_EDIT_SUCCESS,
+        allow_sending_without_reply=True,
+    )
 
     reply_markup = build_manage_catalog_edit_keyboard(user_language_code, role.name)
     await message.answer(

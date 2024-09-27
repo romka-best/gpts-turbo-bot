@@ -31,13 +31,16 @@ from bot.locales.main import get_localization
 
 
 async def update_daily_limits(bot: Bot):
-    all_users = await get_users(is_blocked=False)
+    all_users = await get_users()
 
     for i in range(0, len(all_users), config.USER_BATCH_SIZE):
         batch = firebase.db.batch()
         user_batch = all_users[i:i + config.USER_BATCH_SIZE]
 
         for user in user_batch:
+            if user.is_blocked:
+                continue
+
             await update_user_daily_limits(bot, user, batch)
 
         await batch.commit()

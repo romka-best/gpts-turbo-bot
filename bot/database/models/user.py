@@ -194,7 +194,7 @@ class User:
         self.current_chat_id = str(current_chat_id)
         self.telegram_chat_id = str(telegram_chat_id)
         self.daily_limits = daily_limits if daily_limits is not None \
-            else SubscriptionLimit
+            else SubscriptionLimit.LIMITS[subscription_type]
         self.additional_usage_quota = additional_usage_quota if additional_usage_quota is not None \
             else self.DEFAULT_ADDITIONAL_USAGE_QUOTA
         self.settings = settings if settings is not None else self.DEFAULT_SETTINGS

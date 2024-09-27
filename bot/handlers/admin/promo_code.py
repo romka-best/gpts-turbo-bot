@@ -159,6 +159,7 @@ async def handle_create_promo_promo_code_package_quantity_sent(message: Message,
         await message.reply(
             text=get_localization(user_language_code).VALUE_ERROR,
             reply_markup=reply_markup,
+            allow_sending_without_reply=True,
         )
 
 
@@ -208,6 +209,7 @@ async def handle_create_promo_code_discount_sent(message: Message, state: FSMCon
         await message.reply(
             text=get_localization(user_language_code).VALUE_ERROR,
             reply_markup=reply_markup,
+            allow_sending_without_reply=True,
         )
 
 
@@ -222,11 +224,13 @@ async def promo_code_name_sent(message: Message, state: FSMContext):
         await message.reply(
             text=get_localization(user_language_code).PROMO_CODE_NAME_EXISTS_ERROR,
             reply_markup=reply_markup,
+            allow_sending_without_reply=True,
         )
     else:
         await message.reply(
             text=get_localization(user_language_code).PROMO_CODE_CHOOSE_DATE,
             reply_markup=reply_markup,
+            allow_sending_without_reply=True,
         )
 
         await state.set_state(state=None)
@@ -269,4 +273,5 @@ async def promo_code_date_sent(message: Message, state: FSMContext):
         await message.reply(
             text=get_localization(user_language_code).PROMO_CODE_DATE_VALUE_ERROR,
             reply_markup=reply_markup,
+            allow_sending_without_reply=True,
         )

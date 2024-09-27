@@ -67,7 +67,10 @@ async def handle_stable_diffusion(message: Message, state: FSMContext, user: Use
     if prompt is None:
         prompt = message.text
 
-    processing_message = await message.reply(text=get_localization(user_language_code).processing_request_image())
+    processing_message = await message.reply(
+        text=get_localization(user_language_code).processing_request_image(),
+        allow_sending_without_reply=True,
+    )
 
     async with ChatActionSender.upload_photo(bot=message.bot, chat_id=message.chat.id):
         user_not_finished_requests = await get_started_requests_by_user_id_and_model(user.id, Model.STABLE_DIFFUSION)
@@ -75,6 +78,7 @@ async def handle_stable_diffusion(message: Message, state: FSMContext, user: Use
         if len(user_not_finished_requests):
             await message.reply(
                 text=get_localization(user_language_code).ALREADY_MAKE_REQUEST,
+                allow_sending_without_reply=True,
             )
             await processing_message.delete()
             return

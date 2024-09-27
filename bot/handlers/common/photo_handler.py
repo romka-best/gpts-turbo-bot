@@ -49,7 +49,10 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
 
     current_state = await state.get_state()
     if current_state == Profile.waiting_for_photo.state:
-        processing_message = await message.reply(text=get_localization(user_language_code).UPLOADING_PHOTO)
+        processing_message = await message.reply(
+            text=get_localization(user_language_code).UPLOADING_PHOTO,
+            allow_sending_without_reply=True,
+        )
 
         photo_data_io = await message.bot.download_file(photo_file.file_path)
         photo_data = photo_data_io.read()
@@ -177,7 +180,8 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
             await message.answer(text=get_localization(user_language_code).face_swap_package_forbidden(quota))
         else:
             processing_message = await message.reply(
-                text=get_localization(user_language_code).processing_request_face_swap()
+                text=get_localization(user_language_code).processing_request_face_swap(),
+                allow_sending_without_reply=True,
             )
 
             async with ChatActionSender.upload_photo(bot=message.bot, chat_id=message.chat.id):
@@ -225,6 +229,7 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
     else:
         await message.reply(
             text=get_localization(user_language_code).PHOTO_FORBIDDEN_ERROR,
+            allow_sending_without_reply=True,
         )
 
 
@@ -288,10 +293,12 @@ async def handle_album(message: Message, state: FSMContext, album: List[Message]
     elif user.current_model == Model.FACE_SWAP:
         await message.reply(
             text=get_localization(user_language_code).ALBUM_FORBIDDEN_ERROR,
+            allow_sending_without_reply=True,
         )
     else:
         await message.reply(
             text=get_localization(user_language_code).PHOTO_FORBIDDEN_ERROR,
+            allow_sending_without_reply=True,
         )
 
 

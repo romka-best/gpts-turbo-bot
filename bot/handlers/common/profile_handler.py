@@ -68,7 +68,7 @@ async def profile(message: Message, state: FSMContext):
         subscription.status if subscription and subscription.status else SubscriptionStatus.ACTIVE,
         user.gender,
         user.current_model,
-        user.settings[Model.CHAT_GPT][UserSettings.VERSION],
+        user.settings[user.current_model][UserSettings.VERSION],
         user.daily_limits,
         user.additional_usage_quota,
         renewal_date.strftime('%d.%m.%Y'),

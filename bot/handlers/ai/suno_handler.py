@@ -138,11 +138,13 @@ async def suno_prompt_sent(message: Message, state: FSMContext):
     if prompt is None:
         await message.reply(
             text=get_localization(user_language_code).SUNO_VALUE_ERROR,
+            allow_sending_without_reply=True,
         )
         return
 
     processing_message = await message.reply(
-        text=get_localization(user_language_code).processing_request_music()
+        text=get_localization(user_language_code).processing_request_music(),
+        allow_sending_without_reply=True,
     )
 
     async with ChatActionSender.upload_voice(bot=message.bot, chat_id=message.chat.id):
@@ -159,6 +161,7 @@ async def suno_prompt_sent(message: Message, state: FSMContext):
             if len(user_not_finished_requests):
                 await message.reply(
                     text=get_localization(user_language_code).ALREADY_MAKE_REQUEST,
+                    allow_sending_without_reply=True,
                 )
                 await processing_message.delete()
                 return
@@ -286,6 +289,7 @@ async def suno_lyrics_sent(message: Message, state: FSMContext):
     if lyrics is None:
         await message.reply(
             text=get_localization(user_language_code).SUNO_VALUE_ERROR,
+            allow_sending_without_reply=True,
         )
         return
 
@@ -293,6 +297,7 @@ async def suno_lyrics_sent(message: Message, state: FSMContext):
     await message.reply(
         text=get_localization(user_language_code).SUNO_CUSTOM_MODE_GENRES,
         reply_markup=reply_markup,
+        allow_sending_without_reply=True,
     )
 
     await state.update_data(suno_lyrics=lyrics)
@@ -330,11 +335,13 @@ async def suno_genres_sent(message: Message, state: FSMContext):
     if genres is None:
         await message.reply(
             text=get_localization(user_language_code).SUNO_VALUE_ERROR,
+            allow_sending_without_reply=True,
         )
         return
 
     processing_message = await message.reply(
-        text=get_localization(user_language_code).processing_request_music()
+        text=get_localization(user_language_code).processing_request_music(),
+        allow_sending_without_reply=True,
     )
 
     async with ChatActionSender.upload_voice(bot=message.bot, chat_id=message.chat.id):
@@ -352,6 +359,7 @@ async def suno_genres_sent(message: Message, state: FSMContext):
             if len(user_not_finished_requests):
                 await message.reply(
                     text=get_localization(user_language_code).ALREADY_MAKE_REQUEST,
+                    allow_sending_without_reply=True,
                 )
                 await processing_message.delete()
                 return
