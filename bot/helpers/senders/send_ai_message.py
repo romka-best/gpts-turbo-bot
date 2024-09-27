@@ -16,12 +16,14 @@ async def send_ai_message(message: Message, text: str, reply_markup=None):
                     await message.reply(
                         text=formatted_message,
                         reply_markup=reply_markup if i == len(messages) - 1 else None,
+                        allow_sending_without_reply=True,
                     )
                 except TelegramBadRequest as e:
-                    if e.message.startswith('Bad Request: message to be replied not found'):
-                        await message.answer(
-                            text=formatted_message,
-                            reply_markup=reply_markup if i == len(messages) - 1 else None,
+                    if e.message.startswith('Bad Request: can\'t parse entities'):
+                        await message.reply(
+                            text=messages[i],
+                            reply_markup=reply_markup,
+                            allow_sending_without_reply=True,
                         )
                     else:
                         raise e
@@ -29,12 +31,14 @@ async def send_ai_message(message: Message, text: str, reply_markup=None):
             await message.reply(
                 text=formatted_text,
                 reply_markup=reply_markup,
+                allow_sending_without_reply=True,
             )
     except TelegramBadRequest as e:
-        if e.message.startswith('Bad Request: message to be replied not found'):
-            await message.answer(
-                text=formatted_text,
+        if e.message.startswith('Bad Request: can\'t parse entities'):
+            await message.reply(
+                text=text,
                 reply_markup=reply_markup,
+                allow_sending_without_reply=True,
             )
         else:
             raise e

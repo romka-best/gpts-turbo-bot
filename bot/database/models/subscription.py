@@ -154,7 +154,7 @@ class SubscriptionLimit:
             Quota.VOICE_MESSAGES: True,
         }
     }
-    DISCOUNT: {
+    DISCOUNT = {
         SubscriptionType.FREE: 0,
         SubscriptionType.MINI: 10,
         SubscriptionType.STANDARD: 20,

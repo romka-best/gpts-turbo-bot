@@ -174,7 +174,10 @@ async def handle_gemini(message: Message, state: FSMContext, user: User, user_qu
             'parts': parts,
         })
 
-    processing_message = await message.reply(text=get_localization(user_language_code).processing_request_text())
+    processing_message = await message.reply(
+        text=get_localization(user_language_code).processing_request_text(),
+        allow_sending_without_reply=True,
+    )
 
     if user.settings[user.current_model][UserSettings.TURN_ON_VOICE_MESSAGES]:
         chat_action_sender = ChatActionSender.record_voice

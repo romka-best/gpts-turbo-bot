@@ -41,6 +41,8 @@ I'm your personal gateway to the world of neural networks. Discover the capabili
 
 I am constantly updating myself, implementing the most advanced technologies so that you can fully leverage the possibilities of artificial intelligence. <b>I am the only bot with emotional intelligence</b>, ready to help you with any questions and creative endeavors 🚀
 """
+    START_QUICK_GUIDE = "📖 Quick Guide"
+    START_ADDITIONAL_FEATURES = "🔮 Additional Features"
     QUICK_GUIDE = """
 📖 Here's a quick guide to get started:
 ━ 💭 <b>Text Responses</b>:

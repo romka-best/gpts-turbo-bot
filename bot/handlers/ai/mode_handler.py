@@ -64,7 +64,7 @@ async def handle_mode_selection(callback_query: CallbackQuery, state: FSMContext
         await handle_mode(callback_query.message, state, str(callback_query.from_user.id), True, page)
 
         return
-    elif chosen_model == Model.CHAT_GPT or chosen_model == Model.CLAUDE:
+    elif chosen_model == Model.CHAT_GPT or chosen_model == Model.CLAUDE or chosen_model == Model.GEMINI:
         chosen_version = callback_query.data.split(':')[2]
 
     keyboard = callback_query.message.reply_markup.inline_keyboard
@@ -100,6 +100,8 @@ async def handle_mode_selection(callback_query: CallbackQuery, state: FSMContext
             user.settings[Model.CHAT_GPT][UserSettings.VERSION] = chosen_version
         elif chosen_model == Model.CLAUDE:
             user.settings[Model.CLAUDE][UserSettings.VERSION] = chosen_version
+        elif chosen_model == Model.GEMINI:
+            user.settings[Model.GEMINI][UserSettings.VERSION] = chosen_version
 
         await update_user(user_id, {
             'current_model': user.current_model,
@@ -111,11 +113,13 @@ async def handle_mode_selection(callback_query: CallbackQuery, state: FSMContext
             text=get_localization(user_language_code).switched(user.current_model, chosen_version),
             reply_markup=reply_markup,
             message_effect_id=config.MESSAGE_EFFECTS.get(MessageEffect.FIRE),
+            allow_sending_without_reply=True,
         )
     else:
         await callback_query.message.reply(
             text=get_localization(user_language_code).ALREADY_SWITCHED_TO_THIS_MODEL,
             reply_markup=reply_markup,
+            allow_sending_without_reply=True,
         )
 
     if chosen_model == Model.FACE_SWAP:

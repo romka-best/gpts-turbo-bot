@@ -378,7 +378,8 @@ async def handle_face_swap_manage_edit_picture_selection(callback_query: Callbac
         await state.update_data(file_name=file_name)
     elif action == 'example_picture':
         processing_message = await callback_query.message.reply(
-            text=get_localization(user_language_code).processing_request_face_swap()
+            text=get_localization(user_language_code).processing_request_face_swap(),
+            allow_sending_without_reply=True,
         )
 
         async with ChatActionSender.upload_photo(

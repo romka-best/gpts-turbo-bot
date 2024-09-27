@@ -44,10 +44,16 @@ async def is_time_limit_exceeded(message: Message, state: FSMContext, user: User
 
     remaining_time = int(config.LIMIT_BETWEEN_REQUESTS_SECONDS - time_elapsed)
     if user_data.get('additional_request_made'):
-        await message.reply(text=get_localization(user_language_code).ALREADY_MAKE_REQUEST)
+        await message.reply(
+            text=get_localization(user_language_code).ALREADY_MAKE_REQUEST,
+            allow_sending_without_reply=True,
+        )
     else:
         await state.update_data(additional_request_made=True)
-        await message.reply(text=get_localization(user_language_code).wait_for_another_request(remaining_time))
+        await message.reply(
+            text=get_localization(user_language_code).wait_for_another_request(remaining_time),
+            allow_sending_without_reply=True,
+        )
         asyncio.create_task(
             notify_user_after_timeout(
                 bot=message.bot,

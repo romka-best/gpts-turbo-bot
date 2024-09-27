@@ -118,6 +118,8 @@ async def handle_settings_choose_model_type_selection(callback_query: CallbackQu
         human_model = get_localization(user_language_code).CHATGPT
     elif chosen_model == Model.CLAUDE:
         human_model = get_localization(user_language_code).CLAUDE
+    elif chosen_model == Model.GEMINI:
+        human_model = get_localization(user_language_code).GEMINI
     elif chosen_model == 'back':
         reply_markup = build_settings_choose_model_type_keyboard(user_language_code)
         await callback_query.message.edit_text(
@@ -323,6 +325,8 @@ async def handle_setting_selection(callback_query: CallbackQuery, state: FSMCont
             human_model = get_localization(user_language_code).CHATGPT
         elif chosen_model == Model.CLAUDE:
             human_model = get_localization(user_language_code).CLAUDE
+        elif chosen_model == Model.GEMINI:
+            human_model = get_localization(user_language_code).GEMINI
         elif chosen_model == Model.DALL_E:
             dall_e_cost = get_cost_for_image(
                 user.settings[Model.DALL_E][UserSettings.QUALITY],
@@ -427,10 +431,12 @@ async def handle_voice_messages_setting_selection(callback_query: CallbackQuery,
         if chosen_setting in ['alloy', 'echo', 'fable', 'onyx', 'nova', 'shimmer']:
             user.settings[Model.CHAT_GPT][UserSettings.VOICE] = chosen_setting
             user.settings[Model.CLAUDE][UserSettings.VOICE] = chosen_setting
+            user.settings[Model.GEMINI][UserSettings.VOICE] = chosen_setting
         else:
             new_setting = not user.settings[Model.CHAT_GPT][chosen_setting]
             user.settings[Model.CHAT_GPT][chosen_setting] = new_setting
             user.settings[Model.CLAUDE][chosen_setting] = new_setting
+            user.settings[Model.GEMINI][chosen_setting] = new_setting
 
         await update_user(
             user_id, {
@@ -648,6 +654,7 @@ async def handle_switch_chat_selection(callback_query: CallbackQuery, state: FSM
         await callback_query.message.reply(
             text=get_localization(user_language_code).SWITCH_CHAT_SUCCESS,
             reply_markup=reply_markup,
+            allow_sending_without_reply=True,
         )
 
 
@@ -678,7 +685,10 @@ async def handle_delete_chat_selection(callback_query: CallbackQuery, state: FSM
         reply_markup=InlineKeyboardMarkup(inline_keyboard=new_keyboard)
     )
 
-    await callback_query.message.reply(text=get_localization(user_language_code).DELETE_CHAT_SUCCESS)
+    await callback_query.message.reply(
+        text=get_localization(user_language_code).DELETE_CHAT_SUCCESS,
+        allow_sending_without_reply=True,
+    )
 
 
 @settings_router.message(Chats.waiting_for_chat_name, F.text, ~F.text.startswith('/'))

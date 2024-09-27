@@ -180,8 +180,6 @@ async def handle_update(update: dict):
     except TelegramBadRequest as e:
         if e.message.startswith('Bad Request: message can\'t be deleted for everyone'):
             logging.warning(e)
-        elif e.message.startswith('Bad Request: message to be replied not found'):
-            logging.warning(e)
         elif e.message.startswith('Bad Request: message to delete not found'):
             logging.warning(e)
         elif e.message.startswith('Bad Request: message is not modified'):

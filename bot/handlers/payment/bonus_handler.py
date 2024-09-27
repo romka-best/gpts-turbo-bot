@@ -273,6 +273,7 @@ async def quantity_of_bonus_package_sent(message: Message, state: FSMContext):
             await message.reply(
                 text=get_localization(user_language_code).MAX_ERROR,
                 reply_markup=reply_markup,
+                allow_sending_without_reply=True,
             )
         else:
             user.balance -= price
@@ -326,7 +327,10 @@ async def quantity_of_bonus_package_sent(message: Message, state: FSMContext):
                 'additional_usage_quota': user.additional_usage_quota,
             })
 
-            await message.reply(text=get_localization(user_language_code).BONUS_ACTIVATED_SUCCESSFUL)
+            await message.reply(
+                text=get_localization(user_language_code).BONUS_ACTIVATED_SUCCESSFUL,
+                allow_sending_without_reply=True,
+            )
 
             await state.clear()
     except (TypeError, ValueError):
@@ -334,4 +338,5 @@ async def quantity_of_bonus_package_sent(message: Message, state: FSMContext):
         await message.reply(
             text=get_localization(user_language_code).VALUE_ERROR,
             reply_markup=reply_markup,
+            allow_sending_without_reply=True,
         )

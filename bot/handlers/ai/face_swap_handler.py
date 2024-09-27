@@ -321,12 +321,14 @@ async def face_swap_quantity_handler(message: Message, state: FSMContext, user_i
         await message.reply(
             text=get_localization(user_language_code).VALUE_ERROR,
             reply_markup=reply_markup,
+            allow_sending_without_reply=True,
         )
 
         return
 
     processing_message = await message.reply(
-        text=get_localization(user_language_code).processing_request_face_swap()
+        text=get_localization(user_language_code).processing_request_face_swap(),
+        allow_sending_without_reply=True,
     )
 
     async with ChatActionSender.upload_photo(bot=message.bot, chat_id=message.chat.id):
@@ -366,6 +368,7 @@ async def face_swap_quantity_handler(message: Message, state: FSMContext, user_i
             if len(user_not_finished_requests):
                 await message.reply(
                     text=get_localization(user_language_code).ALREADY_MAKE_REQUEST,
+                    allow_sending_without_reply=True,
                 )
                 await processing_message.delete()
                 return

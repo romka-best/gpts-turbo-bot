@@ -182,7 +182,10 @@ async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_q
             'content': content,
         })
 
-    processing_message = await message.reply(text=get_localization(user_language_code).processing_request_text())
+    processing_message = await message.reply(
+        text=get_localization(user_language_code).processing_request_text(),
+        allow_sending_without_reply=True,
+    )
 
     if user.settings[user.current_model][UserSettings.TURN_ON_VOICE_MESSAGES]:
         chat_action_sender = ChatActionSender.record_voice
@@ -256,6 +259,7 @@ async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_q
             if e.code == 'content_policy_violation':
                 await message.reply(
                     text=get_localization(user_language_code).REQUEST_FORBIDDEN_ERROR,
+                    allow_sending_without_reply=True,
                 )
             else:
                 reply_markup = build_error_keyboard(user_language_code)

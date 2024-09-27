@@ -59,9 +59,15 @@ async def ban_user_id_sent(message: Message, state: FSMContext):
         })
 
         if user.is_banned:
-            await message.reply(text=get_localization(user_language_code).BAN_SUCCESS)
+            await message.reply(
+                text=get_localization(user_language_code).BAN_SUCCESS,
+                allow_sending_without_reply=True,
+            )
         else:
-            await message.reply(text=get_localization(user_language_code).UNBAN_SUCCESS)
+            await message.reply(
+                text=get_localization(user_language_code).UNBAN_SUCCESS,
+                allow_sending_without_reply=True,
+            )
 
         await state.clear()
     except (TypeError, ValueError):
@@ -69,4 +75,5 @@ async def ban_user_id_sent(message: Message, state: FSMContext):
         await message.reply(
             text=get_localization(user_language_code).VALUE_ERROR,
             reply_markup=reply_markup,
+            allow_sending_without_reply=True,
         )

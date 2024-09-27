@@ -64,7 +64,10 @@ async def handle_dall_e(message: Message, state: FSMContext, user: User):
     if text is None:
         text = message.text
 
-    processing_message = await message.reply(text=get_localization(user_language_code).processing_request_image())
+    processing_message = await message.reply(
+        text=get_localization(user_language_code).processing_request_image(),
+        allow_sending_without_reply=True,
+    )
 
     async with ChatActionSender.upload_photo(bot=message.bot, chat_id=message.chat.id):
         try:
@@ -74,7 +77,10 @@ async def handle_dall_e(message: Message, state: FSMContext, user: User):
             quality = user.settings[Model.DALL_E][UserSettings.QUALITY]
             cost = get_cost_for_image(quality, resolution)
             if maximum_generations < cost:
-                await message.reply(get_localization(user_language_code).REACHED_USAGE_LIMIT)
+                await message.reply(
+                    text=get_localization(user_language_code).REACHED_USAGE_LIMIT,
+                    allow_sending_without_reply=True,
+                )
                 return
 
             response_url = await get_response_image(
@@ -112,6 +118,7 @@ async def handle_dall_e(message: Message, state: FSMContext, user: User):
             if e.code == 'content_policy_violation':
                 await message.reply(
                     text=get_localization(user_language_code).REQUEST_FORBIDDEN_ERROR,
+                    allow_sending_without_reply=True,
                 )
         except Exception as e:
             reply_markup = build_error_keyboard(user_language_code)
