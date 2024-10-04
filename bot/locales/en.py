@@ -22,19 +22,26 @@ class English(Texts):
 I'm your personal gateway to the world of neural networks. Discover the capabilities of AI:
 ━ 💭 <b>Text Responses</b>:
     ┣ Communicate free with:
-        ┣ <b>ChatGPT-4.0 Omni Mini ✉️</b> /chatgpt
-        ┣ <b>Claude 3.5 Sonnet 💫</b> /claude
+        ┣ <b>ChatGPT 4.0 Omni Mini ✉️</b> /chatgpt
+        ┣ <b>Claude 3.0 Haiku 📜</b> /claude
         ┗ <b>Gemini 1.5 Flash 🏎</b> /gemini
-    ┗ Unleash the full potential of AI with:
-        ┣ <b>ChatGPT-4.0 Omni 💥</b> /chatgpt
-        ┣ <b>Claude 3.0 Opus 🚀</b> /claude
+    ┣ Unleash the full potential of AI with:
+        ┣ <b>ChatGPT 4.0 Omni 💥</b> and <b>ChatGPT o1-mini 🧩</b> /chatgpt
+        ┣ <b>Claude 3.5 Sonnet 💫</b> /claude
         ┗ <b>Gemini 1.5 Pro 💼</b> /gemini
-━ 🧑‍🎨 <b>Create Images</b>:
+    ┗ Explore the most advanced level of intelligence with:
+        ┣ <b>ChatGPT o1-preview 🧪</b> /chatgpt
+        ┣ <b>Claude 3.0 Opus 🚀</b> /claude
+        ┗ <b>Gemini 1.0 Ultra 🛡️</b> /gemini
+
+━ 🖼 <b>Create Images</b>:
     ┣ Draw beautiful, unforgettable pictures with:
-        ┣ <b>DALL-E 3 🖼️</b> /dalle
+        ┣ <b>DALL-E 3 👨‍🎨</b> /dalle
         ┣ <b>Midjourney 6.1 🎨</b> /midjourney
-        ┗ <b>Stable Diffusion 2.1 🎆</b> /stable_diffusion
-    ┗ To exchange faces with someone in a photo, try <b>FaceSwap 📷️</b> /face_swap
+        ┗ <b>Stable Diffusion 3.0 🎆</b> /stable_diffusion
+    ┣ To exchange faces with someone in a photo, try <b>FaceSwap 📷️</b> /face_swap
+    ┗ Edit your images using <b>Photoshop AI 🪄</b> /photoshop
+
 ━ 🎵 <b>Compose Music</b>:
     ┣ Compose original melodies with <b>MusicGen 🎺</b> /music_gen
     ┗ Record your own songs with <b>Suno 3.5 🎸</b> /suno
@@ -45,6 +52,7 @@ I am constantly updating myself, implementing the most advanced technologies so 
     START_ADDITIONAL_FEATURES = "🔮 Additional Features"
     QUICK_GUIDE = """
 📖 Here's a quick guide to get started:
+
 ━ 💭 <b>Text Responses</b>:
     ┣ 1️⃣ Enter one of the commands:
         ┣ /chatgpt 💥
@@ -52,16 +60,24 @@ I am constantly updating myself, implementing the most advanced technologies so 
         ┗ /gemini 💼
     ┣ 2️⃣ Select the version
     ┗ 3️⃣ Write your requests into the chat
-━ 🧑‍🎨 <b>Create Images</b>:
+
+━ 🖼 <b>Create Images</b>:
     ┣ 1️⃣ Enter one of the commands:
-        ┣ /dalle 🖼️
+        ┣ /dalle 👨‍🎨
         ┣ /midjourney 🎨
         ┗ /stable_diffusion 🎆
     ┗ 2️⃣ Start creating using your imagination with your requests
+
 ━ 😜 <b>Exchange Faces in Photos</b>:
     ┣ 1️⃣ Enter the command /face_swap
     ┣ 2️⃣ Follow the instructions to help AI create better photos
     ┗ 3️⃣ Choose images from our unique packages or send your own photos
+
+━ 🪄 <b>Edit Images</b>:
+    ┣ 1️⃣ Enter the command /photoshop
+    ┣ 2️⃣ Choose what you want to do with the image
+    ┗ 3️⃣ Send the image for editing
+
 ━ 🎵 <b>Compose Music</b>:
     ┣ 1️⃣ Enter one of the command
         ┣ /music_gen 🎺
@@ -70,6 +86,7 @@ I am constantly updating myself, implementing the most advanced technologies so 
 """
     ADDITIONAL_FEATURES = """
 🔮 <b>Additional Features</b>:
+
 ━ 🔄 /mode - One command for switching between all AI models
 ━ 📊 /profile - I'll show your profile and quotes
 ━ 🔍 /info - Useful information about each AI model
@@ -80,26 +97,30 @@ I am constantly updating myself, implementing the most advanced technologies so 
     COMMANDS = """
 🤖 <b>Here's what you can explore:</b>
 
-👋 /start - <b>About me</b>: Discover what I can do for you.
-🤖 /mode - <b>Swap neural network models</b> on the fly with — <b>ChatGPT</b>, <b>Claude</b>, <b>Gemini</b>, <b>DALL-E</b>, <b>Midjourney</b>, <b>Stable Diffusion</b>, <b>FaceSwap</b>, <b>MusicGen</b>, or <b>Suno</b>!
-💳 /buy - <b>Subscribe or buy individual packages</b>: Get a new level
-👤 /profile - <b>View your profile</b>: Check your subscription details or usage quota and more
-🔧 /settings - <b>Customize your experience</b>: Tailor model to fit your needs. There you can also <b>select a digital employee</b> with <b>context-specific chats management</b>
-🌍 /language - <b>Switch languages</b>: Set your preferred language for system interface
-ℹ️ /info - <b>Get information about AI</b>: Learn for what and why do you need them
-🧠 /chatgpt - <b>Chat with ChatGPT</b>: Start a text conversation and receive advanced AI responses
-🚀 /claude - <b>Chat with Claude</b>: Begin a discussion and explore the depth of responses from Claude
-✨ /gemini - <b>Chat with Gemini</b>: TODO
-🖼 /dalle - <b>Draw with DALL-E</b>: Turn your ideas into drawings
-🎨 /midjourney - <b>Create with DALL-E 3</b>: Bring your imaginations to life with images
-🎆 /stable_diffusion - <b>Stable Diffusion</b>: TODO
-😜 /face_swap - <b>Have fun with FaceSwap</b>: Change faces in photos
-🎵 /music_gen - <b>Melodies with MusicGen</b>: Create music without copyrights
-🎸 /suno - <b>Songs with Suno</b>: Create your own song with your lyrics and different genres
-🎁 /bonus - Learn about your bonus balance and <b>exchange bonuses for unique generation packages</b>
-🔑 /promo_code - <b>Unleash exclusive AI features</b> and special offers with your <b>promo code</b>
-📡 /feedback - <b>Leave feedback</b>: Help me improve
-📄 /terms - <b>TOS</b>: Terms of Service
+━ Common commands:
+    ┣ 👋 /start - <b>About me</b>: Discover what I can do for you
+    ┣ 👤 /profile - <b>View your profile</b>: Check your subscription details or usage quota and more
+    ┣ 🌍 /language - <b>Switch languages</b>: Set your preferred language for system interface
+    ┣ 💳 /buy - <b>Subscribe or buy individual packages</b>: Get a new level
+    ┣ 🎁 /bonus - Learn about your bonus balance and <b>exchange bonuses for unique generation packages</b>
+    ┣ 🔑 /promo_code - <b>Unleash exclusive AI features</b> and special offers with your <b>promo code</b>
+    ┣ 📡 /feedback - <b>Leave feedback</b>: Help me improve
+    ┗ 📄 /terms - <b>TOS</b>: Terms of Service
+
+━ AI commands:
+    ┣ 🤖 /mode - <b>Swap neural network models</b> on the fly with — <b>ChatGPT</b>, <b>Claude</b>, <b>Gemini</b>, <b>DALL-E</b>, <b>Midjourney</b>, <b>Stable Diffusion</b>, <b>FaceSwap</b>, <b>Photoshop AI</b>, <b>MusicGen</b>, or <b>Suno</b>!
+    ┣ ℹ️ /info - <b>Get information about AI</b>: Learn for what and why do you need them
+    ┣ 💥 /chatgpt - <b>Chat with ChatGPT</b>: Start a text conversation and receive advanced AI responses
+    ┣ 🚀 /claude - <b>Chat with Claude</b>: Begin a discussion and explore the depth of responses from Claude
+    ┣ ✨ /gemini - <b>Chat with Gemini</b>: Start chatting and immerse yourself in advanced answers from the new AI
+    ┣ 👨‍🎨 /dalle - <b>Draw with DALL-E</b>: Turn your ideas into drawings
+    ┣ 🎨 /midjourney - <b>Create with DALL-E 3</b>: Bring your imaginations to life with images
+    ┣ 🎆 /stable_diffusion - <b>Uniqueness with Stable Diffusion</b>: Create unique images
+    ┣ 😜 /face_swap - <b>Have fun with FaceSwap</b>: Change faces in photos
+    ┣ 🪄 /photoshop - <b>Magic with Photoshop AI</b>: Retouch and edit your photos with one touch
+    ┣ 🎺 /music_gen - <b>Melodies with MusicGen</b>: Create music without copyrights
+    ┣ 🎸 /suno - <b>Songs with Suno</b>: Create your own song with your lyrics and different genres
+    ┗ 🔧 /settings - <b>Customize your experience</b>: Tailor model to fit your needs. There you can also <b>select a digital employee</b> with <b>context-specific chats management</b>
 
 Just type away a command to begin your AI journey! 🌟
 """
@@ -121,23 +142,41 @@ Just type away a command to begin your AI journey! 🌟
     INFO_CHATGPT = """
 🤖 <b>There is what each model can do for you:</b>
 
-✉️ <b>ChatGPT-4.0 Omni Mini: The Versatile Communicator</b>
+✉️ <b>ChatGPT 4.0 Omni Mini: The Versatile Communicator</b>
 - <i>Small Talk to Deep Conversations</i>: Ideal for chatting about anything from daily life to sharing jokes.
 - <i>Educational Assistant</i>: Get help with homework, language learning, or complex topics like coding.
 - <i>Personal Coach</i>: Get motivation, fitness tips, or even meditation guidance.
-- <i>Creative Writer</i>: Need a post, story, or even a song? ChatGPT-4.0 Omni Mini can whip it up in seconds.
+- <i>Creative Writer</i>: Need a post, story, or even a song? ChatGPT 4.0 Omni Mini can whip it up in seconds.
 - <i>Travel Buddy</i>: Ask for travel tips, local cuisines, or historical facts about your next destination.
 - <i>Business Helper</i>: Draft emails, create business plans, or brainstorm marketing ideas.
 
-💥 <b>ChatGPT-4.0 Omni: Next-Generation Intelligence</b>
+💥 <b>ChatGPT 4.0 Omni: Next-Generation Intelligence</b>
 <i>Detailed Analysis</i>: Perfect for in-depth research, complex technical explanations, or virtual scenario analysis.
 <i>Complex Problem Solving</i>: From mathematical calculations to diagnosing software issues and answering scientific queries.
 <i>Language Mastery</i>: High-level translation and enhancement of conversational skills in various languages.
 <i>Creative Mentor</i>: Inspiring ideas for blogs, scripts, or artistic research.
 <i>Personalized Recommendations</i>: Tailored picks for books, movies, or travel routes based on your preferences.
+
+🧩 <b>ChatGPT o1-mini: A Mini Expert for Problem Solving</b>
+<i>Deep Analysis</i>: Assists with logical reasoning and solving complex problems.
+<i>Critical Thinking</i>: Excels at tasks that require attention to detail and well-reasoned conclusions.
+<i>Educational Assistant</i>: Helps with solutions in programming, mathematics, or scientific research.
+<i>Efficiency</i>: Provides quick and accurate answers to both practical and theoretical questions.
+
+🧪 <b>ChatGPT o1-preview: A Revolution in Reasoning</b>
+<i>Advanced Data Analysis</i>: Suitable for processing and analyzing large volumes of information.
+<i>Argumentative Problem Solving</i>: Ideal for tasks that require well-justified conclusions and complex logical structures.
+<i>Hypothesis Generation</i>: Perfect for scientific research and experimentation.
+<i>Strategy Development</i>: Can assist with developing complex strategies in business or personal projects.
 """
     INFO_CLAUDE = """
 🤖 <b>There is what each model can do for you:</b>
+
+📜 <b>Claude 3.0 Haiku: The Art of Brevity and Wisdom</b>
+<i>Deep and Concise Responses</i>: Perfect for brief yet meaningful insights and advice.
+<i>Quick Problem Solving</i>: Instantly delivers solutions for everyday and technical questions.
+<i>Linguistic Precision</i>: Mastery in expressing the essence in a few words, whether it's translation or explanation.
+<i>Creativity in Minimalism</i>: Supports creating short-form content, from poems to succinct ideas.
 
 💫 <b>Claude 3.5 Sonnet: A Balance of Speed and Wisdom</b>
 <i>Multifunctional Analysis</i>: Effective for comprehensive research and technical explanations.
@@ -168,11 +207,18 @@ Just type away a command to begin your AI journey! 🌟
 <i>Linguistic Flexibility</i>: Assists with translations, text editing, and supports multiple languages at a professional level.
 <i>Creative Thinking</i>: Aids in developing ideas for creative projects, writing, and other artistic tasks.
 <i>Personalized Recommendations</i>: Offers expert advice on content selection and event planning based on individual preferences.
+
+🛡 <b>Gemini 1.0 Ultra: Power and Precision</b>
+<i>Unlimited Analytics</i>: Excels in handling complex tasks, deep analysis, and large-scale data processing.
+<i>Accurate Solutions</i>: Ideal for complex calculations and scientific research.
+<i>Linguistic Mastery</i>: Expertise in translations and support for language tasks at the highest level.
+<i>Creative Inspiration</i>: A valuable assistant in the creation and development of complex creative projects and ideas.
+<i>Personalized Interaction</i>: Tailors its responses to your specific needs and preferences.
 """
     INFO_DALL_E = """
 🤖 <b>There is what the model can do for you:</b>
 
-🖼 <b>DALL-E: The Creative Genius</b>
+👨‍🎨 <b>DALL-E: The Creative Genius</b>
 - <i>Art on Demand</i>: Generate unique art from descriptions – perfect for illustrators or those seeking inspiration.
 - <i>Ad Creator</i>: Produce eye-catching images for advertising or social media content.
 - <i>Educational Tool</i>: Visualize complex concepts for better understanding in education.
@@ -209,10 +255,17 @@ Just type away a command to begin your AI journey! 🌟
 - <i>Digital Makeovers</i>: Experiment with new haircuts or makeup styles.
 - <i>Celebrity Mashups</i>: Combine your face with celebrities for fun comparisons.
 """
+    INFO_PHOTOSHOP_AI = """
+🤖 <b>There is what the model can do for you:</b>
+
+<i>Photo Restoration</i>: Revives old or damaged photos, returning them to their original state.
+<i>Black-and-White to Color</i>: Breathes life into black-and-white photos by adding vibrant and natural colors.
+<i>Background Removal</i>: Easily removes the background from images, leaving only the main subject.
+"""
     INFO_MUSIC_GEN = """
 🤖 <b>There is what the model can do for you:</b>
 
-🎶 <b>MusicGen: Your Personal Composer</b>
+🎺 <b>MusicGen: Your Personal Composer</b>
 <i>Creating Unique Melodies</i>: Turn your ideas into musical pieces of any genre - from classical to pop.
 <i>Personalized Soundtracks</i>: Create a soundtrack for your next video project, game, or presentation.
 <i>Exploring Musical Styles</i>: Experiment with different musical genres and sounds to find your unique style.
@@ -231,8 +284,8 @@ Just type away a command to begin your AI journey! 🌟
 """
 
     TEXT_MODELS = "🔤 Text models"
-    IMAGE_MODELS = "🧑‍🎨 Image models"
-    MUSIC_MODELS = "🎺 Music models"
+    IMAGE_MODELS = "🖼 Image models"
+    MUSIC_MODELS = "🎵 Music models"
     VIDEO_MODELS = "📹 Video models"
 
     # Feedback
@@ -510,18 +563,39 @@ To choose a Claude model click a button below 👇
 To choose a Gemini model click a button below 👇
 """
     SWITCHED_TO_CHATGPT4_OMNI_MINI = """
-🤖 <b>Welcome to the world of ChatGPT-4.0 Omni Mini!</b>
+🤖 <b>Welcome to the world of ChatGPT 4.0 Omni Mini!</b>
 
-You've successfully switched to the <b>ChatGPT-4.0 Omni Mini</b> model. Consider this your personal virtual brain, ready to handle all your questions and ideas. Feel free to write anything - from simple queries to complex tasks. And don't worry, your previous conversations are stored in memory, so the context of your dialogue won't be lost
+You've successfully switched to the <b>ChatGPT 4.0 Omni Mini</b> model. Consider this your personal virtual brain, ready to handle all your questions and ideas. Feel free to write anything - from simple queries to complex tasks. And don't worry, your previous conversations are stored in memory, so the context of your dialogue won't be lost
 
-Go ahead, explore the capabilities of <b>ChatGPT-4.0 Omni Mini</b>! 🎉
+Go ahead, explore the capabilities of <b>ChatGPT 4.0 Omni Mini</b>! 🎉
 """
     SWITCHED_TO_CHATGPT4_OMNI = """
-💥 <b>Welcome to a new era with ChatGPT-4.0 Omni!</b>
+💥 <b>Welcome to a new era with ChatGPT 4.0 Omni!</b>
 
-You have successfully switched to the <b>ChatGPT-4.0 Omni</b> model. This is the pinnacle of artificial intelligence innovation! <b>ChatGPT-4.0 Omni</b> surpasses previous models in depth of understanding and breadth of capabilities. Dive into an enhanced AI interaction experience. Your previous conversation history has been preserved, so we can pick up right where we left off.
+You have successfully switched to the <b>ChatGPT 4.0 Omni</b> model. This is the pinnacle of artificial intelligence innovation! <b>ChatGPT 4.0 Omni</b> surpasses previous models in depth of understanding and breadth of capabilities. Dive into an enhanced AI interaction experience. Your previous conversation history has been preserved, so we can pick up right where we left off.
 
-Embark on an exciting journey with <b>ChatGPT-4.0 Omni</b>! 🎉
+Embark on an exciting journey with <b>ChatGPT 4.0 Omni</b>! 🎉
+"""
+    SWITCHED_TO_CHAT_GPT_O_1_MINI = """
+🧩 <b>Welcome to the world of ChatGPT o1-mini!</b>
+
+You have successfully switched to <b>ChatGPT o1-mini</b> — your quick and precise assistant for tackling complex tasks! <b>ChatGPT o1-mini</b> excels at deep analysis and logical reasoning, making it the perfect choice for tasks that require attention to detail and well-structured conclusions. Despite its compact nature, its intellectual capabilities are truly impressive.
+
+Dive into a new level of AI interaction with <b>ChatGPT o1-mini</b>! 🎉
+"""
+    SWITCHED_TO_CHAT_GPT_O_1_PREVIEW = """
+🧪 <b>Welcome to the world of ChatGPT o1-preview!</b>
+
+You have successfully switched to <b>ChatGPT o1-preview</b> — your forward-thinking assistant, specially designed for complex reasoning and analysis! <b>ChatGPT o1-preview</b> offers advanced capabilities in logical solutions and scientific hypotheses, making it indispensable for finding precise and well-thought-out answers.
+
+Explore new horizons with <b>ChatGPT o1-preview</b>! 🎉
+"""
+    SWITCHED_TO_CLAUDE_3_HAIKU = """
+📜 <b>Welcome to the world of Claude 3.0 Haiku!</b>
+
+You have successfully switched to <b>Claude 3.0 Haiku</b> — the master of brevity and precision. <b>Claude 3.0 Haiku</b> is designed for moments when you need quick, concise, and wise answers. Its strength lies in its ability to process information with succinct depth, making it perfect for creative tasks and instant solutions.
+
+Enjoy the art of brevity with <b>Claude 3.0 Haiku</b>! 🎉
 """
     SWITCHED_TO_CLAUDE_3_SONNET = """
 💫 <b>Welcome to the world of Claude 3.5 Sonnet!</b>
@@ -551,8 +625,15 @@ You’ve successfully switched to the <b>Gemini 1.5 Pro</b> model — a powerful
 
 Experience a professional level of productivity with <b>Gemini 1.5 Pro</b>! 🎉
 """
+    SWITCHED_TO_GEMINI_1_ULTRA = """
+🛡 <b>Welcome to the world of Gemini 1.0 Ultra!</b>
+
+You have successfully switched to <b>Gemini 1.0 Ultra</b> — your powerful ally for the most complex and ambitious tasks! <b>Gemini 1.0 Ultra</b> represents the pinnacle of intellectual strength, ready to tackle deep research, precise calculations, and creative challenges at the highest level.
+
+Unlock a new level of interaction with <b>Gemini 1.0 Ultra</b>! 🎉
+"""
     SWITCHED_TO_DALL_E = """
-🖼 <b>Welcome to the world of DALL-E!</b>
+👨‍🎨 <b>Welcome to the world of DALL-E!</b>
 
 You've switched to the <b>DALL-E</b> model — your personal AI artist. Now, you can request to have any image drawn, whatever comes to your mind. Just describe your idea in a single message, and <b>DALL-E</b> will transform it into a visual masterpiece. Note: each new message is processed individually, previous request contexts are not considered
 
@@ -566,7 +647,7 @@ You have successfully switched to the <b>Midjourney</b> model — this is your p
 Time to create! 🎉
 """
     SWITCHED_TO_STABLE_DIFFUSION = """
-🎆 <b>Welcome to the world of Stable Diffusion 2.1!</b>
+🎆 <b>Welcome to the world of Stable Diffusion 3.0!</b>
 
 You’ve successfully switched to the <b>Stable Diffusion</b> model — the perfect tool for generating unique images! This model allows you to bring visual ideas to life with high detail and a variety of artistic styles. Turn text into masterpieces and push the boundaries of your creativity!
 
@@ -579,8 +660,15 @@ You've switched to the <b>FaceSwap</b> model — where faces switch places as if
 
 Your new face awaits! 🎉
 """
+    SWITCHED_TO_PHOTOSHOP_AI = """
+🪄 <b>Welcome to the world of Photoshop AI!</b>
+
+You have successfully switched to <b>Photoshop AI</b> — your personal photo magic expert! <b>Photoshop AI</b> can restore old photos, bring black-and-white images to life with color, and instantly remove backgrounds from your pictures. Harness the power of intelligent editing right now!
+
+It's time to create! 🎉
+"""
     SWITCHED_TO_MUSIC_GEN = """
-🎵 <b>Welcome to the world of MusicGen!</b>
+🎺 <b>Welcome to the world of MusicGen!</b>
 
 You've switched to the <b>MusicGen</b> model — a marvelous world where music is born before your eyes. Create a unique melody by sharing your mood or idea for a composition. From a classical symphony to a modern beat, <b>MusicGen</b> will help you turn your musical dreams into reality.
 
@@ -631,8 +719,8 @@ The adventure continues! 🚀✨
     IMAGE_SUCCESS = "✨ Here's your image creation! 🎨"
 
     # Examples
-    CHATGPT4_OMNI_EXAMPLE = "👇 This is how *ChatGPT-4.0 Omni* would respond to your request 💥"
-    CLAUDE_3_OPUS_EXAMPLE = "👇 This is how *Claude 3.0 Opus* would respond to your request 🚀"
+    CHATGPT4_OMNI_EXAMPLE = "👇 This is how *ChatGPT 4.0 Omni* would respond to your request 💥"
+    CLAUDE_3_SONNET_EXAMPLE = "👇 This is how *Claude 3.5 Sonnet* would respond to your request 🚀"
     GEMINI_1_PRO_EXAMPLE = "👇 This is how *Gemini 1.5 Pro* would respond to your request 💼"
     MIDJOURNEY_EXAMPLE = """
 ☝️ These are the images that <b>Midjourney</b> would draw for your request
@@ -646,7 +734,18 @@ To start creating songs using <b>Suno</b>, just type the command /suno 🎸
 """
 
     PHOTO_FEATURE_FORBIDDEN = """
-⚠️ Sending photos is only available in models: <b>ChatGPT</b>, <b>Claude</b> and <b>Gemini</b>
+⚠️ Sending photos is only available in models:
+━ <b>ChatGPT</b>:
+    ┣ ChatGPT 4.0 Omni Mini ✉️
+    ┗ ChatGPT 4.0 Omni 💥
+━ <b>Claude</b>:
+    ┣ Claude 3.0 Haiku 📜
+    ┣ Claude 3.5 Sonnet 💫
+    ┗ Claude 3.0 Opus 🚀
+━ <b>Gemini</b>:
+    ┣ Gemini 1.5 Flash 🏎
+    ┣ Gemini 1.5 Pro 💼
+    ┗ Gemini 1.0 Ultra 🛡️
 
 Use /mode to switch to a model that supports image vision 👀
 """
@@ -857,10 +956,16 @@ Your chats have switched their unique roles to "Personal Assistant" as your acce
     ADD_TO_CART_OR_BUY_NOW = "Buy now or add to cart?"
     ADDED_TO_CART = "Added to cart ✅"
     GO_TO_CART_OR_CONTINUE_SHOPPING = "Go to cart or continue shopping?"
-    GPT4_OMNI_MINI_REQUESTS = "✉️ ChatGPT-4.0 Omni Mini requests"
-    GPT4_OMNI_MINI_REQUESTS_DESCRIPTION = "Unleash the power of ChatGPT-4.0 Omni Mini for witty chats, smart advice, and endless fun! ✉️"
-    GPT4_OMNI_REQUESTS = "💥 ChatGPT-4.0 Omni requests"
-    GPT4_OMNI_REQUESTS_DESCRIPTION = "Discover new horizons with the intelligence of ChatGPT-4.0 Omni for deeper analyses and innovative dialogues! 💥"
+    GPT4_OMNI_MINI_REQUESTS = "✉️ ChatGPT 4.0 Omni Mini requests"
+    GPT4_OMNI_MINI_REQUESTS_DESCRIPTION = "Unleash the power of ChatGPT 4.0 Omni Mini for witty chats, smart advice, and endless fun! ✉️"
+    GPT4_OMNI_REQUESTS = "💥 ChatGPT 4.0 Omni requests"
+    GPT4_OMNI_REQUESTS_DESCRIPTION = "Discover new horizons with the intelligence of ChatGPT 4.0 Omni for deeper analyses and innovative dialogues! 💥"
+    CHAT_GPT_O_1_MINI_REQUESTS = "🧩 ChatGPT o1-mini requests"
+    CHAT_GPT_O_1_MINI_REQUESTS_DESCRIPTION = "Unlock new possibilities with ChatGPT o1-mini to find quick and precise solutions for your tasks! 🧩"
+    CHAT_GPT_O_1_PREVIEW_REQUESTS = "🧪 ChatGPT o1-preview requests"
+    CHAT_GPT_O_1_PREVIEW_REQUESTS_DESCRIPTION = "Explore the future with ChatGPT o1-preview, making deep and logically sound discoveries! 🧪"
+    CLAUDE_3_HAIKU_REQUESTS = "📜 Claude 3.0 Haiku requests"
+    CLAUDE_3_HAIKU_REQUESTS_DESCRIPTION = "Immerse yourself in the world of brevity and wisdom with Claude 3.0 Haiku! 📜"
     CLAUDE_3_SONNET_REQUESTS = "💫 Claude 3.5 Sonnet requests"
     CLAUDE_3_SONNET_REQUESTS_DESCRIPTION = "Explore the balance of speed and intelligence with Claude 3.5 Sonnet for accurate and timely solutions! 💫"
     CLAUDE_3_OPUS_REQUESTS = "🚀 Claude 3.0 Opus requests"
@@ -869,16 +974,20 @@ Your chats have switched their unique roles to "Personal Assistant" as your acce
     GEMINI_1_FLASH_REQUESTS_DESCRIPTION = "Unleash the power of Gemini 1.5 Flash for instant solutions, quick responses, and dynamic interactions! 🏎"
     GEMINI_1_PRO_REQUESTS = "💼 Gemini 1.5 Pro requests"
     GEMINI_1_PRO_REQUESTS_DESCRIPTION = "Unleash the power of Gemini 1.5 Pro for deep analysis, precise decisions, and maximum productivity! 💼"
-    DALL_E_REQUESTS = "🖼 DALL-E images"
-    DALL_E_REQUESTS_DESCRIPTION = "Turn ideas into art with DALL-E – where your imagination becomes stunning visual reality! 🖼"
+    GEMINI_1_ULTRA_REQUESTS = "🛡 Gemini 1.0 Ultra requests"
+    GEMINI_1_ULTRA_REQUESTS_DESCRIPTION = "Harness the power of Gemini 1.0 Ultra to tackle the most complex challenges and reach new heights! 🛡"
+    DALL_E_REQUESTS = "👨‍🎨 DALL-E images"
+    DALL_E_REQUESTS_DESCRIPTION = "Turn ideas into art with DALL-E – where your imagination becomes stunning visual reality! 👨‍🎨"
     MIDJOURNEY_REQUESTS = "🎨 Midjourney images"
     MIDJOURNEY_REQUESTS_DESCRIPTION = "Unleash your creativity with Midjourney – transform your thoughts into magnificent visual works of art! 🎨"
-    STABLE_DIFFUSION_REQUESTS = "🎆 Stable Diffusion 2.1 images"
+    STABLE_DIFFUSION_REQUESTS = "🎆 Stable Diffusion 3.0 images"
     STABLE_DIFFUSION_REQUESTS_DESCRIPTION = "Open the door to a world of creativity with Stable Diffusion — transform your ideas into stunning images! 🎆"
     FACE_SWAP_REQUESTS = "📷 Images with face replacement"
     FACE_SWAP_REQUESTS_DESCRIPTION = "Enter the playful world of FaceSwap for laughs and surprises in every image! 😂🔄"
-    MUSIC_GEN_REQUESTS = "🎵 Seconds of generation of melodies"
-    MUSIC_GEN_REQUESTS_DESCRIPTION = "Discover a world where every prompt turns into a unique melody! 🎶"
+    PHOTOSHOP_AI_REQUESTS = "🪄 Photoshop AI generations"
+    PHOTOSHOP_AI_REQUESTS_DESCRIPTION = "Create without limits with Photoshop AI, turning every photo into a masterpiece! 🪄"
+    MUSIC_GEN_REQUESTS = "🎺 MusicGen melodies"
+    MUSIC_GEN_REQUESTS_DESCRIPTION = "Discover a world where every prompt turns into a unique melody! 🎺"
     SUNO_REQUESTS = "🎸 Suno songs"
     SUNO_REQUESTS_DESCRIPTION = "Discover a world where every text you write is transformed into a unique song! 🎸"
     THEMATIC_CHATS = "💬 Thematic chats"
@@ -887,7 +996,7 @@ Your chats have switched their unique roles to "Personal Assistant" as your acce
     ACCESS_TO_CATALOG_DESCRIPTION = "Unlock a universe of specialized AI assistants with access to our exclusive catalog, where every role is tailored to fit your unique needs and tasks"
     ANSWERS_AND_REQUESTS_WITH_VOICE_MESSAGES = "🎙 Answers and requests with voice messages"
     ANSWERS_AND_REQUESTS_WITH_VOICE_MESSAGES_DESCRIPTION = "Experience the ease and convenience of voice communication with our AI: Send and receive voice messages for a more dynamic and expressive interaction"
-    FAST_ANSWERS = "⚡ Fast answers"
+    FAST_ANSWERS = "⚡ Fast answers without pauses"
     FAST_ANSWERS_DESCRIPTION = "Quick Messages feature offers lightning-fast, accurate AI responses, ensuring you're always a step ahead in communication"
     MIN_ERROR = "Oops! It looks like the total sum is below our minimum threshold. Please choose count of packages that meets or exceeds the minimum required. Let's try that again! 🔄"
     MAX_ERROR = "Oops! It looks like the number entered is higher than you can purchase. Please enter a smaller value or one corresponding to your balance. Let's try that again! 🔄"
@@ -1019,6 +1128,30 @@ Please upload a new photo where your face is clearly visible and in good quality
 
 🔄 After uploading a new photo, please try again. Thank you for your patience!
 """
+    # Photoshop AI
+    PHOTOSHOP_AI_INFO = """
+This section brings together AI tools for editing and styling images.
+
+Click the button below to choose an action and start your creative journey! 👇
+"""
+    PHOTOSHOP_AI_RESTORATION = "Restoration 🖌"
+    PHOTOSHOP_AI_RESTORATION_INFO = """
+The tool detects scratches and cuts on the original image and removes them.
+
+📸 Upload your image to the chat and let the magic begin! ✨
+"""
+    PHOTOSHOP_AI_COLORIZATION = "Colorization 🌈"
+    PHOTOSHOP_AI_COLORIZATION_INFO = """
+The tool allows you to add color to black-and-white images.
+
+📸 Upload your image to the chat and let the magic begin! ✨
+"""
+    PHOTOSHOP_AI_REMOVE_BACKGROUND = "Background Removal 🗑"
+    PHOTOSHOP_AI_REMOVE_BACKGROUND_INFO = """
+The tool allows you to remove the background from an image.
+
+📸 Upload your image to the chat and let the magic begin! ✨
+"""
 
     ERROR = """
 I've got an unknown error 🤒
@@ -1077,6 +1210,12 @@ Please try again 🥺
             current_model = English.CHATGPT4_OMNI_MINI
         elif current_model == Model.CHAT_GPT and current_model_version == ChatGPTVersion.V4_Omni:
             current_model = English.CHATGPT4_OMNI
+        elif current_model == Model.CHAT_GPT and current_model_version == ChatGPTVersion.V1_O_Mini:
+            current_model = English.CHAT_GPT_O_1_MINI
+        elif current_model == Model.CHAT_GPT and current_model_version == ChatGPTVersion.V1_O_Preview:
+            current_model = English.CHAT_GPT_O_1_PREVIEW
+        elif current_model == Model.CLAUDE and current_model_version == ClaudeGPTVersion.V3_Haiku:
+            current_model = English.CLAUDE_3_HAIKU
         elif current_model == Model.CLAUDE and current_model_version == ClaudeGPTVersion.V3_Sonnet:
             current_model = English.CLAUDE_3_SONNET
         elif current_model == Model.CLAUDE and current_model_version == ClaudeGPTVersion.V3_Opus:
@@ -1085,6 +1224,8 @@ Please try again 🥺
             current_model = English.GEMINI_1_FLASH
         elif current_model == Model.GEMINI and current_model_version == GeminiGPTVersion.V1_Pro:
             current_model = English.GEMINI_1_PRO
+        elif current_model == Model.GEMINI and current_model_version == GeminiGPTVersion.V1_Ultra:
+            current_model = English.GEMINI_1_ULTRA
         elif current_model == Model.DALL_E:
             current_model = English.DALL_E
         elif current_model == Model.MIDJOURNEY:
@@ -1093,6 +1234,8 @@ Please try again 🥺
             current_model = English.STABLE_DIFFUSION
         elif current_model == Model.FACE_SWAP:
             current_model = English.FACE_SWAP
+        elif current_model == Model.PHOTOSHOP_AI:
+            current_model = English.PHOTOSHOP_AI
         elif current_model == Model.MUSIC_GEN:
             current_model = English.MUSIC_GEN
         elif current_model == Model.SUNO:
@@ -1115,25 +1258,43 @@ Please try again 🥺
 ---------------------------
 
 Quota:
-━ ✉️ <b>ChatGPT-4.0 Omni Mini</b>:
-    ┣ {format_number(daily_limits[Quota.CHAT_GPT4_OMNI_MINI])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.CHAT_GPT4_OMNI_MINI])}
-    ┗ Extra: {additional_usage_quota[Quota.CHAT_GPT4_OMNI_MINI]}
-━ 💥 <b>ChatGPT-4.0 Omni</b>:
-    ┣ {format_number(daily_limits[Quota.CHAT_GPT4_OMNI])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.CHAT_GPT4_OMNI])}
-    ┗ Extra: {additional_usage_quota[Quota.CHAT_GPT4_OMNI]}
-━ 💫 <b>Claude 3.5 Sonnet</b>:
-    ┣ {format_number(daily_limits[Quota.CLAUDE_3_SONNET])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.CLAUDE_3_SONNET])}
-    ┗ Extra: {additional_usage_quota[Quota.CLAUDE_3_SONNET]}
-━ 🚀 <b>Claude 3.0 Opus</b>:
-    ┣ {format_number(daily_limits[Quota.CLAUDE_3_OPUS])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.CLAUDE_3_OPUS])}
-    ┗ Extra: {additional_usage_quota[Quota.CLAUDE_3_OPUS]}
-━ 🏎 <b>Gemini 1.5 Flash</b>:
-    ┣ {format_number(daily_limits[Quota.GEMINI_1_FLASH])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.GEMINI_1_FLASH])}
-    ┗ Extra: {additional_usage_quota[Quota.GEMINI_1_FLASH]}
-━ 💼 <b>Gemini 1.5 Pro</b>:
-    ┣ {format_number(daily_limits[Quota.GEMINI_1_PRO])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.GEMINI_1_PRO])}
-    ┗ Extra: {additional_usage_quota[Quota.GEMINI_1_PRO]}
-━ 🖼 <b>DALL-E</b>:
+🔤 Text models:
+━ 💭 <b>ChatGPT</b>:
+    ┣ ✉️ 4.0 Omni Mini:
+        ┣ {format_number(daily_limits[Quota.CHAT_GPT4_OMNI_MINI])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.CHAT_GPT4_OMNI_MINI])}
+        ┗ Extra: {additional_usage_quota[Quota.CHAT_GPT4_OMNI_MINI]}
+    ┣ 💥 4.0 Omni:
+        ┣ {format_number(daily_limits[Quota.CHAT_GPT4_OMNI])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.CHAT_GPT4_OMNI])}
+        ┗ Extra: {additional_usage_quota[Quota.CHAT_GPT4_OMNI]}
+    ┣ 🧩 o1-mini:
+        ┣ {format_number(daily_limits[Quota.CHAT_GPT_O_1_MINI])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.CHAT_GPT_O_1_MINI])}
+        ┗ Extra: {additional_usage_quota[Quota.CHAT_GPT_O_1_MINI]}
+    ┗ 🧪 o1-preview:
+        ┣ {format_number(daily_limits[Quota.CHAT_GPT_O_1_PREVIEW])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.CHAT_GPT_O_1_PREVIEW])}
+        ┗ Extra: {additional_usage_quota[Quota.CHAT_GPT_O_1_PREVIEW]}
+━ 📄 <b>Claude</b>:
+    ┣ 📜 3.0 Haiku:
+        ┣ {format_number(daily_limits[Quota.CLAUDE_3_HAIKU])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.CLAUDE_3_HAIKU])}
+        ┗ Extra: {additional_usage_quota[Quota.CLAUDE_3_HAIKU]}
+    ┣ 💫 3.5 Sonnet:
+        ┣ {format_number(daily_limits[Quota.CLAUDE_3_SONNET])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.CLAUDE_3_SONNET])}
+        ┗ Extra: {additional_usage_quota[Quota.CLAUDE_3_SONNET]}
+    ┗ 🚀 Claude 3.0 Opus:
+        ┣ {format_number(daily_limits[Quota.CLAUDE_3_OPUS])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.CLAUDE_3_OPUS])}
+        ┗ Extra: {additional_usage_quota[Quota.CLAUDE_3_OPUS]}
+━ ✨ <b>Gemini</b>:
+    ┣ 🏎 Gemini 1.5 Flash:
+        ┣ {format_number(daily_limits[Quota.GEMINI_1_FLASH])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.GEMINI_1_FLASH])}
+        ┗ Extra: {additional_usage_quota[Quota.GEMINI_1_FLASH]}
+    ┣ 💼 Gemini 1.5 Pro:
+        ┣ {format_number(daily_limits[Quota.GEMINI_1_PRO])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.GEMINI_1_PRO])}
+        ┗ Extra: {additional_usage_quota[Quota.GEMINI_1_PRO]}
+    ┗ 🛡️ Gemini 1.0 Ultra:
+        ┣ {format_number(daily_limits[Quota.GEMINI_1_ULTRA])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.GEMINI_1_ULTRA])}
+        ┗ Extra: {additional_usage_quota[Quota.GEMINI_1_ULTRA]}
+
+🖼 Image models:
+━ 👨‍🎨 <b>DALL-E</b>:
     ┣ {format_number(daily_limits[Quota.DALL_E])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.DALL_E])}
     ┗ Extra: {additional_usage_quota[Quota.DALL_E]}
 ━ 🎨 <b>Midjourney</b>:
@@ -1145,12 +1306,18 @@ Quota:
 ━ 📷 <b>FaceSwap</b>:
     ┣ {format_number(daily_limits[Quota.FACE_SWAP])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.FACE_SWAP])}
     ┗ Extra: {additional_usage_quota[Quota.FACE_SWAP]}
-━ 🎵 <b>MusicGen</b>:
+━ 🪄 <b>Photoshop AI</b>:
+    ┣ {format_number(daily_limits[Quota.PHOTOSHOP_AI])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.PHOTOSHOP_AI])}
+    ┗ Extra: {additional_usage_quota[Quota.PHOTOSHOP_AI]}
+
+🎵 Music models:
+━ 🎺 <b>MusicGen</b>:
     ┣ {format_number(daily_limits[Quota.MUSIC_GEN])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.MUSIC_GEN])}
     ┗ Extra: {additional_usage_quota[Quota.MUSIC_GEN]}
 ━ 🎸 <b>Suno</b>:
     ┣ {format_number(daily_limits[Quota.SUNO])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.SUNO])}
     ┗ Extra: {additional_usage_quota[Quota.SUNO]}
+
 ━ 💬 <b>Thematic chats</b>: {additional_usage_quota[Quota.ADDITIONAL_CHATS]}
 ━ 🎭 <b>Access to a catalog with digital employees</b>: {'✅' if additional_usage_quota[Quota.ACCESS_TO_CATALOG] else '❌'}
 ━ 🎙 <b>Voice messages</b>: {'✅' if additional_usage_quota[Quota.VOICE_MESSAGES] else '❌'}
@@ -1229,28 +1396,29 @@ You're about to activate subscription {subscription_type} {Subscription.get_emoj
 
         if page == 0:
             description = (
-                "🧠 <b>ChatGPT</b>: Engage in deep, thought-provoking conversations!\n\n"
+                "💥 <b>ChatGPT</b>: Engage in deep, thought-provoking conversations!\n\n"
                 "🚀 <b>Claude</b>: Engage in dialogues that expand the horizons of thinking!\n\n"
-                "✨ <b>Gemini</b>: Unlock a world of quick solutions in an instant!\n\n"
-                "💬 <b>Thematic Chats</b>: Dive into specialized topics and explore dedicated chat realms\n\n"
-                "🎭 <b>Role Catalog Access</b>: Need a specific assistant? Browse our collection and find your perfect AI match"
+                "✨ <b>Gemini</b>: Unlock a world of quick solutions in an instant!"
             )
         elif page == 1:
             description = (
-                "🖼 <b>DALL-E</b>: Transform ideas into stunning visuals!\n\n"
+                "👨‍🎨 <b>DALL-E</b>: Transform ideas into stunning visuals!\n\n"
                 "🎨 <b>Midjourney</b>: Turn ideas into incredible realistic images!\n\n"
                 "🎆 <b>Stable Diffusion</b>: Turn your creative ideas into visual masterpieces!\n\n"
-                "👤 <b>FaceSwap</b>: Play with identities in images!"
+                "👤 <b>FaceSwap</b>: Play with identities in images!\n\n"
+                "🪄 <b>Photoshop AI</b>: Turn your photos into works of art with the magic of editing!"
             )
         elif page == 2:
             description = (
-                "🎵 <b>Harmony with MusicGen</b>: Create unique melodies that will belong only to you!\n\n"
+                "🎺 <b>Harmony with MusicGen</b>: Create unique melodies that will belong only to you!\n\n"
                 "🎸 <b>Creative with Suno</b>: Create original songs with your own lyrics in different genres!"
             )
         elif page == 3:
             description = (
+                "💬 <b>Thematic Chats</b>: Dive into specialized topics and explore dedicated chat realms\n\n"
+                "🎭 <b>Role Catalog Access</b>: Need a specific assistant? Browse our collection and find your perfect AI match\n\n"
                 "🗣️ <b>Voice Messages</b>: Say it out loud! Chatting with AI has never sounded better\n\n"
-                "⚡ <b>Quick Messages</b>: Fast, efficient, and always on point. AI communication at lightning speed"
+                "⚡ <b>Quick Messages Without Pauses</b>: Fast, efficient, and always on point. AI communication at lightning speed"
             )
         else:
             description = ""
@@ -1276,6 +1444,15 @@ Hit a button and choose a package:
         elif package_type == PackageType.CHAT_GPT4_OMNI:
             name = English.GPT4_OMNI_REQUESTS
             quantity = "requests"
+        elif package_type == PackageType.CHAT_GPT_O_1_MINI:
+            name = English.CHAT_GPT_O_1_MINI_REQUESTS
+            quantity = "requests"
+        elif package_type == PackageType.CHAT_GPT_O_1_PREVIEW:
+            name = English.CHAT_GPT_O_1_PREVIEW_REQUESTS
+            quantity = "requests"
+        elif package_type == PackageType.CLAUDE_3_HAIKU:
+            name = English.CLAUDE_3_HAIKU_REQUESTS
+            quantity = "requests"
         elif package_type == PackageType.CLAUDE_3_SONNET:
             name = English.CLAUDE_3_SONNET_REQUESTS
             quantity = "requests"
@@ -1288,6 +1465,9 @@ Hit a button and choose a package:
         elif package_type == PackageType.GEMINI_1_PRO:
             name = English.GEMINI_1_PRO_REQUESTS
             quantity = "requests"
+        elif package_type == PackageType.GEMINI_1_ULTRA:
+            name = English.GEMINI_1_ULTRA_REQUESTS
+            quantity = "requests"
         elif package_type == PackageType.DALL_E:
             name = English.DALL_E_REQUESTS
             quantity = "images"
@@ -1299,6 +1479,9 @@ Hit a button and choose a package:
             quantity = "images"
         elif package_type == PackageType.FACE_SWAP:
             name = English.FACE_SWAP_REQUESTS
+            quantity = "generations"
+        elif package_type == PackageType.PHOTOSHOP_AI:
+            name = English.PHOTOSHOP_AI_REQUESTS
             quantity = "generations"
         elif package_type == PackageType.MUSIC_GEN:
             name = English.MUSIC_GEN_REQUESTS
@@ -1448,6 +1631,12 @@ Looks like you've got only <b>{available_seconds} seconds</b> left in your arsen
             return English.SWITCHED_TO_CHATGPT4_OMNI_MINI
         elif model == Model.CHAT_GPT and model_version == ChatGPTVersion.V4_Omni:
             return English.SWITCHED_TO_CHATGPT4_OMNI
+        elif model == Model.CHAT_GPT and model_version == ChatGPTVersion.V1_O_Mini:
+            return English.SWITCHED_TO_CHAT_GPT_O_1_MINI
+        elif model == Model.CHAT_GPT and model_version == ChatGPTVersion.V1_O_Preview:
+            return English.SWITCHED_TO_CHAT_GPT_O_1_PREVIEW
+        elif model == Model.CLAUDE and model_version == ClaudeGPTVersion.V3_Haiku:
+            return English.SWITCHED_TO_CLAUDE_3_HAIKU
         elif model == Model.CLAUDE and model_version == ClaudeGPTVersion.V3_Sonnet:
             return English.SWITCHED_TO_CLAUDE_3_SONNET
         elif model == Model.CLAUDE and model_version == ClaudeGPTVersion.V3_Opus:
@@ -1456,6 +1645,8 @@ Looks like you've got only <b>{available_seconds} seconds</b> left in your arsen
             return English.SWITCHED_TO_GEMINI_1_FLASH
         elif model == Model.GEMINI and model_version == GeminiGPTVersion.V1_Pro:
             return English.SWITCHED_TO_GEMINI_1_PRO
+        elif model == Model.GEMINI and model_version == GeminiGPTVersion.V1_Ultra:
+            return English.SWITCHED_TO_GEMINI_1_ULTRA
         elif model == Model.DALL_E:
             return English.SWITCHED_TO_DALL_E
         elif model == Model.MIDJOURNEY:
@@ -1464,6 +1655,8 @@ Looks like you've got only <b>{available_seconds} seconds</b> left in your arsen
             return English.SWITCHED_TO_STABLE_DIFFUSION
         elif model == Model.FACE_SWAP:
             return English.SWITCHED_TO_FACE_SWAP
+        elif model == Model.PHOTOSHOP_AI:
+            return English.SWITCHED_TO_PHOTOSHOP_AI
         elif model == Model.MUSIC_GEN:
             return English.SWITCHED_TO_MUSIC_GEN
         elif model == Model.SUNO:
@@ -1601,7 +1794,17 @@ Looks like you've got only <b>{available_seconds} seconds</b> left in your arsen
             "Engaging warp drive for hyper-speed answer retrieval. Hold on tight... 🚀",
             "I'm in the kitchen cooking up a fresh batch of answers. This one's gonna be delicious... 🍳",
             "Taking a quick trip to the cloud and back. Hope to bring back some smart raindrops of info... ☁️",
-            "Planting your question in my digital garden. Let's see what grows... 🌱🤖"
+            "Planting your question in my digital garden. Let's see what grows... 🌱🤖",
+            "Flexing my virtual muscles for a powerful answer... 💪",
+            "Whoosh — calculations in progress! The answer will be ready soon... 🪄",
+            "My digital owls are flying out in search of a wise answer. They'll be back with the goods soon... 🦉",
+            "There's a brainstorm happening in cyberspace, and I'm catching lightning for your answer... ⚡",
+            "My team of digital raccoons is on the hunt for the perfect answer. They're great at this... 🦝",
+            "Sifting through information like a squirrel gathering nuts, looking for the juiciest one... 🐿️",
+            "Throwing on my virtual detective coat, heading out to find your answer... 🕵️‍♂️️",
+            "Downloading a fresh batch of ideas from space. Your answer will land in a few seconds... 🚀",
+            "Hold on, laying out the data cards on the virtual table. Getting ready for a precise answer... 🃏",
+            "My virtual ships are sailing the sea of information. The answer is on the horizon... 🚢",
         ]
 
         return random.choice(texts)
@@ -1623,7 +1826,17 @@ Looks like you've got only <b>{available_seconds} seconds</b> left in your arsen
             "Embarking on a digital safari to capture your artistic vision... 🦁🎨",
             "Revving up the AI art engines, stand by... 🏎️💨",
             "Plunging into a pool of digital imagination... 🏊‍💭",
-            "Cooking up a visual symphony in the AI kitchen... 🍳🎼"
+            "Cooking up a visual symphony in the AI kitchen... 🍳🎼",
+            "Pushing the clouds of creativity to craft your visual masterpiece... ☁️🎨",
+            "Gathering digital brushes and paints to bring your vision to life... 🎨🖌️",
+            "Summoning pixel dragons to create an epic image... 🐉",
+            "Bringing in digital bees to collect the nectar for your visual bloom... 🐝",
+            "Putting on my digital artist hat and getting to work on your masterpiece... 👒",
+            "Dipping pixels into a magical solution so they can shine into a masterpiece... 🧪✨",
+            "Sculpting your image from the clay of imagination, a masterpiece is on the way... 🏺",
+            "My virtual elves are already painting your image... 🧝‍♂️",
+            "Virtual turtles are carrying your image across the sea of data... 🐢",
+            "Virtual kitties are paw-painting your masterpiece right now... 🐱",
         ]
 
         text = random.choice(texts)
@@ -1648,7 +1861,7 @@ Looks like you've got only <b>{available_seconds} seconds</b> left in your arsen
             "Building faces like a master architect... 🏗️👷‍",
             "Embarking on a mystical quest for the perfect face blend... 🗺️🔍",
             "Launching a rocket of face morphing adventures... 🚀👨‍🚀👩‍🚀",
-            "Embarking on a galactic journey of face swapping... 🌌👽"
+            "Embarking on a galactic journey of face swapping... 🌌👽",
         ]
 
         text = random.choice(texts)
@@ -1681,15 +1894,23 @@ Looks like you've got only <b>{available_seconds} seconds</b> left in your arsen
 
         return text
 
+    @staticmethod
+    def photoshop_ai_actions() -> List[str]:
+        return [
+            English.PHOTOSHOP_AI_RESTORATION,
+            English.PHOTOSHOP_AI_COLORIZATION,
+            English.PHOTOSHOP_AI_REMOVE_BACKGROUND,
+        ]
+
     # Settings
     @staticmethod
     def settings(human_model: str, current_model: Model, dall_e_cost=1) -> str:
         if current_model == Model.CHAT_GPT:
-            additional_text = f"\n<b>Version ChatGPT-4.0 Omni Mini</b>: {ChatGPTVersion.V4_Omni_Mini}\n<b>Version ChatGPT-4.0 Omni</b>: {ChatGPTVersion.V4_Omni}"
+            additional_text = f"\n<b>Version ChatGPT 4.0 Omni Mini</b>: {ChatGPTVersion.V4_Omni_Mini}\n<b>Version ChatGPT 4.0 Omni</b>: {ChatGPTVersion.V4_Omni}\n<b>Version ChatGPT o1-mini</b>: {ChatGPTVersion.V1_O_Mini}\n<b>Version ChatGPT o1-preview</b>: {ChatGPTVersion.V1_O_Preview}"
         elif current_model == Model.CLAUDE:
-            additional_text = f"\n<b>Version Claude 3.5 Sonnet</b>: {ClaudeGPTVersion.V3_Sonnet}\n<b>Version Claude 3.0 Opus</b>: {ClaudeGPTVersion.V3_Opus}"
+            additional_text = f"\n<b>Version Claude 3.0 Haiku</b>: {ClaudeGPTVersion.V3_Haiku}\n<b>Version Claude 3.5 Sonnet</b>: {ClaudeGPTVersion.V3_Sonnet}\n<b>Version Claude 3.0 Opus</b>: {ClaudeGPTVersion.V3_Opus}"
         elif current_model == Model.GEMINI:
-            additional_text = f"\n<b>Version Gemini 1.5 Flash</b>: {GeminiGPTVersion.V1_Flash}\n<b>Version Gemini 1.5 Pro</b>: {GeminiGPTVersion.V1_Pro}"
+            additional_text = f"\n<b>Version Gemini 1.5 Flash</b>: {GeminiGPTVersion.V1_Flash}\n<b>Version Gemini 1.5 Pro</b>: {GeminiGPTVersion.V1_Pro}\n<b>Version Gemini 1.0 Ultra</b>: {GeminiGPTVersion.V1_Ultra}"
         elif current_model == Model.DALL_E:
             additional_text = f"\nAt the current settings, 1 request costs: {dall_e_cost} 🖼"
         else:

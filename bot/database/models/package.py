@@ -9,14 +9,19 @@ from bot.database.models.transaction import ServiceType
 class PackageType:
     CHAT_GPT4_OMNI_MINI = 'GPT4_OMNI_MINI'
     CHAT_GPT4_OMNI = 'GPT4_OMNI'
+    CHAT_GPT_O_1_MINI = 'CHAT_GPT_O_1_MINI'
+    CHAT_GPT_O_1_PREVIEW = 'CHAT_GPT_O_1_PREVIEW'
+    CLAUDE_3_HAIKU = 'CLAUDE_3_HAIKU'
     CLAUDE_3_SONNET = 'CLAUDE_3_SONNET'
     CLAUDE_3_OPUS = 'CLAUDE_3_OPUS'
     GEMINI_1_FLASH = 'GEMINI_1_FLASH'
     GEMINI_1_PRO = 'GEMINI_1_PRO'
+    GEMINI_1_ULTRA = 'GEMINI_1_ULTRA'
     DALL_E = 'DALL_E'
     MIDJOURNEY = 'MIDJOURNEY'
     STABLE_DIFFUSION = 'STABLE_DIFFUSION'
     FACE_SWAP = 'FACE_SWAP'
+    PHOTOSHOP_AI = 'PHOTOSHOP_AI'
     MUSIC_GEN = 'MUSIC_GEN'
     SUNO = 'SUNO'
     CHAT = 'CHAT'
@@ -103,15 +108,20 @@ class Package:
         prices = {
             PackageType.CHAT_GPT4_OMNI_MINI: '',
             PackageType.CHAT_GPT4_OMNI: '',
+            PackageType.CHAT_GPT_O_1_MINI: '',
+            PackageType.CHAT_GPT_O_1_PREVIEW: '',
+            PackageType.CLAUDE_3_HAIKU: '',
             PackageType.CLAUDE_3_SONNET: '',
             PackageType.CLAUDE_3_OPUS: '',
             PackageType.GEMINI_1_FLASH: '',
             PackageType.GEMINI_1_PRO: '',
+            PackageType.GEMINI_1_ULTRA: '',
             PackageType.CHAT: '',
             PackageType.DALL_E: '',
             PackageType.MIDJOURNEY: '',
             PackageType.STABLE_DIFFUSION: '',
             PackageType.FACE_SWAP: '',
+            PackageType.PHOTOSHOP_AI: '',
             PackageType.MUSIC_GEN: '',
             PackageType.SUNO: '',
             PackageType.ACCESS_TO_CATALOG: '',
@@ -122,15 +132,20 @@ class Package:
         if currency == Currency.RUB:
             prices[PackageType.CHAT_GPT4_OMNI_MINI] = '2₽'
             prices[PackageType.CHAT_GPT4_OMNI] = '8₽'
-            prices[PackageType.CLAUDE_3_SONNET] = '2₽'
-            prices[PackageType.CLAUDE_3_OPUS] = '8₽'
+            prices[PackageType.CHAT_GPT_O_1_MINI] = '8₽'
+            prices[PackageType.CHAT_GPT_O_1_PREVIEW] = '20₽'
+            prices[PackageType.CLAUDE_3_HAIKU] = '2₽'
+            prices[PackageType.CLAUDE_3_SONNET] = '8₽'
+            prices[PackageType.CLAUDE_3_OPUS] = '20₽'
             prices[PackageType.GEMINI_1_FLASH] = '2₽'
             prices[PackageType.GEMINI_1_PRO] = '8₽'
+            prices[PackageType.GEMINI_1_ULTRA] = '20₽'
             prices[PackageType.DALL_E] = '8₽'
             prices[PackageType.MIDJOURNEY] = '8₽'
             prices[PackageType.STABLE_DIFFUSION] = '8₽'
             prices[PackageType.FACE_SWAP] = '8₽'
-            prices[PackageType.MUSIC_GEN] = '8₽'
+            prices[PackageType.PHOTOSHOP_AI] = '8₽'
+            prices[PackageType.MUSIC_GEN] = '20₽'
             prices[PackageType.SUNO] = '8₽'
             prices[PackageType.CHAT] = '20₽'
             prices[PackageType.ACCESS_TO_CATALOG] = '40₽'
@@ -139,15 +154,20 @@ class Package:
         elif currency == Currency.USD:
             prices[PackageType.CHAT_GPT4_OMNI_MINI] = '$0.02'
             prices[PackageType.CHAT_GPT4_OMNI] = '$0.08'
-            prices[PackageType.CLAUDE_3_SONNET] = '$0.02'
-            prices[PackageType.CLAUDE_3_OPUS] = '$0.08'
+            prices[PackageType.CHAT_GPT_O_1_MINI] = '$0.08'
+            prices[PackageType.CHAT_GPT_O_1_PREVIEW] = '$0.2'
+            prices[PackageType.CLAUDE_3_HAIKU] = '$0.02'
+            prices[PackageType.CLAUDE_3_SONNET] = '$0.08'
+            prices[PackageType.CLAUDE_3_OPUS] = '$0.2'
             prices[PackageType.GEMINI_1_FLASH] = '$0.02'
             prices[PackageType.GEMINI_1_PRO] = '$0.08'
+            prices[PackageType.GEMINI_1_ULTRA] = '$0.2'
             prices[PackageType.DALL_E] = '$0.08'
             prices[PackageType.MIDJOURNEY] = '$0.08'
             prices[PackageType.STABLE_DIFFUSION] = '$0.08'
             prices[PackageType.FACE_SWAP] = '$0.08'
-            prices[PackageType.MUSIC_GEN] = '$0.08'
+            prices[PackageType.PHOTOSHOP_AI] = '$0.08'
+            prices[PackageType.MUSIC_GEN] = '$0.2'
             prices[PackageType.SUNO] = '$0.08'
             prices[PackageType.CHAT] = '$0.2'
             prices[PackageType.ACCESS_TO_CATALOG] = '$0.4'
@@ -156,15 +176,20 @@ class Package:
         else:
             prices[PackageType.CHAT_GPT4_OMNI_MINI] = '2⭐'
             prices[PackageType.CHAT_GPT4_OMNI] = '8⭐️'
-            prices[PackageType.CLAUDE_3_SONNET] = '2⭐'
-            prices[PackageType.CLAUDE_3_OPUS] = '8⭐️'
+            prices[PackageType.CHAT_GPT_O_1_MINI] = '8⭐️'
+            prices[PackageType.CHAT_GPT_O_1_PREVIEW] = '20⭐️'
+            prices[PackageType.CLAUDE_3_HAIKU] = '2⭐'
+            prices[PackageType.CLAUDE_3_SONNET] = '8⭐'
+            prices[PackageType.CLAUDE_3_OPUS] = '20⭐️'
             prices[PackageType.GEMINI_1_FLASH] = '2⭐'
             prices[PackageType.GEMINI_1_PRO] = '8⭐️'
+            prices[PackageType.GEMINI_1_ULTRA] = '20⭐️'
             prices[PackageType.DALL_E] = '8⭐️'
             prices[PackageType.MIDJOURNEY] = '8⭐️'
             prices[PackageType.STABLE_DIFFUSION] = '8⭐️'
             prices[PackageType.FACE_SWAP] = '8⭐️'
-            prices[PackageType.MUSIC_GEN] = '8⭐️'
+            prices[PackageType.PHOTOSHOP_AI] = '8⭐️'
+            prices[PackageType.MUSIC_GEN] = '20⭐️'
             prices[PackageType.SUNO] = '8⭐️'
             prices[PackageType.CHAT] = '20⭐️'
             prices[PackageType.ACCESS_TO_CATALOG] = '40⭐️'
@@ -199,6 +224,15 @@ class Package:
         elif package_type == PackageType.CHAT_GPT4_OMNI:
             name = localization.GPT4_OMNI_REQUESTS
             description = localization.GPT4_OMNI_REQUESTS_DESCRIPTION
+        elif package_type == PackageType.CHAT_GPT_O_1_MINI:
+            name = localization.CHAT_GPT_O_1_MINI_REQUESTS
+            description = localization.CHAT_GPT_O_1_MINI_REQUESTS_DESCRIPTION
+        elif package_type == PackageType.CHAT_GPT_O_1_PREVIEW:
+            name = localization.CHAT_GPT_O_1_PREVIEW_REQUESTS
+            description = localization.CHAT_GPT_O_1_PREVIEW_REQUESTS_DESCRIPTION
+        elif package_type == PackageType.CLAUDE_3_HAIKU:
+            name = localization.CLAUDE_3_HAIKU_REQUESTS
+            description = localization.CLAUDE_3_HAIKU_REQUESTS_DESCRIPTION
         elif package_type == PackageType.CLAUDE_3_SONNET:
             name = localization.CLAUDE_3_SONNET_REQUESTS
             description = localization.CLAUDE_3_SONNET_REQUESTS_DESCRIPTION
@@ -211,6 +245,9 @@ class Package:
         elif package_type == PackageType.GEMINI_1_PRO:
             name = localization.GEMINI_1_PRO_REQUESTS
             description = localization.GEMINI_1_PRO_REQUESTS_DESCRIPTION
+        elif package_type == PackageType.GEMINI_1_ULTRA:
+            name = localization.GEMINI_1_ULTRA_REQUESTS
+            description = localization.GEMINI_1_ULTRA_REQUESTS_DESCRIPTION
         elif package_type == PackageType.DALL_E:
             name = localization.DALL_E_REQUESTS
             description = localization.DALL_E_REQUESTS_DESCRIPTION
@@ -223,6 +260,9 @@ class Package:
         elif package_type == PackageType.FACE_SWAP:
             name = localization.FACE_SWAP_REQUESTS
             description = localization.FACE_SWAP_REQUESTS_DESCRIPTION
+        elif package_type == PackageType.PHOTOSHOP_AI:
+            name = localization.PHOTOSHOP_AI_REQUESTS
+            description = localization.PHOTOSHOP_AI_REQUESTS_DESCRIPTION
         elif package_type == PackageType.MUSIC_GEN:
             name = localization.MUSIC_GEN_REQUESTS
             description = localization.MUSIC_GEN_REQUESTS_DESCRIPTION
@@ -256,6 +296,9 @@ class Package:
         elif package_type == PackageType.CHAT_GPT4_OMNI:
             additional_usage_quota[Quota.CHAT_GPT4_OMNI] += quantity
             service_type = ServiceType.CHAT_GPT4_OMNI
+        elif package_type == PackageType.CLAUDE_3_HAIKU:
+            additional_usage_quota[Quota.CLAUDE_3_HAIKU] += quantity
+            service_type = ServiceType.CLAUDE_3_HAIKU
         elif package_type == PackageType.CLAUDE_3_SONNET:
             additional_usage_quota[Quota.CLAUDE_3_SONNET] += quantity
             service_type = ServiceType.CLAUDE_3_SONNET
@@ -268,6 +311,15 @@ class Package:
         elif package_type == PackageType.GEMINI_1_PRO:
             additional_usage_quota[Quota.GEMINI_1_PRO] += quantity
             service_type = ServiceType.GEMINI_1_PRO
+        elif package_type == PackageType.GEMINI_1_ULTRA:
+            additional_usage_quota[Quota.GEMINI_1_ULTRA] += quantity
+            service_type = ServiceType.GEMINI_1_ULTRA
+        elif package_type == PackageType.CHAT_GPT_O_1_MINI:
+            additional_usage_quota[Quota.CHAT_GPT_O_1_MINI] += quantity
+            service_type = ServiceType.CHAT_GPT_O_1_MINI
+        elif package_type == PackageType.CHAT_GPT_O_1_PREVIEW:
+            additional_usage_quota[Quota.CHAT_GPT_O_1_PREVIEW] += quantity
+            service_type = ServiceType.CHAT_GPT_O_1_PREVIEW
         elif package_type == PackageType.DALL_E:
             additional_usage_quota[Quota.DALL_E] += quantity
             service_type = ServiceType.DALL_E
@@ -280,6 +332,9 @@ class Package:
         elif package_type == PackageType.FACE_SWAP:
             additional_usage_quota[Quota.FACE_SWAP] += quantity
             service_type = ServiceType.FACE_SWAP
+        elif package_type == PackageType.PHOTOSHOP_AI:
+            additional_usage_quota[Quota.PHOTOSHOP_AI] += quantity
+            service_type = ServiceType.PHOTOSHOP_AI
         elif package_type == PackageType.MUSIC_GEN:
             additional_usage_quota[Quota.MUSIC_GEN] += quantity
             service_type = ServiceType.MUSIC_GEN

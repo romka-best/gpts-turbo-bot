@@ -77,4 +77,4 @@ async def create_auto_payment(
                 if response.ok:
                     return body
     else:
-        raise NotImplementedError
+        raise NotImplementedError(f'Payment method is not defined: {payment_method}')

@@ -28,7 +28,7 @@ from bot.database.operations.user.getters import get_user
 from bot.database.operations.user.updaters import update_user
 from bot.helpers.creaters.create_package import create_package
 from bot.helpers.creaters.create_subscription import create_subscription
-from bot.helpers.senders.send_message_to_admins_and_developers import send_message_to_admins_and_developers
+from bot.helpers.senders.send_message_to_admins import send_message_to_admins
 from bot.keyboards.common.common import build_recommendations_keyboard
 from bot.locales.main import get_localization, get_user_language
 
@@ -90,7 +90,7 @@ async def handle_yookassa_webhook(request: Dict, bot: Bot, dp: Dispatcher):
                     message_effect_id=config.MESSAGE_EFFECTS.get('FIRE'),
                 )
 
-                await send_message_to_admins_and_developers(
+                await send_message_to_admins(
                     bot=bot,
                     message=f'#payment #subscription #success\n\n'
                             f'🤑 <b>Успешно оформлена подписка у пользователя: {subscription.user_id}</b>\n\n'
@@ -110,7 +110,7 @@ async def handle_yookassa_webhook(request: Dict, bot: Bot, dp: Dispatcher):
                     }
                 )
 
-                await send_message_to_admins_and_developers(
+                await send_message_to_admins(
                     bot=bot,
                     message=f'#payment #subscription #declined\n\n'
                             f'❌ <b>Отмена оплаты подписки у пользователя: {subscription.user_id}</b>\n\n'
@@ -121,7 +121,7 @@ async def handle_yookassa_webhook(request: Dict, bot: Bot, dp: Dispatcher):
                             f'Грустно, но что поделать 🤷',
                 )
             else:
-                await send_message_to_admins_and_developers(
+                await send_message_to_admins(
                     bot=bot,
                     message=f'#payment #subscription #error\n\n'
                             f'🚫 <b>Неизвестный статус при оплате подписки у пользователя: {subscription.user_id}</b>\n\n'
@@ -182,7 +182,7 @@ async def handle_yookassa_webhook(request: Dict, bot: Bot, dp: Dispatcher):
                         text=get_localization(user_language_code).SUBSCRIPTION_RESET,
                     )
 
-                    await send_message_to_admins_and_developers(
+                    await send_message_to_admins(
                         bot=bot,
                         message=f'#payment #renew #subscription #success\n\n'
                                 f'🤑 <b>Успешно продлена подписка у пользователя: {new_subscription.user_id}</b>\n\n'
@@ -212,7 +212,7 @@ async def handle_yookassa_webhook(request: Dict, bot: Bot, dp: Dispatcher):
                         text=get_localization(user.interface_language_code).SUBSCRIPTION_END,
                     )
 
-                    await send_message_to_admins_and_developers(
+                    await send_message_to_admins(
                         bot=bot,
                         message=f'#payment #renew #subscription #declined\n\n'
                                 f'❌ <b>Отмена продления подписки у пользователя: {old_subscription.user_id}</b>\n\n'
@@ -223,7 +223,7 @@ async def handle_yookassa_webhook(request: Dict, bot: Bot, dp: Dispatcher):
                                 f'Грустно, но что поделать 🤷',
                     )
                 else:
-                    await send_message_to_admins_and_developers(
+                    await send_message_to_admins(
                         bot=bot,
                         message=f'#payment #renew #subscription #error\n\n'
                                 f'🚫 <b>Неизвестный статус при продлении подписки у пользователя: {subscription.user_id}</b>\n\n'
@@ -236,7 +236,7 @@ async def handle_yookassa_webhook(request: Dict, bot: Bot, dp: Dispatcher):
                     )
     except Exception as e:
         logging.exception(f'Error in yookassa_webhook in subscription section: {e}')
-        await send_message_to_admins_and_developers(
+        await send_message_to_admins(
             bot=bot,
             message=f'#payment #subscription #error\n\n'
                     f'🚫 Неизвестная ошибка в блоке оплаты у подписки:\n\n'
@@ -305,7 +305,7 @@ async def handle_yookassa_webhook(request: Dict, bot: Bot, dp: Dispatcher):
                     message_effect_id=config.MESSAGE_EFFECTS.get('FIRE'),
                 )
 
-                await send_message_to_admins_and_developers(
+                await send_message_to_admins(
                     bot=bot,
                     message=f'#payment #package #success\n\n'
                             f'🤑 <b>Успешно прошла оплата пакета у пользователя: {package.user_id}</b>\n\n'
@@ -326,7 +326,7 @@ async def handle_yookassa_webhook(request: Dict, bot: Bot, dp: Dispatcher):
                     }
                 )
 
-                await send_message_to_admins_and_developers(
+                await send_message_to_admins(
                     bot=bot,
                     message=f'#payment #package #declined\n\n'
                             f'❌ <b>Отмена оплаты пакета у пользователя: {package.user_id}</b>\n\n'
@@ -338,7 +338,7 @@ async def handle_yookassa_webhook(request: Dict, bot: Bot, dp: Dispatcher):
                             f'Грустно, но что поделать 🤷',
                 )
             else:
-                await send_message_to_admins_and_developers(
+                await send_message_to_admins(
                     bot=bot,
                     message=f'#payment #package #error\n\n'
                             f'🚫 <b>Неизвестный статус при оплате пакета у пользователя: {package.user_id}</b>\n\n'
@@ -415,7 +415,7 @@ async def handle_yookassa_webhook(request: Dict, bot: Bot, dp: Dispatcher):
                     message_effect_id=config.MESSAGE_EFFECTS.get('FIRE'),
                 )
 
-                await send_message_to_admins_and_developers(
+                await send_message_to_admins(
                     bot=bot,
                     message=f'#payment #packages #success\n\n'
                             f'🤑 <b>Успешно прошла оплата пакетов у пользователя: {user.id}</b>\n\n'
@@ -434,7 +434,7 @@ async def handle_yookassa_webhook(request: Dict, bot: Bot, dp: Dispatcher):
                         }
                     )
 
-                await send_message_to_admins_and_developers(
+                await send_message_to_admins(
                     bot=bot,
                     message=f'#payment #packages #declined\n\n'
                             f'❌ <b>Отмена оплаты пакетов у пользователя: {user.id}</b>\n\n'
@@ -443,7 +443,7 @@ async def handle_yookassa_webhook(request: Dict, bot: Bot, dp: Dispatcher):
                             f'Грустно, но что поделать 🤷',
                 )
             else:
-                await send_message_to_admins_and_developers(
+                await send_message_to_admins(
                     bot=bot,
                     message=f'#payment #packages #error\n\n'
                             f'🚫 <b>Неизвестный статус при оплате пакетов у пользователя: {user.id}</b>\n\n'
@@ -454,7 +454,7 @@ async def handle_yookassa_webhook(request: Dict, bot: Bot, dp: Dispatcher):
                 )
     except Exception as e:
         logging.exception(f'Error in yookassa_webhook in package section: {e}')
-        await send_message_to_admins_and_developers(
+        await send_message_to_admins(
             bot=bot,
             message=f'#payment #package #packages #error\n\n'
                     f'🚫 Неизвестная ошибка в блоке оплаты у пакета(-ов):\n\n'

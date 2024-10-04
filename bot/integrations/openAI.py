@@ -22,11 +22,17 @@ def get_default_max_tokens(model_version: ChatGPTVersion) -> int:
 async def get_response_message(model_version: ChatGPTVersion, history: list) -> Dict:
     max_tokens = get_default_max_tokens(model_version)
 
-    response = await client.chat.completions.create(
-        model=model_version,
-        messages=history,
-        max_tokens=max_tokens,
-    )
+    if model_version == ChatGPTVersion.V4_Omni_Mini or model_version == ChatGPTVersion.V4_Omni:
+        response = await client.chat.completions.create(
+            model=model_version,
+            messages=history,
+            max_tokens=max_tokens,
+        )
+    else:
+        response = await client.chat.completions.create(
+            model=model_version,
+            messages=history,
+        )
 
     return {
         'finish_reason': response.choices[0].finish_reason,

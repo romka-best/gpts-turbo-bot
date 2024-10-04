@@ -22,6 +22,7 @@ class Game:
     user_id: str
     type: GameType
     status: GameStatus
+    reward: int
     created_at: datetime
     edited_at: datetime
 
@@ -31,6 +32,7 @@ class Game:
         user_id: str,
         type: GameType,
         status: GameStatus,
+        reward=0,
         created_at=None,
         edited_at=None,
     ):
@@ -38,6 +40,7 @@ class Game:
         self.user_id = user_id
         self.type = type
         self.status = status
+        self.reward = reward
 
         current_time = datetime.now(timezone.utc)
         self.created_at = created_at if created_at is not None else current_time

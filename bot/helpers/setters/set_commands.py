@@ -41,11 +41,11 @@ commands_en = [
     ),
     BotCommand(
         command='chatgpt',
-        description='🧠 Switch to ChatGPT model',
+        description='💥 Switch to ChatGPT model',
     ),
     BotCommand(
         command='claude',
-        description='💥 Switch to Claude model',
+        description='🚀 Switch to Claude model',
     ),
     BotCommand(
         command='gemini',
@@ -53,7 +53,7 @@ commands_en = [
     ),
     BotCommand(
         command='dalle',
-        description='🖼️ Switch to DALL-E model',
+        description='👨‍🎨 Switch to DALL-E model',
     ),
     BotCommand(
         command='midjourney',
@@ -68,8 +68,12 @@ commands_en = [
         description='📷️ Switch to FaceSwap model',
     ),
     BotCommand(
+        command='photoshop',
+        description='🪄 Switch to Photoshop AI model',
+    ),
+    BotCommand(
         command='music_gen',
-        description='🎵 Switch to MusicGen model',
+        description='🎺 Switch to MusicGen model',
     ),
     BotCommand(
         command='suno',
@@ -128,11 +132,11 @@ commands_ru = [
     ),
     BotCommand(
         command='chatgpt',
-        description='🧠 Переключиться на ChatGPT модель',
+        description='💥 Переключиться на ChatGPT модель',
     ),
     BotCommand(
         command='claude',
-        description='💥 Переключиться на Claude модель',
+        description='🚀 Переключиться на Claude модель',
     ),
     BotCommand(
         command='gemini',
@@ -140,7 +144,7 @@ commands_ru = [
     ),
     BotCommand(
         command='dalle',
-        description='🖼️ Переключиться на DALL-E модель',
+        description='👨‍🎨 Переключиться на DALL-E модель',
     ),
     BotCommand(
         command='midjourney',
@@ -155,8 +159,12 @@ commands_ru = [
         description='📷️ Переключиться на FaceSwap модель',
     ),
     BotCommand(
+        command='photoshop',
+        description='🪄 Переключиться на Photoshop AI модель',
+    ),
+    BotCommand(
         command='music_gen',
-        description='🎵 Переключиться на MusicGen модель',
+        description='🎺 Переключиться на MusicGen модель',
     ),
     BotCommand(
         command='suno',
@@ -193,11 +201,20 @@ async def set_commands(bot: Bot):
         try:
             await bot.set_my_commands(commands=commands_admin, scope=BotCommandScopeChat(chat_id=chat_id))
         except TelegramBadRequest as error:
-            logging.error(error)
+            if error.message.startswith('Bad Request: chat not found'):
+                logging.warning(f'{error.message}: {chat_id}')
+            else:
+                raise error
 
 
 async def set_commands_for_user(bot: Bot, chat_id: str, language='en'):
-    if language == 'ru':
-        await bot.set_my_commands(commands=commands_ru, scope=BotCommandScopeChat(chat_id=chat_id))
-    else:
-        await bot.set_my_commands(commands=commands_en, scope=BotCommandScopeChat(chat_id=chat_id))
+    try:
+        if language == 'ru':
+            await bot.set_my_commands(commands=commands_ru, scope=BotCommandScopeChat(chat_id=chat_id))
+        else:
+            await bot.set_my_commands(commands=commands_en, scope=BotCommandScopeChat(chat_id=chat_id))
+    except TelegramBadRequest as error:
+        if error.message.startswith('Bad Request: chat not found'):
+            logging.warning(f'{error.message}: {chat_id}')
+        else:
+            raise error

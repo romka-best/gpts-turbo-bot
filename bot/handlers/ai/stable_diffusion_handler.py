@@ -28,7 +28,7 @@ from bot.locales.translate_text import translate_text
 
 stable_diffusion_router = Router()
 
-PRICE_STABLE_DIFFUSION = 0.0014
+PRICE_STABLE_DIFFUSION = 0.04
 
 
 @stable_diffusion_router.message(Command('stable_diffusion'))

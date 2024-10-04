@@ -36,9 +36,11 @@ from bot.locales.main import get_user_language, get_localization
 gemini_router = Router()
 
 PRICE_GEMINI_1_FLASH_INPUT = 0.000000075
-PRICE_GEMINI_1_FLASH_OUTPUT = 0.00000030
-PRICE_GEMINI_1_PRO_INPUT = 0.00000350
-PRICE_GEMINI_1_PRO_OUTPUT = 0.00001050
+PRICE_GEMINI_1_FLASH_OUTPUT = 0.0000003
+PRICE_GEMINI_1_PRO_INPUT = 0.00000125
+PRICE_GEMINI_1_PRO_OUTPUT = 0.000005
+PRICE_GEMINI_1_ULTRA_INPUT = 0.00000125
+PRICE_GEMINI_1_ULTRA_OUTPUT = 0.000005
 
 
 @gemini_router.message(Command('gemini'))
@@ -108,8 +110,14 @@ async def handle_gemini_choose_selection(callback_query: CallbackQuery, state: F
 
             if user.settings[user.current_model][UserSettings.VERSION] == GeminiGPTVersion.V1_Flash:
                 text = get_localization(user_language_code).SWITCHED_TO_GEMINI_1_FLASH
-            else:
+            elif user.settings[user.current_model][UserSettings.VERSION] == GeminiGPTVersion.V1_Pro:
                 text = get_localization(user_language_code).SWITCHED_TO_GEMINI_1_PRO
+            elif user.settings[user.current_model][UserSettings.VERSION] == GeminiGPTVersion.V1_Ultra:
+                text = get_localization(user_language_code).SWITCHED_TO_GEMINI_1_ULTRA
+            else:
+                raise NotImplementedError(
+                    f'Model version is not found: {user.settings[user.current_model][UserSettings.VERSION]}'
+                )
 
             await callback_query.message.answer(
                 text=text,
@@ -127,8 +135,8 @@ async def handle_gemini_choose_selection(callback_query: CallbackQuery, state: F
 
 
 async def handle_gemini(message: Message, state: FSMContext, user: User, user_quota: Quota, filenames=None):
-    if user_quota != Quota.GEMINI_1_FLASH and user_quota != Quota.GEMINI_1_PRO:
-        raise NotImplemented(f'User quota is not implemented: {user_quota}')
+    if user_quota != Quota.GEMINI_1_FLASH and user_quota != Quota.GEMINI_1_PRO and user_quota != Quota.GEMINI_1_ULTRA:
+        raise NotImplementedError(f'User quota is not implemented: {user_quota}')
 
     await state.update_data(is_processing=True)
 
@@ -150,7 +158,10 @@ async def handle_gemini(message: Message, state: FSMContext, user: User, user_qu
         await write_message(user.current_chat_id, 'user', user.id, text)
 
     chat = await get_chat(user.current_chat_id)
-    messages = await get_messages_by_chat_id(user.current_chat_id)
+    messages = await get_messages_by_chat_id(
+        user.current_chat_id,
+        20 if user_quota == Quota.GEMINI_1_ULTRA else 10,
+    )
     role = await get_role_by_name(chat.role)
     sorted_messages = sorted(messages, key=lambda m: m.created_at)
     system_prompt = role.translated_instructions.get(user_language_code, 'en')
@@ -169,10 +180,11 @@ async def handle_gemini(message: Message, state: FSMContext, user: User, user_qu
 
                 parts.append(photo_file)
 
-        history.append({
-            'role': sorted_message.sender if sorted_message.sender == 'user' else 'model',
-            'parts': parts,
-        })
+        if parts:
+            history.append({
+                'role': sorted_message.sender if sorted_message.sender == 'user' else 'model',
+                'parts': parts,
+            })
 
     processing_message = await message.reply(
         text=get_localization(user_language_code).processing_request_text(),
@@ -197,10 +209,14 @@ async def handle_gemini(message: Message, state: FSMContext, user: User, user_qu
                 service = ServiceType.GEMINI_1_FLASH
                 input_price = response['input_tokens'] * PRICE_GEMINI_1_FLASH_INPUT
                 output_price = response['output_tokens'] * PRICE_GEMINI_1_FLASH_OUTPUT
-            else:
+            elif user_quota == Quota.GEMINI_1_PRO:
                 service = ServiceType.GEMINI_1_PRO
                 input_price = response['input_tokens'] * PRICE_GEMINI_1_PRO_INPUT
                 output_price = response['output_tokens'] * PRICE_GEMINI_1_PRO_OUTPUT
+            elif user_quota == Quota.GEMINI_1_ULTRA:
+                service = ServiceType.GEMINI_1_ULTRA
+                input_price = response['input_tokens'] * PRICE_GEMINI_1_ULTRA_INPUT
+                output_price = response['output_tokens'] * PRICE_GEMINI_1_ULTRA_OUTPUT
 
             total_price = round(input_price + output_price, 6)
             message_role, message_content = 'assistant', response_message

@@ -18,6 +18,7 @@ class Model:
     MIDJOURNEY = 'midjourney'
     STABLE_DIFFUSION = 'stable-diffusion'
     FACE_SWAP = 'face-swap'
+    PHOTOSHOP_AI = 'photoshop-ai'
     MUSIC_GEN = 'music-gen'
     SUNO = 'suno'
 
@@ -25,14 +26,19 @@ class Model:
 class Quota:
     CHAT_GPT4_OMNI = 'gpt4_omni'
     CHAT_GPT4_OMNI_MINI = 'gpt4_omni_mini'
+    CHAT_GPT_O_1_MINI = 'o1-mini'
+    CHAT_GPT_O_1_PREVIEW = 'o1-preview'
+    CLAUDE_3_HAIKU = 'claude_3_haiku'
     CLAUDE_3_SONNET = 'claude_3_sonnet'
     CLAUDE_3_OPUS = 'claude_3_opus'
     GEMINI_1_FLASH = 'gemini_1_flash'
     GEMINI_1_PRO = 'gemini_1_pro'
+    GEMINI_1_ULTRA = 'gemini_1_ultra'
     DALL_E = 'dall_e'
     MIDJOURNEY = 'midjourney'
     STABLE_DIFFUSION = 'stable_diffusion'
     FACE_SWAP = 'face_swap'
+    PHOTOSHOP_AI = 'photoshop_ai'
     MUSIC_GEN = 'music_gen'
     SUNO = 'suno'
     ADDITIONAL_CHATS = 'additional_chats'
@@ -44,9 +50,12 @@ class Quota:
 class ChatGPTVersion:
     V4_Omni = 'gpt-4o'
     V4_Omni_Mini = 'gpt-4o-mini'
+    V1_O_Mini = 'o1-mini'
+    V1_O_Preview = 'o1-preview'
 
 
 class ClaudeGPTVersion:
+    V3_Haiku = 'claude-3-haiku-20240307'
     V3_Sonnet = 'claude-3-5-sonnet-20240620'
     V3_Opus = 'claude-3-opus-20240229'
 
@@ -54,6 +63,7 @@ class ClaudeGPTVersion:
 class GeminiGPTVersion:
     V1_Flash = 'gemini-1.5-flash'
     V1_Pro = 'gemini-1.5-pro'
+    V1_Ultra = 'gemini-1.0-ultra'
 
 
 class DALLEResolution:
@@ -99,6 +109,16 @@ class StableDiffusionVersion:
 
 class FaceSwapVersion:
     LATEST = 'LATEST'
+
+
+class PhotoshopAIVersion:
+    LATEST = 'LATEST'
+
+
+class PhotoshopAIAction:
+    RESTORATION = 'restoration'
+    COLORIZATION = 'colorization'
+    REMOVAL_BACKGROUND = 'removal_background'
 
 
 class MusicGenVersion:

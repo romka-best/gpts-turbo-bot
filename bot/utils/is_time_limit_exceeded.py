@@ -3,7 +3,7 @@ import asyncio
 from aiogram import Bot
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
-from telegram import constants
+from aiogram.utils.chat_action import ChatActionSender
 
 from bot.config import config
 from bot.database.models.common import Quota, Model
@@ -14,12 +14,13 @@ from bot.locales.main import get_localization, get_user_language
 async def notify_user_after_timeout(bot: Bot, chat_id: int, delay: int, language_code: str, reply_to_message_id: int):
     await asyncio.sleep(delay)
 
-    await bot.send_chat_action(chat_id=chat_id, action=constants.ChatAction.TYPING)
-    await bot.send_message(
-        chat_id=chat_id,
-        text=get_localization(language_code).READY_FOR_NEW_REQUEST,
-        reply_to_message_id=reply_to_message_id
-    )
+    async with ChatActionSender.typing(bot=bot, chat_id=chat_id):
+        await bot.send_message(
+            chat_id=chat_id,
+            text=get_localization(language_code).READY_FOR_NEW_REQUEST,
+            reply_to_message_id=reply_to_message_id,
+            allow_sending_without_reply=True,
+        )
 
 
 async def is_time_limit_exceeded(message: Message, state: FSMContext, user: User, current_time: float) -> bool:

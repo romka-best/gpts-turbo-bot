@@ -23,7 +23,7 @@ from bot.locales.main import get_localization, get_user_language
 
 dall_e_router = Router()
 
-PRICE_DALL_E = 0.040
+PRICE_DALL_E = 0.04
 
 
 @dall_e_router.message(Command('dalle'))

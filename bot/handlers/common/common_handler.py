@@ -1,4 +1,5 @@
-import pytz
+import asyncio
+
 from aiogram import Router
 from aiogram.filters import Command, CommandStart, ChatMemberUpdatedFilter, KICKED, MEMBER
 from aiogram.fsm.context import FSMContext
@@ -8,17 +9,15 @@ from bot.config import config, MessageEffect
 from bot.database.main import firebase
 from bot.database.models.common import Quota
 from bot.database.models.generation import Generation
-from bot.database.models.user import UserSettings
 from bot.database.operations.generation.updaters import update_generation
 from bot.database.operations.user.getters import get_user, get_count_of_users_by_referral
 from bot.database.operations.user.initialize_user_for_the_first_time import initialize_user_for_the_first_time
 from bot.database.operations.user.updaters import update_user
-from bot.helpers.senders.send_message_to_admins_and_developers import send_message_to_admins_and_developers
 from bot.helpers.updaters.update_daily_limits import update_user_daily_limits
 from bot.keyboards.common.common import (
     build_start_keyboard,
     build_start_chosen_keyboard,
-    build_recommendations_keyboard,
+    build_error_keyboard,
 )
 from bot.locales.main import get_localization, get_user_language
 
@@ -52,11 +51,12 @@ async def start(message: Message, state: FSMContext):
                         count_of_referred_users = await get_count_of_users_by_referral(referred_by_user.id)
                         if count_of_referred_users > 50:
                             text = get_localization(referred_by_user_language_code).REFERRAL_LIMIT_ERROR
-                            await message.bot.send_message(
+                            asyncio.create_task(message.bot.send_message(
                                 chat_id=referred_by_user.telegram_chat_id,
                                 text=text,
                                 message_effect_id=config.MESSAGE_EFFECTS.get(MessageEffect.CONGRATS),
-                            )
+                                disable_notification=True,
+                            ))
                         else:
                             added_to_balance = 25.00
                             referred_by_user.balance += added_to_balance
@@ -65,22 +65,28 @@ async def start(message: Message, state: FSMContext):
                             })
 
                             text = get_localization(referred_by_user_language_code).REFERRAL_SUCCESS
-                            await message.bot.send_message(
+                            asyncio.create_task(message.bot.send_message(
                                 chat_id=referred_by_user.telegram_chat_id,
                                 text=text,
                                 message_effect_id=config.MESSAGE_EFFECTS.get(MessageEffect.CONGRATS),
-                            )
+                                disable_notification=True,
+                            ))
                 elif sub_param_key == 'model' and sub_param_value in [
                     'chatgpt4omnimini',
                     'chatgpt4omni',
+                    'chatgpto1mini',
+                    'chatgpto1preview',
+                    'claude3haiku',
                     'claude3sonnet',
                     'claude3opus',
                     'gemini1flash',
                     'gemini1pro',
+                    'gemini1ultra',
                     'dalle',
                     'midjourney',
                     'stablediffusion',
                     'faceswap',
+                    'photoshopai',
                     'suno',
                     'musicgen',
                 ]:
@@ -88,6 +94,12 @@ async def start(message: Message, state: FSMContext):
                         default_quota = Quota.CHAT_GPT4_OMNI_MINI
                     elif sub_param_value == 'chatgpt4omni':
                         default_quota = Quota.CHAT_GPT4_OMNI
+                    elif sub_param_value == 'chatgpto1mini':
+                        default_quota = Quota.CHAT_GPT_O_1_MINI
+                    elif sub_param_value == 'chatgpto1preview':
+                        default_quota = Quota.CHAT_GPT_O_1_PREVIEW
+                    elif sub_param_value == 'claude3haiku':
+                        default_quota = Quota.CLAUDE_3_HAIKU
                     elif sub_param_value == 'claude3sonnet':
                         default_quota = Quota.CLAUDE_3_SONNET
                     elif sub_param_value == 'claude3opus':
@@ -96,6 +108,8 @@ async def start(message: Message, state: FSMContext):
                         default_quota = Quota.GEMINI_1_FLASH
                     elif sub_param_value == 'gemini1pro':
                         default_quota = Quota.GEMINI_1_PRO
+                    elif sub_param_value == 'gemini1ultra':
+                        default_quota = Quota.GEMINI_1_ULTRA
                     elif sub_param_value == 'stablediffusion':
                         default_quota = Quota.STABLE_DIFFUSION
                     elif sub_param_value == 'dalle':
@@ -104,6 +118,8 @@ async def start(message: Message, state: FSMContext):
                         default_quota = Quota.MIDJOURNEY
                     elif sub_param_value == 'faceswap':
                         default_quota = Quota.FACE_SWAP
+                    elif sub_param_value == 'photoshopai':
+                        default_quota = Quota.PHOTOSHOP_AI
                     elif sub_param_value == 'suno':
                         default_quota = Quota.SUNO
                     elif sub_param_value == 'musicgen':
@@ -181,25 +197,6 @@ async def user_blocked_bot(event: ChatMemberUpdated):
         'is_blocked': user.is_blocked,
     })
 
-    last_subscription_limit_update_pst = user.last_subscription_limit_update \
-        .astimezone(pytz.timezone('America/Los_Angeles')) \
-        .strftime('%d.%m.%Y %H:%M')
-    created_at_pst = user.created_at \
-        .astimezone(pytz.timezone('America/Los_Angeles')) \
-        .strftime('%d.%m.%Y %H:%M')
-    await send_message_to_admins_and_developers(
-        bot=event.bot,
-        message=f'#user_status #blocked\n\n'
-                f'🚫 <b>Пользователь заблокировал бота</b>\n\n'
-                f'ℹ️ ID: {user.id}\n'
-                f'🌎 Язык: {"Русский 🇷🇺" if user.interface_language_code == "ru" else "Английский 🇺🇸"}\n'
-                f'🤖 Текущая AI модель: {user.current_model}\n'
-                f'🌀 Текущая версия AI модели: {user.settings[user.current_model][UserSettings.VERSION]}\n'
-                f'💳 Дата обновления подписки: {last_subscription_limit_update_pst}\n'
-                f'🗓 Дата регистрации: {created_at_pst}\n\n'
-                f'Ой, надеюсь пользователь вернётся, а то стало чут-чуть грустненько! 😢',
-    )
-
 
 @common_router.my_chat_member(
     ChatMemberUpdatedFilter(member_status_changed=MEMBER)
@@ -215,36 +212,16 @@ async def user_unblocked_bot(event: ChatMemberUpdated):
     await update_user_daily_limits(event.bot, user, batch)
     await batch.commit()
 
-    last_subscription_limit_update_pst = user.last_subscription_limit_update \
-        .astimezone(pytz.timezone('America/Los_Angeles')) \
-        .strftime('%d.%m.%Y %H:%M')
-    created_at_pst = user.created_at \
-        .astimezone(pytz.timezone('America/Los_Angeles')) \
-        .strftime('%d.%m.%Y %H:%M')
-    await send_message_to_admins_and_developers(
-        bot=event.bot,
-        message=f'#user_status #unblocked\n\n'
-                f'🥳 <b>Пользователь разблокировал бота</b>\n\n'
-                f'ℹ️ ID: {user.id}\n'
-                f'🌎 Язык: {"Русский 🇷🇺" if user.interface_language_code == "ru" else "Английский 🇺🇸"}\n'
-                f'🤖 Была AI модель: {user.current_model}\n'
-                f'🌀 Была версия AI модели: {user.settings[user.current_model][UserSettings.VERSION]}\n'
-                f'💳 Дата обновления подписки: {last_subscription_limit_update_pst}\n'
-                f'🗓 Дата регистрации: {created_at_pst}\n\n'
-                f'Ура, пользователь вернулся, мне стало лучше! 😌',
-    )
-
 
 @common_router.message(Command('help'))
 async def handle_help(message: Message, state: FSMContext):
     await state.clear()
 
     user_id = str(message.from_user.id)
-    user = await get_user(user_id)
     user_language_code = await get_user_language(user_id, state.storage)
 
     text = get_localization(user_language_code).COMMANDS
-    reply_markup = await build_recommendations_keyboard(user.current_model, user_language_code, user.gender)
+    reply_markup = build_error_keyboard(user_language_code)
     await message.answer(
         text=text,
         reply_markup=reply_markup,

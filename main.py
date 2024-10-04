@@ -6,7 +6,8 @@ from datetime import datetime, timezone, timedelta
 
 import uvicorn
 from aiogram.client.default import DefaultBotProperties
-from aiogram.exceptions import TelegramNetworkError, TelegramForbiddenError, TelegramBadRequest
+from aiogram.exceptions import TelegramNetworkError, TelegramForbiddenError, TelegramRetryAfter, TelegramBadRequest
+from aiogram.types import Update
 from fastapi import FastAPI, BackgroundTasks
 from fastapi.responses import JSONResponse
 from aiogram import Bot, Dispatcher, types
@@ -34,6 +35,7 @@ from bot.handlers.ai.gemini_handler import gemini_router
 from bot.handlers.ai.midjourney_handler import midjourney_router
 from bot.handlers.ai.mode_handler import mode_router
 from bot.handlers.ai.music_gen_handler import music_gen_router
+from bot.handlers.ai.photoshop_ai_handler import photoshop_ai_router
 from bot.handlers.ai.stable_diffusion_handler import stable_diffusion_router
 from bot.handlers.ai.suno_handler import suno_router
 from bot.handlers.common.common_handler import common_router
@@ -124,6 +126,7 @@ async def lifespan(_: FastAPI):
         stable_diffusion_router,
         face_swap_router,
         admin_face_swap_router,
+        photoshop_ai_router,
         music_gen_router,
         suno_router,
         document_router,
@@ -156,10 +159,20 @@ async def bot_webhook(update: dict):
     asyncio.create_task(handle_update(update))
 
 
+async def delayed_handle_update(update: Update, timeout: int):
+    await asyncio.sleep(timeout)
+
+    await dp.feed_update(bot=bot, update=update)
+
+
 async def handle_update(update: dict):
     telegram_update = types.Update(**update)
     try:
-        for i in range(config.MAX_RETRIES):
+        retries = config.MAX_RETRIES
+        if telegram_update.callback_query and telegram_update.callback_query.data.startswith('blast_confirmation:'):
+            retries = 1
+
+        for i in range(retries):
             try:
                 await dp.feed_update(bot=bot, update=telegram_update)
                 break
@@ -177,6 +190,11 @@ async def handle_update(update: dict):
         await handle_network_error(bot, telegram_update)
     except TelegramForbiddenError:
         await handle_forbidden_error(telegram_update)
+    except TelegramRetryAfter as e:
+        if telegram_update.callback_query and telegram_update.callback_query.data.startswith('blast_confirmation:'):
+            logging.warning(e)
+        else:
+            asyncio.create_task(delayed_handle_update(telegram_update, e.retry_after + 10))
     except TelegramBadRequest as e:
         if e.message.startswith('Bad Request: message can\'t be deleted for everyone'):
             logging.warning(e)

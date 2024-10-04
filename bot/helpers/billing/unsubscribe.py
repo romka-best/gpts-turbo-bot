@@ -3,7 +3,7 @@ from aiogram import Bot
 from bot.database.models.common import Currency
 from bot.database.models.subscription import Subscription, SubscriptionStatus
 from bot.database.operations.subscription.updaters import update_subscription_in_transaction
-from bot.helpers.senders.send_message_to_admins_and_developers import send_message_to_admins_and_developers
+from bot.helpers.senders.send_message_to_admins import send_message_to_admins
 
 
 async def unsubscribe(transaction, old_subscription: Subscription, bot: Bot):
@@ -12,7 +12,7 @@ async def unsubscribe(transaction, old_subscription: Subscription, bot: Bot):
         'status': SubscriptionStatus.CANCELED,
     })
 
-    await send_message_to_admins_and_developers(
+    await send_message_to_admins(
         bot=bot,
         message=f'#payment #subscription #canceled\n\n'
                 f'❌ <b>Отмена подписки у пользователя: {old_subscription.user_id}</b>\n\n'

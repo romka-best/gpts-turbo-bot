@@ -1,4 +1,5 @@
 import random
+from typing import Optional
 
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton
 
@@ -45,7 +46,7 @@ def build_start_chosen_keyboard(language_code: str) -> InlineKeyboardMarkup:
 async def build_recommendations_keyboard(
     current_model: Model,
     language_code: str,
-    gender: UserGender,
+    gender: Optional[UserGender] = UserGender.UNSPECIFIED,
 ) -> ReplyKeyboardMarkup:
     buttons = []
     if current_model == Model.CHAT_GPT or current_model == Model.CLAUDE or current_model == Model.GEMINI:
@@ -76,6 +77,15 @@ async def build_recommendations_keyboard(
                 [
                     KeyboardButton(
                         text=face_swap_package.translated_names.get(language_code, face_swap_package.name),
+                    )
+                ],
+            )
+    elif current_model == Model.PHOTOSHOP_AI:
+        for photoshop_ai_action in get_localization(language_code).photoshop_ai_actions():
+            buttons.append(
+                [
+                    KeyboardButton(
+                        text=photoshop_ai_action,
                     )
                 ],
             )

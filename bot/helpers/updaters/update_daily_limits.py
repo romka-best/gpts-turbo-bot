@@ -31,16 +31,13 @@ from bot.locales.main import get_localization
 
 
 async def update_daily_limits(bot: Bot):
-    all_users = await get_users()
+    all_users = await get_users(is_blocked=False)
 
-    for i in range(0, len(all_users), config.USER_BATCH_SIZE):
+    for i in range(0, len(all_users), config.BATCH_SIZE):
         batch = firebase.db.batch()
-        user_batch = all_users[i:i + config.USER_BATCH_SIZE]
+        user_batch = all_users[i:i + config.BATCH_SIZE]
 
         for user in user_batch:
-            if user.is_blocked:
-                continue
-
             await update_user_daily_limits(bot, user, batch)
 
         await batch.commit()
@@ -110,6 +107,7 @@ async def update_user_subscription(bot: Bot, user: User, batch: AsyncWriteBatch)
                     await bot.send_message(
                         chat_id=user.telegram_chat_id,
                         text=get_localization(user.interface_language_code).SUBSCRIPTION_END,
+                        disable_notification=True,
                     )
                 return user
             elif current_subscription.payment_method == PaymentMethod.PAY_SELECTION:
@@ -145,6 +143,7 @@ async def update_user_subscription(bot: Bot, user: User, batch: AsyncWriteBatch)
                     await bot.send_message(
                         chat_id=user.telegram_chat_id,
                         text=get_localization(user.interface_language_code).SUBSCRIPTION_END,
+                        disable_notification=True,
                     )
         else:
             current_subscription.status = SubscriptionStatus.FINISHED
@@ -162,6 +161,7 @@ async def update_user_subscription(bot: Bot, user: User, batch: AsyncWriteBatch)
             await bot.send_message(
                 chat_id=user.telegram_chat_id,
                 text=get_localization(user.interface_language_code).SUBSCRIPTION_END,
+                disable_notification=True,
             )
 
         return user
@@ -217,6 +217,7 @@ async def update_user_additional_usage_quota(bot: Bot, user: User, had_subscript
             await bot.send_message(
                 chat_id=user.telegram_chat_id,
                 text=get_localization(user.interface_language_code).PACKAGES_END,
+                disable_notification=True,
             )
 
 
@@ -235,4 +236,5 @@ async def reset_user_chats(user: User, bot: Bot):
         await bot.send_message(
             chat_id=user.telegram_chat_id,
             text=get_localization(user.interface_language_code).CHATS_RESET,
+            disable_notification=True,
         )

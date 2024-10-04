@@ -94,6 +94,12 @@ def build_info_image_models_keyboard(language_code: str) -> InlineKeyboardMarkup
         ],
         [
             InlineKeyboardButton(
+                text=get_localization(language_code).PHOTOSHOP_AI,
+                callback_data=f'info_image_models:{Model.PHOTOSHOP_AI}'
+            ),
+        ],
+        [
+            InlineKeyboardButton(
                 text=get_localization(language_code).BACK,
                 callback_data='info_text_models:back'
             ),

@@ -10,7 +10,7 @@ client = AsyncAnthropic(api_key=config.ANTHROPIC_API_KEY.get_secret_value())
 
 def get_default_max_tokens(model_version: ClaudeGPTVersion) -> int:
     base = 1024
-    if model_version == ClaudeGPTVersion.V3_Sonnet or model_version == ClaudeGPTVersion.V3_Opus:
+    if model_version == ClaudeGPTVersion.V3_Haiku or model_version == ClaudeGPTVersion.V3_Sonnet or model_version == ClaudeGPTVersion.V3_Opus:
         return base
 
     return base

@@ -53,13 +53,6 @@ def build_profile_keyboard(
             )
         ])
 
-    buttons.append([
-        InlineKeyboardButton(
-            text=get_localization(language_code).CLOSE,
-            callback_data=f'profile:close'
-        ),
-    ])
-
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 

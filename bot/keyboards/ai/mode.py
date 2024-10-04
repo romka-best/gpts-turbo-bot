@@ -33,6 +33,30 @@ def build_mode_keyboard(language_code: str, model: Model, model_version: str, pa
                 ],
                 [
                     InlineKeyboardButton(
+                        text=get_localization(language_code).CHAT_GPT_O_1_MINI + (
+                            ' ✅' if model == Model.CHAT_GPT and model_version == ChatGPTVersion.V1_O_Mini else ''
+                        ),
+                        callback_data=f'mode:{Model.CHAT_GPT}:{ChatGPTVersion.V1_O_Mini}'
+                    ),
+                ],
+                [
+                    InlineKeyboardButton(
+                        text=get_localization(language_code).CHAT_GPT_O_1_PREVIEW + (
+                            ' ✅' if model == Model.CHAT_GPT and model_version == ChatGPTVersion.V1_O_Preview else ''
+                        ),
+                        callback_data=f'mode:{Model.CHAT_GPT}:{ChatGPTVersion.V1_O_Preview}'
+                    ),
+                ],
+                [
+                    InlineKeyboardButton(
+                        text=get_localization(language_code).CLAUDE_3_HAIKU + (
+                            ' ✅' if model == Model.CLAUDE and model_version == ClaudeGPTVersion.V3_Haiku else ''
+                        ),
+                        callback_data=f'mode:{Model.CLAUDE}:{ClaudeGPTVersion.V3_Haiku}'
+                    ),
+                ],
+                [
+                    InlineKeyboardButton(
                         text=get_localization(language_code).CLAUDE_3_SONNET + (
                             ' ✅' if model == Model.CLAUDE and model_version == ClaudeGPTVersion.V3_Sonnet else ''
                         ),
@@ -59,6 +83,13 @@ def build_mode_keyboard(language_code: str, model: Model, model_version: str, pa
                         text=get_localization(language_code).GEMINI_1_PRO + (
                             ' ✅' if model == Model.GEMINI and model_version == GeminiGPTVersion.V1_Pro else ''),
                         callback_data=f'mode:{Model.GEMINI}:{GeminiGPTVersion.V1_Pro}'
+                    ),
+                ],
+                [
+                    InlineKeyboardButton(
+                        text=get_localization(language_code).GEMINI_1_ULTRA + (
+                            ' ✅' if model == Model.GEMINI and model_version == GeminiGPTVersion.V1_Ultra else ''),
+                        callback_data=f'mode:{Model.GEMINI}:{GeminiGPTVersion.V1_Ultra}'
                     ),
                 ],
                 [
@@ -107,6 +138,12 @@ def build_mode_keyboard(language_code: str, model: Model, model_version: str, pa
                 InlineKeyboardButton(
                     text=get_localization(language_code).FACE_SWAP + (' ✅' if model == Model.FACE_SWAP else ''),
                     callback_data=f'mode:{Model.FACE_SWAP}'
+                ),
+            ],
+            [
+                InlineKeyboardButton(
+                    text=get_localization(language_code).PHOTOSHOP_AI + (' ✅' if model == Model.PHOTOSHOP_AI else ''),
+                    callback_data=f'mode:{Model.PHOTOSHOP_AI}'
                 ),
             ],
             [

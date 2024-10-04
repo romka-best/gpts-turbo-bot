@@ -35,8 +35,12 @@ chat_gpt_router = Router()
 
 PRICE_GPT4_OMNI_MINI_INPUT = 0.00000015
 PRICE_GPT4_OMNI_MINI_OUTPUT = 0.0000006
-PRICE_GPT4_OMNI_INPUT = 0.000005
-PRICE_GPT4_OMNI_OUTPUT = 0.000015
+PRICE_GPT4_OMNI_INPUT = 0.0000025
+PRICE_GPT4_OMNI_OUTPUT = 0.00001
+PRICE_CHAT_GPT_O_1_MINI_INPUT = 0.000003
+PRICE_CHAT_GPT_O_1_MINI_OUTPUT = 0.000012
+PRICE_CHAT_GPT_O_1_PREVIEW_INPUT = 0.000015
+PRICE_CHAT_GPT_O_1_PREVIEW_OUTPUT = 0.00006
 
 
 @chat_gpt_router.message(Command('chatgpt'))
@@ -106,8 +110,16 @@ async def handle_chat_gpt_choose_selection(callback_query: CallbackQuery, state:
 
             if user.settings[user.current_model][UserSettings.VERSION] == ChatGPTVersion.V4_Omni_Mini:
                 text = get_localization(user_language_code).SWITCHED_TO_CHATGPT4_OMNI_MINI
-            else:
+            elif user.settings[user.current_model][UserSettings.VERSION] == ChatGPTVersion.V4_Omni:
                 text = get_localization(user_language_code).SWITCHED_TO_CHATGPT4_OMNI
+            elif user.settings[user.current_model][UserSettings.VERSION] == ChatGPTVersion.V1_O_Mini:
+                text = get_localization(user_language_code).SWITCHED_TO_CHAT_GPT_O_1_MINI
+            elif user.settings[user.current_model][UserSettings.VERSION] == ChatGPTVersion.V1_O_Preview:
+                text = get_localization(user_language_code).SWITCHED_TO_CHAT_GPT_O_1_PREVIEW
+            else:
+                raise NotImplementedError(
+                    f'Model version is not found: {user.settings[user.current_model][UserSettings.VERSION]}'
+                )
 
             await callback_query.message.answer(
                 text=text,
@@ -125,8 +137,13 @@ async def handle_chat_gpt_choose_selection(callback_query: CallbackQuery, state:
 
 
 async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_quota: Quota, photo_filenames=None):
-    if user_quota != Quota.CHAT_GPT4_OMNI_MINI and user_quota != Quota.CHAT_GPT4_OMNI:
-        raise NotImplemented(f'User quota is not implemented: {user_quota}')
+    if (
+        user_quota != Quota.CHAT_GPT4_OMNI_MINI and
+        user_quota != Quota.CHAT_GPT4_OMNI and
+        user_quota != Quota.CHAT_GPT_O_1_MINI and
+        user_quota != Quota.CHAT_GPT_O_1_PREVIEW
+    ):
+        raise NotImplementedError(f'User quota is not implemented: {user_quota}')
 
     await state.update_data(is_processing=True)
 
@@ -142,21 +159,26 @@ async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_q
         else:
             text = ''
 
-    if photo_filenames and len(photo_filenames):
+    can_work_with_photos = user_quota == Quota.CHAT_GPT4_OMNI_MINI or user_quota == Quota.CHAT_GPT4_OMNI
+    if photo_filenames and len(photo_filenames) and can_work_with_photos:
         await write_message(user.current_chat_id, 'user', user.id, text, True, photo_filenames)
     else:
         await write_message(user.current_chat_id, 'user', user.id, text)
 
     chat = await get_chat(user.current_chat_id)
-    messages = await get_messages_by_chat_id(user.current_chat_id)
+    messages = await get_messages_by_chat_id(
+        user.current_chat_id,
+        10 if can_work_with_photos else 4
+    )
     role = await get_role_by_name(chat.role)
     sorted_messages = sorted(messages, key=lambda m: m.created_at)
-    history = [
-        {
+    history = []
+    if can_work_with_photos:
+        history.append({
             'role': 'system',
             'content': role.translated_instructions.get(user_language_code, 'en'),
-        }
-    ]
+        })
+
     for sorted_message in sorted_messages:
         content = []
         if sorted_message.content:
@@ -165,7 +187,7 @@ async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_q
                 'text': sorted_message.content,
             })
 
-        if sorted_message.photo_filenames:
+        if sorted_message.photo_filenames and can_work_with_photos:
             for photo_filename in sorted_message.photo_filenames:
                 photo_path = f'users/vision/{user.id}/{photo_filename}'
                 photo = await firebase.bucket.get_blob(photo_path)
@@ -204,6 +226,14 @@ async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_q
                 service = ServiceType.CHAT_GPT4_OMNI
                 input_price = response['input_tokens'] * PRICE_GPT4_OMNI_INPUT
                 output_price = response['output_tokens'] * PRICE_GPT4_OMNI_OUTPUT
+            elif user_quota == Quota.CHAT_GPT_O_1_MINI:
+                service = ServiceType.CHAT_GPT_O_1_MINI
+                input_price = response['input_tokens'] * PRICE_CHAT_GPT_O_1_MINI_INPUT
+                output_price = response['output_tokens'] * PRICE_CHAT_GPT_O_1_MINI_OUTPUT
+            elif user_quota == Quota.CHAT_GPT_O_1_PREVIEW:
+                service = ServiceType.CHAT_GPT_O_1_PREVIEW
+                input_price = response['input_tokens'] * PRICE_CHAT_GPT_O_1_PREVIEW_INPUT
+                output_price = response['output_tokens'] * PRICE_CHAT_GPT_O_1_PREVIEW_OUTPUT
 
             total_price = round(input_price + output_price, 6)
             message_role, message_content = response_message.role, response_message.content
@@ -320,7 +350,7 @@ async def handle_chat_gpt_continue_generation_choose_selection(callback_query: C
         elif user.settings[user.current_model][UserSettings.VERSION] == ChatGPTVersion.V4_Omni:
             user_quota = Quota.CHAT_GPT4_OMNI
         else:
-            raise NotImplemented(
+            raise NotImplementedError(
                 f'User quota is not implemented: {user.settings[user.current_model][UserSettings.VERSION]}'
             )
 
