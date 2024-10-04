@@ -42,7 +42,6 @@ from bot.helpers.creaters.create_package import create_package
 from bot.helpers.creaters.create_subscription import create_subscription
 from bot.helpers.getters.get_user_discount import get_user_discount
 from bot.helpers.senders.send_message_to_admins import send_message_to_admins
-from bot.helpers.senders.send_message_to_admins_and_developers import send_message_to_admins_and_developers
 from bot.keyboards.common.common import build_recommendations_keyboard
 from bot.keyboards.payment.payment import (
     build_buy_keyboard,
@@ -1073,7 +1072,7 @@ async def pre_checkout(pre_checkout_query: PreCheckoutQuery):
 
             await pre_checkout_query.answer(ok=False)
 
-            await send_message_to_admins_and_developers(
+            await send_message_to_admins(
                 bot=pre_checkout_query.bot,
                 message=f'#payment #subscription #error\n\n'
                         f'🚫 Неизвестная ошибка в блоке оплаты у подписки:\n\n'
@@ -1112,7 +1111,7 @@ async def pre_checkout(pre_checkout_query: PreCheckoutQuery):
 
             await pre_checkout_query.answer(ok=False)
 
-            await send_message_to_admins_and_developers(
+            await send_message_to_admins(
                 bot=pre_checkout_query.bot,
                 message=f'#payment #package #error\n\n'
                         f'🚫 Неизвестная ошибка в блоке оплаты у пакета:\n\n'
@@ -1161,7 +1160,7 @@ async def pre_checkout(pre_checkout_query: PreCheckoutQuery):
 
             await pre_checkout_query.answer(ok=False)
 
-            await send_message_to_admins_and_developers(
+            await send_message_to_admins(
                 bot=pre_checkout_query.bot,
                 message=f'#payment #packages #error\n\n'
                         f'🚫 Неизвестная ошибка в блоке оплаты у пакетов:\n\n'
@@ -1217,7 +1216,7 @@ async def successful_payment(message: Message, state: FSMContext):
         await message.answer(
             text=get_localization(user_language_code).SUBSCRIPTION_SUCCESS,
         )
-        await send_message_to_admins_and_developers(
+        await send_message_to_admins(
             bot=message.bot,
             message=f'#payment #subscription #success\n\n'
                     f'🤑 <b>Успешно оформлена подписка у пользователя: {subscription.user_id}</b>\n\n'
@@ -1259,7 +1258,7 @@ async def successful_payment(message: Message, state: FSMContext):
         await message.answer(
             text=get_localization(user_language_code).PACKAGE_SUCCESS,
         )
-        await send_message_to_admins_and_developers(
+        await send_message_to_admins(
             bot=message.bot,
             message=f'#payment #package #success\n\n'
                     f'🤑 <b>Успешно прошла оплата пакета у пользователя: {package.user_id}</b>\n\n'
@@ -1309,7 +1308,7 @@ async def successful_payment(message: Message, state: FSMContext):
         await message.answer(
             text=get_localization(user_language_code).PACKAGES_SUCCESS,
         )
-        await send_message_to_admins_and_developers(
+        await send_message_to_admins(
             bot=message.bot,
             message=f'#payment #packages #success\n\n'
                     f'🤑 <b>Успешно прошла оплата пакетов у пользователя: {user.id}</b>\n\n'
@@ -1367,7 +1366,7 @@ async def handle_cancel_subscription_selection(callback_query: CallbackQuery, st
             text=get_localization(user_language_code).CANCEL_SUBSCRIPTION_SUCCESS,
         )
 
-        await send_message_to_admins_and_developers(
+        await send_message_to_admins(
             bot=callback_query.bot,
             message=f'#payment #subscription #canceled\n\n'
                     f'❌ <b>Отмена подписки у пользователя: {subscription.user_id}</b>\n\n'

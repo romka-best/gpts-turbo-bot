@@ -260,7 +260,7 @@ async def handle_face_swap_package_selection(callback_query: CallbackQuery, stat
         reply_markup = build_face_swap_choose_keyboard(user_language_code, face_swap_packages)
         await callback_query.message.edit_text(
             text=get_localization(user_language_code).CHOOSE_YOUR_PACKAGE,
-            reply_markup=reply_markup
+            reply_markup=reply_markup,
         )
 
         await state.clear()

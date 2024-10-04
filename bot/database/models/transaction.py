@@ -18,14 +18,19 @@ class ServiceType:
     CHAT_GPT4_TURBO = 'GPT4'
     CHAT_GPT4_OMNI = 'GPT4_OMNI'
     CHAT_GPT4_OMNI_MINI = 'GPT4_OMNI_MINI'
+    CHAT_GPT_O_1_MINI = 'CHAT_GPT_O_1_MINI'
+    CHAT_GPT_O_1_PREVIEW = 'CHAT_GPT_O_1_PREVIEW'
+    CLAUDE_3_HAIKU = 'CLAUDE_3_HAIKU'
     CLAUDE_3_SONNET = 'CLAUDE_3_SONNET'
     CLAUDE_3_OPUS = 'CLAUDE_3_OPUS'
     GEMINI_1_FLASH = 'GEMINI_1_FLASH'
     GEMINI_1_PRO = 'GEMINI_1_PRO'
+    GEMINI_1_ULTRA = 'GEMINI_1_ULTRA'
     DALL_E = 'DALL_E'
     MIDJOURNEY = 'MIDJOURNEY'
     STABLE_DIFFUSION = 'STABLE_DIFFUSION'
     FACE_SWAP = 'FACE_SWAP'
+    PHOTOSHOP_AI = 'PHOTOSHOP_AI'
     MUSIC_GEN = 'MUSIC_GEN'
     SUNO = 'SUNO'
     ADDITIONAL_CHATS = 'ADDITIONAL_CHATS'
@@ -65,6 +70,7 @@ class Transaction:
         details=None,
         created_at=None,
         edited_at=None,
+        **kwargs,
     ):
         self.id = str(id)
         self.user_id = str(user_id)

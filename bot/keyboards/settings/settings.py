@@ -122,6 +122,12 @@ def build_settings_choose_image_model_keyboard(language_code: str) -> InlineKeyb
         ],
         [
             InlineKeyboardButton(
+                text=get_localization(language_code).PHOTOSHOP_AI,
+                callback_data=f'settings_choose_image_model:{Model.PHOTOSHOP_AI}'
+            ),
+        ],
+        [
+            InlineKeyboardButton(
                 text=get_localization(language_code).BACK,
                 callback_data='settings_choose_image_model:back'
             ),
@@ -275,6 +281,16 @@ def build_settings_keyboard(language_code: str, model: Model, model_type: str, s
                     text=get_localization(language_code).SHOW_USAGE_QUOTA_IN_MESSAGES + (
                         ' ✅' if settings[model][UserSettings.SHOW_USAGE_QUOTA] else ' ❌'),
                     callback_data=f'setting:{UserSettings.SHOW_USAGE_QUOTA}:{Model.FACE_SWAP}'
+                ),
+            ],
+        ]
+    elif model == Model.PHOTOSHOP_AI:
+        buttons = [
+            [
+                InlineKeyboardButton(
+                    text=get_localization(language_code).SHOW_USAGE_QUOTA_IN_MESSAGES + (
+                        ' ✅' if settings[model][UserSettings.SHOW_USAGE_QUOTA] else ' ❌'),
+                    callback_data=f'setting:{UserSettings.SHOW_USAGE_QUOTA}:{Model.PHOTOSHOP_AI}'
                 ),
             ],
         ]

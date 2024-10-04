@@ -219,12 +219,14 @@ def build_packages_keyboard(language_code: str, page=0) -> InlineKeyboardMarkup:
             if package_type in {
                 PackageType.CHAT_GPT4_OMNI_MINI,
                 PackageType.CHAT_GPT4_OMNI,
+                PackageType.CHAT_GPT_O_1_MINI,
+                PackageType.CHAT_GPT_O_1_PREVIEW,
+                PackageType.CLAUDE_3_HAIKU,
                 PackageType.CLAUDE_3_SONNET,
                 PackageType.CLAUDE_3_OPUS,
                 PackageType.GEMINI_1_FLASH,
                 PackageType.GEMINI_1_PRO,
-                PackageType.CHAT,
-                PackageType.ACCESS_TO_CATALOG,
+                PackageType.GEMINI_1_ULTRA,
             }:
                 buttons.append(
                     [
@@ -266,6 +268,7 @@ def build_packages_keyboard(language_code: str, page=0) -> InlineKeyboardMarkup:
                 PackageType.MIDJOURNEY,
                 PackageType.STABLE_DIFFUSION,
                 PackageType.FACE_SWAP,
+                PackageType.PHOTOSHOP_AI,
             }:
                 buttons.append(
                     [
@@ -338,6 +341,8 @@ def build_packages_keyboard(language_code: str, page=0) -> InlineKeyboardMarkup:
     elif page == 3:
         for package_type in PackageType.get_class_attributes_in_order():
             if package_type in {
+                PackageType.CHAT,
+                PackageType.ACCESS_TO_CATALOG,
                 PackageType.VOICE_MESSAGES,
                 PackageType.FAST_MESSAGES,
             }:

@@ -89,7 +89,10 @@ async def profile(message: Message, state: FSMContext):
         )
         await message.answer_photo(
             photo=URLInputFile(photo_link, filename=photo_path),
-            caption=text,
+        )
+        await message.answer(
+            photo=URLInputFile(photo_link, filename=photo_path),
+            text=text,
             reply_markup=reply_markup,
         )
     except aiohttp.ClientResponseError:

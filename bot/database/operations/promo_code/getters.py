@@ -36,10 +36,10 @@ async def get_used_promo_code_by_user_id_and_promo_code_id(user_id: str, promo_c
         return UsedPromoCode(**doc.to_dict())
 
 
-async def get_used_promo_codes(
+async def get_count_of_used_promo_codes(
     start_date: Optional[datetime] = None,
     end_date: Optional[datetime] = None,
-) -> List[UsedPromoCode]:
+) -> int:
     used_promo_code_query = firebase.db.collection(UsedPromoCode.COLLECTION_NAME)
 
     if start_date:
@@ -47,8 +47,6 @@ async def get_used_promo_codes(
     if end_date:
         used_promo_code_query = used_promo_code_query.where(filter=FieldFilter('created_at', '<=', end_date))
 
-    used_promo_codes = used_promo_code_query.stream()
+    used_promo_codes_query = await used_promo_code_query.count().get()
 
-    return [
-        UsedPromoCode(**used_promo_code.to_dict()) async for used_promo_code in used_promo_codes
-    ]
+    return int(used_promo_codes_query[0][0].value)

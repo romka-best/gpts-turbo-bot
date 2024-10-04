@@ -1,6 +1,7 @@
+import asyncio
 from datetime import datetime, timezone, timedelta
 
-from aiogram import Router, F
+from aiogram import Router, F, Bot
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery, URLInputFile
@@ -150,6 +151,26 @@ async def handle_bonus_play_game_selection(callback_query: CallbackQuery, state:
         )
 
 
+async def send_game_status_after_timeout(
+    bot: Bot,
+    chat_id: int,
+    reply_to_message_id: int,
+    language_code: str,
+    won: bool,
+):
+    await asyncio.sleep(5)
+
+    text = get_localization(language_code).PLAY_GAME_WON if won else get_localization(language_code).PLAY_GAME_LOST
+
+    await bot.send_message(
+        chat_id=chat_id,
+        text=text,
+        reply_to_message_id=reply_to_message_id,
+        allow_sending_without_reply=True,
+        message_effect_id=config.MESSAGE_EFFECTS.get(MessageEffect.CONGRATS) if won else None,
+    )
+
+
 @bonus_router.callback_query(lambda c: c.data.startswith('bonus_play_game_chosen:'))
 async def handle_bonus_play_game_chosen_selection(callback_query: CallbackQuery, state: FSMContext):
     await callback_query.answer()
@@ -202,20 +223,31 @@ async def handle_bonus_play_game_chosen_selection(callback_query: CallbackQuery,
             final_credits = 100
 
     game_status = GameStatus.WON if final_credits > 0 else GameStatus.LOST
-    await write_game(user_id, game_type, game_status)
+    await write_game(user_id, game_type, game_status, final_credits)
 
     if game_status == GameStatus.WON:
         await update_user(user_id, {
             'balance': Increment(final_credits),
         })
 
-        await callback_query.message.answer(
-            text=get_localization(user_language_code).PLAY_GAME_WON,
-            message_effect_id=config.MESSAGE_EFFECTS.get(MessageEffect.CONGRATS),
+        asyncio.create_task(
+            send_game_status_after_timeout(
+                bot=callback_query.bot,
+                chat_id=callback_query.message.chat.id,
+                reply_to_message_id=callback_query.message.message_id,
+                language_code=user_language_code,
+                won=True,
+            )
         )
     else:
-        await callback_query.message.answer(
-            text=get_localization(user_language_code).PLAY_GAME_LOST,
+        asyncio.create_task(
+            send_game_status_after_timeout(
+                bot=callback_query.bot,
+                chat_id=callback_query.message.chat.id,
+                reply_to_message_id=callback_query.message.message_id,
+                language_code=user_language_code,
+                won=False,
+            )
         )
 
 

@@ -1,6 +1,6 @@
 from typing import Optional
 
-from telegram import User as TelegramUser
+from aiogram.types import User as TelegramUser
 
 from bot.database.main import firebase
 from bot.database.models.common import Quota

@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 from typing import Dict, Optional
 
-from telegram import User as TelegramUser
+from aiogram.types import User as TelegramUser
 
 from bot.database.models.common import Model, Currency, Quota, ChatGPTVersion, ClaudeGPTVersion, GeminiGPTVersion
 from bot.database.models.subscription import SubscriptionType, SubscriptionLimit

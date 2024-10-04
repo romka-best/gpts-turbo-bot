@@ -7,7 +7,7 @@ from bot.database.models.common import Currency
 from bot.database.models.subscription import SubscriptionStatus
 from bot.database.operations.subscription.getters import get_subscriptions_by_status
 from bot.database.operations.subscription.updaters import update_subscription
-from bot.helpers.senders.send_message_to_admins_and_developers import send_message_to_admins_and_developers
+from bot.helpers.senders.send_message_to_admins import send_message_to_admins
 
 
 async def check_waiting_payments(bot: Bot):
@@ -32,7 +32,7 @@ async def check_waiting_payments(bot: Bot):
             )
         )
 
-        await send_message_to_admins_and_developers(
+        await send_message_to_admins(
             bot=bot,
             message=f'#payment #subscription #declined\n\n'
                     f'❌ <b>Отмена оплаты подписки у пользователя: {not_finished_subscription.user_id}</b>\n\n'

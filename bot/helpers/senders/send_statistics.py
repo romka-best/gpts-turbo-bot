@@ -2,9 +2,17 @@ from aiogram import Bot
 
 from bot.handlers.admin.statistics_handler import handle_get_statistics
 from bot.helpers.senders.send_message_to_admins import send_message_to_admins
+from bot.helpers.senders.send_message_to_super_admin import send_message_to_super_admin
 
 
 async def send_statistics(bot: Bot, period='day'):
     texts = await handle_get_statistics('ru', period)
-    for text in texts:
-        await send_message_to_admins(bot, text)
+
+    await send_message_to_admins(bot, texts.get('users'))
+    await send_message_to_super_admin(bot, texts.get('text_models'))
+    await send_message_to_super_admin(bot, texts.get('image_models'))
+    await send_message_to_super_admin(bot, texts.get('music_models'))
+    await send_message_to_super_admin(bot, texts.get('reactions'))
+    await send_message_to_super_admin(bot, texts.get('bonuses'))
+    await send_message_to_admins(bot, texts.get('expenses'))
+    await send_message_to_admins(bot, texts.get('incomes'))

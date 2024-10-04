@@ -5,7 +5,7 @@ from aiogram import Bot, Dispatcher
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.storage.base import StorageKey
 
-from bot.database.models.common import Model, Currency, Quota
+from bot.database.models.common import Model, Currency, Quota, PhotoshopAIAction
 from bot.database.models.generation import Generation, GenerationStatus
 from bot.database.models.request import Request, RequestStatus
 from bot.database.models.transaction import TransactionType, ServiceType
@@ -20,6 +20,12 @@ from bot.database.operations.transaction.writers import write_transaction
 from bot.database.operations.user.getters import get_user
 from bot.handlers.ai.face_swap_handler import PRICE_FACE_SWAP, handle_face_swap
 from bot.handlers.ai.music_gen_handler import PRICE_MUSIC_GEN, handle_music_gen
+from bot.handlers.ai.photoshop_ai_handler import (
+    PRICE_PHOTOSHOP_AI_RESTORATION,
+    PRICE_PHOTOSHOP_AI_COLORIZATION,
+    PRICE_PHOTOSHOP_AI_REMOVAL_BACKGROUND,
+    handle_photoshop_ai,
+)
 from bot.handlers.ai.stable_diffusion_handler import PRICE_STABLE_DIFFUSION
 from bot.helpers.senders.send_audio import send_audio
 from bot.helpers.senders.send_images import send_image
@@ -64,20 +70,99 @@ async def handle_replicate_webhook(bot: Bot, dp: Dispatcher, prediction: dict):
         logging.error(f'Error in replicate_webhook: {prediction.get("logs")}')
     else:
         generation.result = generation_result[0] if type(generation_result) == list else generation_result
+        if request.model == Model.PHOTOSHOP_AI and request.details.get('type') == PhotoshopAIAction.COLORIZATION:
+            generation.result = generation.result.get('image')
         await update_generation(generation.id, {
             'status': generation.status,
             'result': generation.result,
             'seconds': generation.seconds,
         })
 
-    if request.model == Model.FACE_SWAP:
+    if request.model == Model.STABLE_DIFFUSION:
+        await handle_replicate_stable_diffusion(bot, dp, user, request, generation)
+    elif request.model == Model.FACE_SWAP:
         await handle_replicate_face_swap(bot, dp, user, request, generation)
+    elif request.model == Model.PHOTOSHOP_AI:
+        await handle_replicate_photoshop_ai(bot, dp, user, request, generation)
     elif request.model == Model.MUSIC_GEN:
         await handle_replicate_music_gen(bot, dp, user, request, generation)
-    elif request.model == Model.STABLE_DIFFUSION:
-        await handle_replicate_stable_diffusion(bot, dp, user, request, generation)
 
     return True
+
+
+async def handle_replicate_photoshop_ai(
+    bot: Bot,
+    dp: Dispatcher,
+    user: User,
+    request: Request,
+    generation: Generation,
+):
+    if generation.result:
+        reply_markup = build_reaction_keyboard(generation.id)
+        await send_image(bot, user.telegram_chat_id, generation.result, reply_markup)
+    elif generation.has_error:
+        reply_markup = build_error_keyboard(user.interface_language_code)
+        await bot.send_message(
+            chat_id=user.telegram_chat_id,
+            text=get_localization(user.interface_language_code).ERROR,
+            reply_markup=reply_markup,
+            parse_mode=None,
+        )
+
+    if request.status != RequestStatus.FINISHED:
+        request.status = RequestStatus.FINISHED
+        await update_request(request.id, {
+            'status': request.status
+        })
+
+        action_name = request.details.get('type')
+        if action_name == PhotoshopAIAction.RESTORATION:
+            total_price = round(PRICE_PHOTOSHOP_AI_RESTORATION * generation.seconds, 6)
+        elif action_name == PhotoshopAIAction.COLORIZATION:
+            total_price = round(PRICE_PHOTOSHOP_AI_COLORIZATION * generation.seconds, 6)
+        elif action_name == PhotoshopAIAction.REMOVAL_BACKGROUND:
+            total_price = round(PRICE_PHOTOSHOP_AI_REMOVAL_BACKGROUND * generation.seconds, 6)
+        else:
+            total_price = round(0.000575 * generation.seconds, 6)
+
+        update_tasks = [
+            write_transaction(
+                user_id=user.id,
+                type=TransactionType.EXPENSE,
+                service=ServiceType.PHOTOSHOP_AI,
+                amount=total_price,
+                clear_amount=total_price,
+                currency=Currency.USD,
+                quantity=1 if generation.result else 0,
+                details={
+                    'result': generation.result,
+                    'type': action_name,
+                    'has_error': generation.has_error,
+                },
+            ),
+            update_user_usage_quota(
+                user,
+                Quota.PHOTOSHOP_AI,
+                1 if generation.result else 0,
+            ),
+        ]
+
+        await asyncio.gather(*update_tasks)
+
+        state = FSMContext(
+            storage=dp.storage,
+            key=StorageKey(
+                chat_id=int(user.telegram_chat_id),
+                user_id=int(user.id),
+                bot_id=bot.id,
+            )
+        )
+        await state.clear()
+
+        if user.current_model == Model.PHOTOSHOP_AI:
+            await handle_photoshop_ai(bot, user.telegram_chat_id, state, user.id)
+
+        await bot.delete_message(user.telegram_chat_id, request.message_id)
 
 
 async def handle_replicate_face_swap(

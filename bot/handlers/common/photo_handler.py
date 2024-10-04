@@ -10,7 +10,8 @@ from aiogram.types import Message, URLInputFile, File, ReactionTypeEmoji
 from aiogram.utils.chat_action import ChatActionSender
 
 from bot.database.main import firebase
-from bot.database.models.common import Model, Quota, ChatGPTVersion, ClaudeGPTVersion, GeminiGPTVersion
+from bot.database.models.common import Model, Quota, ChatGPTVersion, ClaudeGPTVersion, GeminiGPTVersion, \
+    PhotoshopAIAction
 from bot.database.models.face_swap_package import FaceSwapPackageStatus
 from bot.database.models.user import UserSettings
 from bot.database.operations.face_swap_package.getters import (
@@ -19,6 +20,7 @@ from bot.database.operations.face_swap_package.getters import (
 )
 from bot.database.operations.face_swap_package.updaters import update_face_swap_package, update_used_face_swap_package
 from bot.database.operations.generation.writers import write_generation
+from bot.database.operations.request.getters import get_started_requests_by_user_id_and_model
 from bot.database.operations.request.writers import write_request
 from bot.database.operations.user.getters import get_user
 from bot.handlers.admin.face_swap_handler import handle_manage_face_swap
@@ -26,13 +28,15 @@ from bot.handlers.ai.chat_gpt_handler import handle_chatgpt
 from bot.handlers.ai.claude_handler import handle_claude
 from bot.handlers.ai.face_swap_handler import handle_face_swap
 from bot.handlers.ai.gemini_handler import handle_gemini
-from bot.integrations.replicateAI import create_face_swap_image
+from bot.handlers.ai.photoshop_ai_handler import photoshop_ai
+from bot.integrations.replicateAI import create_face_swap_image, create_photoshop_ai_image
 from bot.keyboards.admin.catalog import build_manage_catalog_create_role_confirmation_keyboard
 from bot.keyboards.common.common import build_cancel_keyboard
 from bot.locales.main import get_localization, get_user_language
 from bot.middlewares.AlbumMiddleware import AlbumMiddleware
 from bot.states.catalog import Catalog
 from bot.states.face_swap import FaceSwap
+from bot.states.photoshop_ai import PhotoshopAI
 from bot.states.profile import Profile
 from bot.utils.is_already_processing import is_already_processing
 from bot.utils.is_messages_limit_exceeded import is_messages_limit_exceeded
@@ -132,11 +136,79 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
 
         await message.answer(text=get_localization(user_language_code).FACE_SWAP_MANAGE_EDIT_SUCCESS)
         await handle_manage_face_swap(message, str(message.from_user.id), state)
-    elif user.current_model == Model.CHAT_GPT or user.current_model == Model.CLAUDE or user.current_model == Model.GEMINI:
+    elif current_state == PhotoshopAI.waiting_for_photo.state:
+        quota = user.daily_limits[Quota.PHOTOSHOP_AI] + user.additional_usage_quota[Quota.PHOTOSHOP_AI]
+        if quota < 1:
+            await message.answer(text=get_localization(user_language_code).REACHED_USAGE_LIMIT)
+            return
+
+        processing_message = await message.reply(
+            text=get_localization(user_language_code).processing_request_image(),
+            allow_sending_without_reply=True,
+        )
+
+        user_not_finished_requests = await get_started_requests_by_user_id_and_model(user.id, Model.PHOTOSHOP_AI)
+        if len(user_not_finished_requests):
+            await message.reply(
+                text=get_localization(user_language_code).ALREADY_MAKE_REQUEST,
+                allow_sending_without_reply=True,
+            )
+            await processing_message.delete()
+            return
+
+        user_data = await state.get_data()
+        photoshop_ai_action_name = user_data['photoshop_ai_action_name']
+        if photoshop_ai_action_name not in [
+            PhotoshopAIAction.RESTORATION,
+            PhotoshopAIAction.COLORIZATION,
+            PhotoshopAIAction.REMOVAL_BACKGROUND,
+        ]:
+            return
+
+        async with ChatActionSender.upload_photo(bot=message.bot, chat_id=message.chat.id):
+            photo_data_io = await message.bot.download_file(photo_file.file_path)
+            photo_data = photo_data_io.read()
+            photo_name = f'{uuid.uuid4()}.jpeg'
+            photo_path = f'users/photoshop/{photoshop_ai_action_name}/{user_id}/{photo_name}'
+            photo_link = firebase.get_public_url(photo_path)
+            photo_photoshop = firebase.bucket.new_blob(photo_path)
+            await photo_photoshop.upload(photo_data)
+
+            result = await create_photoshop_ai_image(photoshop_ai_action_name, photo_link)
+            request = await write_request(
+                user_id=user_id,
+                message_id=processing_message.message_id,
+                model=Model.PHOTOSHOP_AI,
+                requested=1,
+                details={
+                    'type': photoshop_ai_action_name,
+                },
+            )
+            await write_generation(
+                id=result,
+                request_id=request.id,
+                model=Model.PHOTOSHOP_AI,
+                has_error=result is None,
+                details={
+                    'type': photoshop_ai_action_name,
+                }
+            )
+
+            await state.clear()
+    elif (
+        (user.current_model == Model.CHAT_GPT and (
+            user.settings[user.current_model][UserSettings.VERSION] == ChatGPTVersion.V4_Omni_Mini or
+            user.settings[user.current_model][UserSettings.VERSION] == ChatGPTVersion.V4_Omni
+        )) or
+        user.current_model == Model.CLAUDE or
+        user.current_model == Model.GEMINI
+    ):
         if user.settings[user.current_model][UserSettings.VERSION] == ChatGPTVersion.V4_Omni_Mini:
             quota = Quota.CHAT_GPT4_OMNI_MINI
         elif user.settings[user.current_model][UserSettings.VERSION] == ChatGPTVersion.V4_Omni:
             quota = Quota.CHAT_GPT4_OMNI
+        elif user.settings[user.current_model][UserSettings.VERSION] == ClaudeGPTVersion.V3_Haiku:
+            quota = Quota.CLAUDE_3_HAIKU
         elif user.settings[user.current_model][UserSettings.VERSION] == ClaudeGPTVersion.V3_Sonnet:
             quota = Quota.CLAUDE_3_SONNET
         elif user.settings[user.current_model][UserSettings.VERSION] == ClaudeGPTVersion.V3_Opus:
@@ -145,8 +217,10 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
             quota = Quota.GEMINI_1_FLASH
         elif user.settings[user.current_model][UserSettings.VERSION] == GeminiGPTVersion.V1_Pro:
             quota = Quota.GEMINI_1_PRO
+        elif user.settings[user.current_model][UserSettings.VERSION] == GeminiGPTVersion.V1_Ultra:
+            quota = Quota.GEMINI_1_ULTRA
         else:
-            raise NotImplemented(
+            raise NotImplementedError(
                 f'User quota is not implemented: {user.settings[user.current_model][UserSettings.VERSION]}'
             )
 
@@ -238,11 +312,20 @@ async def handle_album(message: Message, state: FSMContext, album: List[Message]
     user = await get_user(user_id)
     user_language_code = await get_user_language(user_id, state.storage)
 
-    if user.current_model == Model.CHAT_GPT or user.current_model == Model.CLAUDE or user.current_model == Model.GEMINI:
+    if (
+        (user.current_model == Model.CHAT_GPT and (
+            user.settings[user.current_model][UserSettings.VERSION] == ChatGPTVersion.V4_Omni_Mini or
+            user.settings[user.current_model][UserSettings.VERSION] == ChatGPTVersion.V4_Omni
+        )) or
+        user.current_model == Model.CLAUDE or
+        user.current_model == Model.GEMINI
+    ):
         if user.settings[user.current_model][UserSettings.VERSION] == ChatGPTVersion.V4_Omni_Mini:
             quota = Quota.CHAT_GPT4_OMNI_MINI
         elif user.settings[user.current_model][UserSettings.VERSION] == ChatGPTVersion.V4_Omni:
             quota = Quota.CHAT_GPT4_OMNI
+        elif user.settings[user.current_model][UserSettings.VERSION] == ClaudeGPTVersion.V3_Haiku:
+            quota = Quota.CLAUDE_3_HAIKU
         elif user.settings[user.current_model][UserSettings.VERSION] == ClaudeGPTVersion.V3_Sonnet:
             quota = Quota.CLAUDE_3_SONNET
         elif user.settings[user.current_model][UserSettings.VERSION] == ClaudeGPTVersion.V3_Opus:
@@ -251,8 +334,10 @@ async def handle_album(message: Message, state: FSMContext, album: List[Message]
             quota = Quota.GEMINI_1_FLASH
         elif user.settings[user.current_model][UserSettings.VERSION] == GeminiGPTVersion.V1_Pro:
             quota = Quota.GEMINI_1_PRO
+        elif user.settings[user.current_model][UserSettings.VERSION] == GeminiGPTVersion.V1_Ultra:
+            quota = Quota.GEMINI_1_ULTRA
         else:
-            raise NotImplemented(
+            raise NotImplementedError(
                 f'User quota is not implemented: {user.settings[user.current_model][UserSettings.VERSION]}'
             )
 
@@ -290,7 +375,7 @@ async def handle_album(message: Message, state: FSMContext, album: List[Message]
             await handle_claude(message, state, user, quota, photo_vision_filenames)
         elif user.current_model == Model.GEMINI:
             await handle_gemini(message, state, user, quota, photo_vision_filenames)
-    elif user.current_model == Model.FACE_SWAP:
+    elif user.current_model == Model.FACE_SWAP or user.current_model == Model.PHOTOSHOP_AI:
         await message.reply(
             text=get_localization(user_language_code).ALBUM_FORBIDDEN_ERROR,
             allow_sending_without_reply=True,

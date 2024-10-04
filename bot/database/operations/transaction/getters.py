@@ -12,20 +12,7 @@ async def get_transaction(transaction_id: str) -> Optional[Transaction]:
     transaction = await transaction_ref.get()
 
     if transaction.exists:
-        transaction_dict = transaction.to_dict()
-        return Transaction(
-            id=transaction_dict.get('id'),
-            user_id=transaction_dict.get('user_id'),
-            type=transaction_dict.get('type'),
-            service=transaction_dict.get('service'),
-            amount=transaction_dict.get('amount'),
-            clear_amount=transaction_dict.get('clear_amount'),
-            currency=transaction_dict.get('currency'),
-            quantity=transaction_dict.get('quantity'),
-            details=transaction_dict.get('details'),
-            created_at=transaction_dict.get('created_at'),
-            edited_at=transaction_dict.get('edited_at'),
-        )
+        return Transaction(**transaction.to_dict())
 
 
 async def get_transactions_by_service_and_created_time(
@@ -52,19 +39,7 @@ async def get_transactions_by_service_and_created_time(
         .stream()
 
     transactions = [
-        Transaction(
-            id=transaction.to_dict().get('id'),
-            user_id=transaction.to_dict().get('user_id'),
-            type=transaction.to_dict().get('type'),
-            service=transaction.to_dict().get('service'),
-            amount=transaction.to_dict().get('amount'),
-            clear_amount=transaction.to_dict().get('clear_amount'),
-            currency=transaction.to_dict().get('currency'),
-            quantity=transaction.to_dict().get('quantity'),
-            details=transaction.to_dict().get('details'),
-            created_at=transaction.to_dict().get('created_at'),
-            edited_at=transaction.to_dict().get('edited_at'),
-        ) async for transaction in transaction_stream
+        Transaction(**transaction.to_dict()) async for transaction in transaction_stream
     ]
 
     return transactions
@@ -83,17 +58,5 @@ async def get_transactions(
 
     transactions = transactions_query.stream()
     return [
-        Transaction(
-            id=transaction.to_dict().get('id'),
-            user_id=transaction.to_dict().get('user_id'),
-            type=transaction.to_dict().get('type'),
-            service=transaction.to_dict().get('service'),
-            amount=transaction.to_dict().get('amount'),
-            clear_amount=transaction.to_dict().get('clear_amount'),
-            currency=transaction.to_dict().get('currency'),
-            quantity=transaction.to_dict().get('quantity'),
-            details=transaction.to_dict().get('details'),
-            created_at=transaction.to_dict().get('created_at'),
-            edited_at=transaction.to_dict().get('edited_at'),
-        ) async for transaction in transactions
+        Transaction(**transaction.to_dict()) async for transaction in transactions
     ]

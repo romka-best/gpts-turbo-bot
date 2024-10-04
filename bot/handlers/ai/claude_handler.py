@@ -35,6 +35,8 @@ from bot.locales.main import get_user_language, get_localization
 
 claude_router = Router()
 
+PRICE_CLAUDE_3_HAIKU_INPUT = 0.00000025
+PRICE_CLAUDE_3_HAIKU_OUTPUT = 0.00000125
 PRICE_CLAUDE_3_SONNET_INPUT = 0.000003
 PRICE_CLAUDE_3_SONNET_OUTPUT = 0.000015
 PRICE_CLAUDE_3_OPUS_INPUT = 0.000015
@@ -106,9 +108,17 @@ async def handle_claude_choose_selection(callback_query: CallbackQuery, state: F
                 'settings': user.settings,
             })
 
-            text = get_localization(user_language_code).SWITCHED_TO_CLAUDE_3_SONNET \
-                if user.settings[user.current_model][UserSettings.VERSION] == ClaudeGPTVersion.V3_Sonnet \
-                else get_localization(user_language_code).SWITCHED_TO_CLAUDE_3_OPUS
+            if user.settings[user.current_model][UserSettings.VERSION] == ClaudeGPTVersion.V3_Haiku:
+                text = get_localization(user_language_code).SWITCHED_TO_CLAUDE_3_HAIKU
+            elif user.settings[user.current_model][UserSettings.VERSION] == ClaudeGPTVersion.V3_Sonnet:
+                text = get_localization(user_language_code).SWITCHED_TO_CLAUDE_3_SONNET
+            elif user.settings[user.current_model][UserSettings.VERSION] == ClaudeGPTVersion.V3_Opus:
+                text = get_localization(user_language_code).SWITCHED_TO_CLAUDE_3_OPUS
+            else:
+                raise NotImplementedError(
+                    f'Model version is not found: {user.settings[user.current_model][UserSettings.VERSION]}'
+                )
+
             await callback_query.message.answer(
                 text=text,
                 reply_markup=reply_markup,
@@ -125,8 +135,8 @@ async def handle_claude_choose_selection(callback_query: CallbackQuery, state: F
 
 
 async def handle_claude(message: Message, state: FSMContext, user: User, user_quota: Quota, filenames=None):
-    if user_quota != Quota.CLAUDE_3_SONNET and user_quota != Quota.CLAUDE_3_OPUS:
-        raise NotImplemented(f'User quota is not implemented: {user_quota}')
+    if user_quota != Quota.CLAUDE_3_HAIKU and user_quota != Quota.CLAUDE_3_SONNET and user_quota != Quota.CLAUDE_3_OPUS:
+        raise NotImplementedError(f'User quota is not implemented: {user_quota}')
 
     await state.update_data(is_processing=True)
 
@@ -203,7 +213,12 @@ async def handle_claude(message: Message, state: FSMContext, user: User, user_qu
                 history,
             )
             response_message = response['message']
-            if user_quota == Quota.CLAUDE_3_SONNET:
+
+            if user_quota == Quota.CLAUDE_3_HAIKU:
+                service = ServiceType.CLAUDE_3_HAIKU
+                input_price = response['input_tokens'] * PRICE_CLAUDE_3_HAIKU_INPUT
+                output_price = response['output_tokens'] * PRICE_CLAUDE_3_HAIKU_OUTPUT
+            elif user_quota == Quota.CLAUDE_3_SONNET:
                 service = ServiceType.CLAUDE_3_SONNET
                 input_price = response['input_tokens'] * PRICE_CLAUDE_3_SONNET_INPUT
                 output_price = response['output_tokens'] * PRICE_CLAUDE_3_SONNET_OUTPUT
@@ -306,7 +321,7 @@ async def handle_claude(message: Message, state: FSMContext, user: User, user_qu
             await state.update_data(is_processing=False)
 
     asyncio.create_task(
-        handle_claude_3_opus_example(
+        handle_claude_3_sonnet_example(
             user=user,
             user_language_code=user_language_code,
             prompt=text,
@@ -329,12 +344,16 @@ async def handle_claude_continue_generation_choose_selection(callback_query: Cal
 
     if action == 'continue':
         await state.update_data(recognized_text=get_localization(user_language_code).CONTINUE_GENERATING)
-        if user.settings[user.current_model][UserSettings.VERSION] == ClaudeGPTVersion.V3_Sonnet:
+        if user.settings[user.current_model][UserSettings.VERSION] == ClaudeGPTVersion.V3_Haiku:
+            user_quota = Quota.CLAUDE_3_HAIKU
+        elif user.settings[user.current_model][UserSettings.VERSION] == ClaudeGPTVersion.V3_Sonnet:
             user_quota = Quota.CLAUDE_3_SONNET
         elif user.settings[user.current_model][UserSettings.VERSION] == ClaudeGPTVersion.V3_Opus:
             user_quota = Quota.CLAUDE_3_OPUS
         else:
-            raise NotImplemented
+            raise NotImplementedError(
+                f'Claude version is not defined: {user.settings[user.current_model][UserSettings.VERSION]}'
+            )
 
         await handle_claude(callback_query.message, state, user, user_quota)
         await callback_query.message.edit_reply_markup(reply_markup=None)
@@ -342,7 +361,7 @@ async def handle_claude_continue_generation_choose_selection(callback_query: Cal
     await state.clear()
 
 
-async def handle_claude_3_opus_example(
+async def handle_claude_3_sonnet_example(
     user: User,
     user_language_code: str,
     prompt: str,
@@ -356,17 +375,17 @@ async def handle_claude_3_opus_example(
             user.subscription_type == SubscriptionType.FREE and
             user.current_model == Model.CLAUDE and
             user.settings[user.current_model][UserSettings.SHOW_EXAMPLES] and
-            user.daily_limits[Quota.CLAUDE_3_SONNET] + 1 in [1, 10] and
+            user.daily_limits[Quota.CLAUDE_3_HAIKU] + 1 in [1, 10] and
             (current_date - user.last_subscription_limit_update).days <= 3
         ):
             history = get_history_without_duplicates(history)
 
-            response = await get_response_message(ClaudeGPTVersion.V3_Opus, system_prompt, history)
+            response = await get_response_message(ClaudeGPTVersion.V3_Sonnet, system_prompt, history)
             response_message = response['message']
 
-            service = ServiceType.CLAUDE_3_OPUS
-            input_price = response['input_tokens'] * PRICE_CLAUDE_3_OPUS_INPUT
-            output_price = response['output_tokens'] * PRICE_CLAUDE_3_OPUS_OUTPUT
+            service = ServiceType.CLAUDE_3_SONNET
+            input_price = response['input_tokens'] * PRICE_CLAUDE_3_SONNET_INPUT
+            output_price = response['output_tokens'] * PRICE_CLAUDE_3_SONNET_OUTPUT
 
             total_price = round(input_price + output_price, 6)
             message_role, message_content = 'assistant', response_message
@@ -388,7 +407,7 @@ async def handle_claude_3_opus_example(
                 },
             )
 
-            header_text = f'{get_localization(user_language_code).CLAUDE_3_OPUS_EXAMPLE}\n\n'
+            header_text = f'{get_localization(user_language_code).CLAUDE_3_SONNET_EXAMPLE}\n\n'
             full_text = f'{header_text}{message_content}'
             await send_ai_message(
                 message=message,

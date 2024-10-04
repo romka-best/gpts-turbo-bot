@@ -21,9 +21,10 @@ async def send_ai_message(message: Message, text: str, reply_markup=None):
                 except TelegramBadRequest as e:
                     if e.message.startswith('Bad Request: can\'t parse entities'):
                         await message.reply(
-                            text=messages[i],
+                            text=formatted_message,
                             reply_markup=reply_markup,
                             allow_sending_without_reply=True,
+                            parse_mode=None,
                         )
                     else:
                         raise e
@@ -36,9 +37,10 @@ async def send_ai_message(message: Message, text: str, reply_markup=None):
     except TelegramBadRequest as e:
         if e.message.startswith('Bad Request: can\'t parse entities'):
             await message.reply(
-                text=text,
+                text=formatted_text,
                 reply_markup=reply_markup,
                 allow_sending_without_reply=True,
+                parse_mode=None,
             )
         else:
             raise e

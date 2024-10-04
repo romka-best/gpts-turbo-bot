@@ -16,6 +16,8 @@ def get_default_max_tokens(model_version: GeminiGPTVersion) -> int:
         model_version == GeminiGPTVersion.V1_Pro
     ):
         return base
+    elif model_version == GeminiGPTVersion.V1_Ultra:
+        return base * 2
 
     return base
 
@@ -28,8 +30,12 @@ async def get_response_message(
 ) -> Dict:
     max_tokens = get_default_max_tokens(model_version)
 
+    if model_version == GeminiGPTVersion.V1_Ultra:
+        model_name = GeminiGPTVersion.V1_Pro
+    else:
+        model_name = model_version
     model = genai.GenerativeModel(
-        model_name=model_version,
+        model_name=model_name,
         system_instruction=system_prompt,
     )
     chat = model.start_chat(

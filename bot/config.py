@@ -24,7 +24,7 @@ class Settings(BaseSettings):
     REDIS_URL: str
 
     MAX_RETRIES: int = 2
-    USER_BATCH_SIZE: int = 500
+    BATCH_SIZE: int = 500
     LIMIT_BETWEEN_REQUESTS_SECONDS: int = 30
     LIMIT_PROCESSING_SECONDS: int = 60
 
