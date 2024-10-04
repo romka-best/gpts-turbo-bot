@@ -236,7 +236,6 @@ async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_q
                 output_price = response['output_tokens'] * PRICE_CHAT_GPT_O_1_PREVIEW_OUTPUT
 
             total_price = round(input_price + output_price, 6)
-            print(total_price)
             message_role, message_content = response_message.role, response_message.content
             await write_transaction(
                 user_id=user.id,

@@ -10,8 +10,14 @@ from aiogram.types import Message, URLInputFile, File, ReactionTypeEmoji
 from aiogram.utils.chat_action import ChatActionSender
 
 from bot.database.main import firebase
-from bot.database.models.common import Model, Quota, ChatGPTVersion, ClaudeGPTVersion, GeminiGPTVersion, \
-    PhotoshopAIAction
+from bot.database.models.common import (
+    Model,
+    Quota,
+    ChatGPTVersion,
+    ClaudeGPTVersion,
+    GeminiGPTVersion,
+    PhotoshopAIAction,
+)
 from bot.database.models.face_swap_package import FaceSwapPackageStatus
 from bot.database.models.user import UserSettings
 from bot.database.operations.face_swap_package.getters import (
@@ -28,7 +34,6 @@ from bot.handlers.ai.chat_gpt_handler import handle_chatgpt
 from bot.handlers.ai.claude_handler import handle_claude
 from bot.handlers.ai.face_swap_handler import handle_face_swap
 from bot.handlers.ai.gemini_handler import handle_gemini
-from bot.handlers.ai.photoshop_ai_handler import photoshop_ai
 from bot.integrations.replicateAI import create_face_swap_image, create_photoshop_ai_image
 from bot.keyboards.admin.catalog import build_manage_catalog_create_role_confirmation_keyboard
 from bot.keyboards.common.common import build_cancel_keyboard

@@ -387,7 +387,7 @@ async def handle_replicate_stable_diffusion(
             'status': request.status
         })
 
-        total_price = round(PRICE_STABLE_DIFFUSION * generation.seconds, 6)
+        total_price = PRICE_STABLE_DIFFUSION
         update_tasks = [
             write_transaction(
                 user_id=user.id,

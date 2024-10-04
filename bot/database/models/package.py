@@ -108,14 +108,14 @@ class Package:
         prices = {
             PackageType.CHAT_GPT4_OMNI_MINI: '',
             PackageType.CHAT_GPT4_OMNI: '',
+            PackageType.CHAT_GPT_O_1_MINI: '',
+            PackageType.CHAT_GPT_O_1_PREVIEW: '',
             PackageType.CLAUDE_3_HAIKU: '',
             PackageType.CLAUDE_3_SONNET: '',
             PackageType.CLAUDE_3_OPUS: '',
             PackageType.GEMINI_1_FLASH: '',
             PackageType.GEMINI_1_PRO: '',
             PackageType.GEMINI_1_ULTRA: '',
-            PackageType.CHAT_GPT_O_1_MINI: '',
-            PackageType.CHAT_GPT_O_1_PREVIEW: '',
             PackageType.CHAT: '',
             PackageType.DALL_E: '',
             PackageType.MIDJOURNEY: '',
@@ -132,14 +132,14 @@ class Package:
         if currency == Currency.RUB:
             prices[PackageType.CHAT_GPT4_OMNI_MINI] = '2₽'
             prices[PackageType.CHAT_GPT4_OMNI] = '8₽'
+            prices[PackageType.CHAT_GPT_O_1_MINI] = '8₽'
+            prices[PackageType.CHAT_GPT_O_1_PREVIEW] = '20₽'
             prices[PackageType.CLAUDE_3_HAIKU] = '2₽'
             prices[PackageType.CLAUDE_3_SONNET] = '8₽'
             prices[PackageType.CLAUDE_3_OPUS] = '20₽'
             prices[PackageType.GEMINI_1_FLASH] = '2₽'
             prices[PackageType.GEMINI_1_PRO] = '8₽'
             prices[PackageType.GEMINI_1_ULTRA] = '20₽'
-            prices[PackageType.CHAT_GPT_O_1_MINI] = '8₽'
-            prices[PackageType.CHAT_GPT_O_1_PREVIEW] = '20₽'
             prices[PackageType.DALL_E] = '8₽'
             prices[PackageType.MIDJOURNEY] = '8₽'
             prices[PackageType.STABLE_DIFFUSION] = '8₽'
@@ -154,14 +154,14 @@ class Package:
         elif currency == Currency.USD:
             prices[PackageType.CHAT_GPT4_OMNI_MINI] = '$0.02'
             prices[PackageType.CHAT_GPT4_OMNI] = '$0.08'
+            prices[PackageType.CHAT_GPT_O_1_MINI] = '$0.08'
+            prices[PackageType.CHAT_GPT_O_1_PREVIEW] = '$0.2'
             prices[PackageType.CLAUDE_3_HAIKU] = '$0.02'
             prices[PackageType.CLAUDE_3_SONNET] = '$0.08'
             prices[PackageType.CLAUDE_3_OPUS] = '$0.2'
             prices[PackageType.GEMINI_1_FLASH] = '$0.02'
             prices[PackageType.GEMINI_1_PRO] = '$0.08'
             prices[PackageType.GEMINI_1_ULTRA] = '$0.2'
-            prices[PackageType.CHAT_GPT_O_1_MINI] = '$0.08'
-            prices[PackageType.CHAT_GPT_O_1_PREVIEW] = '$0.2'
             prices[PackageType.DALL_E] = '$0.08'
             prices[PackageType.MIDJOURNEY] = '$0.08'
             prices[PackageType.STABLE_DIFFUSION] = '$0.08'
@@ -176,6 +176,8 @@ class Package:
         else:
             prices[PackageType.CHAT_GPT4_OMNI_MINI] = '2⭐'
             prices[PackageType.CHAT_GPT4_OMNI] = '8⭐️'
+            prices[PackageType.CHAT_GPT_O_1_MINI] = '8⭐️'
+            prices[PackageType.CHAT_GPT_O_1_PREVIEW] = '20⭐️'
             prices[PackageType.CLAUDE_3_HAIKU] = '2⭐'
             prices[PackageType.CLAUDE_3_SONNET] = '8⭐'
             prices[PackageType.CLAUDE_3_OPUS] = '20⭐️'
