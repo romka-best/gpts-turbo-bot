@@ -48,6 +48,19 @@ async def create_payment(
             'save_payment_method': is_subscription,
             'description': description,
             'merchant_customer_id': user_id,
+            'receipt': {
+                'items': [
+                    {
+                        'amount': {
+                            'value': amount,
+                            'currency': Currency.RUB,
+                        },
+                        'description': description,
+                        'vat_code': 1,
+                        'quantity': 1,
+                    }
+                ]
+            },
         }
 
         async with aiohttp.ClientSession(

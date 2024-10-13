@@ -20,9 +20,10 @@ from bot.database.operations.user.getters import get_user
 from bot.database.operations.user.updaters import update_user
 from bot.handlers.ai.suno_handler import handle_suno_example
 from bot.helpers.senders.send_error_info import send_error_info
+from bot.keyboards.ai.mode import build_switched_to_ai_keyboard
 from bot.locales.translate_text import translate_text
 from bot.integrations.replicateAI import create_music_gen_melody
-from bot.keyboards.common.common import build_recommendations_keyboard, build_cancel_keyboard, build_error_keyboard
+from bot.keyboards.common.common import build_cancel_keyboard, build_error_keyboard
 from bot.keyboards.ai.music_gen import build_music_gen_keyboard
 from bot.locales.main import get_localization, get_user_language
 from bot.states.music_gen import MusicGen
@@ -41,7 +42,7 @@ async def music_gen(message: Message, state: FSMContext):
     user_language_code = await get_user_language(user_id, state.storage)
 
     if user.current_model == Model.MUSIC_GEN:
-        reply_markup = await build_recommendations_keyboard(user.current_model, user_language_code, user.gender)
+        reply_markup = build_switched_to_ai_keyboard(user_language_code, Model.MUSIC_GEN)
         await message.answer(
             text=get_localization(user_language_code).ALREADY_SWITCHED_TO_THIS_MODEL,
             reply_markup=reply_markup,
@@ -52,7 +53,7 @@ async def music_gen(message: Message, state: FSMContext):
             'current_model': user.current_model,
         })
 
-        reply_markup = await build_recommendations_keyboard(user.current_model, user_language_code, user.gender)
+        reply_markup = build_switched_to_ai_keyboard(user_language_code, Model.MUSIC_GEN)
         await message.answer(
             text=get_localization(user_language_code).SWITCHED_TO_MUSIC_GEN,
             reply_markup=reply_markup,
@@ -63,15 +64,12 @@ async def music_gen(message: Message, state: FSMContext):
 
 
 async def handle_music_gen(bot: Bot, chat_id: str, state: FSMContext, user_id: str, text=None):
-    user = await get_user(str(user_id))
     user_language_code = await get_user_language(str(user_id), state.storage)
 
     if text is None:
-        reply_markup = await build_recommendations_keyboard(user.current_model, user_language_code, user.gender)
         await bot.send_message(
             chat_id=chat_id,
             text=get_localization(user_language_code).MUSIC_GEN_INFO,
-            reply_markup=reply_markup,
         )
     else:
         reply_markup = build_music_gen_keyboard(user_language_code)

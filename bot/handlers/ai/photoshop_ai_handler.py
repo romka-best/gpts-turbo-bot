@@ -7,8 +7,8 @@ from bot.config import config, MessageEffect
 from bot.database.models.common import Model, PhotoshopAIAction
 from bot.database.operations.user.getters import get_user
 from bot.database.operations.user.updaters import update_user
+from bot.keyboards.ai.mode import build_switched_to_ai_keyboard
 from bot.keyboards.ai.photoshop_ai import build_photoshop_ai_keyboard, build_photoshop_ai_chosen_keyboard
-from bot.keyboards.common.common import build_recommendations_keyboard
 from bot.locales.main import get_user_language, get_localization
 from bot.states.photoshop_ai import PhotoshopAI
 
@@ -28,7 +28,7 @@ async def photoshop_ai(message: Message, state: FSMContext):
     user_language_code = await get_user_language(user_id, state.storage)
 
     if user.current_model == Model.PHOTOSHOP_AI:
-        reply_markup = await build_recommendations_keyboard(user.current_model, user_language_code, user.gender)
+        reply_markup = build_switched_to_ai_keyboard(user_language_code, Model.PHOTOSHOP_AI)
         await message.answer(
             text=get_localization(user_language_code).ALREADY_SWITCHED_TO_THIS_MODEL,
             reply_markup=reply_markup,
@@ -39,7 +39,7 @@ async def photoshop_ai(message: Message, state: FSMContext):
             'current_model': user.current_model,
         })
 
-        reply_markup = await build_recommendations_keyboard(user.current_model, user_language_code, user.gender)
+        reply_markup = build_switched_to_ai_keyboard(user_language_code, Model.PHOTOSHOP_AI)
         await message.answer(
             text=get_localization(user_language_code).SWITCHED_TO_PHOTOSHOP_AI,
             reply_markup=reply_markup,

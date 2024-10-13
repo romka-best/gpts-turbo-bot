@@ -27,7 +27,7 @@ from bot.database.operations.user.updaters import update_user
 from bot.helpers.creaters.create_package import create_package
 from bot.helpers.creaters.create_subscription import create_subscription
 from bot.helpers.senders.send_message_to_admins import send_message_to_admins
-from bot.keyboards.common.common import build_recommendations_keyboard
+from bot.keyboards.ai.mode import build_switched_to_ai_keyboard
 from bot.locales.main import get_user_language, get_localization
 
 
@@ -90,7 +90,7 @@ async def handle_pay_selection_webhook(request: Dict, bot: Bot, dp: Dispatcher):
                     text=get_localization(user_language_code).SUBSCRIPTION_SUCCESS,
                 )
 
-                reply_markup = await build_recommendations_keyboard(user.current_model, user_language_code, user.gender)
+                reply_markup = build_switched_to_ai_keyboard(user_language_code, user.current_model)
                 await bot.send_message(
                     chat_id=subscription.user_id,
                     text=get_localization(user_language_code).switched(
@@ -306,7 +306,7 @@ async def handle_pay_selection_webhook(request: Dict, bot: Bot, dp: Dispatcher):
                     text=get_localization(user_language_code).PACKAGE_SUCCESS,
                 )
 
-                reply_markup = await build_recommendations_keyboard(user.current_model, user_language_code, user.gender)
+                reply_markup = build_switched_to_ai_keyboard(user_language_code, user.current_model)
                 await bot.send_message(
                     chat_id=package.user_id,
                     text=get_localization(user_language_code).switched(
@@ -416,7 +416,7 @@ async def handle_pay_selection_webhook(request: Dict, bot: Bot, dp: Dispatcher):
                     text=get_localization(user_language_code).PACKAGES_SUCCESS,
                 )
 
-                reply_markup = await build_recommendations_keyboard(user.current_model, user_language_code, user.gender)
+                reply_markup = build_switched_to_ai_keyboard(user_language_code, user.current_model)
                 await bot.send_message(
                     chat_id=user.id,
                     text=get_localization(user_language_code).switched(

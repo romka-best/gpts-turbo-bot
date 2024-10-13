@@ -18,6 +18,7 @@ async def send_image(bot: Bot, chat_id: str, image: str, reply_markup=None, capt
             reply_markup=reply_markup,
             caption=caption,
             reply_to_message_id=reply_to_message_id,
+            allow_sending_without_reply=True,
         )
     except TelegramForbiddenError:
         await update_user(chat_id, {
@@ -31,6 +32,7 @@ async def send_image(bot: Bot, chat_id: str, image: str, reply_markup=None, capt
             reply_markup=reply_markup,
             text=image,
             reply_to_message_id=reply_to_message_id,
+            allow_sending_without_reply=True,
         )
 
         await send_error_info(

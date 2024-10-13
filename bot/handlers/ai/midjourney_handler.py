@@ -21,6 +21,7 @@ from bot.database.operations.request.writers import write_request
 from bot.database.operations.user.getters import get_user
 from bot.database.operations.user.updaters import update_user
 from bot.helpers.senders.send_error_info import send_error_info
+from bot.keyboards.ai.mode import build_switched_to_ai_keyboard
 from bot.locales.translate_text import translate_text
 from bot.integrations.midjourney import (
     create_midjourney_images,
@@ -28,7 +29,7 @@ from bot.integrations.midjourney import (
     create_different_midjourney_image,
     create_different_midjourney_images,
 )
-from bot.keyboards.common.common import build_recommendations_keyboard, build_error_keyboard
+from bot.keyboards.common.common import build_error_keyboard
 from bot.locales.main import get_localization, get_user_language
 
 midjourney_router = Router()
@@ -45,7 +46,7 @@ async def midjourney(message: Message, state: FSMContext):
     user_language_code = await get_user_language(user_id, state.storage)
 
     if user.current_model == Model.MIDJOURNEY:
-        reply_markup = await build_recommendations_keyboard(user.current_model, user_language_code, user.gender)
+        reply_markup = build_switched_to_ai_keyboard(user_language_code, Model.MIDJOURNEY)
         await message.answer(
             text=get_localization(user_language_code).ALREADY_SWITCHED_TO_THIS_MODEL,
             reply_markup=reply_markup,
@@ -56,7 +57,7 @@ async def midjourney(message: Message, state: FSMContext):
             'current_model': user.current_model,
         })
 
-        reply_markup = await build_recommendations_keyboard(user.current_model, user_language_code, user.gender)
+        reply_markup = build_switched_to_ai_keyboard(user_language_code, Model.MIDJOURNEY)
         await message.answer(
             text=get_localization(user_language_code).SWITCHED_TO_MIDJOURNEY,
             reply_markup=reply_markup,

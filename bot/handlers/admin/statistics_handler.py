@@ -168,7 +168,7 @@ async def get_statistics_by_transactions_query(
         ServiceType.FAST_MESSAGES,
     ]
 
-    transactions_query = firebase.db.collection(Transaction.COLLECTION_NAME)
+    transactions_query = firebase.db.collection(Transaction.COLLECTION_NAME).order_by('created_at')
 
     if start_date:
         transactions_query = transactions_query.where(filter=FieldFilter('created_at', '>=', start_date))

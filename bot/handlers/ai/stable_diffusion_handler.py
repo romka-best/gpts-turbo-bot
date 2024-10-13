@@ -22,7 +22,8 @@ from bot.database.operations.user.updaters import update_user
 from bot.handlers.ai.midjourney_handler import handle_midjourney_example
 from bot.helpers.senders.send_error_info import send_error_info
 from bot.integrations.replicateAI import create_stable_diffusion_image
-from bot.keyboards.common.common import build_recommendations_keyboard, build_error_keyboard
+from bot.keyboards.ai.mode import build_switched_to_ai_keyboard
+from bot.keyboards.common.common import build_error_keyboard
 from bot.locales.main import get_user_language, get_localization
 from bot.locales.translate_text import translate_text
 
@@ -40,7 +41,7 @@ async def stable_diffusion(message: Message, state: FSMContext):
     user_language_code = await get_user_language(user_id, state.storage)
 
     if user.current_model == Model.STABLE_DIFFUSION:
-        reply_markup = await build_recommendations_keyboard(user.current_model, user_language_code, user.gender)
+        reply_markup = build_switched_to_ai_keyboard(user_language_code, Model.STABLE_DIFFUSION)
         await message.answer(
             text=get_localization(user_language_code).ALREADY_SWITCHED_TO_THIS_MODEL,
             reply_markup=reply_markup,
@@ -51,7 +52,7 @@ async def stable_diffusion(message: Message, state: FSMContext):
             'current_model': user.current_model,
         })
 
-        reply_markup = await build_recommendations_keyboard(user.current_model, user_language_code, user.gender)
+        reply_markup = build_switched_to_ai_keyboard(user_language_code, Model.STABLE_DIFFUSION)
         await message.answer(
             text=get_localization(user_language_code).SWITCHED_TO_STABLE_DIFFUSION,
             reply_markup=reply_markup,

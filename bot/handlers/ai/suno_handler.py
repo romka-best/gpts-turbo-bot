@@ -23,13 +23,14 @@ from bot.database.operations.user.getters import get_user
 from bot.database.operations.user.updaters import update_user
 from bot.helpers.senders.send_error_info import send_error_info
 from bot.integrations.suno import generate_song, check_song
+from bot.keyboards.ai.mode import build_switched_to_ai_keyboard
 from bot.keyboards.ai.suno import (
     build_suno_keyboard,
     build_suno_simple_mode_keyboard,
     build_suno_custom_mode_lyrics_keyboard,
     build_suno_custom_mode_genres_keyboard,
 )
-from bot.keyboards.common.common import build_recommendations_keyboard, build_cancel_keyboard, build_error_keyboard
+from bot.keyboards.common.common import build_cancel_keyboard, build_error_keyboard
 from bot.locales.main import get_user_language, get_localization
 from bot.locales.translate_text import translate_text
 from bot.states.suno import Suno
@@ -48,7 +49,7 @@ async def suno(message: Message, state: FSMContext):
     user_language_code = await get_user_language(user_id, state.storage)
 
     if user.current_model == Model.SUNO:
-        reply_markup = await build_recommendations_keyboard(user.current_model, user_language_code, user.gender)
+        reply_markup = build_switched_to_ai_keyboard(user_language_code, Model.SUNO)
         await message.answer(
             text=get_localization(user_language_code).ALREADY_SWITCHED_TO_THIS_MODEL,
             reply_markup=reply_markup,
@@ -59,7 +60,7 @@ async def suno(message: Message, state: FSMContext):
             'current_model': user.current_model,
         })
 
-        reply_markup = await build_recommendations_keyboard(user.current_model, user_language_code, user.gender)
+        reply_markup = build_switched_to_ai_keyboard(user_language_code, Model.SUNO)
         await message.answer(
             text=get_localization(user_language_code).SWITCHED_TO_SUNO,
             reply_markup=reply_markup,

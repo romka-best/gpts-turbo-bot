@@ -123,6 +123,75 @@ def build_reaction_keyboard(generation_id: str) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
+def build_limit_exceeded_keyboard(language_code: str) -> InlineKeyboardMarkup:
+    buttons = [
+        [
+            InlineKeyboardButton(
+                text=get_localization(language_code).CHANGE_AI_MODEL,
+                callback_data='limit_exceeded:change_ai_model'
+            )
+        ],
+        [
+            InlineKeyboardButton(
+                text=get_localization(language_code).OPEN_BONUS_INFO,
+                callback_data='limit_exceeded:open_bonus_info'
+            )
+        ],
+        [
+            InlineKeyboardButton(
+                text=get_localization(language_code).OPEN_BUY_SUBSCRIPTIONS_INFO,
+                callback_data='limit_exceeded:open_buy_subscriptions_info'
+            )
+        ],
+        [
+            InlineKeyboardButton(
+                text=get_localization(language_code).OPEN_BUY_PACKAGES_INFO,
+                callback_data='limit_exceeded:open_buy_packages_info'
+            )
+        ],
+    ]
+
+    return InlineKeyboardMarkup(inline_keyboard=buttons)
+
+
+def build_time_limit_exceeded_keyboard(language_code: str) -> InlineKeyboardMarkup:
+    buttons = [
+        [
+            InlineKeyboardButton(
+                text=get_localization(language_code).REMOVE_RESTRICTION,
+                callback_data='time_limit_exceeded:remove_restriction'
+            )
+        ],
+    ]
+
+    return InlineKeyboardMarkup(inline_keyboard=buttons)
+
+
+def build_time_limit_exceeded_chosen_keyboard(language_code: str) -> InlineKeyboardMarkup:
+    buttons = [
+        [
+            InlineKeyboardButton(
+                text=get_localization(language_code).OPEN_BONUS_INFO,
+                callback_data='limit_exceeded:open_bonus_info'
+            )
+        ],
+        [
+            InlineKeyboardButton(
+                text=get_localization(language_code).OPEN_BUY_SUBSCRIPTIONS_INFO,
+                callback_data='limit_exceeded:open_buy_subscriptions_info'
+            )
+        ],
+        [
+            InlineKeyboardButton(
+                text=get_localization(language_code).OPEN_BUY_PACKAGES_INFO,
+                callback_data='limit_exceeded:open_buy_packages_info'
+            )
+        ],
+    ]
+
+    return InlineKeyboardMarkup(inline_keyboard=buttons)
+
+
 def build_cancel_keyboard(language_code: str) -> InlineKeyboardMarkup:
     buttons = [
         [

@@ -47,7 +47,8 @@ from bot.keyboards.ai.face_swap import (
     build_face_swap_choose_keyboard,
     build_face_swap_package_keyboard,
 )
-from bot.keyboards.common.common import build_cancel_keyboard, build_recommendations_keyboard, build_error_keyboard
+from bot.keyboards.ai.mode import build_switched_to_ai_keyboard
+from bot.keyboards.common.common import build_cancel_keyboard, build_error_keyboard
 from bot.keyboards.common.profile import build_profile_gender_keyboard
 from bot.locales.main import get_localization, get_user_language
 from bot.states.face_swap import FaceSwap
@@ -75,7 +76,7 @@ async def face_swap(message: Message, state: FSMContext):
     user_language_code = await get_user_language(user_id, state.storage)
 
     if user.current_model == Model.FACE_SWAP:
-        reply_markup = await build_recommendations_keyboard(user.current_model, user_language_code, user.gender)
+        reply_markup = build_switched_to_ai_keyboard(user_language_code, Model.FACE_SWAP)
         await message.answer(
             text=get_localization(user_language_code).ALREADY_SWITCHED_TO_THIS_MODEL,
             reply_markup=reply_markup,
@@ -86,7 +87,7 @@ async def face_swap(message: Message, state: FSMContext):
             'current_model': user.current_model,
         })
 
-        reply_markup = await build_recommendations_keyboard(user.current_model, user_language_code, user.gender)
+        reply_markup = build_switched_to_ai_keyboard(user_language_code, Model.FACE_SWAP)
         await message.answer(
             text=get_localization(user_language_code).SWITCHED_TO_FACE_SWAP,
             reply_markup=reply_markup,

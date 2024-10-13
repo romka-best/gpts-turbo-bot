@@ -1,17 +1,31 @@
+import asyncio
 import logging
 
 from aiogram import Bot, Dispatcher
+from aiogram.exceptions import TelegramRetryAfter
 from aiogram.types import Update
 
 from bot.database.main import firebase
 from bot.database.operations.user.getters import get_user
 from bot.database.operations.user.initialize_user_for_the_first_time import initialize_user_for_the_first_time
 from bot.helpers.senders.send_error_info import send_error_info
-from bot.keyboards.common.common import build_recommendations_keyboard, build_error_keyboard
+from bot.keyboards.common.common import build_error_keyboard, build_start_keyboard
 from bot.locales.main import get_localization, get_user_language
 
 
-async def notify_admins_about_error(bot: Bot, telegram_update: Update, dp: Dispatcher, e):
+async def delayed_notify_admins_about_error(
+    bot: Bot,
+    telegram_update: Update,
+    dp: Dispatcher,
+    error_info,
+    timeout: int,
+):
+    await asyncio.sleep(timeout)
+
+    await notify_admins_about_error(bot, telegram_update, dp, error_info)
+
+
+async def notify_admins_about_error(bot: Bot, telegram_update: Update, dp: Dispatcher, error_info):
     try:
         user_id = None
         if telegram_update.callback_query and telegram_update.callback_query.from_user.id:
@@ -37,7 +51,7 @@ async def notify_admins_about_error(bot: Bot, telegram_update: Update, dp: Dispa
 
                 chat_title = get_localization(language_code).DEFAULT_CHAT_TITLE
                 transaction = firebase.db.transaction()
-                await initialize_user_for_the_first_time(
+                user = await initialize_user_for_the_first_time(
                     transaction,
                     telegram_user,
                     chat_id,
@@ -45,12 +59,10 @@ async def notify_admins_about_error(bot: Bot, telegram_update: Update, dp: Dispa
                     None,
                     False,
                 )
-
-                user = await get_user(str(telegram_user.id))
                 user_language_code = await get_user_language(user_id, dp.storage)
 
                 greeting = get_localization(user_language_code).START
-                reply_markup = await build_recommendations_keyboard(user.current_model, user_language_code, user.gender)
+                reply_markup = build_start_keyboard(user_language_code)
                 await bot.send_message(
                     chat_id=chat_id,
                     text=greeting,
@@ -67,8 +79,10 @@ async def notify_admins_about_error(bot: Bot, telegram_update: Update, dp: Dispa
                 await send_error_info(
                     bot=bot,
                     user_id=user.id,
-                    info=e,
+                    info=error_info,
                 )
+    except TelegramRetryAfter as e:
+        asyncio.create_task(delayed_notify_admins_about_error(bot, telegram_update, dp, error_info, e.retry_after + 10))
     except Exception as e:
         logging.exception(f'Error in notify_admins_about_error: {e}')
 

@@ -1,61 +1,75 @@
 import re
+from typing import List, Tuple
 
 
-def get_open_markdown(text_part):
-    open_formatting = {
-        '**': 0,
-        '*': 0,
-        '__': 0,
-        '_': 0,
-        '`': 0,
-        '```': 0,
-    }
+def close_tags(
+    html: str,
+    open_tags: List[str] = None
+) -> Tuple[str, List[str]]:
+    tag_pattern = re.compile(r'<(/?)(\w+)([^>]*)>')
+    open_stack = []
+    close_queue = []
+    close_open_tags = []
 
-    open_code_block = None
+    for tag in tag_pattern.finditer(html):
+        is_closing_tag = tag.group(1) == '/'
+        tag_name = tag.group(2)
+        tag_atr = tag.group(3)
 
-    matches = re.findall(r"(```[\w]*)|(\*\*|\*|__|_|```|`)", text_part)
+        if not is_closing_tag:
+            open_stack.insert(0, tag_name)
+            close_open_tags.append(f"<{tag_name}{tag_atr}>")
+        elif open_stack and open_stack[0] == tag_name:
+            open_stack.pop(0)
+        else:
+            close_queue.append(tag_name)
 
-    for match in matches:
-        symbol = match[0] or match[1]
+    for tag_name in open_stack:
+        html += '</' + tag_name + '>'
 
-        if symbol.startswith('```') and len(symbol) > 3:
-            if open_formatting['```'] % 2 == 0:
-                open_code_block = symbol
-            open_formatting['```'] += 1
-        elif symbol == '```':
-            open_formatting['```'] += 1
-        elif symbol in open_formatting:
-            open_formatting[symbol] += 1
+    if open_tags:
+        html = "".join(open_tags) + html
+    else:
+        for tag_name in close_queue:
+            html = '<' + tag_name + '>' + html
 
-    open_tags = []
-    for symbol, count in open_formatting.items():
-        if count % 2 != 0:
-            if symbol == '```' and open_code_block:
-                open_tags.append(open_code_block + '\n')
-            elif symbol != '_':
-                open_tags.append(symbol)
-
-    return open_tags
-
-
-def close_open_markdown(tags):
-    return ''.join([tag if not tag.startswith('```') else '```' for tag in tags])
-
-
-def reopen_markdown(tags):
-    return ''.join([tag for tag in tags])
+    return html, close_open_tags[-len(open_stack):]
 
 
 def split_message(text: str, chunk_size=4096):
     parts = []
-    current_part = ""
 
-    for i, char in enumerate(text):
-        current_part += char
-        if len(current_part) >= chunk_size or i == len(text) - 1:
-            open_tags = get_open_markdown(current_part)
-            current_part += close_open_markdown(open_tags)
-            parts.append(current_part)
-            current_part = reopen_markdown(open_tags)
+    while text:
+        if len(text) <= chunk_size:
+            parts.append(text)
+            break
 
-    return parts
+        part = text[:chunk_size]
+        first_ln = part.rfind('\n')
+
+        if first_ln != -1:
+            new_part = part[:first_ln]
+            parts.append(new_part)
+
+            text = text[first_ln + 1:]
+            continue
+
+        first_space = part.rfind(' ')
+
+        if first_space != -1:
+            new_part = part[:first_space]
+            parts.append(new_part)
+
+            text = text[first_space + 1:]
+            continue
+
+        parts.append(part)
+        text = text[chunk_size:]
+
+    result_parts = []
+    open_tags = None
+    for part in parts:
+        text, open_tags = close_tags(part, open_tags)
+        result_parts.append(text)
+
+    return result_parts

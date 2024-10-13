@@ -16,8 +16,10 @@ from bot.database.operations.user.updaters import update_user
 from bot.handlers.ai.face_swap_handler import handle_face_swap
 from bot.handlers.payment.bonus_handler import handle_bonus
 from bot.handlers.payment.payment_handler import handle_subscribe, handle_package, handle_cancel_subscription
+from bot.handlers.settings.settings_handler import handle_settings
 from bot.keyboards.common.common import build_cancel_keyboard
-from bot.keyboards.common.profile import build_profile_keyboard, build_profile_gender_keyboard
+from bot.keyboards.common.profile import build_profile_keyboard, build_profile_gender_keyboard, \
+    build_profile_quota_keyboard
 from bot.locales.main import get_localization, get_user_language
 from bot.states.profile import Profile
 
@@ -52,28 +54,13 @@ async def profile(message: Message, state: FSMContext):
     subscription = await get_last_subscription_by_user_id(user_id)
     renewal_date = (user.last_subscription_limit_update + timedelta(days=30))
 
-    current_date = datetime.now(timezone.utc)
-    update_date = datetime(
-        current_date.year,
-        current_date.month,
-        current_date.day,
-        tzinfo=timezone.utc
-    ) + timedelta(days=1)
-    time_left = update_date - current_date
-    hours, remainder = divmod(time_left.seconds, 3600)
-    minutes = remainder // 60
-
     text = get_localization(user_language_code).profile(
         user.subscription_type,
         subscription.status if subscription and subscription.status else SubscriptionStatus.ACTIVE,
         user.gender,
         user.current_model,
         user.settings[user.current_model][UserSettings.VERSION],
-        user.daily_limits,
-        user.additional_usage_quota,
         renewal_date.strftime('%d.%m.%Y'),
-        hours,
-        minutes,
     )
 
     photo_path = f'users/avatars/{user_id}.jpeg'
@@ -89,10 +76,7 @@ async def profile(message: Message, state: FSMContext):
         )
         await message.answer_photo(
             photo=URLInputFile(photo_link, filename=photo_path),
-        )
-        await message.answer(
-            photo=URLInputFile(photo_link, filename=photo_path),
-            text=text,
+            caption=text,
             reply_markup=reply_markup,
         )
     except aiohttp.ClientResponseError:
@@ -112,28 +96,60 @@ async def profile(message: Message, state: FSMContext):
 async def handle_profile_selection(callback_query: CallbackQuery, state: FSMContext):
     await callback_query.answer()
 
-    user_language_code = await get_user_language(str(callback_query.from_user.id), state.storage)
+    user_id = str(callback_query.from_user.id)
+    user_language_code = await get_user_language(user_id, state.storage)
 
     action = callback_query.data.split(':')[1]
 
-    if action == 'change_photo':
+    if action == 'open_settings':
+        await handle_settings(callback_query.message, str(callback_query.from_user.id), state)
+    elif action == 'show_quota':
+        user = await get_user(user_id)
+
+        current_date = datetime.now(timezone.utc)
+        update_date = datetime(
+            current_date.year,
+            current_date.month,
+            current_date.day,
+            tzinfo=timezone.utc
+        ) + timedelta(days=1)
+        time_left = update_date - current_date
+        hours, remainder = divmod(time_left.seconds, 3600)
+        minutes = remainder // 60
+
+        text = get_localization(user_language_code).profile_quota(
+            user.subscription_type,
+            user.daily_limits,
+            user.additional_usage_quota,
+            hours,
+            minutes,
+        )
+        reply_markup = build_profile_quota_keyboard(user_language_code)
+        await callback_query.message.reply(
+            text=text,
+            reply_markup=reply_markup,
+            allow_sending_without_reply=True,
+        )
+    elif action == 'change_photo':
         photo_path = 'users/avatars/example.png'
         photo = await firebase.bucket.get_blob(photo_path)
         photo_link = firebase.get_public_url(photo.name)
 
         reply_markup = build_cancel_keyboard(user_language_code)
-        await callback_query.message.answer_photo(
+        await callback_query.message.reply_photo(
             photo=URLInputFile(photo_link, filename=photo_path),
             caption=get_localization(user_language_code).SEND_ME_YOUR_PICTURE,
-            reply_markup=reply_markup
+            reply_markup=reply_markup,
+            allow_sending_without_reply=True,
         )
 
         await state.set_state(Profile.waiting_for_photo)
     elif action == 'change_gender':
         reply_markup = build_profile_gender_keyboard(user_language_code)
-        await callback_query.message.answer(
+        await callback_query.message.reply(
             text=get_localization(user_language_code).TELL_ME_YOUR_GENDER,
             reply_markup=reply_markup,
+            allow_sending_without_reply=True,
         )
     elif action == 'open_bonus_info':
         await handle_bonus(callback_query.message, str(callback_query.from_user.id), state)

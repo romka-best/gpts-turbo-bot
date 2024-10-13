@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, Optional
 
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
@@ -162,7 +162,14 @@ def build_settings_choose_music_model_keyboard(language_code: str) -> InlineKeyb
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
-def build_settings_keyboard(language_code: str, model: Model, model_type: str, settings: Dict) -> InlineKeyboardMarkup:
+def build_settings_keyboard(
+    language_code: str,
+    model: Model,
+    model_type: str,
+    settings: Dict,
+    show_back_button=True,
+    show_advanced_settings=False,
+) -> InlineKeyboardMarkup:
     buttons = []
     if model == Model.CHAT_GPT or model == Model.CLAUDE or model == Model.GEMINI:
         buttons = [
@@ -191,54 +198,78 @@ def build_settings_keyboard(language_code: str, model: Model, model_type: str, s
                 ),
             ],
         ]
+
+        if show_advanced_settings:
+            buttons.extend(
+                [
+                    [
+                        InlineKeyboardButton(
+                            text=get_localization(language_code).VOICE_MESSAGES,
+                            callback_data=f'setting:voice_messages:{model}'
+                        ),
+                    ],
+                    [
+                        InlineKeyboardButton(
+                            text=get_localization(language_code).MANAGE_CHATS,
+                            callback_data=f'setting:manage_chats:{model}'
+                        ),
+                    ],
+                    [
+                        InlineKeyboardButton(
+                            text=get_localization(language_code).MANAGE_CATALOG,
+                            callback_data=f'setting:manage_catalog:{model}'
+                        ),
+                    ],
+                ]
+            )
     elif model == Model.DALL_E:
         buttons = [
             [
                 InlineKeyboardButton(
                     text=get_localization(language_code).SHOW_USAGE_QUOTA_IN_MESSAGES + (
                         ' ✅' if settings[model][UserSettings.SHOW_USAGE_QUOTA] else ' ❌'),
-                    callback_data=f'setting:{UserSettings.SHOW_USAGE_QUOTA}:{Model.DALL_E}'
+                    callback_data=f'setting:{UserSettings.SHOW_USAGE_QUOTA}:{model}'
                 ),
             ],
             [
                 InlineKeyboardButton(
                     text=DALLEResolution.LOW + (
                         ' ✅' if settings[model][UserSettings.RESOLUTION] == DALLEResolution.LOW else ''),
-                    callback_data=f'setting:{DALLEResolution.LOW}:{Model.DALL_E}'
+                    callback_data=f'setting:{DALLEResolution.LOW}:{model}'
                 ),
                 InlineKeyboardButton(
                     text=DALLEResolution.MEDIUM + (
                         ' ✅' if settings[model][UserSettings.RESOLUTION] == DALLEResolution.MEDIUM else ''),
-                    callback_data=f'setting:{DALLEResolution.MEDIUM}:{Model.DALL_E}'
+                    callback_data=f'setting:{DALLEResolution.MEDIUM}:{model}'
                 ),
                 InlineKeyboardButton(
                     text=DALLEResolution.HIGH + (
                         ' ✅' if settings[model][UserSettings.RESOLUTION] == DALLEResolution.HIGH else ''),
-                    callback_data=f'setting:{DALLEResolution.HIGH}:{Model.DALL_E}'
+                    callback_data=f'setting:{DALLEResolution.HIGH}:{model}'
                 ),
             ],
             [
                 InlineKeyboardButton(
                     text=DALLEQuality.STANDARD + (
                         ' ✅' if settings[model][UserSettings.QUALITY] == DALLEQuality.STANDARD else ''),
-                    callback_data=f'setting:{DALLEQuality.STANDARD}:{Model.DALL_E}'
+                    callback_data=f'setting:{DALLEQuality.STANDARD}:{model}'
                 ),
                 InlineKeyboardButton(
                     text=DALLEQuality.HD + (
                         ' ✅' if settings[model][UserSettings.QUALITY] == DALLEQuality.HD else ''),
-                    callback_data=f'setting:{DALLEQuality.HD}:{Model.DALL_E}'
+                    callback_data=f'setting:{DALLEQuality.HD}:{model}'
                 ),
             ],
             [
                 InlineKeyboardButton(
                     text=DALLEVersion.V2 + (
                         ' ✅' if settings[model][UserSettings.VERSION] == DALLEVersion.V2 else ''),
-                    callback_data=f'setting:{DALLEVersion.V2}:{Model.DALL_E}'
+                    callback_data=f'setting:{DALLEVersion.V2}:{model}'
                 ),
                 InlineKeyboardButton(
                     text=DALLEVersion.V3 + (
                         ' ✅' if settings[model][UserSettings.VERSION] == DALLEVersion.V3 else ''),
-                    callback_data=f'setting:{DALLEVersion.V3}:{Model.DALL_E}'
+                    callback_data=f'setting:{DALLEVersion.V3}:{model}'
                 ),
             ],
         ]
@@ -248,19 +279,19 @@ def build_settings_keyboard(language_code: str, model: Model, model_type: str, s
                 InlineKeyboardButton(
                     text=get_localization(language_code).SHOW_USAGE_QUOTA_IN_MESSAGES + (
                         ' ✅' if settings[model][UserSettings.SHOW_USAGE_QUOTA] else ' ❌'),
-                    callback_data=f'setting:{UserSettings.SHOW_USAGE_QUOTA}:{Model.MIDJOURNEY}'
+                    callback_data=f'setting:{UserSettings.SHOW_USAGE_QUOTA}:{model}'
                 ),
             ],
             [
                 InlineKeyboardButton(
                     text=MidjourneyVersion.V5 + (
                         ' ✅' if settings[model][UserSettings.VERSION] == MidjourneyVersion.V5 else ''),
-                    callback_data=f'setting:{MidjourneyVersion.V5}:{Model.MIDJOURNEY}'
+                    callback_data=f'setting:{MidjourneyVersion.V5}:{model}'
                 ),
                 InlineKeyboardButton(
                     text=MidjourneyVersion.V6 + (
                         ' ✅' if settings[model][UserSettings.VERSION] == MidjourneyVersion.V6 else ''),
-                    callback_data=f'setting:{MidjourneyVersion.V6}:{Model.MIDJOURNEY}'
+                    callback_data=f'setting:{MidjourneyVersion.V6}:{model}'
                 ),
             ],
         ]
@@ -270,7 +301,7 @@ def build_settings_keyboard(language_code: str, model: Model, model_type: str, s
                 InlineKeyboardButton(
                     text=get_localization(language_code).SHOW_USAGE_QUOTA_IN_MESSAGES + (
                         ' ✅' if settings[model][UserSettings.SHOW_USAGE_QUOTA] else ' ❌'),
-                    callback_data=f'setting:{UserSettings.SHOW_USAGE_QUOTA}:{Model.STABLE_DIFFUSION}'
+                    callback_data=f'setting:{UserSettings.SHOW_USAGE_QUOTA}:{model}'
                 ),
             ],
         ]
@@ -280,7 +311,7 @@ def build_settings_keyboard(language_code: str, model: Model, model_type: str, s
                 InlineKeyboardButton(
                     text=get_localization(language_code).SHOW_USAGE_QUOTA_IN_MESSAGES + (
                         ' ✅' if settings[model][UserSettings.SHOW_USAGE_QUOTA] else ' ❌'),
-                    callback_data=f'setting:{UserSettings.SHOW_USAGE_QUOTA}:{Model.FACE_SWAP}'
+                    callback_data=f'setting:{UserSettings.SHOW_USAGE_QUOTA}:{model}'
                 ),
             ],
         ]
@@ -290,7 +321,7 @@ def build_settings_keyboard(language_code: str, model: Model, model_type: str, s
                 InlineKeyboardButton(
                     text=get_localization(language_code).SHOW_USAGE_QUOTA_IN_MESSAGES + (
                         ' ✅' if settings[model][UserSettings.SHOW_USAGE_QUOTA] else ' ❌'),
-                    callback_data=f'setting:{UserSettings.SHOW_USAGE_QUOTA}:{Model.PHOTOSHOP_AI}'
+                    callback_data=f'setting:{UserSettings.SHOW_USAGE_QUOTA}:{model}'
                 ),
             ],
         ]
@@ -300,7 +331,7 @@ def build_settings_keyboard(language_code: str, model: Model, model_type: str, s
                 InlineKeyboardButton(
                     text=get_localization(language_code).SHOW_USAGE_QUOTA_IN_MESSAGES + (
                         ' ✅' if settings[model][UserSettings.SHOW_USAGE_QUOTA] else ' ❌'),
-                    callback_data=f'setting:{UserSettings.SHOW_USAGE_QUOTA}:{Model.MUSIC_GEN}'
+                    callback_data=f'setting:{UserSettings.SHOW_USAGE_QUOTA}:{model}'
                 ),
             ],
         ]
@@ -310,46 +341,53 @@ def build_settings_keyboard(language_code: str, model: Model, model_type: str, s
                 InlineKeyboardButton(
                     text=get_localization(language_code).SHOW_USAGE_QUOTA_IN_MESSAGES + (
                         ' ✅' if settings[model][UserSettings.SHOW_USAGE_QUOTA] else ' ❌'),
-                    callback_data=f'setting:{UserSettings.SHOW_USAGE_QUOTA}:{Model.SUNO}'
+                    callback_data=f'setting:{UserSettings.SHOW_USAGE_QUOTA}:{model}'
                 ),
             ],
             [
                 InlineKeyboardButton(
                     text=get_localization(language_code).AUDIO + (
                         ' ✅' if settings[model][UserSettings.SEND_TYPE] == SunoSendType.AUDIO else ''),
-                    callback_data=f'setting:{SunoSendType.AUDIO}:{Model.SUNO}'
+                    callback_data=f'setting:{SunoSendType.AUDIO}:{model}'
                 ),
                 InlineKeyboardButton(
                     text=get_localization(language_code).VIDEO + (
                         ' ✅' if settings[model][UserSettings.SEND_TYPE] == SunoSendType.VIDEO else ''),
-                    callback_data=f'setting:{SunoSendType.VIDEO}:{Model.SUNO}'
+                    callback_data=f'setting:{SunoSendType.VIDEO}:{model}'
                 ),
             ],
             [
                 InlineKeyboardButton(
                     text=SunoVersion.V3 + (
                         ' ✅' if settings[model][UserSettings.VERSION] == SunoVersion.V3 else ''),
-                    callback_data=f'setting:{SunoVersion.V3}:{Model.SUNO}'
+                    callback_data=f'setting:{SunoVersion.V3}:{model}'
                 ),
                 InlineKeyboardButton(
                     text=SunoVersion.V3_5 + (
                         ' ✅' if settings[model][UserSettings.VERSION] == SunoVersion.V3_5 else ''),
-                    callback_data=f'setting:{SunoVersion.V3_5}:{Model.SUNO}'
+                    callback_data=f'setting:{SunoVersion.V3_5}:{model}'
                 ),
             ],
         ]
 
-    buttons.append([
-        InlineKeyboardButton(
-            text=get_localization(language_code).BACK,
-            callback_data=f'setting:back:{model_type}'
+    if show_back_button:
+        buttons.append(
+            [
+                InlineKeyboardButton(
+                    text=get_localization(language_code).BACK,
+                    callback_data=f'setting:back:{model_type}'
+                )
+            ],
         )
-    ], )
 
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
-def build_voice_messages_settings_keyboard(language_code: str, settings: Dict) -> InlineKeyboardMarkup:
+def build_voice_messages_settings_keyboard(
+    language_code: str,
+    settings: Dict,
+    model: Optional[Model] = None,
+) -> InlineKeyboardMarkup:
     buttons = [
         [
             InlineKeyboardButton(
@@ -397,9 +435,9 @@ def build_voice_messages_settings_keyboard(language_code: str, settings: Dict) -
         [
             InlineKeyboardButton(
                 text=get_localization(language_code).BACK,
-                callback_data='voice_messages_setting:back'
+                callback_data=f'voice_messages_setting:back:{model}' if model else 'voice_messages_setting:back'
             )
-        ]
+        ],
     ]
 
     return InlineKeyboardMarkup(inline_keyboard=buttons)

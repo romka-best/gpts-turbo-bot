@@ -9,9 +9,14 @@ from bot.database.models.user import UserSettings
 from bot.database.operations.user.getters import get_user
 from bot.database.operations.user.updaters import update_user
 from bot.handlers.ai.face_swap_handler import handle_face_swap
+from bot.handlers.ai.music_gen_handler import handle_music_gen
+from bot.handlers.ai.photoshop_ai_handler import handle_photoshop_ai
 from bot.handlers.ai.suno_handler import handle_suno
-from bot.keyboards.common.common import build_recommendations_keyboard
-from bot.keyboards.ai.mode import build_mode_keyboard
+from bot.helpers.getters.get_human_model import get_human_model
+from bot.helpers.getters.get_info_by_model import get_info_by_model
+from bot.helpers.getters.get_model_type import get_model_type
+from bot.keyboards.ai.mode import build_mode_keyboard, build_switched_to_ai_keyboard
+from bot.keyboards.settings.settings import build_settings_keyboard
 from bot.locales.main import get_localization, get_user_language
 
 mode_router = Router()
@@ -94,7 +99,7 @@ async def handle_mode_selection(callback_query: CallbackQuery, state: FSMContext
     user_language_code = await get_user_language(user_id, state.storage)
 
     user.current_model = chosen_model
-    reply_markup = await build_recommendations_keyboard(user.current_model, user_language_code, user.gender)
+    reply_markup = build_switched_to_ai_keyboard(user_language_code, user.current_model)
     if keyboard_changed:
         if chosen_model == Model.CHAT_GPT:
             user.settings[Model.CHAT_GPT][UserSettings.VERSION] = chosen_version
@@ -124,15 +129,60 @@ async def handle_mode_selection(callback_query: CallbackQuery, state: FSMContext
 
     if chosen_model == Model.FACE_SWAP:
         await handle_face_swap(
-            callback_query.bot,
-            str(callback_query.message.chat.id),
-            state,
-            str(callback_query.from_user.id),
+            bot=callback_query.bot,
+            chat_id=str(callback_query.message.chat.id),
+            state=state,
+            user_id=user_id,
+        )
+    elif chosen_model == Model.PHOTOSHOP_AI:
+        await handle_photoshop_ai(
+            bot=callback_query.bot,
+            chat_id=str(callback_query.message.chat.id),
+            state=state,
+            user_id=user_id,
+        )
+    elif chosen_model == Model.MUSIC_GEN:
+        await handle_music_gen(
+            bot=callback_query.bot,
+            chat_id=str(callback_query.message.chat.id),
+            state=state,
+            user_id=user_id,
         )
     elif chosen_model == Model.SUNO:
         await handle_suno(
-            callback_query.bot,
-            str(callback_query.message.chat.id),
-            state,
-            str(callback_query.from_user.id),
+            bot=callback_query.bot,
+            chat_id=str(callback_query.message.chat.id),
+            state=state,
+            user_id=user_id,
+        )
+
+
+@mode_router.callback_query(lambda c: c.data.startswith('switched_to_ai:'))
+async def handle_switched_to_ai_selection(callback_query: CallbackQuery, state: FSMContext):
+    await callback_query.answer()
+
+    user_id = str(callback_query.from_user.id)
+    user_language_code = await get_user_language(user_id, state.storage)
+
+    action, model = callback_query.data.split(':')[1], callback_query.data.split(':')[2]
+    if action == 'settings':
+        user = await get_user(user_id)
+
+        human_model = get_human_model(model, user_language_code)
+        reply_markup = build_settings_keyboard(
+            language_code=user_language_code,
+            model=model,
+            model_type=get_model_type(model),
+            settings=user.settings,
+            show_back_button=False,
+            show_advanced_settings=True,
+        )
+        await callback_query.message.answer(
+            text=get_localization(user_language_code).settings(human_model, model),
+            reply_markup=reply_markup,
+        )
+    elif action == 'info':
+        info_text = get_info_by_model(model, user_language_code)
+        await callback_query.message.answer(
+            text=info_text,
         )

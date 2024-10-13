@@ -21,7 +21,7 @@ async def initialize_user_for_the_first_time(
 ):
     await write_cart_in_transaction(transaction, str(telegram_user.id), [])
     chat = await write_chat_in_transaction(transaction, str(telegram_user.id), telegram_chat_id, title)
-    await write_user_in_transaction(
+    user = await write_user_in_transaction(
         transaction,
         telegram_user,
         chat.id,
@@ -30,3 +30,5 @@ async def initialize_user_for_the_first_time(
         is_referred_by_user,
         quota,
     )
+
+    return user

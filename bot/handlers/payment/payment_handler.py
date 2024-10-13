@@ -15,7 +15,6 @@ from bot.database.models.subscription import (
     SubscriptionStatus,
     SubscriptionType,
     SubscriptionPeriod,
-    SubscriptionLimit,
 )
 from bot.database.models.transaction import TransactionType
 from bot.database.models.user import UserSettings
@@ -42,7 +41,7 @@ from bot.helpers.creaters.create_package import create_package
 from bot.helpers.creaters.create_subscription import create_subscription
 from bot.helpers.getters.get_user_discount import get_user_discount
 from bot.helpers.senders.send_message_to_admins import send_message_to_admins
-from bot.keyboards.common.common import build_recommendations_keyboard
+from bot.keyboards.ai.mode import build_switched_to_ai_keyboard
 from bot.keyboards.payment.payment import (
     build_buy_keyboard,
     build_subscriptions_keyboard,
@@ -362,7 +361,7 @@ async def handle_period_of_subscription_selection(callback_query: CallbackQuery,
     subscription_type, subscription_period = callback_query.data.split(':')[1], callback_query.data.split(':')[2]
     emojis = Subscription.get_emojis()
     price_with_discount = Subscription.get_price(
-        user.currency,
+        Currency.XTR,
         subscription_type,
         subscription_period,
         user.discount,
@@ -1317,7 +1316,7 @@ async def successful_payment(message: Message, state: FSMContext):
                     f'Продолжаем в том же духе 💪',
         )
 
-    reply_markup = await build_recommendations_keyboard(user.current_model, user_language_code, user.gender)
+    reply_markup = build_switched_to_ai_keyboard(user_language_code, user.current_model)
     await message.answer(
         text=get_localization(user_language_code).switched(
             user.current_model,

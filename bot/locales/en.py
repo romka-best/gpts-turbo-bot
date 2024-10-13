@@ -101,7 +101,7 @@ I am constantly updating myself, implementing the most advanced technologies so 
     ┣ 👋 /start - <b>About me</b>: Discover what I can do for you
     ┣ 👤 /profile - <b>View your profile</b>: Check your subscription details or usage quota and more
     ┣ 🌍 /language - <b>Switch languages</b>: Set your preferred language for system interface
-    ┣ 💳 /buy - <b>Subscribe or buy individual packages</b>: Get a new level
+    ┣ 💳 /buy - <b>Subscribe or buy packages</b>: Get a new level
     ┣ 🎁 /bonus - Learn about your bonus balance and <b>exchange bonuses for unique generation packages</b>
     ┣ 🔑 /promo_code - <b>Unleash exclusive AI features</b> and special offers with your <b>promo code</b>
     ┣ 📡 /feedback - <b>Leave feedback</b>: Help me improve
@@ -151,69 +151,69 @@ Just type away a command to begin your AI journey! 🌟
 - <i>Business Helper</i>: Draft emails, create business plans, or brainstorm marketing ideas.
 
 💥 <b>ChatGPT 4.0 Omni: Next-Generation Intelligence</b>
-<i>Detailed Analysis</i>: Perfect for in-depth research, complex technical explanations, or virtual scenario analysis.
-<i>Complex Problem Solving</i>: From mathematical calculations to diagnosing software issues and answering scientific queries.
-<i>Language Mastery</i>: High-level translation and enhancement of conversational skills in various languages.
-<i>Creative Mentor</i>: Inspiring ideas for blogs, scripts, or artistic research.
-<i>Personalized Recommendations</i>: Tailored picks for books, movies, or travel routes based on your preferences.
+- <i>Detailed Analysis</i>: Perfect for in-depth research, complex technical explanations, or virtual scenario analysis.
+- <i>Complex Problem Solving</i>: From mathematical calculations to diagnosing software issues and answering scientific queries.
+- <i>Language Mastery</i>: High-level translation and enhancement of conversational skills in various languages.
+- <i>Creative Mentor</i>: Inspiring ideas for blogs, scripts, or artistic research.
+- <i>Personalized Recommendations</i>: Tailored picks for books, movies, or travel routes based on your preferences.
 
 🧩 <b>ChatGPT o1-mini: A Mini Expert for Problem Solving</b>
-<i>Deep Analysis</i>: Assists with logical reasoning and solving complex problems.
-<i>Critical Thinking</i>: Excels at tasks that require attention to detail and well-reasoned conclusions.
-<i>Educational Assistant</i>: Helps with solutions in programming, mathematics, or scientific research.
-<i>Efficiency</i>: Provides quick and accurate answers to both practical and theoretical questions.
+- <i>Deep Analysis</i>: Assists with logical reasoning and solving complex problems.
+- <i>Critical Thinking</i>: Excels at tasks that require attention to detail and well-reasoned conclusions.
+- <i>Educational Assistant</i>: Helps with solutions in programming, mathematics, or scientific research.
+- <i>Efficiency</i>: Provides quick and accurate answers to both practical and theoretical questions.
 
 🧪 <b>ChatGPT o1-preview: A Revolution in Reasoning</b>
-<i>Advanced Data Analysis</i>: Suitable for processing and analyzing large volumes of information.
-<i>Argumentative Problem Solving</i>: Ideal for tasks that require well-justified conclusions and complex logical structures.
-<i>Hypothesis Generation</i>: Perfect for scientific research and experimentation.
-<i>Strategy Development</i>: Can assist with developing complex strategies in business or personal projects.
+- <i>Advanced Data Analysis</i>: Suitable for processing and analyzing large volumes of information.
+- <i>Argumentative Problem Solving</i>: Ideal for tasks that require well-justified conclusions and complex logical structures.
+- <i>Hypothesis Generation</i>: Perfect for scientific research and experimentation.
+- <i>Strategy Development</i>: Can assist with developing complex strategies in business or personal projects.
 """
     INFO_CLAUDE = """
 🤖 <b>There is what each model can do for you:</b>
 
 📜 <b>Claude 3.0 Haiku: The Art of Brevity and Wisdom</b>
-<i>Deep and Concise Responses</i>: Perfect for brief yet meaningful insights and advice.
-<i>Quick Problem Solving</i>: Instantly delivers solutions for everyday and technical questions.
-<i>Linguistic Precision</i>: Mastery in expressing the essence in a few words, whether it's translation or explanation.
-<i>Creativity in Minimalism</i>: Supports creating short-form content, from poems to succinct ideas.
+- <i>Deep and Concise Responses</i>: Perfect for brief yet meaningful insights and advice.
+- <i>Quick Problem Solving</i>: Instantly delivers solutions for everyday and technical questions.
+- <i>Linguistic Precision</i>: Mastery in expressing the essence in a few words, whether it's translation or explanation.
+- <i>Creativity in Minimalism</i>: Supports creating short-form content, from poems to succinct ideas.
 
 💫 <b>Claude 3.5 Sonnet: A Balance of Speed and Wisdom</b>
-<i>Multifunctional Analysis</i>: Effective for comprehensive research and technical explanations.
-<i>Problem Solving</i>: Assistance with solving mathematical issues, software bugs, or scientific puzzles.
-<i>Linguistic Expert</i>: A reliable assistant for translating texts and enhancing conversational skills in various languages.
-<i>Creative Advisor</i>: Development of creative ideas for content and artistic projects.
-<i>Personal Guide</i>: Recommendations for cultural content and travel planning tailored to your interests.
+- <i>Multifunctional Analysis</i>: Effective for comprehensive research and technical explanations.
+- <i>Problem Solving</i>: Assistance with solving mathematical issues, software bugs, or scientific puzzles.
+- <i>Linguistic Expert</i>: A reliable assistant for translating texts and enhancing conversational skills in various languages.
+- <i>Creative Advisor</i>: Development of creative ideas for content and artistic projects.
+- <i>Personal Guide</i>: Recommendations for cultural content and travel planning tailored to your interests.
 
 🚀 <b>Claude 3.0 Opus: The Pinnacle of Power and Depth</b>
-<i>Advanced Analysis</i>: Ideal for tackling the most complex research and hypothetical scenarios.
-<i>Problem Solving Expert</i>: Addresses challenging scientific inquiries, technical issues, and mathematical problems.
-<i>Language Mastery</i>: Translations and language practice at a professional level.
-<i>Creative Consultant</i>: Support in developing unique ideas for scripts and art projects.
-<i>Recommendations Concierge</i>: Expert advice on selecting books, movies, and travel plans that match your tastes.
+- <i>Advanced Analysis</i>: Ideal for tackling the most complex research and hypothetical scenarios.
+- <i>Problem Solving Expert</i>: Addresses challenging scientific inquiries, technical issues, and mathematical problems.
+- <i>Language Mastery</i>: Translations and language practice at a professional level.
+- <i>Creative Consultant</i>: Support in developing unique ideas for scripts and art projects.
+- <i>Recommendations Concierge</i>: Expert advice on selecting books, movies, and travel plans that match your tastes.
 """
     INFO_GEMINI = """
 🤖 <b>There is what each model can do for you:</b>
 
 🏎 <b>Gemini 1.5 Flash: Speed and Efficiency</b>
-<i>Quick Data Analysis</i>: Ideal for tasks that require instant data processing and response generation.
-<i>Immediate Results</i>: Perfect for fast information retrieval and instant problem-solving.
-<i>Simplified Problem Solving</i>: Capable of assisting with basic calculations, daily tasks, and fast queries.
-<i>Seamless Interaction</i>: Provides users with accurate information in minimal time, ensuring a high level of precision.
+- <i>Quick Data Analysis</i>: Ideal for tasks that require instant data processing and response generation.
+- <i>Immediate Results</i>: Perfect for fast information retrieval and instant problem-solving.
+- <i>Simplified Problem Solving</i>: Capable of assisting with basic calculations, daily tasks, and fast queries.
+- <i>Seamless Interaction</i>: Provides users with accurate information in minimal time, ensuring a high level of precision.
 
 💼 <b>Gemini 1.5 Pro: Professional Power</b>
-<i>In-Depth Analysis</i>: Excels in complex research, deep data analysis, and detailed technical explanations.
-<i>Comprehensive Problem Solving</i>: Suited for high-level tasks, scientific challenges, and complex mathematical questions.
-<i>Linguistic Flexibility</i>: Assists with translations, text editing, and supports multiple languages at a professional level.
-<i>Creative Thinking</i>: Aids in developing ideas for creative projects, writing, and other artistic tasks.
-<i>Personalized Recommendations</i>: Offers expert advice on content selection and event planning based on individual preferences.
+- <i>In-Depth Analysis</i>: Excels in complex research, deep data analysis, and detailed technical explanations.
+- <i>Comprehensive Problem Solving</i>: Suited for high-level tasks, scientific challenges, and complex mathematical questions.
+- <i>Linguistic Flexibility</i>: Assists with translations, text editing, and supports multiple languages at a professional level.
+- <i>Creative Thinking</i>: Aids in developing ideas for creative projects, writing, and other artistic tasks.
+- <i>Personalized Recommendations</i>: Offers expert advice on content selection and event planning based on individual preferences.
 
 🛡 <b>Gemini 1.0 Ultra: Power and Precision</b>
-<i>Unlimited Analytics</i>: Excels in handling complex tasks, deep analysis, and large-scale data processing.
-<i>Accurate Solutions</i>: Ideal for complex calculations and scientific research.
-<i>Linguistic Mastery</i>: Expertise in translations and support for language tasks at the highest level.
-<i>Creative Inspiration</i>: A valuable assistant in the creation and development of complex creative projects and ideas.
-<i>Personalized Interaction</i>: Tailors its responses to your specific needs and preferences.
+- <i>Unlimited Analytics</i>: Excels in handling complex tasks, deep analysis, and large-scale data processing.
+- <i>Accurate Solutions</i>: Ideal for complex calculations and scientific research.
+- <i>Linguistic Mastery</i>: Expertise in translations and support for language tasks at the highest level.
+- <i>Creative Inspiration</i>: A valuable assistant in the creation and development of complex creative projects and ideas.
+- <i>Personalized Interaction</i>: Tailors its responses to your specific needs and preferences.
 """
     INFO_DALL_E = """
 🤖 <b>There is what the model can do for you:</b>
@@ -258,29 +258,30 @@ Just type away a command to begin your AI journey! 🌟
     INFO_PHOTOSHOP_AI = """
 🤖 <b>There is what the model can do for you:</b>
 
-<i>Photo Restoration</i>: Revives old or damaged photos, returning them to their original state.
-<i>Black-and-White to Color</i>: Breathes life into black-and-white photos by adding vibrant and natural colors.
-<i>Background Removal</i>: Easily removes the background from images, leaving only the main subject.
+🪄 <b>Photoshop AI: Magic with Photos</b>
+- <i>Photo Restoration</i>: Revives old or damaged photos, returning them to their original state.
+- <i>Black-and-White to Color</i>: Breathes life into black-and-white photos by adding vibrant and natural colors.
+- <i>Background Removal</i>: Easily removes the background from images, leaving only the main subject.
 """
     INFO_MUSIC_GEN = """
 🤖 <b>There is what the model can do for you:</b>
 
 🎺 <b>MusicGen: Your Personal Composer</b>
-<i>Creating Unique Melodies</i>: Turn your ideas into musical pieces of any genre - from classical to pop.
-<i>Personalized Soundtracks</i>: Create a soundtrack for your next video project, game, or presentation.
-<i>Exploring Musical Styles</i>: Experiment with different musical genres and sounds to find your unique style.
-<i>Learning and Inspiration</i>: Gain new insights into music theory and the history of genres through music creation.
-<i>Instant Melody Creation</i>: Just enter a text description or mood, and MusicGen will instantly turn it into music.
+- <i>Creating Unique Melodies</i>: Turn your ideas into musical pieces of any genre - from classical to pop.
+- <i>Personalized Soundtracks</i>: Create a soundtrack for your next video project, game, or presentation.
+- <i>Exploring Musical Styles</i>: Experiment with different musical genres and sounds to find your unique style.
+- <i>Learning and Inspiration</i>: Gain new insights into music theory and the history of genres through music creation.
+- <i>Instant Melody Creation</i>: Just enter a text description or mood, and MusicGen will instantly turn it into music.
 """
     INFO_SUNO = """
 🤖 <b>There is what the model can do for you:</b>
 
 🎸 <b>Suno: A Pro in Creating Songs</b>
-<i>Text-to-song transformation</i>: Suno turns your text into songs, matching melody and rhythm to your style.
-<i>Personalized songs</i>: Create unique songs for special moments, whether it's a personal gift or a soundtrack for your event.
-<i>Explore musical genres</i>: Discover new musical horizons by experimenting with different styles and sounds.
-<i>Music education and inspiration</i>: Learn about music theory and the history of genres through the practice of composition.
-<i>Instant music creation</i>: Describe your emotions or scenario, and Suno will immediately bring your description to life as a song.
+- <i>Text-to-song transformation</i>: Suno turns your text into songs, matching melody and rhythm to your style.
+- <i>Personalized songs</i>: Create unique songs for special moments, whether it's a personal gift or a soundtrack for your event.
+- <i>Explore musical genres</i>: Discover new musical horizons by experimenting with different styles and sounds.
+- <i>Music education and inspiration</i>: Learn about music theory and the history of genres through the practice of composition.
+- <i>Instant music creation</i>: Describe your emotions or scenario, and Suno will immediately bring your description to life as a song.
 """
 
     TEXT_MODELS = "🔤 Text models"
@@ -334,6 +335,7 @@ But don't worry! You can enter the command /bonus to see the other ways to top u
 """
 
     # Profile
+    SHOW_QUOTA = "🔄 Show Quota"
     TELL_ME_YOUR_GENDER = "Tell me your gender:"
     YOUR_GENDER = "Your gender:"
     UNSPECIFIED = "Unspecified 🤷"
@@ -359,20 +361,21 @@ But don't worry! You can enter the command /bonus to see the other ways to top u
 
 Once you've got the perfect shot, <b>upload your photo</b> and let the magic happen 🌟
     """
-    UPLOAD_PHOTO = "Upload photo 📷"
+    UPLOAD_PHOTO = "📷 Upload Photo"
     UPLOADING_PHOTO = "Uploading photo..."
     NO_FACE_IN_PHOTO = "I can't see a face in the photo. Please try another 📷"
 
-    CHANGE_PHOTO = "Change photo 📷"
+    CHANGE_PHOTO = "📷 Change Photo"
     CHANGE_PHOTO_SUCCESS = "📸 Photo successfully uploaded! 🌟"
 
-    CHOOSE_GENDER = "Choose gender 🚹🚺"
-    CHANGE_GENDER = "Change gender 🚹🚺"
+    CHOOSE_GENDER = "🚹🚺 Choose Gender"
+    CHANGE_GENDER = "🚹🚺 Change Gender"
 
-    OPEN_BONUS_INFO = "🎁 Open bonus balance"
+    OPEN_SETTINGS = "⚙️ Open Settings"
+    OPEN_BONUS_INFO = "🎁 Open Bonus Balance"
     OPEN_BUY_SUBSCRIPTIONS_INFO = "💎 Subscribe"
-    OPEN_BUY_PACKAGES_INFO = "🛍 Purchase individual packages"
-    CANCEL_SUBSCRIPTION = "❌ Cancel subscription"
+    OPEN_BUY_PACKAGES_INFO = "🛍 Purchase Packages"
+    CANCEL_SUBSCRIPTION = "❌ Cancel Subscription"
     CANCEL_SUBSCRIPTION_CONFIRMATION = "❗Are you sure you want to cancel the subscription?"
     CANCEL_SUBSCRIPTION_SUCCESS = "💸 Subscription cancellation was successful!"
     NO_ACTIVE_SUBSCRIPTION = "💸 You don't have an active subscription"
@@ -709,13 +712,12 @@ Our goal is safety and respect for every user! 🌟
 <b>Oops! 🚨</b>
 
 Your today's quota for the current model has just done a Houdini and disappeared! 🎩
-But don't worry, you've got options:
-- Check out /buy for more magical moments, or
-- Invite your friends using /bonus command to get some bonuses, or
-- Switch up the fun with a different AI model using /mode
 
-The adventure continues! 🚀✨
+❗️But don't worry, you've got options:
 """
+    CHANGE_AI_MODEL = "🤖 Change AI Model"
+    REMOVE_RESTRICTION = "⛔️ Remove the Restriction"
+    REMOVE_RESTRICTION_INFO = "To remove the restriction, choose one of the actions 👇"
     IMAGE_SUCCESS = "✨ Here's your image creation! 🎨"
 
     # Examples
@@ -881,8 +883,6 @@ Choose by clicking a button below 👇
 
 🪆💳 <b>YooKassa (Russian's Cards)</b>
 
-🌍💳 <b>PaySelection (International Cards)</b>
-
 ✈️⭐️ <b>Telegram Stars (Currency in Telegram)</b>
 """
     PROCEED_TO_PAY = "🌐 Proceed to payment"
@@ -1036,7 +1036,7 @@ Choose from an array of AI personas, each with its own flair and expertise. Whet
 🔒 <b>Whoops! Looks like you've hit a VIP-only zone!</b> 🌟
 
 You're just a click away from unlocking our treasure trove of AI roles, but it seems you don't have the golden key yet. No worries, though! You can grab it easily.
-🚀 Head over to /buy for some fantastic subscription options, or check out individual packages if you're in the mood for some a la carte AI delights.
+🚀 Head over to /buy for some fantastic subscription options, or check out packages if you're in the mood for some a la carte AI delights.
 
 Once you're all set up, our catalog of AI wonders will be waiting for you – your ticket to an extraordinary world of AI possibilities! 🎫✨
 """
@@ -1186,11 +1186,7 @@ Please try again 🥺
         gender,
         current_model,
         current_model_version,
-        daily_limits,
-        additional_usage_quota,
         renewal_date,
-        hours_before_limit_update,
-        minutes_before_limit_update,
     ) -> str:
         emojis = Subscription.get_emojis()
 
@@ -1257,7 +1253,20 @@ Please try again 🥺
 
 ---------------------------
 
-Quota:
+Choose action 👇
+"""
+
+    @staticmethod
+    def profile_quota(
+        subscription_type: SubscriptionType,
+        daily_limits,
+        additional_usage_quota,
+        hours_before_limit_update: int,
+        minutes_before_limit_update: int,
+    ) -> str:
+        return f"""
+<b>Quota:</b>
+
 🔤 Text models:
 ━ 💭 <b>ChatGPT</b>:
     ┣ ✉️ 4.0 Omni Mini:
@@ -1293,6 +1302,8 @@ Quota:
         ┣ {format_number(daily_limits[Quota.GEMINI_1_ULTRA])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.GEMINI_1_ULTRA])}
         ┗ Extra: {additional_usage_quota[Quota.GEMINI_1_ULTRA]}
 
+---------------------------
+
 🖼 Image models:
 ━ 👨‍🎨 <b>DALL-E</b>:
     ┣ {format_number(daily_limits[Quota.DALL_E])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.DALL_E])}
@@ -1310,6 +1321,8 @@ Quota:
     ┣ {format_number(daily_limits[Quota.PHOTOSHOP_AI])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.PHOTOSHOP_AI])}
     ┗ Extra: {additional_usage_quota[Quota.PHOTOSHOP_AI]}
 
+---------------------------
+
 🎵 Music models:
 ━ 🎺 <b>MusicGen</b>:
     ┣ {format_number(daily_limits[Quota.MUSIC_GEN])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.MUSIC_GEN])}
@@ -1318,10 +1331,14 @@ Quota:
     ┣ {format_number(daily_limits[Quota.SUNO])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.SUNO])}
     ┗ Extra: {additional_usage_quota[Quota.SUNO]}
 
+---------------------------
+
 ━ 💬 <b>Thematic chats</b>: {additional_usage_quota[Quota.ADDITIONAL_CHATS]}
 ━ 🎭 <b>Access to a catalog with digital employees</b>: {'✅' if additional_usage_quota[Quota.ACCESS_TO_CATALOG] else '❌'}
 ━ 🎙 <b>Voice messages</b>: {'✅' if additional_usage_quota[Quota.VOICE_MESSAGES] else '❌'}
 ━ ⚡ <b>Fast answers</b>: {'✅' if additional_usage_quota[Quota.FAST_MESSAGES] else '❌'}
+
+---------------------------
 
 🔄 <i>Limit will be updated in: {hours_before_limit_update} h. {minutes_before_limit_update} min.</i>
 """

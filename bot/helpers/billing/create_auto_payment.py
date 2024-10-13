@@ -41,6 +41,19 @@ async def create_auto_payment(
             'payment_method_id': provider_auto_payment_charge_id,
             'description': description,
             'merchant_customer_id': user_id,
+            'receipt': {
+                'items': [
+                    {
+                        'amount': {
+                            'value': amount,
+                            'currency': Currency.RUB,
+                        },
+                        'description': description,
+                        'vat_code': 1,
+                        'quantity': 1,
+                    }
+                ]
+            },
         }
 
         async with aiohttp.ClientSession(

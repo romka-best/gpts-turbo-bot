@@ -134,12 +134,12 @@ def build_info_music_models_keyboard(language_code: str) -> InlineKeyboardMarkup
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
-def build_info_chosen_model_keyboard(language_code: str, model_type: str) -> InlineKeyboardMarkup:
+def build_info_chosen_model_type_keyboard(language_code: str, model_type: str) -> InlineKeyboardMarkup:
     buttons = [
         [
             InlineKeyboardButton(
                 text=get_localization(language_code).BACK,
-                callback_data=f'info_chosen_model:back:{model_type}'
+                callback_data=f'info_chosen_model_type:back:{model_type}'
             ),
         ],
     ]

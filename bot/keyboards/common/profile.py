@@ -13,6 +13,18 @@ def build_profile_keyboard(
     buttons = [
         [
             InlineKeyboardButton(
+                text=get_localization(language_code).OPEN_SETTINGS,
+                callback_data=f'profile:open_settings'
+            ),
+        ],
+        [
+            InlineKeyboardButton(
+                text=get_localization(language_code).SHOW_QUOTA,
+                callback_data=f'profile:show_quota'
+            ),
+        ],
+        [
+            InlineKeyboardButton(
                 text=get_localization(language_code).CHANGE_PHOTO if is_photo_uploaded else get_localization(
                     language_code).UPLOAD_PHOTO,
                 callback_data=f'profile:change_photo'
@@ -52,6 +64,31 @@ def build_profile_keyboard(
                 callback_data=f'profile:cancel_subscription'
             )
         ])
+
+    return InlineKeyboardMarkup(inline_keyboard=buttons)
+
+
+def build_profile_quota_keyboard(language_code: str):
+    buttons = [
+        [
+            InlineKeyboardButton(
+                text=get_localization(language_code).OPEN_BONUS_INFO,
+                callback_data=f'profile:open_bonus_info'
+            ),
+        ],
+        [
+            InlineKeyboardButton(
+                text=get_localization(language_code).OPEN_BUY_SUBSCRIPTIONS_INFO,
+                callback_data=f'profile:open_buy_subscriptions_info'
+            ),
+        ],
+        [
+            InlineKeyboardButton(
+                text=get_localization(language_code).OPEN_BUY_PACKAGES_INFO,
+                callback_data=f'profile:open_buy_packages_info'
+            ),
+        ],
+    ]
 
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
