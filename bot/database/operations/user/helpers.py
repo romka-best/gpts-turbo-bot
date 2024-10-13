@@ -64,7 +64,7 @@ def create_user_object(
         is_blocked=False,
         is_banned=False,
         current_model=user_data.get('current_model', default_model),
-        currency=user_data.get('currency', Currency.RUB if telegram_user.language_code == 'ru' else Currency.USD),
+        currency=user_data.get('currency', Currency.RUB if telegram_user.language_code == 'ru' else Currency.XTR),
         balance=user_data.get('balance', 25.00 if is_referred_by_user else 0),
         subscription_type=user_data.get('subscription_type', SubscriptionType.FREE),
         last_subscription_limit_update=user_data.get('last_subscription_limit_update', datetime.now(timezone.utc)),

@@ -21,7 +21,7 @@ commands_en = [
     ),
     BotCommand(
         command='buy',
-        description='💎 Buy a subscription or individual packages',
+        description='💎 Buy a subscription or packages',
     ),
     BotCommand(
         command='profile',
@@ -112,7 +112,7 @@ commands_ru = [
     ),
     BotCommand(
         command='buy',
-        description='💎 Приобрести подписку или индивидуальные пакеты',
+        description='💎 Приобрести подписку или пакеты',
     ),
     BotCommand(
         command='profile',

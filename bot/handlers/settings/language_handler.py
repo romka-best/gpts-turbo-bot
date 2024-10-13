@@ -5,7 +5,6 @@ from aiogram.types import Message, CallbackQuery
 
 from bot.database.operations.user.getters import get_user
 from bot.helpers.setters.set_commands import set_commands_for_user
-from bot.keyboards.common.common import build_recommendations_keyboard
 from bot.keyboards.settings.language import build_language_keyboard
 from bot.locales.main import get_localization, get_user_language, set_user_language
 from bot.utils.is_admin import is_admin
@@ -40,10 +39,8 @@ async def handle_language_selection(callback_query: CallbackQuery, state: FSMCon
     if not is_admin(str(callback_query.message.chat.id)) and not is_developer(str(callback_query.message.chat.id)):
         await set_commands_for_user(callback_query.bot, user.telegram_chat_id, chosen_language)
 
-    reply_markup = await build_recommendations_keyboard(user.current_model, chosen_language, user.gender)
     await callback_query.message.answer(
         text=get_localization(chosen_language).CHOOSE_LANGUAGE,
-        reply_markup=reply_markup,
     )
 
     await callback_query.message.delete()

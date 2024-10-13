@@ -130,7 +130,8 @@ def build_mode_keyboard(language_code: str, model: Model, model_version: str, pa
             ],
             [
                 InlineKeyboardButton(
-                    text=get_localization(language_code).STABLE_DIFFUSION + (' ✅' if model == Model.STABLE_DIFFUSION else ''),
+                    text=get_localization(language_code).STABLE_DIFFUSION + (
+                        ' ✅' if model == Model.STABLE_DIFFUSION else ''),
                     callback_data=f'mode:{Model.STABLE_DIFFUSION}'
                 ),
             ],
@@ -196,5 +197,24 @@ def build_mode_keyboard(language_code: str, model: Model, model_version: str, pa
                 ),
             ]
         ])
+
+    return InlineKeyboardMarkup(inline_keyboard=buttons)
+
+
+def build_switched_to_ai_keyboard(language_code: str, model: Model) -> InlineKeyboardMarkup:
+    buttons = [
+        [
+            InlineKeyboardButton(
+                text=get_localization(language_code).SWITCHED_TO_AI_SETTINGS,
+                callback_data=f'switched_to_ai:settings:{model}'
+            ),
+        ],
+        [
+            InlineKeyboardButton(
+                text=get_localization(language_code).SWITCHED_TO_AI_INFO,
+                callback_data=f'switched_to_ai:info:{model}'
+            ),
+        ],
+    ]
 
     return InlineKeyboardMarkup(inline_keyboard=buttons)

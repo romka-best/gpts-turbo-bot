@@ -168,11 +168,7 @@ async def delayed_handle_update(update: Update, timeout: int):
 async def handle_update(update: dict):
     telegram_update = types.Update(**update)
     try:
-        retries = config.MAX_RETRIES
-        if telegram_update.callback_query and telegram_update.callback_query.data.startswith('blast_confirmation:'):
-            retries = 1
-
-        for i in range(retries):
+        for i in range(config.MAX_RETRIES):
             try:
                 await dp.feed_update(bot=bot, update=telegram_update)
                 break
@@ -191,9 +187,14 @@ async def handle_update(update: dict):
     except TelegramForbiddenError:
         await handle_forbidden_error(telegram_update)
     except TelegramRetryAfter as e:
-        if telegram_update.callback_query and telegram_update.callback_query.data.startswith('blast_confirmation:'):
+        if (
+            telegram_update.callback_query and
+            telegram_update.callback_query.data and
+            telegram_update.callback_query.data.startswith('blast_confirmation:')
+        ):
             logging.warning(e)
         else:
+            logging.error(f'Error in bot_webhook telegram retry after: {e}')
             asyncio.create_task(delayed_handle_update(telegram_update, e.retry_after + 10))
     except TelegramBadRequest as e:
         if e.message.startswith('Bad Request: message can\'t be deleted for everyone'):
@@ -207,7 +208,7 @@ async def handle_update(update: dict):
         elif e.message.startswith('Bad Request: query is too old and response timeout expired or query ID is invalid'):
             logging.warning(e)
         else:
-            logging.exception(f'Error in bot_webhook: {e}')
+            logging.error(f'Error in bot_webhook telegram bad request: {e}')
             await notify_admins_about_error(bot, telegram_update, dp, e)
     except Exception as e:
         logging.exception(f'Error in bot_webhook: {e}')

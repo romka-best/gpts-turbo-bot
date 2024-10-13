@@ -56,6 +56,7 @@ class Texts(Protocol):
     FEEDBACK_DENIED: str
 
     # Profile
+    SHOW_QUOTA: str
     TELL_ME_YOUR_GENDER: str
     YOUR_GENDER: str
     UNSPECIFIED: str
@@ -69,6 +70,7 @@ class Texts(Protocol):
     CHANGE_PHOTO_SUCCESS: str
     CHOOSE_GENDER: str
     CHANGE_GENDER: str
+    OPEN_SETTINGS: str
     OPEN_BONUS_INFO: str
     OPEN_BUY_SUBSCRIPTIONS_INFO: str
     OPEN_BUY_PACKAGES_INFO: str
@@ -320,6 +322,8 @@ class Texts(Protocol):
     CHOOSE_CHATGPT_MODEL: str
     CHOOSE_CLAUDE_MODEL: str
     CHOOSE_GEMINI_MODEL: str
+    SWITCHED_TO_AI_SETTINGS: str
+    SWITCHED_TO_AI_INFO: str
     SWITCHED_TO_CHATGPT4_OMNI_MINI: str
     SWITCHED_TO_CHATGPT4_OMNI: str
     SWITCHED_TO_CHAT_GPT_O_1_MINI: str
@@ -349,6 +353,9 @@ class Texts(Protocol):
     READY_FOR_NEW_REQUEST: str
     CONTINUE_GENERATING: str
     REACHED_USAGE_LIMIT: str
+    CHANGE_AI_MODEL: str
+    REMOVE_RESTRICTION: str
+    REMOVE_RESTRICTION_INFO: str
     IMAGE_SUCCESS: str
 
     # Examples
@@ -903,16 +910,16 @@ class Texts(Protocol):
     ┣ ❌ С ошибкой: {count_all_transactions[ServiceType.CHAT_GPT3_TURBO]['FAIL']} {calculate_percentage_difference(is_all_time, count_all_transactions[ServiceType.CHAT_GPT3_TURBO]['FAIL'], count_all_transactions_before[ServiceType.CHAT_GPT3_TURBO]['FAIL'])}
     ┣ 🚀 Примеров: {count_all_transactions[ServiceType.CHAT_GPT3_TURBO]['EXAMPLE']} {calculate_percentage_difference(is_all_time, count_all_transactions[ServiceType.CHAT_GPT3_TURBO]['EXAMPLE'], count_all_transactions_before[ServiceType.CHAT_GPT3_TURBO]['EXAMPLE'])}
     ┗ 📝 Всего: {count_all_transactions[ServiceType.CHAT_GPT3_TURBO]['ALL']} {calculate_percentage_difference(is_all_time, count_all_transactions[ServiceType.CHAT_GPT3_TURBO]['ALL'], count_all_transactions_before[ServiceType.CHAT_GPT3_TURBO]['ALL'])}
-━ 2️⃣ <b>{Texts.CHATGPT4_OMNI_MINI}:</b>
-    ┣ ✅ Удачных: {count_all_transactions[ServiceType.CHAT_GPT4_OMNI_MINI]['SUCCESS']} {calculate_percentage_difference(is_all_time, count_all_transactions[ServiceType.CHAT_GPT4_OMNI_MINI]['SUCCESS'], count_all_transactions_before[ServiceType.CHAT_GPT4_OMNI_MINI]['SUCCESS'])}
-    ┣ ❌ С ошибкой: {count_all_transactions[ServiceType.CHAT_GPT4_OMNI_MINI]['FAIL']} {calculate_percentage_difference(is_all_time, count_all_transactions[ServiceType.CHAT_GPT4_OMNI_MINI]['FAIL'], count_all_transactions_before[ServiceType.CHAT_GPT4_OMNI_MINI]['FAIL'])}
-    ┣ 🚀 Примеров: {count_all_transactions[ServiceType.CHAT_GPT4_OMNI_MINI]['EXAMPLE']} {calculate_percentage_difference(is_all_time, count_all_transactions[ServiceType.CHAT_GPT4_OMNI_MINI]['EXAMPLE'], count_all_transactions_before[ServiceType.CHAT_GPT4_OMNI_MINI]['EXAMPLE'])}
-    ┗ 📝 Всего: {count_all_transactions[ServiceType.CHAT_GPT4_OMNI_MINI]['ALL']} {calculate_percentage_difference(is_all_time, count_all_transactions[ServiceType.CHAT_GPT4_OMNI_MINI]['ALL'], count_all_transactions_before[ServiceType.CHAT_GPT4_OMNI_MINI]['ALL'])}
-━ 3️⃣ <b>{Texts.CHATGPT4_TURBO}:</b>
+━ 2️⃣ <b>{Texts.CHATGPT4_TURBO}:</b>
     ┣ ✅ Удачных: {count_all_transactions[ServiceType.CHAT_GPT4_TURBO]['SUCCESS']} {calculate_percentage_difference(is_all_time, count_all_transactions[ServiceType.CHAT_GPT4_TURBO]['SUCCESS'], count_all_transactions_before[ServiceType.CHAT_GPT4_TURBO]['SUCCESS'])}
     ┣ ❌ С ошибкой: {count_all_transactions[ServiceType.CHAT_GPT4_TURBO]['FAIL']} {calculate_percentage_difference(is_all_time, count_all_transactions[ServiceType.CHAT_GPT4_TURBO]['FAIL'], count_all_transactions_before[ServiceType.CHAT_GPT4_TURBO]['FAIL'])}
     ┣ 🚀 Примеров: {count_all_transactions[ServiceType.CHAT_GPT4_TURBO]['EXAMPLE']} {calculate_percentage_difference(is_all_time, count_all_transactions[ServiceType.CHAT_GPT4_TURBO]['EXAMPLE'], count_all_transactions_before[ServiceType.CHAT_GPT4_TURBO]['EXAMPLE'])}
     ┗ 📝 Всего: {count_all_transactions[ServiceType.CHAT_GPT4_TURBO]['ALL']} {calculate_percentage_difference(is_all_time, count_all_transactions[ServiceType.CHAT_GPT4_TURBO]['ALL'], count_all_transactions_before[ServiceType.CHAT_GPT4_TURBO]['ALL'])}
+━ 3️⃣ <b>{Texts.CHATGPT4_OMNI_MINI}:</b>
+    ┣ ✅ Удачных: {count_all_transactions[ServiceType.CHAT_GPT4_OMNI_MINI]['SUCCESS']} {calculate_percentage_difference(is_all_time, count_all_transactions[ServiceType.CHAT_GPT4_OMNI_MINI]['SUCCESS'], count_all_transactions_before[ServiceType.CHAT_GPT4_OMNI_MINI]['SUCCESS'])}
+    ┣ ❌ С ошибкой: {count_all_transactions[ServiceType.CHAT_GPT4_OMNI_MINI]['FAIL']} {calculate_percentage_difference(is_all_time, count_all_transactions[ServiceType.CHAT_GPT4_OMNI_MINI]['FAIL'], count_all_transactions_before[ServiceType.CHAT_GPT4_OMNI_MINI]['FAIL'])}
+    ┣ 🚀 Примеров: {count_all_transactions[ServiceType.CHAT_GPT4_OMNI_MINI]['EXAMPLE']} {calculate_percentage_difference(is_all_time, count_all_transactions[ServiceType.CHAT_GPT4_OMNI_MINI]['EXAMPLE'], count_all_transactions_before[ServiceType.CHAT_GPT4_OMNI_MINI]['EXAMPLE'])}
+    ┗ 📝 Всего: {count_all_transactions[ServiceType.CHAT_GPT4_OMNI_MINI]['ALL']} {calculate_percentage_difference(is_all_time, count_all_transactions[ServiceType.CHAT_GPT4_OMNI_MINI]['ALL'], count_all_transactions_before[ServiceType.CHAT_GPT4_OMNI_MINI]['ALL'])}
 ━ 4️⃣ <b>{Texts.CHATGPT4_OMNI}:</b>
     ┣ ✅ Удачных: {count_all_transactions[ServiceType.CHAT_GPT4_OMNI]['SUCCESS']} {calculate_percentage_difference(is_all_time, count_all_transactions[ServiceType.CHAT_GPT4_OMNI]['SUCCESS'], count_all_transactions_before[ServiceType.CHAT_GPT4_OMNI]['SUCCESS'])}
     ┣ ❌ С ошибкой: {count_all_transactions[ServiceType.CHAT_GPT4_OMNI]['FAIL']} {calculate_percentage_difference(is_all_time, count_all_transactions[ServiceType.CHAT_GPT4_OMNI]['FAIL'], count_all_transactions_before[ServiceType.CHAT_GPT4_OMNI]['FAIL'])}
@@ -1355,7 +1362,7 @@ class Texts(Protocol):
 📡 <b>Обратная связь:</b>
 ━ 1️⃣ <b>Одобрено:</b> {count_feedbacks[FeedbackStatus.APPROVED]} {calculate_percentage_difference(is_all_time, count_feedbacks[FeedbackStatus.APPROVED], count_feedbacks_before[FeedbackStatus.APPROVED])}
 ━ 2️⃣ <b>Отклонено:</b> {count_feedbacks[FeedbackStatus.DENIED]} {calculate_percentage_difference(is_all_time, count_feedbacks[FeedbackStatus.DENIED], count_feedbacks_before[FeedbackStatus.DENIED])}
-━ 2️⃣ <b>В ожидании:</b> {count_feedbacks[FeedbackStatus.DENIED]} {calculate_percentage_difference(is_all_time, count_feedbacks[FeedbackStatus.DENIED], count_feedbacks_before[FeedbackStatus.DENIED])}
+━ 3️⃣ <b>В ожидании:</b> {count_feedbacks[FeedbackStatus.WAITING]} {calculate_percentage_difference(is_all_time, count_feedbacks[FeedbackStatus.WAITING], count_feedbacks_before[FeedbackStatus.WAITING])}
 ━ 4️⃣ <b>Всего:</b> {all_feedbacks} {calculate_percentage_difference(is_all_time, all_feedbacks, all_feedbacks_before)}
 
 🎮 <b>Игр сыграно:</b>
@@ -1382,6 +1389,61 @@ class Texts(Protocol):
     ):
         is_all_time = period == 'всё время'
 
+        all_bonuses = sum(
+            [
+                count_all_transactions[ServiceType.CHAT_GPT3_TURBO]['BONUS'],
+                count_all_transactions[ServiceType.CHAT_GPT4_TURBO]['BONUS'],
+                count_all_transactions[ServiceType.CHAT_GPT4_OMNI_MINI]['BONUS'],
+                count_all_transactions[ServiceType.CHAT_GPT4_OMNI]['BONUS'],
+                count_all_transactions[ServiceType.CHAT_GPT_O_1_MINI]['BONUS'],
+                count_all_transactions[ServiceType.CHAT_GPT_O_1_PREVIEW]['BONUS'],
+                count_all_transactions[ServiceType.CLAUDE_3_HAIKU]['BONUS'],
+                count_all_transactions[ServiceType.CLAUDE_3_SONNET]['BONUS'],
+                count_all_transactions[ServiceType.CLAUDE_3_OPUS]['BONUS'],
+                count_all_transactions[ServiceType.GEMINI_1_FLASH]['BONUS'],
+                count_all_transactions[ServiceType.GEMINI_1_PRO]['BONUS'],
+                count_all_transactions[ServiceType.GEMINI_1_ULTRA]['BONUS'],
+                count_all_transactions[ServiceType.DALL_E]['BONUS'],
+                count_all_transactions[ServiceType.MIDJOURNEY]['BONUS'],
+                count_all_transactions[ServiceType.STABLE_DIFFUSION]['BONUS'],
+                count_all_transactions[ServiceType.FACE_SWAP]['BONUS'],
+                count_all_transactions[ServiceType.PHOTOSHOP_AI]['BONUS'],
+                count_all_transactions[ServiceType.MUSIC_GEN]['BONUS'],
+                count_all_transactions[ServiceType.SUNO]['BONUS'],
+                count_all_transactions[ServiceType.ADDITIONAL_CHATS]['BONUS'],
+                count_all_transactions[ServiceType.ACCESS_TO_CATALOG]['BONUS'],
+                count_all_transactions[ServiceType.VOICE_MESSAGES]['BONUS'],
+                count_all_transactions[ServiceType.FAST_MESSAGES]['BONUS'],
+            ]
+        )
+        all_bonuses_before = sum(
+            [
+                count_all_transactions_before[ServiceType.CHAT_GPT3_TURBO]['BONUS'],
+                count_all_transactions_before[ServiceType.CHAT_GPT4_TURBO]['BONUS'],
+                count_all_transactions_before[ServiceType.CHAT_GPT4_OMNI_MINI]['BONUS'],
+                count_all_transactions_before[ServiceType.CHAT_GPT4_OMNI]['BONUS'],
+                count_all_transactions_before[ServiceType.CHAT_GPT_O_1_MINI]['BONUS'],
+                count_all_transactions_before[ServiceType.CHAT_GPT_O_1_PREVIEW]['BONUS'],
+                count_all_transactions_before[ServiceType.CLAUDE_3_HAIKU]['BONUS'],
+                count_all_transactions_before[ServiceType.CLAUDE_3_SONNET]['BONUS'],
+                count_all_transactions_before[ServiceType.CLAUDE_3_OPUS]['BONUS'],
+                count_all_transactions_before[ServiceType.GEMINI_1_FLASH]['BONUS'],
+                count_all_transactions_before[ServiceType.GEMINI_1_PRO]['BONUS'],
+                count_all_transactions_before[ServiceType.GEMINI_1_ULTRA]['BONUS'],
+                count_all_transactions_before[ServiceType.DALL_E]['BONUS'],
+                count_all_transactions_before[ServiceType.MIDJOURNEY]['BONUS'],
+                count_all_transactions_before[ServiceType.STABLE_DIFFUSION]['BONUS'],
+                count_all_transactions_before[ServiceType.FACE_SWAP]['BONUS'],
+                count_all_transactions_before[ServiceType.PHOTOSHOP_AI]['BONUS'],
+                count_all_transactions_before[ServiceType.MUSIC_GEN]['BONUS'],
+                count_all_transactions_before[ServiceType.SUNO]['BONUS'],
+                count_all_transactions_before[ServiceType.ADDITIONAL_CHATS]['BONUS'],
+                count_all_transactions_before[ServiceType.ACCESS_TO_CATALOG]['BONUS'],
+                count_all_transactions_before[ServiceType.VOICE_MESSAGES]['BONUS'],
+                count_all_transactions_before[ServiceType.FAST_MESSAGES]['BONUS'],
+            ]
+        )
+
         return f"""
 #statistics #bonuses
 
@@ -1396,8 +1458,8 @@ class Texts(Protocol):
 ━ 2️⃣ <b>Кредитов потрачено на:</b>
     ┣ {Texts.CHATGPT3_TURBO}: {count_all_transactions[ServiceType.CHAT_GPT3_TURBO]['BONUS']} {calculate_percentage_difference(is_all_time, count_all_transactions[ServiceType.CHAT_GPT3_TURBO]['BONUS'], count_all_transactions_before[ServiceType.CHAT_GPT3_TURBO]['BONUS'])}
     ┣ {Texts.CHATGPT4_TURBO}: {count_all_transactions[ServiceType.CHAT_GPT4_TURBO]['BONUS']} {calculate_percentage_difference(is_all_time, count_all_transactions[ServiceType.CHAT_GPT4_TURBO]['BONUS'], count_all_transactions_before[ServiceType.CHAT_GPT4_TURBO]['BONUS'])}
-    ┣ {Texts.CHATGPT4_OMNI}: {count_all_transactions[ServiceType.CHAT_GPT4_OMNI]['BONUS']} {calculate_percentage_difference(is_all_time, count_all_transactions[ServiceType.CHAT_GPT4_OMNI]['BONUS'], count_all_transactions_before[ServiceType.CHAT_GPT4_OMNI]['BONUS'])}
     ┣ {Texts.CHATGPT4_OMNI_MINI}: {count_all_transactions[ServiceType.CHAT_GPT4_OMNI_MINI]['BONUS']} {calculate_percentage_difference(is_all_time, count_all_transactions[ServiceType.CHAT_GPT4_OMNI_MINI]['BONUS'], count_all_transactions_before[ServiceType.CHAT_GPT4_OMNI_MINI]['BONUS'])}
+    ┣ {Texts.CHATGPT4_OMNI}: {count_all_transactions[ServiceType.CHAT_GPT4_OMNI]['BONUS']} {calculate_percentage_difference(is_all_time, count_all_transactions[ServiceType.CHAT_GPT4_OMNI]['BONUS'], count_all_transactions_before[ServiceType.CHAT_GPT4_OMNI]['BONUS'])}
     ┣ {Texts.CHAT_GPT_O_1_MINI}: {count_all_transactions[ServiceType.CHAT_GPT_O_1_MINI]['BONUS']} {calculate_percentage_difference(is_all_time, count_all_transactions[ServiceType.CHAT_GPT_O_1_MINI]['BONUS'], count_all_transactions_before[ServiceType.CHAT_GPT_O_1_MINI]['BONUS'])}
     ┣ {Texts.CHAT_GPT_O_1_PREVIEW}: {count_all_transactions[ServiceType.CHAT_GPT_O_1_PREVIEW]['BONUS']} {calculate_percentage_difference(is_all_time, count_all_transactions[ServiceType.CHAT_GPT_O_1_PREVIEW]['BONUS'], count_all_transactions_before[ServiceType.CHAT_GPT_O_1_PREVIEW]['BONUS'])}
     ┣ {Texts.CLAUDE_3_HAIKU}: {count_all_transactions[ServiceType.CLAUDE_3_HAIKU]['BONUS']} {calculate_percentage_difference(is_all_time, count_all_transactions[ServiceType.CLAUDE_3_HAIKU]['BONUS'], count_all_transactions_before[ServiceType.CLAUDE_3_HAIKU]['BONUS'])}
@@ -1416,7 +1478,8 @@ class Texts(Protocol):
     ┣ 💬 Дополнительные чаты: {count_all_transactions[ServiceType.ADDITIONAL_CHATS]['BONUS']} {calculate_percentage_difference(is_all_time, count_all_transactions[ServiceType.ADDITIONAL_CHATS]['BONUS'], count_all_transactions_before[ServiceType.ADDITIONAL_CHATS]['BONUS'])}
     ┣ 🎭 Доступ к каталогу: {count_all_transactions[ServiceType.ACCESS_TO_CATALOG]['BONUS']} {calculate_percentage_difference(is_all_time, count_all_transactions[ServiceType.ACCESS_TO_CATALOG]['BONUS'], count_all_transactions_before[ServiceType.ACCESS_TO_CATALOG]['BONUS'])}
     ┣ 🎙 Голосовые запросы/ответы: {count_all_transactions[ServiceType.VOICE_MESSAGES]['BONUS']} {calculate_percentage_difference(is_all_time, count_all_transactions[ServiceType.VOICE_MESSAGES]['BONUS'], count_all_transactions_before[ServiceType.VOICE_MESSAGES]['BONUS'])}
-    ┗ ⚡ Быстрые сообщения: {count_all_transactions[ServiceType.FAST_MESSAGES]['BONUS']} {calculate_percentage_difference(is_all_time, count_all_transactions[ServiceType.FAST_MESSAGES]['BONUS'], count_all_transactions_before[ServiceType.FAST_MESSAGES]['BONUS'])}
+    ┣ ⚡ Быстрые сообщения: {count_all_transactions[ServiceType.FAST_MESSAGES]['BONUS']} {calculate_percentage_difference(is_all_time, count_all_transactions[ServiceType.FAST_MESSAGES]['BONUS'], count_all_transactions_before[ServiceType.FAST_MESSAGES]['BONUS'])}
+    ┗ Всего: {all_bonuses} {calculate_percentage_difference(is_all_time, all_bonuses, all_bonuses_before)}
 ━ 3️⃣ <b>Промокоды:</b>
     ┗ Активировано: {count_activated_promo_codes} {calculate_percentage_difference(is_all_time, count_activated_promo_codes, count_activated_promo_codes_before)}
 
@@ -1447,14 +1510,14 @@ class Texts(Protocol):
         ┣ 🚀 Всего за примеры: ${round(count_expense_money[ServiceType.CHAT_GPT4_TURBO]['EXAMPLE_ALL'], 4)} {calculate_percentage_difference(is_all_time, count_expense_money[ServiceType.CHAT_GPT4_TURBO]['EXAMPLE_ALL'], count_expense_money_before[ServiceType.CHAT_GPT4_TURBO]['EXAMPLE_ALL'])}
         ┣ 💸 Средняя цена запроса: ${round(count_expense_money[ServiceType.CHAT_GPT4_TURBO]['AVERAGE_PRICE'], 4)} {calculate_percentage_difference(is_all_time, count_expense_money[ServiceType.CHAT_GPT4_TURBO]['AVERAGE_PRICE'], count_expense_money_before[ServiceType.CHAT_GPT4_TURBO]['AVERAGE_PRICE'])}
         ┗ 💰 Всего: ${round(count_expense_money[ServiceType.CHAT_GPT4_TURBO]['ALL'], 4)} {calculate_percentage_difference(is_all_time, count_expense_money[ServiceType.CHAT_GPT4_TURBO]['ALL'], count_expense_money_before[ServiceType.CHAT_GPT4_TURBO]['ALL'])}
+    ┣ {Texts.CHATGPT4_OMNI_MINI}:
+        ┣ 💸 Средняя цена запроса: ${round(count_expense_money[ServiceType.CHAT_GPT4_OMNI_MINI]['AVERAGE_PRICE'], 4)} {calculate_percentage_difference(is_all_time, count_expense_money[ServiceType.CHAT_GPT4_OMNI_MINI]['AVERAGE_PRICE'], count_expense_money_before[ServiceType.CHAT_GPT4_OMNI_MINI]['AVERAGE_PRICE'])}
+        ┗ 💰 Всего: ${round(count_expense_money[ServiceType.CHAT_GPT4_OMNI_MINI]['ALL'], 4)} {calculate_percentage_difference(is_all_time, count_expense_money[ServiceType.CHAT_GPT4_OMNI_MINI]['ALL'], count_expense_money_before[ServiceType.CHAT_GPT4_OMNI_MINI]['ALL'])}
     ┣ {Texts.CHATGPT4_OMNI}:
         ┣ 🎁 Средняя цена примера: ${round(count_expense_money[ServiceType.CHAT_GPT4_OMNI]['AVERAGE_EXAMPLE_PRICE'], 4)} {calculate_percentage_difference(is_all_time, count_expense_money[ServiceType.CHAT_GPT4_OMNI]['AVERAGE_EXAMPLE_PRICE'], count_expense_money_before[ServiceType.CHAT_GPT4_OMNI]['AVERAGE_EXAMPLE_PRICE'])}
         ┣ 🚀 Всего за примеры: ${round(count_expense_money[ServiceType.CHAT_GPT4_OMNI]['EXAMPLE_ALL'], 4)} {calculate_percentage_difference(is_all_time, count_expense_money[ServiceType.CHAT_GPT4_OMNI]['EXAMPLE_ALL'], count_expense_money_before[ServiceType.CHAT_GPT4_OMNI]['EXAMPLE_ALL'])}
         ┣ 💸 Средняя цена запроса: ${round(count_expense_money[ServiceType.CHAT_GPT4_OMNI]['AVERAGE_PRICE'], 4)} {calculate_percentage_difference(is_all_time, count_expense_money[ServiceType.CHAT_GPT4_OMNI]['AVERAGE_PRICE'], count_expense_money_before[ServiceType.CHAT_GPT4_OMNI]['AVERAGE_PRICE'])}
         ┗ 💰 Всего: ${round(count_expense_money[ServiceType.CHAT_GPT4_OMNI]['ALL'], 4)} {calculate_percentage_difference(is_all_time, count_expense_money[ServiceType.CHAT_GPT4_OMNI]['ALL'], count_expense_money_before[ServiceType.CHAT_GPT4_OMNI]['ALL'])}
-    ┣ {Texts.CHATGPT4_OMNI_MINI}:
-        ┣ 💸 Средняя цена запроса: ${round(count_expense_money[ServiceType.CHAT_GPT4_OMNI_MINI]['AVERAGE_PRICE'], 4)} {calculate_percentage_difference(is_all_time, count_expense_money[ServiceType.CHAT_GPT4_OMNI_MINI]['AVERAGE_PRICE'], count_expense_money_before[ServiceType.CHAT_GPT4_OMNI_MINI]['AVERAGE_PRICE'])}
-        ┗ 💰 Всего: ${round(count_expense_money[ServiceType.CHAT_GPT4_OMNI_MINI]['ALL'], 4)} {calculate_percentage_difference(is_all_time, count_expense_money[ServiceType.CHAT_GPT4_OMNI_MINI]['ALL'], count_expense_money_before[ServiceType.CHAT_GPT4_OMNI_MINI]['ALL'])}
     ┣ {Texts.CHAT_GPT_O_1_MINI}:
         ┣ 💸 Средняя цена запроса: ${round(count_expense_money[ServiceType.CHAT_GPT_O_1_MINI]['AVERAGE_PRICE'], 4)} {calculate_percentage_difference(is_all_time, count_expense_money[ServiceType.CHAT_GPT_O_1_MINI]['AVERAGE_PRICE'], count_expense_money_before[ServiceType.CHAT_GPT_O_1_MINI]['AVERAGE_PRICE'])}
         ┗ 💰 Всего: ${round(count_expense_money[ServiceType.CHAT_GPT_O_1_MINI]['ALL'], 4)} {calculate_percentage_difference(is_all_time, count_expense_money[ServiceType.CHAT_GPT_O_1_MINI]['ALL'], count_expense_money_before[ServiceType.CHAT_GPT_O_1_MINI]['ALL'])}
@@ -1563,8 +1626,8 @@ class Texts(Protocol):
 ━ 2️⃣ <b>Пакеты:</b>
     ┣ {Texts.CHATGPT3_TURBO}: {round(count_income_money[ServiceType.CHAT_GPT3_TURBO], 2)}₽ {calculate_percentage_difference(is_all_time, count_income_money[ServiceType.CHAT_GPT3_TURBO], count_income_money_before[ServiceType.CHAT_GPT3_TURBO])}
     ┣ {Texts.CHATGPT4_TURBO}: {round(count_income_money[ServiceType.CHAT_GPT4_TURBO], 2)}₽ {calculate_percentage_difference(is_all_time, count_income_money[ServiceType.CHAT_GPT4_TURBO], count_income_money_before[ServiceType.CHAT_GPT4_TURBO])}
-    ┣ {Texts.CHATGPT4_OMNI}: {round(count_income_money[ServiceType.CHAT_GPT4_OMNI], 2)}₽ {calculate_percentage_difference(is_all_time, count_income_money[ServiceType.CHAT_GPT4_OMNI], count_income_money_before[ServiceType.CHAT_GPT4_OMNI])}
     ┣ {Texts.CHATGPT4_OMNI_MINI}: {round(count_income_money[ServiceType.CHAT_GPT4_OMNI_MINI], 2)}₽ {calculate_percentage_difference(is_all_time, count_income_money[ServiceType.CHAT_GPT4_OMNI_MINI], count_income_money_before[ServiceType.CHAT_GPT4_OMNI_MINI])}
+    ┣ {Texts.CHATGPT4_OMNI}: {round(count_income_money[ServiceType.CHAT_GPT4_OMNI], 2)}₽ {calculate_percentage_difference(is_all_time, count_income_money[ServiceType.CHAT_GPT4_OMNI], count_income_money_before[ServiceType.CHAT_GPT4_OMNI])}
     ┣ {Texts.CHAT_GPT_O_1_MINI}: {round(count_income_money[ServiceType.CHAT_GPT_O_1_MINI], 2)}₽ {calculate_percentage_difference(is_all_time, count_income_money[ServiceType.CHAT_GPT_O_1_MINI], count_income_money_before[ServiceType.CHAT_GPT_O_1_MINI])}
     ┣ {Texts.CHAT_GPT_O_1_PREVIEW}: {round(count_income_money[ServiceType.CHAT_GPT_O_1_PREVIEW], 2)}₽ {calculate_percentage_difference(is_all_time, count_income_money[ServiceType.CHAT_GPT_O_1_PREVIEW], count_income_money_before[ServiceType.CHAT_GPT_O_1_PREVIEW])}
     ┣ {Texts.CLAUDE_3_HAIKU}: {round(count_income_money[ServiceType.CLAUDE_3_HAIKU], 2)}₽ {calculate_percentage_difference(is_all_time, count_income_money[ServiceType.CLAUDE_3_HAIKU], count_income_money_before[ServiceType.CLAUDE_3_HAIKU])}
@@ -1727,9 +1790,15 @@ class Texts(Protocol):
         gender: UserGender,
         current_model: Model,
         current_model_version: str,
+        renewal_date,
+    ) -> str:
+        raise NotImplementedError
+
+    @staticmethod
+    def profile_quota(
+        subscription_type: SubscriptionType,
         daily_limits,
         additional_usage_quota,
-        renewal_date,
         hours_before_limit_update: int,
         minutes_before_limit_update: int,
     ) -> str:

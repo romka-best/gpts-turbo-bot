@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from aiogram import F, Router
 from aiogram.filters import Command
@@ -14,11 +14,12 @@ from aiogram.types import (
 
 from bot.database.main import firebase
 from bot.database.models.common import (
+    Model,
+    ModelType,
     Quota,
     DALLEVersion,
     DALLEResolution,
     DALLEQuality,
-    Model,
     MidjourneyVersion,
     SunoSendType,
     SunoVersion,
@@ -32,6 +33,8 @@ from bot.database.operations.user.getters import get_user
 from bot.database.operations.user.updaters import update_user
 from bot.handlers.payment.payment_handler import handle_buy
 from bot.helpers.creaters.create_new_chat import create_new_chat
+from bot.helpers.getters.get_human_model import get_human_model
+from bot.helpers.getters.get_model_type import get_model_type
 from bot.integrations.openAI import get_cost_for_image
 from bot.keyboards.settings.catalog import build_catalog_keyboard
 from bot.keyboards.settings.chats import (
@@ -41,7 +44,6 @@ from bot.keyboards.settings.chats import (
     build_reset_chat_keyboard,
     build_delete_chat_keyboard,
 )
-from bot.keyboards.common.common import build_recommendations_keyboard
 from bot.keyboards.settings.settings import (
     build_settings_choose_model_type_keyboard,
     build_settings_choose_text_model_keyboard,
@@ -60,7 +62,11 @@ settings_router = Router()
 async def settings_choose_model(message: Message, state: FSMContext):
     await state.clear()
 
-    user_language_code = await get_user_language(str(message.from_user.id), state.storage)
+    await handle_settings(message, str(message.from_user.id), state)
+
+
+async def handle_settings(message: Message, user_id: str, state: FSMContext):
+    user_language_code = await get_user_language(user_id, state.storage)
 
     reply_markup = build_settings_choose_model_type_keyboard(user_language_code)
     await message.answer(
@@ -114,12 +120,6 @@ async def handle_settings_choose_model_type_selection(callback_query: CallbackQu
     elif chosen_model == 'manage_catalog':
         await handle_catalog(callback_query.message, user_id, state)
         return
-    elif chosen_model == Model.CHAT_GPT:
-        human_model = get_localization(user_language_code).CHATGPT
-    elif chosen_model == Model.CLAUDE:
-        human_model = get_localization(user_language_code).CLAUDE
-    elif chosen_model == Model.GEMINI:
-        human_model = get_localization(user_language_code).GEMINI
     elif chosen_model == 'back':
         reply_markup = build_settings_choose_model_type_keyboard(user_language_code)
         await callback_query.message.edit_text(
@@ -127,10 +127,9 @@ async def handle_settings_choose_model_type_selection(callback_query: CallbackQu
             reply_markup=reply_markup,
         )
         return
-    else:
-        human_model = chosen_model
 
-    reply_markup = build_settings_keyboard(user_language_code, chosen_model, 'text', user.settings)
+    human_model = get_human_model(chosen_model, user_language_code)
+    reply_markup = build_settings_keyboard(user_language_code, chosen_model, ModelType.TEXT, user.settings)
     await callback_query.message.edit_text(
         text=get_localization(user_language_code).settings(human_model, chosen_model),
         reply_markup=reply_markup,
@@ -152,11 +151,6 @@ async def handle_settings_choose_model_type_selection(callback_query: CallbackQu
             user.settings[Model.DALL_E][UserSettings.QUALITY],
             user.settings[Model.DALL_E][UserSettings.RESOLUTION],
         )
-        human_model = get_localization(user_language_code).DALL_E
-    elif chosen_model == Model.MIDJOURNEY:
-        human_model = get_localization(user_language_code).MIDJOURNEY
-    elif chosen_model == Model.FACE_SWAP:
-        human_model = get_localization(user_language_code).FACE_SWAP
     elif chosen_model == 'back':
         reply_markup = build_settings_choose_model_type_keyboard(user_language_code)
         await callback_query.message.edit_text(
@@ -164,10 +158,9 @@ async def handle_settings_choose_model_type_selection(callback_query: CallbackQu
             reply_markup=reply_markup,
         )
         return
-    else:
-        human_model = chosen_model
 
-    reply_markup = build_settings_keyboard(user_language_code, chosen_model, 'image', user.settings)
+    human_model = get_human_model(chosen_model, user_language_code)
+    reply_markup = build_settings_keyboard(user_language_code, chosen_model, ModelType.IMAGE, user.settings)
     await callback_query.message.edit_text(
         text=get_localization(user_language_code).settings(human_model, chosen_model, dall_e_cost),
         reply_markup=reply_markup,
@@ -183,21 +176,16 @@ async def handle_settings_choose_model_type_selection(callback_query: CallbackQu
     user_language_code = await get_user_language(str(callback_query.from_user.id), state.storage)
 
     chosen_model = callback_query.data.split(':')[1]
-    if chosen_model == Model.MUSIC_GEN:
-        human_model = get_localization(user_language_code).MUSIC_GEN
-    elif chosen_model == Model.SUNO:
-        human_model = get_localization(user_language_code).SUNO
-    elif chosen_model == 'back':
+    if chosen_model == 'back':
         reply_markup = build_settings_choose_model_type_keyboard(user_language_code)
         await callback_query.message.edit_text(
             text=get_localization(user_language_code).SETTINGS_CHOOSE_MODEL_TYPE,
             reply_markup=reply_markup,
         )
         return
-    else:
-        human_model = chosen_model
 
-    reply_markup = build_settings_keyboard(user_language_code, chosen_model, 'music', user.settings)
+    human_model = get_human_model(chosen_model, user_language_code)
+    reply_markup = build_settings_keyboard(user_language_code, chosen_model, ModelType.MUSIC, user.settings)
     await callback_query.message.edit_text(
         text=get_localization(user_language_code).settings(human_model, chosen_model),
         reply_markup=reply_markup,
@@ -216,19 +204,19 @@ async def handle_setting_selection(callback_query: CallbackQuery, state: FSMCont
 
     if chosen_setting == 'back':
         model_type = callback_query.data.split(':')[2]
-        if model_type == 'text':
+        if model_type == ModelType.TEXT:
             reply_markup = build_settings_choose_text_model_keyboard(user_language_code)
             await callback_query.message.edit_text(
                 text=get_localization(user_language_code).SETTINGS_CHOOSE_MODEL,
                 reply_markup=reply_markup,
             )
-        elif model_type == 'image':
+        elif model_type == ModelType.IMAGE:
             reply_markup = build_settings_choose_image_model_keyboard(user_language_code)
             await callback_query.message.edit_text(
                 text=get_localization(user_language_code).SETTINGS_CHOOSE_MODEL,
                 reply_markup=reply_markup,
             )
-        elif model_type == 'music':
+        elif model_type == ModelType.MUSIC:
             reply_markup = build_settings_choose_music_model_keyboard(user_language_code)
             await callback_query.message.edit_text(
                 text=get_localization(user_language_code).SETTINGS_CHOOSE_MODEL,
@@ -237,6 +225,17 @@ async def handle_setting_selection(callback_query: CallbackQuery, state: FSMCont
         return
 
     chosen_model = callback_query.data.split(':')[2]
+
+    if chosen_setting == 'voice_messages':
+        await handle_voice_messages(callback_query.message, user_id, state, chosen_model)
+        return
+    elif chosen_setting == 'manage_chats':
+        await handle_chats(callback_query.message, user_id, state, chosen_model)
+        return
+    elif chosen_setting == 'manage_catalog':
+        await handle_catalog(callback_query.message, user_id, state, chosen_model)
+        return
+
     if chosen_setting == DALLEResolution.LOW or chosen_setting == DALLEResolution.MEDIUM or chosen_setting == DALLEResolution.HIGH:
         user.settings[Model.DALL_E][UserSettings.RESOLUTION] = chosen_setting
         what_changed = UserSettings.RESOLUTION
@@ -321,28 +320,12 @@ async def handle_setting_selection(callback_query: CallbackQuery, state: FSMCont
         )
 
         dall_e_cost = 1
-        if chosen_model == Model.CHAT_GPT:
-            human_model = get_localization(user_language_code).CHATGPT
-        elif chosen_model == Model.CLAUDE:
-            human_model = get_localization(user_language_code).CLAUDE
-        elif chosen_model == Model.GEMINI:
-            human_model = get_localization(user_language_code).GEMINI
-        elif chosen_model == Model.DALL_E:
+        if chosen_model == Model.DALL_E:
             dall_e_cost = get_cost_for_image(
                 user.settings[Model.DALL_E][UserSettings.QUALITY],
                 user.settings[Model.DALL_E][UserSettings.RESOLUTION],
             )
-            human_model = get_localization(user_language_code).DALL_E
-        elif chosen_model == Model.MIDJOURNEY:
-            human_model = get_localization(user_language_code).MIDJOURNEY
-        elif chosen_model == Model.FACE_SWAP:
-            human_model = get_localization(user_language_code).FACE_SWAP
-        elif chosen_model == Model.MUSIC_GEN:
-            human_model = get_localization(user_language_code).MUSIC_GEN
-        elif chosen_model == Model.SUNO:
-            human_model = get_localization(user_language_code).SUNO
-        else:
-            human_model = chosen_model
+        human_model = get_human_model(chosen_model, user_language_code)
 
         await callback_query.message.edit_text(
             text=get_localization(user_language_code).settings(human_model, chosen_model, dall_e_cost),
@@ -350,11 +333,11 @@ async def handle_setting_selection(callback_query: CallbackQuery, state: FSMCont
         )
 
 
-async def handle_voice_messages(message: Message, user_id: str, state: FSMContext):
+async def handle_voice_messages(message: Message, user_id: str, state: FSMContext, model: Optional[Model] = None):
     user = await get_user(user_id)
     user_language_code = await get_user_language(user_id, state.storage)
 
-    reply_markup = build_voice_messages_settings_keyboard(user_language_code, user.settings)
+    reply_markup = build_voice_messages_settings_keyboard(user_language_code, user.settings, model)
     await message.edit_text(
         text=get_localization(user_language_code).VOICE_MESSAGES,
         reply_markup=reply_markup,
@@ -372,11 +355,27 @@ async def handle_voice_messages_setting_selection(callback_query: CallbackQuery,
     user_language_code = await get_user_language(user_id, state.storage)
 
     if chosen_setting == 'back':
-        reply_markup = build_settings_choose_text_model_keyboard(user_language_code)
-        await callback_query.message.edit_text(
-            text=get_localization(user_language_code).SETTINGS_CHOOSE_MODEL,
-            reply_markup=reply_markup,
-        )
+        if len(callback_query.data.split(':')) == 3:
+            chosen_model = callback_query.data.split(':')[2]
+            human_model = get_human_model(chosen_model, user_language_code)
+            reply_markup = build_settings_keyboard(
+                language_code=user_language_code,
+                model=chosen_model,
+                model_type=get_model_type(chosen_model),
+                settings=user.settings,
+                show_back_button=False,
+                show_advanced_settings=True,
+            )
+            await callback_query.message.edit_text(
+                text=get_localization(user_language_code).settings(human_model, chosen_model),
+                reply_markup=reply_markup,
+            )
+        else:
+            reply_markup = build_settings_choose_text_model_keyboard(user_language_code)
+            await callback_query.message.edit_text(
+                text=get_localization(user_language_code).SETTINGS_CHOOSE_MODEL,
+                reply_markup=reply_markup,
+            )
 
         return
     elif (
@@ -447,13 +446,13 @@ async def handle_voice_messages_setting_selection(callback_query: CallbackQuery,
         await callback_query.message.edit_reply_markup(reply_markup=InlineKeyboardMarkup(inline_keyboard=new_keyboard))
 
 
-async def handle_catalog(message: Message, user_id: str, state: FSMContext):
+async def handle_catalog(message: Message, user_id: str, state: FSMContext, model: Optional[Model] = None):
     user_language_code = await get_user_language(str(message.from_user.id), state.storage)
 
     text = get_localization(user_language_code).CATALOG
     current_chat = await get_chat_by_user_id(user_id)
     roles = await get_roles()
-    reply_markup = build_catalog_keyboard(user_language_code, current_chat.role, roles)
+    reply_markup = build_catalog_keyboard(user_language_code, current_chat.role, roles, model)
 
     await message.edit_text(
         text=text,
@@ -471,11 +470,27 @@ async def handle_catalog_selection(callback_query: CallbackQuery, state: FSMCont
 
     role_name = callback_query.data.split(':')[1]
     if role_name == 'back':
-        reply_markup = build_settings_choose_text_model_keyboard(user_language_code)
-        await callback_query.message.edit_text(
-            text=get_localization(user_language_code).SETTINGS_CHOOSE_MODEL,
-            reply_markup=reply_markup,
-        )
+        if len(callback_query.data.split(':')) == 3:
+            chosen_model = callback_query.data.split(':')[2]
+            human_model = get_human_model(chosen_model, user_language_code)
+            reply_markup = build_settings_keyboard(
+                language_code=user_language_code,
+                model=chosen_model,
+                model_type=get_model_type(chosen_model),
+                settings=user.settings,
+                show_back_button=False,
+                show_advanced_settings=True,
+            )
+            await callback_query.message.edit_text(
+                text=get_localization(user_language_code).settings(human_model, chosen_model),
+                reply_markup=reply_markup,
+            )
+        else:
+            reply_markup = build_settings_choose_text_model_keyboard(user_language_code)
+            await callback_query.message.edit_text(
+                text=get_localization(user_language_code).SETTINGS_CHOOSE_MODEL,
+                reply_markup=reply_markup,
+            )
         return
 
     role_photo_path = f'roles/{role_name}.png'
@@ -525,7 +540,7 @@ async def handle_catalog_selection(callback_query: CallbackQuery, state: FSMCont
             )
 
 
-async def handle_chats(message: Message, user_id: str, state: FSMContext):
+async def handle_chats(message: Message, user_id: str, state: FSMContext, model: Optional[Model] = None):
     user = await get_user(user_id)
     user_language_code = await get_user_language(user_id, state.storage)
 
@@ -537,9 +552,11 @@ async def handle_chats(message: Message, user_id: str, state: FSMContext):
         len(all_chats),
         user.additional_usage_quota[Quota.ADDITIONAL_CHATS],
     )
-    reply_markup = build_chats_keyboard(user_language_code)
-
-    await message.edit_text(text=text, reply_markup=reply_markup)
+    reply_markup = build_chats_keyboard(user_language_code, model)
+    await message.edit_text(
+        text=text,
+        reply_markup=reply_markup,
+    )
 
 
 @settings_router.callback_query(lambda c: c.data.startswith('chat:'))
@@ -553,11 +570,27 @@ async def handle_chat_selection(callback_query: CallbackQuery, state: FSMContext
     action = callback_query.data.split(':')[1]
 
     if action == 'back':
-        reply_markup = build_settings_choose_text_model_keyboard(user_language_code)
-        await callback_query.message.edit_text(
-            text=get_localization(user_language_code).SETTINGS_CHOOSE_MODEL,
-            reply_markup=reply_markup,
-        )
+        if len(callback_query.data.split(':')) == 3:
+            chosen_model = callback_query.data.split(':')[2]
+            human_model = get_human_model(chosen_model, user_language_code)
+            reply_markup = build_settings_keyboard(
+                language_code=user_language_code,
+                model=chosen_model,
+                model_type=get_model_type(chosen_model),
+                settings=user.settings,
+                show_back_button=False,
+                show_advanced_settings=True,
+            )
+            await callback_query.message.edit_text(
+                text=get_localization(user_language_code).settings(human_model, chosen_model),
+                reply_markup=reply_markup,
+            )
+        else:
+            reply_markup = build_settings_choose_text_model_keyboard(user_language_code)
+            await callback_query.message.edit_text(
+                text=get_localization(user_language_code).SETTINGS_CHOOSE_MODEL,
+                reply_markup=reply_markup,
+            )
         return
     elif action == 'show':
         all_chats = await get_chats_by_user_id(user_id)
@@ -650,10 +683,8 @@ async def handle_switch_chat_selection(callback_query: CallbackQuery, state: FSM
             reply_markup=InlineKeyboardMarkup(inline_keyboard=new_keyboard)
         )
 
-        reply_markup = await build_recommendations_keyboard(user.current_model, user_language_code, user.gender)
         await callback_query.message.reply(
             text=get_localization(user_language_code).SWITCH_CHAT_SUCCESS,
-            reply_markup=reply_markup,
             allow_sending_without_reply=True,
         )
 

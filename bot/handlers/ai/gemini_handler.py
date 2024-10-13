@@ -25,12 +25,14 @@ from bot.database.operations.transaction.writers import write_transaction
 from bot.database.operations.user.getters import get_user
 from bot.database.operations.user.updaters import update_user
 from bot.helpers.creaters.create_new_message_and_update_user import create_new_message_and_update_user
+from bot.helpers.getters.get_switched_to_ai_model import get_switched_to_ai_model
 from bot.helpers.reply_with_voice import reply_with_voice
 from bot.helpers.senders.send_ai_message import send_ai_message
 from bot.helpers.senders.send_error_info import send_error_info
 from bot.integrations.googleAI import get_response_message
 from bot.keyboards.ai.gemini import build_gemini_keyboard, build_gemini_continue_generating_keyboard
-from bot.keyboards.common.common import build_recommendations_keyboard, build_error_keyboard
+from bot.keyboards.ai.mode import build_switched_to_ai_keyboard
+from bot.keyboards.common.common import build_error_keyboard
 from bot.locales.main import get_user_language, get_localization
 
 gemini_router = Router()
@@ -73,7 +75,7 @@ async def handle_gemini_choose_selection(callback_query: CallbackQuery, state: F
     chosen_version = callback_query.data.split(':')[1]
 
     if user.current_model == Model.GEMINI and chosen_version == user.settings[Model.GEMINI][UserSettings.VERSION]:
-        reply_markup = await build_recommendations_keyboard(user.current_model, user_language_code, user.gender)
+        reply_markup = build_switched_to_ai_keyboard(user_language_code, Model.GEMINI)
         await callback_query.message.answer(
             text=get_localization(user_language_code).ALREADY_SWITCHED_TO_THIS_MODEL,
             reply_markup=reply_markup,
@@ -99,7 +101,7 @@ async def handle_gemini_choose_selection(callback_query: CallbackQuery, state: F
             new_keyboard.append(new_row)
         await callback_query.message.edit_reply_markup(reply_markup=InlineKeyboardMarkup(inline_keyboard=new_keyboard))
 
-        reply_markup = await build_recommendations_keyboard(Model.GEMINI, user_language_code, user.gender)
+        reply_markup = build_switched_to_ai_keyboard(user_language_code, Model.GEMINI)
         if keyboard_changed:
             user.current_model = Model.GEMINI
             user.settings[Model.GEMINI][UserSettings.VERSION] = chosen_version
@@ -108,13 +110,12 @@ async def handle_gemini_choose_selection(callback_query: CallbackQuery, state: F
                 'settings': user.settings,
             })
 
-            if user.settings[user.current_model][UserSettings.VERSION] == GeminiGPTVersion.V1_Flash:
-                text = get_localization(user_language_code).SWITCHED_TO_GEMINI_1_FLASH
-            elif user.settings[user.current_model][UserSettings.VERSION] == GeminiGPTVersion.V1_Pro:
-                text = get_localization(user_language_code).SWITCHED_TO_GEMINI_1_PRO
-            elif user.settings[user.current_model][UserSettings.VERSION] == GeminiGPTVersion.V1_Ultra:
-                text = get_localization(user_language_code).SWITCHED_TO_GEMINI_1_ULTRA
-            else:
+            text = get_switched_to_ai_model(
+                user.current_model,
+                user.settings[user.current_model][UserSettings.VERSION],
+                user_language_code,
+            )
+            if not text:
                 raise NotImplementedError(
                     f'Model version is not found: {user.settings[user.current_model][UserSettings.VERSION]}'
                 )

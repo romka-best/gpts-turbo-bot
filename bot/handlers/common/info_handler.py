@@ -3,13 +3,18 @@ from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
 
-from bot.database.models.common import Model
+from bot.database.models.common import ModelType
+from bot.database.models.user import UserSettings
+from bot.database.operations.user.getters import get_user
+from bot.helpers.getters.get_info_by_model import get_info_by_model
+from bot.helpers.getters.get_switched_to_ai_model import get_switched_to_ai_model
+from bot.keyboards.ai.mode import build_switched_to_ai_keyboard
 from bot.keyboards.common.info import (
     build_info_keyboard,
     build_info_text_models_keyboard,
     build_info_image_models_keyboard,
     build_info_music_models_keyboard,
-    build_info_chosen_model_keyboard,
+    build_info_chosen_model_type_keyboard,
 )
 from bot.locales.main import get_user_language, get_localization
 
@@ -39,19 +44,19 @@ async def info_selection(callback_query: CallbackQuery, state: FSMContext):
     user_language_code = await get_user_language(user_id, state.storage)
 
     models_type = callback_query.data.split(':')[1]
-    if models_type == 'text':
+    if models_type == ModelType.TEXT:
         reply_keyboard = build_info_text_models_keyboard(user_language_code)
         await callback_query.message.edit_text(
             text=get_localization(user_language_code).INFO_TEXT_MODELS,
             reply_markup=reply_keyboard,
         )
-    elif models_type == 'image':
+    elif models_type == ModelType.IMAGE:
         reply_keyboard = build_info_image_models_keyboard(user_language_code)
         await callback_query.message.edit_text(
             text=get_localization(user_language_code).INFO_IMAGE_MODELS,
             reply_markup=reply_keyboard,
         )
-    elif models_type == 'music':
+    elif models_type == ModelType.MUSIC:
         reply_keyboard = build_info_music_models_keyboard(user_language_code)
         await callback_query.message.edit_text(
             text=get_localization(user_language_code).INFO_MUSIC_MODELS,
@@ -69,20 +74,11 @@ async def info_text_models_selection(callback_query: CallbackQuery, state: FSMCo
     user_language_code = await get_user_language(user_id, state.storage)
 
     model = callback_query.data.split(':')[1]
-    reply_keyboard = build_info_chosen_model_keyboard(user_language_code, 'text')
-    if model == Model.CHAT_GPT:
+    info_text = get_info_by_model(model, user_language_code)
+    reply_keyboard = build_info_chosen_model_type_keyboard(user_language_code, ModelType.TEXT)
+    if info_text:
         await callback_query.message.edit_text(
-            text=get_localization(user_language_code).INFO_CHATGPT,
-            reply_markup=reply_keyboard,
-        )
-    elif model == Model.CLAUDE:
-        await callback_query.message.edit_text(
-            text=get_localization(user_language_code).INFO_CLAUDE,
-            reply_markup=reply_keyboard,
-        )
-    elif model == Model.GEMINI:
-        await callback_query.message.edit_text(
-            text=get_localization(user_language_code).INFO_GEMINI,
+            text=info_text,
             reply_markup=reply_keyboard,
         )
     else:
@@ -102,25 +98,11 @@ async def info_image_models_selection(callback_query: CallbackQuery, state: FSMC
     user_language_code = await get_user_language(user_id, state.storage)
 
     model = callback_query.data.split(':')[1]
-    reply_keyboard = build_info_chosen_model_keyboard(user_language_code, 'image')
-    if model == Model.DALL_E:
+    info_text = get_info_by_model(model, user_language_code)
+    reply_keyboard = build_info_chosen_model_type_keyboard(user_language_code, ModelType.IMAGE)
+    if info_text:
         await callback_query.message.edit_text(
-            text=get_localization(user_language_code).INFO_DALL_E,
-            reply_markup=reply_keyboard,
-        )
-    elif model == Model.MIDJOURNEY:
-        await callback_query.message.edit_text(
-            text=get_localization(user_language_code).INFO_MIDJOURNEY,
-            reply_markup=reply_keyboard,
-        )
-    elif model == Model.STABLE_DIFFUSION:
-        await callback_query.message.edit_text(
-            text=get_localization(user_language_code).INFO_STABLE_DIFFUSION,
-            reply_markup=reply_keyboard,
-        )
-    elif model == Model.FACE_SWAP:
-        await callback_query.message.edit_text(
-            text=get_localization(user_language_code).INFO_FACE_SWAP,
+            text=info_text,
             reply_markup=reply_keyboard,
         )
     else:
@@ -140,15 +122,11 @@ async def info_music_models_selection(callback_query: CallbackQuery, state: FSMC
     user_language_code = await get_user_language(user_id, state.storage)
 
     model = callback_query.data.split(':')[1]
-    reply_keyboard = build_info_chosen_model_keyboard(user_language_code, 'music')
-    if model == Model.MUSIC_GEN:
+    info_text = get_info_by_model(model, user_language_code)
+    reply_keyboard = build_info_chosen_model_type_keyboard(user_language_code, ModelType.MUSIC)
+    if info_text:
         await callback_query.message.edit_text(
-            text=get_localization(user_language_code).INFO_MUSIC_GEN,
-            reply_markup=reply_keyboard,
-        )
-    elif model == Model.SUNO:
-        await callback_query.message.edit_text(
-            text=get_localization(user_language_code).INFO_SUNO,
+            text=info_text,
             reply_markup=reply_keyboard,
         )
     else:
@@ -160,29 +138,29 @@ async def info_music_models_selection(callback_query: CallbackQuery, state: FSMC
         )
 
 
-@info_router.callback_query(lambda c: c.data.startswith('info_chosen_model:'))
-async def info_selection(callback_query: CallbackQuery, state: FSMContext):
+@info_router.callback_query(lambda c: c.data.startswith('info_chosen_model_type:'))
+async def info_model_type_selection(callback_query: CallbackQuery, state: FSMContext):
     await callback_query.answer()
 
     user_id = str(callback_query.from_user.id)
     user_language_code = await get_user_language(user_id, state.storage)
 
     action, model_type = callback_query.data.split(':')[1], callback_query.data.split(':')[2]
-    if action == 'back' and model_type == 'text':
+    if action == 'back' and model_type == ModelType.TEXT:
         text = get_localization(user_language_code).INFO_TEXT_MODELS
         reply_markup = build_info_text_models_keyboard(user_language_code)
         await callback_query.message.edit_text(
             text=text,
             reply_markup=reply_markup,
         )
-    elif action == 'back' and model_type == 'image':
+    elif action == 'back' and model_type == ModelType.IMAGE:
         text = get_localization(user_language_code).INFO_IMAGE_MODELS
         reply_markup = build_info_image_models_keyboard(user_language_code)
         await callback_query.message.edit_text(
             text=text,
             reply_markup=reply_markup,
         )
-    elif action == 'back' and model_type == 'music':
+    elif action == 'back' and model_type == ModelType.MUSIC:
         text = get_localization(user_language_code).INFO_MUSIC_MODELS
         reply_markup = build_info_music_models_keyboard(user_language_code)
         await callback_query.message.edit_text(

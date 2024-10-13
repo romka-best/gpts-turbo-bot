@@ -13,11 +13,15 @@ from bot.database.operations.generation.updaters import update_generation
 from bot.database.operations.user.getters import get_user, get_count_of_users_by_referral
 from bot.database.operations.user.initialize_user_for_the_first_time import initialize_user_for_the_first_time
 from bot.database.operations.user.updaters import update_user
+from bot.handlers.ai.mode_handler import handle_mode
+from bot.handlers.payment.bonus_handler import handle_bonus
+from bot.handlers.payment.payment_handler import handle_subscribe, handle_package
 from bot.helpers.updaters.update_daily_limits import update_user_daily_limits
 from bot.keyboards.common.common import (
     build_start_keyboard,
     build_start_chosen_keyboard,
     build_error_keyboard,
+    build_time_limit_exceeded_chosen_keyboard,
 )
 from bot.locales.main import get_localization, get_user_language
 
@@ -255,6 +259,39 @@ async def reaction_selection(callback_query: CallbackQuery):
         await callback_query.message.edit_caption(
             caption=Generation.get_reaction_emojis()[reaction],
             reply_markup=None,
+        )
+
+
+@common_router.callback_query(lambda c: c.data.startswith('limit_exceeded:'))
+async def limit_exceeded_selection(callback_query: CallbackQuery, state: FSMContext):
+    await callback_query.answer()
+
+    action = callback_query.data.split(':')[1]
+    if action == 'change_ai_model':
+        await handle_mode(callback_query.message, state, str(callback_query.from_user.id))
+    elif action == 'open_bonus_info':
+        await handle_bonus(callback_query.message, str(callback_query.from_user.id), state)
+    elif action == 'open_buy_subscriptions_info':
+        await handle_subscribe(callback_query.message, str(callback_query.from_user.id), state)
+    elif action == 'open_buy_packages_info':
+        await handle_package(callback_query.message, str(callback_query.from_user.id), state)
+
+
+@common_router.callback_query(lambda c: c.data.startswith('time_limit_exceeded:'))
+async def time_limit_exceeded_selection(callback_query: CallbackQuery, state: FSMContext):
+    await callback_query.answer()
+
+    user_id = str(callback_query.from_user.id)
+    user_language_code = await get_user_language(user_id, state.storage)
+
+    action = callback_query.data.split(':')[1]
+    if action == 'remove_restriction':
+        text = get_localization(user_language_code).REMOVE_RESTRICTION_INFO
+        reply_markup = build_time_limit_exceeded_chosen_keyboard(user_language_code)
+        await callback_query.message.reply(
+            text=text,
+            reply_markup=reply_markup,
+            allow_sending_without_reply=True,
         )
 
 

@@ -23,6 +23,13 @@ class Model:
     SUNO = 'suno'
 
 
+class ModelType:
+    TEXT = 'TEXT'
+    IMAGE = 'IMAGE'
+    MUSIC = 'MUSIC'
+    VIDEO = 'VIDEO'
+
+
 class Quota:
     CHAT_GPT4_OMNI = 'gpt4_omni'
     CHAT_GPT4_OMNI_MINI = 'gpt4_omni_mini'

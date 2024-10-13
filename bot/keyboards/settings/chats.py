@@ -1,12 +1,16 @@
-from typing import List
+from typing import List, Optional
 
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 from bot.database.models.chat import Chat
+from bot.database.models.common import Model
 from bot.locales.main import get_localization
 
 
-def build_chats_keyboard(language_code: str) -> InlineKeyboardMarkup:
+def build_chats_keyboard(
+    language_code: str,
+    model: Optional[Model] = None,
+) -> InlineKeyboardMarkup:
     buttons = [
         [
             InlineKeyboardButton(
@@ -41,7 +45,7 @@ def build_chats_keyboard(language_code: str) -> InlineKeyboardMarkup:
         [
             InlineKeyboardButton(
                 text=get_localization(language_code).BACK,
-                callback_data='chat:back'
+                callback_data=f'chat:back:{model}' if model else 'chat:back'
             )
         ]
     ]

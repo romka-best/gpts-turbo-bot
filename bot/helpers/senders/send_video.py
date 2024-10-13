@@ -26,6 +26,7 @@ async def send_video(
             duration=duration,
             reply_markup=reply_markup,
             reply_to_message_id=reply_to_message_id,
+            allow_sending_without_reply=True,
         )
     except TelegramForbiddenError:
         await update_user(chat_id, {
@@ -39,6 +40,7 @@ async def send_video(
             reply_markup=reply_markup,
             text=result,
             reply_to_message_id=reply_to_message_id,
+            allow_sending_without_reply=True,
         )
 
         await send_error_info(
