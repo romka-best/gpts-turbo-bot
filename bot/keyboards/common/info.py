@@ -1,6 +1,6 @@
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
-from bot.database.models.common import Model
+from bot.database.models.common import Model, ModelType
 from bot.locales.main import get_localization
 
 
@@ -9,19 +9,19 @@ def build_info_keyboard(language_code: str) -> InlineKeyboardMarkup:
         [
             InlineKeyboardButton(
                 text=get_localization(language_code).TEXT_MODELS,
-                callback_data=f'info:text'
+                callback_data=f'info:{ModelType.TEXT}'
             ),
         ],
         [
             InlineKeyboardButton(
                 text=get_localization(language_code).IMAGE_MODELS,
-                callback_data=f'info:image'
+                callback_data=f'info:{ModelType.IMAGE}'
             ),
         ],
         [
             InlineKeyboardButton(
                 text=get_localization(language_code).MUSIC_MODELS,
-                callback_data=f'info:music'
+                callback_data=f'info:{ModelType.MUSIC}'
             ),
         ],
         [

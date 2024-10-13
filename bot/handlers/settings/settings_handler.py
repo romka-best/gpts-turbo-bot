@@ -14,14 +14,15 @@ from aiogram.types import (
 
 from bot.database.main import firebase
 from bot.database.models.common import (
+    Model,
+    ModelType,
     Quota,
     DALLEVersion,
     DALLEResolution,
     DALLEQuality,
-    Model,
     MidjourneyVersion,
     SunoSendType,
-    SunoVersion, ModelType,
+    SunoVersion,
 )
 from bot.database.models.user import UserSettings
 from bot.database.operations.chat.deleters import delete_chat, reset_chat

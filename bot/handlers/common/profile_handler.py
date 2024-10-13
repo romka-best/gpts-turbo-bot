@@ -18,8 +18,11 @@ from bot.handlers.payment.bonus_handler import handle_bonus
 from bot.handlers.payment.payment_handler import handle_subscribe, handle_package, handle_cancel_subscription
 from bot.handlers.settings.settings_handler import handle_settings
 from bot.keyboards.common.common import build_cancel_keyboard
-from bot.keyboards.common.profile import build_profile_keyboard, build_profile_gender_keyboard, \
-    build_profile_quota_keyboard
+from bot.keyboards.common.profile import (
+    build_profile_keyboard,
+    build_profile_quota_keyboard,
+    build_profile_gender_keyboard,
+)
 from bot.locales.main import get_localization, get_user_language
 from bot.states.profile import Profile
 
