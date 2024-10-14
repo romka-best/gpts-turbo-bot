@@ -13,11 +13,12 @@ from bot.database.models.common import (
     MidjourneyVersion,
     StableDiffusionVersion,
     FluxVersion,
+    FluxSafetyTolerance,
     FaceSwapVersion,
     PhotoshopAIVersion,
     MusicGenVersion,
     SunoSendType,
-    SunoVersion, FluxSafetyTolerance,
+    SunoVersion,
 )
 from bot.database.models.subscription import SubscriptionType, SubscriptionLimit
 

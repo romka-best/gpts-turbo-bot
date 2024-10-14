@@ -21,8 +21,9 @@ from bot.database.models.common import (
     DALLEResolution,
     DALLEQuality,
     MidjourneyVersion,
+    FluxSafetyTolerance,
     SunoSendType,
-    SunoVersion, FluxSafetyTolerance,
+    SunoVersion,
 )
 from bot.database.models.user import UserSettings
 from bot.database.operations.chat.deleters import delete_chat, reset_chat

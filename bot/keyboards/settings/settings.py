@@ -8,8 +8,9 @@ from bot.database.models.common import (
     DALLEResolution,
     DALLEQuality,
     MidjourneyVersion,
+    FluxSafetyTolerance,
     SunoSendType,
-    SunoVersion, FluxSafetyTolerance,
+    SunoVersion,
 )
 from bot.database.models.user import UserSettings
 from bot.locales.main import get_localization
