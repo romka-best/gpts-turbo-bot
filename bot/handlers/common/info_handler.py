@@ -4,11 +4,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
 
 from bot.database.models.common import ModelType
-from bot.database.models.user import UserSettings
-from bot.database.operations.user.getters import get_user
 from bot.helpers.getters.get_info_by_model import get_info_by_model
-from bot.helpers.getters.get_switched_to_ai_model import get_switched_to_ai_model
-from bot.keyboards.ai.mode import build_switched_to_ai_keyboard
 from bot.keyboards.common.info import (
     build_info_keyboard,
     build_info_text_models_keyboard,

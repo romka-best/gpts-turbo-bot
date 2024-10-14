@@ -157,7 +157,7 @@ async def get_statistics_by_transactions_query(
         ServiceType.CHAT_GPT_O_1_MINI, ServiceType.CHAT_GPT_O_1_PREVIEW,
         ServiceType.CLAUDE_3_HAIKU, ServiceType.CLAUDE_3_SONNET, ServiceType.CLAUDE_3_OPUS,
         ServiceType.GEMINI_1_FLASH, ServiceType.GEMINI_1_PRO, ServiceType.GEMINI_1_ULTRA,
-        ServiceType.DALL_E, ServiceType.MIDJOURNEY, ServiceType.STABLE_DIFFUSION,
+        ServiceType.DALL_E, ServiceType.MIDJOURNEY, ServiceType.STABLE_DIFFUSION, ServiceType.FLUX,
         ServiceType.FACE_SWAP, ServiceType.PHOTOSHOP_AI,
         ServiceType.MUSIC_GEN, ServiceType.SUNO,
     ]
@@ -569,6 +569,7 @@ async def handle_get_statistics(language_code: str, period: str):
         if not key.startswith('__') and value in {
             ServiceType.MIDJOURNEY,
             ServiceType.STABLE_DIFFUSION,
+            ServiceType.FLUX,
             ServiceType.FACE_SWAP,
             ServiceType.PHOTOSHOP_AI,
             ServiceType.MUSIC_GEN,
@@ -580,6 +581,7 @@ async def handle_get_statistics(language_code: str, period: str):
         if not key.startswith('__') and value in {
             ServiceType.MIDJOURNEY,
             ServiceType.STABLE_DIFFUSION,
+            ServiceType.FLUX,
             ServiceType.FACE_SWAP,
             ServiceType.PHOTOSHOP_AI,
             ServiceType.MUSIC_GEN,
@@ -593,6 +595,8 @@ async def handle_get_statistics(language_code: str, period: str):
             count_reactions_before[ServiceType.MIDJOURNEY][generation_reaction],
             count_reactions[ServiceType.STABLE_DIFFUSION][generation_reaction],
             count_reactions_before[ServiceType.STABLE_DIFFUSION][generation_reaction],
+            count_reactions[ServiceType.FLUX][generation_reaction],
+            count_reactions_before[ServiceType.FLUX][generation_reaction],
             count_reactions[ServiceType.FACE_SWAP][generation_reaction],
             count_reactions_before[ServiceType.FACE_SWAP][generation_reaction],
             count_reactions[ServiceType.PHOTOSHOP_AI][generation_reaction],
@@ -627,6 +631,18 @@ async def handle_get_statistics(language_code: str, period: str):
                 end_date=end_date_before,
                 reaction=generation_reaction,
                 model=Model.STABLE_DIFFUSION,
+            ) if start_date_before and end_date_before else get_zero(),
+            get_count_of_generations(
+                start_date=start_date,
+                end_date=end_date,
+                reaction=generation_reaction,
+                model=Model.FLUX,
+            ),
+            get_count_of_generations(
+                start_date=start_date_before,
+                end_date=end_date_before,
+                reaction=generation_reaction,
+                model=Model.FLUX,
             ) if start_date_before and end_date_before else get_zero(),
             get_count_of_generations(
                 start_date=start_date,

@@ -8,7 +8,8 @@ from bot.database.models.common import (
     DALLEResolution,
     DALLEQuality,
     MidjourneyVersion,
-    SunoSendType, SunoVersion,
+    SunoSendType,
+    SunoVersion, FluxSafetyTolerance,
 )
 from bot.database.models.user import UserSettings
 from bot.locales.main import get_localization
@@ -112,6 +113,12 @@ def build_settings_choose_image_model_keyboard(language_code: str) -> InlineKeyb
             InlineKeyboardButton(
                 text=get_localization(language_code).STABLE_DIFFUSION,
                 callback_data=f'settings_choose_image_model:{Model.STABLE_DIFFUSION}'
+            ),
+        ],
+        [
+            InlineKeyboardButton(
+                text=get_localization(language_code).FLUX,
+                callback_data=f'settings_choose_image_model:{Model.FLUX}'
             ),
         ],
         [
@@ -227,36 +234,42 @@ def build_settings_keyboard(
             [
                 InlineKeyboardButton(
                     text=get_localization(language_code).SHOW_USAGE_QUOTA_IN_MESSAGES + (
-                        ' ✅' if settings[model][UserSettings.SHOW_USAGE_QUOTA] else ' ❌'),
+                        ' ✅' if settings[model][UserSettings.SHOW_USAGE_QUOTA] else ' ❌'
+                    ),
                     callback_data=f'setting:{UserSettings.SHOW_USAGE_QUOTA}:{model}'
                 ),
             ],
             [
                 InlineKeyboardButton(
                     text=DALLEResolution.LOW + (
-                        ' ✅' if settings[model][UserSettings.RESOLUTION] == DALLEResolution.LOW else ''),
+                        ' ✅' if settings[model][UserSettings.RESOLUTION] == DALLEResolution.LOW else ''
+                    ),
                     callback_data=f'setting:{DALLEResolution.LOW}:{model}'
                 ),
                 InlineKeyboardButton(
                     text=DALLEResolution.MEDIUM + (
-                        ' ✅' if settings[model][UserSettings.RESOLUTION] == DALLEResolution.MEDIUM else ''),
+                        ' ✅' if settings[model][UserSettings.RESOLUTION] == DALLEResolution.MEDIUM else ''
+                    ),
                     callback_data=f'setting:{DALLEResolution.MEDIUM}:{model}'
                 ),
                 InlineKeyboardButton(
                     text=DALLEResolution.HIGH + (
-                        ' ✅' if settings[model][UserSettings.RESOLUTION] == DALLEResolution.HIGH else ''),
+                        ' ✅' if settings[model][UserSettings.RESOLUTION] == DALLEResolution.HIGH else ''
+                    ),
                     callback_data=f'setting:{DALLEResolution.HIGH}:{model}'
                 ),
             ],
             [
                 InlineKeyboardButton(
                     text=DALLEQuality.STANDARD + (
-                        ' ✅' if settings[model][UserSettings.QUALITY] == DALLEQuality.STANDARD else ''),
+                        ' ✅' if settings[model][UserSettings.QUALITY] == DALLEQuality.STANDARD else ''
+                    ),
                     callback_data=f'setting:{DALLEQuality.STANDARD}:{model}'
                 ),
                 InlineKeyboardButton(
                     text=DALLEQuality.HD + (
-                        ' ✅' if settings[model][UserSettings.QUALITY] == DALLEQuality.HD else ''),
+                        ' ✅' if settings[model][UserSettings.QUALITY] == DALLEQuality.HD else ''
+                    ),
                     callback_data=f'setting:{DALLEQuality.HD}:{model}'
                 ),
             ],
@@ -278,54 +291,67 @@ def build_settings_keyboard(
             [
                 InlineKeyboardButton(
                     text=get_localization(language_code).SHOW_USAGE_QUOTA_IN_MESSAGES + (
-                        ' ✅' if settings[model][UserSettings.SHOW_USAGE_QUOTA] else ' ❌'),
+                        ' ✅' if settings[model][UserSettings.SHOW_USAGE_QUOTA] else ' ❌'
+                    ),
                     callback_data=f'setting:{UserSettings.SHOW_USAGE_QUOTA}:{model}'
                 ),
             ],
             [
                 InlineKeyboardButton(
                     text=MidjourneyVersion.V5 + (
-                        ' ✅' if settings[model][UserSettings.VERSION] == MidjourneyVersion.V5 else ''),
+                        ' ✅' if settings[model][UserSettings.VERSION] == MidjourneyVersion.V5 else ''
+                    ),
                     callback_data=f'setting:{MidjourneyVersion.V5}:{model}'
                 ),
                 InlineKeyboardButton(
                     text=MidjourneyVersion.V6 + (
-                        ' ✅' if settings[model][UserSettings.VERSION] == MidjourneyVersion.V6 else ''),
+                        ' ✅' if settings[model][UserSettings.VERSION] == MidjourneyVersion.V6 else ''
+                    ),
                     callback_data=f'setting:{MidjourneyVersion.V6}:{model}'
                 ),
             ],
         ]
-    elif model == Model.STABLE_DIFFUSION:
+    elif model == Model.FLUX:
         buttons = [
             [
                 InlineKeyboardButton(
                     text=get_localization(language_code).SHOW_USAGE_QUOTA_IN_MESSAGES + (
-                        ' ✅' if settings[model][UserSettings.SHOW_USAGE_QUOTA] else ' ❌'),
+                        ' ✅' if settings[model][UserSettings.SHOW_USAGE_QUOTA] else ' ❌'
+                    ),
                     callback_data=f'setting:{UserSettings.SHOW_USAGE_QUOTA}:{model}'
                 ),
             ],
-        ]
-    elif model == Model.FACE_SWAP:
-        buttons = [
             [
                 InlineKeyboardButton(
-                    text=get_localization(language_code).SHOW_USAGE_QUOTA_IN_MESSAGES + (
-                        ' ✅' if settings[model][UserSettings.SHOW_USAGE_QUOTA] else ' ❌'),
-                    callback_data=f'setting:{UserSettings.SHOW_USAGE_QUOTA}:{model}'
+                    text=get_localization(language_code).STRICT_SAFETY_TOLERANCE + (
+                        ' ✅' if settings[model][UserSettings.SAFETY_TOLERANCE] == FluxSafetyTolerance.STRICT else ''
+                    ),
+                    callback_data=f'setting:{FluxSafetyTolerance.STRICT}:{model}'
                 ),
             ],
-        ]
-    elif model == Model.PHOTOSHOP_AI:
-        buttons = [
             [
                 InlineKeyboardButton(
-                    text=get_localization(language_code).SHOW_USAGE_QUOTA_IN_MESSAGES + (
-                        ' ✅' if settings[model][UserSettings.SHOW_USAGE_QUOTA] else ' ❌'),
-                    callback_data=f'setting:{UserSettings.SHOW_USAGE_QUOTA}:{model}'
+                    text=get_localization(language_code).MIDDLE_SAFETY_TOLERANCE + (
+                        ' ✅' if settings[model][UserSettings.SAFETY_TOLERANCE] == FluxSafetyTolerance.MIDDLE else ''
+                    ),
+                    callback_data=f'setting:{FluxSafetyTolerance.MIDDLE}:{model}'
+                ),
+            ],
+            [
+                InlineKeyboardButton(
+                    text=get_localization(language_code).PERMISSIVE_SAFETY_TOLERANCE + (
+                        ' ✅' if settings[model][UserSettings.SAFETY_TOLERANCE] == FluxSafetyTolerance.PERMISSIVE else ''
+                    ),
+                    callback_data=f'setting:{FluxSafetyTolerance.PERMISSIVE}:{model}'
                 ),
             ],
         ]
-    elif model == Model.MUSIC_GEN:
+    elif (
+        model == Model.STABLE_DIFFUSION or
+        model == Model.FACE_SWAP or
+        model == Model.PHOTOSHOP_AI or
+        model == Model.MUSIC_GEN
+    ):
         buttons = [
             [
                 InlineKeyboardButton(

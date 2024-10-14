@@ -22,7 +22,7 @@ from bot.database.models.common import (
     DALLEQuality,
     MidjourneyVersion,
     SunoSendType,
-    SunoVersion,
+    SunoVersion, FluxSafetyTolerance,
 )
 from bot.database.models.user import UserSettings
 from bot.database.operations.chat.deleters import delete_chat, reset_chat
@@ -248,6 +248,13 @@ async def handle_setting_selection(callback_query: CallbackQuery, state: FSMCont
     elif chosen_setting == MidjourneyVersion.V5 or chosen_setting == MidjourneyVersion.V6:
         user.settings[Model.MIDJOURNEY][UserSettings.VERSION] = chosen_setting
         what_changed = UserSettings.VERSION
+    elif (
+        chosen_setting == str(FluxSafetyTolerance.STRICT) or
+        chosen_setting == str(FluxSafetyTolerance.MIDDLE) or
+        chosen_setting == str(FluxSafetyTolerance.PERMISSIVE)
+    ):
+        user.settings[Model.FLUX][UserSettings.SAFETY_TOLERANCE] = int(chosen_setting)
+        what_changed = UserSettings.SAFETY_TOLERANCE
     elif chosen_setting == SunoSendType.AUDIO or chosen_setting == SunoSendType.VIDEO:
         user.settings[Model.SUNO][UserSettings.SEND_TYPE] = chosen_setting
         what_changed = UserSettings.SEND_TYPE
@@ -297,6 +304,16 @@ async def handle_setting_selection(callback_query: CallbackQuery, state: FSMCont
                     text += ' ✅'
                     keyboard_changed = True
                 elif callback_data == SunoSendType.AUDIO or callback_data == SunoSendType.VIDEO:
+                    text = text.replace(' ✅', '')
+            elif what_changed == UserSettings.SAFETY_TOLERANCE:
+                if callback_data == chosen_setting and '✅' not in text:
+                    text += ' ✅'
+                    keyboard_changed = True
+                elif (
+                    callback_data == str(FluxSafetyTolerance.STRICT) or
+                    callback_data == str(FluxSafetyTolerance.MIDDLE) or
+                    callback_data == str(FluxSafetyTolerance.PERMISSIVE)
+                ):
                     text = text.replace(' ✅', '')
             elif (
                 chosen_setting == callback_data and

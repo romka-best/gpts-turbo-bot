@@ -18,6 +18,7 @@ from bot.handlers.ai.chat_gpt_handler import handle_chatgpt
 from bot.handlers.ai.claude_handler import handle_claude
 from bot.handlers.ai.dalle_handler import handle_dall_e
 from bot.handlers.ai.face_swap_handler import handle_face_swap
+from bot.handlers.ai.flux_handler import handle_flux
 from bot.handlers.ai.gemini_handler import handle_gemini
 from bot.handlers.ai.midjourney_handler import handle_midjourney
 from bot.handlers.ai.music_gen_handler import handle_music_gen
@@ -79,6 +80,8 @@ async def handle_text(message: Message, state: FSMContext):
         user_quota = Quota.MIDJOURNEY
     elif user.current_model == Model.STABLE_DIFFUSION:
         user_quota = Quota.STABLE_DIFFUSION
+    elif user.current_model == Model.FLUX:
+        user_quota = Quota.FLUX
     elif user.current_model == Model.FACE_SWAP:
         user_quota = Quota.FACE_SWAP
     elif user.current_model == Model.PHOTOSHOP_AI:
@@ -113,6 +116,8 @@ async def handle_text(message: Message, state: FSMContext):
         await handle_midjourney(message, state, user, message.text, MidjourneyAction.IMAGINE)
     elif user.current_model == Model.STABLE_DIFFUSION:
         await handle_stable_diffusion(message, state, user)
+    elif user.current_model == Model.FLUX:
+        await handle_flux(message, state, user)
     elif user.current_model == Model.FACE_SWAP:
         await handle_face_swap(message.bot, str(message.chat.id), state, user.id, message.text)
     elif user.current_model == Model.PHOTOSHOP_AI:

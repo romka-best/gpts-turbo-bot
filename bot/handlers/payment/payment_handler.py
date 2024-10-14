@@ -396,7 +396,7 @@ async def handle_package(message: Message, user_id: str, state: FSMContext, is_e
     user = await get_user(user_id)
     user_language_code = await get_user_language(user_id, state.storage)
 
-    photo_path = f'payments/packages_{user_language_code}.png'
+    photo_path = f'payments/packages_{user.subscription_type.lower()}_{user_language_code}.png'
     photo = await firebase.bucket.get_blob(photo_path)
     photo_link = firebase.get_public_url(photo.name)
 
@@ -486,12 +486,13 @@ async def handle_package_selection_selection(callback_query: CallbackQuery, stat
 @payment_router.message(Payment.waiting_for_package_quantity, ~F.text.startswith('/'))
 async def quantity_of_package_sent(message: Message, state: FSMContext):
     user_id = str(message.from_user.id)
+    user = await get_user(user_id)
     user_language_code = await get_user_language(user_id, state.storage)
 
     try:
         quantity = int(message.text)
 
-        photo_path = f'payments/packages_{user_language_code}.png'
+        photo_path = f'payments/packages_{user.subscription_type.lower()}_{user_language_code}.png'
         photo = await firebase.bucket.get_blob(photo_path)
         photo_link = firebase.get_public_url(photo.name)
 
@@ -564,7 +565,7 @@ async def handle_package_add_to_cart_selection(callback_query: CallbackQuery, st
     if action == 'go_to_cart':
         cart = await get_cart_by_user_id(user_id)
 
-        photo_path = f'payments/packages_{user_language_code}.png'
+        photo_path = f'payments/packages_{user.subscription_type.lower()}_{user_language_code}.png'
         photo = await firebase.bucket.get_blob(photo_path)
         photo_link = firebase.get_public_url(photo.name)
 
@@ -826,7 +827,7 @@ async def handle_payment_method_package_selection(callback_query: CallbackQuery,
             package_name = package_name_and_description.get('name')
             package_description = package_name_and_description.get('description')
 
-            photo_path = f'payments/packages_{user_language_code}.png'
+            photo_path = f'payments/packages_{user.subscription_type.lower()}_{user_language_code}.png'
             photo = await firebase.bucket.get_blob(photo_path)
             photo_link = firebase.get_public_url(photo.name)
 
@@ -1024,7 +1025,7 @@ async def handle_payment_method_cart_selection(callback_query: CallbackQuery, st
                 amount += Package.get_price(Currency.XTR, package_type, package_quantity, 0)
                 payload += f':{package_type}:{package_quantity}'
 
-            photo_path = f'payments/packages_{user_language_code}.png'
+            photo_path = f'payments/packages_{user.subscription_type.lower()}_{user_language_code}.png'
             photo = await firebase.bucket.get_blob(photo_path)
             photo_link = firebase.get_public_url(photo.name)
 

@@ -31,6 +31,7 @@ from bot.handlers.ai.chat_gpt_handler import chat_gpt_router
 from bot.handlers.ai.claude_handler import claude_router
 from bot.handlers.ai.dalle_handler import dall_e_router
 from bot.handlers.ai.face_swap_handler import face_swap_router
+from bot.handlers.ai.flux_handler import flux_router
 from bot.handlers.ai.gemini_handler import gemini_router
 from bot.handlers.ai.midjourney_handler import midjourney_router
 from bot.handlers.ai.mode_handler import mode_router
@@ -70,6 +71,7 @@ from bot.helpers.setters.set_description import set_description
 from bot.helpers.updaters.update_daily_limits import update_daily_limits
 from bot.middlewares.AuthMiddleware import AuthMessageMiddleware, AuthCallbackQueryMiddleware
 from bot.middlewares.LoggingMiddleware import LoggingMessageMiddleware, LoggingCallbackQueryMiddleware
+from bot.utils.migrate import migrate
 
 WEBHOOK_BOT_PATH = f'/bot/{config.BOT_TOKEN.get_secret_value()}'
 WEBHOOK_YOOKASSA_PATH = '/payment/yookassa'
@@ -124,6 +126,7 @@ async def lifespan(_: FastAPI):
         dall_e_router,
         midjourney_router,
         stable_diffusion_router,
+        flux_router,
         face_swap_router,
         admin_face_swap_router,
         photoshop_ai_router,
@@ -145,6 +148,7 @@ async def lifespan(_: FastAPI):
     await set_description(bot)
     await set_commands(bot)
     await firebase.init()
+    await migrate(bot)
     yield
     await bot.session.close()
     await storage.close()

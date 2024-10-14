@@ -88,6 +88,12 @@ def build_info_image_models_keyboard(language_code: str) -> InlineKeyboardMarkup
         ],
         [
             InlineKeyboardButton(
+                text=get_localization(language_code).FLUX,
+                callback_data=f'info_image_models:{Model.FLUX}'
+            ),
+        ],
+        [
+            InlineKeyboardButton(
                 text=get_localization(language_code).FACE_SWAP,
                 callback_data=f'info_image_models:{Model.FACE_SWAP}'
             ),

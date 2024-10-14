@@ -49,6 +49,10 @@ async def create_payment(
             'description': description,
             'merchant_customer_id': user_id,
             'receipt': {
+                'customer': {
+                    'full_name': user_id,
+                    'email': 'me@romandanilov.com',
+                },
                 'items': [
                     {
                         'amount': {
