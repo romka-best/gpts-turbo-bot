@@ -9,7 +9,7 @@ from bot.helpers.senders.send_message_to_admins import send_message_to_admins
 async def unsubscribe(transaction, old_subscription: Subscription, bot: Bot):
     old_subscription.status = SubscriptionStatus.CANCELED
     await update_subscription_in_transaction(transaction, old_subscription.id, {
-        'status': SubscriptionStatus.CANCELED,
+        'status': old_subscription.status,
     })
 
     await send_message_to_admins(

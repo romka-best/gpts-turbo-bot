@@ -5,12 +5,16 @@ from typing import Dict
 from aiogram import Bot, Dispatcher
 from yookassa.domain.notification import WebhookNotification
 
-from bot.config import config
+from bot.config import config, MessageEffect
 from bot.database.main import firebase
 from bot.database.models.common import PaymentMethod, Currency
 from bot.database.models.package import Package, PackageStatus
-from bot.database.models.subscription import SubscriptionStatus, SubscriptionPeriod, SubscriptionType, \
-    SubscriptionLimit, Subscription
+from bot.database.models.subscription import (
+    SubscriptionStatus,
+    SubscriptionPeriod,
+    SubscriptionType,
+    SubscriptionLimit,
+)
 from bot.database.models.transaction import TransactionType
 from bot.database.models.user import UserSettings
 from bot.database.operations.cart.getters import get_cart_by_user_id
@@ -77,6 +81,7 @@ async def handle_yookassa_webhook(request: Dict, bot: Bot, dp: Dispatcher):
                 await bot.send_message(
                     chat_id=subscription.user_id,
                     text=get_localization(user_language_code).SUBSCRIPTION_SUCCESS,
+                    message_effect_id=config.MESSAGE_EFFECTS.get(MessageEffect.HEART),
                 )
 
                 reply_markup = build_switched_to_ai_keyboard(user_language_code, user.current_model)
@@ -180,6 +185,7 @@ async def handle_yookassa_webhook(request: Dict, bot: Bot, dp: Dispatcher):
                     await bot.send_message(
                         chat_id=new_subscription.user_id,
                         text=get_localization(user_language_code).SUBSCRIPTION_RESET,
+                        message_effect_id=config.MESSAGE_EFFECTS.get(MessageEffect.HEART),
                     )
 
                     await send_message_to_admins(
@@ -215,7 +221,7 @@ async def handle_yookassa_webhook(request: Dict, bot: Bot, dp: Dispatcher):
                     await send_message_to_admins(
                         bot=bot,
                         message=f'#payment #renew #subscription #declined\n\n'
-                                f'❌ <b>Отмена продления подписки у пользователя: {old_subscription.user_id}</b>\n\n'
+                                f'❌ <b>Не смогли продлить подписку у пользователя: {old_subscription.user_id}</b>\n\n'
                                 f'ℹ️ ID: {old_subscription.id}\n'
                                 f'💱 Метод оплаты: {old_subscription.payment_method}\n'
                                 f'💳 Тип подписки: {old_subscription.type}\n'
@@ -226,7 +232,7 @@ async def handle_yookassa_webhook(request: Dict, bot: Bot, dp: Dispatcher):
                     await send_message_to_admins(
                         bot=bot,
                         message=f'#payment #renew #subscription #error\n\n'
-                                f'🚫 <b>Неизвестный статус при продлении подписки у пользователя: {subscription.user_id}</b>\n\n'
+                                f'🚫 <b>Неизвестный статус при продлении подписки у пользователя: {old_subscription.user_id}</b>\n\n'
                                 f'ℹ️ ID: {old_subscription.id}\n'
                                 f'🛠 Статус: {payment.status}\n'
                                 f'💱 Метод оплаты: {old_subscription.payment_method}\n'
@@ -292,6 +298,7 @@ async def handle_yookassa_webhook(request: Dict, bot: Bot, dp: Dispatcher):
                 await bot.send_message(
                     chat_id=package.user_id,
                     text=get_localization(user_language_code).PACKAGE_SUCCESS,
+                    message_effect_id=config.MESSAGE_EFFECTS.get(MessageEffect.HEART),
                 )
 
                 reply_markup = build_switched_to_ai_keyboard(user_language_code, user.current_model)
@@ -402,6 +409,7 @@ async def handle_yookassa_webhook(request: Dict, bot: Bot, dp: Dispatcher):
                 await bot.send_message(
                     chat_id=user.id,
                     text=get_localization(user_language_code).PACKAGES_SUCCESS,
+                    message_effect_id=config.MESSAGE_EFFECTS.get(MessageEffect.HEART),
                 )
 
                 reply_markup = build_switched_to_ai_keyboard(user_language_code, user.current_model)

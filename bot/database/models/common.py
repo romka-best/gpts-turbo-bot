@@ -17,6 +17,7 @@ class Model:
     DALL_E = 'dall-e'
     MIDJOURNEY = 'midjourney'
     STABLE_DIFFUSION = 'stable-diffusion'
+    FLUX = 'flux'
     FACE_SWAP = 'face-swap'
     PHOTOSHOP_AI = 'photoshop-ai'
     MUSIC_GEN = 'music-gen'
@@ -44,6 +45,7 @@ class Quota:
     DALL_E = 'dall_e'
     MIDJOURNEY = 'midjourney'
     STABLE_DIFFUSION = 'stable_diffusion'
+    FLUX = 'flux'
     FACE_SWAP = 'face_swap'
     PHOTOSHOP_AI = 'photoshop_ai'
     MUSIC_GEN = 'music_gen'
@@ -112,6 +114,16 @@ class MidjourneyAction:
 
 class StableDiffusionVersion:
     LATEST = 'LATEST'
+
+
+class FluxVersion:
+    LATEST = 'LATEST'
+
+
+class FluxSafetyTolerance:
+    STRICT = 1
+    MIDDLE = 3
+    PERMISSIVE = 5
 
 
 class FaceSwapVersion:

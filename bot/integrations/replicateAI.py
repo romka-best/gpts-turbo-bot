@@ -129,3 +129,27 @@ async def create_stable_diffusion_image(prompt: str) -> Optional[str]:
         # TODO: Send in TG
         error_trace = traceback.format_exc()
         logging.error(f'Error in create_stable_diffusion_image: {e}\n{error_trace}')
+
+
+async def create_flux_image(prompt: str, safety_tolerance=3) -> Optional[str]:
+    try:
+        input_parameters = {
+            'prompt': prompt,
+            'output_format': 'jpg',
+            'output_quality': 100,
+            'safety_tolerance': safety_tolerance,
+        }
+
+        model = await replicate.models.async_get('black-forest-labs/flux-1.1-pro')
+        prediction = await replicate.predictions.async_create(
+            model=model,
+            input=input_parameters,
+            webhook=WEBHOOK_REPLICATE_URL,
+            webhook_events_filter=['completed'],
+        )
+
+        return prediction.id
+    except Exception as e:
+        # TODO: Send in TG
+        error_trace = traceback.format_exc()
+        logging.error(f'Error in create_flux_image: {e}\n{error_trace}')

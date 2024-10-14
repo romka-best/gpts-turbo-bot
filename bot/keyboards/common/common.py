@@ -58,7 +58,12 @@ async def build_recommendations_keyboard(
                     text=recommendation,
                 )
             ])
-    elif current_model == Model.DALL_E or current_model == Model.MIDJOURNEY or current_model == Model.STABLE_DIFFUSION:
+    elif (
+        current_model == Model.DALL_E or
+        current_model == Model.MIDJOURNEY or
+        current_model == Model.STABLE_DIFFUSION or
+        current_model == Model.FLUX
+    ):
         recommendations = get_localization(language_code).image_recommendations()
         random.shuffle(recommendations)
         for recommendation in recommendations[:4]:

@@ -2,7 +2,7 @@ aiogram==3.13.1
 aiohttp==3.10.10
 aioredis==2.0.1
 aiofiles===23.2.1
-anthropic==0.34.2
+anthropic==0.36.0
 async-timeout==4.0.3
 cachetools==5.5.0
 certifi==2024.8.30
@@ -27,7 +27,7 @@ PyJWT==2.9.0
 pillow==10.4.0
 redis==5.1.1
 requests==2.32.3
-replicate==0.34.2
+replicate==1.0.1
 six==1.16.0
 openai==1.51.2
 python-dotenv==1.0.1

@@ -19,6 +19,7 @@ from bot.database.operations.request.updaters import update_request
 from bot.database.operations.transaction.writers import write_transaction
 from bot.database.operations.user.getters import get_user
 from bot.handlers.ai.face_swap_handler import PRICE_FACE_SWAP, handle_face_swap
+from bot.handlers.ai.flux_handler import PRICE_FLUX
 from bot.handlers.ai.music_gen_handler import PRICE_MUSIC_GEN, handle_music_gen
 from bot.handlers.ai.photoshop_ai_handler import (
     PRICE_PHOTOSHOP_AI_RESTORATION,
@@ -80,6 +81,8 @@ async def handle_replicate_webhook(bot: Bot, dp: Dispatcher, prediction: dict):
 
     if request.model == Model.STABLE_DIFFUSION:
         await handle_replicate_stable_diffusion(bot, dp, user, request, generation)
+    elif request.model == Model.FLUX:
+        await handle_replicate_flux(bot, dp, user, request, generation)
     elif request.model == Model.FACE_SWAP:
         await handle_replicate_face_swap(bot, dp, user, request, generation)
     elif request.model == Model.PHOTOSHOP_AI:
@@ -406,6 +409,71 @@ async def handle_replicate_stable_diffusion(
             update_user_usage_quota(
                 user,
                 Quota.STABLE_DIFFUSION,
+                1 if generation.result else 0,
+            ),
+        ]
+
+        await asyncio.gather(*update_tasks)
+
+        state = FSMContext(
+            storage=dp.storage,
+            key=StorageKey(
+                chat_id=int(user.telegram_chat_id),
+                user_id=int(user.id),
+                bot_id=bot.id,
+            )
+        )
+        await state.clear()
+
+        await bot.delete_message(user.telegram_chat_id, request.message_id)
+
+
+async def handle_replicate_flux(
+    bot: Bot,
+    dp: Dispatcher,
+    user: User,
+    request: Request,
+    generation: Generation,
+):
+    prompt = generation.details.get('prompt')
+
+    if generation.result:
+        reply_markup = build_reaction_keyboard(generation.id)
+        await send_image(bot, user.telegram_chat_id, generation.result, reply_markup)
+    elif generation.has_error:
+        reply_markup = build_error_keyboard(user.interface_language_code)
+        await bot.send_message(
+            chat_id=user.telegram_chat_id,
+            text=get_localization(user.interface_language_code).ERROR,
+            reply_markup=reply_markup,
+            parse_mode=None,
+        )
+
+    if request.status != RequestStatus.FINISHED:
+        request.status = RequestStatus.FINISHED
+        await update_request(request.id, {
+            'status': request.status
+        })
+
+        total_price = PRICE_FLUX
+        update_tasks = [
+            write_transaction(
+                user_id=user.id,
+                type=TransactionType.EXPENSE,
+                service=ServiceType.FLUX,
+                amount=total_price,
+                clear_amount=total_price,
+                currency=Currency.USD,
+                quantity=1 if generation.result else 0,
+                details={
+                    'result': generation.result,
+                    'prompt': prompt,
+                    'has_error': generation.has_error,
+                },
+            ),
+            update_user_usage_quota(
+                user,
+                Quota.FLUX,
                 1 if generation.result else 0,
             ),
         ]

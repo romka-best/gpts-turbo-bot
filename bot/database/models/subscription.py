@@ -45,6 +45,7 @@ class SubscriptionLimit:
             Quota.DALL_E: 1,
             Quota.MIDJOURNEY: 1,
             Quota.STABLE_DIFFUSION: 1,
+            Quota.FLUX: 1,
             Quota.FACE_SWAP: 1,
             Quota.PHOTOSHOP_AI: 1,
             Quota.MUSIC_GEN: 0,
@@ -64,6 +65,7 @@ class SubscriptionLimit:
             Quota.DALL_E: 5,
             Quota.MIDJOURNEY: 5,
             Quota.STABLE_DIFFUSION: 5,
+            Quota.FLUX: 5,
             Quota.FACE_SWAP: 5,
             Quota.PHOTOSHOP_AI: 5,
             Quota.MUSIC_GEN: 2,
@@ -83,6 +85,7 @@ class SubscriptionLimit:
             Quota.DALL_E: 10,
             Quota.MIDJOURNEY: 10,
             Quota.STABLE_DIFFUSION: 10,
+            Quota.FLUX: 10,
             Quota.FACE_SWAP: 10,
             Quota.PHOTOSHOP_AI: 10,
             Quota.MUSIC_GEN: 5,
@@ -102,6 +105,7 @@ class SubscriptionLimit:
             Quota.DALL_E: 15,
             Quota.MIDJOURNEY: 15,
             Quota.STABLE_DIFFUSION: 15,
+            Quota.FLUX: 15,
             Quota.FACE_SWAP: 15,
             Quota.PHOTOSHOP_AI: 15,
             Quota.MUSIC_GEN: 10,
@@ -121,6 +125,7 @@ class SubscriptionLimit:
             Quota.DALL_E: 30,
             Quota.MIDJOURNEY: 30,
             Quota.STABLE_DIFFUSION: 30,
+            Quota.FLUX: 30,
             Quota.FACE_SWAP: 30,
             Quota.PHOTOSHOP_AI: 30,
             Quota.MUSIC_GEN: 20,
@@ -140,6 +145,7 @@ class SubscriptionLimit:
             Quota.DALL_E: float('inf'),
             Quota.MIDJOURNEY: float('inf'),
             Quota.STABLE_DIFFUSION: float('inf'),
+            Quota.FLUX: float('inf'),
             Quota.FACE_SWAP: float('inf'),
             Quota.PHOTOSHOP_AI: float('inf'),
             Quota.MUSIC_GEN: float('inf'),
@@ -154,7 +160,7 @@ class SubscriptionLimit:
             Quota.VOICE_MESSAGES: False,
         },
         SubscriptionType.MINI: {
-            Quota.ADDITIONAL_CHATS: 0,
+            Quota.ADDITIONAL_CHATS: 1,
             Quota.ACCESS_TO_CATALOG: True,
             Quota.FAST_MESSAGES: True,
             Quota.VOICE_MESSAGES: True,
@@ -190,7 +196,7 @@ class SubscriptionLimit:
         SubscriptionType.STANDARD: 20,
         SubscriptionType.VIP: 30,
         SubscriptionType.PREMIUM: 50,
-        SubscriptionType.UNLIMITED: 50
+        SubscriptionType.UNLIMITED: 50,
     }
 
 

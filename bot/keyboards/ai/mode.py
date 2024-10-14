@@ -131,8 +131,17 @@ def build_mode_keyboard(language_code: str, model: Model, model_version: str, pa
             [
                 InlineKeyboardButton(
                     text=get_localization(language_code).STABLE_DIFFUSION + (
-                        ' ✅' if model == Model.STABLE_DIFFUSION else ''),
+                        ' ✅' if model == Model.STABLE_DIFFUSION else ''
+                    ),
                     callback_data=f'mode:{Model.STABLE_DIFFUSION}'
+                ),
+            ],
+            [
+                InlineKeyboardButton(
+                    text=get_localization(language_code).FLUX + (
+                        ' ✅' if model == Model.FLUX else ''
+                    ),
+                    callback_data=f'mode:{Model.FLUX}'
                 ),
             ],
             [

@@ -64,6 +64,10 @@ commands_en = [
         description='🎆 Switch to Stable Diffusion model',
     ),
     BotCommand(
+        command='flux',
+        description='🫐 Switch to Flux model',
+    ),
+    BotCommand(
         command='face_swap',
         description='📷️ Switch to FaceSwap model',
     ),
@@ -153,6 +157,10 @@ commands_ru = [
     BotCommand(
         command='stable_diffusion',
         description='🎆 Переключиться на Stable Diffusion модель',
+    ),
+    BotCommand(
+        command='flux',
+        description='🫐 Переключиться на Flux модель',
     ),
     BotCommand(
         command='face_swap',

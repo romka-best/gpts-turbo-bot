@@ -38,7 +38,8 @@ I'm your personal gateway to the world of neural networks. Discover the capabili
     ┣ Draw beautiful, unforgettable pictures with:
         ┣ <b>DALL-E 3 👨‍🎨</b> /dalle
         ┣ <b>Midjourney 6.1 🎨</b> /midjourney
-        ┗ <b>Stable Diffusion 3.0 🎆</b> /stable_diffusion
+        ┣ <b>Stable Diffusion 3.0 🎆</b> /stable_diffusion
+        ┗ <b>Flux 1.1 Pro 🫐</b> /flux
     ┣ To exchange faces with someone in a photo, try <b>FaceSwap 📷️</b> /face_swap
     ┗ Edit your images using <b>Photoshop AI 🪄</b> /photoshop
 
@@ -65,7 +66,8 @@ I am constantly updating myself, implementing the most advanced technologies so 
     ┣ 1️⃣ Enter one of the commands:
         ┣ /dalle 👨‍🎨
         ┣ /midjourney 🎨
-        ┗ /stable_diffusion 🎆
+        ┣ /stable_diffusion 🎆
+        ┗ /flux 🫐
     ┗ 2️⃣ Start creating using your imagination with your requests
 
 ━ 😜 <b>Exchange Faces in Photos</b>:
@@ -116,6 +118,7 @@ I am constantly updating myself, implementing the most advanced technologies so 
     ┣ 👨‍🎨 /dalle - <b>Draw with DALL-E</b>: Turn your ideas into drawings
     ┣ 🎨 /midjourney - <b>Create with DALL-E 3</b>: Bring your imaginations to life with images
     ┣ 🎆 /stable_diffusion - <b>Uniqueness with Stable Diffusion</b>: Create unique images
+    ┣ 🫐 /flux - <b>Experiments with Flux</b>: Explore endless image variations without limitations
     ┣ 😜 /face_swap - <b>Have fun with FaceSwap</b>: Change faces in photos
     ┣ 🪄 /photoshop - <b>Magic with Photoshop AI</b>: Retouch and edit your photos with one touch
     ┣ 🎺 /music_gen - <b>Melodies with MusicGen</b>: Create music without copyrights
@@ -244,6 +247,17 @@ Just type away a command to begin your AI journey! 🌟
 - <i>Image Stylization</i>: Transform existing images into different artistic styles, from comic book designs to classic painting styles.
 - <i>Design Prototyping</i>: Quickly generate visual concepts for logos, posters, or web design projects.
 - <i>Art Style Experimentation</i>: Experiment with colors, shapes, and textures to develop new visual solutions.
+"""
+    INFO_FLUX = """
+🤖 <b>There is what the model can do for you:</b>
+
+🫐 <b>Flux: Experiments with Flux</b>
+
+- <i>Endless Variations</i>: Generate diverse images from a single prompt, each result being unique.
+- <i>Fine-Tuning Parameters</i>: Control the image creation process to achieve results tailored to your specific needs.
+- <i>Randomized Generation</i>: Introduce elements of randomness to create unexpectedly creative outcomes.
+- <i>Diverse Visual Concepts</i>: Explore a wide range of artistic styles and approaches, adjusting the process to fit your project.
+- <i>Fast Visual Experiments</i>: Experiment with various concepts and styles without limitations, unlocking new creative possibilities.
 """
     INFO_FACE_SWAP = """
 🤖 <b>There is what the model can do for you:</b>
@@ -565,6 +579,8 @@ To choose a Claude model click a button below 👇
     CHOOSE_GEMINI_MODEL = """
 To choose a Gemini model click a button below 👇
 """
+    SWITCHED_TO_AI_SETTINGS = "⚙️ Go to Model's Settings"
+    SWITCHED_TO_AI_INFO = "ℹ️ What Can This Model Do"
     SWITCHED_TO_CHATGPT4_OMNI_MINI = """
 🤖 <b>Welcome to the world of ChatGPT 4.0 Omni Mini!</b>
 
@@ -652,7 +668,14 @@ Time to create! 🎉
     SWITCHED_TO_STABLE_DIFFUSION = """
 🎆 <b>Welcome to the world of Stable Diffusion 3.0!</b>
 
-You’ve successfully switched to the <b>Stable Diffusion</b> model — the perfect tool for generating unique images! This model allows you to bring visual ideas to life with high detail and a variety of artistic styles. Turn text into masterpieces and push the boundaries of your creativity!
+You've successfully switched to the <b>Stable Diffusion</b> model — the perfect tool for generating unique images! This model allows you to bring visual ideas to life with high detail and a variety of artistic styles. Turn text into masterpieces and push the boundaries of your creativity!
+
+Time to create! 🎉
+"""
+    SWITCHED_TO_FLUX = """
+🫐 <b>Welcome to the world of Flux 1.1 Pro!</b>
+
+You've successfully switched to the <b>Flux</b> model.
 
 Time to create! 🎉
 """
@@ -754,6 +777,11 @@ Use /mode to switch to a model that supports image vision 👀
 
     # Midjourney
     MIDJOURNEY_ALREADY_CHOSE_UPSCALE = "You've already chosen this image, try a new one 🙂"
+
+    # Flux
+    STRICT_SAFETY_TOLERANCE = "🔒 Strict Prompt Security"
+    MIDDLE_SAFETY_TOLERANCE = "🔏 Average Prompt Security"
+    PERMISSIVE_SAFETY_TOLERANCE = "🔓 Weak Prompt Security"
 
     # Suno
     SUNO_INFO = """
@@ -982,6 +1010,8 @@ Your chats have switched their unique roles to "Personal Assistant" as your acce
     MIDJOURNEY_REQUESTS_DESCRIPTION = "Unleash your creativity with Midjourney – transform your thoughts into magnificent visual works of art! 🎨"
     STABLE_DIFFUSION_REQUESTS = "🎆 Stable Diffusion 3.0 images"
     STABLE_DIFFUSION_REQUESTS_DESCRIPTION = "Open the door to a world of creativity with Stable Diffusion — transform your ideas into stunning images! 🎆"
+    FLUX_REQUESTS = "🫐 Flux 1.1 Pro images"
+    FLUX_REQUESTS_DESCRIPTION = "Explore visual variations with Flux — experiment and create unique images! 🫐"
     FACE_SWAP_REQUESTS = "📷 Images with face replacement"
     FACE_SWAP_REQUESTS_DESCRIPTION = "Enter the playful world of FaceSwap for laughs and surprises in every image! 😂🔄"
     PHOTOSHOP_AI_REQUESTS = "🪄 Photoshop AI generations"
@@ -1228,6 +1258,8 @@ Please try again 🥺
             current_model = English.MIDJOURNEY
         elif current_model == Model.STABLE_DIFFUSION:
             current_model = English.STABLE_DIFFUSION
+        elif current_model == Model.FLUX:
+            current_model = English.FLUX
         elif current_model == Model.FACE_SWAP:
             current_model = English.FACE_SWAP
         elif current_model == Model.PHOTOSHOP_AI:
@@ -1314,6 +1346,9 @@ Choose action 👇
 ━ 🎆 <b>Stable Diffusion</b>:
     ┣ {format_number(daily_limits[Quota.STABLE_DIFFUSION])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.STABLE_DIFFUSION])}
     ┗ Extra: {additional_usage_quota[Quota.STABLE_DIFFUSION]}
+━ 🫐 <b>Flux</b>:
+    ┣ {format_number(daily_limits[Quota.FLUX])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.FLUX])}
+    ┗ Extra: {additional_usage_quota[Quota.FLUX]}
 ━ 📷 <b>FaceSwap</b>:
     ┣ {format_number(daily_limits[Quota.FACE_SWAP])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.FACE_SWAP])}
     ┗ Extra: {additional_usage_quota[Quota.FACE_SWAP]}
@@ -1346,11 +1381,11 @@ Choose action 👇
     # Payment
     @staticmethod
     def payment_description_subscription(user_id: str, subscription_type: SubscriptionType):
-        return f"Paying a subscription {subscription_type} for user: {user_id}"
+        return f"Paying a subscription {subscription_type} {Subscription.get_emojis()[subscription_type]} for user: {user_id}"
 
     @staticmethod
     def payment_description_renew_subscription(user_id: str, subscription_type: SubscriptionType):
-        return f"Renewing a subscription {subscription_type} for user: {user_id}"
+        return f"Renewing a subscription {subscription_type} {Subscription.get_emojis()[subscription_type]} for user: {user_id}"
 
     @staticmethod
     def subscribe(currency: Currency, min_prices: Dict):
@@ -1422,6 +1457,7 @@ You're about to activate subscription {subscription_type} {Subscription.get_emoj
                 "👨‍🎨 <b>DALL-E</b>: Transform ideas into stunning visuals!\n\n"
                 "🎨 <b>Midjourney</b>: Turn ideas into incredible realistic images!\n\n"
                 "🎆 <b>Stable Diffusion</b>: Turn your creative ideas into visual masterpieces!\n\n"
+                "🫐 <b>Flux</b>: Experiment with images and create unique visual concepts!\n\n"
                 "👤 <b>FaceSwap</b>: Play with identities in images!\n\n"
                 "🪄 <b>Photoshop AI</b>: Turn your photos into works of art with the magic of editing!"
             )
@@ -1493,6 +1529,9 @@ Hit a button and choose a package:
             quantity = "images"
         elif package_type == PackageType.STABLE_DIFFUSION:
             name = English.STABLE_DIFFUSION_REQUESTS
+            quantity = "images"
+        elif package_type == PackageType.FLUX:
+            name = English.FLUX_REQUESTS
             quantity = "images"
         elif package_type == PackageType.FACE_SWAP:
             name = English.FACE_SWAP_REQUESTS
@@ -1670,6 +1709,8 @@ Looks like you've got only <b>{available_seconds} seconds</b> left in your arsen
             return English.SWITCHED_TO_MIDJOURNEY
         elif model == Model.STABLE_DIFFUSION:
             return English.SWITCHED_TO_STABLE_DIFFUSION
+        elif model == Model.FLUX:
+            return English.SWITCHED_TO_FLUX
         elif model == Model.FACE_SWAP:
             return English.SWITCHED_TO_FACE_SWAP
         elif model == Model.PHOTOSHOP_AI:

@@ -88,7 +88,7 @@ def build_statistics_choose_service_keyboard(
             [
                 InlineKeyboardButton(
                     text=f'{SubscriptionType.MINI} {emojis[SubscriptionType.MINI]}',
-                    callback_data=f'statistics_choose_service:{ServiceType.STANDARD}'
+                    callback_data=f'statistics_choose_service:{ServiceType.MINI}'
                 )
             ],
             [
@@ -123,20 +123,38 @@ def build_statistics_choose_service_keyboard(
             ],
             [
                 InlineKeyboardButton(
-                    text=get_localization(language_code).CHATGPT4_OMNI_MINI,
-                    callback_data=f'statistics_choose_service:{ServiceType.CHAT_GPT4_OMNI_MINI}'
-                )
-            ],
-            [
-                InlineKeyboardButton(
                     text=get_localization(language_code).CHATGPT4_TURBO,
                     callback_data=f'statistics_choose_service:{ServiceType.CHAT_GPT4_TURBO}'
                 )
             ],
             [
                 InlineKeyboardButton(
+                    text=get_localization(language_code).CHATGPT4_OMNI_MINI,
+                    callback_data=f'statistics_choose_service:{ServiceType.CHAT_GPT4_OMNI_MINI}'
+                )
+            ],
+            [
+                InlineKeyboardButton(
                     text=get_localization(language_code).CHATGPT4_OMNI,
                     callback_data=f'statistics_choose_service:{ServiceType.CHAT_GPT4_OMNI}'
+                )
+            ],
+            [
+                InlineKeyboardButton(
+                    text=get_localization(language_code).CHAT_GPT_O_1_MINI,
+                    callback_data=f'statistics_choose_service:{ServiceType.CHAT_GPT_O_1_MINI}'
+                )
+            ],
+            [
+                InlineKeyboardButton(
+                    text=get_localization(language_code).CHAT_GPT_O_1_PREVIEW,
+                    callback_data=f'statistics_choose_service:{ServiceType.CHAT_GPT_O_1_PREVIEW}'
+                )
+            ],
+            [
+                InlineKeyboardButton(
+                    text=get_localization(language_code).CLAUDE_3_HAIKU,
+                    callback_data=f'statistics_choose_service:{ServiceType.CLAUDE_3_HAIKU}'
                 )
             ],
             [
@@ -165,6 +183,12 @@ def build_statistics_choose_service_keyboard(
             ],
             [
                 InlineKeyboardButton(
+                    text=get_localization(language_code).GEMINI_1_ULTRA,
+                    callback_data=f'statistics_choose_service:{ServiceType.GEMINI_1_ULTRA}'
+                )
+            ],
+            [
+                InlineKeyboardButton(
                     text=get_localization(language_code).DALL_E,
                     callback_data=f'statistics_choose_service:{ServiceType.DALL_E}'
                 )
@@ -183,8 +207,20 @@ def build_statistics_choose_service_keyboard(
             ],
             [
                 InlineKeyboardButton(
+                    text=get_localization(language_code).FLUX,
+                    callback_data=f'statistics_choose_service:{ServiceType.FLUX}'
+                )
+            ],
+            [
+                InlineKeyboardButton(
                     text=get_localization(language_code).FACE_SWAP,
                     callback_data=f'statistics_choose_service:{ServiceType.FACE_SWAP}'
+                )
+            ],
+            [
+                InlineKeyboardButton(
+                    text=get_localization(language_code).PHOTOSHOP_AI,
+                    callback_data=f'statistics_choose_service:{ServiceType.PHOTOSHOP_AI}'
                 )
             ],
             [
@@ -240,20 +276,38 @@ def build_statistics_choose_service_keyboard(
             ],
             [
                 InlineKeyboardButton(
-                    text=get_localization(language_code).CHATGPT4_OMNI_MINI,
-                    callback_data=f'statistics_choose_service:{ServiceType.CHAT_GPT4_OMNI_MINI}'
-                )
-            ],
-            [
-                InlineKeyboardButton(
                     text=get_localization(language_code).CHATGPT4_TURBO,
                     callback_data=f'statistics_choose_service:{ServiceType.CHAT_GPT4_TURBO}'
                 )
             ],
             [
                 InlineKeyboardButton(
+                    text=get_localization(language_code).CHATGPT4_OMNI_MINI,
+                    callback_data=f'statistics_choose_service:{ServiceType.CHAT_GPT4_OMNI_MINI}'
+                )
+            ],
+            [
+                InlineKeyboardButton(
                     text=get_localization(language_code).CHATGPT4_OMNI,
                     callback_data=f'statistics_choose_service:{ServiceType.CHAT_GPT4_OMNI}'
+                )
+            ],
+            [
+                InlineKeyboardButton(
+                    text=get_localization(language_code).CHAT_GPT_O_1_MINI,
+                    callback_data=f'statistics_choose_service:{ServiceType.CHAT_GPT_O_1_MINI}'
+                )
+            ],
+            [
+                InlineKeyboardButton(
+                    text=get_localization(language_code).CHAT_GPT_O_1_PREVIEW,
+                    callback_data=f'statistics_choose_service:{ServiceType.CHAT_GPT_O_1_PREVIEW}'
+                )
+            ],
+            [
+                InlineKeyboardButton(
+                    text=get_localization(language_code).CLAUDE_3_HAIKU,
+                    callback_data=f'statistics_choose_service:{ServiceType.CLAUDE_3_HAIKU}'
                 )
             ],
             [
@@ -271,13 +325,19 @@ def build_statistics_choose_service_keyboard(
             [
                 InlineKeyboardButton(
                     text=get_localization(language_code).GEMINI_1_FLASH,
-                    callback_data=f'statistics_choose_service:{ServiceType.CLAUDE_3_SONNET}'
+                    callback_data=f'statistics_choose_service:{ServiceType.GEMINI_1_FLASH}'
                 )
             ],
             [
                 InlineKeyboardButton(
                     text=get_localization(language_code).GEMINI_1_PRO,
-                    callback_data=f'statistics_choose_service:{ServiceType.CLAUDE_3_OPUS}'
+                    callback_data=f'statistics_choose_service:{ServiceType.GEMINI_1_PRO}'
+                )
+            ],
+            [
+                InlineKeyboardButton(
+                    text=get_localization(language_code).GEMINI_1_ULTRA,
+                    callback_data=f'statistics_choose_service:{ServiceType.GEMINI_1_ULTRA}'
                 )
             ],
             [
@@ -300,8 +360,20 @@ def build_statistics_choose_service_keyboard(
             ],
             [
                 InlineKeyboardButton(
+                    text=get_localization(language_code).FLUX,
+                    callback_data=f'statistics_choose_service:{ServiceType.FLUX}'
+                )
+            ],
+            [
+                InlineKeyboardButton(
                     text=get_localization(language_code).FACE_SWAP,
                     callback_data=f'statistics_choose_service:{ServiceType.FACE_SWAP}'
+                )
+            ],
+            [
+                InlineKeyboardButton(
+                    text=get_localization(language_code).PHOTOSHOP_AI,
+                    callback_data=f'statistics_choose_service:{ServiceType.PHOTOSHOP_AI}'
                 )
             ],
             [

@@ -31,6 +31,7 @@ from bot.handlers.ai.chat_gpt_handler import chat_gpt_router
 from bot.handlers.ai.claude_handler import claude_router
 from bot.handlers.ai.dalle_handler import dall_e_router
 from bot.handlers.ai.face_swap_handler import face_swap_router
+from bot.handlers.ai.flux_handler import flux_router
 from bot.handlers.ai.gemini_handler import gemini_router
 from bot.handlers.ai.midjourney_handler import midjourney_router
 from bot.handlers.ai.mode_handler import mode_router
@@ -124,6 +125,7 @@ async def lifespan(_: FastAPI):
         dall_e_router,
         midjourney_router,
         stable_diffusion_router,
+        flux_router,
         face_swap_router,
         admin_face_swap_router,
         photoshop_ai_router,

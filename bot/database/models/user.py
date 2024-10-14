@@ -12,6 +12,8 @@ from bot.database.models.common import (
     DALLEVersion,
     MidjourneyVersion,
     StableDiffusionVersion,
+    FluxVersion,
+    FluxSafetyTolerance,
     FaceSwapVersion,
     PhotoshopAIVersion,
     MusicGenVersion,
@@ -32,6 +34,7 @@ class UserSettings:
     QUALITY = 'quality'
     VERSION = 'version'
     SEND_TYPE = 'send_type'
+    SAFETY_TOLERANCE = 'safety_tolerance'
 
 
 class UserGender:
@@ -83,6 +86,7 @@ class User:
         Quota.DALL_E: 0,
         Quota.MIDJOURNEY: 0,
         Quota.STABLE_DIFFUSION: 0,
+        Quota.FLUX: 0,
         Quota.FACE_SWAP: 0,
         Quota.PHOTOSHOP_AI: 0,
         Quota.MUSIC_GEN: 0,
@@ -135,6 +139,12 @@ class User:
         Model.STABLE_DIFFUSION: {
             UserSettings.SHOW_USAGE_QUOTA: True,
             UserSettings.VERSION: StableDiffusionVersion.LATEST,
+            UserSettings.SHOW_EXAMPLES: False,
+        },
+        Model.FLUX: {
+            UserSettings.SHOW_USAGE_QUOTA: True,
+            UserSettings.VERSION: FluxVersion.LATEST,
+            UserSettings.SAFETY_TOLERANCE: FluxSafetyTolerance.MIDDLE,
             UserSettings.SHOW_EXAMPLES: False,
         },
         Model.FACE_SWAP: {

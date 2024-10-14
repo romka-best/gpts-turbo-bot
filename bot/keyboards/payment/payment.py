@@ -267,6 +267,7 @@ def build_packages_keyboard(language_code: str, page=0) -> InlineKeyboardMarkup:
                 PackageType.DALL_E,
                 PackageType.MIDJOURNEY,
                 PackageType.STABLE_DIFFUSION,
+                PackageType.FLUX,
                 PackageType.FACE_SWAP,
                 PackageType.PHOTOSHOP_AI,
             }:

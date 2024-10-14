@@ -34,6 +34,8 @@ def get_switched_to_ai_model(model: Model, version: str, language_code: str):
         text = get_localization(language_code).SWITCHED_TO_MIDJOURNEY
     elif model == Model.STABLE_DIFFUSION:
         text = get_localization(language_code).SWITCHED_TO_STABLE_DIFFUSION
+    elif model == Model.FLUX:
+        text = get_localization(language_code).SWITCHED_TO_FLUX
     elif model == Model.FACE_SWAP:
         text = get_localization(language_code).SWITCHED_TO_FACE_SWAP
     elif model == Model.PHOTOSHOP_AI:

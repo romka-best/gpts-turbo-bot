@@ -17,6 +17,8 @@ def get_info_by_model(model: Model, language_code: str):
         info = get_localization(language_code).INFO_MIDJOURNEY
     elif model == Model.STABLE_DIFFUSION:
         info = get_localization(language_code).INFO_STABLE_DIFFUSION
+    elif model == Model.FLUX:
+        info = get_localization(language_code).INFO_FLUX
     elif model == Model.FACE_SWAP:
         info = get_localization(language_code).INFO_FACE_SWAP
     elif model == Model.PHOTOSHOP_AI:
