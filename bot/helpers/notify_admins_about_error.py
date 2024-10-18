@@ -82,7 +82,7 @@ async def notify_admins_about_error(bot: Bot, telegram_update: Update, dp: Dispa
                     info=error_info,
                 )
     except TelegramRetryAfter as e:
-        asyncio.create_task(delayed_notify_admins_about_error(bot, telegram_update, dp, error_info, e.retry_after + 10))
+        asyncio.create_task(delayed_notify_admins_about_error(bot, telegram_update, dp, error_info, e.retry_after + 30))
     except Exception as e:
         logging.exception(f'Error in notify_admins_about_error: {e}')
 

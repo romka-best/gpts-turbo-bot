@@ -17,7 +17,7 @@ from bot.database.models.user import UserGender
 
 class English(Texts):
     START = """
-🤖 <b>Welcome to the future of AI with me, ChatGPTs Turbo AI Bot!</b> 🎉
+🤖 <b>Welcome to the future of AI with me, MindFusion AI Bot!</b> 🎉
 
 I'm your personal gateway to the world of neural networks. Discover the capabilities of AI:
 ━ 💭 <b>Text Responses</b>:

@@ -32,6 +32,8 @@ common_router = Router()
 async def start(message: Message, state: FSMContext):
     await state.clear()
 
+    tasks = []
+
     user_id = str(message.from_user.id)
     user = await get_user(user_id)
     if not user:
@@ -55,7 +57,7 @@ async def start(message: Message, state: FSMContext):
                         count_of_referred_users = await get_count_of_users_by_referral(referred_by_user.id)
                         if count_of_referred_users > 50:
                             text = get_localization(referred_by_user_language_code).REFERRAL_LIMIT_ERROR
-                            asyncio.create_task(message.bot.send_message(
+                            tasks.append(message.bot.send_message(
                                 chat_id=referred_by_user.telegram_chat_id,
                                 text=text,
                                 message_effect_id=config.MESSAGE_EFFECTS.get(MessageEffect.CONGRATS),
@@ -69,7 +71,7 @@ async def start(message: Message, state: FSMContext):
                             })
 
                             text = get_localization(referred_by_user_language_code).REFERRAL_SUCCESS
-                            asyncio.create_task(message.bot.send_message(
+                            tasks.append(message.bot.send_message(
                                 chat_id=referred_by_user.telegram_chat_id,
                                 text=text,
                                 message_effect_id=config.MESSAGE_EFFECTS.get(MessageEffect.CONGRATS),
@@ -162,6 +164,9 @@ async def start(message: Message, state: FSMContext):
         reply_markup=reply_markup,
         message_effect_id=config.MESSAGE_EFFECTS.get(MessageEffect.CONGRATS),
     )
+
+    if len(tasks) > 0:
+        await asyncio.gather(*tasks)
 
 
 @common_router.callback_query(lambda c: c.data.startswith('start:'))
