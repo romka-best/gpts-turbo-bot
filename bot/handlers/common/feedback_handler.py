@@ -84,8 +84,9 @@ async def handle_manage_feedback(callback_query: CallbackQuery, state: FSMContex
         count_of_feedbacks = await get_count_of_approved_feedbacks_by_user_id(user_id)
         if count_of_feedbacks > 4:
             await callback_query.bot.send_message(
-                user_id,
-                get_localization(user_language_code).FEEDBACK_APPROVED_WITH_LIMIT_ERROR,
+                chat_id=user_id,
+                text=get_localization(user_language_code).FEEDBACK_APPROVED_WITH_LIMIT_ERROR,
+                disable_notification=True,
             )
         else:
             user.balance += 25.00
@@ -94,14 +95,16 @@ async def handle_manage_feedback(callback_query: CallbackQuery, state: FSMContex
             })
 
             await callback_query.bot.send_message(
-                user_id,
-                get_localization(user_language_code).FEEDBACK_APPROVED,
+                chat_id=user_id,
+                text=get_localization(user_language_code).FEEDBACK_APPROVED,
+                disable_notification=True,
             )
         status = FeedbackStatus.APPROVED
     elif action == 'deny':
         await callback_query.bot.send_message(
-            user_id,
-            get_localization(user_language_code).FEEDBACK_DENIED,
+            chat_id=user_id,
+            text=get_localization(user_language_code).FEEDBACK_DENIED,
+            disable_notification=True,
         )
         status = FeedbackStatus.DENIED
 
