@@ -181,7 +181,7 @@ async def delayed_handle_update(update: Update, timeout: int):
             logging.warning(e)
         else:
             logging.error(f'Error in bot_delayed_webhook telegram retry after: {e}')
-            await delayed_handle_update(update, e.retry_after + 30)
+            asyncio.create_task(delayed_handle_update(update, e.retry_after + 30))
     except TelegramBadRequest as e:
         if e.message.startswith('Bad Request: message can\'t be deleted for everyone'):
             logging.warning(e)
@@ -231,7 +231,7 @@ async def handle_update(update: dict):
             logging.warning(e)
         else:
             logging.error(f'Error in bot_webhook telegram retry after: {e}')
-            await delayed_handle_update(telegram_update, e.retry_after + 30)
+            asyncio.create_task(delayed_handle_update(telegram_update, e.retry_after + 30))
     except TelegramBadRequest as e:
         if e.message.startswith('Bad Request: message can\'t be deleted for everyone'):
             logging.warning(e)

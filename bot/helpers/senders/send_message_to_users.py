@@ -24,7 +24,7 @@ async def delayed_send_message_to_user(bot: Bot, chat_id: str, text: str, timeou
     except TelegramForbiddenError:
         asyncio.create_task(update_user(chat_id, {'is_blocked': True}))
     except TelegramRetryAfter as e:
-        await delayed_send_message_to_user(bot, chat_id, text, e.retry_after + 30)
+        asyncio.create_task(delayed_send_message_to_user(bot, chat_id, text, e.retry_after + 30))
     except TelegramNetworkError as error:
         logging.error(error)
     except TelegramBadRequest as error:
@@ -42,9 +42,9 @@ async def send_message_to_user(bot: Bot, user: User, message: str):
     except TelegramForbiddenError:
         asyncio.create_task(update_user(user.id, {'is_blocked': True}))
     except TelegramRetryAfter as e:
-        await delayed_send_message_to_user(bot, user.telegram_chat_id, message, e.retry_after + 30)
+        asyncio.create_task(delayed_send_message_to_user(bot, user.telegram_chat_id, message, e.retry_after + 30))
     except TelegramNetworkError:
-        await delayed_send_message_to_user(bot, user.telegram_chat_id, message, 60)
+        asyncio.create_task(delayed_send_message_to_user(bot, user.telegram_chat_id, message, 60))
     except TelegramBadRequest as error:
         logging.error(error)
 
