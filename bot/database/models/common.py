@@ -65,8 +65,8 @@ class ChatGPTVersion:
 
 class ClaudeGPTVersion:
     V3_Haiku = 'claude-3-haiku-20240307'
-    V3_Sonnet = 'claude-3-5-sonnet-20240620'
-    V3_Opus = 'claude-3-opus-20240229'
+    V3_Sonnet = 'claude-3-5-sonnet-latest'
+    V3_Opus = 'claude-3-opus-latest'
 
 
 class GeminiGPTVersion:
@@ -172,6 +172,14 @@ class PaymentMethod:
     TELEGRAM_STARS = 'TELEGRAM_STARS'
     CRYPTO = 'CRYPTO'
     GIFT = 'GIFT'
+
+
+class UTM:
+    SOURCE = 'source'
+    MEDIUM = 'medium'
+    CAMPAIGN = 'campaign'
+    TERM = 'term'
+    CONTENT = 'content'
 
 
 DEFAULT_ROLE = 'PERSONAL_ASSISTANT'

@@ -18,6 +18,7 @@ async def initialize_user_for_the_first_time(
     referred_by: Optional[str],
     is_referred_by_user=False,
     quota=Quota.CHAT_GPT4_OMNI_MINI,
+    utm=None,
 ):
     await write_cart_in_transaction(transaction, str(telegram_user.id), [])
     chat = await write_chat_in_transaction(transaction, str(telegram_user.id), telegram_chat_id, title)
@@ -29,6 +30,7 @@ async def initialize_user_for_the_first_time(
         referred_by,
         is_referred_by_user,
         quota,
+        utm,
     )
 
     return user

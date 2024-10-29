@@ -10,6 +10,7 @@ from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.utils.chat_action import ChatActionSender
+from google.generativeai.types import StopCandidateException, BlockedPromptException
 
 from bot.config import config, MessageEffect
 from bot.database.main import firebase
@@ -159,9 +160,15 @@ async def handle_gemini(message: Message, state: FSMContext, user: User, user_qu
         await write_message(user.current_chat_id, 'user', user.id, text)
 
     chat = await get_chat(user.current_chat_id)
+    if user.subscription_type == SubscriptionType.FREE:
+        limit = 4
+    elif user_quota == Quota.GEMINI_1_ULTRA:
+        limit = 20
+    else:
+        limit = 10
     messages = await get_messages_by_chat_id(
-        user.current_chat_id,
-        20 if user_quota == Quota.GEMINI_1_ULTRA else 10,
+        chat_id=user.current_chat_id,
+        limit=limit,
     )
     role = await get_role_by_name(chat.role)
     sorted_messages = sorted(messages, key=lambda m: m.created_at)
@@ -269,6 +276,11 @@ async def handle_gemini(message: Message, state: FSMContext, user: User, user_qu
                     text=full_text,
                     reply_markup=reply_markup if response['finish_reason'] == 'MAX_TOKENS' else None,
                 )
+        except (StopCandidateException, BlockedPromptException):
+            await message.reply(
+                text=get_localization(user_language_code).REQUEST_FORBIDDEN_ERROR,
+                allow_sending_without_reply=True,
+            )
         except Exception as e:
             reply_markup = build_error_keyboard(user_language_code)
             await message.answer(

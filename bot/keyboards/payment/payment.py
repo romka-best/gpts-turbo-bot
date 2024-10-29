@@ -138,6 +138,12 @@ def build_payment_method_for_subscription_keyboard(
         ],
         # [
         #     InlineKeyboardButton(
+        #         text=f'{get_localization(language_code).STRIPE_PAYMENT_METHOD}',
+        #         callback_data=f'pms:{PaymentMethod.STRIPE}:{subscription_type}'
+        #     ),
+        # ],
+        # [
+        #     InlineKeyboardButton(
         #         text=f'{get_localization(language_code).PAY_SELECTION_PAYMENT_METHOD}',
         #         callback_data=f'pms:{PaymentMethod.PAY_SELECTION}:{subscription_type}'
         #     ),
@@ -491,6 +497,12 @@ def build_payment_method_for_package_keyboard(
         ],
         # [
         #     InlineKeyboardButton(
+        #         text=f'{get_localization(language_code).STRIPE_PAYMENT_METHOD}',
+        #         callback_data=f'pmp:{PaymentMethod.STRIPE}:{package_type}:{package_quantity}'
+        #     ),
+        # ],
+        # [
+        #     InlineKeyboardButton(
         #         text=f'{get_localization(language_code).PAY_SELECTION_PAYMENT_METHOD}',
         #         callback_data=f'pmp:{PaymentMethod.PAY_SELECTION}:{package_type}:{package_quantity}'
         #     ),
@@ -526,6 +538,12 @@ def build_payment_method_for_cart_keyboard(language_code: str) -> InlineKeyboard
                 callback_data=f'pmc:{PaymentMethod.YOOKASSA}'
             ),
         ],
+        # [
+        #     InlineKeyboardButton(
+        #         text=f'{get_localization(language_code).STRIPE_PAYMENT_METHOD}',
+        #         callback_data=f'pmc:{PaymentMethod.STRIPE}'
+        #     ),
+        # ],
         # [
         #     InlineKeyboardButton(
         #         text=f'{get_localization(language_code).PAY_SELECTION_PAYMENT_METHOD}',

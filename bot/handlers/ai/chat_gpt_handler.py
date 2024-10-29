@@ -165,9 +165,15 @@ async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_q
         await write_message(user.current_chat_id, 'user', user.id, text)
 
     chat = await get_chat(user.current_chat_id)
+    if user.subscription_type == SubscriptionType.FREE:
+        limit = 4
+    elif can_work_with_photos:
+        limit = 10
+    else:
+        limit = 4
     messages = await get_messages_by_chat_id(
-        user.current_chat_id,
-        10 if can_work_with_photos else 4
+        chat_id=user.current_chat_id,
+        limit=limit,
     )
     role = await get_role_by_name(chat.role)
     sorted_messages = sorted(messages, key=lambda m: m.created_at)

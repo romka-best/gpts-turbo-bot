@@ -7,13 +7,14 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery, URLInputFile
 
 from bot.database.main import firebase
-from bot.database.models.common import Model
+from bot.database.models.common import Model, Currency
 from bot.database.models.subscription import SubscriptionType, SubscriptionStatus
 from bot.database.models.user import UserGender, UserSettings
 from bot.database.operations.subscription.getters import get_last_subscription_by_user_id
 from bot.database.operations.user.getters import get_user
 from bot.database.operations.user.updaters import update_user
 from bot.handlers.ai.face_swap_handler import handle_face_swap
+from bot.handlers.ai.mode_handler import handle_mode
 from bot.handlers.payment.bonus_handler import handle_bonus
 from bot.handlers.payment.payment_handler import handle_subscribe, handle_package, handle_cancel_subscription
 from bot.handlers.settings.settings_handler import handle_settings
@@ -33,9 +34,12 @@ profile_router = Router()
 async def profile(message: Message, state: FSMContext):
     await state.clear()
 
+    await handle_profile(message, state, str(message.from_user.id), False)
+
+
+async def handle_profile(message: Message, state: FSMContext, user_id: str, is_edit=False):
     telegram_user = message.from_user
 
-    user_id = str(telegram_user.id)
     user = await get_user(user_id)
     user_language_code = await get_user_language(user_id, state.storage)
 
@@ -63,6 +67,7 @@ async def profile(message: Message, state: FSMContext):
         user.gender,
         user.current_model,
         user.settings[user.current_model][UserSettings.VERSION],
+        user.currency,
         renewal_date.strftime('%d.%m.%Y'),
     )
 
@@ -77,11 +82,17 @@ async def profile(message: Message, state: FSMContext):
             user.gender != UserGender.UNSPECIFIED,
             user.subscription_type != SubscriptionType.FREE,
         )
-        await message.answer_photo(
-            photo=URLInputFile(photo_link, filename=photo_path),
-            caption=text,
-            reply_markup=reply_markup,
-        )
+        if is_edit:
+            await message.edit_caption(
+                caption=text,
+                reply_markup=reply_markup,
+            )
+        else:
+            await message.answer_photo(
+                photo=URLInputFile(photo_link, filename=photo_path),
+                caption=text,
+                reply_markup=reply_markup,
+            )
     except aiohttp.ClientResponseError:
         reply_markup = build_profile_keyboard(
             user_language_code,
@@ -89,10 +100,16 @@ async def profile(message: Message, state: FSMContext):
             user.gender != UserGender.UNSPECIFIED,
             user.subscription_type != SubscriptionType.FREE,
         )
-        await message.answer(
-            text=text,
-            reply_markup=reply_markup,
-        )
+        if is_edit:
+            await message.edit_text(
+                text=text,
+                reply_markup=reply_markup,
+            )
+        else:
+            await message.answer(
+                text=text,
+                reply_markup=reply_markup,
+            )
 
 
 @profile_router.callback_query(lambda c: c.data.startswith('profile:'))
@@ -154,6 +171,23 @@ async def handle_profile_selection(callback_query: CallbackQuery, state: FSMCont
             reply_markup=reply_markup,
             allow_sending_without_reply=True,
         )
+    elif action == 'change_currency':
+        user = await get_user(user_id)
+
+        if user.currency == Currency.RUB:
+            user.currency = Currency.USD
+        elif user.currency == Currency.USD:
+            user.currency = Currency.XTR
+        else:
+            user.currency = Currency.RUB
+        await update_user(
+            user_id,
+            {
+                'currency': user.currency,
+            }
+        )
+
+        await handle_profile(callback_query.message, state, str(callback_query.from_user.id), True)
     elif action == 'open_bonus_info':
         await handle_bonus(callback_query.message, str(callback_query.from_user.id), state)
     elif action == 'open_buy_subscriptions_info':

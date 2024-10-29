@@ -63,6 +63,7 @@ from bot.helpers.handlers.handle_midjourney_webhook import handle_midjourney_web
 from bot.helpers.handlers.handle_network_error import handle_network_error
 from bot.helpers.handlers.handle_pay_selection_webhook import handle_pay_selection_webhook
 from bot.helpers.handlers.handle_replicate_webhook import handle_replicate_webhook
+from bot.helpers.handlers.handle_stripe_webhook import handle_stripe_webhook
 from bot.helpers.handlers.handle_yookassa_webhook import handle_yookassa_webhook
 from bot.helpers.notify_admins_about_error import notify_admins_about_error
 from bot.helpers.senders.send_statistics import send_statistics
@@ -75,6 +76,7 @@ from bot.middlewares.LoggingMiddleware import LoggingMessageMiddleware, LoggingC
 WEBHOOK_BOT_PATH = f'/bot/{config.BOT_TOKEN.get_secret_value()}'
 WEBHOOK_YOOKASSA_PATH = '/payment/yookassa'
 WEBHOOK_PAY_SELECTION_PATH = '/payment/pay-selection'
+WEBHOOK_STRIPE_PATH = '/payment/stripe'
 WEBHOOK_REPLICATE_PATH = config.WEBHOOK_REPLICATE_PATH
 WEBHOOK_MIDJOURNEY_PATH = config.WEBHOOK_MIDJOURNEY_PATH
 
@@ -259,6 +261,11 @@ async def yookassa_webhook(request: dict):
 @app.post(WEBHOOK_PAY_SELECTION_PATH)
 async def pay_selection_webhook(request: dict):
     asyncio.create_task(handle_pay_selection_webhook(request, bot, dp))
+
+
+@app.post(WEBHOOK_STRIPE_PATH)
+async def stripe_webhook(request: dict):
+    asyncio.create_task(handle_stripe_webhook(request, bot, dp))
 
 
 @app.post(WEBHOOK_REPLICATE_PATH)
