@@ -1,12 +1,12 @@
 from typing import Dict
 
-import google.generativeai as genai
-from google.generativeai import GenerationConfig
+from google.generativeai import configure, GenerativeModel, GenerationConfig
+from google.generativeai.types import HarmCategory, HarmBlockThreshold
 
 from bot.config import config
 from bot.database.models.common import GeminiGPTVersion
 
-genai.configure(api_key=config.GEMINI_API_KEY.get_secret_value())
+configure(api_key=config.GEMINI_API_KEY.get_secret_value())
 
 
 def get_default_max_tokens(model_version: GeminiGPTVersion) -> int:
@@ -34,7 +34,7 @@ async def get_response_message(
         model_name = GeminiGPTVersion.V1_Pro
     else:
         model_name = model_version
-    model = genai.GenerativeModel(
+    model = GenerativeModel(
         model_name=model_name,
         system_instruction=system_prompt,
     )
@@ -45,7 +45,13 @@ async def get_response_message(
         content=new_prompt,
         generation_config=GenerationConfig(
             max_output_tokens=max_tokens,
-        )
+        ),
+        safety_settings={
+            HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
+            HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_NONE,
+            HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE,
+            HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: HarmBlockThreshold.BLOCK_NONE,
+        }
     )
 
     return {

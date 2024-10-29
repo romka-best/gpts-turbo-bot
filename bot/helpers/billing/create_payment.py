@@ -4,6 +4,7 @@ import uuid
 from typing import Dict
 
 import aiohttp
+import stripe
 from aiohttp import BasicAuth
 from yookassa import Configuration
 
@@ -14,6 +15,7 @@ from bot.locales.main import get_localization
 
 Configuration.account_id = config.YOOKASSA_ACCOUNT_ID.get_secret_value()
 Configuration.secret_key = config.YOOKASSA_SECRET_KEY.get_secret_value()
+stripe.api_key = config.STRIPE_SECRET_KEY.get_secret_value()
 
 YOOKASSA_URL = 'https://api.yookassa.ru/v3'
 PAY_SELECTION_URL = 'https://webform.payselection.com'
@@ -112,5 +114,40 @@ async def create_payment(
                 logging.info(body)
                 if response.ok:
                     return body
+    elif payment_method == PaymentMethod.STRIPE:
+        price = await stripe.Price.create_async(
+            product_data={
+                'name': description,
+            },
+            currency=Currency.USD.lower(),
+            unit_amount=int(amount * 100),
+            recurring={'interval': 'month'} if is_subscription else None,
+            metadata={
+                'order_id': order_id,
+            },
+        )
+        payment_link = await stripe.PaymentLink.create_async(
+            line_items=[
+                {
+                    'price': price.id,
+                    'quantity': 1,
+                },
+            ],
+            payment_intent_data={
+                'metadata': {
+                    'order_id': order_id,
+                },
+            } if not is_subscription else None,
+            automatic_tax={
+                'enabled': True,
+            },
+            after_completion={
+                'type': 'redirect',
+                'redirect': {
+                    'url': config.BOT_URL,
+                },
+            },
+        )
+        return payment_link
     else:
-        raise NotImplementedError
+        raise NotImplementedError(f'Payment method is not implemented: {payment_method}')

@@ -24,7 +24,8 @@ from bot.handlers.common.feedback_handler import handle_feedback
 from bot.keyboards.payment.bonus import (
     build_bonus_keyboard,
     build_bonus_play_game_keyboard,
-    build_bonus_cash_out_keyboard, build_bonus_play_game_chosen_keyboard,
+    build_bonus_cash_out_keyboard,
+    build_bonus_play_game_chosen_keyboard,
 )
 from bot.keyboards.common.common import build_cancel_keyboard
 from bot.locales.main import get_localization, get_user_language
@@ -47,7 +48,7 @@ async def handle_bonus(message: Message, user_id: str, state: FSMContext):
     count_of_feedbacks = await get_count_of_approved_feedbacks_by_user_id(user_id)
     count_of_games = await get_count_of_games_by_user_id(user_id)
 
-    photo_path = f'payments/packages_{user_language_code}.png'
+    photo_path = f'payments/packages_free_{user_language_code}.png'
     photo = await firebase.bucket.get_blob(photo_path)
     photo_link = firebase.get_public_url(photo.name)
 

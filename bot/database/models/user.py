@@ -68,6 +68,7 @@ class User:
     settings: dict
     referred_by: str
     discount: int
+    utm: dict
     created_at: datetime
     edited_at: datetime
 
@@ -194,6 +195,7 @@ class User:
         settings=None,
         referred_by=None,
         discount=0,
+        utm=None,
         created_at=None,
         edited_at=None,
         **kwargs,
@@ -221,6 +223,7 @@ class User:
         self.settings = settings if settings is not None else self.DEFAULT_SETTINGS
         self.referred_by = referred_by
         self.discount = discount
+        self.utm = utm if utm is not None else {}
 
         current_time = datetime.now(timezone.utc)
         self.last_subscription_limit_update = last_subscription_limit_update \

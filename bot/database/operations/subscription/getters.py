@@ -122,6 +122,7 @@ async def get_subscription_by_provider_auto_payment_charge_id(
 ) -> Optional[Subscription]:
     subscription_stream = firebase.db.collection(Subscription.COLLECTION_NAME) \
         .where(filter=FieldFilter('provider_auto_payment_charge_id', '==', provider_auto_payment_charge_id)) \
+        .order_by('created_at', direction=Query.DESCENDING) \
         .limit(1) \
         .stream()
 

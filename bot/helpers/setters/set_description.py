@@ -25,7 +25,7 @@ Access to AI:
     ┣ 💥 ChatGPT 4.0 Omni
     ┣ 🧩 ChatGPT o1-mini
     ┣ 🧪 ChatGPT o1-preview
-    ┣ 📜 Claude 3.0 Haiku
+    ┣ 📜 Claude 3.5 Haiku
     ┣ 💫 Claude 3.5 Sonnet
     ┣ 🚀 Claude 3.0 Opus
     ┣ 🏎 Gemini 1.5 Flash
@@ -35,7 +35,7 @@ Access to AI:
 ━ 🖼 Image Models
     ┣ 👨‍🎨 DALL•E 3
     ┣ 🎨 Midjourney 6.1
-    ┣ 🎆 Stable Diffusion 3.0
+    ┣ 🎆 Stable Diffusion 3.5
     ┣ 🫐 Flux 1.1 Pro
     ┣ 😜 FaceSwap
     ┗ 🪄 Photoshop AI
@@ -54,7 +54,7 @@ Access to AI:
     ┣ 💥 ChatGPT 4.0 Omni
     ┣ 🧩 ChatGPT o1-mini
     ┣ 🧪 ChatGPT o1-preview
-    ┣ 📜 Claude 3.0 Haiku
+    ┣ 📜 Claude 3.5 Haiku
     ┣ 💫 Claude 3.5 Sonnet
     ┣ 🚀 Claude 3.0 Opus
     ┣ 🏎 Gemini 1.5 Flash
@@ -64,7 +64,7 @@ Access to AI:
 ━ 🖼 Графические
     ┣ 👨‍🎨 DALL•E 3
     ┣ 🎨 Midjourney 6.1
-    ┣ 🎆 Stable Diffusion 3.0
+    ┣ 🎆 Stable Diffusion 3.5
     ┣ 🫐 Flux 1.1 Pro
     ┣ 😜 FaceSwap
     ┗ 🪄 Photoshop AI

@@ -37,9 +37,14 @@ class Firebase:
         if self.storage:
             await self.storage.close()
 
-    def get_public_url(self, blob_name: str):
+    def get_public_url(self, blob_name: str, query_params='alt=media'):
         blob_name = quote(blob_name, safe='')
-        return f'https://firebasestorage.googleapis.com/v0/b/{self.bucket.name}/o/{blob_name}?alt=media'
+
+        public_url = f'https://firebasestorage.googleapis.com/v0/b/{self.bucket.name}/o/{blob_name}'
+        if query_params:
+            public_url = f'{public_url}?{query_params}'
+
+        return public_url
 
     async def delete_blob(self, blob_name: str):
         await self.storage.delete(self.bucket.name, blob_name)

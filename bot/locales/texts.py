@@ -19,6 +19,9 @@ class Texts(Protocol):
     QUICK_GUIDE: str
     ADDITIONAL_FEATURES: str
 
+    # Promos
+    PROMO_SOCIAL_MEDIA_PROMPTS: str
+
     COMMANDS: str
     INFO: str
     INFO_TEXT_MODELS: str
@@ -305,7 +308,7 @@ class Texts(Protocol):
     CHAT_GPT_O_1_MINI = "🧩 ChatGPT o1-mini"
     CHAT_GPT_O_1_PREVIEW = "🧪 ChatGPT o1-preview"
     CLAUDE = "📄 Claude"
-    CLAUDE_3_HAIKU = "📜 Claude 3.0 Haiku"
+    CLAUDE_3_HAIKU = "📜 Claude 3.5 Haiku"
     CLAUDE_3_SONNET = "💫 Claude 3.5 Sonnet"
     CLAUDE_3_OPUS = "🚀 Claude 3.0 Opus"
     GEMINI = "✨ Gemini"
@@ -418,6 +421,7 @@ class Texts(Protocol):
     CHANGE_CURRENCY: str
     YOOKASSA_PAYMENT_METHOD: str
     PAY_SELECTION_PAYMENT_METHOD: str
+    STRIPE_PAYMENT_METHOD: str
     TELEGRAM_STARS_PAYMENT_METHOD: str
     CRYPTO_PAYMENT_METHOD: str
     CHOOSE_PAYMENT_METHOD: str
@@ -1830,6 +1834,7 @@ class Texts(Protocol):
         gender: UserGender,
         current_model: Model,
         current_model_version: str,
+        current_currency: Currency,
         renewal_date,
     ) -> str:
         raise NotImplementedError

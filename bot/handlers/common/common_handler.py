@@ -3,11 +3,11 @@ import asyncio
 from aiogram import Router
 from aiogram.filters import Command, CommandStart, ChatMemberUpdatedFilter, KICKED, MEMBER
 from aiogram.fsm.context import FSMContext
-from aiogram.types import Message, CallbackQuery, ChatMemberUpdated
+from aiogram.types import Message, CallbackQuery, ChatMemberUpdated, URLInputFile
 
 from bot.config import config, MessageEffect
 from bot.database.main import firebase
-from bot.database.models.common import Quota
+from bot.database.models.common import Quota, UTM
 from bot.database.models.generation import Generation
 from bot.database.operations.generation.updaters import update_generation
 from bot.database.operations.user.getters import get_user, get_count_of_users_by_referral
@@ -33,11 +33,13 @@ async def start(message: Message, state: FSMContext):
     await state.clear()
 
     tasks = []
+    params = message.text.split()
+    user_utm = {}
+    utm = [value for key, value in vars(UTM).items() if not key.startswith('__')]
 
     user_id = str(message.from_user.id)
     user = await get_user(user_id)
     if not user:
-        params = message.text.split()
         default_quota = Quota.CHAT_GPT4_OMNI_MINI
         referred_by = None
         referred_by_user = None
@@ -55,7 +57,7 @@ async def start(message: Message, state: FSMContext):
 
                     if referred_by_user:
                         count_of_referred_users = await get_count_of_users_by_referral(referred_by_user.id)
-                        if count_of_referred_users > 50:
+                        if count_of_referred_users > 40:
                             text = get_localization(referred_by_user_language_code).REFERRAL_LIMIT_ERROR
                             tasks.append(message.bot.send_message(
                                 chat_id=referred_by_user.telegram_chat_id,
@@ -130,6 +132,8 @@ async def start(message: Message, state: FSMContext):
                         default_quota = Quota.SUNO
                     elif sub_param_value == 'musicgen':
                         default_quota = Quota.MUSIC_GEN
+                elif sub_param_key in utm:
+                    user_utm[sub_param_key] = sub_param_value.lower()
 
         language_code = message.from_user.language_code
         await state.storage.redis.set(f'user:{user_id}:language', language_code)
@@ -144,6 +148,7 @@ async def start(message: Message, state: FSMContext):
             referred_by,
             bool(referred_by_user),
             default_quota,
+            user_utm,
         )
     elif user and user.is_blocked:
         user.is_blocked = False
@@ -154,8 +159,29 @@ async def start(message: Message, state: FSMContext):
         batch = firebase.db.batch()
         await update_user_daily_limits(message.bot, user, batch)
         await batch.commit()
+    elif user and len(params) > 1:
+        sub_params = params[1].split('_')
+        for sub_param in sub_params:
+            if '-' not in sub_param:
+                continue
+
+            sub_param_key, sub_param_value = sub_param.split('-')
+            if sub_param_key in utm:
+                user_utm[sub_param_key] = sub_param_value.lower()
 
     user_language_code = await get_user_language(user_id, state.storage)
+
+    if user_utm.get(UTM.CAMPAIGN, '').startswith('prompts'):
+        promo_file_path = f'promos/social_media_prompts.pdf'
+        promo_file = await firebase.bucket.get_blob(promo_file_path)
+        promo_file_link = firebase.get_public_url(promo_file.name)
+        tasks.append(message.bot.send_document(
+            chat_id=message.chat.id,
+            document=URLInputFile(promo_file_link, filename=promo_file_path, timeout=60),
+            caption=get_localization(user_language_code).PROMO_SOCIAL_MEDIA_PROMPTS,
+            message_effect_id=config.MESSAGE_EFFECTS.get(MessageEffect.FIRE),
+            disable_notification=True,
+        ))
 
     greeting = get_localization(user_language_code).START
     reply_markup = build_start_keyboard(user_language_code)

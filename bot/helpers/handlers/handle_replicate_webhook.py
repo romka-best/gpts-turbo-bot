@@ -29,6 +29,7 @@ from bot.handlers.ai.photoshop_ai_handler import (
 )
 from bot.handlers.ai.stable_diffusion_handler import PRICE_STABLE_DIFFUSION
 from bot.helpers.senders.send_audio import send_audio
+from bot.helpers.senders.send_document import send_document
 from bot.helpers.senders.send_images import send_image
 from bot.helpers.updaters.update_user_usage_quota import update_user_usage_quota
 from bot.keyboards.common.common import build_reaction_keyboard, build_error_keyboard
@@ -102,7 +103,7 @@ async def handle_replicate_photoshop_ai(
 ):
     if generation.result:
         reply_markup = build_reaction_keyboard(generation.id)
-        await send_image(bot, user.telegram_chat_id, generation.result, reply_markup)
+        await send_document(bot, user.telegram_chat_id, generation.result, reply_markup)
     elif generation.has_error:
         reply_markup = build_error_keyboard(user.interface_language_code)
         await bot.send_message(

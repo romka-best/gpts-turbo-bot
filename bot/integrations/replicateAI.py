@@ -116,7 +116,7 @@ async def create_stable_diffusion_image(prompt: str) -> Optional[str]:
             'output_quality': 100,
         }
 
-        model = await replicate.models.async_get('stability-ai/stable-diffusion-3')
+        model = await replicate.models.async_get('stability-ai/stable-diffusion-3.5-large-turbo')
         prediction = await replicate.predictions.async_create(
             model=model,
             input=input_parameters,

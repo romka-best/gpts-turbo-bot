@@ -23,7 +23,7 @@ I'm your personal gateway to the world of neural networks. Discover the capabili
 ━ 💭 <b>Text Responses</b>:
     ┣ Communicate free with:
         ┣ <b>ChatGPT 4.0 Omni Mini ✉️</b> /chatgpt
-        ┣ <b>Claude 3.0 Haiku 📜</b> /claude
+        ┣ <b>Claude 3.5 Haiku 📜</b> /claude
         ┗ <b>Gemini 1.5 Flash 🏎</b> /gemini
     ┣ Unleash the full potential of AI with:
         ┣ <b>ChatGPT 4.0 Omni 💥</b> and <b>ChatGPT o1-mini 🧩</b> /chatgpt
@@ -38,7 +38,7 @@ I'm your personal gateway to the world of neural networks. Discover the capabili
     ┣ Draw beautiful, unforgettable pictures with:
         ┣ <b>DALL-E 3 👨‍🎨</b> /dalle
         ┣ <b>Midjourney 6.1 🎨</b> /midjourney
-        ┣ <b>Stable Diffusion 3.0 🎆</b> /stable_diffusion
+        ┣ <b>Stable Diffusion 3.5 🎆</b> /stable_diffusion
         ┗ <b>Flux 1.1 Pro 🫐</b> /flux
     ┣ To exchange faces with someone in a photo, try <b>FaceSwap 📷️</b> /face_swap
     ┗ Edit your images using <b>Photoshop AI 🪄</b> /photoshop
@@ -94,6 +94,15 @@ I am constantly updating myself, implementing the most advanced technologies so 
 ━ 🔍 /info - Useful information about each AI model
 ━ 🎁 /bonus - Learn how to get free access to all AI models for free
 ━ 🎭️ /settings - Personalization and settings. Digital employees and thematic chats for text models
+"""
+
+    # Promos
+    PROMO_SOCIAL_MEDIA_PROMPTS = """
+🎉 Congratulations! Here’s a library of prompts to create standout social media content — everything you need to make your account grow and shine! 🚀
+
+✨ Collections for social media — get inspired, experiment, and wow your audience!
+
+🔥 Ready to dive in? Let the creativity begin!
 """
 
     COMMANDS = """
@@ -175,7 +184,7 @@ Just type away a command to begin your AI journey! 🌟
     INFO_CLAUDE = """
 🤖 <b>There is what each model can do for you:</b>
 
-📜 <b>Claude 3.0 Haiku: The Art of Brevity and Wisdom</b>
+📜 <b>Claude 3.5 Haiku: The Art of Brevity and Wisdom</b>
 - <i>Deep and Concise Responses</i>: Perfect for brief yet meaningful insights and advice.
 - <i>Quick Problem Solving</i>: Instantly delivers solutions for everyday and technical questions.
 - <i>Linguistic Precision</i>: Mastery in expressing the essence in a few words, whether it's translation or explanation.
@@ -610,11 +619,11 @@ You have successfully switched to <b>ChatGPT o1-preview</b> — your forward-thi
 Explore new horizons with <b>ChatGPT o1-preview</b>! 🎉
 """
     SWITCHED_TO_CLAUDE_3_HAIKU = """
-📜 <b>Welcome to the world of Claude 3.0 Haiku!</b>
+📜 <b>Welcome to the world of Claude 3.5 Haiku!</b>
 
-You have successfully switched to <b>Claude 3.0 Haiku</b> — the master of brevity and precision. <b>Claude 3.0 Haiku</b> is designed for moments when you need quick, concise, and wise answers. Its strength lies in its ability to process information with succinct depth, making it perfect for creative tasks and instant solutions.
+You have successfully switched to <b>Claude 3.5 Haiku</b> — the master of brevity and precision. <b>Claude 3.5 Haiku</b> is designed for moments when you need quick, concise, and wise answers. Its strength lies in its ability to process information with succinct depth, making it perfect for creative tasks and instant solutions.
 
-Enjoy the art of brevity with <b>Claude 3.0 Haiku</b>! 🎉
+Enjoy the art of brevity with <b>Claude 3.5 Haiku</b>! 🎉
 """
     SWITCHED_TO_CLAUDE_3_SONNET = """
 💫 <b>Welcome to the world of Claude 3.5 Sonnet!</b>
@@ -666,7 +675,7 @@ You have successfully switched to the <b>Midjourney</b> model — this is your p
 Time to create! 🎉
 """
     SWITCHED_TO_STABLE_DIFFUSION = """
-🎆 <b>Welcome to the world of Stable Diffusion 3.0!</b>
+🎆 <b>Welcome to the world of Stable Diffusion 3.5!</b>
 
 You've successfully switched to the <b>Stable Diffusion</b> model — the perfect tool for generating unique images! This model allows you to bring visual ideas to life with high detail and a variety of artistic styles. Turn text into masterpieces and push the boundaries of your creativity!
 
@@ -764,7 +773,7 @@ To start creating songs using <b>Suno</b>, just type the command /suno 🎸
     ┣ ChatGPT 4.0 Omni Mini ✉️
     ┗ ChatGPT 4.0 Omni 💥
 ━ <b>Claude</b>:
-    ┣ Claude 3.0 Haiku 📜
+    ┣ Claude 3.5 Haiku 📜
     ┣ Claude 3.5 Sonnet 💫
     ┗ Claude 3.0 Opus 🚀
 ━ <b>Gemini</b>:
@@ -905,6 +914,7 @@ Choose by clicking a button below 👇
     CHANGE_CURRENCY = "💱 Change currency"
     YOOKASSA_PAYMENT_METHOD = "🪆💳 YooKassa"
     PAY_SELECTION_PAYMENT_METHOD = "🌍💳 PaySelection"
+    STRIPE_PAYMENT_METHOD = "🌍💳 Stripe"
     TELEGRAM_STARS_PAYMENT_METHOD = "✈️⭐️ Telegram Stars"
     CHOOSE_PAYMENT_METHOD = """
 <b>Choose a payment method:</b>
@@ -992,8 +1002,8 @@ Your chats have switched their unique roles to "Personal Assistant" as your acce
     CHAT_GPT_O_1_MINI_REQUESTS_DESCRIPTION = "Unlock new possibilities with ChatGPT o1-mini to find quick and precise solutions for your tasks! 🧩"
     CHAT_GPT_O_1_PREVIEW_REQUESTS = "🧪 ChatGPT o1-preview requests"
     CHAT_GPT_O_1_PREVIEW_REQUESTS_DESCRIPTION = "Explore the future with ChatGPT o1-preview, making deep and logically sound discoveries! 🧪"
-    CLAUDE_3_HAIKU_REQUESTS = "📜 Claude 3.0 Haiku requests"
-    CLAUDE_3_HAIKU_REQUESTS_DESCRIPTION = "Immerse yourself in the world of brevity and wisdom with Claude 3.0 Haiku! 📜"
+    CLAUDE_3_HAIKU_REQUESTS = "📜 Claude 3.5 Haiku requests"
+    CLAUDE_3_HAIKU_REQUESTS_DESCRIPTION = "Immerse yourself in the world of brevity and wisdom with Claude 3.5 Haiku! 📜"
     CLAUDE_3_SONNET_REQUESTS = "💫 Claude 3.5 Sonnet requests"
     CLAUDE_3_SONNET_REQUESTS_DESCRIPTION = "Explore the balance of speed and intelligence with Claude 3.5 Sonnet for accurate and timely solutions! 💫"
     CLAUDE_3_OPUS_REQUESTS = "🚀 Claude 3.0 Opus requests"
@@ -1008,7 +1018,7 @@ Your chats have switched their unique roles to "Personal Assistant" as your acce
     DALL_E_REQUESTS_DESCRIPTION = "Turn ideas into art with DALL-E – where your imagination becomes stunning visual reality! 👨‍🎨"
     MIDJOURNEY_REQUESTS = "🎨 Midjourney images"
     MIDJOURNEY_REQUESTS_DESCRIPTION = "Unleash your creativity with Midjourney – transform your thoughts into magnificent visual works of art! 🎨"
-    STABLE_DIFFUSION_REQUESTS = "🎆 Stable Diffusion 3.0 images"
+    STABLE_DIFFUSION_REQUESTS = "🎆 Stable Diffusion 3.5 images"
     STABLE_DIFFUSION_REQUESTS_DESCRIPTION = "Open the door to a world of creativity with Stable Diffusion — transform your ideas into stunning images! 🎆"
     FLUX_REQUESTS = "🫐 Flux 1.1 Pro images"
     FLUX_REQUESTS_DESCRIPTION = "Explore visual variations with Flux — experiment and create unique images! 🫐"
@@ -1216,6 +1226,7 @@ Please try again 🥺
         gender,
         current_model,
         current_model_version,
+        current_currency,
         renewal_date,
     ) -> str:
         emojis = Subscription.get_emojis()
@@ -1269,6 +1280,11 @@ Please try again 🥺
         elif current_model == Model.SUNO:
             current_model = English.SUNO
 
+        if current_currency == Currency.XTR:
+            current_currency = f'Telegram Stars {Currency.SYMBOLS[current_currency]}'
+        else:
+            current_currency = f'{Currency.SYMBOLS[current_currency]}'
+
         return f"""
 <b>Profile</b> 👤
 
@@ -1279,6 +1295,7 @@ Please try again 🥺
 
 ---------------------------
 
+💱 <b>Current currency: {current_currency}</b>
 {emojis[subscription_type]} <b>Subscription type:</b> {subscription_type}
 🗓 <b>Subscription renewal date:</b> {renewal_date}
 {subscription_info}
@@ -1314,7 +1331,7 @@ Choose action 👇
         ┣ {format_number(daily_limits[Quota.CHAT_GPT_O_1_PREVIEW])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.CHAT_GPT_O_1_PREVIEW])}
         ┗ Extra: {additional_usage_quota[Quota.CHAT_GPT_O_1_PREVIEW]}
 ━ 📄 <b>Claude</b>:
-    ┣ 📜 3.0 Haiku:
+    ┣ 📜 3.5 Haiku:
         ┣ {format_number(daily_limits[Quota.CLAUDE_3_HAIKU])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.CLAUDE_3_HAIKU])}
         ┗ Extra: {additional_usage_quota[Quota.CLAUDE_3_HAIKU]}
     ┣ 💫 3.5 Sonnet:
@@ -1966,7 +1983,7 @@ Looks like you've got only <b>{available_seconds} seconds</b> left in your arsen
         if current_model == Model.CHAT_GPT:
             additional_text = f"\n<b>Version ChatGPT 4.0 Omni Mini</b>: {ChatGPTVersion.V4_Omni_Mini}\n<b>Version ChatGPT 4.0 Omni</b>: {ChatGPTVersion.V4_Omni}\n<b>Version ChatGPT o1-mini</b>: {ChatGPTVersion.V1_O_Mini}\n<b>Version ChatGPT o1-preview</b>: {ChatGPTVersion.V1_O_Preview}"
         elif current_model == Model.CLAUDE:
-            additional_text = f"\n<b>Version Claude 3.0 Haiku</b>: {ClaudeGPTVersion.V3_Haiku}\n<b>Version Claude 3.5 Sonnet</b>: {ClaudeGPTVersion.V3_Sonnet}\n<b>Version Claude 3.0 Opus</b>: {ClaudeGPTVersion.V3_Opus}"
+            additional_text = f"\n<b>Version Claude 3.5 Haiku</b>: {ClaudeGPTVersion.V3_Haiku}\n<b>Version Claude 3.5 Sonnet</b>: {ClaudeGPTVersion.V3_Sonnet}\n<b>Version Claude 3.0 Opus</b>: {ClaudeGPTVersion.V3_Opus}"
         elif current_model == Model.GEMINI:
             additional_text = f"\n<b>Version Gemini 1.5 Flash</b>: {GeminiGPTVersion.V1_Flash}\n<b>Version Gemini 1.5 Pro</b>: {GeminiGPTVersion.V1_Pro}\n<b>Version Gemini 1.0 Ultra</b>: {GeminiGPTVersion.V1_Ultra}"
         elif current_model == Model.DALL_E:

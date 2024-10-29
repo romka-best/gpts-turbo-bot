@@ -56,6 +56,9 @@ class Settings(BaseSettings):
     PAY_SELECTION_SECRET_KEY: SecretStr
     PAY_SELECTION_PUBLIC_KEY: SecretStr
 
+    STRIPE_PUBLISH_KEY: SecretStr
+    STRIPE_SECRET_KEY: SecretStr
+
     OAUTH_YANDEX_TOKEN: SecretStr
     OPENAI_API_KEY: SecretStr
     ANTHROPIC_API_KEY: SecretStr

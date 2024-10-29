@@ -159,7 +159,14 @@ async def handle_claude(message: Message, state: FSMContext, user: User, user_qu
         await write_message(user.current_chat_id, 'user', user.id, text)
 
     chat = await get_chat(user.current_chat_id)
-    messages = await get_messages_by_chat_id(user.current_chat_id)
+    if user.subscription_type == SubscriptionType.FREE:
+        limit = 4
+    else:
+        limit = 10
+    messages = await get_messages_by_chat_id(
+        chat_id=user.current_chat_id,
+        limit=limit,
+    )
     role = await get_role_by_name(chat.role)
     sorted_messages = sorted(messages, key=lambda m: m.created_at)
     system_prompt = role.translated_instructions.get(user_language_code, 'en')
