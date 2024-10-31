@@ -185,8 +185,14 @@ async def handle_claude(message: Message, state: FSMContext, user: User, user_qu
                 photo = await firebase.bucket.get_blob(photo_path)
                 photo_link = firebase.get_public_url(photo.name)
 
+                async with httpx.AsyncClient() as client:
+                    response = await client.get(photo_link)
+                    image_content = response.content
+
                 image_media_type = 'image/jpeg'
-                image_data = base64.b64encode(httpx.get(photo_link).content).decode('utf-8')
+                image_data = await asyncio.get_running_loop().run_in_executor(
+                    None, lambda: base64.b64encode(image_content).decode('utf-8')
+                )
                 content.append({
                     'type': 'image',
                     'source': {

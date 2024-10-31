@@ -184,7 +184,12 @@ async def handle_gemini(message: Message, state: FSMContext, user: User, user_qu
                 photo_path = f'users/vision/{user.id}/{photo_filename}'
                 photo = await firebase.bucket.get_blob(photo_path)
                 photo_link = firebase.get_public_url(photo.name)
-                photo_file = PIL.Image.open(BytesIO(httpx.get(photo_link).content))
+
+                async with httpx.AsyncClient() as client:
+                    response = await client.get(photo_link)
+                    photo_content = response.content
+                loop = asyncio.get_running_loop()
+                photo_file = await loop.run_in_executor(None, lambda: PIL.Image.open(BytesIO(photo_content)))
 
                 parts.append(photo_file)
 
