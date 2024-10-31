@@ -1,3 +1,4 @@
+import asyncio
 import io
 import math
 import os
@@ -51,7 +52,8 @@ async def process_voice_message(bot: Bot, voice: File, user_id: str):
         voice_ogg = io.BytesIO()
         await bot.download_file(voice.file_path, voice_ogg)
 
-        audio = AudioSegment.from_file(voice_ogg, format='ogg')
+        loop = asyncio.get_running_loop()
+        audio = await loop.run_in_executor(None, lambda: AudioSegment.from_file(voice_ogg, format='ogg'))
 
         audio_in_seconds = audio.duration_seconds
 

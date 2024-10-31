@@ -541,8 +541,6 @@ If you've got a <b>promo code</b>, just type it in to reveal hidden features and
     PROMO_CODE_SUCCESS = """
 🎉 <b>Your promo code has been successfully activated!</b> 🌟
 
-To see what the activated promo code has brought you, type the command /profile ✨
-
 Get ready to dive into a world of AI wonders with your shiny new perks. Happy exploring! 🚀
 """
     PROMO_CODE_ALREADY_HAVE_SUBSCRIPTION = """
