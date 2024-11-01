@@ -118,7 +118,7 @@ async def handle_blast_confirmation_selection(callback_query: CallbackQuery, sta
                     message=blast_letters[blast_language],
                 )
             )
-        await asyncio.gather(*tasks)
+        await asyncio.gather(*tasks, return_exceptions=True)
 
         await callback_query.message.answer(text=get_localization(user_language_code).BLAST_SUCCESS)
         await callback_query.message.delete()
