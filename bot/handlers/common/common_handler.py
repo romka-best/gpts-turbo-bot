@@ -3,7 +3,7 @@ import asyncio
 from aiogram import Router
 from aiogram.filters import Command, CommandStart, ChatMemberUpdatedFilter, KICKED, MEMBER
 from aiogram.fsm.context import FSMContext
-from aiogram.types import Message, CallbackQuery, ChatMemberUpdated, URLInputFile
+from aiogram.types import Message, CallbackQuery, ChatMemberUpdated, URLInputFile, InaccessibleMessage
 
 from bot.config import config, MessageEffect
 from bot.database.main import firebase
@@ -330,13 +330,15 @@ async def time_limit_exceeded_selection(callback_query: CallbackQuery, state: FS
 async def handle_close_selection(callback_query: CallbackQuery):
     await callback_query.answer()
 
-    await callback_query.message.delete()
+    if not isinstance(callback_query.message, InaccessibleMessage):
+        await callback_query.message.delete()
 
 
 @common_router.callback_query(lambda c: c.data.endswith(':cancel'))
 async def handle_cancel_selection(callback_query: CallbackQuery, state: FSMContext):
     await callback_query.answer()
 
-    await callback_query.message.delete()
+    if not isinstance(callback_query.message, InaccessibleMessage):
+        await callback_query.message.delete()
 
     await state.clear()

@@ -162,7 +162,7 @@ async def handle_claude(message: Message, state: FSMContext, user: User, user_qu
     if user.subscription_type == SubscriptionType.FREE:
         limit = 4
     else:
-        limit = 10
+        limit = 8
     messages = await get_messages_by_chat_id(
         chat_id=user.current_chat_id,
         limit=limit,
@@ -404,7 +404,7 @@ async def handle_claude_3_sonnet_example(
             user.subscription_type == SubscriptionType.FREE and
             user.current_model == Model.CLAUDE and
             user.settings[user.current_model][UserSettings.SHOW_EXAMPLES] and
-            user.daily_limits[Quota.CLAUDE_3_HAIKU] + 1 in [1, 10] and
+            user.daily_limits[Quota.CLAUDE_3_HAIKU] + 1 in [3, 10] and
             (current_date - user.last_subscription_limit_update).days <= 3
         ):
             history = get_history_without_duplicates(history)

@@ -58,7 +58,7 @@ async def send_message_to_users(bot: Bot, language_code: str, message: str):
             send_message_to_user(bot, user, message) for user in batch_users
         ]
 
-        await asyncio.gather(*tasks)
+        await asyncio.gather(*tasks, return_exceptions=True)
 
         if i + BATCH_SIZE < len(users):
             await asyncio.sleep(DELAY_SECONDS)

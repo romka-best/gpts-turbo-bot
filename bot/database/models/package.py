@@ -152,7 +152,7 @@ class Package:
             prices[PackageType.SUNO] = '4₽'
             prices[PackageType.CHAT] = '10₽'
             prices[PackageType.ACCESS_TO_CATALOG] = '20₽'
-            prices[PackageType.VOICE_MESSAGES] = '20₽'
+            prices[PackageType.VOICE_MESSAGES] = '50₽'
             prices[PackageType.FAST_MESSAGES] = '20₽'
         elif currency == Currency.USD:
             prices[PackageType.CHAT_GPT4_OMNI_MINI] = '$0.01'
@@ -175,7 +175,7 @@ class Package:
             prices[PackageType.SUNO] = '$0.04'
             prices[PackageType.CHAT] = '$0.1'
             prices[PackageType.ACCESS_TO_CATALOG] = '$0.2'
-            prices[PackageType.VOICE_MESSAGES] = '$0.2'
+            prices[PackageType.VOICE_MESSAGES] = '$0.5'
             prices[PackageType.FAST_MESSAGES] = '$0.2'
         else:
             prices[PackageType.CHAT_GPT4_OMNI_MINI] = '1⭐'
@@ -198,7 +198,7 @@ class Package:
             prices[PackageType.SUNO] = '4⭐️'
             prices[PackageType.CHAT] = '10⭐️'
             prices[PackageType.ACCESS_TO_CATALOG] = '20⭐️'
-            prices[PackageType.VOICE_MESSAGES] = '20⭐️'
+            prices[PackageType.VOICE_MESSAGES] = '50⭐️'
             prices[PackageType.FAST_MESSAGES] = '20⭐️'
 
         return prices
