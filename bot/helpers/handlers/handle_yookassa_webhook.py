@@ -137,7 +137,7 @@ async def handle_yookassa_webhook(request: Dict, bot: Bot, dp: Dispatcher):
                             f'💰 Сумма: {subscription.amount}{Currency.SYMBOLS[subscription.currency]}\n\n'
                             f'@roman_danilov, посмотришь? 🤨',
                 )
-        else:
+        elif payment.payment_method and payment.payment_method.id:
             old_subscription = await get_subscription_by_provider_auto_payment_charge_id(payment.payment_method.id)
             if old_subscription is not None:
                 user = await get_user(old_subscription.user_id)

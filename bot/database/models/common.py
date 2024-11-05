@@ -64,7 +64,7 @@ class ChatGPTVersion:
 
 
 class ClaudeGPTVersion:
-    V3_Haiku = 'claude-3-haiku-20240307'
+    V3_Haiku = 'claude-3-5-haiku-latest'
     V3_Sonnet = 'claude-3-5-sonnet-latest'
     V3_Opus = 'claude-3-opus-latest'
 

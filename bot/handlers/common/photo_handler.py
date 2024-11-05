@@ -205,7 +205,10 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
             user.settings[user.current_model][UserSettings.VERSION] == ChatGPTVersion.V4_Omni_Mini or
             user.settings[user.current_model][UserSettings.VERSION] == ChatGPTVersion.V4_Omni
         )) or
-        user.current_model == Model.CLAUDE or
+        (user.current_model == Model.CLAUDE and (
+            user.settings[user.current_model][UserSettings.VERSION] == ClaudeGPTVersion.V3_Sonnet or
+            user.settings[user.current_model][UserSettings.VERSION] == ClaudeGPTVersion.V3_Opus
+        )) or
         user.current_model == Model.GEMINI
     ):
         if user.settings[user.current_model][UserSettings.VERSION] == ChatGPTVersion.V4_Omni_Mini:
