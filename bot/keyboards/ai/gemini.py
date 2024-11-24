@@ -33,16 +33,3 @@ def build_gemini_keyboard(language_code: str, model: Model, model_version: Gemin
     ]
 
     return InlineKeyboardMarkup(inline_keyboard=buttons)
-
-
-def build_gemini_continue_generating_keyboard(language_code: str) -> InlineKeyboardMarkup:
-    buttons = [
-        [
-            InlineKeyboardButton(
-                text=get_localization(language_code).CONTINUE_GENERATING,
-                callback_data='gemini_continue_generation:continue'
-            )
-        ]
-    ]
-
-    return InlineKeyboardMarkup(inline_keyboard=buttons)

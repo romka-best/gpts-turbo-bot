@@ -264,11 +264,11 @@ async def ads_link_sent(message: Message, state: FSMContext):
 
     await message.answer(text=f'''
 📯 <i>{utm_parts[UTM.CAMPAIGN]}</i>. <b>{len(users)}</b>
-# <b>{len(users) - only_text_users - only_image_users - text_and_image_users}</b> - Не писали ничего
-# <b>{only_text_users}</b> - Сделали запрос только в текстовой модели
-# <b>{only_image_users}</b> - Сделали запрос только в графической модели
-# <b>{text_and_image_users}</b> - Сделали запрос в текстовой и графической моделях
-# <b>{clients}</b> - Купили что-то
+┣ <b>{len(users) - only_text_users - only_image_users - text_and_image_users}</b> - Не писали ничего
+┣ <b>{only_text_users}</b> - Сделали запрос только в текстовой модели
+┣ <b>{only_image_users}</b> - Сделали запрос только в графической модели
+┣ <b>{text_and_image_users}</b> - Сделали запрос в текстовой и графической моделях
+┗ <b>{clients}</b> - Купили что-то
 ''')
 
     await state.clear()

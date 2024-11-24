@@ -7,13 +7,16 @@ from aiogram.types import Message, CallbackQuery, ChatMemberUpdated, URLInputFil
 
 from bot.config import config, MessageEffect
 from bot.database.main import firebase
-from bot.database.models.common import Quota, UTM
+from bot.database.models.common import Quota, UTM, ChatGPTVersion, ClaudeGPTVersion, GeminiGPTVersion
 from bot.database.models.generation import Generation
 from bot.database.models.user import UserSettings
 from bot.database.operations.generation.updaters import update_generation
 from bot.database.operations.user.getters import get_user, get_count_of_users_by_referral
 from bot.database.operations.user.initialize_user_for_the_first_time import initialize_user_for_the_first_time
 from bot.database.operations.user.updaters import update_user
+from bot.handlers.ai.chat_gpt_handler import handle_chatgpt
+from bot.handlers.ai.claude_handler import handle_claude
+from bot.handlers.ai.gemini_handler import handle_gemini
 from bot.handlers.ai.mode_handler import handle_mode
 from bot.handlers.payment.bonus_handler import handle_bonus
 from bot.handlers.payment.payment_handler import handle_subscribe, handle_package
@@ -282,6 +285,67 @@ async def terms(message: Message, state: FSMContext):
     user_language_code = await get_user_language(user_id, state.storage)
 
     await message.answer(text=get_localization(user_language_code).TERMS_LINK)
+
+
+@common_router.callback_query(lambda c: c.data.startswith('continue_generation:'))
+async def handle_continue_generation_choose_selection(callback_query: CallbackQuery, state: FSMContext):
+    await callback_query.answer()
+
+    user_id = str(callback_query.from_user.id)
+    user = await get_user(user_id)
+    user_language_code = await get_user_language(user_id, state.storage)
+
+    action = callback_query.data.split(':')[1]
+
+    if action == 'continue':
+        await state.update_data(recognized_text=get_localization(user_language_code).CONTINUE_GENERATING)
+        if user.settings[user.current_model][UserSettings.VERSION] == ChatGPTVersion.V4_Omni_Mini:
+            user_quota = Quota.CHAT_GPT4_OMNI_MINI
+        elif user.settings[user.current_model][UserSettings.VERSION] == ChatGPTVersion.V4_Omni:
+            user_quota = Quota.CHAT_GPT4_OMNI
+        elif user.settings[user.current_model][UserSettings.VERSION] == ChatGPTVersion.V1_O_Mini:
+            user_quota = Quota.CHAT_GPT_O_1_MINI
+        elif user.settings[user.current_model][UserSettings.VERSION] == ChatGPTVersion.V1_O_Preview:
+            user_quota = Quota.CHAT_GPT_O_1_PREVIEW
+        elif user.settings[user.current_model][UserSettings.VERSION] == ClaudeGPTVersion.V3_Haiku:
+            user_quota = Quota.CLAUDE_3_HAIKU
+        elif user.settings[user.current_model][UserSettings.VERSION] == ClaudeGPTVersion.V3_Sonnet:
+            user_quota = Quota.CLAUDE_3_SONNET
+        elif user.settings[user.current_model][UserSettings.VERSION] == ClaudeGPTVersion.V3_Opus:
+            user_quota = Quota.CLAUDE_3_OPUS
+        elif user.settings[user.current_model][UserSettings.VERSION] == GeminiGPTVersion.V1_Flash:
+            user_quota = Quota.GEMINI_1_FLASH
+        elif user.settings[user.current_model][UserSettings.VERSION] == GeminiGPTVersion.V1_Pro:
+            user_quota = Quota.GEMINI_1_PRO
+        elif user.settings[user.current_model][UserSettings.VERSION] == GeminiGPTVersion.V1_Ultra:
+            user_quota = Quota.GEMINI_1_ULTRA
+        else:
+            raise NotImplementedError(
+                f'AI version is not defined: {user.settings[user.current_model][UserSettings.VERSION]}'
+            )
+
+        if user_quota in [
+            Quota.CHAT_GPT4_OMNI_MINI,
+            Quota.CHAT_GPT4_OMNI,
+            Quota.CHAT_GPT_O_1_MINI,
+            Quota.CHAT_GPT_O_1_PREVIEW,
+        ]:
+            await handle_chatgpt(callback_query.message, state, user, user_quota)
+        elif user_quota in [
+            Quota.CLAUDE_3_HAIKU,
+            Quota.CLAUDE_3_SONNET,
+            Quota.CLAUDE_3_OPUS,
+        ]:
+            await handle_claude(callback_query.message, state, user, user_quota)
+        elif user_quota in [
+            Quota.GEMINI_1_FLASH,
+            Quota.GEMINI_1_PRO,
+            Quota.GEMINI_1_ULTRA,
+        ]:
+            await handle_gemini(callback_query.message, state, user, user_quota)
+        await callback_query.message.edit_reply_markup(reply_markup=None)
+
+    await state.clear()
 
 
 @common_router.callback_query(lambda c: c.data.startswith('reaction:'))

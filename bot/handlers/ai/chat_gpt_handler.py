@@ -27,9 +27,9 @@ from bot.helpers.reply_with_voice import reply_with_voice
 from bot.helpers.senders.send_error_info import send_error_info
 from bot.helpers.senders.send_ai_message import send_ai_message
 from bot.integrations.openAI import get_response_message
-from bot.keyboards.ai.chat_gpt import build_chat_gpt_continue_generating_keyboard, build_chat_gpt_keyboard
+from bot.keyboards.ai.chat_gpt import build_chat_gpt_keyboard
 from bot.keyboards.ai.mode import build_switched_to_ai_keyboard
-from bot.keyboards.common.common import build_error_keyboard
+from bot.keyboards.common.common import build_error_keyboard, build_continue_generating_keyboard
 from bot.locales.main import get_localization, get_user_language
 
 chat_gpt_router = Router()
@@ -261,7 +261,7 @@ async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_q
             await create_new_message_and_update_user(transaction, message_role, message_content, user, user_quota)
 
             if user.settings[user.current_model][UserSettings.TURN_ON_VOICE_MESSAGES]:
-                reply_markup = build_chat_gpt_continue_generating_keyboard(user_language_code)
+                reply_markup = build_continue_generating_keyboard(user_language_code)
                 await reply_with_voice(
                     message=message,
                     text=message_content,
@@ -280,7 +280,7 @@ async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_q
                 footer_text = f'\n\n✉️ {user.daily_limits[user_quota] + user.additional_usage_quota[user_quota] + 1}' \
                     if user.settings[user.current_model][UserSettings.SHOW_USAGE_QUOTA] and \
                        user.daily_limits[user_quota] != float('inf') else ''
-                reply_markup = build_chat_gpt_continue_generating_keyboard(user_language_code)
+                reply_markup = build_continue_generating_keyboard(user_language_code)
                 full_text = f"{header_text}{message_content}{footer_text}"
                 await send_ai_message(
                     message=message,
@@ -333,33 +333,6 @@ async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_q
             message=message,
         )
     )
-
-
-@chat_gpt_router.callback_query(lambda c: c.data.startswith('chat_gpt_continue_generation:'))
-async def handle_chat_gpt_continue_generation_choose_selection(callback_query: CallbackQuery, state: FSMContext):
-    await callback_query.answer()
-
-    user_id = str(callback_query.from_user.id)
-    user = await get_user(user_id)
-    user_language_code = await get_user_language(user_id, state.storage)
-
-    action = callback_query.data.split(':')[1]
-
-    if action == 'continue':
-        await state.update_data(recognized_text=get_localization(user_language_code).CONTINUE_GENERATING)
-        if user.settings[user.current_model][UserSettings.VERSION] == ChatGPTVersion.V4_Omni_Mini:
-            user_quota = Quota.CHAT_GPT4_OMNI_MINI
-        elif user.settings[user.current_model][UserSettings.VERSION] == ChatGPTVersion.V4_Omni:
-            user_quota = Quota.CHAT_GPT4_OMNI
-        else:
-            raise NotImplementedError(
-                f'User quota is not implemented: {user.settings[user.current_model][UserSettings.VERSION]}'
-            )
-
-        await handle_chatgpt(callback_query.message, state, user, user_quota)
-        await callback_query.message.edit_reply_markup(reply_markup=None)
-
-    await state.clear()
 
 
 async def handle_chatgpt4_example(user: User, user_language_code: str, prompt: str, history: list, message: Message):

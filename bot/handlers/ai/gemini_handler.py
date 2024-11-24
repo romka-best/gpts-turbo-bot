@@ -30,9 +30,9 @@ from bot.helpers.reply_with_voice import reply_with_voice
 from bot.helpers.senders.send_ai_message import send_ai_message
 from bot.helpers.senders.send_error_info import send_error_info
 from bot.integrations.googleAI import get_response_message
-from bot.keyboards.ai.gemini import build_gemini_keyboard, build_gemini_continue_generating_keyboard
+from bot.keyboards.ai.gemini import build_gemini_keyboard
 from bot.keyboards.ai.mode import build_switched_to_ai_keyboard
-from bot.keyboards.common.common import build_error_keyboard
+from bot.keyboards.common.common import build_error_keyboard, build_continue_generating_keyboard
 from bot.locales.main import get_user_language, get_localization
 
 gemini_router = Router()
@@ -253,7 +253,7 @@ async def handle_gemini(message: Message, state: FSMContext, user: User, user_qu
             await create_new_message_and_update_user(transaction, message_role, message_content, user, user_quota)
 
             if user.settings[user.current_model][UserSettings.TURN_ON_VOICE_MESSAGES]:
-                reply_markup = build_gemini_continue_generating_keyboard(user_language_code)
+                reply_markup = build_continue_generating_keyboard(user_language_code)
                 await reply_with_voice(
                     message=message,
                     text=message_content,
@@ -272,7 +272,7 @@ async def handle_gemini(message: Message, state: FSMContext, user: User, user_qu
                 footer_text = f'\n\n✉️ {user.daily_limits[user_quota] + user.additional_usage_quota[user_quota] + 1}' \
                     if user.settings[user.current_model][UserSettings.SHOW_USAGE_QUOTA] and \
                        user.daily_limits[user_quota] != float('inf') else ''
-                reply_markup = build_gemini_continue_generating_keyboard(user_language_code)
+                reply_markup = build_continue_generating_keyboard(user_language_code)
                 full_text = f'{header_text}{message_content}{footer_text}'
                 await send_ai_message(
                     message=message,
