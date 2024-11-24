@@ -10,6 +10,7 @@ from bot.config import config
 from bot.database.main import firebase
 from bot.database.models.cart import Cart
 from bot.database.models.common import Currency, Quota, Model, SunoVersion
+from bot.database.models.generation import Generation
 from bot.database.models.package import PackageType
 from bot.database.models.product import ProductType, ProductCategory
 from bot.database.models.subscription import SubscriptionType, SubscriptionPeriod
@@ -23,7 +24,8 @@ from bot.database.operations.package.updaters import update_package
 from bot.database.operations.product.writers import write_product
 from bot.database.operations.promo_code.getters import (
     get_promo_codes_by_subscription_type,
-    get_promo_codes_by_package_type, get_promo_codes,
+    get_promo_codes_by_package_type,
+    get_promo_codes,
 )
 from bot.database.operations.promo_code.updaters import update_promo_code
 from bot.database.operations.subscription.getters import (
@@ -2002,6 +2004,7 @@ async def migrate(bot: Bot):
             parse_mode=None,
         )
 
+    # TODO ONLY AFTER RELEASE
     try:
         await send_message_to_admins_and_developers(bot, '<b>Third migration started!</b>')
 
@@ -2030,20 +2033,323 @@ async def migrate(bot: Bot):
             })
         await send_message_to_admins_and_developers(bot, '<b>PROMO_CODES migration was successful!</b> 🎉')
 
-        # TODO ADD BATCH
         generations = await get_generations()
-        for generation in generations:
-            await update_generation(generation.id, {
-                'model': DELETE_FIELD,
-            })
+        for i in range(0, len(generations), config.BATCH_SIZE):
+            batch = firebase.db.batch()
+            generation_batch = generations[i:i + config.BATCH_SIZE]
+
+            for generation in generation_batch:
+                generation_ref = firebase.db.collection(Generation.COLLECTION_NAME).document(generation.id)
+
+                batch.update(generation_ref, {
+                    'model': DELETE_FIELD,
+                })
+            await batch.commit()
         await send_message_to_admins_and_developers(bot, '<b>GENERATIONS migration was successful!</b> 🎉')
 
         # TODO ADD BATCH AND SEPARATE
-        transactions = await get_transactions()
-        for transaction in transactions:
-            await update_transaction(transaction.id, {
+        mini_transactions = await get_transactions(service=ServiceType.MINI)
+        for mini_transaction in mini_transactions:
+            await update_transaction(mini_transaction.id, {
                 'service': DELETE_FIELD,
             })
+        standard_transactions = await get_transactions(service=ServiceType.STANDARD)
+        for standard_transaction in standard_transactions:
+            await update_transaction(standard_transaction.id, {
+                'service': DELETE_FIELD,
+            })
+        vip_transactions = await get_transactions(service=ServiceType.VIP)
+        for vip_transaction in vip_transactions:
+            await update_transaction(vip_transaction.id, {
+                'service': DELETE_FIELD,
+            })
+        premium_transactions = await get_transactions(service=ServiceType.PREMIUM)
+        for premium_transaction in premium_transactions:
+            await update_transaction(premium_transaction.id, {
+                'service': DELETE_FIELD,
+            })
+        unlimited_transactions = await get_transactions(service=ServiceType.UNLIMITED)
+        for unlimited_transaction in unlimited_transactions:
+            await update_transaction(unlimited_transaction.id, {
+                'service': DELETE_FIELD,
+            })
+
+        chatgpt3_turbo_transactions = await get_transactions(service=ServiceType.CHAT_GPT3_TURBO)
+        for i in range(0, len(chatgpt3_turbo_transactions), config.BATCH_SIZE):
+            batch = firebase.db.batch()
+            chatgpt3_turbo_transaction_batch = chatgpt3_turbo_transactions[i:i + config.BATCH_SIZE]
+            for chatgpt3_turbo_transaction in chatgpt3_turbo_transaction_batch:
+                chatgpt3_turbo_transaction_ref = firebase.db.collection(
+                    Transaction.COLLECTION_NAME
+                ).document(chatgpt3_turbo_transaction.id)
+                batch.update(chatgpt3_turbo_transaction_ref, {
+                    'service': DELETE_FIELD,
+                })
+            await batch.commit()
+        chatgpt4_turbo_transactions = await get_transactions(service=ServiceType.CHAT_GPT4_TURBO)
+        for i in range(0, len(chatgpt4_turbo_transactions), config.BATCH_SIZE):
+            batch = firebase.db.batch()
+            chatgpt4_turbo_transaction_batch = chatgpt4_turbo_transactions[i:i + config.BATCH_SIZE]
+            for chatgpt4_turbo_transaction in chatgpt4_turbo_transaction_batch:
+                chatgpt4_turbo_transaction_ref = firebase.db.collection(
+                    Transaction.COLLECTION_NAME
+                ).document(chatgpt4_turbo_transaction.id)
+                batch.update(chatgpt4_turbo_transaction_ref, {
+                    'service': DELETE_FIELD,
+                })
+            await batch.commit()
+        chatgpt4_omni_mini_transactions = await get_transactions(service=ServiceType.CHAT_GPT4_OMNI_MINI)
+        for i in range(0, len(chatgpt4_omni_mini_transactions), config.BATCH_SIZE):
+            batch = firebase.db.batch()
+            chatgpt4_omni_mini_transaction_batch = chatgpt4_omni_mini_transactions[i:i + config.BATCH_SIZE]
+            for chatgpt4_omni_mini_transaction in chatgpt4_omni_mini_transaction_batch:
+                chatgpt4_omni_mini_transaction_ref = firebase.db.collection(
+                    Transaction.COLLECTION_NAME
+                ).document(chatgpt4_omni_mini_transaction.id)
+                batch.update(chatgpt4_omni_mini_transaction_ref, {
+                    'service': DELETE_FIELD,
+                })
+            await batch.commit()
+        chatgpt4_omni_transactions = await get_transactions(service=ServiceType.CHAT_GPT4_OMNI)
+        for i in range(0, len(chatgpt4_omni_transactions), config.BATCH_SIZE):
+            batch = firebase.db.batch()
+            chatgpt4_omni_transaction_batch = chatgpt4_omni_transactions[i:i + config.BATCH_SIZE]
+            for chatgpt4_omni_transaction in chatgpt4_omni_transaction_batch:
+                chatgpt4_omni_transaction_ref = firebase.db.collection(
+                    Transaction.COLLECTION_NAME
+                ).document(chatgpt4_omni_transaction.id)
+                batch.update(chatgpt4_omni_transaction_ref, {
+                    'service': DELETE_FIELD,
+                })
+            await batch.commit()
+        chatgpt_o_1_mini_transactions = await get_transactions(service=ServiceType.CHAT_GPT_O_1_MINI)
+        for i in range(0, len(chatgpt_o_1_mini_transactions), config.BATCH_SIZE):
+            batch = firebase.db.batch()
+            chatgpt_o_1_mini_transaction_batch = chatgpt_o_1_mini_transactions[i:i + config.BATCH_SIZE]
+            for chatgpt_o_1_mini_transaction in chatgpt_o_1_mini_transaction_batch:
+                chatgpt_o_1_mini_transaction_ref = firebase.db.collection(
+                    Transaction.COLLECTION_NAME
+                ).document(chatgpt_o_1_mini_transaction.id)
+                batch.update(chatgpt_o_1_mini_transaction_ref, {
+                    'service': DELETE_FIELD,
+                })
+            await batch.commit()
+        chatgpt_o_1_preview_transactions = await get_transactions(service=ServiceType.CHAT_GPT_O_1_PREVIEW)
+        for i in range(0, len(chatgpt_o_1_preview_transactions), config.BATCH_SIZE):
+            batch = firebase.db.batch()
+            chatgpt_o_1_preview_transaction_batch = chatgpt_o_1_preview_transactions[i:i + config.BATCH_SIZE]
+            for chatgpt_o_1_preview_transaction in chatgpt_o_1_preview_transaction_batch:
+                chatgpt_o_1_preview_transaction_ref = firebase.db.collection(
+                    Transaction.COLLECTION_NAME
+                ).document(chatgpt_o_1_preview_transaction.id)
+                batch.update(chatgpt_o_1_preview_transaction_ref, {
+                    'service': DELETE_FIELD,
+                })
+            await batch.commit()
+        claude_3_haiku_transactions = await get_transactions(service=ServiceType.CLAUDE_3_HAIKU)
+        for i in range(0, len(claude_3_haiku_transactions), config.BATCH_SIZE):
+            batch = firebase.db.batch()
+            claude_3_haiku_transaction_batch = claude_3_haiku_transactions[i:i + config.BATCH_SIZE]
+            for claude_3_haiku_transaction in claude_3_haiku_transaction_batch:
+                claude_3_haiku_transaction_ref = firebase.db.collection(
+                    Transaction.COLLECTION_NAME
+                ).document(claude_3_haiku_transaction.id)
+                batch.update(claude_3_haiku_transaction_ref, {
+                    'service': DELETE_FIELD,
+                })
+            await batch.commit()
+        claude_3_sonnet_transactions = await get_transactions(service=ServiceType.CLAUDE_3_SONNET)
+        for i in range(0, len(claude_3_sonnet_transactions), config.BATCH_SIZE):
+            batch = firebase.db.batch()
+            claude_3_sonnet_transaction_batch = claude_3_sonnet_transactions[i:i + config.BATCH_SIZE]
+            for claude_3_sonnet_transaction in claude_3_sonnet_transaction_batch:
+                claude_3_sonnet_transaction_ref = firebase.db.collection(
+                    Transaction.COLLECTION_NAME
+                ).document(claude_3_sonnet_transaction.id)
+                batch.update(claude_3_sonnet_transaction_ref, {
+                    'service': DELETE_FIELD,
+                })
+            await batch.commit()
+        claude_3_opus_transactions = await get_transactions(service=ServiceType.CLAUDE_3_OPUS)
+        for i in range(0, len(claude_3_opus_transactions), config.BATCH_SIZE):
+            batch = firebase.db.batch()
+            claude_3_opus_transaction_batch = claude_3_opus_transactions[i:i + config.BATCH_SIZE]
+            for claude_3_opus_transaction in claude_3_opus_transaction_batch:
+                claude_3_opus_transaction_ref = firebase.db.collection(
+                    Transaction.COLLECTION_NAME
+                ).document(claude_3_opus_transaction.id)
+                batch.update(claude_3_opus_transaction_ref, {
+                    'service': DELETE_FIELD,
+                })
+            await batch.commit()
+        gemini_1_flash_transactions = await get_transactions(service=ServiceType.GEMINI_1_FLASH)
+        for i in range(0, len(gemini_1_flash_transactions), config.BATCH_SIZE):
+            batch = firebase.db.batch()
+            gemini_1_flash_transaction_batch = gemini_1_flash_transactions[i:i + config.BATCH_SIZE]
+            for gemini_1_flash_transaction in gemini_1_flash_transaction_batch:
+                gemini_1_flash_transaction_ref = firebase.db.collection(
+                    Transaction.COLLECTION_NAME
+                ).document(gemini_1_flash_transaction.id)
+                batch.update(gemini_1_flash_transaction_ref, {
+                    'service': DELETE_FIELD,
+                })
+            await batch.commit()
+        gemini_1_pro_transactions = await get_transactions(service=ServiceType.GEMINI_1_PRO)
+        for i in range(0, len(gemini_1_pro_transactions), config.BATCH_SIZE):
+            batch = firebase.db.batch()
+            gemini_1_pro_transaction_batch = gemini_1_pro_transactions[i:i + config.BATCH_SIZE]
+            for gemini_1_pro_transaction in gemini_1_pro_transaction_batch:
+                gemini_1_pro_transaction_ref = firebase.db.collection(
+                    Transaction.COLLECTION_NAME
+                ).document(gemini_1_pro_transaction.id)
+                batch.update(gemini_1_pro_transaction_ref, {
+                    'service': DELETE_FIELD,
+                })
+            await batch.commit()
+        gemini_1_ultra_transactions = await get_transactions(service=ServiceType.GEMINI_1_ULTRA)
+        for i in range(0, len(gemini_1_ultra_transactions), config.BATCH_SIZE):
+            batch = firebase.db.batch()
+            gemini_1_ultra_transaction_batch = gemini_1_ultra_transactions[i:i + config.BATCH_SIZE]
+            for gemini_1_ultra_transaction in gemini_1_ultra_transaction_batch:
+                gemini_1_ultra_transaction_ref = firebase.db.collection(
+                    Transaction.COLLECTION_NAME
+                ).document(gemini_1_ultra_transaction.id)
+                batch.update(gemini_1_ultra_transaction_ref, {
+                    'service': DELETE_FIELD,
+                })
+            await batch.commit()
+        dall_e_transactions = await get_transactions(service=ServiceType.DALL_E)
+        for i in range(0, len(dall_e_transactions), config.BATCH_SIZE):
+            batch = firebase.db.batch()
+            dall_e_transaction_batch = dall_e_transactions[i:i + config.BATCH_SIZE]
+            for dall_e_transaction in dall_e_transaction_batch:
+                dall_e_transaction_ref = firebase.db.collection(
+                    Transaction.COLLECTION_NAME
+                ).document(dall_e_transaction.id)
+                batch.update(dall_e_transaction_ref, {
+                    'service': DELETE_FIELD,
+                })
+            await batch.commit()
+        midjourney_transactions = await get_transactions(service=ServiceType.MIDJOURNEY)
+        for i in range(0, len(midjourney_transactions), config.BATCH_SIZE):
+            batch = firebase.db.batch()
+            midjourney_transaction_batch = midjourney_transactions[i:i + config.BATCH_SIZE]
+            for midjourney_transaction in midjourney_transaction_batch:
+                midjourney_transaction_ref = firebase.db.collection(
+                    Transaction.COLLECTION_NAME
+                ).document(midjourney_transaction.id)
+                batch.update(midjourney_transaction_ref, {
+                    'service': DELETE_FIELD,
+                })
+            await batch.commit()
+        stable_diffusion_transactions = await get_transactions(service=ServiceType.STABLE_DIFFUSION)
+        for i in range(0, len(stable_diffusion_transactions), config.BATCH_SIZE):
+            batch = firebase.db.batch()
+            stable_diffusion_transaction_batch = stable_diffusion_transactions[i:i + config.BATCH_SIZE]
+            for stable_diffusion_transaction in stable_diffusion_transaction_batch:
+                stable_diffusion_transaction_ref = firebase.db.collection(
+                    Transaction.COLLECTION_NAME
+                ).document(stable_diffusion_transaction.id)
+                batch.update(stable_diffusion_transaction_ref, {
+                    'service': DELETE_FIELD,
+                })
+            await batch.commit()
+        flux_transactions = await get_transactions(service=ServiceType.FLUX)
+        for i in range(0, len(flux_transactions), config.BATCH_SIZE):
+            batch = firebase.db.batch()
+            flux_transaction_batch = flux_transactions[i:i + config.BATCH_SIZE]
+            for flux_transaction in flux_transaction_batch:
+                flux_transaction_ref = firebase.db.collection(
+                    Transaction.COLLECTION_NAME
+                ).document(flux_transaction.id)
+                batch.update(flux_transaction_ref, {
+                    'service': DELETE_FIELD,
+                })
+            await batch.commit()
+        face_swap_transactions = await get_transactions(service=ServiceType.FACE_SWAP)
+        for i in range(0, len(face_swap_transactions), config.BATCH_SIZE):
+            batch = firebase.db.batch()
+            face_swap_transaction_batch = face_swap_transactions[i:i + config.BATCH_SIZE]
+            for face_swap_transaction in face_swap_transaction_batch:
+                face_swap_transaction_ref = firebase.db.collection(
+                    Transaction.COLLECTION_NAME
+                ).document(face_swap_transaction.id)
+                batch.update(face_swap_transaction_ref, {
+                    'service': DELETE_FIELD,
+                })
+            await batch.commit()
+        photoshop_ai_transactions = await get_transactions(service=ServiceType.PHOTOSHOP_AI)
+        for i in range(0, len(photoshop_ai_transactions), config.BATCH_SIZE):
+            batch = firebase.db.batch()
+            photoshop_ai_transaction_batch = photoshop_ai_transactions[i:i + config.BATCH_SIZE]
+            for photoshop_ai_transaction in photoshop_ai_transaction_batch:
+                photoshop_ai_transaction_ref = firebase.db.collection(
+                    Transaction.COLLECTION_NAME
+                ).document(photoshop_ai_transaction.id)
+                batch.update(photoshop_ai_transaction_ref, {
+                    'service': DELETE_FIELD,
+                })
+            await batch.commit()
+        music_gen_transactions = await get_transactions(service=ServiceType.MUSIC_GEN)
+        for i in range(0, len(music_gen_transactions), config.BATCH_SIZE):
+            batch = firebase.db.batch()
+            music_gen_transaction_batch = music_gen_transactions[i:i + config.BATCH_SIZE]
+            for music_gen_transaction in music_gen_transaction_batch:
+                music_gen_transaction_ref = firebase.db.collection(
+                    Transaction.COLLECTION_NAME
+                ).document(music_gen_transaction.id)
+                batch.update(music_gen_transaction_ref, {
+                    'service': DELETE_FIELD,
+                })
+            await batch.commit()
+        suno_transactions = await get_transactions(service=ServiceType.SUNO)
+        for i in range(0, len(suno_transactions), config.BATCH_SIZE):
+            batch = firebase.db.batch()
+            suno_transaction_batch = suno_transactions[i:i + config.BATCH_SIZE]
+            for suno_transaction in suno_transaction_batch:
+                suno_transaction_ref = firebase.db.collection(
+                    Transaction.COLLECTION_NAME
+                ).document(suno_transaction.id)
+                batch.update(suno_transaction_ref, {
+                    'service': DELETE_FIELD,
+                })
+            await batch.commit()
+        chat_transactions = await get_transactions(service=ServiceType.ADDITIONAL_CHATS)
+        for chat_transaction in chat_transactions:
+            await update_transaction(chat_transaction.id, {
+                'service': DELETE_FIELD,
+            })
+        access_to_catalog_transactions = await get_transactions(service=ServiceType.ACCESS_TO_CATALOG)
+        for access_to_catalog_transaction in access_to_catalog_transactions:
+            await update_transaction(access_to_catalog_transaction.id, {
+                'service': DELETE_FIELD,
+            })
+        voice_messages_transactions = await get_transactions(service=ServiceType.VOICE_MESSAGES)
+        for voice_messages_transaction in voice_messages_transactions:
+            await update_transaction(voice_messages_transaction.id, {
+                'service': DELETE_FIELD,
+            })
+        fast_messages_transactions = await get_transactions(service=ServiceType.FAST_MESSAGES)
+        for fast_messages_transaction in fast_messages_transactions:
+            await update_transaction(fast_messages_transaction.id, {
+                'service': DELETE_FIELD,
+            })
+        server_transactions = await get_transactions(service=ServiceType.SERVER)
+        for server_transaction in server_transactions:
+            await update_transaction(server_transaction.id, {
+                'service': DELETE_FIELD,
+            })
+        database_transactions = await get_transactions(service=ServiceType.DATABASE)
+        for database_transaction in database_transactions:
+            await update_transaction(database_transaction.id, {
+                'service': DELETE_FIELD,
+            })
+        other_transactions = await get_transactions(service=ServiceType.OTHER)
+        for other_transaction in other_transactions:
+            await update_transaction(other_transaction.id, {
+                'service': DELETE_FIELD,
+            })
+
         await send_message_to_admins_and_developers(bot, '<b>TRANSACTIONS migration was successful!</b> 🎉')
 
         await send_message_to_admins_and_developers(bot, '<b>The third database migration was successful!</b> 🎉')
