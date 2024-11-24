@@ -1,12 +1,12 @@
 from bot.database.main import firebase
 from bot.database.models.common import Currency
-from bot.database.models.transaction import Transaction, TransactionType, ServiceType
+from bot.database.models.transaction import Transaction, TransactionType
 
 
 async def create_transaction_object(
     user_id: str,
     type: TransactionType,
-    service: ServiceType,
+    product_id: str,
     amount: float,
     clear_amount: float,
     currency: Currency,
@@ -19,7 +19,7 @@ async def create_transaction_object(
         id=transaction_ref.id,
         user_id=user_id,
         type=type,
-        service=service,
+        product_id=product_id,
         amount=amount,
         clear_amount=clear_amount,
         currency=currency,

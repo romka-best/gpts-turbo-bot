@@ -1,7 +1,2 @@
-from bot.database.models.subscription import SubscriptionLimit
-
-
-def get_user_discount(user_discount: int, user_subscription_type) -> int:
-    if user_discount > SubscriptionLimit.DISCOUNT[user_subscription_type]:
-        return user_discount
-    return SubscriptionLimit.DISCOUNT[user_subscription_type]
+def get_user_discount(user_discount: int, subscription_discount: int, product_discount: int) -> int:
+    return max(user_discount, subscription_discount, product_discount)

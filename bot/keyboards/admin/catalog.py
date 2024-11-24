@@ -1,12 +1,10 @@
-from typing import List
-
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 from bot.database.models.role import Role
 from bot.locales.main import get_localization
 
 
-def build_manage_catalog_keyboard(language_code: str, roles: List[Role]) -> InlineKeyboardMarkup:
+def build_manage_catalog_keyboard(language_code: str, roles: list[Role]) -> InlineKeyboardMarkup:
     buttons = []
     for role in roles:
         buttons.append(

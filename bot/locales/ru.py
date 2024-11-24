@@ -1,15 +1,22 @@
 import random
-from typing import List, Dict
+from typing import Union
 
+from bot.database.models.product import Product, ProductType, ProductCategory
+from bot.database.operations.product.getters import get_product
 from bot.helpers.formatters.format_number import format_number
+from bot.helpers.getters.get_user_discount import get_user_discount
 from bot.locales.texts import Texts
-from bot.database.models.common import Currency, Quota, Model, ChatGPTVersion, ClaudeGPTVersion, GeminiGPTVersion
-from bot.database.models.package import PackageType, Package
+from bot.database.models.common import (
+    Currency,
+    Quota,
+    Model,
+    ChatGPTVersion,
+    ClaudeGPTVersion,
+    GeminiGPTVersion,
+)
 from bot.database.models.subscription import (
     Subscription,
-    SubscriptionType,
     SubscriptionPeriod,
-    SubscriptionLimit,
     SubscriptionStatus,
 )
 from bot.database.models.user import UserGender
@@ -45,7 +52,7 @@ class Russian(Texts):
 
 ━ 🎵 <b>Произведение музыки</b>:
     ┣ Сочиняйте оригинальные мелодии с <b>MusicGen 🎺</b> /music_gen
-    ┗ Создавайте уникальные песни с <b>Suno 3.5 🎸</b> /suno
+    ┗ Создавайте уникальные песни с <b>Suno 4.0 🎸</b> /suno
 
 Я постоянно обновляюсь, внедряя самые передовые технологии, чтобы вы могли максимально использовать возможности искусственного интеллекта. <b>Я — единственный бот с эмоциональным интеллектом</b>, готовый помочь вам в любых вопросах и творческих начинаниях 🚀
 """
@@ -95,6 +102,7 @@ class Russian(Texts):
 ━ 🎁 /bonus - Узнайте как получить доступ ко всем нейросетям бесплатно
 ━ 🎭️ /settings - Персонализация и настройки. Цифровые помощники и тематические чаты для текстовых моделей
 """
+    MAINTENANCE_MODE = "🤖 Я в режиме тех. обслуживания. Пожалуйста, подождите, немного 🛠"
 
     # Promos
     PROMO_SOCIAL_MEDIA_PROMPTS = """
@@ -305,6 +313,9 @@ class Russian(Texts):
 - <i>Музыкальное образование и вдохновение</i>: Изучите музыкальную теорию и историю жанров через практику композиции.
 - <i>Быстрое создание музыки</i>: Опишите свои эмоции или сценарий, и Suno немедленно оживит ваше описание в виде песни.
 """
+
+    SERVER = "💻 Сервер"
+    DATABASE = "🗄 База Данных"
 
     TEXT_MODELS = "🔤 Текстовые модели"
     IMAGE_MODELS = "🖼 Графические модели"
@@ -893,20 +904,15 @@ class Russian(Texts):
 
     # Payment
     BUY = """
-🚀 <b>Приветствуем вас в магазине чудес!</b> 🛍
+🚀 <b>Приветствую вас в магазине чудес!</b> 🪄
 
 Перед вами открываются врата в мир эксклюзивных возможностей! Что же будет сегодня?
 
-🌟 <b>Подписка: Ваш VIP-пропуск в мир возможностей!</b>
-Получите полный доступ ко всему спектру инновационных сервисов: от бесед с ChatGPT до создания уникальных песен с Suno. Используйте тематические чаты, чтобы углубляться в интересующие вас темы и расширять горизонты каждый день. Откройте для себя комфорт быстрых ответов и уникальность персонализированных изображений с FaceSwap. Всё это и многое другое ждёт вас в наших подписках:
-━ <b>MINI</b> 🍬
-━ <b>STANDARD</b> ✨
-━ <b>VIP</b> 🔥
-━ <b>PREMIUM</b> 💎
-━ <b>UNLIMITED</b> 🚀
+🌟 <b>Подписки: Всё и сразу — VIP-пропуск открывает доступ ко всем нейросетям и не только!</b>
+Общение с ChatGPT, Claude, Gemini; Креатив с DALL-E, Midjourney, Stable Diffusion, Flux, FaceSwap, Photoshop AI; Создание музыки с MusicGen, Suno; Голосовые сообщения, Быстрые ответы, Тематические чаты и многое другое. Всё включено в подписке для вашего удобства и новых открытий каждый день!
 
-🛍 <b>Пакеты: Идеальное решение для специфических нужд!</b>
-Ищете целевое решение для одноразового проекта? Наши пакеты предоставляют необходимое количество запросов и сервисов, которые помогут вам достичь ваших целей. Выбирайте только то, что нужно для вашего следующего творческого прорыва или бизнес-задачи, и платите только за использованные вами ресурсы.
+🛍 <b>Пакеты: Только нужные вам генерации!</b>
+Нужны отдельные генерации под конкретные задачи? Пакеты позволяют выбрать определённое количество запросов и нейросетей — оплачивайте только то, что действительно необходимо
 
 Выберите нажав на кнопку ниже 👇
 """
@@ -920,9 +926,13 @@ class Russian(Texts):
 
 🪆💳 <b>ЮKassa (РФ Карты)</b>
 
+🌍💳 <b>Stripe (Международные Карты)</b>
+
 ✈️⭐️ <b>Telegram Stars (Валюта в Telegram)</b>
 """
     PROCEED_TO_PAY = "🌐 Перейти к оплате"
+    MONTHLY = "Месячная"
+    YEARLY = "Годовая"
 
     # Subscription
     MONTH_1 = "1 месяц"
@@ -993,50 +1003,6 @@ class Russian(Texts):
     ADD_TO_CART_OR_BUY_NOW = "Приобрести сразу или добавить в корзину?"
     ADDED_TO_CART = "Добавлено в корзину ✅"
     GO_TO_CART_OR_CONTINUE_SHOPPING = "Перейти к корзине или продолжить покупки?"
-    GPT4_OMNI_MINI_REQUESTS = "✉️ ChatGPT 4.0 Omni Mini запросы"
-    GPT4_OMNI_MINI_REQUESTS_DESCRIPTION = "Разбудите мощь ChatGPT 4.0 Omni Mini для остроумных бесед, умных советов и бесконечного веселья! ✉️"
-    GPT4_OMNI_REQUESTS = "💥 ChatGPT 4.0 Omni запросы"
-    GPT4_OMNI_REQUESTS_DESCRIPTION = "Откройте новые горизонты с интеллектом ChatGPT 4.0 Omni для более глубоких анализов и инновационных диалогов! 💥"
-    CHAT_GPT_O_1_MINI_REQUESTS = "🧩 ChatGPT o1-mini запросы"
-    CHAT_GPT_O_1_MINI_REQUESTS_DESCRIPTION = "Откройте новые перспективы с ChatGPT o1-mini, чтобы находить быстрые и точные решения для ваших задач! 🧩"
-    CHAT_GPT_O_1_PREVIEW_REQUESTS = "🧪 ChatGPT o1-preview запросы"
-    CHAT_GPT_O_1_PREVIEW_REQUESTS_DESCRIPTION = "Исследуйте будущее с ChatGPT o1-preview, совершая глубокие и логически выверенные открытия! 🧪"
-    CLAUDE_3_HAIKU_REQUESTS = "📜 Claude 3.5 Haiku запросы"
-    CLAUDE_3_HAIKU_REQUESTS_DESCRIPTION = "Погрузитесь в мир краткости и мудрости с Claude 3.5 Haiku, где лаконичность рождает гениальные идеи! 📜"
-    CLAUDE_3_SONNET_REQUESTS = "💫 Claude 3.5 Sonnet запросы"
-    CLAUDE_3_SONNET_REQUESTS_DESCRIPTION = "Исследуйте баланс скорости и интеллекта с Claude 3.5 Sonnet для точных и оперативных решений! 💫"
-    CLAUDE_3_OPUS_REQUESTS = "🚀 Claude 3.0 Opus запросы"
-    CLAUDE_3_OPUS_REQUESTS_DESCRIPTION = "Проникнитесь мощью Claude 3.0 Opus для решения самых сложных задач и создания глубоких инсайтов! 🚀"
-    GEMINI_1_FLASH_REQUESTS = "🏎 Gemini 1.5 Flash запросы"
-    GEMINI_1_FLASH_REQUESTS_DESCRIPTION = "Разбудите мощь Gemini 1.5 Flash для мгновенных решений, быстрых ответов и динамичных взаимодействий! 🏎"
-    GEMINI_1_PRO_REQUESTS = "💼 Gemini 1.5 Pro запросы"
-    GEMINI_1_PRO_REQUESTS_DESCRIPTION = "Разбудите мощь Gemini 1.5 Pro для глубокого анализа, точных решений и максимальной продуктивности! 💼"
-    GEMINI_1_ULTRA_REQUESTS = "🛡 Gemini 1.0 Ultra запросы"
-    GEMINI_1_ULTRA_REQUESTS_DESCRIPTION = "Воспользуйтесь силой Gemini 1.0 Ultra для решения самых сложных задач и достижений на новых высотах! 🛡"
-    DALL_E_REQUESTS = "👨‍🎨 DALL-E изображения"
-    DALL_E_REQUESTS_DESCRIPTION = "Превратите свои идеи в искусство с помощью DALL-E – там, где ваше воображение становится поразительной визуальной реальностью! 👨‍🎨"
-    MIDJOURNEY_REQUESTS = "🎨 Midjourney изображения"
-    MIDJOURNEY_REQUESTS_DESCRIPTION = "Раскройте свой творческий потенциал с Midjourney – превращайте ваши мысли в великолепные визуальные произведения искусства! 🎨"
-    STABLE_DIFFUSION_REQUESTS = "🎆 Stable Diffusion 3.5 изображения"
-    STABLE_DIFFUSION_REQUESTS_DESCRIPTION = "Откройте дверь в мир творчества с Stable Diffusion — превращайте свои идеи в изображения, которые поражают воображение! 🎆"
-    FLUX_REQUESTS = "🫐 Flux 1.1 Pro изображения"
-    FLUX_REQUESTS_DESCRIPTION = "Исследуйте визуальные вариации с Flux — экспериментируйте и создавайте уникальные изображения! 🫐"
-    FACE_SWAP_REQUESTS = "📷 FaceSwap изображения"
-    FACE_SWAP_REQUESTS_DESCRIPTION = "Погрузитесь в игровой мир замены лиц для смеха и удивления на каждом изображении! 😂🔄"
-    PHOTOSHOP_AI_REQUESTS = "🪄 Photoshop AI генерации"
-    PHOTOSHOP_AI_REQUESTS_DESCRIPTION = "Творите без границ с Photoshop AI, превращая каждую фотографию в шедевр! 🪄"
-    MUSIC_GEN_REQUESTS = "🎺 MusicGen мелодии"
-    MUSIC_GEN_REQUESTS_DESCRIPTION = "Откройте для себя мир, где каждый промпт превращается в уникальную мелодию! 🎺"
-    SUNO_REQUESTS = "🎸 Suno песни"
-    SUNO_REQUESTS_DESCRIPTION = "Попробуйте мир, где каждый ваш текст превращается в уникальную песню! 🎸"
-    THEMATIC_CHATS = "💬 Тематические чаты"
-    THEMATIC_CHATS_DESCRIPTION = "Окунитесь в интересные темы с тематическими чатами, направляемыми AI в мире индивидуальных дискуссий! 🗨️"
-    ACCESS_TO_CATALOG = "🎭 Доступ к каталогу с ролями"
-    ACCESS_TO_CATALOG_DESCRIPTION = "Откройте для себя вселенную специализированных AI-помощников с доступом к нашему эксклюзивному каталогу, где каждая роль адаптирована под ваши уникальные потребности и задачи"
-    ANSWERS_AND_REQUESTS_WITH_VOICE_MESSAGES = "🎙 Ответы и запросы голосом"
-    ANSWERS_AND_REQUESTS_WITH_VOICE_MESSAGES_DESCRIPTION = "Ощутите удобство и простоту голосового общения с нашим AI: отправляйте и получайте голосовые сообщения для более динамичного и выразительного взаимодействия"
-    FAST_ANSWERS = "⚡ Быстрые ответы без пауз"
-    FAST_ANSWERS_DESCRIPTION = "Функция 'Быстрые ответы без пауз' предлагает мгновенные, точные ответы AI, обеспечивая ваше преимущество в общении"
     MIN_ERROR = "Ой! Кажется, сумма меньше нашего минимального порога. Пожалуйста, выберите количество пакетов, соответствующее или превышающее минимальную требуемую сумму. Давайте попробуем еще раз! 🔄"
     MAX_ERROR = "Ой! Кажется, введенное число выше, чем вы можете приобрести. Пожалуйста, введите значение поменьше или соответствующее вашему балансу. Давайте попробуем еще раз! 🔄"
     VALUE_ERROR = """
@@ -1221,8 +1187,19 @@ class Russian(Texts):
     TERMS_LINK = "https://telegra.ph/Polzovatelskoe-soglashenie-v-GPTsTurboBot-05-07"
 
     @staticmethod
+    def purchase_minimal_price(currency: Currency, current_price: str) -> str:
+        left_part_price = Currency.SYMBOLS[currency] if currency == Currency.USD else ''
+        right_part_price = '' if currency == Currency.USD else Currency.SYMBOLS[currency]
+        return f"""
+😕 Ох-ох...
+
+Для совершения покупки общая сумма должна быть равной или больше, чем <b>{left_part_price}1{right_part_price}</b>
+Сейчас сумма покупки составляет: <b>{left_part_price}{current_price}{right_part_price}</b>
+"""
+
+    @staticmethod
     def profile(
-        subscription_type,
+        subscription_name,
         subscription_status,
         gender,
         current_model,
@@ -1230,8 +1207,6 @@ class Russian(Texts):
         current_currency,
         renewal_date,
     ) -> str:
-        emojis = Subscription.get_emojis()
-
         if subscription_status == SubscriptionStatus.CANCELED:
             subscription_info = f"📫 <b>Статус подписки:</b> Отменена. Действует до {renewal_date}"
         else:
@@ -1297,7 +1272,7 @@ class Russian(Texts):
 ---------------------------
 
 💱 <b>Текущая валюта: {current_currency}</b>
-{emojis[subscription_type]} <b>Тип подписки:</b> {subscription_type}
+💳 <b>Тип подписки:</b> {subscription_name}
 🗓 <b>Дата обновления подписки:</b> {renewal_date}
 {subscription_info}
 
@@ -1308,7 +1283,7 @@ class Russian(Texts):
 
     @staticmethod
     def profile_quota(
-        subscription_type: SubscriptionType,
+        subscription_limits: dict,
         daily_limits,
         additional_usage_quota,
         hours_before_limit_update: int,
@@ -1320,68 +1295,68 @@ class Russian(Texts):
 🔤 Текстовые модели:
 ━ 💭 <b>ChatGPT</b>:
     ┣ ✉️ 4.0 Omni Mini:
-        ┣ {format_number(daily_limits[Quota.CHAT_GPT4_OMNI_MINI])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.CHAT_GPT4_OMNI_MINI])}
+        ┣ {format_number(daily_limits[Quota.CHAT_GPT4_OMNI_MINI])}/{format_number(subscription_limits[Quota.CHAT_GPT4_OMNI_MINI])}
         ┗ Доп.: {additional_usage_quota[Quota.CHAT_GPT4_OMNI_MINI]}
     ┣ 💥 4.0 Omni:
-        ┣ {format_number(daily_limits[Quota.CHAT_GPT4_OMNI])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.CHAT_GPT4_OMNI])}
+        ┣ {format_number(daily_limits[Quota.CHAT_GPT4_OMNI])}/{format_number(subscription_limits[Quota.CHAT_GPT4_OMNI])}
         ┗ Доп.: {additional_usage_quota[Quota.CHAT_GPT4_OMNI]}
     ┣ 🧩 o1-mini:
-        ┣ {format_number(daily_limits[Quota.CHAT_GPT_O_1_MINI])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.CHAT_GPT_O_1_MINI])}
+        ┣ {format_number(daily_limits[Quota.CHAT_GPT_O_1_MINI])}/{format_number(subscription_limits[Quota.CHAT_GPT_O_1_MINI])}
         ┗ Доп.: {additional_usage_quota[Quota.CHAT_GPT_O_1_MINI]}
     ┗ 🧪 o1-preview:
-        ┣ {format_number(daily_limits[Quota.CHAT_GPT_O_1_PREVIEW])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.CHAT_GPT_O_1_PREVIEW])}
+        ┣ {format_number(daily_limits[Quota.CHAT_GPT_O_1_PREVIEW])}/{format_number(subscription_limits[Quota.CHAT_GPT_O_1_PREVIEW])}
         ┗ Доп.: {additional_usage_quota[Quota.CHAT_GPT_O_1_PREVIEW]}
 ━ 📄 <b>Claude</b>:
     ┣ 📜 3.5 Haiku:
-        ┣ {format_number(daily_limits[Quota.CLAUDE_3_HAIKU])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.CLAUDE_3_HAIKU])}
+        ┣ {format_number(daily_limits[Quota.CLAUDE_3_HAIKU])}/{format_number(subscription_limits[Quota.CLAUDE_3_HAIKU])}
         ┗ Доп.: {additional_usage_quota[Quota.CLAUDE_3_HAIKU]}
     ┣ 💫 3.5 Sonnet:
-        ┣ {format_number(daily_limits[Quota.CLAUDE_3_SONNET])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.CLAUDE_3_SONNET])}
+        ┣ {format_number(daily_limits[Quota.CLAUDE_3_SONNET])}/{format_number(subscription_limits[Quota.CLAUDE_3_SONNET])}
         ┗ Доп.: {additional_usage_quota[Quota.CLAUDE_3_SONNET]}
     ┗ 🚀 Claude 3.0 Opus:
-        ┣ {format_number(daily_limits[Quota.CLAUDE_3_OPUS])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.CLAUDE_3_OPUS])}
+        ┣ {format_number(daily_limits[Quota.CLAUDE_3_OPUS])}/{format_number(subscription_limits[Quota.CLAUDE_3_OPUS])}
         ┗ Доп.: {additional_usage_quota[Quota.CLAUDE_3_OPUS]}
 ━ ✨ <b>Gemini</b>:
     ┣ 🏎 Gemini 1.5 Flash:
-        ┣ {format_number(daily_limits[Quota.GEMINI_1_FLASH])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.GEMINI_1_FLASH])}
+        ┣ {format_number(daily_limits[Quota.GEMINI_1_FLASH])}/{format_number(subscription_limits[Quota.GEMINI_1_FLASH])}
         ┗ Доп.: {additional_usage_quota[Quota.GEMINI_1_FLASH]}
     ┣ 💼 Gemini 1.5 Pro:
-        ┣ {format_number(daily_limits[Quota.GEMINI_1_PRO])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.GEMINI_1_PRO])}
+        ┣ {format_number(daily_limits[Quota.GEMINI_1_PRO])}/{format_number(subscription_limits[Quota.GEMINI_1_PRO])}
         ┗ Доп.: {additional_usage_quota[Quota.GEMINI_1_PRO]}
     ┗ 🛡️ Gemini 1.0 Ultra:
-        ┣ {format_number(daily_limits[Quota.GEMINI_1_ULTRA])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.GEMINI_1_ULTRA])}
+        ┣ {format_number(daily_limits[Quota.GEMINI_1_ULTRA])}/{format_number(subscription_limits[Quota.GEMINI_1_ULTRA])}
         ┗ Доп.: {additional_usage_quota[Quota.GEMINI_1_ULTRA]}
 
 ---------------------------
 
 🖼 Графические модели:
 ━ 👨‍🎨 <b>DALL-E</b>:
-    ┣ {format_number(daily_limits[Quota.DALL_E])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.DALL_E])}
+    ┣ {format_number(daily_limits[Quota.DALL_E])}/{format_number(subscription_limits[Quota.DALL_E])}
     ┗ Доп.: {additional_usage_quota[Quota.DALL_E]}
 ━ 🎨 <b>Midjourney</b>:
-    ┣ {format_number(daily_limits[Quota.MIDJOURNEY])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.MIDJOURNEY])}
+    ┣ {format_number(daily_limits[Quota.MIDJOURNEY])}/{format_number(subscription_limits[Quota.MIDJOURNEY])}
     ┗ Доп.: {additional_usage_quota[Quota.MIDJOURNEY]}
 ━ 🎆 <b>Stable Diffusion</b>:
-    ┣ {format_number(daily_limits[Quota.STABLE_DIFFUSION])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.STABLE_DIFFUSION])}
+    ┣ {format_number(daily_limits[Quota.STABLE_DIFFUSION])}/{format_number(subscription_limits[Quota.STABLE_DIFFUSION])}
     ┗ Доп.: {additional_usage_quota[Quota.STABLE_DIFFUSION]}
 ━ 🫐 <b>Flux</b>:
-    ┣ {format_number(daily_limits[Quota.FLUX])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.FLUX])}
+    ┣ {format_number(daily_limits[Quota.FLUX])}/{format_number(subscription_limits[Quota.FLUX])}
     ┗ Доп.: {additional_usage_quota[Quota.FLUX]}
 ━ 📷 <b>FaceSwap</b>:
-    ┣ {format_number(daily_limits[Quota.FACE_SWAP])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.FACE_SWAP])}
+    ┣ {format_number(daily_limits[Quota.FACE_SWAP])}/{format_number(subscription_limits[Quota.FACE_SWAP])}
     ┗ Доп.: {additional_usage_quota[Quota.FACE_SWAP]}
 ━ 🪄 <b>Photoshop AI</b>:
-    ┣ {format_number(daily_limits[Quota.PHOTOSHOP_AI])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.PHOTOSHOP_AI])}
+    ┣ {format_number(daily_limits[Quota.PHOTOSHOP_AI])}/{format_number(subscription_limits[Quota.PHOTOSHOP_AI])}
     ┗ Доп.: {additional_usage_quota[Quota.PHOTOSHOP_AI]}
 
 ---------------------------
 
 🎵 Музыкальные модели:
 ━ 🎺 <b>MusicGen</b>:
-    ┣ {format_number(daily_limits[Quota.MUSIC_GEN])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.MUSIC_GEN])}
+    ┣ {format_number(daily_limits[Quota.MUSIC_GEN])}/{format_number(subscription_limits[Quota.MUSIC_GEN])}
     ┗ Доп.: {additional_usage_quota[Quota.MUSIC_GEN]}
 ━ 🎸 <b>Suno</b>:
-    ┣ {format_number(daily_limits[Quota.SUNO])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.SUNO])}
+    ┣ {format_number(daily_limits[Quota.SUNO])}/{format_number(subscription_limits[Quota.SUNO])}
     ┗ Доп.: {additional_usage_quota[Quota.SUNO]}
 
 ---------------------------
@@ -1398,35 +1373,44 @@ class Russian(Texts):
 
     # Payment
     @staticmethod
-    def payment_description_subscription(user_id: str, subscription_type: SubscriptionType):
-        return f"Оплата подписки {subscription_type} {Subscription.get_emojis()[subscription_type]} для пользователя: {user_id}"
+    def payment_description_subscription(user_id: str, name: str):
+        return f"Оплата подписки {name} для пользователя: {user_id}"
 
     @staticmethod
-    def payment_description_renew_subscription(user_id: str, subscription_type: SubscriptionType):
-        return f"Обновление подписки {subscription_type} {Subscription.get_emojis()[subscription_type]} для пользователя: {user_id}"
+    def payment_description_renew_subscription(user_id: str, name: str):
+        return f"Обновление подписки {name} для пользователя: {user_id}"
 
     @staticmethod
-    def subscribe(currency: Currency, min_prices: Dict):
+    def subscribe(subscriptions: list[Product], currency: Currency, user_discount: int):
+        text_subscriptions = ''
+        for subscription in subscriptions:
+            subscription_name = subscription.names.get('ru')
+            subscription_price = subscription.prices.get(currency)
+            left_part_price = Currency.SYMBOLS[currency] if currency == Currency.USD else ''
+            right_part_price = Currency.SYMBOLS[currency] if currency != Currency.USD else ''
+            if subscription_name and subscription_price:
+                text_subscriptions += f'- <b>{subscription_name}</b>: '
+                per_period = 'в месяц' if subscription.category == ProductCategory.MONTHLY else 'в год'
+
+                discount = get_user_discount(user_discount, 0, subscription.discount)
+                if discount:
+                    discount_price = Product.get_discount_price(
+                        ProductType.SUBSCRIPTION,
+                        1,
+                        subscription_price,
+                        currency,
+                        discount,
+                        SubscriptionPeriod.MONTH1 if subscription.category == ProductCategory.MONTHLY else SubscriptionPeriod.MONTHS12,
+                    )
+                    text_subscriptions += f'<s>{left_part_price}{subscription_price}{right_part_price}</s> {discount_price} {per_period}\n'
+                else:
+                    text_subscriptions += f'{left_part_price}{subscription_price}{right_part_price} {per_period}\n'
+
         return f"""
 🤖 Готовы ускорить своё цифровое путешествие? Вот, что мы предлагаем:
 
-- <b>MINI</b> 🍬: {min_prices[SubscriptionType.MINI]}{Currency.SYMBOLS[currency]} в месяц
-- <b>STANDARD</b> ⭐: {min_prices[SubscriptionType.STANDARD]}{Currency.SYMBOLS[currency]} в месяц
-- <b>VIP</b> 🔥: {min_prices[SubscriptionType.VIP]}{Currency.SYMBOLS[currency]} в месяц
-- <b>PREMIUM</b> 💎: {min_prices[SubscriptionType.PREMIUM]}{Currency.SYMBOLS[currency]} в месяц
-- <b>UNLIMITED</b> 🚀: {min_prices[SubscriptionType.UNLIMITED]}{Currency.SYMBOLS[currency]} в месяц
-
+{text_subscriptions}
 Выберите свой вариант и нажмите кнопку ниже, чтобы подписаться:
-"""
-
-    @staticmethod
-    def choose_how_many_months_to_subscribe(subscription_type: SubscriptionType):
-        emojis = Subscription.get_emojis()
-
-        return f"""
-Вы выбрали <b>{subscription_type}</b> {emojis[subscription_type]}
-
-Пожалуйста, выберите период подписки, нажав на кнопку:
 """
 
     @staticmethod
@@ -1439,11 +1423,17 @@ class Russian(Texts):
         }
 
     @staticmethod
-    def confirmation_subscribe(subscription_type: SubscriptionType, currency: Currency, price: float):
-        if currency == Currency.XTR:
-            return f"Вы собираетесь активировать подписку {subscription_type} {Subscription.get_emojis()[subscription_type]} за {price}{Currency.SYMBOLS[currency]}"
+    def confirmation_subscribe(
+        name: str,
+        category: ProductCategory,
+        currency: Currency,
+        price: Union[str, int, float],
+    ):
+        left_price_part = Currency.SYMBOLS[currency] if currency == Currency.USD else ''
+        right_price_part = '' if currency == Currency.USD else Currency.SYMBOLS[currency]
+        period = 'месяц' if category == ProductCategory.MONTHLY else 'год'
         return f"""
-Вы собираетесь активировать подписку {subscription_type} {Subscription.get_emojis()[subscription_type]} за {price}{Currency.SYMBOLS[currency]}/месяц
+Вы собираетесь активировать подписку {name} за {left_price_part}{price}{right_price_part}/{period}
 
 ❗️Подписку можно отменить в любое время в разделе <b>Профиль 👤</b>
 """
@@ -1458,153 +1448,50 @@ class Russian(Texts):
         return f"Оплата пакетов из корзины для пользователя: {user_id}"
 
     @staticmethod
-    def package(currency: Currency, page: int):
+    def package(currency: Currency, cost: str):
         if currency == Currency.USD:
-            balance = f"{Currency.SYMBOLS[currency]}0.01"
+            cost = f"{Currency.SYMBOLS[currency]}0.01"
         else:
-            balance = f"1{Currency.SYMBOLS[currency]}"
-
-        if page == 0:
-            description = (
-                "💥 <b>ChatGPT</b>: Погрузитесь в глубокие, заставляющие задуматься разговоры!\n\n"
-                "🚀 <b>Claude</b>: Вступите в диалоги, которые расширяют горизонты мышления!\n\n"
-                "✨ <b>Gemini</b>: Откройте мир быстрых решений в одно мгновение!"
-            )
-        elif page == 1:
-            description = (
-                "👨‍🎨 <b>DALL-E</b>: Превращайте идеи в потрясающие визуализации!\n\n"
-                "🎨 <b>Midjourney</b>: Воплощайте идеи в невероятные реалистичные изображения!\n\n"
-                "🎆 <b>Stable Diffusion</b>: Превратите свои креативные идеи в визуальные шедевры!\n\n"
-                "🫐 <b>Flux</b>: Экспериментируйте с изображений и создавайте уникальные визуальные концепции!\n\n"
-                "👤 <b>FaceSwap</b>: Играйте с идентичностью на изображениях!\n\n"
-                "🪄 <b>Photoshop AI</b>: Превращайте фотографии в произведения искусства с помощью магии редактирования!"
-            )
-        elif page == 2:
-            description = (
-                "🎺 <b>MusicGen</b>: Создавайте уникальные мелодии, которые будут принадлежать только вам!\n\n"
-                "🎸 <b>Suno</b>: Создавайте оригинальные песни с вашим текстом и в разных жанрах!"
-            )
-        elif page == 3:
-            description = (
-                "💬 <b>Тематические чаты</b>: Погрузитесь в специализированные темы и исследуйте посвящённые им чаты\n\n"
-                "🎭 <b>Доступ к каталогу ролей</b>: Нужен определённый ассистент? Просмотрите нашу коллекцию и найдите своё идеальное сочетание ИИ\n\n"
-                "🗣️ <b>Голосовые сообщения</b>: Говорите вслух! Общение с ИИ ещё никогда не звучало так хорошо\n\n"
-                "⚡ <b>Быстрые сообщения без пауз</b>: Быстро, эффективно и всегда точно. Общение с ИИ на скорости молнии"
-            )
-        else:
-            description = ""
+            cost = f"1{Currency.SYMBOLS[currency]}"
 
         return f"""
 🤖 <b>Добро пожаловать в зону покупок!</b> 🛍
 
-🪙 <b>1 кредит = {balance}</b>
-
-Каждое нажатие кнопки открывает мир чудес ИИ:
-{description}
+<b>1 🪙 = {cost}</b>
 
 Нажмите кнопку, чтобы выбрать пакет:
 """
 
     @staticmethod
-    def get_package_name_and_quantity_by_package_type(package_type: PackageType):
-        name = ""
-        quantity = ""
-        if package_type == PackageType.CHAT_GPT4_OMNI_MINI:
-            name = Russian.GPT4_OMNI_MINI_REQUESTS
-            quantity = "запросов"
-        elif package_type == PackageType.CHAT_GPT4_OMNI:
-            name = Russian.GPT4_OMNI_REQUESTS
-            quantity = "запросов"
-        elif package_type == PackageType.CHAT_GPT_O_1_MINI:
-            name = Russian.CHAT_GPT_O_1_MINI_REQUESTS
-            quantity = "запросов"
-        elif package_type == PackageType.CHAT_GPT_O_1_PREVIEW:
-            name = Russian.CHAT_GPT_O_1_PREVIEW_REQUESTS
-            quantity = "запросов"
-        elif package_type == PackageType.CLAUDE_3_HAIKU:
-            name = Russian.CLAUDE_3_HAIKU_REQUESTS
-            quantity = "запросов"
-        elif package_type == PackageType.CLAUDE_3_SONNET:
-            name = Russian.CLAUDE_3_SONNET_REQUESTS
-            quantity = "запросов"
-        elif package_type == PackageType.CLAUDE_3_OPUS:
-            name = Russian.CLAUDE_3_OPUS_REQUESTS
-            quantity = "запросов"
-        elif package_type == PackageType.GEMINI_1_FLASH:
-            name = Russian.GEMINI_1_FLASH_REQUESTS
-            quantity = "запросов"
-        elif package_type == PackageType.GEMINI_1_PRO:
-            name = Russian.GEMINI_1_PRO_REQUESTS
-            quantity = "запросов"
-        elif package_type == PackageType.GEMINI_1_ULTRA:
-            name = Russian.GEMINI_1_ULTRA_REQUESTS
-            quantity = "запросов"
-        elif package_type == PackageType.DALL_E:
-            name = Russian.DALL_E_REQUESTS
-            quantity = "изображений"
-        elif package_type == PackageType.MIDJOURNEY:
-            name = Russian.MIDJOURNEY_REQUESTS
-            quantity = "изображений"
-        elif package_type == PackageType.STABLE_DIFFUSION:
-            name = Russian.STABLE_DIFFUSION_REQUESTS
-            quantity = "изображений"
-        elif package_type == PackageType.FLUX:
-            name = Russian.FLUX_REQUESTS
-            quantity = "изображений"
-        elif package_type == PackageType.FACE_SWAP:
-            name = Russian.FACE_SWAP_REQUESTS
-            quantity = "генераций"
-        elif package_type == PackageType.PHOTOSHOP_AI:
-            name = Russian.PHOTOSHOP_AI_REQUESTS
-            quantity = "генераций"
-        elif package_type == PackageType.MUSIC_GEN:
-            name = Russian.MUSIC_GEN_REQUESTS
-            quantity = "секунд"
-        elif package_type == PackageType.SUNO:
-            name = Russian.SUNO_REQUESTS
-            quantity = "песен"
-        elif package_type == PackageType.CHAT:
-            name = Russian.THEMATIC_CHATS
-            quantity = "чатов"
-        elif package_type == PackageType.ACCESS_TO_CATALOG:
-            name = Russian.ACCESS_TO_CATALOG
-            quantity = "месяцев"
-        elif package_type == PackageType.VOICE_MESSAGES:
-            name = Russian.ANSWERS_AND_REQUESTS_WITH_VOICE_MESSAGES
-            quantity = "месяцев"
-        elif package_type == PackageType.FAST_MESSAGES:
-            name = Russian.FAST_ANSWERS
-            quantity = "месяцев"
-        return name, quantity
-
-    @staticmethod
-    def choose_min(package_type: PackageType):
-        name, quantity = Russian.get_package_name_and_quantity_by_package_type(package_type)
-
+    def choose_min(name: str):
         return f"""
 🚀 Замечательно!
 
 Вы выбрали пакет <b>{name}</b>
 
-🌟 Пожалуйста, <b>введите количество {quantity}</b>, которое вы хотели бы приобрести
+🌟 Пожалуйста, <b>введите количество</b>, которое вы хотели бы приобрести
 """
 
     @staticmethod
-    def shopping_cart(currency: Currency, cart_items: List[Dict], discount: int):
+    async def shopping_cart(currency: Currency, cart_items: list[dict], discount: int):
         text = ""
-        total_sum = 0.0
+        total_sum = 0
         for index, cart_item in enumerate(cart_items):
-            package_type, package_quantity = cart_item.get("package_type", None), cart_item.get("quantity", 0)
+            product_id, product_quantity = cart_item.get("product_id", ''), cart_item.get("quantity", 0)
 
-            name, quantity = Russian.get_package_name_and_quantity_by_package_type(package_type)
+            product = await get_product(product_id)
 
-            text += f"{index + 1}. {name} ({package_quantity} {quantity})\n"
-            total_sum += Package.get_price(currency, package_type, package_quantity, discount)
+            text += f"{index + 1}. {product.names.get('ru')}: {product_quantity}\n"
+            total_sum += float(Product.get_discount_price(
+                ProductType.PACKAGE,
+                product_quantity,
+                product.prices.get(currency),
+                currency,
+                discount,
+            ))
 
-        if currency == Currency.USD:
-            total_sum = f"{Currency.SYMBOLS[currency]}{total_sum}"
-        else:
-            total_sum = f"{total_sum}{Currency.SYMBOLS[currency]}"
+        left_total_sum_part = '' if currency == Currency.USD else Currency.SYMBOLS[currency]
+        right_total_sum_part = Currency.SYMBOLS[currency] if currency == Currency.USD else ''
 
         if not text:
             text = "Ваша корзина пуста"
@@ -1614,22 +1501,24 @@ class Russian(Texts):
 
 {text}
 
-💳 К оплате: {total_sum}
+💳 К оплате: {left_total_sum_part}{round(total_sum, 2)}{right_total_sum_part}
 """
 
     @staticmethod
-    def confirmation_package(package_name: str, package_quantity: int, currency: Currency, price: float) -> str:
-        return f"Вы собираетесь купить {package_quantity} пакет(-ов) <b>{package_name}</b> за {price}{Currency.SYMBOLS[currency]}"
+    def confirmation_package(package_name: str, package_quantity: int, currency: Currency, price: str) -> str:
+        left_price_part = Currency.SYMBOLS[currency] if currency == Currency.USD else ''
+        right_price_part = '' if currency == Currency.USD else Currency.SYMBOLS[currency]
+        return f"Вы собираетесь купить {package_quantity} пакет(-ов) <b>{package_name}</b> за {left_price_part}{price}{right_price_part}"
 
     @staticmethod
-    def confirmation_cart(cart_items: List[Dict], currency: Currency, price: float) -> str:
+    async def confirmation_cart(cart_items: list[dict], currency: Currency, price: float) -> str:
         text = ""
         for index, cart_item in enumerate(cart_items):
-            package_type, package_quantity = cart_item.get("package_type", None), cart_item.get("quantity", 0)
+            product_id, product_quantity = cart_item.get("product_id", ''), cart_item.get("quantity", 0)
 
-            name, quantity = Russian.get_package_name_and_quantity_by_package_type(package_type)
+            product = await get_product(product_id)
 
-            text += f"{index + 1}. {name} ({package_quantity} {quantity})\n"
+            text += f"{index + 1}. {product.names.get('ru')}: {product_quantity}\n"
 
         if currency == Currency.USD:
             total_sum = f"{Currency.SYMBOLS[currency]}{price}"
@@ -1739,7 +1628,7 @@ class Russian(Texts):
             return Russian.SWITCHED_TO_SUNO
 
     @staticmethod
-    def requests_recommendations() -> List[str]:
+    def requests_recommendations() -> list[str]:
         texts = [
             "Расскажи мне интересный факт о космосе 👩‍🚀",
             "Какие последствия могут быть от глобального потепления? 🌍",
@@ -1776,7 +1665,7 @@ class Russian(Texts):
         return texts
 
     @staticmethod
-    def image_recommendations() -> List[str]:
+    def image_recommendations() -> list[str]:
         texts = [
             "Пейзаж марсианского города под розовым небом 🪐",
             "Стимпанк версия Тадж-Махала 🕌",
@@ -1813,7 +1702,7 @@ class Russian(Texts):
         return texts
 
     @staticmethod
-    def music_recommendations() -> List[str]:
+    def music_recommendations() -> list[str]:
         texts = [
             "Поп-трек с заразительными мелодиями, тропической перкуссией и веселыми ритмами, идеально подходящий для пляжа 🏖",
             "Великолепная оркестровая аранжировка с мощными ударами, эпическими духовыми фанфарами, создающая кинематографическую атмосферу, достойную героической битвы 🎻",
@@ -1971,7 +1860,7 @@ class Russian(Texts):
         return text
 
     @staticmethod
-    def photoshop_ai_actions() -> List[str]:
+    def photoshop_ai_actions() -> list[str]:
         return [
             Russian.PHOTOSHOP_AI_RESTORATION,
             Russian.PHOTOSHOP_AI_COLORIZATION,

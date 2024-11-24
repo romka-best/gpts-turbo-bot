@@ -11,7 +11,6 @@ from bot.config import config, MessageEffect
 from bot.database.models.common import Model, SunoMode, Quota, SunoVersion
 from bot.database.models.generation import GenerationStatus
 from bot.database.models.request import RequestStatus
-from bot.database.models.subscription import SubscriptionType
 from bot.database.models.user import User, UserSettings
 from bot.database.operations.generation.getters import get_generations_by_request_id
 from bot.database.operations.generation.updaters import update_generation
@@ -465,7 +464,7 @@ async def suno_genres_sent(message: Message, state: FSMContext):
 async def handle_suno_example(user: User, prompt: str, message: Message, state: FSMContext):
     current_date = datetime.now(timezone.utc)
     if (
-        user.subscription_type == SubscriptionType.FREE and
+        not user.subscription_id and
         user.current_model == Model.MUSIC_GEN and
         user.settings[user.current_model][UserSettings.SHOW_EXAMPLES] and
         user.daily_limits[Quota.MUSIC_GEN] in [1] and

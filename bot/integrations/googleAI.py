@@ -1,5 +1,3 @@
-from typing import Dict
-
 from google.generativeai import configure, GenerativeModel, GenerationConfig
 from google.generativeai.types import HarmCategory, HarmBlockThreshold
 
@@ -27,7 +25,7 @@ async def get_response_message(
     system_prompt: str,
     new_prompt: dict,
     history: list,
-) -> Dict:
+) -> dict:
     max_tokens = get_default_max_tokens(model_version)
 
     if model_version == GeminiGPTVersion.V1_Ultra:

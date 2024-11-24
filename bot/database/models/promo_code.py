@@ -29,6 +29,7 @@ class PromoCode:
         until=None,
         created_at=None,
         edited_at=None,
+        **kwargs,
     ):
         self.id = id
         self.created_by_user_id = created_by_user_id

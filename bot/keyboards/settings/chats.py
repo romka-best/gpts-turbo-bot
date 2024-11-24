@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Optional
 
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
@@ -66,7 +66,7 @@ def build_create_chat_keyboard(language_code: str) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
-def build_switch_chat_keyboard(language_code: str, current_chat_id: str, chats: List[Chat]) -> InlineKeyboardMarkup:
+def build_switch_chat_keyboard(language_code: str, current_chat_id: str, chats: list[Chat]) -> InlineKeyboardMarkup:
     buttons = []
     for chat in chats:
         buttons.append([
@@ -85,7 +85,7 @@ def build_switch_chat_keyboard(language_code: str, current_chat_id: str, chats: 
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
-def build_delete_chat_keyboard(language_code: str, current_chat_id: str, chats: List[Chat]) -> InlineKeyboardMarkup:
+def build_delete_chat_keyboard(language_code: str, current_chat_id: str, chats: list[Chat]) -> InlineKeyboardMarkup:
     buttons = []
     for chat in chats:
         if current_chat_id != chat.id:

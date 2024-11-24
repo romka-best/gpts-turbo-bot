@@ -21,6 +21,7 @@ from redis.exceptions import ConnectionError
 from bot.config import config
 from bot.database.main import firebase
 from bot.handlers.admin.admin_handler import admin_router
+from bot.handlers.admin.ads_handler import ads_router
 from bot.handlers.admin.ban_handler import ban_router
 from bot.handlers.admin.blast_handler import blast_router
 from bot.handlers.admin.catalog_handler import catalog_router
@@ -43,6 +44,7 @@ from bot.handlers.common.common_handler import common_router
 from bot.handlers.common.document_handler import document_router
 from bot.handlers.common.feedback_handler import feedback_router
 from bot.handlers.common.info_handler import info_router
+from bot.handlers.common.maintenance_handler import maintenance_router
 from bot.handlers.common.photo_handler import photo_router
 from bot.handlers.common.profile_handler import profile_router
 from bot.handlers.common.sticker_handler import sticker_router
@@ -72,6 +74,7 @@ from bot.helpers.setters.set_description import set_description
 from bot.helpers.updaters.update_daily_limits import update_daily_limits
 from bot.middlewares.AuthMiddleware import AuthMessageMiddleware, AuthCallbackQueryMiddleware
 from bot.middlewares.LoggingMiddleware import LoggingMessageMiddleware, LoggingCallbackQueryMiddleware
+from bot.utils.migrate import migrate
 
 WEBHOOK_BOT_PATH = f'/bot/{config.BOT_TOKEN.get_secret_value()}'
 WEBHOOK_YOOKASSA_PATH = '/payment/yookassa'
@@ -95,7 +98,11 @@ storage = RedisStorage.from_url(config.REDIS_URL, {
     'retry_on_timeout': True,
     'retry': Retry(FullJitterBackoff(cap=5, base=1), 5),
 })
-dp = Dispatcher(storage=storage, sm_strategy=FSMStrategy.GLOBAL_USER)
+dp = Dispatcher(
+    storage=storage,
+    sm_strategy=FSMStrategy.GLOBAL_USER,
+    maintenance_mode=False,
+)
 
 
 @asynccontextmanager
@@ -105,6 +112,7 @@ async def lifespan(_: FastAPI):
         await bot.set_webhook(url=WEBHOOK_BOT_URL)
 
     dp.include_routers(
+        maintenance_router,
         common_router,
         info_router,
         catalog_router,
@@ -116,6 +124,7 @@ async def lifespan(_: FastAPI):
         promo_code_router,
         admin_router,
         admin_promo_code_router,
+        ads_router,
         ban_router,
         bonus_router,
         blast_router,
@@ -149,6 +158,7 @@ async def lifespan(_: FastAPI):
     await set_description(bot)
     await set_commands(bot)
     await firebase.init()
+    # await migrate(bot)
     yield
     await bot.session.close()
     await storage.close()
@@ -305,3 +315,22 @@ async def daily_tasks(background_tasks: BackgroundTasks):
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
     uvicorn.run(app, host='0.0.0.0', port=os.getenv('PORT', 8080))
+
+# 0. Добавление Stripe как метод оплаты (ВЫСОКИЙ ПРИОРИТЕТ)
+# 1. Починить Long Message (ВЫСОКИЙ ПРИОРИТЕТ): DONE
+# 2. Починить списание подписок (ВЫСОКИЙ ПРИОРИТЕТ): DONE
+
+# 0. Trial подписки (СРЕДНИЙ ПРИОРИТЕТ)
+# 1. Скидки в Telegram Stars (СРЕДНИЙ ПРИОРИТЕТ): DONE
+# 2. Подписки в Telegram STARS (СРЕДНИЙ ПРИОРИТЕТ): DONE
+# 3. Ограничить размер картинки и аудио (СРЕДНИЙ ПРИОРИТЕТ)
+# 4. Обработать кейс Slow down в Midjourney (СРЕДНИЙ ПРИОРИТЕТ): DONE
+# 5. ADS для админа (СРЕДНИЙ ПРИОРИТЕТ)
+
+# 0. Добавление Runway модели
+# 1. Добавление Eightify модели
+# 2. Предлагать переключиться на модель после оплаты пакета
+# 3. Выбор дня/недели/месяца в статистике
+# 4. Отображать кнопки, когда AI присылает примеры
+# 5. Добавить автоматически списывание Midjourney и Suno
+# 6. Удалять данные когда пользователь блокирует

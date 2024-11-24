@@ -1,7 +1,6 @@
 import asyncio
 import base64
 from datetime import datetime, timezone
-from typing import List
 
 import anthropic
 import httpx
@@ -14,12 +13,12 @@ from aiogram.utils.chat_action import ChatActionSender
 from bot.config import config, MessageEffect
 from bot.database.main import firebase
 from bot.database.models.common import Model, ClaudeGPTVersion, Quota, Currency
-from bot.database.models.subscription import SubscriptionType
-from bot.database.models.transaction import ServiceType, TransactionType
+from bot.database.models.transaction import TransactionType
 from bot.database.models.user import UserSettings, User
 from bot.database.operations.chat.getters import get_chat
 from bot.database.operations.message.getters import get_messages_by_chat_id
 from bot.database.operations.message.writers import write_message
+from bot.database.operations.product.getters import get_product_by_quota
 from bot.database.operations.role.getters import get_role_by_name
 from bot.database.operations.transaction.writers import write_transaction
 from bot.database.operations.user.getters import get_user
@@ -159,8 +158,10 @@ async def handle_claude(message: Message, state: FSMContext, user: User, user_qu
         await write_message(user.current_chat_id, 'user', user.id, text)
 
     chat = await get_chat(user.current_chat_id)
-    if user.subscription_type == SubscriptionType.FREE:
+    if not user.subscription_id:
         limit = 4
+    elif user_quota == Quota.CLAUDE_3_OPUS:
+        limit = 6
     else:
         limit = 8
     messages = await get_messages_by_chat_id(
@@ -229,24 +230,23 @@ async def handle_claude(message: Message, state: FSMContext, user: User, user_qu
             response_message = response['message']
 
             if user_quota == Quota.CLAUDE_3_HAIKU:
-                service = ServiceType.CLAUDE_3_HAIKU
                 input_price = response['input_tokens'] * PRICE_CLAUDE_3_HAIKU_INPUT
                 output_price = response['output_tokens'] * PRICE_CLAUDE_3_HAIKU_OUTPUT
             elif user_quota == Quota.CLAUDE_3_SONNET:
-                service = ServiceType.CLAUDE_3_SONNET
                 input_price = response['input_tokens'] * PRICE_CLAUDE_3_SONNET_INPUT
                 output_price = response['output_tokens'] * PRICE_CLAUDE_3_SONNET_OUTPUT
             else:
-                service = ServiceType.CLAUDE_3_OPUS
                 input_price = response['input_tokens'] * PRICE_CLAUDE_3_OPUS_INPUT
                 output_price = response['output_tokens'] * PRICE_CLAUDE_3_OPUS_OUTPUT
+
+            product = await get_product_by_quota(user_quota)
 
             total_price = round(input_price + output_price, 6)
             message_role, message_content = 'assistant', response_message
             await write_transaction(
                 user_id=user.id,
                 type=TransactionType.EXPENSE,
-                service=service,
+                product_id=product.id,
                 amount=total_price,
                 clear_amount=total_price,
                 currency=Currency.USD,
@@ -395,13 +395,13 @@ async def handle_claude_3_sonnet_example(
     user_language_code: str,
     prompt: str,
     system_prompt: str,
-    history: List,
+    history: list,
     message: Message,
 ):
     try:
         current_date = datetime.now(timezone.utc)
         if (
-            user.subscription_type == SubscriptionType.FREE and
+            not user.subscription_id and
             user.current_model == Model.CLAUDE and
             user.settings[user.current_model][UserSettings.SHOW_EXAMPLES] and
             user.daily_limits[Quota.CLAUDE_3_HAIKU] + 1 in [3, 10] and
@@ -412,7 +412,8 @@ async def handle_claude_3_sonnet_example(
             response = await get_response_message(ClaudeGPTVersion.V3_Sonnet, system_prompt, history)
             response_message = response['message']
 
-            service = ServiceType.CLAUDE_3_SONNET
+            product = await get_product_by_quota(Quota.CLAUDE_3_SONNET)
+
             input_price = response['input_tokens'] * PRICE_CLAUDE_3_SONNET_INPUT
             output_price = response['output_tokens'] * PRICE_CLAUDE_3_SONNET_OUTPUT
 
@@ -421,7 +422,7 @@ async def handle_claude_3_sonnet_example(
             await write_transaction(
                 user_id=user.id,
                 type=TransactionType.EXPENSE,
-                service=service,
+                product_id=product.id,
                 amount=total_price,
                 clear_amount=total_price,
                 currency=Currency.USD,
@@ -451,7 +452,7 @@ async def handle_claude_3_sonnet_example(
         )
 
 
-def get_history_without_duplicates(history: List) -> List:
+def get_history_without_duplicates(history: list) -> list:
     result = []
     first_user_found = False
 

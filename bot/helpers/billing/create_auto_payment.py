@@ -1,7 +1,6 @@
 import json
 import logging
 import uuid
-from typing import Dict
 
 import aiohttp
 from aiohttp import BasicAuth
@@ -9,6 +8,7 @@ from yookassa import Configuration
 
 from bot.config import config
 from bot.database.models.common import Currency, PaymentMethod
+from bot.helpers.billing.create_payment import OrderItem
 from bot.helpers.billing.generate_signature import generate_signature
 
 Configuration.account_id = config.YOOKASSA_ACCOUNT_ID.get_secret_value()
@@ -24,14 +24,28 @@ async def create_auto_payment(
     user_id: str,
     description: str,
     amount: float,
+    language_code: str,
+    order_items: list[OrderItem],
     order_id=None,
-) -> Dict:
+) -> dict:
     if payment_method == PaymentMethod.YOOKASSA:
         url = f'{YOOKASSA_URL}/payments'
         headers = {
             'Content-Type': 'application/json',
             'Idempotence-Key': str(uuid.uuid4()),
         }
+        items = []
+        for order_item in order_items:
+            product, final_price, quantity = order_item.product, order_item.final_price, order_item.quantity
+            items.append({
+                'amount': {
+                    'value': final_price,
+                    'currency': Currency.RUB,
+                },
+                'description': product.names.get(language_code),
+                'vat_code': 1,
+                'quantity': quantity,
+            })
         payload = {
             'amount': {
                 'value': amount,

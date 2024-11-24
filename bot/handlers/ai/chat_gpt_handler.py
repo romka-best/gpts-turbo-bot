@@ -1,6 +1,5 @@
 import asyncio
 from datetime import datetime, timezone
-from typing import List
 
 import openai
 from aiogram import Router
@@ -12,12 +11,12 @@ from aiogram.utils.chat_action import ChatActionSender
 from bot.config import config, MessageEffect
 from bot.database.main import firebase
 from bot.database.models.common import Quota, Currency, Model, ChatGPTVersion
-from bot.database.models.subscription import SubscriptionType
-from bot.database.models.transaction import ServiceType, TransactionType
+from bot.database.models.transaction import TransactionType
 from bot.database.models.user import UserSettings, User
 from bot.database.operations.chat.getters import get_chat
 from bot.database.operations.message.getters import get_messages_by_chat_id
 from bot.database.operations.message.writers import write_message
+from bot.database.operations.product.getters import get_product_by_quota
 from bot.database.operations.role.getters import get_role_by_name
 from bot.database.operations.transaction.writers import write_transaction
 from bot.database.operations.user.getters import get_user
@@ -165,7 +164,7 @@ async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_q
         await write_message(user.current_chat_id, 'user', user.id, text)
 
     chat = await get_chat(user.current_chat_id)
-    if user.subscription_type == SubscriptionType.FREE:
+    if not user.subscription_id:
         limit = 4
     elif can_work_with_photos:
         limit = 8
@@ -224,28 +223,26 @@ async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_q
             response = await get_response_message(user.settings[user.current_model][UserSettings.VERSION], history)
             response_message = response['message']
             if user_quota == Quota.CHAT_GPT4_OMNI_MINI:
-                service = ServiceType.CHAT_GPT4_OMNI_MINI
                 input_price = response['input_tokens'] * PRICE_GPT4_OMNI_MINI_INPUT
                 output_price = response['output_tokens'] * PRICE_GPT4_OMNI_MINI_OUTPUT
             elif user_quota == Quota.CHAT_GPT4_OMNI:
-                service = ServiceType.CHAT_GPT4_OMNI
                 input_price = response['input_tokens'] * PRICE_GPT4_OMNI_INPUT
                 output_price = response['output_tokens'] * PRICE_GPT4_OMNI_OUTPUT
             elif user_quota == Quota.CHAT_GPT_O_1_MINI:
-                service = ServiceType.CHAT_GPT_O_1_MINI
                 input_price = response['input_tokens'] * PRICE_CHAT_GPT_O_1_MINI_INPUT
                 output_price = response['output_tokens'] * PRICE_CHAT_GPT_O_1_MINI_OUTPUT
             elif user_quota == Quota.CHAT_GPT_O_1_PREVIEW:
-                service = ServiceType.CHAT_GPT_O_1_PREVIEW
                 input_price = response['input_tokens'] * PRICE_CHAT_GPT_O_1_PREVIEW_INPUT
                 output_price = response['output_tokens'] * PRICE_CHAT_GPT_O_1_PREVIEW_OUTPUT
+
+            product = await get_product_by_quota(user_quota)
 
             total_price = round(input_price + output_price, 6)
             message_role, message_content = response_message.role, response_message.content
             await write_transaction(
                 user_id=user.id,
                 type=TransactionType.EXPENSE,
-                service=service,
+                product_id=product.id,
                 amount=total_price,
                 clear_amount=total_price,
                 currency=Currency.USD,
@@ -365,11 +362,11 @@ async def handle_chat_gpt_continue_generation_choose_selection(callback_query: C
     await state.clear()
 
 
-async def handle_chatgpt4_example(user: User, user_language_code: str, prompt: str, history: List, message: Message):
+async def handle_chatgpt4_example(user: User, user_language_code: str, prompt: str, history: list, message: Message):
     try:
         current_date = datetime.now(timezone.utc)
         if (
-            user.subscription_type == SubscriptionType.FREE and
+            not user.subscription_id and
             user.current_model == Model.CHAT_GPT and
             user.settings[user.current_model][UserSettings.SHOW_EXAMPLES] and
             user.daily_limits[Quota.CHAT_GPT4_OMNI_MINI] + 1 in [3, 10] and
@@ -378,7 +375,7 @@ async def handle_chatgpt4_example(user: User, user_language_code: str, prompt: s
             response = await get_response_message(ChatGPTVersion.V4_Omni, history)
             response_message = response['message']
 
-            service = ServiceType.CHAT_GPT4_OMNI
+            product = await get_product_by_quota(Quota.CHAT_GPT4_OMNI)
             input_price = response['input_tokens'] * PRICE_GPT4_OMNI_INPUT
             output_price = response['output_tokens'] * PRICE_GPT4_OMNI_OUTPUT
 
@@ -387,7 +384,7 @@ async def handle_chatgpt4_example(user: User, user_language_code: str, prompt: s
             await write_transaction(
                 user_id=user.id,
                 type=TransactionType.EXPENSE,
-                service=service,
+                product_id=product.id,
                 amount=total_price,
                 clear_amount=total_price,
                 currency=Currency.USD,

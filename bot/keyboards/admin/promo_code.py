@@ -1,6 +1,6 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
-from bot.database.models.package import Package, PackageType
+from bot.database.models.product import Product
 from bot.database.models.promo_code import PromoCodeType
 from bot.database.models.subscription import Subscription, SubscriptionType, SubscriptionPeriod
 from bot.locales.main import get_localization
@@ -122,17 +122,14 @@ def build_create_promo_code_period_of_subscription_keyboard(
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
-def build_create_promo_code_package_keyboard(language_code: str):
+def build_create_promo_code_package_keyboard(language_code: str, products: list[Product]):
     buttons = []
-    for package_type in PackageType.get_class_attributes_in_order():
+    for product in products:
         buttons.append(
             [
                 InlineKeyboardButton(
-                    text=Package.get_translate_name_and_description(
-                        get_localization(language_code),
-                        package_type,
-                    ).get('name'),
-                    callback_data=f'create_promo_code_package:{package_type}'
+                    text=product.names.get(language_code),
+                    callback_data=f'create_promo_code_package:{product.id}'
                 ),
             ],
         )

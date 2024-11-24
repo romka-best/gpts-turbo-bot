@@ -1,15 +1,17 @@
 from datetime import datetime
-from symbol import subscript
-from typing import Optional, List
+from typing import Optional
 
 from google.cloud.firestore_v1 import FieldFilter, Query
 
 from bot.config import config
 from bot.database.main import firebase
-from bot.database.models.subscription import Subscription, SubscriptionStatus, SubscriptionType, SubscriptionPeriod
+from bot.database.models.subscription import Subscription, SubscriptionStatus, SubscriptionType
 
 
 async def get_subscription(subscription_id: str) -> Optional[Subscription]:
+    if not subscription_id:
+        return
+
     subscription_ref = firebase.db.collection(Subscription.COLLECTION_NAME).document(str(subscription_id))
     subscription = await subscription_ref.get()
 
@@ -34,29 +36,11 @@ async def get_last_subscription_by_user_id(user_id: str) -> Optional[Subscriptio
         return Subscription(**doc.to_dict())
 
 
-async def get_last_subscription_with_waiting_payment(
-    user_id: str,
-    subscription_type: SubscriptionType,
-    subscription_period: SubscriptionPeriod,
-) -> Optional[Subscription]:
-    subscription_stream = firebase.db.collection(Subscription.COLLECTION_NAME) \
-        .where(filter=FieldFilter('user_id', '==', user_id)) \
-        .where(filter=FieldFilter('status', '==', SubscriptionStatus.WAITING)) \
-        .where(filter=FieldFilter('type', '==', subscription_type)) \
-        .where(filter=FieldFilter('period', '==', subscription_period)) \
-        .order_by('created_at', direction=Query.DESCENDING) \
-        .limit(1) \
-        .stream()
-
-    async for doc in subscription_stream:
-        return Subscription(**doc.to_dict())
-
-
 async def get_count_of_subscriptions(
     start_date: Optional[datetime] = None,
     end_date: Optional[datetime] = None,
-    type: Optional[SubscriptionType] = None,
-    statuses: Optional[List[SubscriptionStatus]] = None,
+    product_id: Optional[str] = None,
+    statuses: Optional[list[SubscriptionStatus]] = None,
 ) -> int:
     total_subscriptions = set()
     subscriptions_query = firebase.db.collection(Subscription.COLLECTION_NAME)
@@ -65,8 +49,8 @@ async def get_count_of_subscriptions(
         subscriptions_query = subscriptions_query.where(filter=FieldFilter('end_date', '>=', start_date))
     if end_date:
         subscriptions_query = subscriptions_query.where(filter=FieldFilter('start_date', '<=', end_date))
-    if type:
-        subscriptions_query = subscriptions_query.where(filter=FieldFilter('type', '==', type))
+    if product_id:
+        subscriptions_query = subscriptions_query.where(filter=FieldFilter('product_id', '==', product_id))
     if statuses is not None:
         subscriptions_query = subscriptions_query.where(filter=FieldFilter('status', 'in', statuses))
 
@@ -97,9 +81,20 @@ async def get_count_of_subscriptions(
     return len(total_subscriptions)
 
 
-async def get_subscriptions_by_user_id(user_id: str) -> List[Subscription]:
+async def get_subscriptions_by_user_id(user_id: str) -> list[Subscription]:
     subscriptions = firebase.db.collection(Subscription.COLLECTION_NAME) \
         .where(filter=FieldFilter('user_id', '==', user_id)) \
+        .stream()
+
+    return [
+        Subscription(**subscription.to_dict()) async for subscription in subscriptions
+    ]
+
+
+# TODO DELETE AFTER MIGRATION
+async def get_subscriptions_by_type(type: SubscriptionType) -> list[Subscription]:
+    subscriptions = firebase.db.collection(Subscription.COLLECTION_NAME) \
+        .where(filter=FieldFilter('type', '==', type)) \
         .stream()
 
     return [
@@ -133,7 +128,7 @@ async def get_subscription_by_provider_auto_payment_charge_id(
 async def get_subscriptions(
     start_date: Optional[datetime] = None,
     end_date: Optional[datetime] = None,
-) -> List[Subscription]:
+) -> list[Subscription]:
     subscriptions_query = firebase.db.collection(Subscription.COLLECTION_NAME)
 
     if start_date:
@@ -152,7 +147,7 @@ async def get_subscriptions_by_status(
     start_date: Optional[datetime] = None,
     end_date: Optional[datetime] = None,
     status: SubscriptionStatus = None,
-) -> List[Subscription]:
+) -> list[Subscription]:
     subscriptions_query = firebase.db.collection(Subscription.COLLECTION_NAME) \
         .where(filter=FieldFilter('status', '==', status))
 

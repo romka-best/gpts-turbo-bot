@@ -2,7 +2,7 @@ import asyncio
 import logging
 import os
 import traceback
-from typing import Dict, List, Optional
+from typing import Optional
 
 import replicate
 
@@ -13,7 +13,7 @@ os.environ['REPLICATE_API_TOKEN'] = config.REPLICATE_API_TOKEN.get_secret_value(
 WEBHOOK_REPLICATE_URL = config.WEBHOOK_URL + config.WEBHOOK_REPLICATE_PATH
 
 
-async def create_face_swap_images(images: List[Dict]):
+async def create_face_swap_images(images: list[dict]):
     tasks = [create_face_swap_image(image['target_image'], image['source_image']) for image in images]
     results = await asyncio.gather(*tasks)
 

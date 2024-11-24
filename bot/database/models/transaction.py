@@ -8,6 +8,7 @@ class TransactionType:
     EXPENSE = 'EXPENSE'
 
 
+# TODO DELETE AFTER MIGRATION
 class ServiceType:
     MINI = 'MINI'
     STANDARD = 'STANDARD'
@@ -49,7 +50,7 @@ class Transaction:
     id: str
     user_id: str
     type: TransactionType
-    service: ServiceType
+    product_id: str
     amount: float
     clear_amount: float
     currency: Currency
@@ -63,10 +64,10 @@ class Transaction:
         id: str,
         user_id: str,
         type: TransactionType,
-        service: ServiceType,
         amount: float,
         clear_amount: float,
         currency: Currency,
+        product_id: str = '',
         quantity=1,
         details=None,
         created_at=None,
@@ -76,7 +77,7 @@ class Transaction:
         self.id = str(id)
         self.user_id = str(user_id)
         self.type = type
-        self.service = service
+        self.product_id = product_id
         self.amount = amount
         self.clear_amount = clear_amount
         self.currency = currency

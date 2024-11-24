@@ -1,6 +1,5 @@
 import asyncio
 import random
-from typing import List
 
 import aiohttp
 from aiogram import Router, Bot, F
@@ -59,7 +58,7 @@ face_swap_router = Router()
 PRICE_FACE_SWAP = 0.0014
 
 
-def count_active_files(files_list: List[FaceSwapFileData]) -> int:
+def count_active_files(files_list: list[FaceSwapFileData]) -> int:
     active_count = sum(
         1 for file in files_list if file.get('status', FaceSwapPackageStatus.LEGACY) == FaceSwapPackageStatus.PUBLIC
     )

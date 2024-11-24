@@ -1,5 +1,4 @@
 from datetime import datetime, timezone
-from typing import List
 
 
 class Message:
@@ -11,8 +10,8 @@ class Message:
     sender_id: str
     content: str
     is_in_context: bool
-    photo_filenames: List[str]
-    documents: List[str]
+    photo_filenames: list[str]
+    documents: list[str]
     created_at: datetime
     edited_at: datetime
 

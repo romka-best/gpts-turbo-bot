@@ -7,10 +7,11 @@ from aiogram.types import Message
 
 from bot.database.main import firebase
 from bot.database.models.common import PaymentMethod
-from bot.database.models.package import PackageType, PackageStatus
+from bot.database.models.package import PackageStatus
 from bot.database.models.promo_code import PromoCodeType
-from bot.database.models.subscription import SubscriptionType, SubscriptionStatus
+from bot.database.models.subscription import SubscriptionStatus
 from bot.database.operations.package.writers import write_package
+from bot.database.operations.product.getters import get_product
 from bot.database.operations.promo_code.getters import (
     get_promo_code_by_name,
     get_used_promo_code_by_user_id_and_promo_code_id,
@@ -67,11 +68,11 @@ async def promo_code_sent(message: Message, state: FSMContext):
                 )
             else:
                 if typed_promo_code.type == PromoCodeType.SUBSCRIPTION:
-                    if user.subscription_type == SubscriptionType.FREE:
+                    if not user.subscription_id:
                         subscription = await write_subscription(
                             None,
                             user_id,
-                            typed_promo_code.details['subscription_type'],
+                            typed_promo_code.details['subscription_id'],
                             typed_promo_code.details['subscription_period'],
                             SubscriptionStatus.WAITING,
                             user.currency,
@@ -107,23 +108,21 @@ async def promo_code_sent(message: Message, state: FSMContext):
                             allow_sending_without_reply=True,
                         )
                 elif typed_promo_code.type == PromoCodeType.PACKAGE:
-                    package_type = typed_promo_code.details['package_type']
+                    package_id = typed_promo_code.details['package_id']
                     package_quantity = typed_promo_code.details['package_quantity']
 
+                    product = await get_product(package_id)
+
                     until_at = None
-                    if (
-                        package_type == PackageType.VOICE_MESSAGES or
-                        package_type == PackageType.FAST_MESSAGES or
-                        package_type == PackageType.ACCESS_TO_CATALOG
-                    ):
+                    if product.details.get('is_recurring', False):
                         current_date = datetime.now(timezone.utc)
                         until_at = current_date + timedelta(days=30 * int(package_quantity))
 
                     package = await write_package(
                         None,
                         user_id,
-                        package_type,
-                        PackageStatus.SUCCESS,
+                        package_id,
+                        PackageStatus.WAITING,
                         user.currency,
                         0,
                         0,

@@ -10,7 +10,6 @@ from bot.config import config, MessageEffect
 from bot.database.models.common import Model, Quota, MidjourneyAction, MidjourneyVersion
 from bot.database.models.generation import GenerationStatus
 from bot.database.models.request import RequestStatus
-from bot.database.models.subscription import SubscriptionType
 from bot.database.models.user import User, UserSettings
 from bot.database.operations.generation.getters import get_generation, get_generations_by_request_id
 from bot.database.operations.generation.updaters import update_generation
@@ -229,7 +228,7 @@ async def handle_midjourney_selection(callback_query: CallbackQuery, state: FSMC
 async def handle_midjourney_example(user: User, user_language_code: str, prompt: str, message: Message):
     current_date = datetime.now(timezone.utc)
     if (
-        user.subscription_type == SubscriptionType.FREE and
+        not user.subscription_id and
         user.current_model == Model.DALL_E and
         user.settings[user.current_model][UserSettings.SHOW_EXAMPLES] and
         user.daily_limits[Quota.DALL_E] + 1 in [1] and

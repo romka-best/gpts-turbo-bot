@@ -9,10 +9,11 @@ from aiogram.utils.markdown import hlink
 from bot.database.models.common import Quota, Currency, Model, SunoSendType
 from bot.database.models.generation import GenerationStatus, Generation
 from bot.database.models.request import RequestStatus, Request
-from bot.database.models.transaction import TransactionType, ServiceType
+from bot.database.models.transaction import TransactionType
 from bot.database.models.user import UserSettings, User
 from bot.database.operations.generation.getters import get_generation, get_generations_by_request_id
 from bot.database.operations.generation.updaters import update_generation
+from bot.database.operations.product.getters import get_product_by_quota
 from bot.database.operations.request.getters import get_request
 from bot.database.operations.request.updaters import update_request
 from bot.database.operations.transaction.writers import write_transaction
@@ -20,6 +21,7 @@ from bot.database.operations.user.getters import get_user
 from bot.database.operations.user.updaters import update_user
 from bot.helpers.senders.send_audio import send_audio
 from bot.helpers.senders.send_video import send_video
+from bot.helpers.updaters.update_user_usage_quota import get_user_with_updated_quota
 from bot.keyboards.ai.suno import build_suno_keyboard
 from bot.keyboards.common.common import build_reaction_keyboard
 from bot.locales.main import get_user_language, get_localization
@@ -147,23 +149,14 @@ async def handle_suno_webhook(bot: Bot, storage: BaseStorage, body: dict):
                     )
 
         quantity_to_delete = total_result
-        quantity_deleted = 0
-        if not is_suggestion:
-            while quantity_deleted != quantity_to_delete:
-                if user.daily_limits[Quota.SUNO] != 0:
-                    user.daily_limits[Quota.SUNO] -= 1
-                    quantity_deleted += 1
-                elif user.additional_usage_quota[Quota.SUNO] != 0:
-                    user.additional_usage_quota[Quota.SUNO] -= 1
-                    quantity_deleted += 1
-                else:
-                    break
+        user = get_user_with_updated_quota(user, Quota.SUNO, quantity_to_delete)
 
+        product = await get_product_by_quota(Quota.SUNO)
         update_tasks = [
             write_transaction(
                 user_id=user.id,
                 type=TransactionType.EXPENSE,
-                service=ServiceType.SUNO,
+                product_id=product.id,
                 amount=0,
                 clear_amount=0,
                 currency=Currency.USD,

@@ -1,7 +1,7 @@
 import os
 from urllib.parse import quote
 
-from firebase_admin import credentials, initialize_app, firestore_async
+from firebase_admin import auth, credentials, initialize_app, firestore_async
 from gcloud.aio.auth import Token
 from google.cloud.firestore_v1 import AsyncClient
 from gcloud.aio.storage import Storage, Bucket
@@ -14,6 +14,7 @@ class Firebase:
     db: AsyncClient
     storage: Storage
     bucket: Bucket
+    auth = None
 
     def __init__(self):
         self.path_to_credentials = os.path.join(config.BASE_DIR, config.CERTIFICATE_NAME.get_secret_value())
@@ -30,6 +31,7 @@ class Firebase:
         self.db = firestore_async.client()
         self.storage = Storage(token=self.token)
         self.bucket = self.storage.get_bucket(config.STORAGE_NAME.get_secret_value())
+        self.auth = auth
 
     async def close(self):
         if self.db:

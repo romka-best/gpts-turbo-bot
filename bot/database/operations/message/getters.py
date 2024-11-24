@@ -1,4 +1,4 @@
-from typing import Optional, List
+from typing import Optional
 
 from google.cloud.firestore_v1 import FieldFilter, Query
 
@@ -25,7 +25,7 @@ async def get_message(message_id: str) -> Optional[Message]:
         )
 
 
-async def get_messages() -> List[Message]:
+async def get_messages() -> list[Message]:
     messages = firebase.db.collection(Message.COLLECTION_NAME).stream()
 
     return [
@@ -43,7 +43,7 @@ async def get_messages() -> List[Message]:
     ]
 
 
-async def get_messages_by_chat_id(chat_id: str, limit=10, is_in_context=True) -> List[Message]:
+async def get_messages_by_chat_id(chat_id: str, limit=10, is_in_context=True) -> list[Message]:
     messages_query = firebase.db.collection(Message.COLLECTION_NAME).where(filter=FieldFilter('chat_id', '==', chat_id))
     if is_in_context is not None:
         messages_query = messages_query.where(filter=FieldFilter('is_in_context', '==', is_in_context))

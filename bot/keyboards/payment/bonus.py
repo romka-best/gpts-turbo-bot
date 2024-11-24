@@ -1,7 +1,7 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 from bot.database.models.game import GameType
-from bot.database.models.package import Package, PackageType
+from bot.database.models.product import Product
 from bot.locales.main import get_localization
 
 
@@ -150,17 +150,14 @@ def build_bonus_play_game_chosen_keyboard(language_code: str, game_type: GameTyp
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
-def build_bonus_cash_out_keyboard(language_code: str) -> InlineKeyboardMarkup:
+def build_bonus_cash_out_keyboard(language_code: str, products: list[Product]) -> InlineKeyboardMarkup:
     buttons = []
-    for package_type in PackageType.get_class_attributes_in_order():
+    for product in products:
         buttons.append(
             [
                 InlineKeyboardButton(
-                    text=Package.get_translate_name_and_description(
-                        get_localization(language_code),
-                        package_type,
-                    ).get('name'),
-                    callback_data=f'bonus_cash_out:{package_type}'
+                    text=product.names.get(language_code),
+                    callback_data=f'bonus_cash_out:{product.id}'
                 ),
             ],
         )

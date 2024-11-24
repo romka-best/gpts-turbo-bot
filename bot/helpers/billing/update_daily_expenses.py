@@ -2,8 +2,8 @@ from datetime import datetime
 
 from bot.config import config
 from bot.database.models.common import Currency
-from bot.database.models.transaction import ServiceType, TransactionType
-from bot.database.operations.transaction.getters import get_transactions_by_service_and_created_time
+from bot.database.models.transaction import TransactionType
+from bot.database.operations.transaction.getters import get_transactions_by_product_id_and_created_time
 from bot.database.operations.transaction.writers import write_transaction
 from bot.helpers.billing.main import client
 
@@ -12,8 +12,8 @@ async def update_daily_expenses(date: datetime):
     need_count_server_expenses = True
     need_count_database_expenses = True
 
-    server_transactions = await get_transactions_by_service_and_created_time(ServiceType.SERVER, date)
-    database_transactions = await get_transactions_by_service_and_created_time(ServiceType.DATABASE, date)
+    server_transactions = await get_transactions_by_product_id_and_created_time('SERVER', date)
+    database_transactions = await get_transactions_by_product_id_and_created_time('DATABASE', date)
     if len(server_transactions) > 0:
         need_count_server_expenses = False
     if len(database_transactions) > 0:
@@ -62,7 +62,7 @@ GROUP BY
         await write_transaction(
             user_id=config.SUPER_ADMIN_ID,
             type=TransactionType.EXPENSE,
-            service=ServiceType.SERVER,
+            product_id='SERVER',
             amount=server_expenses,
             clear_amount=server_expenses,
             currency=Currency.USD,
@@ -73,7 +73,7 @@ GROUP BY
         await write_transaction(
             user_id=config.SUPER_ADMIN_ID,
             type=TransactionType.EXPENSE,
-            service=ServiceType.DATABASE,
+            product_id='DATABASE',
             amount=database_expenses,
             clear_amount=server_expenses,
             currency=Currency.USD,

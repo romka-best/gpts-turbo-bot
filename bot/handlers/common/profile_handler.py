@@ -4,17 +4,17 @@ import aiohttp
 from aiogram import Router
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
-from aiogram.types import Message, CallbackQuery, URLInputFile
+from aiogram.types import Message, CallbackQuery, URLInputFile, User as TelegramUser
 
 from bot.database.main import firebase
 from bot.database.models.common import Model, Currency
-from bot.database.models.subscription import SubscriptionType, SubscriptionStatus
+from bot.database.models.subscription import SubscriptionStatus, SUBSCRIPTION_FREE_LIMITS
 from bot.database.models.user import UserGender, UserSettings
-from bot.database.operations.subscription.getters import get_last_subscription_by_user_id
+from bot.database.operations.product.getters import get_product
+from bot.database.operations.subscription.getters import get_subscription
 from bot.database.operations.user.getters import get_user
 from bot.database.operations.user.updaters import update_user
 from bot.handlers.ai.face_swap_handler import handle_face_swap
-from bot.handlers.ai.mode_handler import handle_mode
 from bot.handlers.payment.bonus_handler import handle_bonus
 from bot.handlers.payment.payment_handler import handle_subscribe, handle_package, handle_cancel_subscription
 from bot.handlers.settings.settings_handler import handle_settings
@@ -34,14 +34,12 @@ profile_router = Router()
 async def profile(message: Message, state: FSMContext):
     await state.clear()
 
-    await handle_profile(message, state, str(message.from_user.id), False)
+    await handle_profile(message, state, message.from_user, False)
 
 
-async def handle_profile(message: Message, state: FSMContext, user_id: str, is_edit=False):
-    telegram_user = message.from_user
-
-    user = await get_user(user_id)
-    user_language_code = await get_user_language(user_id, state.storage)
+async def handle_profile(message: Message, state: FSMContext, telegram_user: TelegramUser, is_edit=False):
+    user = await get_user(str(telegram_user.id))
+    user_language_code = await get_user_language(str(telegram_user.id), state.storage)
 
     if (
         user.first_name != telegram_user.first_name or
@@ -50,7 +48,7 @@ async def handle_profile(message: Message, state: FSMContext, user_id: str, is_e
         user.is_premium != telegram_user.is_premium or
         user.language_code != telegram_user.language_code
     ):
-        await update_user(user_id, {
+        await update_user(user.id, {
             'first_name': telegram_user.first_name,
             'last_name': telegram_user.last_name or '',
             'username': telegram_user.username,
@@ -58,11 +56,16 @@ async def handle_profile(message: Message, state: FSMContext, user_id: str, is_e
             'language_code': telegram_user.language_code,
         })
 
-    subscription = await get_last_subscription_by_user_id(user_id)
+    subscription = await get_subscription(user.subscription_id)
+    if subscription:
+        product_subscription = await get_product(subscription.product_id)
+        subscription_name = product_subscription.names.get(user_language_code)
+    else:
+        subscription_name = '🆓'
     renewal_date = (user.last_subscription_limit_update + timedelta(days=30))
 
     text = get_localization(user_language_code).profile(
-        user.subscription_type,
+        subscription_name,
         subscription.status if subscription and subscription.status else SubscriptionStatus.ACTIVE,
         user.gender,
         user.current_model,
@@ -71,7 +74,7 @@ async def handle_profile(message: Message, state: FSMContext, user_id: str, is_e
         renewal_date.strftime('%d.%m.%Y'),
     )
 
-    photo_path = f'users/avatars/{user_id}.jpeg'
+    photo_path = f'users/avatars/{user.id}.jpeg'
     try:
         photo = await firebase.bucket.get_blob(photo_path)
         photo_link = firebase.get_public_url(photo.name)
@@ -80,7 +83,7 @@ async def handle_profile(message: Message, state: FSMContext, user_id: str, is_e
             user_language_code,
             True,
             user.gender != UserGender.UNSPECIFIED,
-            user.subscription_type != SubscriptionType.FREE,
+            bool(user.subscription_id),
         )
         if is_edit:
             await message.edit_caption(
@@ -98,7 +101,7 @@ async def handle_profile(message: Message, state: FSMContext, user_id: str, is_e
             user_language_code,
             False,
             user.gender != UserGender.UNSPECIFIED,
-            user.subscription_type != SubscriptionType.FREE,
+            bool(user.subscription_id),
         )
         if is_edit:
             await message.edit_text(
@@ -137,8 +140,14 @@ async def handle_profile_selection(callback_query: CallbackQuery, state: FSMCont
         hours, remainder = divmod(time_left.seconds, 3600)
         minutes = remainder // 60
 
+        user_subscription = await get_subscription(user.subscription_id)
+        if user_subscription:
+            product_subscription = await get_product(user_subscription.product_id)
+            limits = product_subscription.details.get('limits')
+        else:
+            limits = SUBSCRIPTION_FREE_LIMITS
         text = get_localization(user_language_code).profile_quota(
-            user.subscription_type,
+            limits,
             user.daily_limits,
             user.additional_usage_quota,
             hours,
@@ -187,7 +196,7 @@ async def handle_profile_selection(callback_query: CallbackQuery, state: FSMCont
             }
         )
 
-        await handle_profile(callback_query.message, state, str(callback_query.from_user.id), True)
+        await handle_profile(callback_query.message, state, callback_query.from_user, True)
     elif action == 'open_bonus_info':
         await handle_bonus(callback_query.message, str(callback_query.from_user.id), state)
     elif action == 'open_buy_subscriptions_info':

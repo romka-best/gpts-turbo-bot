@@ -1,5 +1,4 @@
 import random
-from typing import List, Dict
 
 from bot.helpers.formatters.format_number import format_number
 from bot.locales.texts import Texts
@@ -9,7 +8,6 @@ from bot.database.models.subscription import (
     Subscription,
     SubscriptionType,
     SubscriptionPeriod,
-    SubscriptionLimit,
     SubscriptionStatus,
 )
 from bot.database.models.user import UserGender
@@ -45,7 +43,7 @@ I'm your personal gateway to the world of neural networks. Discover the capabili
 
 ━ 🎵 <b>Compose Music</b>:
     ┣ Compose original melodies with <b>MusicGen 🎺</b> /music_gen
-    ┗ Record your own songs with <b>Suno 3.5 🎸</b> /suno
+    ┗ Record your own songs with <b>Suno 4.0 🎸</b> /suno
 
 I am constantly updating myself, implementing the most advanced technologies so that you can fully leverage the possibilities of artificial intelligence. <b>I am the only bot with emotional intelligence</b>, ready to help you with any questions and creative endeavors 🚀
 """
@@ -892,20 +890,15 @@ Let's turn those voice messages into text and keep the conversation flowing! �
 
     # Payment
     BUY = """
-🚀 <b>Welcome to the wonder store!</b> 🛍
+🚀 <b>Welcome to the Wonder Store!</b> 🪄
 
-The gates to a world of exclusive opportunities are now open before you! What will it be today?
+You’re stepping into a world of exclusive possibilities! What will it be today?
 
-🌟 <b>Subscription: Your VIP pass to a world of opportunities!</b>
-Gain full access to the entire spectrum of innovative services: from conversations with ChatGPT to creating unique songs with Suno. Use thematic chats to delve into topics of interest and expand your horizons every day. Discover the comfort of quick responses and the uniqueness of personalized images with FaceSwap. All this and much more are waiting for you in our subscriptions:
-━ <b>MINI</b> 🍬
-━ <b>STANDARD</b> ✨
-━ <b>VIP</b> 🔥
-━ <b>PREMIUM</b> 💎
-━ <b>UNLIMITED</b> 🚀
+🌟 <b>Subscriptions: All-in-One — your VIP pass to every AI model and more!</b>
+Chat with ChatGPT, Claude, and Gemini; Create with DALL-E, Midjourney, Stable Diffusion, Flux, FaceSwap, and Photoshop AI; Make music with MusicGen and Suno; Voice messages, Quick Replies, Themed Chats, and so much more. Enjoy it all in one subscription for daily discoveries and seamless access!
 
-🛍 <b>Packages: The perfect solution for specific needs!</b>
-Looking for a targeted solution for a one-time project? Our Package provides the necessary number of requests and services to help you achieve your goals. Choose only what you need for your next creative breakthrough or business task, and pay only for the resources you use
+🛍 <b>Packages: Only the Generations You Need!</b>
+Just need specific generations for certain tasks? Packages let you choose the number of requests and AI tools — pay only for what you actually need.
 
 Choose by clicking a button below 👇
 """
@@ -922,6 +915,8 @@ Choose by clicking a button below 👇
 ✈️⭐️ <b>Telegram Stars (Currency in Telegram)</b>
 """
     PROCEED_TO_PAY = "🌐 Proceed to payment"
+    MONTHLY = "Monthly"
+    YEARLY = "Yearly"
 
     # Subscription
     MONTH_1 = "1 month"
@@ -992,50 +987,6 @@ Your chats have switched their unique roles to "Personal Assistant" as your acce
     ADD_TO_CART_OR_BUY_NOW = "Buy now or add to cart?"
     ADDED_TO_CART = "Added to cart ✅"
     GO_TO_CART_OR_CONTINUE_SHOPPING = "Go to cart or continue shopping?"
-    GPT4_OMNI_MINI_REQUESTS = "✉️ ChatGPT 4.0 Omni Mini requests"
-    GPT4_OMNI_MINI_REQUESTS_DESCRIPTION = "Unleash the power of ChatGPT 4.0 Omni Mini for witty chats, smart advice, and endless fun! ✉️"
-    GPT4_OMNI_REQUESTS = "💥 ChatGPT 4.0 Omni requests"
-    GPT4_OMNI_REQUESTS_DESCRIPTION = "Discover new horizons with the intelligence of ChatGPT 4.0 Omni for deeper analyses and innovative dialogues! 💥"
-    CHAT_GPT_O_1_MINI_REQUESTS = "🧩 ChatGPT o1-mini requests"
-    CHAT_GPT_O_1_MINI_REQUESTS_DESCRIPTION = "Unlock new possibilities with ChatGPT o1-mini to find quick and precise solutions for your tasks! 🧩"
-    CHAT_GPT_O_1_PREVIEW_REQUESTS = "🧪 ChatGPT o1-preview requests"
-    CHAT_GPT_O_1_PREVIEW_REQUESTS_DESCRIPTION = "Explore the future with ChatGPT o1-preview, making deep and logically sound discoveries! 🧪"
-    CLAUDE_3_HAIKU_REQUESTS = "📜 Claude 3.5 Haiku requests"
-    CLAUDE_3_HAIKU_REQUESTS_DESCRIPTION = "Immerse yourself in the world of brevity and wisdom with Claude 3.5 Haiku! 📜"
-    CLAUDE_3_SONNET_REQUESTS = "💫 Claude 3.5 Sonnet requests"
-    CLAUDE_3_SONNET_REQUESTS_DESCRIPTION = "Explore the balance of speed and intelligence with Claude 3.5 Sonnet for accurate and timely solutions! 💫"
-    CLAUDE_3_OPUS_REQUESTS = "🚀 Claude 3.0 Opus requests"
-    CLAUDE_3_OPUS_REQUESTS_DESCRIPTION = "Experience the power of Claude 3.0 Opus to solve the most complex challenges and create profound insights! 🚀"
-    GEMINI_1_FLASH_REQUESTS = "🏎 Gemini 1.5 Flash requests"
-    GEMINI_1_FLASH_REQUESTS_DESCRIPTION = "Unleash the power of Gemini 1.5 Flash for instant solutions, quick responses, and dynamic interactions! 🏎"
-    GEMINI_1_PRO_REQUESTS = "💼 Gemini 1.5 Pro requests"
-    GEMINI_1_PRO_REQUESTS_DESCRIPTION = "Unleash the power of Gemini 1.5 Pro for deep analysis, precise decisions, and maximum productivity! 💼"
-    GEMINI_1_ULTRA_REQUESTS = "🛡 Gemini 1.0 Ultra requests"
-    GEMINI_1_ULTRA_REQUESTS_DESCRIPTION = "Harness the power of Gemini 1.0 Ultra to tackle the most complex challenges and reach new heights! 🛡"
-    DALL_E_REQUESTS = "👨‍🎨 DALL-E images"
-    DALL_E_REQUESTS_DESCRIPTION = "Turn ideas into art with DALL-E – where your imagination becomes stunning visual reality! 👨‍🎨"
-    MIDJOURNEY_REQUESTS = "🎨 Midjourney images"
-    MIDJOURNEY_REQUESTS_DESCRIPTION = "Unleash your creativity with Midjourney – transform your thoughts into magnificent visual works of art! 🎨"
-    STABLE_DIFFUSION_REQUESTS = "🎆 Stable Diffusion 3.5 images"
-    STABLE_DIFFUSION_REQUESTS_DESCRIPTION = "Open the door to a world of creativity with Stable Diffusion — transform your ideas into stunning images! 🎆"
-    FLUX_REQUESTS = "🫐 Flux 1.1 Pro images"
-    FLUX_REQUESTS_DESCRIPTION = "Explore visual variations with Flux — experiment and create unique images! 🫐"
-    FACE_SWAP_REQUESTS = "📷 Images with face replacement"
-    FACE_SWAP_REQUESTS_DESCRIPTION = "Enter the playful world of FaceSwap for laughs and surprises in every image! 😂🔄"
-    PHOTOSHOP_AI_REQUESTS = "🪄 Photoshop AI generations"
-    PHOTOSHOP_AI_REQUESTS_DESCRIPTION = "Create without limits with Photoshop AI, turning every photo into a masterpiece! 🪄"
-    MUSIC_GEN_REQUESTS = "🎺 MusicGen melodies"
-    MUSIC_GEN_REQUESTS_DESCRIPTION = "Discover a world where every prompt turns into a unique melody! 🎺"
-    SUNO_REQUESTS = "🎸 Suno songs"
-    SUNO_REQUESTS_DESCRIPTION = "Discover a world where every text you write is transformed into a unique song! 🎸"
-    THEMATIC_CHATS = "💬 Thematic chats"
-    THEMATIC_CHATS_DESCRIPTION = "Dive into topics you love with Thematic Chats, guided by AI in a world of tailored discussions 🗨️"
-    ACCESS_TO_CATALOG = "🎭 Access to a roles catalog"
-    ACCESS_TO_CATALOG_DESCRIPTION = "Unlock a universe of specialized AI assistants with access to our exclusive catalog, where every role is tailored to fit your unique needs and tasks"
-    ANSWERS_AND_REQUESTS_WITH_VOICE_MESSAGES = "🎙 Answers and requests with voice messages"
-    ANSWERS_AND_REQUESTS_WITH_VOICE_MESSAGES_DESCRIPTION = "Experience the ease and convenience of voice communication with our AI: Send and receive voice messages for a more dynamic and expressive interaction"
-    FAST_ANSWERS = "⚡ Fast answers without pauses"
-    FAST_ANSWERS_DESCRIPTION = "Quick Messages feature offers lightning-fast, accurate AI responses, ensuring you're always a step ahead in communication"
     MIN_ERROR = "Oops! It looks like the total sum is below our minimum threshold. Please choose count of packages that meets or exceeds the minimum required. Let's try that again! 🔄"
     MAX_ERROR = "Oops! It looks like the number entered is higher than you can purchase. Please enter a smaller value or one corresponding to your balance. Let's try that again! 🔄"
     VALUE_ERROR = """
@@ -1311,87 +1262,88 @@ Choose action 👇
         hours_before_limit_update: int,
         minutes_before_limit_update: int,
     ) -> str:
-        return f"""
-<b>Quota:</b>
-
-🔤 Text models:
-━ 💭 <b>ChatGPT</b>:
-    ┣ ✉️ 4.0 Omni Mini:
-        ┣ {format_number(daily_limits[Quota.CHAT_GPT4_OMNI_MINI])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.CHAT_GPT4_OMNI_MINI])}
-        ┗ Extra: {additional_usage_quota[Quota.CHAT_GPT4_OMNI_MINI]}
-    ┣ 💥 4.0 Omni:
-        ┣ {format_number(daily_limits[Quota.CHAT_GPT4_OMNI])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.CHAT_GPT4_OMNI])}
-        ┗ Extra: {additional_usage_quota[Quota.CHAT_GPT4_OMNI]}
-    ┣ 🧩 o1-mini:
-        ┣ {format_number(daily_limits[Quota.CHAT_GPT_O_1_MINI])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.CHAT_GPT_O_1_MINI])}
-        ┗ Extra: {additional_usage_quota[Quota.CHAT_GPT_O_1_MINI]}
-    ┗ 🧪 o1-preview:
-        ┣ {format_number(daily_limits[Quota.CHAT_GPT_O_1_PREVIEW])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.CHAT_GPT_O_1_PREVIEW])}
-        ┗ Extra: {additional_usage_quota[Quota.CHAT_GPT_O_1_PREVIEW]}
-━ 📄 <b>Claude</b>:
-    ┣ 📜 3.5 Haiku:
-        ┣ {format_number(daily_limits[Quota.CLAUDE_3_HAIKU])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.CLAUDE_3_HAIKU])}
-        ┗ Extra: {additional_usage_quota[Quota.CLAUDE_3_HAIKU]}
-    ┣ 💫 3.5 Sonnet:
-        ┣ {format_number(daily_limits[Quota.CLAUDE_3_SONNET])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.CLAUDE_3_SONNET])}
-        ┗ Extra: {additional_usage_quota[Quota.CLAUDE_3_SONNET]}
-    ┗ 🚀 Claude 3.0 Opus:
-        ┣ {format_number(daily_limits[Quota.CLAUDE_3_OPUS])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.CLAUDE_3_OPUS])}
-        ┗ Extra: {additional_usage_quota[Quota.CLAUDE_3_OPUS]}
-━ ✨ <b>Gemini</b>:
-    ┣ 🏎 Gemini 1.5 Flash:
-        ┣ {format_number(daily_limits[Quota.GEMINI_1_FLASH])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.GEMINI_1_FLASH])}
-        ┗ Extra: {additional_usage_quota[Quota.GEMINI_1_FLASH]}
-    ┣ 💼 Gemini 1.5 Pro:
-        ┣ {format_number(daily_limits[Quota.GEMINI_1_PRO])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.GEMINI_1_PRO])}
-        ┗ Extra: {additional_usage_quota[Quota.GEMINI_1_PRO]}
-    ┗ 🛡️ Gemini 1.0 Ultra:
-        ┣ {format_number(daily_limits[Quota.GEMINI_1_ULTRA])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.GEMINI_1_ULTRA])}
-        ┗ Extra: {additional_usage_quota[Quota.GEMINI_1_ULTRA]}
-
----------------------------
-
-🖼 Image models:
-━ 👨‍🎨 <b>DALL-E</b>:
-    ┣ {format_number(daily_limits[Quota.DALL_E])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.DALL_E])}
-    ┗ Extra: {additional_usage_quota[Quota.DALL_E]}
-━ 🎨 <b>Midjourney</b>:
-    ┣ {format_number(daily_limits[Quota.MIDJOURNEY])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.MIDJOURNEY])}
-    ┗ Extra: {additional_usage_quota[Quota.MIDJOURNEY]}
-━ 🎆 <b>Stable Diffusion</b>:
-    ┣ {format_number(daily_limits[Quota.STABLE_DIFFUSION])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.STABLE_DIFFUSION])}
-    ┗ Extra: {additional_usage_quota[Quota.STABLE_DIFFUSION]}
-━ 🫐 <b>Flux</b>:
-    ┣ {format_number(daily_limits[Quota.FLUX])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.FLUX])}
-    ┗ Extra: {additional_usage_quota[Quota.FLUX]}
-━ 📷 <b>FaceSwap</b>:
-    ┣ {format_number(daily_limits[Quota.FACE_SWAP])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.FACE_SWAP])}
-    ┗ Extra: {additional_usage_quota[Quota.FACE_SWAP]}
-━ 🪄 <b>Photoshop AI</b>:
-    ┣ {format_number(daily_limits[Quota.PHOTOSHOP_AI])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.PHOTOSHOP_AI])}
-    ┗ Extra: {additional_usage_quota[Quota.PHOTOSHOP_AI]}
-
----------------------------
-
-🎵 Music models:
-━ 🎺 <b>MusicGen</b>:
-    ┣ {format_number(daily_limits[Quota.MUSIC_GEN])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.MUSIC_GEN])}
-    ┗ Extra: {additional_usage_quota[Quota.MUSIC_GEN]}
-━ 🎸 <b>Suno</b>:
-    ┣ {format_number(daily_limits[Quota.SUNO])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.SUNO])}
-    ┗ Extra: {additional_usage_quota[Quota.SUNO]}
-
----------------------------
-
-━ 💬 <b>Thematic chats</b>: {additional_usage_quota[Quota.ADDITIONAL_CHATS]}
-━ 🎭 <b>Access to a catalog with digital employees</b>: {'✅' if additional_usage_quota[Quota.ACCESS_TO_CATALOG] else '❌'}
-━ 🎙 <b>Voice messages</b>: {'✅' if additional_usage_quota[Quota.VOICE_MESSAGES] else '❌'}
-━ ⚡ <b>Fast answers</b>: {'✅' if additional_usage_quota[Quota.FAST_MESSAGES] else '❌'}
-
----------------------------
-
-🔄 <i>Limit will be updated in: {hours_before_limit_update} h. {minutes_before_limit_update} min.</i>
-"""
+        return ""
+#         return f"""
+# <b>Quota:</b>
+#
+# 🔤 Text models:
+# ━ 💭 <b>ChatGPT</b>:
+#     ┣ ✉️ 4.0 Omni Mini:
+#         ┣ {format_number(daily_limits[Quota.CHAT_GPT4_OMNI_MINI])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.CHAT_GPT4_OMNI_MINI])}
+#         ┗ Extra: {additional_usage_quota[Quota.CHAT_GPT4_OMNI_MINI]}
+#     ┣ 💥 4.0 Omni:
+#         ┣ {format_number(daily_limits[Quota.CHAT_GPT4_OMNI])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.CHAT_GPT4_OMNI])}
+#         ┗ Extra: {additional_usage_quota[Quota.CHAT_GPT4_OMNI]}
+#     ┣ 🧩 o1-mini:
+#         ┣ {format_number(daily_limits[Quota.CHAT_GPT_O_1_MINI])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.CHAT_GPT_O_1_MINI])}
+#         ┗ Extra: {additional_usage_quota[Quota.CHAT_GPT_O_1_MINI]}
+#     ┗ 🧪 o1-preview:
+#         ┣ {format_number(daily_limits[Quota.CHAT_GPT_O_1_PREVIEW])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.CHAT_GPT_O_1_PREVIEW])}
+#         ┗ Extra: {additional_usage_quota[Quota.CHAT_GPT_O_1_PREVIEW]}
+# ━ 📄 <b>Claude</b>:
+#     ┣ 📜 3.5 Haiku:
+#         ┣ {format_number(daily_limits[Quota.CLAUDE_3_HAIKU])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.CLAUDE_3_HAIKU])}
+#         ┗ Extra: {additional_usage_quota[Quota.CLAUDE_3_HAIKU]}
+#     ┣ 💫 3.5 Sonnet:
+#         ┣ {format_number(daily_limits[Quota.CLAUDE_3_SONNET])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.CLAUDE_3_SONNET])}
+#         ┗ Extra: {additional_usage_quota[Quota.CLAUDE_3_SONNET]}
+#     ┗ 🚀 Claude 3.0 Opus:
+#         ┣ {format_number(daily_limits[Quota.CLAUDE_3_OPUS])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.CLAUDE_3_OPUS])}
+#         ┗ Extra: {additional_usage_quota[Quota.CLAUDE_3_OPUS]}
+# ━ ✨ <b>Gemini</b>:
+#     ┣ 🏎 Gemini 1.5 Flash:
+#         ┣ {format_number(daily_limits[Quota.GEMINI_1_FLASH])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.GEMINI_1_FLASH])}
+#         ┗ Extra: {additional_usage_quota[Quota.GEMINI_1_FLASH]}
+#     ┣ 💼 Gemini 1.5 Pro:
+#         ┣ {format_number(daily_limits[Quota.GEMINI_1_PRO])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.GEMINI_1_PRO])}
+#         ┗ Extra: {additional_usage_quota[Quota.GEMINI_1_PRO]}
+#     ┗ 🛡️ Gemini 1.0 Ultra:
+#         ┣ {format_number(daily_limits[Quota.GEMINI_1_ULTRA])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.GEMINI_1_ULTRA])}
+#         ┗ Extra: {additional_usage_quota[Quota.GEMINI_1_ULTRA]}
+#
+# ---------------------------
+#
+# 🖼 Image models:
+# ━ 👨‍🎨 <b>DALL-E</b>:
+#     ┣ {format_number(daily_limits[Quota.DALL_E])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.DALL_E])}
+#     ┗ Extra: {additional_usage_quota[Quota.DALL_E]}
+# ━ 🎨 <b>Midjourney</b>:
+#     ┣ {format_number(daily_limits[Quota.MIDJOURNEY])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.MIDJOURNEY])}
+#     ┗ Extra: {additional_usage_quota[Quota.MIDJOURNEY]}
+# ━ 🎆 <b>Stable Diffusion</b>:
+#     ┣ {format_number(daily_limits[Quota.STABLE_DIFFUSION])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.STABLE_DIFFUSION])}
+#     ┗ Extra: {additional_usage_quota[Quota.STABLE_DIFFUSION]}
+# ━ 🫐 <b>Flux</b>:
+#     ┣ {format_number(daily_limits[Quota.FLUX])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.FLUX])}
+#     ┗ Extra: {additional_usage_quota[Quota.FLUX]}
+# ━ 📷 <b>FaceSwap</b>:
+#     ┣ {format_number(daily_limits[Quota.FACE_SWAP])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.FACE_SWAP])}
+#     ┗ Extra: {additional_usage_quota[Quota.FACE_SWAP]}
+# ━ 🪄 <b>Photoshop AI</b>:
+#     ┣ {format_number(daily_limits[Quota.PHOTOSHOP_AI])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.PHOTOSHOP_AI])}
+#     ┗ Extra: {additional_usage_quota[Quota.PHOTOSHOP_AI]}
+#
+# ---------------------------
+#
+# 🎵 Music models:
+# ━ 🎺 <b>MusicGen</b>:
+#     ┣ {format_number(daily_limits[Quota.MUSIC_GEN])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.MUSIC_GEN])}
+#     ┗ Extra: {additional_usage_quota[Quota.MUSIC_GEN]}
+# ━ 🎸 <b>Suno</b>:
+#     ┣ {format_number(daily_limits[Quota.SUNO])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.SUNO])}
+#     ┗ Extra: {additional_usage_quota[Quota.SUNO]}
+#
+# ---------------------------
+#
+# ━ 💬 <b>Thematic chats</b>: {additional_usage_quota[Quota.ADDITIONAL_CHATS]}
+# ━ 🎭 <b>Access to a catalog with digital employees</b>: {'✅' if additional_usage_quota[Quota.ACCESS_TO_CATALOG] else '❌'}
+# ━ 🎙 <b>Voice messages</b>: {'✅' if additional_usage_quota[Quota.VOICE_MESSAGES] else '❌'}
+# ━ ⚡ <b>Fast answers</b>: {'✅' if additional_usage_quota[Quota.FAST_MESSAGES] else '❌'}
+#
+# ---------------------------
+#
+# 🔄 <i>Limit will be updated in: {hours_before_limit_update} h. {minutes_before_limit_update} min.</i>
+# """
 
     # Payment
     @staticmethod
@@ -1403,7 +1355,7 @@ Choose action 👇
         return f"Renewing a subscription {subscription_type} {Subscription.get_emojis()[subscription_type]} for user: {user_id}"
 
     @staticmethod
-    def subscribe(currency: Currency, min_prices: Dict):
+    def subscribe(currency: Currency, min_prices: dict):
         return f"""
 🤖 Ready to supercharge your digital journey? Here's what's on the menu:
 
@@ -1411,7 +1363,7 @@ Choose action 👇
 - <b>STANDARD</b> ⭐: {min_prices[SubscriptionType.STANDARD]}{Currency.SYMBOLS[currency]} per month
 - <b>VIP</b> 🔥: {min_prices[SubscriptionType.VIP]}{Currency.SYMBOLS[currency]} per month
 - <b>PREMIUM</b> 💎: {min_prices[SubscriptionType.PREMIUM]}{Currency.SYMBOLS[currency]} per month
-- <b>UNLIMITED</b> 🚀: {min_prices[SubscriptionType.UNLIMITED]}{Currency.SYMBOLS[currency]} per month
+- <b>UNLIMITED</b> ♾️: {min_prices[SubscriptionType.UNLIMITED]}{Currency.SYMBOLS[currency]} per month
 
 Pick your potion and hit the button below to subscribe:
 """
@@ -1587,7 +1539,7 @@ You've selected the <b>{name}</b> package
 """
 
     @staticmethod
-    def shopping_cart(currency: Currency, cart_items: List[Dict], discount: int):
+    def shopping_cart(currency: Currency, cart_items: list[dict], discount: int):
         text = ""
         total_sum = 0.0
         for index, cart_item in enumerate(cart_items):
@@ -1619,7 +1571,7 @@ You've selected the <b>{name}</b> package
         return f"You're about to buy {package_quantity} package(-s) <b>{package_name}</b> for {price}{Currency.SYMBOLS[currency]}"
 
     @staticmethod
-    def confirmation_cart(cart_items: List[Dict], currency: Currency, price: float) -> str:
+    def confirmation_cart(cart_items: list[dict], currency: Currency, price: float) -> str:
         text = ""
         for index, cart_item in enumerate(cart_items):
             package_type, package_quantity = cart_item.get("package_type", None), cart_item.get("quantity", 0)
@@ -1736,7 +1688,7 @@ Looks like you've got only <b>{available_seconds} seconds</b> left in your arsen
             return English.SWITCHED_TO_SUNO
 
     @staticmethod
-    def requests_recommendations() -> List[str]:
+    def requests_recommendations() -> list[str]:
         texts = [
             "Tell me an interesting fact about space 👩‍🚀",
             "What could be the consequences of global warming? 🌍",
@@ -1773,7 +1725,7 @@ Looks like you've got only <b>{available_seconds} seconds</b> left in your arsen
         return texts
 
     @staticmethod
-    def image_recommendations() -> List[str]:
+    def image_recommendations() -> list[str]:
         texts = [
             "Martian cityscape under a pink sky 🪐",
             "Steampunk version of the Taj Mahal 🕌",
@@ -1810,7 +1762,7 @@ Looks like you've got only <b>{available_seconds} seconds</b> left in your arsen
         return texts
 
     @staticmethod
-    def music_recommendations() -> List[str]:
+    def music_recommendations() -> list[str]:
         texts = [
             "A pop track with infectious melodies, tropical percussion, and cheerful rhythms, perfect for the beach 🏖",
             "A magnificent orchestral arrangement with powerful beats, epic brass fanfares, creating a cinematic atmosphere worthy of a heroic battle 🎻",
@@ -1968,7 +1920,7 @@ Looks like you've got only <b>{available_seconds} seconds</b> left in your arsen
         return text
 
     @staticmethod
-    def photoshop_ai_actions() -> List[str]:
+    def photoshop_ai_actions() -> list[str]:
         return [
             English.PHOTOSHOP_AI_RESTORATION,
             English.PHOTOSHOP_AI_COLORIZATION,

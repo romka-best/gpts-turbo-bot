@@ -1,6 +1,5 @@
 import logging
 import uuid
-from typing import List
 
 from aiogram import Bot
 from aiogram.exceptions import TelegramForbiddenError
@@ -44,7 +43,7 @@ async def send_image(bot: Bot, chat_id: str, image: str, reply_markup=None, capt
         )
 
 
-async def send_images(bot: Bot, chat_id: str, images: List[str]):
+async def send_images(bot: Bot, chat_id: str, images: list[str]):
     for i in range(0, len(images), 10):
         sliced_images = images[i:i + 10]
         try:

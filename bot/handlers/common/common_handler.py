@@ -9,6 +9,7 @@ from bot.config import config, MessageEffect
 from bot.database.main import firebase
 from bot.database.models.common import Quota, UTM
 from bot.database.models.generation import Generation
+from bot.database.models.user import UserSettings
 from bot.database.operations.generation.updaters import update_generation
 from bot.database.operations.user.getters import get_user, get_count_of_users_by_referral
 from bot.database.operations.user.initialize_user_for_the_first_time import initialize_user_for_the_first_time
@@ -16,7 +17,9 @@ from bot.database.operations.user.updaters import update_user
 from bot.handlers.ai.mode_handler import handle_mode
 from bot.handlers.payment.bonus_handler import handle_bonus
 from bot.handlers.payment.payment_handler import handle_subscribe, handle_package
+from bot.helpers.getters.get_switched_to_ai_model import get_switched_to_ai_model
 from bot.helpers.updaters.update_daily_limits import update_user_daily_limits
+from bot.keyboards.ai.mode import build_switched_to_ai_keyboard
 from bot.keyboards.common.common import (
     build_start_keyboard,
     build_start_chosen_keyboard,
@@ -183,12 +186,20 @@ async def start(message: Message, state: FSMContext):
             disable_notification=True,
         ))
 
-    greeting = get_localization(user_language_code).START
-    reply_markup = build_start_keyboard(user_language_code)
     await message.answer(
-        text=greeting,
-        reply_markup=reply_markup,
+        text=get_localization(user_language_code).START,
+        reply_markup=build_start_keyboard(user_language_code),
         message_effect_id=config.MESSAGE_EFFECTS.get(MessageEffect.CONGRATS),
+    )
+
+    await message.answer(
+        text=get_switched_to_ai_model(
+            user.current_model,
+            user.settings[user.current_model][UserSettings.VERSION],
+            user_language_code,
+        ),
+        reply_markup=build_switched_to_ai_keyboard(user_language_code, user.current_model),
+        message_effect_id=config.MESSAGE_EFFECTS.get(MessageEffect.FIRE),
     )
 
     if len(tasks) > 0:

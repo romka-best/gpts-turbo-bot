@@ -1,5 +1,4 @@
 import asyncio
-from typing import Dict
 
 from aiogram import Router, F
 from aiogram.fsm.context import FSMContext
@@ -220,7 +219,7 @@ async def handle_face_swap_manage_edit_choose_package_selection(callback_query: 
 
 
 async def show_picture(
-    file: Dict,
+    file: dict,
     language_code: str,
     face_swap_package: FaceSwapPackage,
     callback_query: CallbackQuery,

@@ -1,18 +1,19 @@
 from datetime import datetime, timezone
-from typing import Dict, Optional
+from typing import Optional
 
 from aiogram.types import User as TelegramUser
 
 from bot.database.models.common import Model, Currency, Quota, ChatGPTVersion, ClaudeGPTVersion, GeminiGPTVersion
-from bot.database.models.subscription import SubscriptionType, SubscriptionLimit
+from bot.database.models.subscription import SUBSCRIPTION_FREE_LIMITS
 from bot.database.models.user import User, UserGender, UserSettings
 
 
 def create_user_object(
     telegram_user: TelegramUser,
-    user_data: Dict,
+    user_data: dict,
     chat_id: str,
     telegram_chat_id: str,
+    stripe_id: str,
     referred_by: Optional[str],
     is_referred_by_user=False,
     quota=Quota.CHAT_GPT4_OMNI_MINI,
@@ -55,6 +56,7 @@ def create_user_object(
         username=telegram_user.username,
         current_chat_id=chat_id,
         telegram_chat_id=telegram_chat_id,
+        stripe_id=stripe_id,
         gender=user_data.get('gender', UserGender.UNSPECIFIED),
         language_code=telegram_user.language_code,
         interface_language_code=user_data.get(
@@ -67,9 +69,9 @@ def create_user_object(
         current_model=user_data.get('current_model', default_model),
         currency=user_data.get('currency', Currency.RUB if telegram_user.language_code == 'ru' else Currency.XTR),
         balance=user_data.get('balance', 25.00 if is_referred_by_user else 0),
-        subscription_type=user_data.get('subscription_type', SubscriptionType.FREE),
+        subscription_id=user_data.get('subscription_id', ''),
         last_subscription_limit_update=user_data.get('last_subscription_limit_update', datetime.now(timezone.utc)),
-        daily_limits=user_data.get('daily_limits', SubscriptionLimit.LIMITS[SubscriptionType.FREE]),
+        daily_limits=user_data.get('daily_limits', SUBSCRIPTION_FREE_LIMITS),
         additional_usage_quota=user_data.get('additional_usage_quota', User.DEFAULT_ADDITIONAL_USAGE_QUOTA),
         settings=user_data.get('settings', default_settings),
         referred_by=user_data.get('referred_by', referred_by),

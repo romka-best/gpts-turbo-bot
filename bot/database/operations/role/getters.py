@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional, List
+from typing import Optional
 
 from google.cloud.firestore_v1 import FieldFilter, Query
 
@@ -28,7 +28,7 @@ async def get_role_by_name(name: str) -> Optional[Role]:
 async def get_roles(
     start_date: Optional[datetime] = None,
     end_date: Optional[datetime] = None,
-) -> List[Role]:
+) -> list[Role]:
     roles_query = firebase.db.collection(Role.COLLECTION_NAME)
 
     if start_date:

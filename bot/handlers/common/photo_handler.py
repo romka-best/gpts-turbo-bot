@@ -1,6 +1,5 @@
 import time
 import uuid
-from typing import List
 
 import aiohttp
 from aiogram import Router, F
@@ -84,7 +83,7 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
         used_face_swap_packages = await get_used_face_swap_packages_by_user_id(user_id)
         for used_face_swap_package in used_face_swap_packages:
             await update_used_face_swap_package(used_face_swap_package.id, {
-                'used_images': []
+                'used_images': [],
             })
 
         await processing_message.edit_text(get_localization(user_language_code).CHANGE_PHOTO_SUCCESS)
@@ -107,7 +106,7 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
         reply_markup = build_manage_catalog_create_role_confirmation_keyboard(user_language_code)
         await message.answer(
             text=get_localization(user_language_code).catalog_manage_create_role_confirmation(
-                role_system_name=user_data.get('system_role_name', None),
+                role_system_name=user_data.get('system_role_name', ''),
                 role_names=user_data.get('role_names', {}),
                 role_descriptions=user_data.get('role_descriptions', {}),
                 role_instructions=user_data.get('role_instructions', {}),
@@ -313,7 +312,7 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
         )
 
 
-async def handle_album(message: Message, state: FSMContext, album: List[Message]):
+async def handle_album(message: Message, state: FSMContext, album: list[Message]):
     user_id = str(message.from_user.id)
     user = await get_user(user_id)
     user_language_code = await get_user_language(user_id, state.storage)
@@ -395,7 +394,7 @@ async def handle_album(message: Message, state: FSMContext, album: List[Message]
 
 
 @photo_router.message(F.photo)
-async def photo(message: Message, state: FSMContext, album: List[Message]):
+async def photo(message: Message, state: FSMContext, album: list[Message]):
     if len(album):
         await handle_album(message, state, album)
     else:

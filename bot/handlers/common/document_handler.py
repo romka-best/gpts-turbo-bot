@@ -1,5 +1,3 @@
-from typing import List
-
 from aiogram import Router, F
 
 from aiogram.fsm.context import FSMContext
@@ -13,7 +11,7 @@ document_router.message.middleware(AlbumMiddleware())
 
 
 @document_router.message(F.document)
-async def handle_document(message: Message, state: FSMContext, album: List[Message]):
+async def handle_document(message: Message, state: FSMContext, album: list[Message]):
     if len(album):
         await handle_album(message, state, album)
     elif message.document.mime_type.startswith('image') and message.document.thumbnail:

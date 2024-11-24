@@ -1,6 +1,5 @@
 import asyncio
 import logging
-from typing import List, Dict
 
 import aiohttp
 from aiogram import Bot
@@ -41,12 +40,12 @@ class Suno:
         await self.session.close()
 
     async def _get_sid(self) -> str:
-        url = 'https://clerk.suno.com/v1/client?_clerk_js_version=4.73.3'
+        url = 'https://clerk.suno.com/v1/client?_clerk_js_version=5.31.2'
         data = await self.request('GET', url)
         return data['response']['last_active_session_id']
 
     async def _get_jwt(self) -> str:
-        url = f'https://clerk.suno.com/v1/client/sessions/{self._sid}/tokens/api?_clerk_js_version=4.73.3'
+        url = f'https://clerk.suno.com/v1/client/sessions/{self._sid}/tokens/api?_clerk_js_version=5.31.2'
         data = await self.request('POST', url)
         return data['jwt']
 
@@ -84,7 +83,7 @@ class Songs(APIResource):
         instrumental: bool = False,
         custom: bool = False,
         tags: str = ''
-    ) -> List:
+    ) -> list:
         url = f'{SUNO_API_URL}/api/generate/v2/'
         payload = {
             'mv': version,
@@ -96,7 +95,7 @@ class Songs(APIResource):
         data = await self.request('POST', url, json=payload)
         return data['clips']
 
-    async def get(self, id: str) -> Dict:
+    async def get(self, id: str) -> dict:
         url = f'{SUNO_API_URL}/api/feed/v2?ids={id}'
         data = await self.request('GET', url)
         return data['clips'][0]
@@ -108,7 +107,7 @@ async def generate_song(
     instrumental: bool = False,
     custom: bool = False,
     tags: str = ''
-) -> List[str]:
+) -> list[str]:
     async with Suno(cookie=SUNO_TOKEN) as client:
         clips = await client.songs.generate(
             version=version,

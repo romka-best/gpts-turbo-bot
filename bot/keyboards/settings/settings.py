@@ -1,4 +1,4 @@
-from typing import Dict, Optional
+from typing import Optional
 
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
@@ -174,7 +174,7 @@ def build_settings_keyboard(
     language_code: str,
     model: Model,
     model_type: str,
-    settings: Dict,
+    settings: dict,
     show_back_button=True,
     show_advanced_settings=False,
 ) -> InlineKeyboardMarkup:
@@ -412,7 +412,7 @@ def build_settings_keyboard(
 
 def build_voice_messages_settings_keyboard(
     language_code: str,
-    settings: Dict,
+    settings: dict,
     model: Optional[Model] = None,
 ) -> InlineKeyboardMarkup:
     buttons = [

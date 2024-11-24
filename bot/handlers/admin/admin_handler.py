@@ -3,6 +3,7 @@ from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
 
+from bot.handlers.admin.ads_handler import handle_ads
 from bot.handlers.admin.ban_handler import handle_ban
 from bot.handlers.admin.blast_handler import handle_blast
 from bot.handlers.admin.catalog_handler import handle_manage_catalog
@@ -43,6 +44,8 @@ async def handle_admin_selection(callback_query: CallbackQuery, state: FSMContex
         await handle_manage_catalog(callback_query.message, str(callback_query.from_user.id), state)
     elif action == 'statistics':
         await handle_statistics(callback_query.message, str(callback_query.from_user.id), state)
+    elif action == 'ads':
+        await handle_ads(callback_query.message, str(callback_query.from_user.id), state)
     elif action == 'blast':
         await handle_blast(callback_query.message, str(callback_query.from_user.id), state)
     elif action == 'ban':

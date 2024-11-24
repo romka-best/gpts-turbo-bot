@@ -42,7 +42,7 @@ Access to AI:
 
 ━ 🎵 Music Models
     ┣ 🎺 MusicGen
-    ┗ 🎸 Suno 3.5
+    ┗ 🎸 Suno 4.0
 """,
     )
     await bot.set_my_description(
@@ -71,7 +71,7 @@ Access to AI:
 
 ━ 🎵 Музыкальные
     ┣ 🎺 MusicGen
-    ┗ 🎸 Suno 3.5
+    ┗ 🎸 Suno 4.0
 """,
         language_code='ru',
     )

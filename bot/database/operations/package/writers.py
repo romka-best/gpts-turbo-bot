@@ -3,14 +3,14 @@ from typing import Optional
 
 from bot.database.main import firebase
 from bot.database.models.common import Currency, PaymentMethod
-from bot.database.models.package import Package, PackageType, PackageStatus
+from bot.database.models.package import Package, PackageStatus
 from bot.database.operations.package.helpers import create_package_object
 
 
 async def write_package(
     package_id: Optional[str],
     user_id: str,
-    type: PackageType,
+    product_id: str,
     status: PackageStatus,
     currency: Currency,
     amount: float,
@@ -23,7 +23,7 @@ async def write_package(
     package = await create_package_object(
         package_id,
         user_id,
-        type,
+        product_id,
         status,
         currency,
         amount,

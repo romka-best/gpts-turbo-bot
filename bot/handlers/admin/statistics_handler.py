@@ -11,17 +11,19 @@ from google.cloud.firestore_v1 import FieldFilter
 
 from bot.config import config
 from bot.database.main import firebase
-from bot.database.models.common import Model, MidjourneyAction, SunoMode, Currency, PhotoshopAIAction
+from bot.database.models.common import Currency
 from bot.database.models.feedback import FeedbackStatus
 from bot.database.models.game import GameType
 from bot.database.models.generation import GenerationReaction
-from bot.database.models.subscription import SubscriptionType, SubscriptionStatus
-from bot.database.models.transaction import TransactionType, ServiceType, Transaction
+from bot.database.models.product import ProductType, ProductCategory, Product
+from bot.database.models.subscription import SubscriptionStatus
+from bot.database.models.transaction import Transaction, TransactionType
 from bot.database.operations.feedback.getters import get_count_of_feedbacks
 from bot.database.operations.game.getters import get_count_of_games, get_sum_of_games_reward
 from bot.database.operations.generation.getters import get_count_of_generations
+from bot.database.operations.product.getters import get_products
 from bot.database.operations.promo_code.getters import get_count_of_used_promo_codes
-from bot.database.operations.subscription.getters import get_count_of_subscriptions
+from bot.database.operations.subscription.getters import get_count_of_subscriptions, get_subscription
 from bot.database.operations.transaction.writers import write_transaction
 from bot.database.operations.user.getters import get_user, get_count_of_users, get_count_of_users_referred_by
 from bot.keyboards.admin.admin import build_admin_keyboard
@@ -62,15 +64,15 @@ async def get_zero():
 
 
 async def get_statistics_by_transactions_query(
+    products: list[Product],
     start_date: Optional[datetime] = None,
     end_date: Optional[datetime] = None,
 ):
-    free_users = set()
-    mini_users = set()
-    standard_users = set()
-    vip_users = set()
-    premium_users = set()
-    unlimited_users = set()
+    subscription_users = {
+        product.id: set() for product in products if product.type == ProductType.SUBSCRIPTION
+    }
+    subscription_users['FREE'] = set()
+
     paid_users = set()
     activated_users = set()
 
@@ -84,19 +86,23 @@ async def get_statistics_by_transactions_query(
         'BONUS': 0,
     }
     count_all_transactions = {
-        value: default_transaction_nested_dict.copy() for key, value in vars(ServiceType).items()
-        if not key.startswith('__')
+        product.id: default_transaction_nested_dict.copy() for product in products
     }
+    count_all_transactions['FREE'] = default_transaction_nested_dict.copy()
+    count_all_transactions['SERVER'] = default_transaction_nested_dict.copy()
+    count_all_transactions['DATABASE'] = default_transaction_nested_dict.copy()
+    count_all_transactions['OTHER'] = default_transaction_nested_dict.copy()
 
     count_income_money_total = 0
     count_income_money = {
-        value: 0 for key, value in vars(ServiceType).items()
-        if not key.startswith('__') and value not in {
-            ServiceType.SERVER,
-            ServiceType.DATABASE,
+        product.id: 0 for product in products
+        if product.id not in {
+            'SERVER',
+            'DATABASE',
         }
     }
     count_income_money.update({
+        'OTHER': 0,
         'SUBSCRIPTION_ALL': 0,
         'PACKAGES_ALL': 0,
         'AVERAGE_PRICE': 0,
@@ -111,61 +117,27 @@ async def get_statistics_by_transactions_query(
         'ALL': 0,
     }
     count_expense_money = {
-        value: default_expense_money_nested_dict.copy() for key, value in vars(ServiceType).items()
-        if not key.startswith('__') and value not in {
-            ServiceType.ADDITIONAL_CHATS,
-            ServiceType.FAST_MESSAGES,
-            ServiceType.ACCESS_TO_CATALOG,
-        }
+        product.id: default_expense_money_nested_dict.copy() for product in products
     }
-    count_expense_money[SubscriptionType.FREE] = default_expense_money_nested_dict.copy()
-    count_expense_money['ALL'] = 0
-
-    count_midjourney_usage = {
-        MidjourneyAction.IMAGINE: 0,
-        MidjourneyAction.UPSCALE: 0,
-        MidjourneyAction.VARIATION: 0,
-        MidjourneyAction.REROLL: 0,
+    count_expense_money.update({
+        'FREE': default_expense_money_nested_dict.copy(),
+        'SERVER': default_expense_money_nested_dict.copy(),
+        'DATABASE': default_expense_money_nested_dict.copy(),
+        'OTHER': default_expense_money_nested_dict.copy(),
         'ALL': 0,
-    }
-    count_face_swap_usage = {
-        'CUSTOM': 0,
-        'ALL': 0,
-    }
-    count_photoshop_ai_usage = {
-        PhotoshopAIAction.RESTORATION: 0,
-        PhotoshopAIAction.COLORIZATION: 0,
-        PhotoshopAIAction.REMOVAL_BACKGROUND: 0,
-        'ALL': 0,
-    }
-    count_suno_usage = {
-        SunoMode.SIMPLE: 0,
-        SunoMode.CUSTOM: 0,
-        'ALL': 0,
-    }
+    })
 
     service_subscriptions = [
-        ServiceType.MINI,
-        ServiceType.STANDARD,
-        ServiceType.VIP,
-        ServiceType.PREMIUM,
-        ServiceType.UNLIMITED,
+        product.id for product in products
+        if product.type == ProductType.SUBSCRIPTION
     ]
     service_ai_models = [
-        ServiceType.CHAT_GPT3_TURBO, ServiceType.CHAT_GPT4_TURBO,
-        ServiceType.CHAT_GPT4_OMNI, ServiceType.CHAT_GPT4_OMNI_MINI,
-        ServiceType.CHAT_GPT_O_1_MINI, ServiceType.CHAT_GPT_O_1_PREVIEW,
-        ServiceType.CLAUDE_3_HAIKU, ServiceType.CLAUDE_3_SONNET, ServiceType.CLAUDE_3_OPUS,
-        ServiceType.GEMINI_1_FLASH, ServiceType.GEMINI_1_PRO, ServiceType.GEMINI_1_ULTRA,
-        ServiceType.DALL_E, ServiceType.MIDJOURNEY, ServiceType.STABLE_DIFFUSION, ServiceType.FLUX,
-        ServiceType.FACE_SWAP, ServiceType.PHOTOSHOP_AI,
-        ServiceType.MUSIC_GEN, ServiceType.SUNO,
+        product.id for product in products
+        if product.type == ProductType.PACKAGE and product.category != ProductCategory.OTHER
     ]
     service_packages = service_ai_models + [
-        ServiceType.ADDITIONAL_CHATS,
-        ServiceType.ACCESS_TO_CATALOG,
-        ServiceType.VOICE_MESSAGES,
-        ServiceType.FAST_MESSAGES,
+        product.id for product in products
+        if product.type == ProductType.PACKAGE and product.category == ProductCategory.OTHER
     ]
 
     transactions_query = firebase.db.collection(Transaction.COLLECTION_NAME).order_by('created_at')
@@ -198,116 +170,67 @@ async def get_statistics_by_transactions_query(
             else:
                 transaction_user = user_cache[transaction.user_id]
 
-            if transaction_user.subscription_type == SubscriptionType.FREE:
-                free_users.add(transaction_user.id)
-            elif transaction_user.subscription_type == SubscriptionType.MINI:
-                mini_users.add(transaction_user.id)
-            elif transaction_user.subscription_type == SubscriptionType.STANDARD:
-                standard_users.add(transaction_user.id)
-            elif transaction_user.subscription_type == SubscriptionType.VIP:
-                vip_users.add(transaction_user.id)
-            elif transaction_user.subscription_type == SubscriptionType.PREMIUM:
-                premium_users.add(transaction_user.id)
-            elif transaction_user.subscription_type == SubscriptionType.UNLIMITED:
-                unlimited_users.add(transaction_user.id)
+            if not transaction_user.subscription_id:
+                subscription_users['FREE'].add(transaction_user.id)
+            else:
+                transaction_user_subscription = await get_subscription(transaction_user.subscription_id)
+                subscription_users[transaction_user_subscription.product_id].add(transaction_user.id)
             activated_users.add(transaction.user_id)
 
             if transaction.type == TransactionType.INCOME:
                 count_income_money_total += 1
+                transaction_net = transaction.clear_amount
                 if transaction.currency == Currency.USD:
-                    count_income_money[transaction.service] += transaction.clear_amount * 100
-                    if transaction.service in service_subscriptions:
-                        count_income_money['SUBSCRIPTION_ALL'] += transaction.clear_amount * 100
-                    elif transaction.service in service_packages:
-                        count_income_money['PACKAGES_ALL'] += transaction.clear_amount * 100
-                    count_income_money['ALL'] += transaction.clear_amount * 100
-                elif transaction.currency == Currency.RUB:
-                    count_income_money[transaction.service] += transaction.clear_amount
-                    if transaction.service in service_subscriptions:
-                        count_income_money['SUBSCRIPTION_ALL'] += transaction.clear_amount
-                    elif transaction.service in service_packages:
-                        count_income_money['PACKAGES_ALL'] += transaction.clear_amount
-                    count_income_money['ALL'] += transaction.clear_amount
-                else:
-                    count_income_money[transaction.service] += transaction.clear_amount * 2
-                    if transaction.service in service_subscriptions:
-                        count_income_money['SUBSCRIPTION_ALL'] += transaction.clear_amount * 2
-                    elif transaction.service in service_packages:
-                        count_income_money['PACKAGES_ALL'] += transaction.clear_amount * 2
-                    count_income_money['ALL'] += transaction.clear_amount * 2
+                    transaction_net *= 100
+                elif transaction.currency == Currency.XTR:
+                    transaction_net *= 2
 
-                count_all_transactions[transaction.service]['BONUS'] += 1 \
+                count_income_money[transaction.product_id] += transaction_net
+                if transaction.product_id in service_subscriptions:
+                    count_income_money['SUBSCRIPTION_ALL'] += transaction_net
+                elif transaction.product_id in service_packages:
+                    count_income_money['PACKAGES_ALL'] += transaction_net
+                count_income_money['ALL'] += transaction_net
+
+                count_all_transactions[transaction.product_id]['BONUS'] += 1 \
                     if transaction.details.get('is_bonus', False) \
                     else 0
 
-                if transaction.clear_amount > 0:
+                if transaction_net > 0:
                     paid_users.add(transaction.user_id)
             elif transaction.type == TransactionType.EXPENSE:
-                count_all_transactions[transaction.service]['SUCCESS'] += transaction.quantity \
-                    if not transaction.details.get('has_error', False) \
-                    else 0
-                count_all_transactions[transaction.service]['FAIL'] += transaction.quantity \
-                    if transaction.details.get('has_error', False) \
-                    else 0
-                count_all_transactions[transaction.service]['EXAMPLE'] += transaction.quantity \
-                    if transaction.details.get('is_suggestion', False) \
-                    else 0
-                count_all_transactions[transaction.service]['ALL'] += transaction.quantity
+                has_error = transaction.details.get('has_error', False)
+                is_suggestion = transaction.details.get('is_suggestion', False)
 
-                count_expense_money[transaction.service]['AVERAGE_EXAMPLE_PRICE'] += transaction.amount \
-                    if transaction.details.get('is_suggestion', False) \
+                count_all_transactions[transaction.product_id]['SUCCESS'] += transaction.quantity \
+                    if not has_error \
                     else 0
-                count_expense_money[transaction.service]['EXAMPLE_ALL'] += transaction.amount \
-                    if transaction.details.get('is_suggestion', False) \
+                count_all_transactions[transaction.product_id]['FAIL'] += transaction.quantity \
+                    if has_error \
                     else 0
-                count_expense_money[transaction.service]['AVERAGE_PRICE'] += transaction.amount \
-                    if not transaction.details.get('is_suggestion', False) \
+                count_all_transactions[transaction.product_id]['EXAMPLE'] += transaction.quantity \
+                    if is_suggestion \
                     else 0
-                count_expense_money[transaction.service]['ALL'] += transaction.amount
+                count_all_transactions[transaction.product_id]['ALL'] += transaction.quantity
+
+                count_expense_money[transaction.product_id]['AVERAGE_EXAMPLE_PRICE'] += transaction.amount \
+                    if is_suggestion \
+                    else 0
+                count_expense_money[transaction.product_id]['EXAMPLE_ALL'] += transaction.amount \
+                    if is_suggestion \
+                    else 0
+                count_expense_money[transaction.product_id]['AVERAGE_PRICE'] += transaction.amount \
+                    if not is_suggestion \
+                    else 0
+                count_expense_money[transaction.product_id]['ALL'] += transaction.amount
                 count_expense_money['ALL'] += transaction.amount
 
                 is_super_admin = transaction.user_id == config.SUPER_ADMIN_ID
-                if transaction.user_id in free_users and not is_super_admin:
-                    count_expense_money[SubscriptionType.FREE]['ALL'] += transaction.amount
-                elif transaction.user_id in mini_users and not is_super_admin:
-                    count_expense_money[SubscriptionType.MINI]['ALL'] += transaction.amount
-                elif transaction.user_id in standard_users and not is_super_admin:
-                    count_expense_money[SubscriptionType.STANDARD]['ALL'] += transaction.amount
-                elif transaction.user_id in vip_users and not is_super_admin:
-                    count_expense_money[SubscriptionType.VIP]['ALL'] += transaction.amount
-                elif transaction.user_id in premium_users and not is_super_admin:
-                    count_expense_money[SubscriptionType.PREMIUM]['ALL'] += transaction.amount
-                elif transaction.user_id in unlimited_users and not is_super_admin:
-                    count_expense_money[SubscriptionType.UNLIMITED]['ALL'] += transaction.amount
-
-                if transaction.service == ServiceType.MIDJOURNEY:
-                    midjourney_action = transaction.details.get('type', MidjourneyAction.PAYMENT)
-                    count_midjourney_usage[midjourney_action] = count_midjourney_usage.get(
-                        midjourney_action,
-                        0,
-                    ) + transaction.quantity
-
-                if transaction.service == ServiceType.FACE_SWAP and transaction.quantity != 0:
-                    face_swap_name = transaction.details.get('name', 'UNKNOWN')
-                    face_swap_images = transaction.details.get('images', ['UNKNOWN'])
-                    count_face_swap_usage[face_swap_name] = count_face_swap_usage.get(
-                        face_swap_name,
-                        0,
-                    ) + len(face_swap_images)
-
-                if transaction.service == ServiceType.PHOTOSHOP_AI:
-                    photoshop_ai_action = transaction.details.get('type', 'UNKNOWN')
-                    count_photoshop_ai_usage[photoshop_ai_action] = count_photoshop_ai_usage.get(
-                        photoshop_ai_action,
-                        0,
-                    ) + transaction.quantity
-
-                if transaction.service == ServiceType.SUNO:
-                    suno_mode = transaction.details.get('mode', 'Payment')
-                    count_suno_usage[suno_mode] = count_suno_usage.get(
-                        suno_mode,
-                        0,
-                    ) + transaction.quantity
+                if not is_super_admin:
+                    for key, value in subscription_users.items():
+                        if transaction.user_id in value:
+                            count_expense_money[key]['ALL'] += transaction.amount
+                            break
 
         if count < config.BATCH_SIZE:
             is_running = False
@@ -328,42 +251,18 @@ async def get_statistics_by_transactions_query(
             if total > 0 else 0
         count_expense_money[service]['AVERAGE_EXAMPLE_PRICE'] = average_example_price / examples \
             if examples > 0 else 0
-    count_expense_money[SubscriptionType.FREE]['AVERAGE_PRICE'] = (
-        count_expense_money[SubscriptionType.FREE]['ALL'] / len(free_users)
-    ) if len(free_users) else 0
-    count_expense_money[SubscriptionType.MINI]['AVERAGE_PRICE'] = (
-        count_expense_money[SubscriptionType.MINI]['ALL'] / len(mini_users)
-    ) if len(mini_users) else 0
-    count_expense_money[SubscriptionType.STANDARD]['AVERAGE_PRICE'] = (
-        count_expense_money[SubscriptionType.STANDARD]['ALL'] / len(standard_users)
-    ) if len(standard_users) else 0
-    count_expense_money[SubscriptionType.VIP]['AVERAGE_PRICE'] = (
-        count_expense_money[SubscriptionType.VIP]['ALL'] / len(vip_users)
-    ) if len(vip_users) else 0
-    count_expense_money[SubscriptionType.PREMIUM]['AVERAGE_PRICE'] = (
-        count_expense_money[SubscriptionType.PREMIUM]['ALL'] / len(premium_users)
-    ) if len(premium_users) else 0
-    count_expense_money[SubscriptionType.UNLIMITED]['AVERAGE_PRICE'] = (
-        count_expense_money[SubscriptionType.UNLIMITED]['ALL'] / len(unlimited_users)
-    ) if len(unlimited_users) else 0
+    for key, value in subscription_users.items():
+        count_expense_money[key]['AVERAGE_PRICE'] = (
+            count_expense_money[key]['ALL'] / len(value)
+        ) if len(value) else 0
 
     return (
-        free_users,
-        mini_users,
-        standard_users,
-        vip_users,
-        premium_users,
-        unlimited_users,
         paid_users,
         activated_users,
         count_all_transactions,
         count_income_money_total,
         count_income_money,
         count_expense_money,
-        count_midjourney_usage,
-        count_face_swap_usage,
-        count_photoshop_ai_usage,
-        count_suno_usage,
     )
 
 
@@ -438,6 +337,35 @@ async def handle_get_statistics(language_code: str, period: str):
         )
     else:
         period = 'всё время'
+
+    products = await get_products()
+    products = sorted(products, key=lambda p: p.order)
+
+    text_products = {
+        product.id: product.names.get(language_code) for product in products
+        if product.category == ProductCategory.TEXT
+    }
+    image_products = {
+        product.id: product.names.get(language_code) for product in products
+        if product.category == ProductCategory.IMAGE
+    }
+    music_products = {
+        product.id: product.names.get(language_code) for product in products
+        if product.category == ProductCategory.MUSIC
+    }
+    ai_products = text_products | image_products | music_products
+
+    package_products = {
+        product.id: product.names.get(language_code) for product in products
+        if product.type == ProductType.PACKAGE
+    }
+
+    tech_products = {
+        product.id: product.names.get(language_code) for product in products
+        if product.type == ProductType.PACKAGE and 'voice answers' in product.names.get('en', '').lower()
+    }
+    tech_products['SERVER'] = get_localization(language_code).SERVER
+    tech_products['DATABASE'] = get_localization(language_code).DATABASE
 
     # users
     (
@@ -517,24 +445,27 @@ async def handle_get_statistics(language_code: str, period: str):
         count_all_users_before - (count_english_users_before + count_russian_users_before),
     )
 
-    subscriptions = [value for key, value in vars(SubscriptionType).items() if not key.startswith('__')]
+    subscriptions = [
+        product.id for product in products
+        if product.type == ProductType.SUBSCRIPTION
+    ]
     count_subscription_users = {}
     count_subscription_users_before = {}
     subscription_tasks = [
         get_count_of_subscriptions(
             start_date=start_date,
             end_date=end_date,
-            type=subscription,
+            product_id=subscription,
             statuses=[SubscriptionStatus.ACTIVE, SubscriptionStatus.CANCELED],
-        ) if start_date and end_date else get_count_of_users(
-            subscription_type=subscription,
+        ) if start_date and end_date else get_count_of_users(  # TODO
+            subscription_id=subscription,
         ) for subscription in subscriptions
     ]
     subscription_before_tasks = [
         get_count_of_subscriptions(
             start_date=start_date_before,
             end_date=end_date_before,
-            type=subscription,
+            product_id=subscription,
             statuses=[SubscriptionStatus.ACTIVE, SubscriptionStatus.CANCELED],
         ) if start_date_before and end_date_before else get_zero() for subscription in subscriptions
     ]
@@ -544,196 +475,86 @@ async def handle_get_statistics(language_code: str, period: str):
         asyncio.gather(*subscription_before_tasks)
     )
 
+    count_subscription_users['FREE'] = 0
+    count_subscription_users_before['FREE'] = 0
     for subscription, count, count_before in zip(subscriptions, subscription_results, subscription_before_results):
         count_subscription_users[subscription] = count
         count_subscription_users_before[subscription] = count_before
 
+    subscription_products = {}
+    for product in products:
+        if product.type == ProductType.SUBSCRIPTION and product.category == ProductCategory.MONTHLY:
+            subscription_products[product.id] = f'{get_localization(language_code).MONTHLY} {product.names.get(language_code)}'
+    for product in products:
+        if product.type == ProductType.SUBSCRIPTION and product.category == ProductCategory.YEARLY:
+            subscription_products[product.id] = f'{get_localization(language_code).YEARLY} {product.names.get(language_code)}'
+
     count_users = await get_count_of_users()
-    count_subscription_users[SubscriptionType.FREE] = abs(
+    count_subscription_users['FREE'] = abs(
         count_users - sum(count_subscription_users.values())
-    ) if count_subscription_users[SubscriptionType.FREE] == 0 \
-        else count_subscription_users[SubscriptionType.FREE]
-    count_subscription_users_before[SubscriptionType.FREE] = abs(
+    ) if count_subscription_users['FREE'] == 0 \
+        else count_subscription_users['FREE']
+    count_subscription_users_before['FREE'] = abs(
         count_users - sum(count_subscription_users_before.values())
-    ) if count_subscription_users_before[SubscriptionType.FREE] == 0 \
-        else count_subscription_users_before[SubscriptionType.FREE]
+    ) if count_subscription_users_before['FREE'] == 0 \
+        else count_subscription_users_before['FREE']
 
     # reactions
+    products_with_reactions = {
+        product.id: product.names.get(language_code) for product in products
+        if product.details.get('has_reactions', False)
+    }
     default_reactions_nested_dict = {
         GenerationReaction.LIKED: 0,
         GenerationReaction.DISLIKED: 0,
         GenerationReaction.NONE: 0,
     }
     count_reactions = {
-        value: default_reactions_nested_dict.copy() for key, value in vars(ServiceType).items()
-        if not key.startswith('__') and value in {
-            ServiceType.MIDJOURNEY,
-            ServiceType.STABLE_DIFFUSION,
-            ServiceType.FLUX,
-            ServiceType.FACE_SWAP,
-            ServiceType.PHOTOSHOP_AI,
-            ServiceType.MUSIC_GEN,
-            ServiceType.SUNO,
-        }
+        product_with_reactions: default_reactions_nested_dict.copy()
+        for product_with_reactions in products_with_reactions
     }
     count_reactions_before = {
-        value: default_reactions_nested_dict.copy() for key, value in vars(ServiceType).items()
-        if not key.startswith('__') and value in {
-            ServiceType.MIDJOURNEY,
-            ServiceType.STABLE_DIFFUSION,
-            ServiceType.FLUX,
-            ServiceType.FACE_SWAP,
-            ServiceType.PHOTOSHOP_AI,
-            ServiceType.MUSIC_GEN,
-            ServiceType.SUNO,
-        }
+        product_with_reactions: default_reactions_nested_dict.copy()
+        for product_with_reactions in products_with_reactions
     }
 
-    for generation_reaction in [GenerationReaction.LIKED, GenerationReaction.DISLIKED, GenerationReaction.NONE]:
-        (
-            count_reactions[ServiceType.MIDJOURNEY][generation_reaction],
-            count_reactions_before[ServiceType.MIDJOURNEY][generation_reaction],
-            count_reactions[ServiceType.STABLE_DIFFUSION][generation_reaction],
-            count_reactions_before[ServiceType.STABLE_DIFFUSION][generation_reaction],
-            count_reactions[ServiceType.FLUX][generation_reaction],
-            count_reactions_before[ServiceType.FLUX][generation_reaction],
-            count_reactions[ServiceType.FACE_SWAP][generation_reaction],
-            count_reactions_before[ServiceType.FACE_SWAP][generation_reaction],
-            count_reactions[ServiceType.PHOTOSHOP_AI][generation_reaction],
-            count_reactions_before[ServiceType.PHOTOSHOP_AI][generation_reaction],
-            count_reactions[ServiceType.MUSIC_GEN][generation_reaction],
-            count_reactions_before[ServiceType.MUSIC_GEN][generation_reaction],
-            count_reactions[ServiceType.SUNO][generation_reaction],
-            count_reactions_before[ServiceType.SUNO][generation_reaction],
-        ) = await asyncio.gather(
-            get_count_of_generations(
+    for product_with_reactions in products_with_reactions:
+        for generation_reaction in [GenerationReaction.LIKED, GenerationReaction.DISLIKED, GenerationReaction.NONE]:
+            count_reactions[product_with_reactions][generation_reaction] = await get_count_of_generations(
                 start_date=start_date,
                 end_date=end_date,
                 reaction=generation_reaction,
-                model=Model.MIDJOURNEY,
-                action=MidjourneyAction.UPSCALE,
-            ),
-            get_count_of_generations(
-                start_date=start_date_before,
-                end_date=end_date_before,
-                reaction=generation_reaction,
-                model=Model.MIDJOURNEY,
-                action=MidjourneyAction.UPSCALE,
-            ) if start_date_before and end_date_before else get_zero(),
-            get_count_of_generations(
+                product_id=product_with_reactions,
+            )
+            count_reactions_before[product_with_reactions][generation_reaction] = await get_count_of_generations(
                 start_date=start_date,
                 end_date=end_date,
                 reaction=generation_reaction,
-                model=Model.STABLE_DIFFUSION,
-            ),
-            get_count_of_generations(
-                start_date=start_date_before,
-                end_date=end_date_before,
-                reaction=generation_reaction,
-                model=Model.STABLE_DIFFUSION,
-            ) if start_date_before and end_date_before else get_zero(),
-            get_count_of_generations(
-                start_date=start_date,
-                end_date=end_date,
-                reaction=generation_reaction,
-                model=Model.FLUX,
-            ),
-            get_count_of_generations(
-                start_date=start_date_before,
-                end_date=end_date_before,
-                reaction=generation_reaction,
-                model=Model.FLUX,
-            ) if start_date_before and end_date_before else get_zero(),
-            get_count_of_generations(
-                start_date=start_date,
-                end_date=end_date,
-                reaction=generation_reaction,
-                model=Model.FACE_SWAP,
-            ),
-            get_count_of_generations(
-                start_date=start_date_before,
-                end_date=end_date_before,
-                reaction=generation_reaction,
-                model=Model.FACE_SWAP,
-            ) if start_date_before and end_date_before else get_zero(),
-            get_count_of_generations(
-                start_date=start_date,
-                end_date=end_date,
-                reaction=generation_reaction,
-                model=Model.PHOTOSHOP_AI,
-            ),
-            get_count_of_generations(
-                start_date=start_date_before,
-                end_date=end_date_before,
-                reaction=generation_reaction,
-                model=Model.PHOTOSHOP_AI,
-            ) if start_date_before and end_date_before else get_zero(),
-            get_count_of_generations(
-                start_date=start_date,
-                end_date=end_date,
-                reaction=generation_reaction,
-                model=Model.MUSIC_GEN,
-            ),
-            get_count_of_generations(
-                start_date=start_date_before,
-                end_date=end_date_before,
-                reaction=generation_reaction,
-                model=Model.MUSIC_GEN,
-            ) if start_date_before and end_date_before else get_zero(),
-            get_count_of_generations(
-                start_date=start_date,
-                end_date=end_date,
-                reaction=generation_reaction,
-                model=Model.SUNO,
-            ),
-            get_count_of_generations(
-                start_date=start_date_before,
-                end_date=end_date_before,
-                reaction=generation_reaction,
-                model=Model.SUNO,
-            ) if start_date_before and end_date_before else get_zero(),
-        )
+                product_id=product_with_reactions,
+            ) if start_date_before and end_date_before else 0
 
     # transactions
     (
-        free_users,
-        mini_users,
-        standard_users,
-        vip_users,
-        premium_users,
-        unlimited_users,
         paid_users,
         activated_users,
         count_all_transactions,
         count_income_money_total,
         count_income_money,
         count_expense_money,
-        count_midjourney_usage,
-        count_face_swap_usage,
-        count_photoshop_ai_usage,
-        count_suno_usage,
     ) = await get_statistics_by_transactions_query(
+        products=products,
         start_date=start_date,
         end_date=end_date,
     )
     (
-        free_users_before,
-        mini_users_before,
-        standard_users_before,
-        vip_users_before,
-        premium_users_before,
-        unlimited_users_before,
         paid_users_before,
         activated_users_before,
         count_all_transactions_before,
         count_income_money_total_before,
         count_income_money_before,
         count_expense_money_before,
-        count_midjourney_usage_before,
-        count_face_swap_usage_before,
-        count_photoshop_ai_usage_before,
-        count_suno_usage_before,
     ) = await get_statistics_by_transactions_query(
+        products=products,
         start_date=start_date_before,
         end_date=end_date_before,
     )
@@ -878,12 +699,7 @@ async def handle_get_statistics(language_code: str, period: str):
         'PLAY_GAMES': 0,
         'ALL': 0,
     }
-    count_credits_before = {
-        'INVITE_FRIENDS': 0,
-        'LEAVE_FEEDBACKS': 0,
-        'PLAY_GAMES': 0,
-        'ALL': 0,
-    }
+    count_credits_before = count_credits.copy()
     count_credits['INVITE_FRIENDS'] = 50 * count_referred_users
     count_credits_before['INVITE_FRIENDS'] = 50 * count_referred_users_before
     count_credits['LEAVE_FEEDBACKS'] = 25 * approved_feedbacks
@@ -910,14 +726,10 @@ async def handle_get_statistics(language_code: str, period: str):
     count_income_money['VAL'] = count_income_money['ALL'] - count_expense_money['ALL'] * 100
     count_income_money_before['VAL'] = count_income_money_before['ALL'] - count_expense_money_before['ALL'] * 100
 
-    count_midjourney_usage['ALL'] = sum(count_midjourney_usage.values())
-    count_face_swap_usage['ALL'] = sum(count_face_swap_usage.values())
-    count_photoshop_ai_usage['ALL'] = sum(count_photoshop_ai_usage.values())
-    count_suno_usage['ALL'] = sum(count_suno_usage.values())
-
     texts = {
         'users': get_localization(language_code).statistics_users(
             period=period,
+            subscription_products=subscription_products,
             count_all_users=count_all_users,
             count_all_users_before=count_all_users_before,
             count_activated_users=count_activated_users,
@@ -939,25 +751,25 @@ async def handle_get_statistics(language_code: str, period: str):
         ),
         'text_models': get_localization(language_code).statistics_text_models(
             period=period,
+            text_products=text_products,
             count_all_transactions=count_all_transactions,
             count_all_transactions_before=count_all_transactions_before,
         ),
         'image_models': get_localization(language_code).statistics_image_models(
             period=period,
+            image_products=image_products,
             count_all_transactions=count_all_transactions,
             count_all_transactions_before=count_all_transactions_before,
-            count_midjourney_usage=count_midjourney_usage,
-            count_face_swap_usage=count_face_swap_usage,
-            count_photoshop_ai_usage=count_photoshop_ai_usage,
         ),
         'music_models': get_localization(language_code).statistics_music_models(
             period=period,
+            music_products=music_products,
             count_all_transactions=count_all_transactions,
             count_all_transactions_before=count_all_transactions_before,
-            count_suno_usage=count_suno_usage,
         ),
         'reactions': get_localization(language_code).statistics_reactions(
             period=period,
+            products_with_reactions=products_with_reactions,
             count_reactions=count_reactions,
             count_reactions_before=count_reactions_before,
             count_feedbacks=count_feedbacks,
@@ -967,6 +779,7 @@ async def handle_get_statistics(language_code: str, period: str):
         ),
         'bonuses': get_localization(language_code).statistics_bonuses(
             period=period,
+            package_products=package_products,
             count_credits=count_credits,
             count_credits_before=count_credits_before,
             count_all_transactions=count_all_transactions,
@@ -976,11 +789,16 @@ async def handle_get_statistics(language_code: str, period: str):
         ),
         'expenses': get_localization(language_code).statistics_expenses(
             period=period,
+            ai_products=ai_products,
+            tech_products=tech_products,
+            subscription_products=subscription_products,
             count_expense_money=count_expense_money,
             count_expense_money_before=count_expense_money_before,
         ),
         'incomes': get_localization(language_code).statistics_incomes(
             period=period,
+            subscription_products=subscription_products,
+            package_products=package_products,
             count_income_money=count_income_money,
             count_income_money_before=count_income_money_before,
         ),
@@ -1038,7 +856,8 @@ async def handle_statistics_write_transaction_selection(callback_query: Callback
     else:
         user_language_code = await get_user_language(str(callback_query.from_user.id), state.storage)
 
-        reply_markup = build_statistics_choose_service_keyboard(user_language_code, transaction_type)
+        products = await get_products()
+        reply_markup = build_statistics_choose_service_keyboard(user_language_code, products, transaction_type)
         await callback_query.message.edit_text(
             text=get_localization(user_language_code).STATISTICS_CHOOSE_SERVICE,
             reply_markup=reply_markup
@@ -1051,7 +870,7 @@ async def handle_statistics_write_transaction_selection(callback_query: Callback
 async def handle_statistics_choose_service_selection(callback_query: CallbackQuery, state: FSMContext):
     await callback_query.answer()
 
-    service_type = callback_query.data.split(':')[1]
+    service_id = callback_query.data.split(':')[1]
     user_language_code = await get_user_language(str(callback_query.from_user.id), state.storage)
 
     reply_markup = build_statistics_choose_currency_keyboard(user_language_code)
@@ -1061,7 +880,7 @@ async def handle_statistics_choose_service_selection(callback_query: CallbackQue
     )
 
     await state.set_state(Statistics.waiting_for_statistics_service_quantity)
-    await state.update_data(service_type=service_type)
+    await state.update_data(service_id=service_id)
 
 
 @statistics_router.callback_query(lambda c: c.data.startswith('statistics_choose_currency:'))
@@ -1151,14 +970,14 @@ async def statistics_service_date_sent(message: Message, state: FSMContext):
         service_date = datetime.strptime(message.text, '%d.%m.%Y')
         service_amount = user_data['service_amount']
         service_quantity = user_data['service_quantity']
-        service_type = user_data['service_type']
+        service_id = user_data['service_id']
         transaction_type = user_data['transaction_type']
         currency = user_data['currency']
 
         await write_transaction(
             user_id=user_id,
             type=transaction_type,
-            service=service_type,
+            product_id=service_id,
             amount=service_amount,
             clear_amount=service_amount,
             currency=currency,

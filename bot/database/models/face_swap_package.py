@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from typing import Dict, List, TypedDict
+from typing import TypedDict
 
 from bot.database.models.user import UserGender
 
@@ -20,9 +20,9 @@ class FaceSwapPackage:
 
     id: str
     name: str
-    translated_names: Dict
+    translated_names: dict
     gender: UserGender
-    files: List[FaceSwapFileData]
+    files: list[FaceSwapFileData]
     status: FaceSwapPackageStatus
     created_at: datetime
     edited_at: datetime
@@ -31,9 +31,9 @@ class FaceSwapPackage:
         self,
         id: str,
         name: str,
-        translated_names: Dict,
+        translated_names: dict,
         gender: UserGender,
-        files: List[FaceSwapFileData],
+        files: list[FaceSwapFileData],
         status: FaceSwapPackageStatus,
         created_at=None,
         edited_at=None,
@@ -59,7 +59,7 @@ class UsedFaceSwapPackage:
     id: str
     user_id: str
     package_id: str
-    used_images: List[str]
+    used_images: list[str]
     created_at: datetime
     edited_at: datetime
 
@@ -68,7 +68,7 @@ class UsedFaceSwapPackage:
         id: str,
         user_id: str,
         package_id: str,
-        used_images: List[str],
+        used_images: list[str],
         created_at=None,
         edited_at=None,
     ):

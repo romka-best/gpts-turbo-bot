@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional, List
+from typing import Optional
 
 from google.cloud.firestore_v1 import FieldFilter
 
@@ -23,13 +23,12 @@ async def get_chat_by_user_id(user_id: str) -> Optional[Chat]:
     if user:
         chat = await get_chat(user.current_chat_id)
         return chat
-    return None
 
 
 async def get_chats(
     start_date: Optional[datetime] = None,
     end_date: Optional[datetime] = None,
-) -> List[Chat]:
+) -> list[Chat]:
     chats_query = firebase.db.collection(Chat.COLLECTION_NAME)
 
     if start_date:
@@ -41,7 +40,7 @@ async def get_chats(
     return [Chat(**chat.to_dict()) async for chat in chats]
 
 
-async def get_chats_by_user_id(user_id: str) -> List[Chat]:
+async def get_chats_by_user_id(user_id: str) -> list[Chat]:
     chats_query = firebase.db.collection(Chat.COLLECTION_NAME).where(filter=FieldFilter('user_id', '==', user_id))
     chats = [Chat(**chat.to_dict()) async for chat in chats_query.stream()]
 

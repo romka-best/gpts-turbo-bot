@@ -36,30 +36,35 @@ async def info(message: Message, state: FSMContext):
 async def info_selection(callback_query: CallbackQuery, state: FSMContext):
     await callback_query.answer()
 
+    await handle_info_selection(callback_query, state, callback_query.data.split(':')[1], True)
+
+
+async def handle_info_selection(callback_query: CallbackQuery, state: FSMContext, model_type: str, is_edit=False):
     user_id = str(callback_query.from_user.id)
     user_language_code = await get_user_language(user_id, state.storage)
 
-    models_type = callback_query.data.split(':')[1]
-    if models_type == ModelType.TEXT:
+    if model_type == ModelType.TEXT:
         reply_keyboard = build_info_text_models_keyboard(user_language_code)
-        await callback_query.message.edit_text(
-            text=get_localization(user_language_code).INFO_TEXT_MODELS,
-            reply_markup=reply_keyboard,
-        )
-    elif models_type == ModelType.IMAGE:
+        text = get_localization(user_language_code).INFO_TEXT_MODELS
+    elif model_type == ModelType.IMAGE:
         reply_keyboard = build_info_image_models_keyboard(user_language_code)
-        await callback_query.message.edit_text(
-            text=get_localization(user_language_code).INFO_IMAGE_MODELS,
-            reply_markup=reply_keyboard,
-        )
-    elif models_type == ModelType.MUSIC:
+        text = get_localization(user_language_code).INFO_IMAGE_MODELS,
+    elif model_type == ModelType.MUSIC:
         reply_keyboard = build_info_music_models_keyboard(user_language_code)
+        text = get_localization(user_language_code).INFO_MUSIC_MODELS
+    else:
+        return
+
+    if is_edit:
         await callback_query.message.edit_text(
-            text=get_localization(user_language_code).INFO_MUSIC_MODELS,
+            text=text,
             reply_markup=reply_keyboard,
         )
     else:
-        await callback_query.message.delete()
+        await callback_query.message.answer(
+            text=text,
+            reply_markup=reply_keyboard,
+        )
 
 
 @info_router.callback_query(lambda c: c.data.startswith('info_text_models:'))

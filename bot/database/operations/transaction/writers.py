@@ -1,13 +1,13 @@
 from bot.database.main import firebase
 from bot.database.models.common import Currency
-from bot.database.models.transaction import Transaction, TransactionType, ServiceType
+from bot.database.models.transaction import Transaction, TransactionType
 from bot.database.operations.transaction.helpers import create_transaction_object
 
 
 async def write_transaction(
     user_id: str,
     type: TransactionType,
-    service: ServiceType,
+    product_id: str,
     amount: float,
     clear_amount: float,
     currency: Currency,
@@ -18,7 +18,7 @@ async def write_transaction(
     transaction = await create_transaction_object(
         user_id,
         type,
-        service,
+        product_id,
         amount,
         clear_amount,
         currency,
@@ -35,7 +35,7 @@ async def write_transaction_in_transaction(
     transaction,
     user_id: str,
     type: TransactionType,
-    service: ServiceType,
+    product_id: str,
     amount: float,
     clear_amount: float,
     currency: Currency,
@@ -46,7 +46,7 @@ async def write_transaction_in_transaction(
     transaction_object = await create_transaction_object(
         user_id,
         type,
-        service,
+        product_id,
         amount,
         clear_amount,
         currency,

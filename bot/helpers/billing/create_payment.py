@@ -1,15 +1,18 @@
 import json
 import logging
 import uuid
-from typing import Dict
+from typing import Optional
 
 import aiohttp
 import stripe
 from aiohttp import BasicAuth
+from pydantic import BaseModel
 from yookassa import Configuration
 
 from bot.config import config
 from bot.database.models.common import Currency, PaymentMethod
+from bot.database.models.product import Product
+from bot.database.models.user import User
 from bot.helpers.billing.generate_signature import generate_signature
 from bot.locales.main import get_localization
 
@@ -21,21 +24,41 @@ YOOKASSA_URL = 'https://api.yookassa.ru/v3'
 PAY_SELECTION_URL = 'https://webform.payselection.com'
 
 
+class OrderItem(BaseModel):
+    product: Product
+    price: float
+    quantity: Optional[int] = 1
+
+
 async def create_payment(
     payment_method: PaymentMethod,
-    user_id: str,
+    user: User,
     description: str,
     amount: float,
     language_code: str,
-    is_subscription: bool,
+    is_recurring: bool,
+    order_items: list[OrderItem],
     order_id=None,
-) -> Dict:
+    order_interval=None,
+) -> dict:
     if payment_method == PaymentMethod.YOOKASSA:
         url = f'{YOOKASSA_URL}/payments'
         headers = {
             'Content-Type': 'application/json',
             'Idempotence-Key': str(uuid.uuid4()),
         }
+        items = []
+        for order_item in order_items:
+            product, price, quantity = order_item.product, order_item.price, order_item.quantity
+            items.append({
+                'amount': {
+                    'value': price,
+                    'currency': Currency.RUB,
+                },
+                'description': product.names.get(language_code),
+                'vat_code': 1,
+                'quantity': quantity,
+            })
         payload = {
             'amount': {
                 'value': amount,
@@ -47,25 +70,15 @@ async def create_payment(
                 'locale': 'ru_RU' if language_code == 'ru' else 'en_US',
             },
             'capture': True,
-            'save_payment_method': is_subscription,
+            'save_payment_method': is_recurring,
             'description': description,
-            'merchant_customer_id': user_id,
+            'merchant_customer_id': user.id,
             'receipt': {
                 'customer': {
-                    'full_name': user_id,
+                    'full_name': user.id,
                     'email': 'me@romandanilov.com',
                 },
-                'items': [
-                    {
-                        'amount': {
-                            'value': amount,
-                            'currency': Currency.RUB,
-                        },
-                        'description': description,
-                        'vat_code': 1,
-                        'quantity': 1,
-                    }
-                ]
+                'items': items,
             },
         }
 
@@ -90,7 +103,7 @@ async def create_payment(
                 'Amount': f'{amount:.2f}',
                 'Currency': Currency.USD,
                 'Description': description,
-                'RebillFlag': is_subscription,
+                'RebillFlag': is_recurring,
                 'ExtraData': {
                     'ReturnUrl': config.BOT_URL,
                     'WebhookUrl': f'{config.WEBHOOK_URL}/payment/pay-selection'
@@ -115,39 +128,55 @@ async def create_payment(
                 if response.ok:
                     return body
     elif payment_method == PaymentMethod.STRIPE:
-        price = await stripe.Price.create_async(
-            product_data={
-                'name': description,
+        items = []
+        for order_item in order_items:
+            product, price, quantity = order_item.product, order_item.price, order_item.quantity
+
+            stripe_prices = await stripe.Price.list_async(product=product.stripe_id)
+            stripe_price_id = None
+            for stripe_price in stripe_prices:
+                if stripe_price.currency == Currency.USD.lower() and stripe_price.unit_amount == int(price * 100):
+                    stripe_price_id = stripe_price.id
+                    break
+            if stripe_price_id is None:
+                created_stripe_price = await stripe.Price.create_async(
+                    product=product.stripe_id,
+                    currency=Currency.USD.lower(),
+                    unit_amount=int(price * 100),
+                    recurring={'interval': order_interval} if is_recurring else None,
+                )
+                stripe_price_id = created_stripe_price.id
+
+            items.append({
+                'price': stripe_price_id,
+                'quantity': quantity,
+            })
+        payment_session = await stripe.checkout.Session.create_async(
+            customer=user.stripe_id,
+            customer_update={
+                'address': 'auto',
+                'name': 'auto',
             },
-            currency=Currency.USD.lower(),
-            unit_amount=int(amount * 100),
-            recurring={'interval': 'month'} if is_subscription else None,
-            metadata={
-                'order_id': order_id,
-            },
-        )
-        payment_link = await stripe.PaymentLink.create_async(
-            line_items=[
-                {
-                    'price': price.id,
-                    'quantity': 1,
-                },
-            ],
+            line_items=items,
+            mode='subscription' if is_recurring else 'payment',
             payment_intent_data={
                 'metadata': {
                     'order_id': order_id,
                 },
-            } if not is_subscription else None,
+            } if not is_recurring else None,
+            subscription_data={
+                'metadata': {
+                    'order_id': order_id,
+                },
+            } if is_recurring else None,
             automatic_tax={
                 'enabled': True,
             },
-            after_completion={
-                'type': 'redirect',
-                'redirect': {
-                    'url': config.BOT_URL,
-                },
+            adaptive_pricing={
+                'enabled': True,
             },
+            success_url=config.BOT_URL,
         )
-        return payment_link
+        return payment_session
     else:
         raise NotImplementedError(f'Payment method is not implemented: {payment_method}')
