@@ -1,6 +1,5 @@
 import random
 from typing import Protocol, Union
-from unittest.mock import right
 
 from bot.database.models.common import Currency, Model
 from bot.database.models.feedback import FeedbackStatus
@@ -41,11 +40,18 @@ class Texts(Protocol):
     INFO_MUSIC_GEN: str
     INFO_SUNO: str
 
-    ADMIN_INFO = "👨‍💻 Выберите действие, админ 👩‍💻"
-    ADS_INFO = "Отправь мне название рекламной кампании 📯"
-    BAN_INFO = "Отправь мне id пользователя, которого вы хотите забанить/разбанить ⛔️"
-    BAN_SUCCESS = "Вы успешно забанили пользователя 📛"
-    UNBAN_SUCCESS = "Вы успешно разбанили пользователя 🔥"
+    ADMIN_INFO = '👨‍💻 Выберите действие, админ 👩‍💻'
+    ADS_INFO = 'Выберите, что хотите сделать:'
+    ADS_CREATE = 'Создать рекламную ссылку 📯'
+    ADS_GET = 'Получить информацию о рекламной кампании 📯'
+    ADS_SEND_LINK = 'Отправьте мне ссылку с рекламной кампанией 📯'
+    ADS_CHOOSE_SOURCE = 'Выберите источник рекламной кампании 📯'
+    ADS_CHOOSE_MEDIUM = 'Выберите тип трафика рекламной кампании 📯'
+    ADS_SEND_NAME = 'Отправьте название рекламной кампании, которое состоит из одного слова без спец. символов 📯'
+    ADS_SEND_QUANTITY = 'Отправьте количество создаваемых ссылок 📯'
+    BAN_INFO = 'Отправь мне id пользователя, которого вы хотите забанить/разбанить ⛔️'
+    BAN_SUCCESS = 'Вы успешно забанили пользователя 📛'
+    UNBAN_SUCCESS = 'Вы успешно разбанили пользователя 🔥'
 
     SERVER: str
     DATABASE: str
@@ -58,8 +64,8 @@ class Texts(Protocol):
     # Feedback
     FEEDBACK: str
     FEEDBACK_SUCCESS: str
-    FEEDBACK_ADMIN_APPROVE = "Одобрить ✅"
-    FEEDBACK_ADMIN_DENY = "Отклонить ❌"
+    FEEDBACK_ADMIN_APPROVE = 'Одобрить ✅'
+    FEEDBACK_ADMIN_DENY = 'Отклонить ❌'
     FEEDBACK_APPROVED: str
     FEEDBACK_APPROVED_WITH_LIMIT_ERROR: str
     FEEDBACK_DENIED: str
@@ -110,12 +116,12 @@ class Texts(Protocol):
     PLAY_DARTS_GAME_DESCRIPTION: str
     PLAY_DICE_GAME: str
     PLAY_DICE_GAME_CHOOSE: str
-    PLAY_DICE_GAME_CHOOSE_1 = "🎲 1️⃣"
-    PLAY_DICE_GAME_CHOOSE_2 = "🎲 2️⃣"
-    PLAY_DICE_GAME_CHOOSE_3 = "🎲 3️⃣"
-    PLAY_DICE_GAME_CHOOSE_4 = "🎲 4️⃣"
-    PLAY_DICE_GAME_CHOOSE_5 = "🎲 5️⃣"
-    PLAY_DICE_GAME_CHOOSE_6 = "🎲 6️⃣"
+    PLAY_DICE_GAME_CHOOSE_1 = '🎲 1️⃣'
+    PLAY_DICE_GAME_CHOOSE_2 = '🎲 2️⃣'
+    PLAY_DICE_GAME_CHOOSE_3 = '🎲 3️⃣'
+    PLAY_DICE_GAME_CHOOSE_4 = '🎲 4️⃣'
+    PLAY_DICE_GAME_CHOOSE_5 = '🎲 5️⃣'
+    PLAY_DICE_GAME_CHOOSE_6 = '🎲 6️⃣'
     PLAY_CASINO_GAME: str
     PLAY_CASINO_GAME_DESCRIPTION: str
     PLAY_GAME_WON: str
@@ -305,29 +311,29 @@ class Texts(Protocol):
 """
 
     # AI
-    CHATGPT = "💭 ChatGPT"
-    CHATGPT3_TURBO = "✉️ ChatGPT 3.5 Turbo"
-    CHATGPT4_OMNI_MINI = "✉️ ChatGPT 4.0 Omni Mini"
-    CHATGPT4_TURBO = "🧠 ChatGPT 4.0 Turbo"
-    CHATGPT4_OMNI = "💥 ChatGPT 4.0 Omni"
-    CHAT_GPT_O_1_MINI = "🧩 ChatGPT o1-mini"
-    CHAT_GPT_O_1_PREVIEW = "🧪 ChatGPT o1-preview"
-    CLAUDE = "📄 Claude"
-    CLAUDE_3_HAIKU = "📜 Claude 3.5 Haiku"
-    CLAUDE_3_SONNET = "💫 Claude 3.5 Sonnet"
-    CLAUDE_3_OPUS = "🚀 Claude 3.0 Opus"
-    GEMINI = "✨ Gemini"
-    GEMINI_1_FLASH = "🏎 Gemini 1.5 Flash"
-    GEMINI_1_PRO = "💼 Gemini 1.5 Pro"
-    GEMINI_1_ULTRA = "🛡️ Gemini 1.0 Ultra"
-    DALL_E = "👨‍🎨 DALL-E"
-    MIDJOURNEY = "🎨 Midjourney"
-    STABLE_DIFFUSION = "🎆 Stable Diffusion"
-    FLUX = "🫐 Flux"
-    PHOTOSHOP_AI = "🪄 Photoshop AI"
-    FACE_SWAP = "📷️ FaceSwap"
-    MUSIC_GEN = "🎺 MusicGen"
-    SUNO = "🎸 Suno"
+    CHATGPT = '💭 ChatGPT'
+    CHATGPT3_TURBO = '✉️ ChatGPT 3.5 Turbo'
+    CHATGPT4_OMNI_MINI = '✉️ ChatGPT 4.0 Omni Mini'
+    CHATGPT4_TURBO = '🧠 ChatGPT 4.0 Turbo'
+    CHATGPT4_OMNI = '💥 ChatGPT 4.0 Omni'
+    CHAT_GPT_O_1_MINI = '🧩 ChatGPT o1-mini'
+    CHAT_GPT_O_1_PREVIEW = '🧪 ChatGPT o1-preview'
+    CLAUDE = '📄 Claude'
+    CLAUDE_3_HAIKU = '📜 Claude 3.5 Haiku'
+    CLAUDE_3_SONNET = '💫 Claude 3.5 Sonnet'
+    CLAUDE_3_OPUS = '🚀 Claude 3.0 Opus'
+    GEMINI = '✨ Gemini'
+    GEMINI_1_FLASH = '🏎 Gemini 1.5 Flash'
+    GEMINI_1_PRO = '💼 Gemini 1.5 Pro'
+    GEMINI_1_ULTRA = '🛡️ Gemini 1.0 Ultra'
+    DALL_E = '👨‍🎨 DALL-E'
+    MIDJOURNEY = '🎨 Midjourney'
+    STABLE_DIFFUSION = '🎆 Stable Diffusion'
+    FLUX = '🫐 Flux'
+    PHOTOSHOP_AI = '🪄 Photoshop AI'
+    FACE_SWAP = '📷️ FaceSwap'
+    MUSIC_GEN = '🎺 MusicGen'
+    SUNO = '🎸 Suno'
     MODE: str
     CHOOSE_CHATGPT_MODEL: str
     CHOOSE_CLAUDE_MODEL: str
@@ -462,50 +468,6 @@ class Texts(Protocol):
     ADD_TO_CART_OR_BUY_NOW: str
     ADDED_TO_CART: str
     GO_TO_CART_OR_CONTINUE_SHOPPING: str
-    GPT4_OMNI_REQUESTS: str
-    GPT4_OMNI_REQUESTS_DESCRIPTION: str
-    GPT4_OMNI_MINI_REQUESTS: str
-    GPT4_OMNI_MINI_REQUESTS_DESCRIPTION: str
-    CHAT_GPT_O_1_MINI_REQUESTS: str
-    CHAT_GPT_O_1_MINI_REQUESTS_DESCRIPTION: str
-    CHAT_GPT_O_1_PREVIEW_REQUESTS: str
-    CHAT_GPT_O_1_PREVIEW_REQUESTS_DESCRIPTION: str
-    CLAUDE_3_HAIKU_REQUESTS: str
-    CLAUDE_3_HAIKU_REQUESTS_DESCRIPTION: str
-    CLAUDE_3_SONNET_REQUESTS: str
-    CLAUDE_3_SONNET_REQUESTS_DESCRIPTION: str
-    CLAUDE_3_OPUS_REQUESTS: str
-    CLAUDE_3_OPUS_REQUESTS_DESCRIPTION: str
-    GEMINI_1_FLASH_REQUESTS: str
-    GEMINI_1_FLASH_REQUESTS_DESCRIPTION: str
-    GEMINI_1_PRO_REQUESTS: str
-    GEMINI_1_PRO_REQUESTS_DESCRIPTION: str
-    GEMINI_1_ULTRA_REQUESTS: str
-    GEMINI_1_ULTRA_REQUESTS_DESCRIPTION: str
-    THEMATIC_CHATS: str
-    THEMATIC_CHATS_DESCRIPTION: str
-    DALL_E_REQUESTS: str
-    DALL_E_REQUESTS_DESCRIPTION: str
-    MIDJOURNEY_REQUESTS: str
-    MIDJOURNEY_REQUESTS_DESCRIPTION: str
-    STABLE_DIFFUSION_REQUESTS: str
-    STABLE_DIFFUSION_REQUESTS_DESCRIPTION: str
-    FLUX_REQUESTS: str
-    FLUX_REQUESTS_DESCRIPTION: str
-    FACE_SWAP_REQUESTS: str
-    FACE_SWAP_REQUESTS_DESCRIPTION: str
-    PHOTOSHOP_AI_REQUESTS: str
-    PHOTOSHOP_AI_REQUESTS_DESCRIPTION: str
-    MUSIC_GEN_REQUESTS: str
-    MUSIC_GEN_REQUESTS_DESCRIPTION: str
-    SUNO_REQUESTS: str
-    SUNO_REQUESTS_DESCRIPTION: str
-    ACCESS_TO_CATALOG: str
-    ACCESS_TO_CATALOG_DESCRIPTION: str
-    ANSWERS_AND_REQUESTS_WITH_VOICE_MESSAGES: str
-    ANSWERS_AND_REQUESTS_WITH_VOICE_MESSAGES_DESCRIPTION: str
-    FAST_ANSWERS: str
-    FAST_ANSWERS_DESCRIPTION: str
     MIN_ERROR: str
     MAX_ERROR: str
     VALUE_ERROR: str
@@ -526,7 +488,7 @@ class Texts(Protocol):
 
 Выбери своё приключение в этом мире AI-талантов! 🚀
 """
-    CREATE_ROLE = "Создать роль"
+    CREATE_ROLE = 'Создать роль'
     CATALOG_MANAGE_CREATE = """
 🌈 <b>Создание новой роли</b> 🎨
 
@@ -579,10 +541,10 @@ class Texts(Protocol):
 
 💬 Помощник уже готов к работе и ждет команд пользователей. Поздравляю с успешным расширением команды AI!
 """
-    EDIT_ROLE_NAME = "Изменить имя 🖌"
-    EDIT_ROLE_DESCRIPTION = "Изменить описание 🖌"
-    EDIT_ROLE_INSTRUCTION = "Изменить инструкцию 🖌"
-    EDIT_ROLE_PHOTO = "Изменить фотографию 🖼"
+    EDIT_ROLE_NAME = 'Изменить имя 🖌'
+    EDIT_ROLE_DESCRIPTION = 'Изменить описание 🖌'
+    EDIT_ROLE_INSTRUCTION = 'Изменить инструкцию 🖌'
+    EDIT_ROLE_PHOTO = 'Изменить фотографию 🖼'
     CATALOG_MANAGE_EDIT_ROLE_NAME = """
 📝 <b>Время для ребрендинга!</b> 🎨
 
@@ -639,8 +601,8 @@ class Texts(Protocol):
 
     # FaceSwap
     CHOOSE_YOUR_PACKAGE: str
-    CREATE_PACKAGE = "Создать новый пакет"
-    EDIT_PACKAGE = "Редактировать существующий пакет"
+    CREATE_PACKAGE = 'Создать новый пакет'
+    EDIT_PACKAGE = 'Редактировать существующий пакет'
     GENERATIONS_IN_PACKAGES_ENDED: str
     FACE_SWAP_MIN_ERROR: str
     FACE_SWAP_MAX_ERROR: str
@@ -682,8 +644,8 @@ class Texts(Protocol):
 
 🖼 Время для магии фото! Теперь вы можете начать наполнять пакет самыми невероятными и забавными фотографиями. От смешных до вдохновляющих, каждое изображение добавит уникальности вашему пакету
 """
-    FACE_SWAP_MANAGE_EDIT_CHOOSE_GENDER = "Выбери пол:"
-    FACE_SWAP_MANAGE_EDIT_CHOOSE_PACKAGE = "Выбери пакет:"
+    FACE_SWAP_MANAGE_EDIT_CHOOSE_GENDER = 'Выбери пол:'
+    FACE_SWAP_MANAGE_EDIT_CHOOSE_PACKAGE = 'Выбери пакет:'
     FACE_SWAP_MANAGE_EDIT = """
 🎨 <b>Время творить! Вы выбрали пакет для редактирования</b> 🖌️
 
@@ -694,12 +656,12 @@ class Texts(Protocol):
 
 🚀 Готовы к изменениям? Ваше творчество вдохнет новую жизнь в этот пакет. Пусть каждая генерация будет уникальной и запоминающейся!
 """
-    FACE_SWAP_MANAGE_CHANGE_STATUS = "Изменить видимость 👁"
-    FACE_SWAP_MANAGE_SHOW_PICTURES = "Просмотреть картинки 🖼"
-    FACE_SWAP_MANAGE_ADD_NEW_PICTURE = "Добавить новую картинку 👨‍🎨"
-    FACE_SWAP_MANAGE_ADD_NEW_PICTURE_NAME = "Отправьте мне название будущего изображения на английском языке в CamelCase, например 'ContentMaker'"
-    FACE_SWAP_MANAGE_ADD_NEW_PICTURE_IMAGE = "Теперь, отправьте мне фотографию"
-    FACE_SWAP_MANAGE_EXAMPLE_PICTURE = "Пример генерации 🎭"
+    FACE_SWAP_MANAGE_CHANGE_STATUS = 'Изменить видимость 👁'
+    FACE_SWAP_MANAGE_SHOW_PICTURES = 'Просмотреть картинки 🖼'
+    FACE_SWAP_MANAGE_ADD_NEW_PICTURE = 'Добавить новую картинку 👨‍🎨'
+    FACE_SWAP_MANAGE_ADD_NEW_PICTURE_NAME = 'Отправьте мне название будущего изображения на английском языке в CamelCase, например "ContentMaker"'
+    FACE_SWAP_MANAGE_ADD_NEW_PICTURE_IMAGE = 'Теперь, отправьте мне фотографию'
+    FACE_SWAP_MANAGE_EXAMPLE_PICTURE = 'Пример генерации 🎭'
     FACE_SWAP_MANAGE_EDIT_SUCCESS = """
 🌟 <b>Пакет успешно отредактирован!</b> 🎉
 
@@ -707,8 +669,8 @@ class Texts(Protocol):
 
 🚀 Готовы к новым приключениям? Ваша креативность и умение управлять пакетами делают мир FaceSwap ещё ярче и интереснее. Продолжайте творить и вдохновлять пользователей своими уникальными идеями!
 """
-    FACE_SWAP_PUBLIC = "Видно всем 🔓"
-    FACE_SWAP_PRIVATE = "Видно админам 🔒"
+    FACE_SWAP_PUBLIC = 'Видно всем 🔓'
+    FACE_SWAP_PRIVATE = 'Видно админам 🔒'
 
     # Photoshop AI
     PHOTOSHOP_AI_INFO: str
@@ -814,7 +776,7 @@ class Texts(Protocol):
             all_requests += count_all_transactions[text_product_id]['ALL']
             all_requests_before += count_all_transactions_before[text_product_id]['ALL']
 
-            emoji_number = ''.join(f"{digit}\uFE0F\u20E3" for digit in str(index + 1))
+            emoji_number = ''.join(f'{digit}\uFE0F\u20E3' for digit in str(index + 1))
             text_info += f"""━ {emoji_number} <b>{text_product_name}:</b>
     ┣ ✅ Удачных: {count_all_transactions[text_product_id]['SUCCESS']} {calculate_percentage_difference(is_all_time, count_all_transactions[text_product_id]['SUCCESS'], count_all_transactions_before[text_product_id]['SUCCESS'])}
     ┣ ❌ С ошибкой: {count_all_transactions[text_product_id]['FAIL']} {calculate_percentage_difference(is_all_time, count_all_transactions[text_product_id]['FAIL'], count_all_transactions_before[text_product_id]['FAIL'])}
@@ -867,7 +829,7 @@ class Texts(Protocol):
             all_requests += count_all_transactions[image_product_id]['ALL']
             all_requests_before += count_all_transactions_before[image_product_id]['ALL']
 
-            emoji_number = ''.join(f"{digit}\uFE0F\u20E3" for digit in str(index + 1))
+            emoji_number = ''.join(f'{digit}\uFE0F\u20E3' for digit in str(index + 1))
             image_info += f"""━ {emoji_number} <b>{image_product_name}:</b>
     ┣ ✅ Удачных: {count_all_transactions[image_product_id]['SUCCESS']} {calculate_percentage_difference(is_all_time, count_all_transactions[image_product_id]['SUCCESS'], count_all_transactions_before[image_product_id]['SUCCESS'])}
     ┣ ❌ С ошибкой: {count_all_transactions[image_product_id]['FAIL']} {calculate_percentage_difference(is_all_time, count_all_transactions[image_product_id]['FAIL'], count_all_transactions_before[image_product_id]['FAIL'])}
@@ -920,7 +882,7 @@ class Texts(Protocol):
             all_requests += count_all_transactions[music_product_id]['ALL']
             all_requests_before += count_all_transactions_before[music_product_id]['ALL']
 
-            emoji_number = ''.join(f"{digit}\uFE0F\u20E3" for digit in str(index + 1))
+            emoji_number = ''.join(f'{digit}\uFE0F\u20E3' for digit in str(index + 1))
             music_info += f"""━ {emoji_number} <b>{music_product_name}:</b>
     ┣ ✅ Удачных: {count_all_transactions[music_product_id]['SUCCESS']} {calculate_percentage_difference(is_all_time, count_all_transactions[music_product_id]['SUCCESS'], count_all_transactions_before[music_product_id]['SUCCESS'])}
     ┣ ❌ С ошибкой: {count_all_transactions[music_product_id]['FAIL']} {calculate_percentage_difference(is_all_time, count_all_transactions[music_product_id]['FAIL'], count_all_transactions_before[music_product_id]['FAIL'])}
@@ -974,7 +936,7 @@ class Texts(Protocol):
             all_none += count_reactions[product_with_reaction_id][GenerationReaction.NONE]
             all_none_before += count_reactions_before[product_with_reaction_id][GenerationReaction.NONE]
 
-            emoji_number = ''.join(f"{digit}\uFE0F\u20E3" for digit in str(index + 1))
+            emoji_number = ''.join(f'{digit}\uFE0F\u20E3' for digit in str(index + 1))
             reaction_info += f"""━ {emoji_number} <b>{product_with_reactions_name}:</b>
     ┣ 👍 {count_reactions[product_with_reaction_id][GenerationReaction.LIKED]} {calculate_percentage_difference(is_all_time, count_reactions[product_with_reaction_id][GenerationReaction.LIKED], count_reactions_before[product_with_reaction_id][GenerationReaction.LIKED])}
     ┣ 👎 {count_reactions[product_with_reaction_id][GenerationReaction.DISLIKED]} {calculate_percentage_difference(is_all_time, count_reactions[product_with_reaction_id][GenerationReaction.DISLIKED], count_reactions_before[product_with_reaction_id][GenerationReaction.DISLIKED])}
@@ -1084,7 +1046,7 @@ class Texts(Protocol):
         ai_info = ''
         for index, (ai_product_id, ai_product_name) in enumerate(ai_products.items()):
             is_last = index == len(ai_products) - 1
-            left_part = "┣" if not is_last else "┗"
+            left_part = '┣' if not is_last else '┗'
             right_part = '\n' if not is_last else ''
             ai_info += f"""    {left_part} {ai_product_name}:
         ┣ 💸 Средняя цена запроса: ${round(count_expense_money[ai_product_id]['AVERAGE_PRICE'], 4)} {calculate_percentage_difference(is_all_time, count_expense_money[ai_product_id]['AVERAGE_PRICE'], count_expense_money_before[ai_product_id]['AVERAGE_PRICE'])}
@@ -1092,13 +1054,13 @@ class Texts(Protocol):
         tech_info = ''
         for index, (tech_product_id, tech_product_name) in enumerate(tech_products.items()):
             is_last = index == len(tech_products) - 1
-            left_part = "┣" if not is_last else "┗"
+            left_part = '┣' if not is_last else '┗'
             right_part = '\n' if not is_last else ''
             tech_info += f"    {left_part} {tech_product_name}: ${round(count_expense_money[tech_product_id]['ALL'], 4)} {calculate_percentage_difference(is_all_time, count_expense_money[tech_product_id]['ALL'], count_expense_money_before[tech_product_id]['ALL'])}{right_part}"
         subscription_info = ''
         for index, (subscription_product_id, subscription_product_name) in enumerate(subscription_products.items()):
             is_last = index == len(subscription_products) - 1
-            left_part = "┣" if not is_last else "┗"
+            left_part = '┣' if not is_last else '┗'
             right_part = '\n' if not is_last else ''
             subscription_info += f"""    {left_part} <b>{subscription_product_name}:</b>
         ┣ 💸 Средняя цена подписчика: ${round(count_expense_money[subscription_product_id]['AVERAGE_PRICE'], 4)} {calculate_percentage_difference(is_all_time, count_expense_money[subscription_product_id]['AVERAGE_PRICE'], count_expense_money_before[subscription_product_id]['AVERAGE_PRICE'])}
@@ -1166,7 +1128,7 @@ class Texts(Protocol):
     def blast_confirmation(
         blast_letters: dict,
     ):
-        letters = ""
+        letters = ''
         for i, (language_code, letter) in enumerate(blast_letters.items()):
             letters += f'{language_code}:\n{letter}'
             letters += '\n' if i < len(blast_letters.items()) - 1 else ''
@@ -1187,15 +1149,15 @@ class Texts(Protocol):
         role_descriptions: dict,
         role_instructions: dict,
     ):
-        names = ""
+        names = ''
         for i, (language_code, name) in enumerate(role_names.items()):
             names += f'{language_code}: {name}'
             names += '\n' if i < len(role_names.items()) - 1 else ''
-        descriptions = ""
+        descriptions = ''
         for i, (language_code, description) in enumerate(role_descriptions.items()):
             descriptions += f'{language_code}: {description}'
             descriptions += '\n' if i < len(role_descriptions.items()) - 1 else ''
-        instructions = ""
+        instructions = ''
         for i, (language_code, instruction) in enumerate(role_instructions.items()):
             instructions += f'{language_code}: {instruction}'
             instructions += '\n' if i < len(role_instructions.items()) - 1 else ''
@@ -1225,15 +1187,15 @@ class Texts(Protocol):
         role_descriptions: dict,
         role_instructions: dict,
     ):
-        names = ""
+        names = ''
         for i, (language_code, name) in enumerate(role_names.items()):
             names += f'{language_code}: {name}'
             names += '\n' if i < len(role_names.items()) - 1 else ''
-        descriptions = ""
+        descriptions = ''
         for i, (language_code, description) in enumerate(role_descriptions.items()):
             descriptions += f'{language_code}: {description}'
             descriptions += '\n' if i < len(role_descriptions.items()) - 1 else ''
-        instructions = ""
+        instructions = ''
         for i, (language_code, instruction) in enumerate(role_instructions.items()):
             instructions += f'{language_code}: {instruction}'
             instructions += '\n' if i < len(role_instructions.items()) - 1 else ''
@@ -1265,7 +1227,7 @@ class Texts(Protocol):
         package_system_name: str,
         package_names: dict,
     ):
-        names = ""
+        names = ''
         for i, (language_code, name) in enumerate(package_names.items()):
             names += f'{language_code}: {name}'
             names += '\n' if i < len(package_names.items()) - 1 else ''
@@ -1424,11 +1386,11 @@ class Texts(Protocol):
     @staticmethod
     def processing_statistics() -> str:
         texts = [
-            "Вызываю кибернетических уток, чтобы ускорить процесс. Кря-кря, и данные у нас! 🦆💻",
-            "Использую тайные заклинания кода, чтобы вызволить вашу статистику из пучины данных. Абракадабра! 🧙‍💾",
-            "Таймер установлен, чайник на плите. Пока я готовлю чай, данные собираются сами! ☕📊",
-            "Подключаюсь к космическим спутникам, чтобы найти нужную статистику. Вот это звёздный поиск! 🛰️✨",
-            "Зову на помощь армию пикселей. Они уже маршируют сквозь строки кода, чтобы доставить вам данные! 🪖🖥️",
+            'Вызываю кибернетических уток, чтобы ускорить процесс. Кря-кря, и данные у нас! 🦆💻',
+            'Использую тайные заклинания кода, чтобы вызволить вашу статистику из пучины данных. Абракадабра! 🧙‍💾',
+            'Таймер установлен, чайник на плите. Пока я готовлю чай, данные собираются сами! ☕📊',
+            'Подключаюсь к космическим спутникам, чтобы найти нужную статистику. Вот это звёздный поиск! 🛰️✨',
+            'Зову на помощь армию пикселей. Они уже маршируют сквозь строки кода, чтобы доставить вам данные! 🪖🖥️',
         ]
 
         return random.choice(texts)
@@ -1446,5 +1408,5 @@ class Texts(Protocol):
     @staticmethod
     def referral_link(user_id: str, is_share: bool) -> str:
         if is_share:
-            return f"https://t.me/share/url?url=https://t.me/GPTsTurboBot?start=referral-{user_id}"
-        return f"https://t.me/GPTsTurboBot?start=referral-{user_id}"
+            return f'https://t.me/share/url?url=https://t.me/GPTsTurboBot?start=referral-{user_id}'
+        return f'https://t.me/GPTsTurboBot?start=referral-{user_id}'

@@ -2047,7 +2047,6 @@ async def migrate(bot: Bot):
             await batch.commit()
         await send_message_to_admins_and_developers(bot, '<b>GENERATIONS migration was successful!</b> 🎉')
 
-        # TODO ADD BATCH AND SEPARATE
         mini_transactions = await get_transactions(service=ServiceType.MINI)
         for mini_transaction in mini_transactions:
             await update_transaction(mini_transaction.id, {
