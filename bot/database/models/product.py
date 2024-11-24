@@ -5,7 +5,7 @@ from typing import Optional, ClassVar, Union
 from pydantic import BaseModel, Field
 
 from bot.database.models.common import Currency, ModelType
-from bot.database.models.subscription import SubscriptionPeriod
+from bot.database.models.subscription import SubscriptionType, SubscriptionPeriod
 
 
 class ProductType(str, Enum):
@@ -14,8 +14,8 @@ class ProductType(str, Enum):
 
 
 class ProductCategory(str, Enum):
-    MONTHLY = 'MONTHLY'
-    YEARLY = 'YEARLY'
+    MONTHLY = SubscriptionType.MONTHLY
+    YEARLY = SubscriptionType.YEARLY
     TEXT = ModelType.TEXT
     IMAGE = ModelType.IMAGE
     MUSIC = ModelType.MUSIC

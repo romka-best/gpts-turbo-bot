@@ -1,12 +1,13 @@
 import random
+from typing import Union
 
+from bot.database.models.product import Product, ProductCategory, ProductType
+from bot.database.operations.product.getters import get_product
 from bot.helpers.formatters.format_number import format_number
+from bot.helpers.getters.get_user_discount import get_user_discount
 from bot.locales.texts import Texts
 from bot.database.models.common import Currency, Quota, Model, ChatGPTVersion, ClaudeGPTVersion, GeminiGPTVersion
-from bot.database.models.package import PackageType, Package
 from bot.database.models.subscription import (
-    Subscription,
-    SubscriptionType,
     SubscriptionPeriod,
     SubscriptionStatus,
 )
@@ -93,6 +94,7 @@ I am constantly updating myself, implementing the most advanced technologies so 
 ━ 🎁 /bonus - Learn how to get free access to all AI models for free
 ━ 🎭️ /settings - Personalization and settings. Digital employees and thematic chats for text models
 """
+    MAINTENANCE_MODE = "🤖 I'm in maintenance mode. Please wait a little bit 🛠"
 
     # Promos
     PROMO_SOCIAL_MEDIA_PROMPTS = """
@@ -304,6 +306,9 @@ Just type away a command to begin your AI journey! 🌟
 - <i>Music education and inspiration</i>: Learn about music theory and the history of genres through the practice of composition.
 - <i>Instant music creation</i>: Describe your emotions or scenario, and Suno will immediately bring your description to life as a song.
 """
+
+    SERVER = "💻 Server"
+    DATABASE = "🗄 Database"
 
     TEXT_MODELS = "🔤 Text models"
     IMAGE_MODELS = "🖼 Image models"
@@ -894,11 +899,11 @@ Let's turn those voice messages into text and keep the conversation flowing! �
 
 You’re stepping into a world of exclusive possibilities! What will it be today?
 
-🌟 <b>Subscriptions: All-in-One — your VIP pass to every AI model and more!</b>
-Chat with ChatGPT, Claude, and Gemini; Create with DALL-E, Midjourney, Stable Diffusion, Flux, FaceSwap, and Photoshop AI; Make music with MusicGen and Suno; Voice messages, Quick Replies, Themed Chats, and so much more. Enjoy it all in one subscription for daily discoveries and seamless access!
+🌟 <b>Subscriptions: Everything All at Once — Your VIP pass to all AI tools and beyond!</b>
+Chat with ChatGPT, Claude, and Gemini; Create with DALL-E, Midjourney, Stable Diffusion, Flux, FaceSwap, and Photoshop AI; Make music with MusicGen and Suno; Enjoy voice messages, quick replies, themed chats, and much more. Everything is included in the subscription for your convenience and daily discoveries!
 
-🛍 <b>Packages: Only the Generations You Need!</b>
-Just need specific generations for certain tasks? Packages let you choose the number of requests and AI tools — pay only for what you actually need.
+🛍 <b>Packages: Pay only for the generations you need!</b>
+Need specific generations for particular tasks? Packages let you choose a set number of requests and AI tools — pay only for what you truly need.
 
 Choose by clicking a button below 👇
 """
@@ -911,6 +916,8 @@ Choose by clicking a button below 👇
 <b>Choose a payment method:</b>
 
 🪆💳 <b>YooKassa (Russian's Cards)</b>
+
+🌍💳 <b>Stripe (International Cards)</b>
 
 ✈️⭐️ <b>Telegram Stars (Currency in Telegram)</b>
 """
@@ -1169,8 +1176,19 @@ Please try again 🥺
     TERMS_LINK = "https://telegra.ph/Terms-of-Service-in-GPTsTurboBot-05-07"
 
     @staticmethod
+    def purchase_minimal_price(currency: Currency, current_price: str) -> str:
+        left_part_price = Currency.SYMBOLS[currency] if currency == Currency.USD else ''
+        right_part_price = '' if currency == Currency.USD else Currency.SYMBOLS[currency]
+        return f"""
+😕 Oh no...
+
+To complete the purchase, the total amount must be equal to or greater than <b>{left_part_price}1{right_part_price}</b>
+Currently, the total purchase amount is: <b>{left_part_price}{current_price}{right_part_price}</b>
+"""
+
+    @staticmethod
     def profile(
-        subscription_type,
+        subscription_name,
         subscription_status,
         gender,
         current_model,
@@ -1178,8 +1196,6 @@ Please try again 🥺
         current_currency,
         renewal_date,
     ) -> str:
-        emojis = Subscription.get_emojis()
-
         if subscription_status == SubscriptionStatus.CANCELED:
             subscription_info = f"📫 <b>Subscription Status:</b> Canceled. Active until {renewal_date}"
         else:
@@ -1245,7 +1261,7 @@ Please try again 🥺
 ---------------------------
 
 💱 <b>Current currency: {current_currency}</b>
-{emojis[subscription_type]} <b>Subscription type:</b> {subscription_type}
+💳 <b>Subscription type:</b> {subscription_name}
 🗓 <b>Subscription renewal date:</b> {renewal_date}
 {subscription_info}
 
@@ -1256,143 +1272,148 @@ Choose action 👇
 
     @staticmethod
     def profile_quota(
-        subscription_type: SubscriptionType,
-        daily_limits,
-        additional_usage_quota,
+        subscription_limits: dict,
+        daily_limits: dict,
+        additional_usage_quota: dict,
         hours_before_limit_update: int,
         minutes_before_limit_update: int,
     ) -> str:
-        return ""
-#         return f"""
-# <b>Quota:</b>
-#
-# 🔤 Text models:
-# ━ 💭 <b>ChatGPT</b>:
-#     ┣ ✉️ 4.0 Omni Mini:
-#         ┣ {format_number(daily_limits[Quota.CHAT_GPT4_OMNI_MINI])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.CHAT_GPT4_OMNI_MINI])}
-#         ┗ Extra: {additional_usage_quota[Quota.CHAT_GPT4_OMNI_MINI]}
-#     ┣ 💥 4.0 Omni:
-#         ┣ {format_number(daily_limits[Quota.CHAT_GPT4_OMNI])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.CHAT_GPT4_OMNI])}
-#         ┗ Extra: {additional_usage_quota[Quota.CHAT_GPT4_OMNI]}
-#     ┣ 🧩 o1-mini:
-#         ┣ {format_number(daily_limits[Quota.CHAT_GPT_O_1_MINI])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.CHAT_GPT_O_1_MINI])}
-#         ┗ Extra: {additional_usage_quota[Quota.CHAT_GPT_O_1_MINI]}
-#     ┗ 🧪 o1-preview:
-#         ┣ {format_number(daily_limits[Quota.CHAT_GPT_O_1_PREVIEW])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.CHAT_GPT_O_1_PREVIEW])}
-#         ┗ Extra: {additional_usage_quota[Quota.CHAT_GPT_O_1_PREVIEW]}
-# ━ 📄 <b>Claude</b>:
-#     ┣ 📜 3.5 Haiku:
-#         ┣ {format_number(daily_limits[Quota.CLAUDE_3_HAIKU])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.CLAUDE_3_HAIKU])}
-#         ┗ Extra: {additional_usage_quota[Quota.CLAUDE_3_HAIKU]}
-#     ┣ 💫 3.5 Sonnet:
-#         ┣ {format_number(daily_limits[Quota.CLAUDE_3_SONNET])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.CLAUDE_3_SONNET])}
-#         ┗ Extra: {additional_usage_quota[Quota.CLAUDE_3_SONNET]}
-#     ┗ 🚀 Claude 3.0 Opus:
-#         ┣ {format_number(daily_limits[Quota.CLAUDE_3_OPUS])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.CLAUDE_3_OPUS])}
-#         ┗ Extra: {additional_usage_quota[Quota.CLAUDE_3_OPUS]}
-# ━ ✨ <b>Gemini</b>:
-#     ┣ 🏎 Gemini 1.5 Flash:
-#         ┣ {format_number(daily_limits[Quota.GEMINI_1_FLASH])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.GEMINI_1_FLASH])}
-#         ┗ Extra: {additional_usage_quota[Quota.GEMINI_1_FLASH]}
-#     ┣ 💼 Gemini 1.5 Pro:
-#         ┣ {format_number(daily_limits[Quota.GEMINI_1_PRO])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.GEMINI_1_PRO])}
-#         ┗ Extra: {additional_usage_quota[Quota.GEMINI_1_PRO]}
-#     ┗ 🛡️ Gemini 1.0 Ultra:
-#         ┣ {format_number(daily_limits[Quota.GEMINI_1_ULTRA])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.GEMINI_1_ULTRA])}
-#         ┗ Extra: {additional_usage_quota[Quota.GEMINI_1_ULTRA]}
-#
-# ---------------------------
-#
-# 🖼 Image models:
-# ━ 👨‍🎨 <b>DALL-E</b>:
-#     ┣ {format_number(daily_limits[Quota.DALL_E])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.DALL_E])}
-#     ┗ Extra: {additional_usage_quota[Quota.DALL_E]}
-# ━ 🎨 <b>Midjourney</b>:
-#     ┣ {format_number(daily_limits[Quota.MIDJOURNEY])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.MIDJOURNEY])}
-#     ┗ Extra: {additional_usage_quota[Quota.MIDJOURNEY]}
-# ━ 🎆 <b>Stable Diffusion</b>:
-#     ┣ {format_number(daily_limits[Quota.STABLE_DIFFUSION])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.STABLE_DIFFUSION])}
-#     ┗ Extra: {additional_usage_quota[Quota.STABLE_DIFFUSION]}
-# ━ 🫐 <b>Flux</b>:
-#     ┣ {format_number(daily_limits[Quota.FLUX])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.FLUX])}
-#     ┗ Extra: {additional_usage_quota[Quota.FLUX]}
-# ━ 📷 <b>FaceSwap</b>:
-#     ┣ {format_number(daily_limits[Quota.FACE_SWAP])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.FACE_SWAP])}
-#     ┗ Extra: {additional_usage_quota[Quota.FACE_SWAP]}
-# ━ 🪄 <b>Photoshop AI</b>:
-#     ┣ {format_number(daily_limits[Quota.PHOTOSHOP_AI])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.PHOTOSHOP_AI])}
-#     ┗ Extra: {additional_usage_quota[Quota.PHOTOSHOP_AI]}
-#
-# ---------------------------
-#
-# 🎵 Music models:
-# ━ 🎺 <b>MusicGen</b>:
-#     ┣ {format_number(daily_limits[Quota.MUSIC_GEN])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.MUSIC_GEN])}
-#     ┗ Extra: {additional_usage_quota[Quota.MUSIC_GEN]}
-# ━ 🎸 <b>Suno</b>:
-#     ┣ {format_number(daily_limits[Quota.SUNO])}/{format_number(SubscriptionLimit.LIMITS[subscription_type][Quota.SUNO])}
-#     ┗ Extra: {additional_usage_quota[Quota.SUNO]}
-#
-# ---------------------------
-#
-# ━ 💬 <b>Thematic chats</b>: {additional_usage_quota[Quota.ADDITIONAL_CHATS]}
-# ━ 🎭 <b>Access to a catalog with digital employees</b>: {'✅' if additional_usage_quota[Quota.ACCESS_TO_CATALOG] else '❌'}
-# ━ 🎙 <b>Voice messages</b>: {'✅' if additional_usage_quota[Quota.VOICE_MESSAGES] else '❌'}
-# ━ ⚡ <b>Fast answers</b>: {'✅' if additional_usage_quota[Quota.FAST_MESSAGES] else '❌'}
-#
-# ---------------------------
-#
-# 🔄 <i>Limit will be updated in: {hours_before_limit_update} h. {minutes_before_limit_update} min.</i>
-# """
+        return f"""
+<b>Quota:</b>
+
+🔤 Text models:
+━ 💭 <b>ChatGPT</b>:
+    ┣ ✉️ 4.0 Omni Mini:
+        ┣ {format_number(daily_limits[Quota.CHAT_GPT4_OMNI_MINI])}/{format_number(subscription_limits[Quota.CHAT_GPT4_OMNI_MINI])}
+        ┗ Extra: {additional_usage_quota[Quota.CHAT_GPT4_OMNI_MINI]}
+    ┣ 💥 4.0 Omni:
+        ┣ {format_number(daily_limits[Quota.CHAT_GPT4_OMNI])}/{format_number(subscription_limits[Quota.CHAT_GPT4_OMNI])}
+        ┗ Extra: {additional_usage_quota[Quota.CHAT_GPT4_OMNI]}
+    ┣ 🧩 o1-mini:
+        ┣ {format_number(daily_limits[Quota.CHAT_GPT_O_1_MINI])}/{format_number(subscription_limits[Quota.CHAT_GPT_O_1_MINI])}
+        ┗ Extra: {additional_usage_quota[Quota.CHAT_GPT_O_1_MINI]}
+    ┗ 🧪 o1-preview:
+        ┣ {format_number(daily_limits[Quota.CHAT_GPT_O_1_PREVIEW])}/{format_number(subscription_limits[Quota.CHAT_GPT_O_1_PREVIEW])}
+        ┗ Extra: {additional_usage_quota[Quota.CHAT_GPT_O_1_PREVIEW]}
+━ 📄 <b>Claude</b>:
+    ┣ 📜 3.5 Haiku:
+        ┣ {format_number(daily_limits[Quota.CLAUDE_3_HAIKU])}/{format_number(subscription_limits[Quota.CLAUDE_3_HAIKU])}
+        ┗ Extra: {additional_usage_quota[Quota.CLAUDE_3_HAIKU]}
+    ┣ 💫 3.5 Sonnet:
+        ┣ {format_number(daily_limits[Quota.CLAUDE_3_SONNET])}/{format_number(subscription_limits[Quota.CLAUDE_3_SONNET])}
+        ┗ Extra: {additional_usage_quota[Quota.CLAUDE_3_SONNET]}
+    ┗ 🚀 Claude 3.0 Opus:
+        ┣ {format_number(daily_limits[Quota.CLAUDE_3_OPUS])}/{format_number(subscription_limits[Quota.CLAUDE_3_OPUS])}
+        ┗ Extra: {additional_usage_quota[Quota.CLAUDE_3_OPUS]}
+━ ✨ <b>Gemini</b>:
+    ┣ 🏎 Gemini 1.5 Flash:
+        ┣ {format_number(daily_limits[Quota.GEMINI_1_FLASH])}/{format_number(subscription_limits[Quota.GEMINI_1_FLASH])}
+        ┗ Extra: {additional_usage_quota[Quota.GEMINI_1_FLASH]}
+    ┣ 💼 Gemini 1.5 Pro:
+        ┣ {format_number(daily_limits[Quota.GEMINI_1_PRO])}/{format_number(subscription_limits[Quota.GEMINI_1_PRO])}
+        ┗ Extra: {additional_usage_quota[Quota.GEMINI_1_PRO]}
+    ┗ 🛡️ Gemini 1.0 Ultra:
+        ┣ {format_number(daily_limits[Quota.GEMINI_1_ULTRA])}/{format_number(subscription_limits[Quota.GEMINI_1_ULTRA])}
+        ┗ Extra: {additional_usage_quota[Quota.GEMINI_1_ULTRA]}
+
+---------------------------
+
+🖼 Image models:
+━ 👨‍🎨 <b>DALL-E</b>:
+    ┣ {format_number(daily_limits[Quota.DALL_E])}/{format_number(subscription_limits[Quota.DALL_E])}
+    ┗ Extra: {additional_usage_quota[Quota.DALL_E]}
+━ 🎨 <b>Midjourney</b>:
+    ┣ {format_number(daily_limits[Quota.MIDJOURNEY])}/{format_number(subscription_limits[Quota.MIDJOURNEY])}
+    ┗ Extra: {additional_usage_quota[Quota.MIDJOURNEY]}
+━ 🎆 <b>Stable Diffusion</b>:
+    ┣ {format_number(daily_limits[Quota.STABLE_DIFFUSION])}/{format_number(subscription_limits[Quota.STABLE_DIFFUSION])}
+    ┗ Extra: {additional_usage_quota[Quota.STABLE_DIFFUSION]}
+━ 🫐 <b>Flux</b>:
+    ┣ {format_number(daily_limits[Quota.FLUX])}/{format_number(subscription_limits[Quota.FLUX])}
+    ┗ Extra: {additional_usage_quota[Quota.FLUX]}
+━ 📷 <b>FaceSwap</b>:
+    ┣ {format_number(daily_limits[Quota.FACE_SWAP])}/{format_number(subscription_limits[Quota.FACE_SWAP])}
+    ┗ Extra: {additional_usage_quota[Quota.FACE_SWAP]}
+━ 🪄 <b>Photoshop AI</b>:
+    ┣ {format_number(daily_limits[Quota.PHOTOSHOP_AI])}/{format_number(subscription_limits[Quota.PHOTOSHOP_AI])}
+    ┗ Extra: {additional_usage_quota[Quota.PHOTOSHOP_AI]}
+
+---------------------------
+
+🎵 Music models:
+━ 🎺 <b>MusicGen</b>:
+    ┣ {format_number(daily_limits[Quota.MUSIC_GEN])}/{format_number(subscription_limits[Quota.MUSIC_GEN])}
+    ┗ Extra: {additional_usage_quota[Quota.MUSIC_GEN]}
+━ 🎸 <b>Suno</b>:
+    ┣ {format_number(daily_limits[Quota.SUNO])}/{format_number(subscription_limits[Quota.SUNO])}
+    ┗ Extra: {additional_usage_quota[Quota.SUNO]}
+
+---------------------------
+
+━ 💬 <b>Thematic chats</b>: {additional_usage_quota[Quota.ADDITIONAL_CHATS]}
+━ 🎭 <b>Access to a catalog with digital employees</b>: {'✅' if additional_usage_quota[Quota.ACCESS_TO_CATALOG] else '❌'}
+━ 🎙 <b>Voice messages</b>: {'✅' if additional_usage_quota[Quota.VOICE_MESSAGES] else '❌'}
+━ ⚡ <b>Fast answers</b>: {'✅' if additional_usage_quota[Quota.FAST_MESSAGES] else '❌'}
+
+---------------------------
+
+🔄 <i>Limit will be updated in: {hours_before_limit_update} h. {minutes_before_limit_update} min.</i>
+"""
 
     # Payment
     @staticmethod
-    def payment_description_subscription(user_id: str, subscription_type: SubscriptionType):
-        return f"Paying a subscription {subscription_type} {Subscription.get_emojis()[subscription_type]} for user: {user_id}"
+    def payment_description_subscription(user_id: str, name: str):
+        return f"Paying a subscription {name} for user: {user_id}"
 
     @staticmethod
-    def payment_description_renew_subscription(user_id: str, subscription_type: SubscriptionType):
-        return f"Renewing a subscription {subscription_type} {Subscription.get_emojis()[subscription_type]} for user: {user_id}"
+    def payment_description_renew_subscription(user_id: str, name: str):
+        return f"Renewing a subscription {name} for user: {user_id}"
 
     @staticmethod
-    def subscribe(currency: Currency, min_prices: dict):
+    def subscribe(subscriptions: list[Product], currency: Currency, user_discount: int):
+        text_subscriptions = ''
+        for subscription in subscriptions:
+            subscription_name = subscription.names.get('en')
+            subscription_price = subscription.prices.get(currency)
+            left_part_price = Currency.SYMBOLS[currency] if currency == Currency.USD else ''
+            right_part_price = Currency.SYMBOLS[currency] if currency != Currency.USD else ''
+            if subscription_name and subscription_price:
+                text_subscriptions += f'- <b>{subscription_name}</b>: '
+                per_period = 'per month' if subscription.category == ProductCategory.MONTHLY else 'per year'
+
+                discount = get_user_discount(user_discount, 0, subscription.discount)
+                if discount:
+                    discount_price = Product.get_discount_price(
+                        ProductType.SUBSCRIPTION,
+                        1,
+                        subscription_price,
+                        currency,
+                        discount,
+                        SubscriptionPeriod.MONTH1 if subscription.category == ProductCategory.MONTHLY else SubscriptionPeriod.MONTHS12,
+                    )
+                    text_subscriptions += f'<s>{left_part_price}{subscription_price}{right_part_price}</s> {discount_price} {per_period}\n'
+                else:
+                    text_subscriptions += f'{left_part_price}{subscription_price}{right_part_price} {per_period}\n'
         return f"""
 🤖 Ready to supercharge your digital journey? Here's what's on the menu:
 
-- <b>MINI</b> 🍬: {min_prices[SubscriptionType.MINI]}{Currency.SYMBOLS[currency]} per month
-- <b>STANDARD</b> ⭐: {min_prices[SubscriptionType.STANDARD]}{Currency.SYMBOLS[currency]} per month
-- <b>VIP</b> 🔥: {min_prices[SubscriptionType.VIP]}{Currency.SYMBOLS[currency]} per month
-- <b>PREMIUM</b> 💎: {min_prices[SubscriptionType.PREMIUM]}{Currency.SYMBOLS[currency]} per month
-- <b>UNLIMITED</b> ♾️: {min_prices[SubscriptionType.UNLIMITED]}{Currency.SYMBOLS[currency]} per month
+{text_subscriptions}
 
 Pick your potion and hit the button below to subscribe:
 """
 
     @staticmethod
-    def choose_how_many_months_to_subscribe(subscription_type: SubscriptionType):
-        emojis = Subscription.get_emojis()
-
+    def confirmation_subscribe(
+        name: str,
+        category: ProductCategory,
+        currency: Currency,
+        price: Union[str, int, float],
+    ):
+        left_price_part = Currency.SYMBOLS[currency] if currency == Currency.USD else ''
+        right_price_part = '' if currency == Currency.USD else Currency.SYMBOLS[currency]
+        period = 'month' if category == ProductCategory.MONTHLY else 'year'
         return f"""
-You're choosing <b>{subscription_type}</b> {emojis[subscription_type]}
-
-Please select the subscription period by clicking on the button:
-"""
-
-    @staticmethod
-    def cycles_subscribe():
-        return {
-            SubscriptionPeriod.MONTH1: English.MONTH_1,
-            SubscriptionPeriod.MONTHS3: English.MONTHS_3,
-            SubscriptionPeriod.MONTHS6: English.MONTHS_6,
-            SubscriptionPeriod.MONTHS12: English.MONTHS_12,
-        }
-
-    @staticmethod
-    def confirmation_subscribe(subscription_type: SubscriptionType, currency: Currency, price: float):
-        if currency == Currency.XTR:
-            return f"You're about to activate subscription {subscription_type} {Subscription.get_emojis()[subscription_type]} for {price}{Currency.SYMBOLS[currency]}"
-        return f"""
-You're about to activate subscription {subscription_type} {Subscription.get_emojis()[subscription_type]} for {price}{Currency.SYMBOLS[currency]}/month
+You're about to activate subscription {name} for {left_price_part}{price}{right_price_part}/{period}
 
 ❗️You can cancel your subscription at any time in <b>Profile 👤</b>
 """
@@ -1407,153 +1428,50 @@ You're about to activate subscription {subscription_type} {Subscription.get_emoj
         return f"Paying packages from the cart for user: {user_id}"
 
     @staticmethod
-    def package(currency: Currency, page: int):
+    def package(currency: Currency, cost: str):
         if currency == Currency.USD:
-            balance = f"{Currency.SYMBOLS[currency]}0.01"
+            cost = f"{Currency.SYMBOLS[currency]}0.01"
         else:
-            balance = f"1{Currency.SYMBOLS[currency]}"
-
-        if page == 0:
-            description = (
-                "💥 <b>ChatGPT</b>: Engage in deep, thought-provoking conversations!\n\n"
-                "🚀 <b>Claude</b>: Engage in dialogues that expand the horizons of thinking!\n\n"
-                "✨ <b>Gemini</b>: Unlock a world of quick solutions in an instant!"
-            )
-        elif page == 1:
-            description = (
-                "👨‍🎨 <b>DALL-E</b>: Transform ideas into stunning visuals!\n\n"
-                "🎨 <b>Midjourney</b>: Turn ideas into incredible realistic images!\n\n"
-                "🎆 <b>Stable Diffusion</b>: Turn your creative ideas into visual masterpieces!\n\n"
-                "🫐 <b>Flux</b>: Experiment with images and create unique visual concepts!\n\n"
-                "👤 <b>FaceSwap</b>: Play with identities in images!\n\n"
-                "🪄 <b>Photoshop AI</b>: Turn your photos into works of art with the magic of editing!"
-            )
-        elif page == 2:
-            description = (
-                "🎺 <b>Harmony with MusicGen</b>: Create unique melodies that will belong only to you!\n\n"
-                "🎸 <b>Creative with Suno</b>: Create original songs with your own lyrics in different genres!"
-            )
-        elif page == 3:
-            description = (
-                "💬 <b>Thematic Chats</b>: Dive into specialized topics and explore dedicated chat realms\n\n"
-                "🎭 <b>Role Catalog Access</b>: Need a specific assistant? Browse our collection and find your perfect AI match\n\n"
-                "🗣️ <b>Voice Messages</b>: Say it out loud! Chatting with AI has never sounded better\n\n"
-                "⚡ <b>Quick Messages Without Pauses</b>: Fast, efficient, and always on point. AI communication at lightning speed"
-            )
-        else:
-            description = ""
+            cost = f"1{Currency.SYMBOLS[currency]}"
 
         return f"""
 🤖 <b>Welcome to the AI shopping spree!</b> 📦
 
-🪙 <b>1 credit = {balance}</b>
-
-Each button tap unlocks a world of AI wonders:
-{description}
+🪙 <b>1 credit = {cost}</b>
 
 Hit a button and choose a package:
 """
 
     @staticmethod
-    def get_package_name_and_quantity_by_package_type(package_type: PackageType):
-        name = ""
-        quantity = ""
-        if package_type == PackageType.CHAT_GPT4_OMNI_MINI:
-            name = English.GPT4_OMNI_MINI_REQUESTS
-            quantity = "requests"
-        elif package_type == PackageType.CHAT_GPT4_OMNI:
-            name = English.GPT4_OMNI_REQUESTS
-            quantity = "requests"
-        elif package_type == PackageType.CHAT_GPT_O_1_MINI:
-            name = English.CHAT_GPT_O_1_MINI_REQUESTS
-            quantity = "requests"
-        elif package_type == PackageType.CHAT_GPT_O_1_PREVIEW:
-            name = English.CHAT_GPT_O_1_PREVIEW_REQUESTS
-            quantity = "requests"
-        elif package_type == PackageType.CLAUDE_3_HAIKU:
-            name = English.CLAUDE_3_HAIKU_REQUESTS
-            quantity = "requests"
-        elif package_type == PackageType.CLAUDE_3_SONNET:
-            name = English.CLAUDE_3_SONNET_REQUESTS
-            quantity = "requests"
-        elif package_type == PackageType.CLAUDE_3_OPUS:
-            name = English.CLAUDE_3_OPUS_REQUESTS
-            quantity = "requests"
-        elif package_type == PackageType.GEMINI_1_FLASH:
-            name = English.GEMINI_1_FLASH_REQUESTS
-            quantity = "requests"
-        elif package_type == PackageType.GEMINI_1_PRO:
-            name = English.GEMINI_1_PRO_REQUESTS
-            quantity = "requests"
-        elif package_type == PackageType.GEMINI_1_ULTRA:
-            name = English.GEMINI_1_ULTRA_REQUESTS
-            quantity = "requests"
-        elif package_type == PackageType.DALL_E:
-            name = English.DALL_E_REQUESTS
-            quantity = "images"
-        elif package_type == PackageType.MIDJOURNEY:
-            name = English.MIDJOURNEY_REQUESTS
-            quantity = "images"
-        elif package_type == PackageType.STABLE_DIFFUSION:
-            name = English.STABLE_DIFFUSION_REQUESTS
-            quantity = "images"
-        elif package_type == PackageType.FLUX:
-            name = English.FLUX_REQUESTS
-            quantity = "images"
-        elif package_type == PackageType.FACE_SWAP:
-            name = English.FACE_SWAP_REQUESTS
-            quantity = "generations"
-        elif package_type == PackageType.PHOTOSHOP_AI:
-            name = English.PHOTOSHOP_AI_REQUESTS
-            quantity = "generations"
-        elif package_type == PackageType.MUSIC_GEN:
-            name = English.MUSIC_GEN_REQUESTS
-            quantity = "seconds"
-        elif package_type == PackageType.SUNO:
-            name = English.SUNO_REQUESTS
-            quantity = "songs"
-        elif package_type == PackageType.CHAT:
-            name = English.THEMATIC_CHATS
-            quantity = "chats"
-        elif package_type == PackageType.ACCESS_TO_CATALOG:
-            name = English.ACCESS_TO_CATALOG
-            quantity = "months"
-        elif package_type == PackageType.VOICE_MESSAGES:
-            name = English.ANSWERS_AND_REQUESTS_WITH_VOICE_MESSAGES
-            quantity = "months"
-        elif package_type == PackageType.FAST_MESSAGES:
-            name = English.FAST_ANSWERS
-            quantity = "months"
-        return name, quantity
-
-    @staticmethod
-    def choose_min(package_type: PackageType):
-        name, quantity = English.get_package_name_and_quantity_by_package_type(package_type)
-
+    def choose_min(name: str):
         return f"""
 🚀 Fantastic!
 
 You've selected the <b>{name}</b> package
 
-🌟 Please <b>type in the number of {quantity}</b> you'd like to go for
+🌟 Please <b>type in the number of quantity</b> you'd like to go for
 """
 
     @staticmethod
-    def shopping_cart(currency: Currency, cart_items: list[dict], discount: int):
+    async def shopping_cart(currency: Currency, cart_items: list[dict], discount: int):
         text = ""
-        total_sum = 0.0
+        total_sum = 0
         for index, cart_item in enumerate(cart_items):
-            package_type, package_quantity = cart_item.get("package_type", None), cart_item.get("quantity", 0)
+            product_id, product_quantity = cart_item.get("product_id", ''), cart_item.get("quantity", 0)
 
-            name, quantity = English.get_package_name_and_quantity_by_package_type(package_type)
+            product = await get_product(product_id)
 
-            text += f"{index + 1}. {name} ({package_quantity} {quantity})\n"
-            total_sum += Package.get_price(currency, package_type, package_quantity, discount)
+            text += f"{index + 1}. {product.names.get('en')}: {product_quantity}\n"
+            total_sum += float(Product.get_discount_price(
+                ProductType.PACKAGE,
+                product_quantity,
+                product.prices.get(currency),
+                currency,
+                discount,
+            ))
 
-        if currency == Currency.USD:
-            total_sum = f"{Currency.SYMBOLS[currency]}{total_sum}"
-        else:
-            total_sum = f"{total_sum}{Currency.SYMBOLS[currency]}"
+        left_total_sum_part = '' if currency == Currency.USD else Currency.SYMBOLS[currency]
+        right_total_sum_part = Currency
 
         if not text:
             text = "Your cart is empty"
@@ -1563,22 +1481,24 @@ You've selected the <b>{name}</b> package
 
 {text}
 
-💳 Total: {total_sum}
+💳 Total: {left_total_sum_part}{round(total_sum, 2)}{right_total_sum_part}
 """
 
     @staticmethod
-    def confirmation_package(package_name: str, package_quantity: int, currency: Currency, price: float) -> str:
-        return f"You're about to buy {package_quantity} package(-s) <b>{package_name}</b> for {price}{Currency.SYMBOLS[currency]}"
+    def confirmation_package(package_name: str, package_quantity: int, currency: Currency, price: str) -> str:
+        left_price_part = Currency.SYMBOLS[currency] if currency == Currency.USD else ''
+        right_price_part = '' if currency == Currency.USD else Currency.SYMBOLS[currency]
+        return f"You're about to buy {package_quantity} package(-s) <b>{package_name}</b> for {left_price_part}{price}{right_price_part}"
 
     @staticmethod
-    def confirmation_cart(cart_items: list[dict], currency: Currency, price: float) -> str:
+    async def confirmation_cart(cart_items: list[dict], currency: Currency, price: float) -> str:
         text = ""
         for index, cart_item in enumerate(cart_items):
-            package_type, package_quantity = cart_item.get("package_type", None), cart_item.get("quantity", 0)
+            product_id, product_quantity = cart_item.get("product_id", ''), cart_item.get("quantity", 0)
 
-            name, quantity = English.get_package_name_and_quantity_by_package_type(package_type)
+            product = await get_product(product_id)
 
-            text += f"{index + 1}. {name} ({package_quantity} {quantity})\n"
+            text += f"{index + 1}. {product.names.get('en')}: {product_quantity}\n"
 
         if currency == Currency.USD:
             total_sum = f"{Currency.SYMBOLS[currency]}{price}"

@@ -15,7 +15,6 @@ from bot.database.models.common import (
     GeminiGPTVersion,
 )
 from bot.database.models.subscription import (
-    Subscription,
     SubscriptionPeriod,
     SubscriptionStatus,
 )
@@ -1284,8 +1283,8 @@ class Russian(Texts):
     @staticmethod
     def profile_quota(
         subscription_limits: dict,
-        daily_limits,
-        additional_usage_quota,
+        daily_limits: dict,
+        additional_usage_quota: dict,
         hours_before_limit_update: int,
         minutes_before_limit_update: int,
     ) -> str:
@@ -1412,15 +1411,6 @@ class Russian(Texts):
 {text_subscriptions}
 Выберите свой вариант и нажмите кнопку ниже, чтобы подписаться:
 """
-
-    @staticmethod
-    def cycles_subscribe():
-        return {
-            SubscriptionPeriod.MONTH1: Russian.MONTH_1,
-            SubscriptionPeriod.MONTHS3: Russian.MONTHS_3,
-            SubscriptionPeriod.MONTHS6: Russian.MONTHS_6,
-            SubscriptionPeriod.MONTHS12: Russian.MONTHS_12,
-        }
 
     @staticmethod
     def confirmation_subscribe(

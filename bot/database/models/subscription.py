@@ -12,6 +12,8 @@ class SubscriptionType:
     VIP = 'VIP'
     PREMIUM = 'PREMIUM'
     UNLIMITED = 'UNLIMITED'
+    MONTHLY = 'MONTHLY'
+    YEARLY = 'YEARLY'
 
 
 class SubscriptionPeriod:
