@@ -21,7 +21,7 @@ async def unsubscribe(transaction, old_subscription: Subscription, bot: Bot):
                 f'❌ <b>Отмена подписки у пользователя: {old_subscription.user_id}</b>\n\n'
                 f'ℹ️ ID: {old_subscription.id}\n'
                 f'💱 Метод оплаты: {old_subscription.payment_method}\n'
-                # f'💳 Тип: {product.names.get("ru")}\n'
+                f'💳 Тип: {product.names.get("ru")}\n'
                 f'💰 Сумма: {old_subscription.amount}{Currency.SYMBOLS[old_subscription.currency]}\n'
                 f'💸 Чистая сумма: {float(old_subscription.income_amount)}{Currency.SYMBOLS[old_subscription.currency]}\n'
                 f'🗓 Период подписки: {old_subscription.start_date.strftime("%d.%m.%Y")}-{old_subscription.end_date.strftime("%d.%m.%Y")}\n\n'

@@ -15,7 +15,7 @@ from bot.database.operations.request.getters import get_request
 from bot.database.operations.request.updaters import update_request
 from bot.helpers.handlers.handle_suno_webhook import handle_suno_webhook
 
-SUNO_API_URL = 'https://studio-api.suno.ai'
+SUNO_API_URL = 'https://studio-api.prod.suno.com'
 SUNO_TOKEN = config.SUNO_TOKEN.get_secret_value()
 
 

@@ -14,7 +14,8 @@ from bot.database.models.user import User, UserSettings
 from bot.database.operations.generation.getters import get_generation, get_generations_by_request_id
 from bot.database.operations.generation.updaters import update_generation
 from bot.database.operations.generation.writers import write_generation
-from bot.database.operations.request.getters import get_started_requests_by_user_id_and_model
+from bot.database.operations.product.getters import get_product_by_quota
+from bot.database.operations.request.getters import get_started_requests_by_user_id_and_product_id
 from bot.database.operations.request.updaters import update_request
 from bot.database.operations.request.writers import write_request
 from bot.database.operations.user.getters import get_user
@@ -94,8 +95,9 @@ async def handle_midjourney(
                 allow_sending_without_reply=True,
             )
         else:
-            user_not_finished_requests = await get_started_requests_by_user_id_and_model(user.id, Model.MIDJOURNEY)
+            product = await get_product_by_quota(Quota.MIDJOURNEY)
 
+            user_not_finished_requests = await get_started_requests_by_user_id_and_product_id(user.id, product.id)
             if len(user_not_finished_requests):
                 await message.reply(
                     text=get_localization(user_language_code).ALREADY_MAKE_REQUEST,
@@ -107,7 +109,7 @@ async def handle_midjourney(
             request = await write_request(
                 user_id=user.id,
                 message_id=processing_message.message_id,
-                model=Model.MIDJOURNEY,
+                product_id=product.id,
                 requested=1,
                 details={
                     'prompt': prompt,
@@ -134,7 +136,7 @@ async def handle_midjourney(
                 await write_generation(
                     id=result_id,
                     request_id=request.id,
-                    model=Model.MIDJOURNEY,
+                    product_id=product.id,
                     has_error=result_id is None,
                     details={
                         'prompt': prompt,
@@ -234,10 +236,12 @@ async def handle_midjourney_example(user: User, user_language_code: str, prompt:
         user.daily_limits[Quota.DALL_E] + 1 in [1] and
         (current_date - user.last_subscription_limit_update).days <= 3
     ):
+        product = await get_product_by_quota(Quota.MIDJOURNEY)
+
         request = await write_request(
             user_id=user.id,
             message_id=message.message_id,
-            model=Model.MIDJOURNEY,
+            product_id=product.id,
             requested=1,
             details={
                 'prompt': prompt,
@@ -256,7 +260,7 @@ async def handle_midjourney_example(user: User, user_language_code: str, prompt:
             await write_generation(
                 id=result_id,
                 request_id=request.id,
-                model=Model.MIDJOURNEY,
+                product_id=product.id,
                 has_error=result_id is None,
                 details={
                     'prompt': prompt,

@@ -795,7 +795,8 @@ async def handle_payment_method_package_selection(callback_query: CallbackQuery,
                 order_items=[
                     OrderItem(
                         product=package,
-                        price=float(package_amount),
+                        price=round(float(package_amount) / package_quantity, 2),
+                        quantity=package_quantity,
                     ),
                 ],
                 order_id=package_ref.id if payment_method == PaymentMethod.PAY_SELECTION or payment_method == PaymentMethod.STRIPE else None,
@@ -913,7 +914,8 @@ async def handle_payment_method_cart_selection(callback_query: CallbackQuery, st
             order_items.append(
                 OrderItem(
                     product=product,
-                    price=product_price,
+                    price=round(product_price / product_quantity, 2),
+                    quantity=product_quantity,
                 )
             )
             payload += f':{product_id}:{product_quantity}'

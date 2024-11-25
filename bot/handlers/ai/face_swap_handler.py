@@ -35,7 +35,8 @@ from bot.database.operations.face_swap_package.writers import write_used_face_sw
 from bot.database.operations.generation.getters import get_generations_by_request_id
 from bot.database.operations.generation.updaters import update_generation
 from bot.database.operations.generation.writers import write_generation
-from bot.database.operations.request.getters import get_started_requests_by_user_id_and_model
+from bot.database.operations.product.getters import get_product_by_quota
+from bot.database.operations.request.getters import get_started_requests_by_user_id_and_product_id
 from bot.database.operations.request.updaters import update_request
 from bot.database.operations.request.writers import write_request
 from bot.database.operations.user.getters import get_user
@@ -363,7 +364,9 @@ async def face_swap_quantity_handler(message: Message, state: FSMContext, user_i
                 reply_markup=reply_markup,
             )
         else:
-            user_not_finished_requests = await get_started_requests_by_user_id_and_model(user.id, Model.FACE_SWAP)
+            product = await get_product_by_quota(Quota.FACE_SWAP)
+
+            user_not_finished_requests = await get_started_requests_by_user_id_and_product_id(user.id, product.id)
 
             if len(user_not_finished_requests):
                 await message.reply(
@@ -383,7 +386,7 @@ async def face_swap_quantity_handler(message: Message, state: FSMContext, user_i
             request = await write_request(
                 user_id=user.id,
                 message_id=processing_message.message_id,
-                model=Model.FACE_SWAP,
+                product_id=product.id,
                 requested=quantity,
                 details={
                     'is_test': False,
@@ -407,7 +410,7 @@ async def face_swap_quantity_handler(message: Message, state: FSMContext, user_i
                             write_generation(
                                 id=result,
                                 request_id=request.id,
-                                model=Model.FACE_SWAP,
+                                product_id=product.id,
                                 has_error=result is None,
                                 details={
                                     'used_face_swap_package_id': used_face_swap_package.id,

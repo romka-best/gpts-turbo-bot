@@ -25,7 +25,8 @@ from bot.database.operations.face_swap_package.getters import (
 )
 from bot.database.operations.face_swap_package.updaters import update_face_swap_package, update_used_face_swap_package
 from bot.database.operations.generation.writers import write_generation
-from bot.database.operations.request.getters import get_started_requests_by_user_id_and_model
+from bot.database.operations.product.getters import get_product_by_quota
+from bot.database.operations.request.getters import get_started_requests_by_user_id_and_product_id
 from bot.database.operations.request.writers import write_request
 from bot.database.operations.user.getters import get_user
 from bot.handlers.admin.face_swap_handler import handle_manage_face_swap
@@ -151,7 +152,9 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
             allow_sending_without_reply=True,
         )
 
-        user_not_finished_requests = await get_started_requests_by_user_id_and_model(user.id, Model.PHOTOSHOP_AI)
+        product = await get_product_by_quota(Quota.PHOTOSHOP_AI)
+
+        user_not_finished_requests = await get_started_requests_by_user_id_and_product_id(user.id, product.id)
         if len(user_not_finished_requests):
             await message.reply(
                 text=get_localization(user_language_code).ALREADY_MAKE_REQUEST,
@@ -182,7 +185,7 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
             request = await write_request(
                 user_id=user_id,
                 message_id=processing_message.message_id,
-                model=Model.PHOTOSHOP_AI,
+                product_id=product.id,
                 requested=1,
                 details={
                     'type': photoshop_ai_action_name,
@@ -191,7 +194,7 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
             await write_generation(
                 id=result,
                 request_id=request.id,
-                model=Model.PHOTOSHOP_AI,
+                product_id=product.id,
                 has_error=result is None,
                 details={
                     'type': photoshop_ai_action_name,
@@ -275,11 +278,13 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
                     await background_photo.upload(photo_data)
                     background_photo_link = firebase.get_public_url(background_path)
 
+                    product = await get_product_by_quota(Quota.FACE_SWAP)
+
                     result = await create_face_swap_image(background_photo_link, user_photo_link)
                     request = await write_request(
                         user_id=user_id,
                         message_id=processing_message.message_id,
-                        model=Model.FACE_SWAP,
+                        product_id=product.id,
                         requested=1,
                         details={
                             'is_test': False,
@@ -288,7 +293,7 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
                     await write_generation(
                         id=result,
                         request_id=request.id,
-                        model=Model.FACE_SWAP,
+                        product_id=product.id,
                         has_error=result is None
                     )
 

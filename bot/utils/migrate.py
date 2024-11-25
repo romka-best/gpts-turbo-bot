@@ -28,6 +28,8 @@ from bot.database.operations.promo_code.getters import (
     get_promo_codes,
 )
 from bot.database.operations.promo_code.updaters import update_promo_code
+from bot.database.operations.request.getters import get_requests_by_model, get_requests
+from bot.database.operations.request.updaters import update_request
 from bot.database.operations.subscription.getters import (
     get_subscriptions_by_type,
     get_last_subscription_by_user_id,
@@ -51,6 +53,8 @@ async def migrate(bot: Bot):
         await get_transactions(service='TEST')
         await get_promo_codes_by_subscription_type('TEST')
         await get_users_by_subscription_type('TEST')
+        await get_requests_by_model('TEST')
+        await get_generations_by_model('TEST')
 
         await send_message_to_admins_and_developers(bot, '<b>The check before migration was successful!</b> 🎉')
     except Exception as e:
@@ -66,7 +70,7 @@ async def migrate(bot: Bot):
         # create products
         # MINI
         mini_monthly_product = await write_product(
-            stripe_id='prod_RCFxmUvHM3P5yh',
+            stripe_id='prod_RHNcjbft7nET1G',
             is_active=True,
             type=ProductType.SUBSCRIPTION,
             category=ProductCategory.MONTHLY,
@@ -117,7 +121,7 @@ async def migrate(bot: Bot):
             },
         )
         mini_yearly_product = await write_product(
-            stripe_id='prod_RCFxmUvHM3P5yh',
+            stripe_id='prod_RHNcjbft7nET1G',
             is_active=True,
             type=ProductType.SUBSCRIPTION,
             category=ProductCategory.YEARLY,
@@ -199,7 +203,7 @@ async def migrate(bot: Bot):
 
         # STANDARD
         standard_monthly_product = await write_product(
-            stripe_id='prod_RCG6CRyv8SI8c9',
+            stripe_id='prod_RHNcJ9uGDFTOrc',
             is_active=True,
             type=ProductType.SUBSCRIPTION,
             category=ProductCategory.MONTHLY,
@@ -250,7 +254,7 @@ async def migrate(bot: Bot):
             },
         )
         standard_yearly_product = await write_product(
-            stripe_id='prod_RCG6CRyv8SI8c9',
+            stripe_id='prod_RHNcJ9uGDFTOrc',
             is_active=True,
             type=ProductType.SUBSCRIPTION,
             category=ProductCategory.YEARLY,
@@ -331,7 +335,7 @@ async def migrate(bot: Bot):
 
         # VIP
         vip_monthly_product = await write_product(
-            stripe_id='prod_RCH4W0qNOcJezR',
+            stripe_id='prod_RHNcZChkZUanjr',
             is_active=True,
             type=ProductType.SUBSCRIPTION,
             category=ProductCategory.MONTHLY,
@@ -382,7 +386,7 @@ async def migrate(bot: Bot):
             },
         )
         vip_yearly_product = await write_product(
-            stripe_id='prod_RCH4W0qNOcJezR',
+            stripe_id='prod_RHNcZChkZUanjr',
             is_active=True,
             type=ProductType.SUBSCRIPTION,
             category=ProductCategory.YEARLY,
@@ -463,7 +467,7 @@ async def migrate(bot: Bot):
 
         # PREMIUM
         premium_monthly_product = await write_product(
-            stripe_id='prod_RCHAcAlWbilJ4t',
+            stripe_id='prod_RHNdgOMwE5Wfuy',
             is_active=True,
             type=ProductType.SUBSCRIPTION,
             category=ProductCategory.MONTHLY,
@@ -514,7 +518,7 @@ async def migrate(bot: Bot):
             },
         )
         premium_yearly_product = await write_product(
-            stripe_id='prod_RCHAcAlWbilJ4t',
+            stripe_id='prod_RHNdgOMwE5Wfuy',
             is_active=True,
             type=ProductType.SUBSCRIPTION,
             category=ProductCategory.YEARLY,
@@ -595,7 +599,7 @@ async def migrate(bot: Bot):
 
         # UNLIMITED
         unlimited_monthly_product = await write_product(
-            stripe_id='',
+            stripe_id='prod_RHNdWeHzwmGgCX',
             is_active=True,
             type=ProductType.SUBSCRIPTION,
             category=ProductCategory.MONTHLY,
@@ -646,7 +650,7 @@ async def migrate(bot: Bot):
             },
         )
         unlimited_yearly_product = await write_product(
-            stripe_id='',
+            stripe_id='prod_RHNdWeHzwmGgCX',
             is_active=True,
             type=ProductType.SUBSCRIPTION,
             category=ProductCategory.YEARLY,
@@ -727,13 +731,13 @@ async def migrate(bot: Bot):
 
         # CHAT_GPT3_TURBO
         chatgpt3_turbo_product = await write_product(
-            stripe_id='prod_RCHLYzi4VWvRi4',
+            stripe_id='prod_RHNdnIIXn43za1',
             is_active=False,
             type=ProductType.PACKAGE,
             category=ProductCategory.TEXT,
             names={
-                'ru': '✉️ ChatGPT 3.5 Turbo',
-                'en': '✉️ ChatGPT 3.5 Turbo',
+                'ru': 'ChatGPT 3.5 Turbo ✉️',
+                'en': 'ChatGPT 3.5 Turbo ✉️',
             },
             descriptions={
                 'ru': 'Разбудите мощь ChatGPT 3.5 Turbo для остроумных бесед, умных советов и бесконечного веселья! ✉️',
@@ -774,13 +778,13 @@ async def migrate(bot: Bot):
         await send_message_to_admins_and_developers(bot, '<b>GPT3 migration was successful!</b> 🎉')
         # CHAT_GPT4_TURBO
         chatgpt4_turbo_product = await write_product(
-            stripe_id='prod_RCHMiVNelUjFYR',
+            stripe_id='prod_RHNdHY5UuRKCWU',
             is_active=False,
             type=ProductType.PACKAGE,
             category=ProductCategory.TEXT,
             names={
-                'ru': '🧠 ChatGPT 4.0 Turbo',
-                'en': '🧠 ChatGPT 4.0 Turbo',
+                'ru': 'ChatGPT 4.0 Turbo 🧠',
+                'en': 'ChatGPT 4.0 Turbo 🧠',
             },
             descriptions={
                 'ru': 'Откройте новые горизонты с интеллектом ChatGPT 4.0 Turbo для более глубоких анализов и инновационных диалогов! 🧠',
@@ -822,13 +826,13 @@ async def migrate(bot: Bot):
 
         # CHAT_GPT4_OMNI_MINI
         chatgpt4_omni_mini_product = await write_product(
-            stripe_id='prod_RCBywvoRVhusyD',
+            stripe_id='prod_RHNmr3PRsiezOI',
             is_active=True,
             type=ProductType.PACKAGE,
             category=ProductCategory.TEXT,
             names={
-                'ru': '✉️ ChatGPT 4.0 Omni Mini',
-                'en': '✉️ ChatGPT 4.0 Omni Mini',
+                'ru': 'ChatGPT 4.0 Omni Mini ✉️',
+                'en': 'ChatGPT 4.0 Omni Mini ✉️',
             },
             descriptions={
                 'ru': 'Разбудите мощь ChatGPT 4.0 Omni Mini для остроумных бесед, умных советов и бесконечного веселья! ✉️',
@@ -870,13 +874,13 @@ async def migrate(bot: Bot):
         await send_message_to_admins_and_developers(bot, '<b>CHAT_GPT4_OMNI_MINI migration was successful!</b> 🎉')
         # CHAT_GPT4_OMNI
         chatgpt4_omni_product = await write_product(
-            stripe_id='prod_RCF5QMKPnsfn5y',
+            stripe_id='prod_RHNnfx8kxnkdwC',
             is_active=True,
             type=ProductType.PACKAGE,
             category=ProductCategory.TEXT,
             names={
-                'ru': '💥 ChatGPT 4.0 Omni',
-                'en': '💥 ChatGPT 4.0 Omni',
+                'ru': 'ChatGPT 4.0 Omni 💥',
+                'en': 'ChatGPT 4.0 Omni 💥',
             },
             descriptions={
                 'ru': 'Откройте новые горизонты с интеллектом ChatGPT 4.0 Omni для более глубоких анализов и инновационных диалогов! 💥',
@@ -918,13 +922,13 @@ async def migrate(bot: Bot):
         await send_message_to_admins_and_developers(bot, '<b>CHAT_GPT4_OMNI migration was successful!</b> 🎉')
         # CHAT_GPT_O_1_MINI
         chatgpt_o_1_mini_product = await write_product(
-            stripe_id='prod_RCFA3qFqGi1VuM',
+            stripe_id='prod_RHNnp9xsxRtJhc',
             is_active=True,
             type=ProductType.PACKAGE,
             category=ProductCategory.TEXT,
             names={
-                'ru': '🧩 ChatGPT o1-mini',
-                'en': '🧩 ChatGPT o1-mini',
+                'ru': 'ChatGPT o1-mini 🧩',
+                'en': 'ChatGPT o1-mini 🧩',
             },
             descriptions={
                 'ru': 'Откройте новые перспективы с ChatGPT o1-mini, чтобы находить быстрые и точные решения для ваших задач! 🧩',
@@ -966,13 +970,13 @@ async def migrate(bot: Bot):
         await send_message_to_admins_and_developers(bot, '<b>CHAT_GPT_O_1_MINI migration was successful!</b> 🎉')
         # CHAT_GPT_O_1_PREVIEW
         chatgpt_o_1_preview_product = await write_product(
-            stripe_id='prod_RCFCBQEROcDH6m',
+            stripe_id='prod_RHNoY55CSLKHwP',
             is_active=True,
             type=ProductType.PACKAGE,
             category=ProductCategory.TEXT,
             names={
-                'ru': '🧪 ChatGPT o1-preview',
-                'en': '🧪 ChatGPT o1-preview',
+                'ru': 'ChatGPT o1-preview 🧪',
+                'en': 'ChatGPT o1-preview 🧪',
             },
             descriptions={
                 'ru': 'Исследуйте будущее с ChatGPT o1-preview, совершая глубокие и логически выверенные открытия! 🧪',
@@ -1015,13 +1019,13 @@ async def migrate(bot: Bot):
 
         # CLAUDE_3_HAIKU
         claude_3_haiku_product = await write_product(
-            stripe_id='prod_RCFHr0XeULiJ0Y',
+            stripe_id='prod_RHNoE4HCiI0uJi',
             is_active=True,
             type=ProductType.PACKAGE,
             category=ProductCategory.TEXT,
             names={
-                'ru': '📜 Claude 3.5 Haiku',
-                'en': '📜 Claude 3.5 Haiku',
+                'ru': 'Claude 3.5 Haiku 📜',
+                'en': 'Claude 3.5 Haiku 📜',
             },
             descriptions={
                 'ru': 'Погрузитесь в мир краткости и мудрости с Claude 3.5 Haiku, где лаконичность рождает гениальные идеи! 📜',
@@ -1063,13 +1067,13 @@ async def migrate(bot: Bot):
         await send_message_to_admins_and_developers(bot, '<b>CLAUDE_3_HAIKU migration was successful!</b> 🎉')
         # CLAUDE_3_SONNET
         claude_3_sonnet_product = await write_product(
-            stripe_id='prod_RCFJqiWAlLjOX2',
+            stripe_id='prod_RHNoq0gEgqVi59',
             is_active=True,
             type=ProductType.PACKAGE,
             category=ProductCategory.TEXT,
             names={
-                'ru': '💫 Claude 3.5 Sonnet',
-                'en': '💫 Claude 3.5 Sonnet',
+                'ru': 'Claude 3.5 Sonnet 💫',
+                'en': 'Claude 3.5 Sonnet 💫',
             },
             descriptions={
                 'ru': 'Исследуйте баланс скорости и интеллекта с Claude 3.5 Sonnet для точных и оперативных решений! 💫',
@@ -1111,13 +1115,13 @@ async def migrate(bot: Bot):
         await send_message_to_admins_and_developers(bot, '<b>CLAUDE_3_SONNET migration was successful!</b> 🎉')
         # CLAUDE_3_OPUS
         claude_3_opus_product = await write_product(
-            stripe_id='prod_RCFLP6MotSILJZ',
+            stripe_id='prod_RHNoEs0MGtCDDs',
             is_active=True,
             type=ProductType.PACKAGE,
             category=ProductCategory.TEXT,
             names={
-                'ru': '🚀 Claude 3.0 Opus',
-                'en': '🚀 Claude 3.0 Opus',
+                'ru': 'Claude 3.0 Opus 🚀',
+                'en': 'Claude 3.0 Opus 🚀',
             },
             descriptions={
                 'ru': 'Проникнитесь мощью Claude 3.0 Opus для решения самых сложных задач и создания глубоких инсайтов! 🚀',
@@ -1160,13 +1164,13 @@ async def migrate(bot: Bot):
 
         # GEMINI_1_FLASH
         gemini_1_flash_product = await write_product(
-            stripe_id='prod_RCFORfxP5KkHoM',
+            stripe_id='prod_RHNov6pvSAOxOv',
             is_active=True,
             type=ProductType.PACKAGE,
             category=ProductCategory.TEXT,
             names={
-                'ru': '🏎 Gemini 1.5 Flash',
-                'en': '🏎 Gemini 1.5 Flash',
+                'ru': 'Gemini 1.5 Flash 🏎',
+                'en': 'Gemini 1.5 Flash 🏎',
             },
             descriptions={
                 'ru': 'Разбудите мощь Gemini 1.5 Flash для мгновенных решений, быстрых ответов и динамичных взаимодействий! 🏎',
@@ -1208,13 +1212,13 @@ async def migrate(bot: Bot):
         await send_message_to_admins_and_developers(bot, '<b>GEMINI_1_FLASH migration was successful!</b> 🎉')
         # GEMINI_1_PRO
         gemini_1_pro_product = await write_product(
-            stripe_id='prod_RCFPNXSH9vNVts',
+            stripe_id='prod_RHNp2NVU2N00o2',
             is_active=True,
             type=ProductType.PACKAGE,
             category=ProductCategory.TEXT,
             names={
-                'ru': '💼 Gemini 1.5 Pro',
-                'en': '💼 Gemini 1.5 Pro',
+                'ru': 'Gemini 1.5 Pro 💼',
+                'en': 'Gemini 1.5 Pro 💼',
             },
             descriptions={
                 'ru': 'Разбудите мощь Gemini 1.5 Pro для глубокого анализа, точных решений и максимальной продуктивности! 💼',
@@ -1256,13 +1260,13 @@ async def migrate(bot: Bot):
         await send_message_to_admins_and_developers(bot, '<b>GEMINI_1_PRO migration was successful!</b> 🎉')
         # GEMINI_1_ULTRA
         gemini_1_ultra_product = await write_product(
-            stripe_id='prod_RCFSQYQ9A0Sovw',
+            stripe_id='prod_RHNqfsnNOBhwbK',
             is_active=True,
             type=ProductType.PACKAGE,
             category=ProductCategory.TEXT,
             names={
-                'ru': '🛡 Gemini 1.0 Ultra',
-                'en': '🛡 Gemini 1.0 Ultra',
+                'ru': 'Gemini 1.0 Ultra 🛡',
+                'en': 'Gemini 1.0 Ultra 🛡',
             },
             descriptions={
                 'ru': 'Воспользуйтесь силой Gemini 1.0 Ultra для решения самых сложных задач и достижений на новых высотах! 🛡',
@@ -1305,13 +1309,13 @@ async def migrate(bot: Bot):
 
         # DALL_E
         dall_e_product = await write_product(
-            stripe_id='prod_RCFVyVhcZbejOq',
+            stripe_id='prod_RHNqijlBdOxmCP',
             is_active=True,
             type=ProductType.PACKAGE,
             category=ProductCategory.IMAGE,
             names={
-                'ru': '👨‍🎨 DALL-E',
-                'en': '👨‍🎨 DALL-E',
+                'ru': 'DALL-E 👨‍🎨',
+                'en': 'DALL-E 👨‍🎨',
             },
             descriptions={
                 'ru': 'Превратите свои идеи в искусство с помощью DALL-E – там, где ваше воображение становится поразительной визуальной реальностью! 👨‍🎨',
@@ -1353,13 +1357,13 @@ async def migrate(bot: Bot):
         await send_message_to_admins_and_developers(bot, '<b>DALL_E migration was successful!</b> 🎉')
         # MIDJOURNEY
         midjourney_product = await write_product(
-            stripe_id='prod_RCFWuF54VQGsf9',
+            stripe_id='prod_RHNrVDhpUAvoAF',
             is_active=True,
             type=ProductType.PACKAGE,
             category=ProductCategory.IMAGE,
             names={
-                'ru': '🎨 Midjourney',
-                'en': '🎨 Midjourney',
+                'ru': 'Midjourney 🎨',
+                'en': 'Midjourney 🎨',
             },
             descriptions={
                 'ru': 'Раскройте свой творческий потенциал с Midjourney – превращайте ваши мысли в великолепные визуальные произведения искусства! 🎨',
@@ -1376,6 +1380,11 @@ async def migrate(bot: Bot):
                 'has_reactions': True,
             },
         )
+        midjourney_requests = await get_requests_by_model(model=Model.MIDJOURNEY)
+        for midjourney_request in midjourney_requests:
+            await update_request(midjourney_request.id, {
+                'product_id': midjourney_product.id,
+            })
         midjourney_generations = await get_generations_by_model(model=Model.MIDJOURNEY)
         for midjourney_generation in midjourney_generations:
             await update_generation(midjourney_generation.id, {
@@ -1407,13 +1416,13 @@ async def migrate(bot: Bot):
         await send_message_to_admins_and_developers(bot, '<b>MIDJOURNEY migration was successful!</b> 🎉')
         # STABLE_DIFFUSION
         stable_diffusion_product = await write_product(
-            stripe_id='prod_RCFXXpas00fSBR',
+            stripe_id='prod_RHNr4qfz3kJjZB',
             is_active=True,
             type=ProductType.PACKAGE,
             category=ProductCategory.IMAGE,
             names={
-                'ru': '🎆 Stable Diffusion 3.5',
-                'en': '🎆 Stable Diffusion 3.5',
+                'ru': 'Stable Diffusion 3.5 🎆',
+                'en': 'Stable Diffusion 3.5 🎆',
             },
             descriptions={
                 'ru': 'Откройте дверь в мир творчества с Stable Diffusion — превращайте свои идеи в изображения, которые поражают воображение! 🎆',
@@ -1430,6 +1439,11 @@ async def migrate(bot: Bot):
                 'has_reactions': True,
             },
         )
+        stable_diffusion_requests = await get_requests_by_model(model=Model.STABLE_DIFFUSION)
+        for stable_diffusion_request in stable_diffusion_requests:
+            await update_request(stable_diffusion_request.id, {
+                'product_id': stable_diffusion_product.id,
+            })
         stable_diffusion_generations = await get_generations_by_model(model=Model.STABLE_DIFFUSION)
         for stable_diffusion_generation in stable_diffusion_generations:
             await update_generation(stable_diffusion_generation.id, {
@@ -1461,13 +1475,13 @@ async def migrate(bot: Bot):
         await send_message_to_admins_and_developers(bot, '<b>STABLE_DIFFUSION migration was successful!</b> 🎉')
         # FLUX
         flux_product = await write_product(
-            stripe_id='prod_RCFZCtGHdBDmFc',
+            stripe_id='prod_RHNrAc0WIEbR2h',
             is_active=True,
             type=ProductType.PACKAGE,
             category=ProductCategory.IMAGE,
             names={
-                'ru': '🫐 Flux 1.1 Pro',
-                'en': '🫐 Flux 1.1 Pro',
+                'ru': 'Flux 1.1 Pro 🫐',
+                'en': 'Flux 1.1 Pro 🫐',
             },
             descriptions={
                 'ru': 'Исследуйте визуальные вариации с Flux — экспериментируйте и создавайте уникальные изображения! 🫐',
@@ -1484,6 +1498,11 @@ async def migrate(bot: Bot):
                 'has_reactions': True,
             },
         )
+        flux_requests = await get_requests_by_model(model=Model.FLUX)
+        for flux_request in flux_requests:
+            await update_request(flux_request.id, {
+                'product_id': flux_product.id,
+            })
         flux_generations = await get_generations_by_model(model=Model.FLUX)
         for flux_generation in flux_generations:
             await update_generation(flux_generation.id, {
@@ -1515,13 +1534,13 @@ async def migrate(bot: Bot):
         await send_message_to_admins_and_developers(bot, '<b>FLUX migration was successful!</b> 🎉')
         # FACE_SWAP
         face_swap_product = await write_product(
-            stripe_id='prod_RCFaoZHhW2M9uo',
+            stripe_id='prod_RHNrBTAHqhMreX',
             is_active=True,
             type=ProductType.PACKAGE,
             category=ProductCategory.IMAGE,
             names={
-                'ru': '📷 FaceSwap',
-                'en': '📷 FaceSwap',
+                'ru': 'FaceSwap 📷',
+                'en': 'FaceSwap 📷',
             },
             descriptions={
                 'ru': 'Погрузитесь в игровой мир замены лиц для смеха и удивления на каждом изображении! 📷',
@@ -1538,6 +1557,11 @@ async def migrate(bot: Bot):
                 'has_reactions': True,
             },
         )
+        face_swap_requests = await get_requests_by_model(model=Model.FACE_SWAP)
+        for face_swap_request in face_swap_requests:
+            await update_request(face_swap_request.id, {
+                'product_id': face_swap_product.id,
+            })
         face_swap_generations = await get_generations_by_model(model=Model.FACE_SWAP)
         for face_swap_generation in face_swap_generations:
             await update_generation(face_swap_generation.id, {
@@ -1569,13 +1593,13 @@ async def migrate(bot: Bot):
         await send_message_to_admins_and_developers(bot, '<b>FACE_SWAP migration was successful!</b> 🎉')
         # PHOTOSHOP_AI
         photoshop_ai_product = await write_product(
-            stripe_id='prod_RCFaoZHhW2M9uo',
+            stripe_id='prod_RHNs4YG7pCMIKf',
             is_active=True,
             type=ProductType.PACKAGE,
             category=ProductCategory.IMAGE,
             names={
-                'ru': '🪄 Photoshop AI',
-                'en': '🪄 Photoshop AI',
+                'ru': 'Photoshop AI 🪄',
+                'en': 'Photoshop AI 🪄',
             },
             descriptions={
                 'ru': 'Творите без границ с Photoshop AI, превращая каждую фотографию в шедевр! 🪄',
@@ -1592,6 +1616,11 @@ async def migrate(bot: Bot):
                 'has_reactions': True,
             },
         )
+        photoshop_ai_requests = await get_requests_by_model(model=Model.PHOTOSHOP_AI)
+        for photoshop_ai_request in photoshop_ai_requests:
+            await update_request(photoshop_ai_request.id, {
+                'product_id': photoshop_ai_product.id,
+            })
         photoshop_ai_generations = await get_generations_by_model(model=Model.PHOTOSHOP_AI)
         for photoshop_ai_generation in photoshop_ai_generations:
             await update_generation(photoshop_ai_generation.id, {
@@ -1624,13 +1653,13 @@ async def migrate(bot: Bot):
 
         # MUSIC_GEN
         music_gen_product = await write_product(
-            stripe_id='prod_RCFdvZo9jKe6J0',
+            stripe_id='prod_RHNsuN9ktAhJjw',
             is_active=True,
             type=ProductType.PACKAGE,
             category=ProductCategory.MUSIC,
             names={
-                'ru': '🎺 MusicGen',
-                'en': '🎺 MusicGen',
+                'ru': 'MusicGen 🎺',
+                'en': 'MusicGen 🎺',
             },
             descriptions={
                 'ru': 'Откройте для себя мир, где каждый промпт превращается в уникальную мелодию! 🎺',
@@ -1647,6 +1676,11 @@ async def migrate(bot: Bot):
                 'has_reactions': True,
             },
         )
+        music_gen_requests = await get_requests_by_model(model=Model.MUSIC_GEN)
+        for music_gen_request in music_gen_requests:
+            await update_request(music_gen_request.id, {
+                'product_id': music_gen_product.id,
+            })
         music_gen_generations = await get_generations_by_model(model=Model.MUSIC_GEN)
         for music_gen_generation in music_gen_generations:
             await update_generation(music_gen_generation.id, {
@@ -1678,13 +1712,13 @@ async def migrate(bot: Bot):
         await send_message_to_admins_and_developers(bot, '<b>MUSIC_GEN migration was successful!</b> 🎉')
         # SUNO
         suno_product = await write_product(
-            stripe_id='prod_RCFeFuuzo1aLdt',
+            stripe_id='prod_RHNsxMchoJzawB',
             is_active=True,
             type=ProductType.PACKAGE,
             category=ProductCategory.MUSIC,
             names={
-                'ru': '🎸 Suno',
-                'en': '🎸 Suno',
+                'ru': 'Suno 4.0 🎸',
+                'en': 'Suno 4.0 🎸',
             },
             descriptions={
                 'ru': 'Попробуйте мир, где каждый ваш текст превращается в уникальную песню! 🎸',
@@ -1701,6 +1735,11 @@ async def migrate(bot: Bot):
                 'has_reactions': True,
             },
         )
+        suno_requests = await get_requests_by_model(model=Model.SUNO)
+        for suno_request in suno_requests:
+            await update_request(suno_request.id, {
+                'product_id': suno_product.id,
+            })
         suno_generations = await get_generations_by_model(model=Model.FLUX)
         for suno_generation in suno_generations:
             await update_generation(suno_generation.id, {
@@ -1733,13 +1772,13 @@ async def migrate(bot: Bot):
 
         # CHAT
         chat_product = await write_product(
-            stripe_id='prod_RCFhqamS0qdN5n',
+            stripe_id='prod_RHNucovOmmyk60',
             is_active=True,
             type=ProductType.PACKAGE,
             category=ProductCategory.OTHER,
             names={
-                'ru': '💬 Тематические чаты',
-                'en': '💬 Thematic chats',
+                'ru': 'Тематические чаты 💬',
+                'en': 'Thematic chats 💬',
             },
             descriptions={
                 'ru': 'Окунитесь в интересные темы с тематическими чатами, направляемыми AI в мире индивидуальных дискуссий! 💬',
@@ -1774,13 +1813,13 @@ async def migrate(bot: Bot):
         await send_message_to_admins_and_developers(bot, '<b>CHAT migration was successful!</b> 🎉')
         # ACCESS_TO_CATALOG
         access_to_catalog_product = await write_product(
-            stripe_id='prod_RCFmrMCKMou6CX',
+            stripe_id='prod_RHNu52alX6deIg',
             is_active=True,
             type=ProductType.PACKAGE,
             category=ProductCategory.OTHER,
             names={
-                'ru': '🎭 Доступ к каталогу с цифровыми сотрудниками',
-                'en': '🎭 Access to the Digital Staff Catalog',
+                'ru': 'Доступ к каталогу с цифровыми сотрудниками 🎭',
+                'en': 'Access to the Digital Staff Catalog 🎭',
             },
             descriptions={
                 'ru': 'Откройте вселенную специализированных AI-помощников с доступом к эксклюзивному каталогу, где каждая роль адаптирована под ваши уникальные потребности и задачи! 🎭',
@@ -1816,13 +1855,13 @@ async def migrate(bot: Bot):
         await send_message_to_admins_and_developers(bot, '<b>ACCESS_TO_CATALOG migration was successful!</b> 🎉')
         # VOICE_MESSAGES
         voice_messages_product = await write_product(
-            stripe_id='prod_RCFoCDuQGumQyh',
+            stripe_id='prod_RHNu76DLiwtAYq',
             is_active=True,
             type=ProductType.PACKAGE,
             category=ProductCategory.OTHER,
             names={
-                'ru': '🎙 Голосовые ответы и запросы',
-                'en': '🎙 Voice Answers and Requests',
+                'ru': 'Голосовые ответы и запросы 🎙',
+                'en': 'Voice Answers and Requests 🎙',
             },
             descriptions={
                 'ru': 'Ощутите удобство и простоту голосового общения с нашим AI: отправляйте и получайте голосовые сообщения для более динамичного и выразительного взаимодействия! 🎙',
@@ -1858,13 +1897,13 @@ async def migrate(bot: Bot):
         await send_message_to_admins_and_developers(bot, '<b>VOICE_MESSAGES migration was successful!</b> 🎉')
         # FAST_MESSAGES
         fast_messages_product = await write_product(
-            stripe_id='prod_RCFq0maH67nJ9c',
+            stripe_id='prod_RHNuT0Qr4VmKrk',
             is_active=True,
             type=ProductType.PACKAGE,
             category=ProductCategory.OTHER,
             names={
-                'ru': '⚡ Быстрые ответы без пауз',
-                'en': '⚡ Fast Answers Without Pauses',
+                'ru': 'Быстрые ответы без пауз ⚡',
+                'en': 'Fast Answers Without Pauses ⚡',
             },
             descriptions={
                 'ru': 'Функция \'Быстрые ответы без пауз\' предлагает мгновенные, точные ответы AI, обеспечивая ваше преимущество в общении! ⚡',
@@ -2032,6 +2071,34 @@ async def migrate(bot: Bot):
                 'details': promo_code.details,
             })
         await send_message_to_admins_and_developers(bot, '<b>PROMO_CODES migration was successful!</b> 🎉')
+
+        users = await get_users()
+        for i in range(0, len(users), config.BATCH_SIZE):
+            batch = firebase.db.batch()
+            user_batch = users[i:i + config.BATCH_SIZE]
+
+            for user in user_batch:
+                user_ref = firebase.db.collection(Generation.COLLECTION_NAME).document(user.id)
+
+                batch.update(user_ref, {
+                    'subscription_type': DELETE_FIELD,
+                })
+            await batch.commit()
+        await send_message_to_admins_and_developers(bot, '<b>USERS migration was successful!</b> 🎉')
+
+        requests = await get_requests()
+        for i in range(0, len(requests), config.BATCH_SIZE):
+            batch = firebase.db.batch()
+            request_batch = requests[i:i + config.BATCH_SIZE]
+
+            for request in request_batch:
+                request_ref = firebase.db.collection(Generation.COLLECTION_NAME).document(request.id)
+
+                batch.update(request_ref, {
+                    'model': DELETE_FIELD,
+                })
+            await batch.commit()
+        await send_message_to_admins_and_developers(bot, '<b>REQUESTS migration was successful!</b> 🎉')
 
         generations = await get_generations()
         for i in range(0, len(generations), config.BATCH_SIZE):

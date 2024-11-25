@@ -1287,6 +1287,14 @@ class Texts(Protocol):
         raise NotImplementedError
 
     @staticmethod
+    def choose_how_many_months_to_subscribe(subscription_name: str) -> str:
+        raise NotImplementedError
+
+    @staticmethod
+    def cycles_subscribe() -> str:
+        raise NotImplementedError
+
+    @staticmethod
     def confirmation_subscribe(
         name: str,
         category: ProductCategory,

@@ -800,7 +800,7 @@ Use /mode to switch to a model that supports image vision 👀
 🎹 In <b>simple mode</b>, you only need to describe the theme of the song and the genre
 🎸 In <b>custom mode</b>, you have the opportunity to use your own lyrics and experiment with genres
 
-<b>Suno</b> will create 2 tracks, up to 2 minutes each 🎧
+<b>Suno</b> will create 2 tracks, up to 4 minutes each 🎧
 """
     SUNO_SIMPLE_MODE = "🎹 Simple"
     SUNO_CUSTOM_MODE = "🎸 Custom"
@@ -1403,6 +1403,13 @@ Pick your potion and hit the button below to subscribe:
 """
 
     @staticmethod
+    def choose_how_many_months_to_subscribe(subscription_name: str):
+        return f"""
+You're choosing <b>{subscription_name}</b>
+Please select the subscription period by clicking on the button:
+"""
+
+    @staticmethod
     def confirmation_subscribe(
         name: str,
         category: ProductCategory,
@@ -1430,9 +1437,9 @@ You're about to activate subscription {name} for {left_price_part}{price}{right_
     @staticmethod
     def package(currency: Currency, cost: str):
         if currency == Currency.USD:
-            cost = f"{Currency.SYMBOLS[currency]}0.01"
+            cost = f"{Currency.SYMBOLS[currency]}{cost}"
         else:
-            cost = f"1{Currency.SYMBOLS[currency]}"
+            cost = f"{cost}{Currency.SYMBOLS[currency]}"
 
         return f"""
 🤖 <b>Welcome to the AI shopping spree!</b> 📦
@@ -1456,22 +1463,25 @@ You've selected the <b>{name}</b> package
     async def shopping_cart(currency: Currency, cart_items: list[dict], discount: int):
         text = ""
         total_sum = 0
+        left_price_part = Currency.SYMBOLS[currency] if currency == Currency.USD else ''
+        right_price_part = '' if currency == Currency.USD else Currency.SYMBOLS[currency]
+
         for index, cart_item in enumerate(cart_items):
             product_id, product_quantity = cart_item.get("product_id", ''), cart_item.get("quantity", 0)
 
             product = await get_product(product_id)
 
-            text += f"{index + 1}. {product.names.get('en')}: {product_quantity}\n"
-            total_sum += float(Product.get_discount_price(
+            is_last = index == len(cart_items) - 1
+            right_part = '\n' if not is_last else ''
+            price = Product.get_discount_price(
                 ProductType.PACKAGE,
                 product_quantity,
                 product.prices.get(currency),
                 currency,
                 discount,
-            ))
-
-        left_total_sum_part = '' if currency == Currency.USD else Currency.SYMBOLS[currency]
-        right_total_sum_part = Currency
+            )
+            total_sum += float(price)
+            text += f"{index + 1}. {product.names.get('en')}: {product_quantity} ({left_price_part}{price}{right_price_part}){right_part}"
 
         if not text:
             text = "Your cart is empty"
@@ -1481,7 +1491,7 @@ You've selected the <b>{name}</b> package
 
 {text}
 
-💳 Total: {left_total_sum_part}{round(total_sum, 2)}{right_total_sum_part}
+💳 Total: {left_price_part}{round(total_sum, 2)}{right_price_part}
 """
 
     @staticmethod

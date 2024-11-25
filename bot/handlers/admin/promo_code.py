@@ -5,7 +5,9 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery, URLInputFile
 
 from bot.database.main import firebase
+from bot.database.models.product import ProductType
 from bot.database.models.promo_code import PromoCodeType
+from bot.database.operations.product.getters import get_active_products_by_product_type_and_category, get_product
 from bot.database.operations.promo_code.getters import get_promo_code_by_name
 from bot.database.operations.promo_code.writers import write_promo_code
 from bot.keyboards.admin.admin import build_admin_keyboard
@@ -53,8 +55,10 @@ async def handle_create_promo_code_selection(callback_query: CallbackQuery, stat
         photo = await firebase.bucket.get_blob(photo_path)
         photo_link = firebase.get_public_url(photo.name)
 
+        products = await get_active_products_by_product_type_and_category(ProductType.SUBSCRIPTION)
+
         caption = get_localization(user_language_code).PROMO_CODE_CHOOSE_SUBSCRIPTION_ADMIN
-        reply_markup = build_create_promo_code_subscription_keyboard(user_language_code)
+        reply_markup = build_create_promo_code_subscription_keyboard(user_language_code, products)
         await callback_query.message.answer_photo(
             photo=URLInputFile(photo_link, filename=photo_path),
             caption=caption,
@@ -65,8 +69,10 @@ async def handle_create_promo_code_selection(callback_query: CallbackQuery, stat
         photo = await firebase.bucket.get_blob(photo_path)
         photo_link = firebase.get_public_url(photo.name)
 
+        products = await get_active_products_by_product_type_and_category(ProductType.PACKAGE)
+
         caption = get_localization(user_language_code).PROMO_CODE_CHOOSE_PACKAGE_ADMIN
-        reply_markup = build_create_promo_code_package_keyboard(user_language_code)
+        reply_markup = build_create_promo_code_package_keyboard(user_language_code, products)
         await callback_query.message.answer_photo(
             photo=URLInputFile(photo_link, filename=photo_path),
             caption=caption,
@@ -91,10 +97,13 @@ async def handle_create_promo_code_subscription_selection(callback_query: Callba
 
     user_language_code = await get_user_language(str(callback_query.from_user.id), state.storage)
 
-    subscription_type = callback_query.data.split(':')[1]
+    product_id = callback_query.data.split(':')[1]
+    product = await get_product(product_id)
 
-    message = get_localization(user_language_code).choose_how_many_months_to_subscribe(subscription_type)
-    reply_markup = build_create_promo_code_period_of_subscription_keyboard(user_language_code, subscription_type)
+    message = get_localization(user_language_code).choose_how_many_months_to_subscribe(
+        product.names.get(user_language_code)
+    )
+    reply_markup = build_create_promo_code_period_of_subscription_keyboard(user_language_code, product_id)
     await callback_query.message.edit_caption(caption=message, reply_markup=reply_markup)
 
 
@@ -104,7 +113,7 @@ async def handle_create_promo_code_period_of_subscription_selection(callback_que
 
     user_language_code = await get_user_language(str(callback_query.from_user.id), state.storage)
 
-    subscription_type, subscription_period = callback_query.data.split(':')[1], callback_query.data.split(':')[2]
+    product_id, subscription_period = callback_query.data.split(':')[1], callback_query.data.split(':')[2]
 
     reply_markup = build_cancel_keyboard(user_language_code)
     await callback_query.message.edit_caption(
@@ -115,7 +124,7 @@ async def handle_create_promo_code_period_of_subscription_selection(callback_que
     await state.set_state(PromoCode.waiting_for_promo_code_name)
     await state.update_data(
         promo_code_type=PromoCodeType.SUBSCRIPTION,
-        promo_code_subscription_type=subscription_type,
+        promo_code_product_id=product_id,
         promo_code_subscription_period=subscription_period,
     )
 
@@ -126,13 +135,14 @@ async def handle_create_promo_code_package_selection(callback_query: CallbackQue
 
     user_language_code = await get_user_language(str(callback_query.from_user.id), state.storage)
 
-    package_type = callback_query.data.split(':')[1]
+    product_id = callback_query.data.split(':')[1]
+    product = await get_product(product_id)
 
-    message = get_localization(user_language_code).choose_min(package_type)
+    message = get_localization(user_language_code).choose_min(product.names.get(user_language_code))
     reply_markup = build_cancel_keyboard(user_language_code)
     await callback_query.message.edit_caption(caption=message, reply_markup=reply_markup)
 
-    await state.update_data(promo_code_package_type=package_type)
+    await state.update_data(promo_code_product_id=product_id)
     await state.set_state(PromoCode.waiting_for_promo_code_package_quantity)
 
 
@@ -250,10 +260,10 @@ async def promo_code_date_sent(message: Message, state: FSMContext):
         promo_code_type = user_data['promo_code_type']
         details = {}
         if promo_code_type == PromoCodeType.SUBSCRIPTION:
-            details['subscription_type'] = user_data['promo_code_subscription_type']
+            details['product_id'] = user_data['promo_code_product_id']
             details['subscription_period'] = user_data['promo_code_subscription_period']
         elif promo_code_type == PromoCodeType.PACKAGE:
-            details['package_type'] = user_data['promo_code_package_type']
+            details['product_id'] = user_data['promo_code_product_id']
             details['package_quantity'] = user_data['promo_code_package_quantity']
         elif promo_code_type == PromoCodeType.DISCOUNT:
             details['discount'] = int(user_data['promo_code_discount'])

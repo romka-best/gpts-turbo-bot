@@ -5,14 +5,15 @@ from aiogram.types import Message
 from aiogram.utils.chat_action import ChatActionSender
 
 from bot.config import config, MessageEffect
-from bot.database.models.common import Model
+from bot.database.models.common import Model, Quota
 from bot.database.models.generation import GenerationStatus
 from bot.database.models.request import RequestStatus
 from bot.database.models.user import User, UserSettings
 from bot.database.operations.generation.getters import get_generations_by_request_id
 from bot.database.operations.generation.updaters import update_generation
 from bot.database.operations.generation.writers import write_generation
-from bot.database.operations.request.getters import get_started_requests_by_user_id_and_model
+from bot.database.operations.product.getters import get_product_by_quota
+from bot.database.operations.request.getters import get_started_requests_by_user_id_and_product_id
 from bot.database.operations.request.updaters import update_request
 from bot.database.operations.request.writers import write_request
 from bot.database.operations.user.getters import get_user
@@ -71,7 +72,9 @@ async def handle_flux(message: Message, state: FSMContext, user: User):
     )
 
     async with ChatActionSender.upload_photo(bot=message.bot, chat_id=message.chat.id):
-        user_not_finished_requests = await get_started_requests_by_user_id_and_model(user.id, Model.FLUX)
+        product = await get_product_by_quota(Quota.FLUX)
+
+        user_not_finished_requests = await get_started_requests_by_user_id_and_product_id(user.id, product.id)
 
         if len(user_not_finished_requests):
             await message.reply(
@@ -84,7 +87,7 @@ async def handle_flux(message: Message, state: FSMContext, user: User):
         request = await write_request(
             user_id=user.id,
             message_id=processing_message.message_id,
-            model=Model.FLUX,
+            product_id=product.id,
             requested=1,
         )
 
@@ -96,7 +99,7 @@ async def handle_flux(message: Message, state: FSMContext, user: User):
             await write_generation(
                 id=result_id,
                 request_id=request.id,
-                model=Model.FLUX,
+                product_id=product.id,
                 has_error=result_id is None,
                 details={
                     'prompt': prompt,

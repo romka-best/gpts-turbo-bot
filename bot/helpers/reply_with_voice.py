@@ -36,7 +36,8 @@ async def reply_with_voice(
         },
     )
 
-    await message.answer_voice(
+    await message.reply_voice(
         voice=BufferedInputFile(audio_content.read(), filename='answer.ogg'),
         reply_markup=reply_markup,
+        allow_sending_without_reply=True,
     )

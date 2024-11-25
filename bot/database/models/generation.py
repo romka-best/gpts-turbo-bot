@@ -31,7 +31,8 @@ class Generation:
         self,
         id: str,
         request_id: str,
-        product_id: str,
+        # TODO MAKE : str
+        product_id='',
         result='',
         has_error=False,
         status=GenerationStatus.STARTED,
@@ -40,6 +41,7 @@ class Generation:
         details=None,
         created_at=None,
         edited_at=None,
+        **kwargs,
     ):
         self.id = id
         self.request_id = request_id

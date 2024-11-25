@@ -101,7 +101,7 @@ storage = RedisStorage.from_url(config.REDIS_URL, {
 dp = Dispatcher(
     storage=storage,
     sm_strategy=FSMStrategy.GLOBAL_USER,
-    maintenance_mode=False,
+    maintenance_mode=True,
 )
 
 

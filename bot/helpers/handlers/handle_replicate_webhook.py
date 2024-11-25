@@ -14,7 +14,7 @@ from bot.database.operations.face_swap_package.getters import get_used_face_swap
 from bot.database.operations.face_swap_package.updaters import update_used_face_swap_package
 from bot.database.operations.generation.getters import get_generations_by_request_id, get_generation
 from bot.database.operations.generation.updaters import update_generation
-from bot.database.operations.product.getters import get_product_by_quota
+from bot.database.operations.product.getters import get_product
 from bot.database.operations.request.getters import get_request
 from bot.database.operations.request.updaters import update_request
 from bot.database.operations.transaction.writers import write_transaction
@@ -45,6 +45,7 @@ async def handle_replicate_webhook(bot: Bot, dp: Dispatcher, prediction: dict):
         return True
 
     request = await get_request(generation.request_id)
+    product = await get_product(request.product_id)
     user = await get_user(request.user_id)
 
     generation_error, generation_result = prediction.get('error', False), prediction.get('output', {})
@@ -73,7 +74,7 @@ async def handle_replicate_webhook(bot: Bot, dp: Dispatcher, prediction: dict):
         logging.error(f'Error in replicate_webhook: {prediction.get("logs")}')
     else:
         generation.result = generation_result[0] if type(generation_result) == list else generation_result
-        if request.model == Model.PHOTOSHOP_AI and request.details.get('type') == PhotoshopAIAction.COLORIZATION:
+        if product.details.get('quota') == Quota.PHOTOSHOP_AI and request.details.get('type') == PhotoshopAIAction.COLORIZATION:
             generation.result = generation.result.get('image')
         await update_generation(generation.id, {
             'status': generation.status,
@@ -81,15 +82,15 @@ async def handle_replicate_webhook(bot: Bot, dp: Dispatcher, prediction: dict):
             'seconds': generation.seconds,
         })
 
-    if request.model == Model.STABLE_DIFFUSION:
+    if product.details.get('quota') == Quota.STABLE_DIFFUSION:
         await handle_replicate_stable_diffusion(bot, dp, user, request, generation)
-    elif request.model == Model.FLUX:
+    elif product.details.get('quota') == Quota.FLUX:
         await handle_replicate_flux(bot, dp, user, request, generation)
-    elif request.model == Model.FACE_SWAP:
+    elif product.details.get('quota') == Quota.FACE_SWAP:
         await handle_replicate_face_swap(bot, dp, user, request, generation)
-    elif request.model == Model.PHOTOSHOP_AI:
+    elif product.details.get('quota') == Quota.PHOTOSHOP_AI:
         await handle_replicate_photoshop_ai(bot, dp, user, request, generation)
-    elif request.model == Model.MUSIC_GEN:
+    elif product.details.get('quota') == Quota.MUSIC_GEN:
         await handle_replicate_music_gen(bot, dp, user, request, generation)
 
     return True
@@ -130,12 +131,11 @@ async def handle_replicate_photoshop_ai(
         else:
             total_price = round(0.000575 * generation.seconds, 6)
 
-        product = await get_product_by_quota(Quota.PHOTOSHOP_AI)
         update_tasks = [
             write_transaction(
                 user_id=user.id,
                 type=TransactionType.EXPENSE,
-                product_id=product.id,
+                product_id=generation.product_id,
                 amount=total_price,
                 clear_amount=total_price,
                 currency=Currency.USD,
@@ -210,7 +210,6 @@ async def handle_replicate_face_swap(
                 get_localization(user_language_code).FACE_SWAP_NO_FACE_FOUND_ERROR,
             )
 
-        product = await get_product_by_quota(Quota.FACE_SWAP)
         used_face_swap_package = await get_used_face_swap_package(
             generation.details.get('used_face_swap_package_id')
         )
@@ -220,7 +219,7 @@ async def handle_replicate_face_swap(
                 write_transaction(
                     user_id=user.id,
                     type=TransactionType.EXPENSE,
-                    product_id=product.id,
+                    product_id=generation.product_id,
                     amount=total_price,
                     clear_amount=total_price,
                     currency=Currency.USD,
@@ -238,7 +237,7 @@ async def handle_replicate_face_swap(
                 write_transaction(
                     user_id=user.id,
                     type=TransactionType.EXPENSE,
-                    product_id=product.id,
+                    product_id=generation.product_id,
                     amount=total_price,
                     clear_amount=total_price,
                     currency=Currency.USD,
@@ -325,14 +324,12 @@ async def handle_replicate_music_gen(
             'status': request.status
         })
 
-        product = await get_product_by_quota(Quota.MUSIC_GEN)
-
         total_price = round(PRICE_MUSIC_GEN * generation.seconds, 6)
         update_tasks = [
             write_transaction(
                 user_id=user.id,
                 type=TransactionType.EXPENSE,
-                product_id=product.id,
+                product_id=generation.product_id,
                 amount=total_price,
                 clear_amount=total_price,
                 currency=Currency.USD,
@@ -396,14 +393,12 @@ async def handle_replicate_stable_diffusion(
             'status': request.status
         })
 
-        product = await get_product_by_quota(Quota.STABLE_DIFFUSION)
-
         total_price = PRICE_STABLE_DIFFUSION
         update_tasks = [
             write_transaction(
                 user_id=user.id,
                 type=TransactionType.EXPENSE,
-                product_id=product.id,
+                product_id=generation.product_id,
                 amount=total_price,
                 clear_amount=total_price,
                 currency=Currency.USD,
@@ -463,14 +458,12 @@ async def handle_replicate_flux(
             'status': request.status
         })
 
-        product = await get_product_by_quota(Quota.FLUX)
-
         total_price = PRICE_FLUX
         update_tasks = [
             write_transaction(
                 user_id=user.id,
                 type=TransactionType.EXPENSE,
-                product_id=product.id,
+                product_id=generation.product_id,
                 amount=total_price,
                 clear_amount=total_price,
                 currency=Currency.USD,

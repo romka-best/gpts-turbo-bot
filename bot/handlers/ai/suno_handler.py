@@ -15,7 +15,8 @@ from bot.database.models.user import User, UserSettings
 from bot.database.operations.generation.getters import get_generations_by_request_id
 from bot.database.operations.generation.updaters import update_generation
 from bot.database.operations.generation.writers import write_generation
-from bot.database.operations.request.getters import get_started_requests_by_user_id_and_model
+from bot.database.operations.product.getters import get_product_by_quota
+from bot.database.operations.request.getters import get_started_requests_by_user_id_and_product_id
 from bot.database.operations.request.updaters import update_request
 from bot.database.operations.request.writers import write_request
 from bot.database.operations.user.getters import get_user
@@ -156,7 +157,9 @@ async def suno_prompt_sent(message: Message, state: FSMContext):
                 reply_markup=reply_markup,
             )
         else:
-            user_not_finished_requests = await get_started_requests_by_user_id_and_model(user.id, Model.SUNO)
+            product = await get_product_by_quota(Quota.SUNO)
+
+            user_not_finished_requests = await get_started_requests_by_user_id_and_product_id(user.id, product.id)
 
             if len(user_not_finished_requests):
                 await message.reply(
@@ -169,7 +172,7 @@ async def suno_prompt_sent(message: Message, state: FSMContext):
             request = await write_request(
                 user_id=user.id,
                 message_id=processing_message.message_id,
-                model=Model.SUNO,
+                product_id=product.id,
                 requested=2,
                 details={
                     'mode': SunoMode.SIMPLE,
@@ -187,7 +190,7 @@ async def suno_prompt_sent(message: Message, state: FSMContext):
                             write_generation(
                                 id=result,
                                 request_id=request.id,
-                                model=Model.SUNO,
+                                product_id=product.id,
                                 has_error=result is None,
                                 details={
                                     'mode': SunoMode.SIMPLE,
@@ -354,7 +357,9 @@ async def suno_genres_sent(message: Message, state: FSMContext):
                 reply_markup=reply_markup,
             )
         else:
-            user_not_finished_requests = await get_started_requests_by_user_id_and_model(user.id, Model.SUNO)
+            product = await get_product_by_quota(Quota.SUNO)
+
+            user_not_finished_requests = await get_started_requests_by_user_id_and_product_id(user.id, product.id)
 
             if len(user_not_finished_requests):
                 await message.reply(
@@ -371,7 +376,7 @@ async def suno_genres_sent(message: Message, state: FSMContext):
                 request = await write_request(
                     user_id=user.id,
                     message_id=processing_message.message_id,
-                    model=Model.SUNO,
+                    product_id=product.id,
                     requested=2,
                     details={
                         'mode': SunoMode.CUSTOM,
@@ -395,7 +400,7 @@ async def suno_genres_sent(message: Message, state: FSMContext):
                             write_generation(
                                 id=result,
                                 request_id=request.id,
-                                model=Model.SUNO,
+                                product_id=product.id,
                                 has_error=result is None,
                                 details={
                                     'mode': SunoMode.CUSTOM,
@@ -470,10 +475,12 @@ async def handle_suno_example(user: User, prompt: str, message: Message, state: 
         user.daily_limits[Quota.MUSIC_GEN] in [1] and
         (current_date - user.last_subscription_limit_update).days <= 3
     ):
+        product = await get_product_by_quota(Quota.SUNO)
+
         request = await write_request(
             user_id=user.id,
             message_id=message.message_id,
-            model=Model.SUNO,
+            product_id=product.id,
             requested=2,
             details={
                 'mode': SunoMode.SIMPLE,
@@ -491,7 +498,7 @@ async def handle_suno_example(user: User, prompt: str, message: Message, state: 
                         write_generation(
                             id=result,
                             request_id=request.id,
-                            model=Model.SUNO,
+                            product_id=product.id,
                             has_error=result is None,
                             details={
                                 'mode': SunoMode.SIMPLE,

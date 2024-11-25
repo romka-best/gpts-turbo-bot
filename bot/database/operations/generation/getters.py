@@ -16,6 +16,7 @@ async def get_generation(generation_id: str) -> Optional[Generation]:
         return Generation(**generation.to_dict())
 
 
+# TODO DELETE AFTER MIGRATION
 async def get_generations(
     start_date: Optional[datetime] = None,
     end_date: Optional[datetime] = None,

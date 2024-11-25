@@ -12,7 +12,6 @@ from bot.database.models.transaction import TransactionType
 from bot.database.models.user import User, UserSettings
 from bot.database.operations.generation.getters import get_generation
 from bot.database.operations.generation.updaters import update_generation
-from bot.database.operations.product.getters import get_product_by_quota
 from bot.database.operations.request.getters import get_request
 from bot.database.operations.request.updaters import update_request
 from bot.database.operations.transaction.writers import write_transaction
@@ -125,12 +124,11 @@ async def handle_midjourney_result(
         'status': request.status
     })
 
-    product = await get_product_by_quota(Quota.MIDJOURNEY)
     update_tasks = [
         write_transaction(
             user_id=user.id,
             type=TransactionType.EXPENSE,
-            product_id=product.id,
+            product_id=generation.product_id,
             amount=PRICE_MIDJOURNEY_REQUEST,
             clear_amount=PRICE_MIDJOURNEY_REQUEST,
             currency=Currency.USD,

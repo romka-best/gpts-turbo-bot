@@ -36,10 +36,10 @@ async def create_auto_payment(
         }
         items = []
         for order_item in order_items:
-            product, final_price, quantity = order_item.product, order_item.final_price, order_item.quantity
+            product, price, quantity = order_item.product, order_item.price, order_item.quantity
             items.append({
                 'amount': {
-                    'value': final_price,
+                    'value': price,
                     'currency': Currency.RUB,
                 },
                 'description': product.names.get(language_code),
@@ -60,17 +60,7 @@ async def create_auto_payment(
                     'full_name': user_id,
                     'email': 'me@romandanilov.com',
                 },
-                'items': [
-                    {
-                        'amount': {
-                            'value': amount,
-                            'currency': Currency.RUB,
-                        },
-                        'description': description,
-                        'vat_code': 1,
-                        'quantity': 1,
-                    }
-                ]
+                'items': items,
             },
         }
 
