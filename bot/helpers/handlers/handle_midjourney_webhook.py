@@ -8,7 +8,7 @@ from aiogram.fsm.storage.base import StorageKey
 from bot.database.models.common import Quota, Currency, Model, MidjourneyAction
 from bot.database.models.generation import GenerationStatus, Generation
 from bot.database.models.request import Request, RequestStatus
-from bot.database.models.transaction import TransactionType, ServiceType
+from bot.database.models.transaction import TransactionType
 from bot.database.models.user import User, UserSettings
 from bot.database.operations.generation.getters import get_generation
 from bot.database.operations.generation.updaters import update_generation
@@ -87,17 +87,22 @@ async def handle_midjourney_result(
             request.message_id,
         )
     else:
-        generation_error = generation.details.get('error')
+        generation_error = generation.details.get('error', '').lower()
         if 'banned prompt detected' in generation_error:
             if not is_suggestion:
                 await bot.send_message(
                     chat_id=user.telegram_chat_id,
                     text=get_localization(user_language_code).REQUEST_FORBIDDEN_ERROR,
                 )
-        elif 'You can request another upscale for this image' in generation_error:
+        elif 'you can request another upscale for this image' in generation_error:
             await bot.send_message(
                 chat_id=user.telegram_chat_id,
                 text=get_localization(user_language_code).MIDJOURNEY_ALREADY_CHOSE_UPSCALE,
+            )
+        elif 'slow down!' in generation_error:
+            await bot.send_message(
+                chat_id=user.telegram_chat_id,
+                text=get_localization(user_language_code).SERVER_OVERLOADED_ERROR,
             )
         else:
             if not is_suggestion:
@@ -123,7 +128,7 @@ async def handle_midjourney_result(
         write_transaction(
             user_id=user.id,
             type=TransactionType.EXPENSE,
-            service=ServiceType.MIDJOURNEY,
+            product_id=generation.product_id,
             amount=PRICE_MIDJOURNEY_REQUEST,
             clear_amount=PRICE_MIDJOURNEY_REQUEST,
             currency=Currency.USD,

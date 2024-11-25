@@ -1,4 +1,4 @@
-from typing import Dict, Optional
+from typing import Optional
 
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
@@ -174,7 +174,7 @@ def build_settings_keyboard(
     language_code: str,
     model: Model,
     model_type: str,
-    settings: Dict,
+    settings: dict,
     show_back_button=True,
     show_advanced_settings=False,
 ) -> InlineKeyboardMarkup:
@@ -374,25 +374,37 @@ def build_settings_keyboard(
             [
                 InlineKeyboardButton(
                     text=get_localization(language_code).AUDIO + (
-                        ' ✅' if settings[model][UserSettings.SEND_TYPE] == SunoSendType.AUDIO else ''),
+                        ' ✅' if settings[model][UserSettings.SEND_TYPE] == SunoSendType.AUDIO else ''
+                    ),
                     callback_data=f'setting:{SunoSendType.AUDIO}:{model}'
                 ),
                 InlineKeyboardButton(
                     text=get_localization(language_code).VIDEO + (
-                        ' ✅' if settings[model][UserSettings.SEND_TYPE] == SunoSendType.VIDEO else ''),
+                        ' ✅' if settings[model][UserSettings.SEND_TYPE] == SunoSendType.VIDEO else ''
+                    ),
                     callback_data=f'setting:{SunoSendType.VIDEO}:{model}'
                 ),
             ],
             [
                 InlineKeyboardButton(
                     text=SunoVersion.V3 + (
-                        ' ✅' if settings[model][UserSettings.VERSION] == SunoVersion.V3 else ''),
+                        ' ✅' if settings[model][UserSettings.VERSION] == SunoVersion.V3 else ''
+                    ),
                     callback_data=f'setting:{SunoVersion.V3}:{model}'
                 ),
                 InlineKeyboardButton(
                     text=SunoVersion.V3_5 + (
-                        ' ✅' if settings[model][UserSettings.VERSION] == SunoVersion.V3_5 else ''),
+                        ' ✅' if settings[model][UserSettings.VERSION] == SunoVersion.V3_5 else ''
+                    ),
                     callback_data=f'setting:{SunoVersion.V3_5}:{model}'
+                ),
+            ],
+            [
+                InlineKeyboardButton(
+                    text=SunoVersion.V4 + (
+                        ' ✅' if settings[model][UserSettings.VERSION] == SunoVersion.V4 else ''
+                    ),
+                    callback_data=f'setting:{SunoVersion.V4}:{model}'
                 ),
             ],
         ]
@@ -412,7 +424,7 @@ def build_settings_keyboard(
 
 def build_voice_messages_settings_keyboard(
     language_code: str,
-    settings: Dict,
+    settings: dict,
     model: Optional[Model] = None,
 ) -> InlineKeyboardMarkup:
     buttons = [

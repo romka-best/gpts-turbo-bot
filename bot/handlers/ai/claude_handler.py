@@ -1,7 +1,6 @@
 import asyncio
 import base64
 from datetime import datetime, timezone
-from typing import List
 
 import anthropic
 import httpx
@@ -14,12 +13,12 @@ from aiogram.utils.chat_action import ChatActionSender
 from bot.config import config, MessageEffect
 from bot.database.main import firebase
 from bot.database.models.common import Model, ClaudeGPTVersion, Quota, Currency
-from bot.database.models.subscription import SubscriptionType
-from bot.database.models.transaction import ServiceType, TransactionType
+from bot.database.models.transaction import TransactionType
 from bot.database.models.user import UserSettings, User
 from bot.database.operations.chat.getters import get_chat
 from bot.database.operations.message.getters import get_messages_by_chat_id
 from bot.database.operations.message.writers import write_message
+from bot.database.operations.product.getters import get_product_by_quota
 from bot.database.operations.role.getters import get_role_by_name
 from bot.database.operations.transaction.writers import write_transaction
 from bot.database.operations.user.getters import get_user
@@ -30,9 +29,9 @@ from bot.helpers.reply_with_voice import reply_with_voice
 from bot.helpers.senders.send_error_info import send_error_info
 from bot.helpers.senders.send_ai_message import send_ai_message
 from bot.integrations.anthropic import get_response_message
-from bot.keyboards.ai.claude import build_claude_keyboard, build_claude_continue_generating_keyboard
+from bot.keyboards.ai.claude import build_claude_keyboard
 from bot.keyboards.ai.mode import build_switched_to_ai_keyboard
-from bot.keyboards.common.common import build_error_keyboard
+from bot.keyboards.common.common import build_error_keyboard, build_continue_generating_keyboard
 from bot.locales.main import get_user_language, get_localization
 
 claude_router = Router()
@@ -159,8 +158,10 @@ async def handle_claude(message: Message, state: FSMContext, user: User, user_qu
         await write_message(user.current_chat_id, 'user', user.id, text)
 
     chat = await get_chat(user.current_chat_id)
-    if user.subscription_type == SubscriptionType.FREE:
+    if not user.subscription_id:
         limit = 4
+    elif user_quota == Quota.CLAUDE_3_OPUS:
+        limit = 6
     else:
         limit = 8
     messages = await get_messages_by_chat_id(
@@ -190,9 +191,7 @@ async def handle_claude(message: Message, state: FSMContext, user: User, user_qu
                     image_content = response.content
 
                 image_media_type = 'image/jpeg'
-                image_data = await asyncio.get_running_loop().run_in_executor(
-                    None, lambda: base64.b64encode(image_content).decode('utf-8')
-                )
+                image_data = await asyncio.to_thread(lambda: base64.b64encode(image_content).decode('utf-8'))
                 content.append({
                     'type': 'image',
                     'source': {
@@ -229,24 +228,23 @@ async def handle_claude(message: Message, state: FSMContext, user: User, user_qu
             response_message = response['message']
 
             if user_quota == Quota.CLAUDE_3_HAIKU:
-                service = ServiceType.CLAUDE_3_HAIKU
                 input_price = response['input_tokens'] * PRICE_CLAUDE_3_HAIKU_INPUT
                 output_price = response['output_tokens'] * PRICE_CLAUDE_3_HAIKU_OUTPUT
             elif user_quota == Quota.CLAUDE_3_SONNET:
-                service = ServiceType.CLAUDE_3_SONNET
                 input_price = response['input_tokens'] * PRICE_CLAUDE_3_SONNET_INPUT
                 output_price = response['output_tokens'] * PRICE_CLAUDE_3_SONNET_OUTPUT
             else:
-                service = ServiceType.CLAUDE_3_OPUS
                 input_price = response['input_tokens'] * PRICE_CLAUDE_3_OPUS_INPUT
                 output_price = response['output_tokens'] * PRICE_CLAUDE_3_OPUS_OUTPUT
+
+            product = await get_product_by_quota(user_quota)
 
             total_price = round(input_price + output_price, 6)
             message_role, message_content = 'assistant', response_message
             await write_transaction(
                 user_id=user.id,
                 type=TransactionType.EXPENSE,
-                service=service,
+                product_id=product.id,
                 amount=total_price,
                 clear_amount=total_price,
                 currency=Currency.USD,
@@ -265,7 +263,7 @@ async def handle_claude(message: Message, state: FSMContext, user: User, user_qu
             await create_new_message_and_update_user(transaction, message_role, message_content, user, user_quota)
 
             if user.settings[user.current_model][UserSettings.TURN_ON_VOICE_MESSAGES]:
-                reply_markup = build_claude_continue_generating_keyboard(user_language_code)
+                reply_markup = build_continue_generating_keyboard(user_language_code)
                 await reply_with_voice(
                     message=message,
                     text=message_content,
@@ -284,7 +282,7 @@ async def handle_claude(message: Message, state: FSMContext, user: User, user_qu
                 footer_text = f'\n\n✉️ {user.daily_limits[user_quota] + user.additional_usage_quota[user_quota] + 1}' \
                     if user.settings[user.current_model][UserSettings.SHOW_USAGE_QUOTA] and \
                        user.daily_limits[user_quota] != float('inf') else ''
-                reply_markup = build_claude_continue_generating_keyboard(user_language_code)
+                reply_markup = build_continue_generating_keyboard(user_language_code)
                 full_text = f'{header_text}{message_content}{footer_text}'
                 await send_ai_message(
                     message=message,
@@ -361,47 +359,18 @@ async def handle_claude(message: Message, state: FSMContext, user: User, user_qu
     )
 
 
-@claude_router.callback_query(lambda c: c.data.startswith('claude_continue_generation:'))
-async def handle_claude_continue_generation_choose_selection(callback_query: CallbackQuery, state: FSMContext):
-    await callback_query.answer()
-
-    user_id = str(callback_query.from_user.id)
-    user = await get_user(user_id)
-    user_language_code = await get_user_language(user_id, state.storage)
-
-    action = callback_query.data.split(':')[1]
-
-    if action == 'continue':
-        await state.update_data(recognized_text=get_localization(user_language_code).CONTINUE_GENERATING)
-        if user.settings[user.current_model][UserSettings.VERSION] == ClaudeGPTVersion.V3_Haiku:
-            user_quota = Quota.CLAUDE_3_HAIKU
-        elif user.settings[user.current_model][UserSettings.VERSION] == ClaudeGPTVersion.V3_Sonnet:
-            user_quota = Quota.CLAUDE_3_SONNET
-        elif user.settings[user.current_model][UserSettings.VERSION] == ClaudeGPTVersion.V3_Opus:
-            user_quota = Quota.CLAUDE_3_OPUS
-        else:
-            raise NotImplementedError(
-                f'Claude version is not defined: {user.settings[user.current_model][UserSettings.VERSION]}'
-            )
-
-        await handle_claude(callback_query.message, state, user, user_quota)
-        await callback_query.message.edit_reply_markup(reply_markup=None)
-
-    await state.clear()
-
-
 async def handle_claude_3_sonnet_example(
     user: User,
     user_language_code: str,
     prompt: str,
     system_prompt: str,
-    history: List,
+    history: list,
     message: Message,
 ):
     try:
         current_date = datetime.now(timezone.utc)
         if (
-            user.subscription_type == SubscriptionType.FREE and
+            not user.subscription_id and
             user.current_model == Model.CLAUDE and
             user.settings[user.current_model][UserSettings.SHOW_EXAMPLES] and
             user.daily_limits[Quota.CLAUDE_3_HAIKU] + 1 in [3, 10] and
@@ -412,7 +381,8 @@ async def handle_claude_3_sonnet_example(
             response = await get_response_message(ClaudeGPTVersion.V3_Sonnet, system_prompt, history)
             response_message = response['message']
 
-            service = ServiceType.CLAUDE_3_SONNET
+            product = await get_product_by_quota(Quota.CLAUDE_3_SONNET)
+
             input_price = response['input_tokens'] * PRICE_CLAUDE_3_SONNET_INPUT
             output_price = response['output_tokens'] * PRICE_CLAUDE_3_SONNET_OUTPUT
 
@@ -421,7 +391,7 @@ async def handle_claude_3_sonnet_example(
             await write_transaction(
                 user_id=user.id,
                 type=TransactionType.EXPENSE,
-                service=service,
+                product_id=product.id,
                 amount=total_price,
                 clear_amount=total_price,
                 currency=Currency.USD,
@@ -451,7 +421,7 @@ async def handle_claude_3_sonnet_example(
         )
 
 
-def get_history_without_duplicates(history: List) -> List:
+def get_history_without_duplicates(history: list) -> list:
     result = []
     first_user_found = False
 

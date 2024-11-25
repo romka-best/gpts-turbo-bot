@@ -1,10 +1,10 @@
 from datetime import datetime
-from typing import Optional, List
+from typing import Optional
 
 from google.cloud.firestore_v1 import FieldFilter
 
 from bot.database.main import firebase
-from bot.database.models.transaction import Transaction, ServiceType
+from bot.database.models.transaction import Transaction
 
 
 async def get_transaction(transaction_id: str) -> Optional[Transaction]:
@@ -15,10 +15,10 @@ async def get_transaction(transaction_id: str) -> Optional[Transaction]:
         return Transaction(**transaction.to_dict())
 
 
-async def get_transactions_by_service_and_created_time(
-    service: ServiceType,
+async def get_transactions_by_product_id_and_created_time(
+    product_id: str,
     created_time: datetime,
-) -> List[Transaction]:
+) -> list[Transaction]:
     start_date = created_time.replace(
         hour=0,
         minute=0,
@@ -33,30 +33,11 @@ async def get_transactions_by_service_and_created_time(
     )
 
     transaction_stream = firebase.db.collection(Transaction.COLLECTION_NAME) \
-        .where(filter=FieldFilter('service', '==', service)) \
+        .where(filter=FieldFilter('product_id', '==', product_id)) \
         .where(filter=FieldFilter('created_at', '>=', start_date)) \
         .where(filter=FieldFilter('created_at', '<=', end_date)) \
         .stream()
 
-    transactions = [
-        Transaction(**transaction.to_dict()) async for transaction in transaction_stream
-    ]
-
-    return transactions
-
-
-async def get_transactions(
-    start_date: Optional[datetime] = None,
-    end_date: Optional[datetime] = None,
-) -> List[Transaction]:
-    transactions_query = firebase.db.collection(Transaction.COLLECTION_NAME)
-
-    if start_date:
-        transactions_query = transactions_query.where(filter=FieldFilter('created_at', '>=', start_date))
-    if end_date:
-        transactions_query = transactions_query.where(filter=FieldFilter('created_at', '<=', end_date))
-
-    transactions = transactions_query.stream()
     return [
-        Transaction(**transaction.to_dict()) async for transaction in transactions
+        Transaction(**transaction.to_dict()) async for transaction in transaction_stream
     ]

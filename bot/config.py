@@ -1,12 +1,13 @@
 import os
+from enum import Enum
 from pathlib import Path
-from typing import ClassVar, List, Dict
+from typing import ClassVar
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import SecretStr
 
 
-class MessageEffect:
+class MessageEffect(str, Enum):
     FIRE = 'FIRE'
     LIKE = 'LIKE'
     DISLIKE = 'DISLIKE'
@@ -29,8 +30,9 @@ class Settings(BaseSettings):
     LIMIT_PROCESSING_SECONDS: int = 60
 
     SUPER_ADMIN_ID: str = '354543567'
-    ADMIN_IDS: List[str] = ['354543567', '6078317830']
-    DEVELOPER_IDS: List[str] = ['763258583', '5456216473', '789575146']
+    ADMIN_IDS: list[str] = ['354543567', '6078317830']
+    DEVELOPER_IDS: list[str] = ['763258583', '5456216473', '789575146']
+    MODERATOR_IDS: list[str] = []
 
     CERTIFICATE_NAME: SecretStr
     STORAGE_NAME: SecretStr
@@ -39,7 +41,7 @@ class Settings(BaseSettings):
     BOT_URL: str
     BOT_TOKEN: SecretStr
 
-    MESSAGE_EFFECTS: Dict = {
+    MESSAGE_EFFECTS: dict[MessageEffect, str] = {
         MessageEffect.FIRE: '5104841245755180586',  # 🔥
         MessageEffect.LIKE: '5107584321108051014',  # 👍
         MessageEffect.DISLIKE: '5104858069142078462',  # 👎
@@ -47,7 +49,7 @@ class Settings(BaseSettings):
         MessageEffect.CONGRATS: '5046509860389126442',  # 🎉
         MessageEffect.POOP: '5046589136895476101',  # 💩
     }
-    MESSAGE_STICKERS: Dict = {}
+    MESSAGE_STICKERS: dict = {}
 
     YOOKASSA_ACCOUNT_ID: SecretStr
     YOOKASSA_SECRET_KEY: SecretStr

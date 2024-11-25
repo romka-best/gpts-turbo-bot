@@ -111,6 +111,19 @@ async def build_recommendations_keyboard(
     )
 
 
+def build_continue_generating_keyboard(language_code: str) -> InlineKeyboardMarkup:
+    buttons = [
+        [
+            InlineKeyboardButton(
+                text=get_localization(language_code).CONTINUE_GENERATING,
+                callback_data='continue_generation:continue'
+            )
+        ]
+    ]
+
+    return InlineKeyboardMarkup(inline_keyboard=buttons)
+
+
 def build_reaction_keyboard(generation_id: str) -> InlineKeyboardMarkup:
     buttons = [
         [

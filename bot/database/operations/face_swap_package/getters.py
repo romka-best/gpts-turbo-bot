@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional, List
+from typing import Optional
 
 from google.cloud.firestore_v1 import FieldFilter, Query
 
@@ -33,7 +33,7 @@ async def get_face_swap_package_by_name_and_gender(
 async def get_face_swap_packages(
     start_date: Optional[datetime] = None,
     end_date: Optional[datetime] = None,
-) -> List[FaceSwapPackage]:
+) -> list[FaceSwapPackage]:
     face_swap_packages_query = firebase.db.collection(FaceSwapPackage.COLLECTION_NAME)
 
     if start_date:
@@ -52,7 +52,7 @@ async def get_face_swap_packages_by_gender(
     start_date: Optional[datetime] = None,
     end_date: Optional[datetime] = None,
     status: Optional[FaceSwapPackageStatus] = None
-) -> List[FaceSwapPackage]:
+) -> list[FaceSwapPackage]:
     face_swap_packages_query = firebase.db.collection(FaceSwapPackage.COLLECTION_NAME) \
         .where(filter=FieldFilter('gender', '==', gender))
 
@@ -93,7 +93,7 @@ async def get_used_face_swap_package_by_user_id_and_package_id(
         return UsedFaceSwapPackage(**doc.to_dict())
 
 
-async def get_used_face_swap_packages_by_user_id(user_id: str) -> List[UsedFaceSwapPackage]:
+async def get_used_face_swap_packages_by_user_id(user_id: str) -> list[UsedFaceSwapPackage]:
     used_face_swap_packages_stream = firebase.db.collection(UsedFaceSwapPackage.COLLECTION_NAME) \
         .where(filter=FieldFilter('user_id', '==', user_id)) \
         .order_by('created_at', direction=Query.DESCENDING) \
@@ -110,7 +110,7 @@ async def get_used_face_swap_packages_by_user_id(user_id: str) -> List[UsedFaceS
 async def get_used_face_swap_packages(
     start_date: Optional[datetime] = None,
     end_date: Optional[datetime] = None,
-) -> List[UsedFaceSwapPackage]:
+) -> list[UsedFaceSwapPackage]:
     used_face_swap_packages_query = firebase.db.collection(UsedFaceSwapPackage.COLLECTION_NAME)
 
     if start_date:

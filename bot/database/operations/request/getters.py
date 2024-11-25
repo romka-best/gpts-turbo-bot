@@ -1,10 +1,9 @@
 from datetime import datetime
-from typing import Optional, List
+from typing import Optional
 
 from google.cloud.firestore_v1 import FieldFilter
 
 from bot.database.main import firebase
-from bot.database.models.common import Model
 from bot.database.models.request import Request, RequestStatus
 
 
@@ -19,7 +18,7 @@ async def get_request(request_id: str) -> Optional[Request]:
 async def get_started_requests(
     start_date: Optional[datetime] = None,
     end_date: Optional[datetime] = None,
-) -> List[Request]:
+) -> list[Request]:
     requests_query = firebase.db.collection(Request.COLLECTION_NAME)
 
     if start_date:
@@ -33,11 +32,11 @@ async def get_started_requests(
     return requests
 
 
-async def get_started_requests_by_user_id_and_model(user_id: str, model: Model) -> List[Request]:
+async def get_started_requests_by_user_id_and_product_id(user_id: str, product_id: str) -> list[Request]:
     requests_stream = firebase.db.collection(Request.COLLECTION_NAME) \
         .where(filter=FieldFilter('user_id', '==', user_id)) \
         .where(filter=FieldFilter('status', '==', RequestStatus.STARTED)) \
-        .where(filter=FieldFilter('model', '==', model)) \
+        .where(filter=FieldFilter('product_id', '==', product_id)) \
         .stream()
 
     requests = [Request(**request.to_dict()) async for request in requests_stream]

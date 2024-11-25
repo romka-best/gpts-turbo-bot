@@ -1,4 +1,4 @@
-from typing import Dict, Type
+from typing import Type
 
 from aiogram.fsm.storage.base import BaseStorage
 
@@ -6,7 +6,7 @@ from . import en, ru
 from .texts import Texts
 from ..database.operations.user.updaters import update_user
 
-localization_classes: Dict[str, Type[Texts]] = {
+localization_classes: dict[str, Type[Texts]] = {
     'en': en.English,
     'ru': ru.Russian
 }

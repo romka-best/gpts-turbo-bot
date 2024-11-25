@@ -157,6 +157,7 @@ class SunoSendType:
 class SunoVersion:
     V3 = 'chirp-v3-0'
     V3_5 = 'chirp-v3-5'
+    V4 = 'chirp-v4'
 
 
 class PaymentType:
@@ -172,6 +173,19 @@ class PaymentMethod:
     TELEGRAM_STARS = 'TELEGRAM_STARS'
     CRYPTO = 'CRYPTO'
     GIFT = 'GIFT'
+
+    _CURRENCY_MAP = {
+        YOOKASSA: Currency.RUB,
+        PAY_SELECTION: Currency.USD,
+        STRIPE: Currency.USD,
+        TELEGRAM_STARS: Currency.XTR,
+        CRYPTO: None,
+        GIFT: None,
+    }
+
+    @staticmethod
+    def get_currency(payment_method: str):
+        return PaymentMethod._CURRENCY_MAP.get(payment_method, Currency.USD)
 
 
 class UTM:

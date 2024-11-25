@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Optional
 
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
@@ -10,7 +10,7 @@ from bot.locales.main import get_localization
 def build_catalog_keyboard(
     language_code: str,
     current_role: str,
-    roles: List[Role],
+    roles: list[Role],
     model: Optional[Model] = None,
 ) -> InlineKeyboardMarkup:
     buttons = []

@@ -1,5 +1,3 @@
-from typing import List
-
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 from bot.database.models.face_swap_package import FaceSwapPackage, FaceSwapPackageStatus
@@ -91,7 +89,7 @@ def build_manage_face_swap_edit_choose_gender_keyboard(language_code: str) -> In
 
 def build_manage_face_swap_edit_choose_package_keyboard(
     language_code: str,
-    packages: List[FaceSwapPackage],
+    packages: list[FaceSwapPackage],
 ) -> InlineKeyboardMarkup:
     buttons = []
     for package in packages:

@@ -11,12 +11,14 @@ from bot.config import config, MessageEffect
 from bot.database.main import firebase
 from bot.database.models.common import PaymentMethod
 from bot.database.models.game import GameType, GameStatus
-from bot.database.models.package import PackageType, Package, PackageStatus
+from bot.database.models.package import PackageStatus
+from bot.database.models.product import Product, ProductType
 from bot.database.models.transaction import TransactionType
 from bot.database.operations.feedback.getters import get_count_of_approved_feedbacks_by_user_id
 from bot.database.operations.game.getters import get_count_of_games_by_user_id
 from bot.database.operations.game.writers import write_game
 from bot.database.operations.package.writers import write_package
+from bot.database.operations.product.getters import get_product, get_active_products_by_product_type_and_category
 from bot.database.operations.transaction.writers import write_transaction
 from bot.database.operations.user.getters import get_user, get_count_of_users_by_referral
 from bot.database.operations.user.updaters import update_user
@@ -48,7 +50,7 @@ async def handle_bonus(message: Message, user_id: str, state: FSMContext):
     count_of_feedbacks = await get_count_of_approved_feedbacks_by_user_id(user_id)
     count_of_games = await get_count_of_games_by_user_id(user_id)
 
-    photo_path = f'payments/packages_free_{user_language_code}.png'
+    photo_path = f'payments/packages_{user_language_code}.png'
     photo = await firebase.bucket.get_blob(photo_path)
     photo_link = firebase.get_public_url(photo.name)
 
@@ -85,7 +87,8 @@ async def handle_bonus_selection(callback_query: CallbackQuery, state: FSMContex
     elif action == 'cash_out':
         user_language_code = await get_user_language(str(callback_query.from_user.id), state.storage)
 
-        reply_markup = build_bonus_cash_out_keyboard(user_language_code)
+        products = await get_active_products_by_product_type_and_category(ProductType.PACKAGE)
+        reply_markup = build_bonus_cash_out_keyboard(user_language_code, products)
         await callback_query.message.edit_caption(
             caption=get_localization(user_language_code).BONUS_CHOOSE_PACKAGE,
             reply_markup=reply_markup,
@@ -259,8 +262,8 @@ async def handle_bonus_cash_out_selection(callback_query: CallbackQuery, state: 
     user_id = str(callback_query.from_user.id)
     user_language_code = await get_user_language(user_id, state.storage)
 
-    package_type = callback_query.data.split(':')[1]
-    if package_type == 'back':
+    product_id = callback_query.data.split(':')[1]
+    if product_id == 'back':
         user = await get_user(user_id)
         count_of_referred_users = await get_count_of_users_by_referral(user_id)
         count_of_feedbacks = await get_count_of_approved_feedbacks_by_user_id(user_id)
@@ -281,12 +284,13 @@ async def handle_bonus_cash_out_selection(callback_query: CallbackQuery, state: 
 
         return
 
-    message = get_localization(user_language_code).choose_min(package_type)
+    product = await get_product(product_id)
+    message = get_localization(user_language_code).choose_min(product.names.get(user_language_code))
 
     reply_markup = build_cancel_keyboard(user_language_code)
     await callback_query.message.edit_caption(caption=message, reply_markup=reply_markup)
 
-    await state.update_data(package_type=package_type)
+    await state.update_data(product_id=product_id)
     await state.set_state(Bonus.waiting_for_package_quantity)
 
 
@@ -298,9 +302,18 @@ async def quantity_of_bonus_package_sent(message: Message, state: FSMContext):
 
     try:
         user_data = await state.get_data()
-        package_type = user_data['package_type']
-        package_quantity = int(message.text)
-        price = Package.get_price(user.currency, package_type, package_quantity, 0)
+        package_product_id = user_data['product_id']
+        package_product_quantity = int(message.text)
+
+        product = await get_product(package_product_id)
+
+        price = float(Product.get_discount_price(
+            ProductType.PACKAGE,
+            package_product_quantity,
+            product.prices.get(user.currency),
+            user.currency,
+            0,
+        ))
         if price > user.balance:
             reply_markup = build_cancel_keyboard(user_language_code)
             await message.reply(
@@ -311,43 +324,31 @@ async def quantity_of_bonus_package_sent(message: Message, state: FSMContext):
         else:
             user.balance -= price
             until_at = None
-            if (
-                package_type == PackageType.VOICE_MESSAGES or
-                package_type == PackageType.FAST_MESSAGES or
-                package_type == PackageType.ACCESS_TO_CATALOG
-            ):
+            if product.details.get('is_recurring', False):
                 current_date = datetime.now(timezone.utc)
-                until_at = current_date + timedelta(days=30 * package_quantity)
+                until_at = current_date + timedelta(days=30 * package_product_quantity)
             package = await write_package(
                 None,
                 user_id,
-                package_type,
+                product.id,
                 PackageStatus.SUCCESS,
                 user.currency,
                 0,
                 0,
-                package_quantity,
+                package_product_quantity,
                 PaymentMethod.GIFT,
                 None,
                 until_at,
             )
 
-            (
-                service_type,
-                user.additional_usage_quota,
-            ) = Package.get_service_type_and_update_quota(
-                package_type,
-                user.additional_usage_quota,
-                package_quantity,
-            )
             await write_transaction(
                 user_id=user_id,
                 type=TransactionType.INCOME,
-                service=service_type,
+                product_id=package.product_id,
                 amount=0,
                 clear_amount=0,
                 currency=user.currency,
-                quantity=package_quantity,
+                quantity=package_product_quantity,
                 details={
                     'payment_method': PaymentMethod.GIFT,
                     'package_id': package.id,

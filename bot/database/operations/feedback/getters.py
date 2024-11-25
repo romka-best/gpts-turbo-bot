@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional, List
+from typing import Optional
 
 from google.cloud.firestore_v1 import FieldFilter
 
@@ -47,7 +47,7 @@ async def get_count_of_feedbacks(
 async def get_feedbacks(
     start_date: Optional[datetime] = None,
     end_date: Optional[datetime] = None,
-) -> List[Feedback]:
+) -> list[Feedback]:
     feedbacks_query = firebase.db.collection(Feedback.COLLECTION_NAME)
 
     if start_date:

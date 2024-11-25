@@ -1,5 +1,4 @@
 import asyncio
-from typing import Dict
 
 from aiogram import Router, F
 from aiogram.fsm.context import FSMContext
@@ -7,7 +6,7 @@ from aiogram.types import Message, CallbackQuery, URLInputFile, InlineKeyboardMa
 from aiogram.utils.chat_action import ChatActionSender
 
 from bot.database.main import firebase
-from bot.database.models.common import Model
+from bot.database.models.common import Quota
 from bot.database.models.face_swap_package import FaceSwapPackageStatus, FaceSwapPackage
 from bot.database.models.user import UserGender
 from bot.database.operations.face_swap_package.getters import (
@@ -18,6 +17,7 @@ from bot.database.operations.face_swap_package.getters import (
 from bot.database.operations.face_swap_package.updaters import update_face_swap_package
 from bot.database.operations.face_swap_package.writers import write_face_swap_package
 from bot.database.operations.generation.writers import write_generation
+from bot.database.operations.product.getters import get_product_by_quota
 from bot.database.operations.request.writers import write_request
 from bot.keyboards.admin.admin import build_admin_keyboard
 from bot.locales.translate_text import translate_text
@@ -220,7 +220,7 @@ async def handle_face_swap_manage_edit_choose_package_selection(callback_query: 
 
 
 async def show_picture(
-    file: Dict,
+    file: dict,
     language_code: str,
     face_swap_package: FaceSwapPackage,
     callback_query: CallbackQuery,
@@ -393,10 +393,12 @@ async def handle_face_swap_manage_edit_picture_selection(callback_query: Callbac
             image = await firebase.bucket.get_blob(image_path)
             image_link = firebase.get_public_url(image.name)
 
+            product = await get_product_by_quota(Quota.FACE_SWAP)
+
             request = await write_request(
                 user_id=user_id,
                 message_id=processing_message.message_id,
-                model=Model.FACE_SWAP,
+                product_id=product.id,
                 requested=1,
                 details={
                     'is_test': True,
@@ -409,7 +411,7 @@ async def handle_face_swap_manage_edit_picture_selection(callback_query: Callbac
             await write_generation(
                 id=face_swap_response,
                 request_id=request.id,
-                model=Model.FACE_SWAP,
+                product_id=product.id,
                 has_error=face_swap_response is None,
             )
 

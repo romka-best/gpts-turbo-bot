@@ -1,5 +1,3 @@
-from typing import Dict, List
-
 from bot.database.main import firebase
 from bot.database.models.face_swap_package import (
     FaceSwapPackage,
@@ -12,9 +10,9 @@ from bot.database.models.user import UserGender
 
 async def create_face_swap_package_object(
     name: str,
-    translated_names: Dict,
+    translated_names: dict,
     gender: UserGender,
-    files: List[FaceSwapFileData],
+    files: list[FaceSwapFileData],
     status: FaceSwapPackageStatus,
 ) -> FaceSwapPackage:
     face_swap_package_ref = firebase.db.collection(FaceSwapPackage.COLLECTION_NAME).document()
@@ -31,7 +29,7 @@ async def create_face_swap_package_object(
 async def create_used_face_swap_package_object(
     user_id: str,
     package_id: str,
-    used_images: List[str],
+    used_images: list[str],
 ) -> UsedFaceSwapPackage:
     used_face_swap_package_ref = firebase.db.collection(UsedFaceSwapPackage.COLLECTION_NAME).document()
     return UsedFaceSwapPackage(

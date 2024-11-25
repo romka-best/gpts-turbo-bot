@@ -9,8 +9,9 @@ from aiogram.utils.chat_action import ChatActionSender
 
 from bot.config import config, MessageEffect
 from bot.database.models.common import Quota, Currency, Model
-from bot.database.models.transaction import TransactionType, ServiceType
+from bot.database.models.transaction import TransactionType
 from bot.database.models.user import UserSettings, User
+from bot.database.operations.product.getters import get_product_by_quota
 from bot.database.operations.transaction.writers import write_transaction
 from bot.database.operations.user.getters import get_user
 from bot.database.operations.user.updaters import update_user
@@ -93,11 +94,13 @@ async def handle_dall_e(message: Message, state: FSMContext, user: User):
 
             await update_user_usage_quota(user, Quota.DALL_E, cost)
 
+            product = await get_product_by_quota(Quota.DALL_E)
+
             total_price = PRICE_DALL_E * cost
             await write_transaction(
                 user_id=user.id,
                 type=TransactionType.EXPENSE,
-                service=ServiceType.DALL_E,
+                product_id=product.id,
                 amount=total_price,
                 clear_amount=total_price,
                 currency=Currency.USD,

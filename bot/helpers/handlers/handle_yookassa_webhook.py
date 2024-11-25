@@ -1,6 +1,5 @@
 import logging
 from datetime import datetime, timezone
-from typing import Dict
 
 from aiogram import Bot, Dispatcher
 from yookassa.domain.notification import WebhookNotification
@@ -8,12 +7,10 @@ from yookassa.domain.notification import WebhookNotification
 from bot.config import config, MessageEffect
 from bot.database.main import firebase
 from bot.database.models.common import PaymentMethod, Currency
-from bot.database.models.package import Package, PackageStatus
+from bot.database.models.package import PackageStatus
 from bot.database.models.subscription import (
     SubscriptionStatus,
-    SubscriptionPeriod,
-    SubscriptionType,
-    SubscriptionLimit,
+    SUBSCRIPTION_FREE_LIMITS,
 )
 from bot.database.models.transaction import TransactionType
 from bot.database.models.user import UserSettings
@@ -21,7 +18,9 @@ from bot.database.operations.cart.getters import get_cart_by_user_id
 from bot.database.operations.cart.updaters import update_cart
 from bot.database.operations.package.getters import get_packages_by_provider_payment_charge_id
 from bot.database.operations.package.updaters import update_package
+from bot.database.operations.product.getters import get_product
 from bot.database.operations.subscription.getters import (
+    get_subscription,
     get_subscription_by_provider_payment_charge_id,
     get_subscription_by_provider_auto_payment_charge_id,
 )
@@ -37,7 +36,7 @@ from bot.keyboards.ai.mode import build_switched_to_ai_keyboard
 from bot.locales.main import get_localization, get_user_language
 
 
-async def handle_yookassa_webhook(request: Dict, bot: Bot, dp: Dispatcher):
+async def handle_yookassa_webhook(request: dict, bot: Bot, dp: Dispatcher):
     notification_object = WebhookNotification(request)
     payment = notification_object.object
 
@@ -45,6 +44,7 @@ async def handle_yookassa_webhook(request: Dict, bot: Bot, dp: Dispatcher):
         subscription = await get_subscription_by_provider_payment_charge_id(payment.id)
         if subscription is not None:
             user = await get_user(subscription.user_id)
+            product = await get_product(subscription.product_id)
             if payment.status == 'succeeded':
                 transaction = firebase.db.transaction()
                 await create_subscription(
@@ -59,7 +59,7 @@ async def handle_yookassa_webhook(request: Dict, bot: Bot, dp: Dispatcher):
                 await write_transaction(
                     user_id=subscription.user_id,
                     type=TransactionType.INCOME,
-                    service=subscription.type,
+                    product_id=subscription.product_id,
                     amount=subscription.amount,
                     clear_amount=float(payment.income_amount.value),
                     currency=subscription.currency,
@@ -72,7 +72,7 @@ async def handle_yookassa_webhook(request: Dict, bot: Bot, dp: Dispatcher):
                     },
                 )
 
-                if user.discount:
+                if user.discount > product.discount:
                     await update_user(subscription.user_id, {
                         'discount': 0,
                     })
@@ -92,7 +92,7 @@ async def handle_yookassa_webhook(request: Dict, bot: Bot, dp: Dispatcher):
                         user.settings[user.current_model][UserSettings.VERSION],
                     ),
                     reply_markup=reply_markup,
-                    message_effect_id=config.MESSAGE_EFFECTS.get('FIRE'),
+                    message_effect_id=config.MESSAGE_EFFECTS.get(MessageEffect.FIRE),
                 )
 
                 await send_message_to_admins(
@@ -101,7 +101,7 @@ async def handle_yookassa_webhook(request: Dict, bot: Bot, dp: Dispatcher):
                             f'🤑 <b>Успешно оформлена подписка у пользователя: {subscription.user_id}</b>\n\n'
                             f'ℹ️ ID: {subscription.id}\n'
                             f'💱 Метод оплаты: {subscription.payment_method}\n'
-                            f'💳 Тип подписки: {subscription.type}\n'
+                            f'💳 Тип: {product.names.get("ru")}\n'
                             f'💰 Сумма: {subscription.amount}{Currency.SYMBOLS[subscription.currency]}\n'
                             f'💸 Чистая сумма: {float(payment.income_amount.value)}{Currency.SYMBOLS[subscription.currency]}\n\n'
                             f'Продолжаем в том же духе 💪',
@@ -121,7 +121,7 @@ async def handle_yookassa_webhook(request: Dict, bot: Bot, dp: Dispatcher):
                             f'❌ <b>Отмена оплаты подписки у пользователя: {subscription.user_id}</b>\n\n'
                             f'ℹ️ ID: {subscription.id}\n'
                             f'💱 Метод оплаты: {subscription.payment_method}\n'
-                            f'💳 Тип подписки: {subscription.type}\n'
+                            f'💳 Тип: {product.names.get("ru")}\n'
                             f'💰 Сумма: {subscription.amount}{Currency.SYMBOLS[subscription.currency]}\n\n'
                             f'Грустно, но что поделать 🤷',
                 )
@@ -133,7 +133,7 @@ async def handle_yookassa_webhook(request: Dict, bot: Bot, dp: Dispatcher):
                             f'ℹ️ ID: {subscription.id}\n'
                             f'🛠 Статус: {payment.status}\n'
                             f'💱 Метод оплаты: {subscription.payment_method}\n'
-                            f'💳 Тип подписки: {subscription.type}\n'
+                            f'💳 Тип: {product.names.get("ru")}\n'
                             f'💰 Сумма: {subscription.amount}{Currency.SYMBOLS[subscription.currency]}\n\n'
                             f'@roman_danilov, посмотришь? 🤨',
                 )
@@ -141,14 +141,15 @@ async def handle_yookassa_webhook(request: Dict, bot: Bot, dp: Dispatcher):
             old_subscription = await get_subscription_by_provider_auto_payment_charge_id(payment.payment_method.id)
             if old_subscription is not None:
                 user = await get_user(old_subscription.user_id)
+                product = await get_product(old_subscription.product_id)
                 if payment.status == 'succeeded':
                     transaction = firebase.db.transaction()
                     await update_subscription(old_subscription.id, {'status': SubscriptionStatus.FINISHED})
                     new_subscription = await write_subscription(
                         None,
                         user.id,
-                        old_subscription.type,
-                        SubscriptionPeriod.MONTH1,
+                        old_subscription.product_id,
+                        old_subscription.period,
                         SubscriptionStatus.ACTIVE,
                         Currency.RUB,
                         float(payment.amount.value),
@@ -168,7 +169,7 @@ async def handle_yookassa_webhook(request: Dict, bot: Bot, dp: Dispatcher):
                     await write_transaction(
                         user_id=new_subscription.user_id,
                         type=TransactionType.INCOME,
-                        service=new_subscription.type,
+                        product_id=new_subscription.product_id,
                         amount=new_subscription.amount,
                         clear_amount=float(payment.income_amount.value),
                         currency=new_subscription.currency,
@@ -194,7 +195,7 @@ async def handle_yookassa_webhook(request: Dict, bot: Bot, dp: Dispatcher):
                                 f'🤑 <b>Успешно продлена подписка у пользователя: {new_subscription.user_id}</b>\n\n'
                                 f'ℹ️ ID: {new_subscription.id}\n'
                                 f'💱 Метод оплаты: {new_subscription.payment_method}\n'
-                                f'💳 Тип подписки: {new_subscription.type}\n'
+                                f'💳 Тип: {product.names.get("ru")}\n'
                                 f'💰 Сумма: {new_subscription.amount}{Currency.SYMBOLS[new_subscription.currency]}\n'
                                 f'💸 Чистая сумма: {float(payment.income_amount.value)}{Currency.SYMBOLS[new_subscription.currency]}\n\n'
                                 f'Продолжаем в том же духе 💪',
@@ -203,12 +204,11 @@ async def handle_yookassa_webhook(request: Dict, bot: Bot, dp: Dispatcher):
                     current_date = datetime.now(timezone.utc)
 
                     old_subscription.status = SubscriptionStatus.FINISHED
-                    user.subscription_type = SubscriptionType.FREE
-                    user.daily_limits = SubscriptionLimit.LIMITS[SubscriptionType.FREE]
+                    user.daily_limits = SUBSCRIPTION_FREE_LIMITS
 
                     await update_subscription(old_subscription.id, {'status': old_subscription.status})
                     await update_user(old_subscription.user_id, {
-                        'subscription_type': user.subscription_type,
+                        'subscription_id': '',
                         'daily_limits': user.daily_limits,
                         'last_subscription_limit_update': current_date,
                     })
@@ -224,7 +224,7 @@ async def handle_yookassa_webhook(request: Dict, bot: Bot, dp: Dispatcher):
                                 f'❌ <b>Не смогли продлить подписку у пользователя: {old_subscription.user_id}</b>\n\n'
                                 f'ℹ️ ID: {old_subscription.id}\n'
                                 f'💱 Метод оплаты: {old_subscription.payment_method}\n'
-                                f'💳 Тип подписки: {old_subscription.type}\n'
+                                f'💳 Тип: {product.names.get("ru")}\n'
                                 f'💰 Сумма: {old_subscription.amount}{Currency.SYMBOLS[old_subscription.currency]}\n\n'
                                 f'Грустно, но что поделать 🤷',
                     )
@@ -236,7 +236,7 @@ async def handle_yookassa_webhook(request: Dict, bot: Bot, dp: Dispatcher):
                                 f'ℹ️ ID: {old_subscription.id}\n'
                                 f'🛠 Статус: {payment.status}\n'
                                 f'💱 Метод оплаты: {old_subscription.payment_method}\n'
-                                f'💳 Тип подписки: {old_subscription.type}\n'
+                                f'💳 Тип: {product.names.get("ru")}\n'
                                 f'💰 Сумма: {old_subscription.amount}{Currency.SYMBOLS[old_subscription.currency]}\n\n'
                                 f'@roman_danilov, посмотришь? 🤨',
                     )
@@ -256,7 +256,14 @@ async def handle_yookassa_webhook(request: Dict, bot: Bot, dp: Dispatcher):
         packages = await get_packages_by_provider_payment_charge_id(payment.id)
         if len(packages) == 1:
             package = packages[0]
+            product = await get_product(package.product_id)
             user = await get_user(package.user_id)
+            user_subscription = await get_subscription(user.subscription_id)
+            if user_subscription:
+                product_subscription = await get_product(user_subscription.product_id)
+                subscription_discount = product_subscription.details.get('discount', 0)
+            else:
+                subscription_discount = 0
             if payment.status == 'succeeded':
                 transaction = firebase.db.transaction()
                 await create_package(
@@ -267,15 +274,10 @@ async def handle_yookassa_webhook(request: Dict, bot: Bot, dp: Dispatcher):
                     payment.id,
                 )
 
-                service_type, _ = Package.get_service_type_and_update_quota(
-                    package.type,
-                    user.additional_usage_quota,
-                    0,
-                )
                 await write_transaction(
                     user_id=package.user_id,
                     type=TransactionType.INCOME,
-                    service=service_type,
+                    product_id=package.product_id,
                     amount=package.amount,
                     clear_amount=float(payment.income_amount.value),
                     currency=package.currency,
@@ -287,8 +289,7 @@ async def handle_yookassa_webhook(request: Dict, bot: Bot, dp: Dispatcher):
                     },
                 )
                 if (
-                    (user.subscription_type == SubscriptionType.FREE and user.discount) or
-                    SubscriptionLimit.DISCOUNT[user.subscription_type] < user.discount
+                    user.discount > product.discount and user.discount > subscription_discount
                 ):
                     await update_user(package.user_id, {
                         'discount': 0,
@@ -309,7 +310,7 @@ async def handle_yookassa_webhook(request: Dict, bot: Bot, dp: Dispatcher):
                         user.settings[user.current_model][UserSettings.VERSION],
                     ),
                     reply_markup=reply_markup,
-                    message_effect_id=config.MESSAGE_EFFECTS.get('FIRE'),
+                    message_effect_id=config.MESSAGE_EFFECTS.get(MessageEffect.FIRE),
                 )
 
                 await send_message_to_admins(
@@ -318,7 +319,7 @@ async def handle_yookassa_webhook(request: Dict, bot: Bot, dp: Dispatcher):
                             f'🤑 <b>Успешно прошла оплата пакета у пользователя: {package.user_id}</b>\n\n'
                             f'ℹ️ ID: {package.id}\n'
                             f'💱 Метод оплаты: {package.payment_method}\n'
-                            f'💳 Тип пакета: {package.type}\n'
+                            f'💳 Тип: {product.names.get("ru")}\n'
                             f'🔢 Количество: {package.quantity}\n'
                             f'💰 Сумма: {package.amount}{Currency.SYMBOLS[package.currency]}\n'
                             f'💸 Чистая сумма: {float(payment.income_amount.value)}{Currency.SYMBOLS[package.currency]}\n\n'
@@ -339,7 +340,7 @@ async def handle_yookassa_webhook(request: Dict, bot: Bot, dp: Dispatcher):
                             f'❌ <b>Отмена оплаты пакета у пользователя: {package.user_id}</b>\n\n'
                             f'ℹ️ ID: {package.id}\n'
                             f'💱 Метод оплаты: {package.payment_method}\n'
-                            f'💳 Тип пакета: {package.type}\n'
+                            f'💳 Тип: {product.names.get("ru")}\n'
                             f'🔢 Количество: {package.quantity}\n'
                             f'💰 Сумма: {package.amount}{Currency.SYMBOLS[package.currency]}\n\n'
                             f'Грустно, но что поделать 🤷',
@@ -352,13 +353,19 @@ async def handle_yookassa_webhook(request: Dict, bot: Bot, dp: Dispatcher):
                             f'ℹ️ ID: {package.id}\n'
                             f'🛠 Статус: {payment.status}\n'
                             f'💱 Метод оплаты: {package.payment_method}\n'
-                            f'💳 Тип пакета: {package.type}\n'
+                            f'💳 Тип: {product.names.get("ru")}\n'
                             f'🔢 Количество: {package.quantity}\n'
                             f'💰 Сумма: {package.amount}{Currency.SYMBOLS[package.currency]}\n\n'
                             f'@roman_danilov, посмотришь? 🤨',
                 )
         elif len(packages) > 1:
             user = await get_user(packages[0].user_id)
+            user_subscription = await get_subscription(user.subscription_id)
+            if user_subscription:
+                product_subscription = await get_product(user_subscription.product_id)
+                subscription_discount = product_subscription.details.get('discount', 0)
+            else:
+                subscription_discount = 0
 
             if payment.status == 'succeeded':
                 transaction = firebase.db.transaction()
@@ -371,15 +378,10 @@ async def handle_yookassa_webhook(request: Dict, bot: Bot, dp: Dispatcher):
                         payment.id,
                     )
 
-                    service_type, _ = Package.get_service_type_and_update_quota(
-                        package.type,
-                        user.additional_usage_quota,
-                        0,
-                    )
                     await write_transaction(
                         user_id=user.id,
                         type=TransactionType.INCOME,
-                        service=service_type,
+                        product_id=package.product_id,
                         amount=package.amount,
                         clear_amount=float(payment.income_amount.value),
                         currency=package.currency,
@@ -398,8 +400,7 @@ async def handle_yookassa_webhook(request: Dict, bot: Bot, dp: Dispatcher):
                 })
 
                 if (
-                    (user.subscription_type == SubscriptionType.FREE and user.discount) or
-                    SubscriptionLimit.DISCOUNT[user.subscription_type] < user.discount
+                    user.discount > subscription_discount
                 ):
                     await update_user(user.id, {
                         'discount': 0,
@@ -420,7 +421,7 @@ async def handle_yookassa_webhook(request: Dict, bot: Bot, dp: Dispatcher):
                         user.settings[user.current_model][UserSettings.VERSION],
                     ),
                     reply_markup=reply_markup,
-                    message_effect_id=config.MESSAGE_EFFECTS.get('FIRE'),
+                    message_effect_id=config.MESSAGE_EFFECTS.get(MessageEffect.FIRE),
                 )
 
                 await send_message_to_admins(

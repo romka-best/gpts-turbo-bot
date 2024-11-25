@@ -1,5 +1,5 @@
 import asyncio
-from typing import Callable, Any, Awaitable, Dict
+from typing import Callable, Any, Awaitable
 
 from aiogram import BaseMiddleware
 from aiogram.types import Message
@@ -12,9 +12,9 @@ class AlbumMiddleware(BaseMiddleware):
 
     async def __call__(
         self,
-        handler: Callable[[Message, Dict[str, Any]], Awaitable[Any]],
+        handler: Callable[[Message, dict[str, Any]], Awaitable[Any]],
         message: Message,
-        data: Dict[str, Any],
+        data: dict[str, Any],
     ):
         if message.media_group_id:
             if message.media_group_id not in self.albums:
@@ -25,7 +25,7 @@ class AlbumMiddleware(BaseMiddleware):
             data['album'] = []
             await handler(message, data)
 
-    async def dispatch_album(self, media_group_id: str, handler: Callable, data: Dict[str, Any], message: Message):
+    async def dispatch_album(self, media_group_id: str, handler: Callable, data: dict[str, Any], message: Message):
         await asyncio.sleep(self.latency)
         album = self.albums.pop(media_group_id, [])
         if album:

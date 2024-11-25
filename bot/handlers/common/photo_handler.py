@@ -1,6 +1,5 @@
 import time
 import uuid
-from typing import List
 
 import aiohttp
 from aiogram import Router, F
@@ -26,7 +25,8 @@ from bot.database.operations.face_swap_package.getters import (
 )
 from bot.database.operations.face_swap_package.updaters import update_face_swap_package, update_used_face_swap_package
 from bot.database.operations.generation.writers import write_generation
-from bot.database.operations.request.getters import get_started_requests_by_user_id_and_model
+from bot.database.operations.product.getters import get_product_by_quota
+from bot.database.operations.request.getters import get_started_requests_by_user_id_and_product_id
 from bot.database.operations.request.writers import write_request
 from bot.database.operations.user.getters import get_user
 from bot.handlers.admin.face_swap_handler import handle_manage_face_swap
@@ -84,7 +84,7 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
         used_face_swap_packages = await get_used_face_swap_packages_by_user_id(user_id)
         for used_face_swap_package in used_face_swap_packages:
             await update_used_face_swap_package(used_face_swap_package.id, {
-                'used_images': []
+                'used_images': [],
             })
 
         await processing_message.edit_text(get_localization(user_language_code).CHANGE_PHOTO_SUCCESS)
@@ -107,7 +107,7 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
         reply_markup = build_manage_catalog_create_role_confirmation_keyboard(user_language_code)
         await message.answer(
             text=get_localization(user_language_code).catalog_manage_create_role_confirmation(
-                role_system_name=user_data.get('system_role_name', None),
+                role_system_name=user_data.get('system_role_name', ''),
                 role_names=user_data.get('role_names', {}),
                 role_descriptions=user_data.get('role_descriptions', {}),
                 role_instructions=user_data.get('role_instructions', {}),
@@ -152,7 +152,9 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
             allow_sending_without_reply=True,
         )
 
-        user_not_finished_requests = await get_started_requests_by_user_id_and_model(user.id, Model.PHOTOSHOP_AI)
+        product = await get_product_by_quota(Quota.PHOTOSHOP_AI)
+
+        user_not_finished_requests = await get_started_requests_by_user_id_and_product_id(user.id, product.id)
         if len(user_not_finished_requests):
             await message.reply(
                 text=get_localization(user_language_code).ALREADY_MAKE_REQUEST,
@@ -183,7 +185,7 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
             request = await write_request(
                 user_id=user_id,
                 message_id=processing_message.message_id,
-                model=Model.PHOTOSHOP_AI,
+                product_id=product.id,
                 requested=1,
                 details={
                     'type': photoshop_ai_action_name,
@@ -192,7 +194,7 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
             await write_generation(
                 id=result,
                 request_id=request.id,
-                model=Model.PHOTOSHOP_AI,
+                product_id=product.id,
                 has_error=result is None,
                 details={
                     'type': photoshop_ai_action_name,
@@ -276,11 +278,13 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
                     await background_photo.upload(photo_data)
                     background_photo_link = firebase.get_public_url(background_path)
 
+                    product = await get_product_by_quota(Quota.FACE_SWAP)
+
                     result = await create_face_swap_image(background_photo_link, user_photo_link)
                     request = await write_request(
                         user_id=user_id,
                         message_id=processing_message.message_id,
-                        model=Model.FACE_SWAP,
+                        product_id=product.id,
                         requested=1,
                         details={
                             'is_test': False,
@@ -289,7 +293,7 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
                     await write_generation(
                         id=result,
                         request_id=request.id,
-                        model=Model.FACE_SWAP,
+                        product_id=product.id,
                         has_error=result is None
                     )
 
@@ -313,7 +317,7 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
         )
 
 
-async def handle_album(message: Message, state: FSMContext, album: List[Message]):
+async def handle_album(message: Message, state: FSMContext, album: list[Message]):
     user_id = str(message.from_user.id)
     user = await get_user(user_id)
     user_language_code = await get_user_language(user_id, state.storage)
@@ -395,7 +399,7 @@ async def handle_album(message: Message, state: FSMContext, album: List[Message]
 
 
 @photo_router.message(F.photo)
-async def photo(message: Message, state: FSMContext, album: List[Message]):
+async def photo(message: Message, state: FSMContext, album: list[Message]):
     if len(album):
         await handle_album(message, state, album)
     else:

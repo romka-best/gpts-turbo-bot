@@ -6,6 +6,7 @@ from datetime import datetime, timezone, timedelta
 
 import uvicorn
 from aiogram.client.default import DefaultBotProperties
+from aiogram.client.session.aiohttp import AiohttpSession
 from aiogram.exceptions import TelegramNetworkError, TelegramForbiddenError, TelegramRetryAfter, TelegramBadRequest
 from aiogram.types import Update
 from fastapi import FastAPI, BackgroundTasks
@@ -21,6 +22,7 @@ from redis.exceptions import ConnectionError
 from bot.config import config
 from bot.database.main import firebase
 from bot.handlers.admin.admin_handler import admin_router
+from bot.handlers.admin.ads_handler import ads_router
 from bot.handlers.admin.ban_handler import ban_router
 from bot.handlers.admin.blast_handler import blast_router
 from bot.handlers.admin.catalog_handler import catalog_router
@@ -43,6 +45,7 @@ from bot.handlers.common.common_handler import common_router
 from bot.handlers.common.document_handler import document_router
 from bot.handlers.common.feedback_handler import feedback_router
 from bot.handlers.common.info_handler import info_router
+from bot.handlers.common.maintenance_handler import maintenance_router
 from bot.handlers.common.photo_handler import photo_router
 from bot.handlers.common.profile_handler import profile_router
 from bot.handlers.common.sticker_handler import sticker_router
@@ -85,6 +88,9 @@ WEBHOOK_REPLICATE_URL = config.WEBHOOK_URL + config.WEBHOOK_REPLICATE_PATH
 
 bot = Bot(
     token=config.BOT_TOKEN.get_secret_value(),
+    session=AiohttpSession(
+        timeout=300,
+    ),
     default=DefaultBotProperties(
         parse_mode=ParseMode.HTML,
     ),
@@ -95,7 +101,11 @@ storage = RedisStorage.from_url(config.REDIS_URL, {
     'retry_on_timeout': True,
     'retry': Retry(FullJitterBackoff(cap=5, base=1), 5),
 })
-dp = Dispatcher(storage=storage, sm_strategy=FSMStrategy.GLOBAL_USER)
+dp = Dispatcher(
+    storage=storage,
+    sm_strategy=FSMStrategy.GLOBAL_USER,
+    maintenance_mode=False,
+)
 
 
 @asynccontextmanager
@@ -105,6 +115,7 @@ async def lifespan(_: FastAPI):
         await bot.set_webhook(url=WEBHOOK_BOT_URL)
 
     dp.include_routers(
+        maintenance_router,
         common_router,
         info_router,
         catalog_router,
@@ -116,6 +127,7 @@ async def lifespan(_: FastAPI):
         promo_code_router,
         admin_router,
         admin_promo_code_router,
+        ads_router,
         ban_router,
         bonus_router,
         blast_router,
@@ -282,6 +294,11 @@ async def midjourney_webhook(body: dict):
         return JSONResponse(content={}, status_code=500)
 
 
+@app.get('/migrate')
+async def migrate_webhook():
+    pass
+
+
 @app.get('/run-daily-tasks')
 async def daily_tasks(background_tasks: BackgroundTasks):
     yesterday_utc_day = datetime.now(timezone.utc) - timedelta(days=1)
@@ -304,4 +321,4 @@ async def daily_tasks(background_tasks: BackgroundTasks):
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
-    uvicorn.run(app, host='0.0.0.0', port=os.getenv('PORT', 8080))
+    uvicorn.run(app, host='0.0.0.0', port=os.getenv('PORT', 8080), timeout_keep_alive=300)

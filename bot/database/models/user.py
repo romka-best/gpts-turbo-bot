@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+from typing import Optional
 
 from bot.database.models.common import (
     Currency,
@@ -20,7 +21,7 @@ from bot.database.models.common import (
     SunoSendType,
     SunoVersion,
 )
-from bot.database.models.subscription import SubscriptionType, SubscriptionLimit
+from bot.database.models.subscription import SUBSCRIPTION_FREE_LIMITS
 
 
 class UserSettings:
@@ -52,6 +53,7 @@ class User:
     username: str
     current_chat_id: str
     telegram_chat_id: str
+    stripe_id: str
     language_code: str
     interface_language_code: str
     gender: UserGender
@@ -61,7 +63,7 @@ class User:
     current_model: Model
     currency: Currency
     balance: float
-    subscription_type: SubscriptionType
+    subscription_id: Optional[str]
     last_subscription_limit_update: datetime
     daily_limits: dict
     additional_usage_quota: dict
@@ -166,7 +168,7 @@ class User:
         Model.SUNO: {
             UserSettings.SHOW_USAGE_QUOTA: True,
             UserSettings.SEND_TYPE: SunoSendType.VIDEO,
-            UserSettings.VERSION: SunoVersion.V3_5,
+            UserSettings.VERSION: SunoVersion.V4,
             UserSettings.SHOW_EXAMPLES: False,
         },
     }
@@ -179,6 +181,7 @@ class User:
         username: str,
         current_chat_id: str,
         telegram_chat_id: str,
+        stripe_id: str,
         gender=UserGender.UNSPECIFIED,
         language_code='en',
         interface_language_code='en',
@@ -188,7 +191,7 @@ class User:
         current_model=Model.CHAT_GPT,
         currency=Currency.RUB,
         balance=0,
-        subscription_type=SubscriptionType.FREE,
+        subscription_id='',
         last_subscription_limit_update=None,
         daily_limits=None,
         additional_usage_quota=None,
@@ -213,11 +216,11 @@ class User:
         self.current_model = current_model
         self.currency = currency
         self.balance = balance
-        self.subscription_type = subscription_type
+        self.subscription_id = subscription_id
         self.current_chat_id = str(current_chat_id)
         self.telegram_chat_id = str(telegram_chat_id)
-        self.daily_limits = daily_limits if daily_limits is not None \
-            else SubscriptionLimit.LIMITS[subscription_type]
+        self.stripe_id = stripe_id
+        self.daily_limits = daily_limits if daily_limits is not None else SUBSCRIPTION_FREE_LIMITS
         self.additional_usage_quota = additional_usage_quota if additional_usage_quota is not None \
             else self.DEFAULT_ADDITIONAL_USAGE_QUOTA
         self.settings = settings if settings is not None else self.DEFAULT_SETTINGS

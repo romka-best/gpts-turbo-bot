@@ -28,7 +28,7 @@ async def handle_ban(message: Message, user_id: str, state: FSMContext):
 
 
 @ban_router.callback_query(lambda c: c.data.startswith('ban:'))
-async def handle_blast_language_selection(callback_query: CallbackQuery, state: FSMContext):
+async def handle_ban_selection(callback_query: CallbackQuery, state: FSMContext):
     await callback_query.answer()
 
     user_language_code = await get_user_language(str(callback_query.from_user.id), state.storage)

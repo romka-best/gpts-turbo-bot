@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Optional
 
 from aiogram import F, Router
 from aiogram.filters import Command
@@ -405,7 +405,7 @@ async def handle_voice_messages_setting_selection(callback_query: CallbackQuery,
 
         return
     elif chosen_setting == 'listen':
-        voices: List[InputMediaAudio] = []
+        voices: list[InputMediaAudio] = []
         voices_path = f'voices/{user_language_code}'
         for voice_name in ['alloy', 'echo', 'nova', 'shimmer', 'fable', 'onyx']:
             voice_filename = f'{voice_name}.mp3'
@@ -465,7 +465,7 @@ async def handle_voice_messages_setting_selection(callback_query: CallbackQuery,
 
 
 async def handle_catalog(message: Message, user_id: str, state: FSMContext, model: Optional[Model] = None):
-    user_language_code = await get_user_language(str(message.from_user.id), state.storage)
+    user_language_code = await get_user_language(user_id, state.storage)
 
     text = get_localization(user_language_code).CATALOG
     current_chat = await get_chat_by_user_id(user_id)

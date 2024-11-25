@@ -1,4 +1,4 @@
-from typing import Callable, Any, Awaitable, Dict
+from typing import Callable, Any, Awaitable
 
 from aiogram import BaseMiddleware
 from aiogram.types import Message, CallbackQuery
@@ -9,9 +9,9 @@ from bot.database.operations.user.getters import get_user
 class AuthMessageMiddleware(BaseMiddleware):
     async def __call__(
         self,
-        handler: Callable[[Message, Dict[str, Any]], Awaitable[Any]],
+        handler: Callable[[Message, dict[str, Any]], Awaitable[Any]],
         message: Message,
-        data: Dict[str, Any],
+        data: dict[str, Any],
     ):
         user = await get_user(str(message.from_user.id))
         if user and user.is_banned:
@@ -26,9 +26,9 @@ class AuthMessageMiddleware(BaseMiddleware):
 class AuthCallbackQueryMiddleware(BaseMiddleware):
     async def __call__(
         self,
-        handler: Callable[[CallbackQuery, Dict[str, Any]], Awaitable[Any]],
+        handler: Callable[[CallbackQuery, dict[str, Any]], Awaitable[Any]],
         callback_query: CallbackQuery,
-        data: Dict[str, Any],
+        data: dict[str, Any],
     ):
         user = await get_user(str(callback_query.from_user.id))
         if user and user.is_banned:

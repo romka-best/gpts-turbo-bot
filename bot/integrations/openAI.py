@@ -1,4 +1,4 @@
-from typing import Dict, BinaryIO, Literal
+from typing import BinaryIO, Literal
 
 import openai
 
@@ -19,7 +19,7 @@ def get_default_max_tokens(model_version: ChatGPTVersion) -> int:
     return base
 
 
-async def get_response_message(model_version: ChatGPTVersion, history: list) -> Dict:
+async def get_response_message(model_version: ChatGPTVersion, history: list) -> dict:
     max_tokens = get_default_max_tokens(model_version)
 
     if model_version == ChatGPTVersion.V4_Omni_Mini or model_version == ChatGPTVersion.V4_Omni:

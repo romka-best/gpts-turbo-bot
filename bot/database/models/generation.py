@@ -1,7 +1,5 @@
 from datetime import datetime, timezone
 
-from bot.database.models.common import Model
-
 
 class GenerationStatus:
     STARTED = 'STARTED'
@@ -19,7 +17,7 @@ class Generation:
 
     id: str
     request_id: str
-    model: Model
+    product_id: str
     result: str
     has_error: bool
     status: GenerationStatus
@@ -33,7 +31,7 @@ class Generation:
         self,
         id: str,
         request_id: str,
-        model: Model,
+        product_id: str,
         result='',
         has_error=False,
         status=GenerationStatus.STARTED,
@@ -42,10 +40,11 @@ class Generation:
         details=None,
         created_at=None,
         edited_at=None,
+        **kwargs,
     ):
         self.id = id
         self.request_id = request_id
-        self.model = model
+        self.product_id = product_id
         self.result = result
         self.has_error = has_error
         self.status = status

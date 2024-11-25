@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional, List
+from typing import Optional
 
 from google.cloud.firestore_v1 import FieldFilter
 
@@ -74,7 +74,7 @@ async def get_sum_of_games_reward(
 async def get_games(
     start_date: Optional[datetime] = None,
     end_date: Optional[datetime] = None,
-) -> List[Game]:
+) -> list[Game]:
     games_query = firebase.db.collection(Game.COLLECTION_NAME)
 
     if start_date:

@@ -1,5 +1,4 @@
 from datetime import datetime, timezone
-from typing import Dict
 
 
 class Role:
@@ -7,9 +6,9 @@ class Role:
 
     id: str
     name: str
-    translated_names: Dict
-    translated_descriptions: Dict
-    translated_instructions: Dict
+    translated_names: dict
+    translated_descriptions: dict
+    translated_instructions: dict
     created_at: datetime
     edited_at: datetime
 
@@ -17,9 +16,9 @@ class Role:
         self,
         id: str,
         name: str,
-        translated_names: Dict,
-        translated_descriptions: Dict,
-        translated_instructions: Dict,
+        translated_names: dict,
+        translated_descriptions: dict,
+        translated_instructions: dict,
         created_at=None,
         edited_at=None,
     ):

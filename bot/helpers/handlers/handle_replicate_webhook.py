@@ -8,12 +8,13 @@ from aiogram.fsm.storage.base import StorageKey
 from bot.database.models.common import Model, Currency, Quota, PhotoshopAIAction
 from bot.database.models.generation import Generation, GenerationStatus
 from bot.database.models.request import Request, RequestStatus
-from bot.database.models.transaction import TransactionType, ServiceType
+from bot.database.models.transaction import TransactionType
 from bot.database.models.user import User, UserSettings
 from bot.database.operations.face_swap_package.getters import get_used_face_swap_package
 from bot.database.operations.face_swap_package.updaters import update_used_face_swap_package
 from bot.database.operations.generation.getters import get_generations_by_request_id, get_generation
 from bot.database.operations.generation.updaters import update_generation
+from bot.database.operations.product.getters import get_product
 from bot.database.operations.request.getters import get_request
 from bot.database.operations.request.updaters import update_request
 from bot.database.operations.transaction.writers import write_transaction
@@ -44,6 +45,7 @@ async def handle_replicate_webhook(bot: Bot, dp: Dispatcher, prediction: dict):
         return True
 
     request = await get_request(generation.request_id)
+    product = await get_product(request.product_id)
     user = await get_user(request.user_id)
 
     generation_error, generation_result = prediction.get('error', False), prediction.get('output', {})
@@ -72,7 +74,7 @@ async def handle_replicate_webhook(bot: Bot, dp: Dispatcher, prediction: dict):
         logging.error(f'Error in replicate_webhook: {prediction.get("logs")}')
     else:
         generation.result = generation_result[0] if type(generation_result) == list else generation_result
-        if request.model == Model.PHOTOSHOP_AI and request.details.get('type') == PhotoshopAIAction.COLORIZATION:
+        if product.details.get('quota') == Quota.PHOTOSHOP_AI and request.details.get('type') == PhotoshopAIAction.COLORIZATION:
             generation.result = generation.result.get('image')
         await update_generation(generation.id, {
             'status': generation.status,
@@ -80,15 +82,15 @@ async def handle_replicate_webhook(bot: Bot, dp: Dispatcher, prediction: dict):
             'seconds': generation.seconds,
         })
 
-    if request.model == Model.STABLE_DIFFUSION:
+    if product.details.get('quota') == Quota.STABLE_DIFFUSION:
         await handle_replicate_stable_diffusion(bot, dp, user, request, generation)
-    elif request.model == Model.FLUX:
+    elif product.details.get('quota') == Quota.FLUX:
         await handle_replicate_flux(bot, dp, user, request, generation)
-    elif request.model == Model.FACE_SWAP:
+    elif product.details.get('quota') == Quota.FACE_SWAP:
         await handle_replicate_face_swap(bot, dp, user, request, generation)
-    elif request.model == Model.PHOTOSHOP_AI:
+    elif product.details.get('quota') == Quota.PHOTOSHOP_AI:
         await handle_replicate_photoshop_ai(bot, dp, user, request, generation)
-    elif request.model == Model.MUSIC_GEN:
+    elif product.details.get('quota') == Quota.MUSIC_GEN:
         await handle_replicate_music_gen(bot, dp, user, request, generation)
 
     return True
@@ -133,7 +135,7 @@ async def handle_replicate_photoshop_ai(
             write_transaction(
                 user_id=user.id,
                 type=TransactionType.EXPENSE,
-                service=ServiceType.PHOTOSHOP_AI,
+                product_id=generation.product_id,
                 amount=total_price,
                 clear_amount=total_price,
                 currency=Currency.USD,
@@ -217,7 +219,7 @@ async def handle_replicate_face_swap(
                 write_transaction(
                     user_id=user.id,
                     type=TransactionType.EXPENSE,
-                    service=ServiceType.FACE_SWAP,
+                    product_id=generation.product_id,
                     amount=total_price,
                     clear_amount=total_price,
                     currency=Currency.USD,
@@ -235,7 +237,7 @@ async def handle_replicate_face_swap(
                 write_transaction(
                     user_id=user.id,
                     type=TransactionType.EXPENSE,
-                    service=ServiceType.FACE_SWAP,
+                    product_id=generation.product_id,
                     amount=total_price,
                     clear_amount=total_price,
                     currency=Currency.USD,
@@ -327,7 +329,7 @@ async def handle_replicate_music_gen(
             write_transaction(
                 user_id=user.id,
                 type=TransactionType.EXPENSE,
-                service=ServiceType.MUSIC_GEN,
+                product_id=generation.product_id,
                 amount=total_price,
                 clear_amount=total_price,
                 currency=Currency.USD,
@@ -396,7 +398,7 @@ async def handle_replicate_stable_diffusion(
             write_transaction(
                 user_id=user.id,
                 type=TransactionType.EXPENSE,
-                service=ServiceType.STABLE_DIFFUSION,
+                product_id=generation.product_id,
                 amount=total_price,
                 clear_amount=total_price,
                 currency=Currency.USD,
@@ -461,7 +463,7 @@ async def handle_replicate_flux(
             write_transaction(
                 user_id=user.id,
                 type=TransactionType.EXPENSE,
-                service=ServiceType.FLUX,
+                product_id=generation.product_id,
                 amount=total_price,
                 clear_amount=total_price,
                 currency=Currency.USD,

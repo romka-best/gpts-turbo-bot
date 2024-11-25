@@ -1,23 +1,21 @@
 from datetime import datetime, timezone
-from typing import List, Dict
-
-from bot.database.models.package import PackageType
 
 
 class CartItem:
-    package_type: PackageType
+    product_id: str
     quantity: int
     created_at: datetime
     edited_at: datetime
 
     def __init__(
         self,
-        package_type: PackageType,
+        product_id: str,
         quantity: int,
         created_at=None,
         edited_at=None,
+        **kwargs,
     ):
-        self.package_type = package_type
+        self.product_id = product_id
         self.quantity = quantity
 
         current_time = datetime.now(timezone.utc)
@@ -33,7 +31,7 @@ class Cart:
 
     id: str
     user_id: str
-    items: List[Dict]
+    items: list[dict]
     created_at: datetime
     edited_at: datetime
 
@@ -41,7 +39,7 @@ class Cart:
         self,
         id: str,
         user_id: str,
-        items: List[Dict],
+        items: list[dict],
         created_at=None,
         edited_at=None,
     ):

@@ -31,6 +31,12 @@ def build_admin_keyboard(language_code: str) -> InlineKeyboardMarkup:
         ],
         [
             InlineKeyboardButton(
+                text='🏷 Реклама',
+                callback_data='admin:ads',
+            ),
+        ],
+        [
+            InlineKeyboardButton(
                 text='📣 Сделать рассылку',
                 callback_data='admin:blast',
             ),

@@ -33,16 +33,3 @@ def build_claude_keyboard(language_code: str, model: Model, model_version: Claud
     ]
 
     return InlineKeyboardMarkup(inline_keyboard=buttons)
-
-
-def build_claude_continue_generating_keyboard(language_code: str) -> InlineKeyboardMarkup:
-    buttons = [
-        [
-            InlineKeyboardButton(
-                text=get_localization(language_code).CONTINUE_GENERATING,
-                callback_data='claude_continue_generation:continue'
-            )
-        ]
-    ]
-
-    return InlineKeyboardMarkup(inline_keyboard=buttons)

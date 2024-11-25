@@ -20,8 +20,9 @@ from bot.database.models.common import (
     GeminiGPTVersion,
     MidjourneyAction,
 )
-from bot.database.models.transaction import TransactionType, ServiceType
+from bot.database.models.transaction import TransactionType
 from bot.database.models.user import UserSettings
+from bot.database.operations.product.getters import get_product_by_quota
 from bot.database.operations.transaction.writers import write_transaction
 from bot.database.operations.user.getters import get_user
 from bot.handlers.ai.chat_gpt_handler import handle_chatgpt
@@ -52,22 +53,30 @@ async def process_voice_message(bot: Bot, voice: File, user_id: str):
         voice_ogg = io.BytesIO()
         await bot.download_file(voice.file_path, voice_ogg)
 
-        loop = asyncio.get_running_loop()
-        audio = await loop.run_in_executor(None, lambda: AudioSegment.from_file(voice_ogg, format='ogg'))
-
+        audio_data = {
+            'file': voice_ogg,
+            'format': 'ogg',
+        }
+        audio = await asyncio.to_thread(AudioSegment.from_file, **audio_data)
         audio_in_seconds = audio.duration_seconds
 
-        audio.export(wav_path, format='wav')
+        audio_export_data = {
+            'out_f': wav_path,
+            'format': 'wav',
+        }
+        await asyncio.to_thread(audio.export, **audio_export_data)
 
-        audio_file = open(wav_path, 'rb')
+        audio_file = await asyncio.to_thread(lambda: open(wav_path, 'rb'))
         text = await get_response_speech_to_text(audio_file)
-        audio_file.close()
+        await asyncio.to_thread(audio_file.close)
+
+        product = await get_product_by_quota(Quota.VOICE_MESSAGES)
 
         total_price = 0.0001 * math.ceil(audio_in_seconds)
         await write_transaction(
             user_id=user_id,
             type=TransactionType.EXPENSE,
-            service=ServiceType.VOICE_MESSAGES,
+            product_id=product.id,
             amount=total_price,
             clear_amount=total_price,
             currency=Currency.USD,

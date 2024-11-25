@@ -1,5 +1,3 @@
-from typing import Dict
-
 from anthropic import AsyncAnthropic
 
 from bot.config import config
@@ -16,7 +14,7 @@ def get_default_max_tokens(model_version: ClaudeGPTVersion) -> int:
     return base
 
 
-async def get_response_message(model_version: ClaudeGPTVersion, system_prompt: str, history: list) -> Dict:
+async def get_response_message(model_version: ClaudeGPTVersion, system_prompt: str, history: list) -> dict:
     max_tokens = get_default_max_tokens(model_version)
 
     response = await client.messages.create(
