@@ -24,9 +24,8 @@ class Request:
         id: str,
         user_id: str,
         message_id: int,
+        product_id: str,
         requested: int,
-        # TODO MAKE : str
-        product_id='',
         status=RequestStatus.STARTED,
         details=None,
         created_at=None,

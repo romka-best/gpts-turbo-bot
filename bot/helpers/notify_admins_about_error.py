@@ -51,7 +51,7 @@ async def notify_admins_about_error(bot: Bot, telegram_update: Update, dp: Dispa
 
                 chat_title = get_localization(language_code).DEFAULT_CHAT_TITLE
                 transaction = firebase.db.transaction()
-                user = await initialize_user_for_the_first_time(
+                await initialize_user_for_the_first_time(
                     transaction,
                     telegram_user,
                     chat_id,

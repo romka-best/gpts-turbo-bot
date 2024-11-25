@@ -8,38 +8,7 @@ class TransactionType:
     EXPENSE = 'EXPENSE'
 
 
-# TODO DELETE AFTER MIGRATION
 class ServiceType:
-    MINI = 'MINI'
-    STANDARD = 'STANDARD'
-    VIP = 'VIP'
-    PREMIUM = 'PREMIUM'
-    UNLIMITED = 'UNLIMITED'
-    CHAT_GPT3_TURBO = 'GPT3'
-    CHAT_GPT4_TURBO = 'GPT4'
-    CHAT_GPT4_OMNI = 'GPT4_OMNI'
-    CHAT_GPT4_OMNI_MINI = 'GPT4_OMNI_MINI'
-    CHAT_GPT_O_1_MINI = 'CHAT_GPT_O_1_MINI'
-    CHAT_GPT_O_1_PREVIEW = 'CHAT_GPT_O_1_PREVIEW'
-    CLAUDE_3_HAIKU = 'CLAUDE_3_HAIKU'
-    CLAUDE_3_SONNET = 'CLAUDE_3_SONNET'
-    CLAUDE_3_OPUS = 'CLAUDE_3_OPUS'
-    GEMINI_1_FLASH = 'GEMINI_1_FLASH'
-    GEMINI_1_PRO = 'GEMINI_1_PRO'
-    GEMINI_1_ULTRA = 'GEMINI_1_ULTRA'
-    DALL_E = 'DALL_E'
-    MIDJOURNEY = 'MIDJOURNEY'
-    STABLE_DIFFUSION = 'STABLE_DIFFUSION'
-    FLUX = 'FLUX'
-    FACE_SWAP = 'FACE_SWAP'
-    PHOTOSHOP_AI = 'PHOTOSHOP_AI'
-    MUSIC_GEN = 'MUSIC_GEN'
-    SUNO = 'SUNO'
-    ADDITIONAL_CHATS = 'ADDITIONAL_CHATS'
-    FAST_MESSAGES = 'FAST_MESSAGES'
-    VOICE_MESSAGES = 'VOICE_MESSAGES'
-    ACCESS_TO_CATALOG = 'ACCESS_TO_CATALOG'
-
     FREE = 'FREE'
     SERVER = 'SERVER'
     DATABASE = 'DATABASE'
@@ -66,10 +35,10 @@ class Transaction:
         id: str,
         user_id: str,
         type: TransactionType,
+        product_id: str,
         amount: float,
         clear_amount: float,
         currency: Currency,
-        product_id: str = '',
         quantity=1,
         details=None,
         created_at=None,

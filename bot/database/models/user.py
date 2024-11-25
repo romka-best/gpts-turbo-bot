@@ -181,7 +181,7 @@ class User:
         username: str,
         current_chat_id: str,
         telegram_chat_id: str,
-        stripe_id='',
+        stripe_id: str,
         gender=UserGender.UNSPECIFIED,
         language_code='en',
         interface_language_code='en',

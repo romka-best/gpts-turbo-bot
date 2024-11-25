@@ -5,7 +5,7 @@ from google.cloud.firestore_v1 import FieldFilter, Query
 
 from bot.config import config
 from bot.database.main import firebase
-from bot.database.models.subscription import Subscription, SubscriptionStatus, SubscriptionType
+from bot.database.models.subscription import Subscription, SubscriptionStatus
 
 
 async def get_subscription(subscription_id: str) -> Optional[Subscription]:
@@ -84,17 +84,6 @@ async def get_count_of_subscriptions(
 async def get_subscriptions_by_user_id(user_id: str) -> list[Subscription]:
     subscriptions = firebase.db.collection(Subscription.COLLECTION_NAME) \
         .where(filter=FieldFilter('user_id', '==', user_id)) \
-        .stream()
-
-    return [
-        Subscription(**subscription.to_dict()) async for subscription in subscriptions
-    ]
-
-
-# TODO DELETE AFTER MIGRATION
-async def get_subscriptions_by_type(type: SubscriptionType) -> list[Subscription]:
-    subscriptions = firebase.db.collection(Subscription.COLLECTION_NAME) \
-        .where(filter=FieldFilter('type', '==', type)) \
         .stream()
 
     return [

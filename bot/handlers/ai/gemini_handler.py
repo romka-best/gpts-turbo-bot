@@ -187,9 +187,7 @@ async def handle_gemini(message: Message, state: FSMContext, user: User, user_qu
                 async with httpx.AsyncClient() as client:
                     response = await client.get(photo_link)
                     photo_content = response.content
-                loop = asyncio.get_running_loop()
-                photo_file = await loop.run_in_executor(None, lambda: PIL.Image.open(BytesIO(photo_content)))
-
+                photo_file = await asyncio.to_thread(lambda: PIL.Image.open(BytesIO(photo_content)))
                 parts.append(photo_file)
 
         if parts:

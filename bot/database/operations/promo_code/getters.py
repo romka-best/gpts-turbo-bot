@@ -4,9 +4,7 @@ from typing import Optional
 from google.cloud.firestore_v1 import FieldFilter
 
 from bot.database.main import firebase
-from bot.database.models.package import PackageType
 from bot.database.models.promo_code import PromoCode, UsedPromoCode
-from bot.database.models.subscription import SubscriptionType
 
 
 async def get_promo_code(promo_code_id: str) -> Optional[PromoCode]:
@@ -36,31 +34,6 @@ async def get_used_promo_code_by_user_id_and_promo_code_id(user_id: str, promo_c
 
     async for doc in used_promo_code_stream:
         return UsedPromoCode(**doc.to_dict())
-
-
-# TODO DELETE AFTER MIGRATION
-async def get_promo_codes() -> list[PromoCode]:
-    promo_codes = firebase.db.collection(PromoCode.COLLECTION_NAME).stream()
-
-    return [PromoCode(**promo_code.to_dict()) async for promo_code in promo_codes]
-
-
-# TODO DELETE AFTER MIGRATION
-async def get_promo_codes_by_subscription_type(subscription_type: SubscriptionType) -> list[PromoCode]:
-    promo_codes = firebase.db.collection(PromoCode.COLLECTION_NAME) \
-        .where(filter=FieldFilter('details.subscription_type', '==', subscription_type)) \
-        .stream()
-
-    return [PromoCode(**promo_code.to_dict()) async for promo_code in promo_codes]
-
-
-# TODO DELETE AFTER MIGRATION
-async def get_promo_codes_by_package_type(package_type: PackageType) -> list[PromoCode]:
-    promo_codes = firebase.db.collection(PromoCode.COLLECTION_NAME) \
-        .where(filter=FieldFilter('details.package_type', '==', package_type)) \
-        .stream()
-
-    return [PromoCode(**promo_code.to_dict()) async for promo_code in promo_codes]
 
 
 async def get_count_of_used_promo_codes(

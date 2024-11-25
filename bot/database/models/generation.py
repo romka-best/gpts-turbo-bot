@@ -31,8 +31,7 @@ class Generation:
         self,
         id: str,
         request_id: str,
-        # TODO MAKE : str
-        product_id='',
+        product_id: str,
         result='',
         has_error=False,
         status=GenerationStatus.STARTED,

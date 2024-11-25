@@ -45,7 +45,7 @@ async def initialize_user_for_the_first_time(
     )
 
     # create user in firebase
-    firebase.auth.create_user(
+    await firebase.create_user(
         uid=user.id,
         display_name=full_name,
     )

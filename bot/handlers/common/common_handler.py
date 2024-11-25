@@ -146,7 +146,7 @@ async def start(message: Message, state: FSMContext):
 
         chat_title = get_localization(language_code).DEFAULT_CHAT_TITLE
         transaction = firebase.db.transaction()
-        await initialize_user_for_the_first_time(
+        user = await initialize_user_for_the_first_time(
             transaction,
             message.from_user,
             str(message.chat.id),

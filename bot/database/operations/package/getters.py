@@ -4,7 +4,7 @@ from typing import Optional
 from google.cloud.firestore_v1 import FieldFilter, Query
 
 from bot.database.main import firebase
-from bot.database.models.package import Package, PackageStatus, PackageType
+from bot.database.models.package import Package, PackageStatus
 
 
 async def get_package(package_id: str) -> Optional[Package]:
@@ -75,17 +75,6 @@ async def get_packages_by_user_id_and_status(user_id: str, status: PackageStatus
 
 async def get_packages_by_user_id(user_id: str) -> list[Package]:
     packages_query = firebase.db.collection(Package.COLLECTION_NAME).where(filter=FieldFilter('user_id', '==', user_id))
-
-    packages = packages_query.stream()
-
-    return [
-        Package(**package.to_dict()) async for package in packages
-    ]
-
-
-# TODO DELETE AFTER MIGRATION
-async def get_packages_by_type(type: PackageType) -> list[Package]:
-    packages_query = firebase.db.collection(Package.COLLECTION_NAME).where(filter=FieldFilter('type', '==', type))
 
     packages = packages_query.stream()
 

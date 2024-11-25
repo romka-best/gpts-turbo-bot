@@ -4,14 +4,7 @@ from typing import Optional
 from bot.database.models.common import Currency, PaymentMethod, Quota
 
 
-# TODO DELETE AFTER MIGRATION
 class SubscriptionType:
-    FREE = 'FREE'
-    MINI = 'MINI'
-    STANDARD = 'STANDARD'
-    VIP = 'VIP'
-    PREMIUM = 'PREMIUM'
-    UNLIMITED = 'UNLIMITED'
     MONTHLY = 'MONTHLY'
     YEARLY = 'YEARLY'
 
@@ -81,11 +74,11 @@ class Subscription:
         self,
         id: str,
         user_id: str,
+        product_id: str,
         period: SubscriptionPeriod,
         status: SubscriptionStatus,
         currency: Currency,
         amount: float,
-        product_id='',
         income_amount=0.00,
         payment_method=PaymentMethod.YOOKASSA,
         provider_payment_charge_id='',

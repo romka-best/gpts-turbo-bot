@@ -1,4 +1,6 @@
+import asyncio
 import os
+from typing import Optional
 from urllib.parse import quote
 
 from firebase_admin import auth, credentials, initialize_app, firestore_async
@@ -23,6 +25,7 @@ class Firebase:
         cred = credentials.Certificate(self.path_to_credentials)
         initialize_app(cred, {
             'storageBucket': config.STORAGE_NAME.get_secret_value(),
+            'httpTimeout': 300,
         })
 
         scopes = ['https://www.googleapis.com/auth/cloud-platform']
@@ -50,6 +53,24 @@ class Firebase:
 
     async def delete_blob(self, blob_name: str):
         await self.storage.delete(self.bucket.name, blob_name)
+
+    async def get_user(self, uid: str):
+        await asyncio.to_thread(
+            self.auth.get_user,
+            uid,
+            None,
+        )
+
+    async def create_user(self, uid: str, display_name: str, photo_url: Optional[str] = None):
+        user_data = {
+            'uid': uid,
+            'display_name': display_name,
+            'photo_url': photo_url,
+        }
+        await asyncio.to_thread(
+            self.auth.create_user,
+            **user_data,
+        )
 
 
 firebase = Firebase()

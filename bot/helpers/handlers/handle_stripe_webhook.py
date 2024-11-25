@@ -49,6 +49,7 @@ async def handle_stripe_webhook(request: dict, bot: Bot, dp: Dispatcher):
     request_type = request.get('type', '')
     request_object = request.get('data', {}).get('object', {})
     request_id = request_object.get('id', '')
+
     if request_type.startswith('invoice'):
         amount = round(request_object.get('amount_paid') / 100, 2)
         order_id = request_object.get('lines', {}).get('data', [{}])[0].get('metadata', {}).get('order_id')
@@ -58,6 +59,9 @@ async def handle_stripe_webhook(request: dict, bot: Bot, dp: Dispatcher):
         order_id = request_object.get('metadata', {}).get('order_id')
         charge_id = request_object.get('latest_charge')
     else:
+        return
+
+    if not order_id:
         return
 
     payment_charge = await stripe.Charge.retrieve_async(

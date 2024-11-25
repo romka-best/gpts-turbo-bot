@@ -6,6 +6,7 @@ from datetime import datetime, timezone, timedelta
 
 import uvicorn
 from aiogram.client.default import DefaultBotProperties
+from aiogram.client.session.aiohttp import AiohttpSession
 from aiogram.exceptions import TelegramNetworkError, TelegramForbiddenError, TelegramRetryAfter, TelegramBadRequest
 from aiogram.types import Update
 from fastapi import FastAPI, BackgroundTasks
@@ -74,7 +75,6 @@ from bot.helpers.setters.set_description import set_description
 from bot.helpers.updaters.update_daily_limits import update_daily_limits
 from bot.middlewares.AuthMiddleware import AuthMessageMiddleware, AuthCallbackQueryMiddleware
 from bot.middlewares.LoggingMiddleware import LoggingMessageMiddleware, LoggingCallbackQueryMiddleware
-from bot.utils.migrate import migrate
 
 WEBHOOK_BOT_PATH = f'/bot/{config.BOT_TOKEN.get_secret_value()}'
 WEBHOOK_YOOKASSA_PATH = '/payment/yookassa'
@@ -88,6 +88,9 @@ WEBHOOK_REPLICATE_URL = config.WEBHOOK_URL + config.WEBHOOK_REPLICATE_PATH
 
 bot = Bot(
     token=config.BOT_TOKEN.get_secret_value(),
+    session=AiohttpSession(
+        timeout=300,
+    ),
     default=DefaultBotProperties(
         parse_mode=ParseMode.HTML,
     ),
@@ -101,7 +104,7 @@ storage = RedisStorage.from_url(config.REDIS_URL, {
 dp = Dispatcher(
     storage=storage,
     sm_strategy=FSMStrategy.GLOBAL_USER,
-    maintenance_mode=True,
+    maintenance_mode=False,
 )
 
 
@@ -158,7 +161,6 @@ async def lifespan(_: FastAPI):
     await set_description(bot)
     await set_commands(bot)
     await firebase.init()
-    # await migrate(bot)
     yield
     await bot.session.close()
     await storage.close()
@@ -292,6 +294,11 @@ async def midjourney_webhook(body: dict):
         return JSONResponse(content={}, status_code=500)
 
 
+@app.get('/migrate')
+async def migrate_webhook():
+    pass
+
+
 @app.get('/run-daily-tasks')
 async def daily_tasks(background_tasks: BackgroundTasks):
     yesterday_utc_day = datetime.now(timezone.utc) - timedelta(days=1)
@@ -314,4 +321,4 @@ async def daily_tasks(background_tasks: BackgroundTasks):
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
-    uvicorn.run(app, host='0.0.0.0', port=os.getenv('PORT', 8080), timeout_keep_alive=60)
+    uvicorn.run(app, host='0.0.0.0', port=os.getenv('PORT', 8080), timeout_keep_alive=300)

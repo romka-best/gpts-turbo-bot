@@ -17,7 +17,7 @@ from bot.database.models.game import GameType
 from bot.database.models.generation import GenerationReaction
 from bot.database.models.product import ProductType, ProductCategory, Product
 from bot.database.models.subscription import SubscriptionStatus
-from bot.database.models.transaction import Transaction, TransactionType
+from bot.database.models.transaction import Transaction, TransactionType, ServiceType
 from bot.database.operations.feedback.getters import get_count_of_feedbacks
 from bot.database.operations.game.getters import get_count_of_games, get_sum_of_games_reward
 from bot.database.operations.generation.getters import get_count_of_generations
@@ -71,7 +71,7 @@ async def get_statistics_by_transactions_query(
     subscription_users = {
         product.id: set() for product in products if product.type == ProductType.SUBSCRIPTION
     }
-    subscription_users['FREE'] = set()
+    subscription_users[ServiceType.FREE] = set()
 
     paid_users = set()
     activated_users = set()
@@ -88,21 +88,21 @@ async def get_statistics_by_transactions_query(
     count_all_transactions = {
         product.id: default_transaction_nested_dict.copy() for product in products
     }
-    count_all_transactions['FREE'] = default_transaction_nested_dict.copy()
-    count_all_transactions['SERVER'] = default_transaction_nested_dict.copy()
-    count_all_transactions['DATABASE'] = default_transaction_nested_dict.copy()
-    count_all_transactions['OTHER'] = default_transaction_nested_dict.copy()
+    count_all_transactions[ServiceType.FREE] = default_transaction_nested_dict.copy()
+    count_all_transactions[ServiceType.SERVER] = default_transaction_nested_dict.copy()
+    count_all_transactions[ServiceType.DATABASE] = default_transaction_nested_dict.copy()
+    count_all_transactions[ServiceType.OTHER] = default_transaction_nested_dict.copy()
 
     count_income_money_total = 0
     count_income_money = {
         product.id: 0 for product in products
         if product.id not in {
-            'SERVER',
-            'DATABASE',
+            ServiceType.SERVER,
+            ServiceType.DATABASE,
         }
     }
     count_income_money.update({
-        'OTHER': 0,
+        ServiceType.OTHER: 0,
         'SUBSCRIPTION_ALL': 0,
         'PACKAGES_ALL': 0,
         'AVERAGE_PRICE': 0,
@@ -120,10 +120,10 @@ async def get_statistics_by_transactions_query(
         product.id: default_expense_money_nested_dict.copy() for product in products
     }
     count_expense_money.update({
-        'FREE': default_expense_money_nested_dict.copy(),
-        'SERVER': default_expense_money_nested_dict.copy(),
-        'DATABASE': default_expense_money_nested_dict.copy(),
-        'OTHER': default_expense_money_nested_dict.copy(),
+        ServiceType.FREE: default_expense_money_nested_dict.copy(),
+        ServiceType.SERVER: default_expense_money_nested_dict.copy(),
+        ServiceType.DATABASE: default_expense_money_nested_dict.copy(),
+        ServiceType.OTHER: default_expense_money_nested_dict.copy(),
         'ALL': 0,
     })
 
@@ -171,7 +171,7 @@ async def get_statistics_by_transactions_query(
                 transaction_user = user_cache[transaction.user_id]
 
             if not transaction_user.subscription_id:
-                subscription_users['FREE'].add(transaction_user.id)
+                subscription_users[ServiceType.FREE].add(transaction_user.id)
             else:
                 transaction_user_subscription = await get_subscription(transaction_user.subscription_id)
                 subscription_users[transaction_user_subscription.product_id].add(transaction_user.id)
@@ -364,8 +364,8 @@ async def handle_get_statistics(language_code: str, period: str):
         product.id: product.names.get(language_code) for product in products
         if product.type == ProductType.PACKAGE and 'voice answers' in product.names.get('en', '').lower()
     }
-    tech_products['SERVER'] = get_localization(language_code).SERVER
-    tech_products['DATABASE'] = get_localization(language_code).DATABASE
+    tech_products[ServiceType.SERVER] = get_localization(language_code).SERVER
+    tech_products[ServiceType.DATABASE] = get_localization(language_code).DATABASE
 
     # users
     (
@@ -475,8 +475,8 @@ async def handle_get_statistics(language_code: str, period: str):
         asyncio.gather(*subscription_before_tasks)
     )
 
-    count_subscription_users['FREE'] = 0
-    count_subscription_users_before['FREE'] = 0
+    count_subscription_users[ServiceType.FREE] = 0
+    count_subscription_users_before[ServiceType.FREE] = 0
     for subscription, count, count_before in zip(subscriptions, subscription_results, subscription_before_results):
         count_subscription_users[subscription] = count
         count_subscription_users_before[subscription] = count_before
@@ -490,14 +490,14 @@ async def handle_get_statistics(language_code: str, period: str):
             subscription_products[product.id] = f'{get_localization(language_code).YEARLY} {product.names.get(language_code)}'
 
     count_users = await get_count_of_users()
-    count_subscription_users['FREE'] = abs(
+    count_subscription_users[ServiceType.FREE] = abs(
         count_users - sum(count_subscription_users.values())
-    ) if count_subscription_users['FREE'] == 0 \
-        else count_subscription_users['FREE']
-    count_subscription_users_before['FREE'] = abs(
+    ) if count_subscription_users[ServiceType.FREE] == 0 \
+        else count_subscription_users[ServiceType.FREE]
+    count_subscription_users_before[ServiceType.FREE] = abs(
         count_users - sum(count_subscription_users_before.values())
-    ) if count_subscription_users_before['FREE'] == 0 \
-        else count_subscription_users_before['FREE']
+    ) if count_subscription_users_before[ServiceType.FREE] == 0 \
+        else count_subscription_users_before[ServiceType.FREE]
 
     # reactions
     products_with_reactions = {

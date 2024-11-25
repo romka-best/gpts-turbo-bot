@@ -50,7 +50,7 @@ async def handle_bonus(message: Message, user_id: str, state: FSMContext):
     count_of_feedbacks = await get_count_of_approved_feedbacks_by_user_id(user_id)
     count_of_games = await get_count_of_games_by_user_id(user_id)
 
-    photo_path = f'payments/packages_free_{user_language_code}.png'
+    photo_path = f'payments/packages_{user_language_code}.png'
     photo = await firebase.bucket.get_blob(photo_path)
     photo_link = firebase.get_public_url(photo.name)
 
@@ -262,8 +262,8 @@ async def handle_bonus_cash_out_selection(callback_query: CallbackQuery, state: 
     user_id = str(callback_query.from_user.id)
     user_language_code = await get_user_language(user_id, state.storage)
 
-    package_type = callback_query.data.split(':')[1]
-    if package_type == 'back':
+    product_id = callback_query.data.split(':')[1]
+    if product_id == 'back':
         user = await get_user(user_id)
         count_of_referred_users = await get_count_of_users_by_referral(user_id)
         count_of_feedbacks = await get_count_of_approved_feedbacks_by_user_id(user_id)
@@ -284,12 +284,13 @@ async def handle_bonus_cash_out_selection(callback_query: CallbackQuery, state: 
 
         return
 
-    message = get_localization(user_language_code).choose_min(package_type)
+    product = await get_product(product_id)
+    message = get_localization(user_language_code).choose_min(product.names.get(user_language_code))
 
     reply_markup = build_cancel_keyboard(user_language_code)
     await callback_query.message.edit_caption(caption=message, reply_markup=reply_markup)
 
-    await state.update_data(package_type=package_type)
+    await state.update_data(product_id=product_id)
     await state.set_state(Bonus.waiting_for_package_quantity)
 
 
@@ -301,18 +302,19 @@ async def quantity_of_bonus_package_sent(message: Message, state: FSMContext):
 
     try:
         user_data = await state.get_data()
-        package_product_id = user_data['package_product_id']
+        package_product_id = user_data['product_id']
         package_product_quantity = int(message.text)
+
         product = await get_product(package_product_id)
 
-        price = Product.get_discount_price(
+        price = float(Product.get_discount_price(
             ProductType.PACKAGE,
             package_product_quantity,
             product.prices.get(user.currency),
             user.currency,
             0,
-        )
-        if float(price) > user.balance:
+        ))
+        if price > user.balance:
             reply_markup = build_cancel_keyboard(user_language_code)
             await message.reply(
                 text=get_localization(user_language_code).MAX_ERROR,

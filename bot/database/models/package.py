@@ -3,32 +3,6 @@ from datetime import datetime, timezone
 from bot.database.models.common import Currency, PaymentMethod
 
 
-# TODO DELETE AFTER MIGRATION
-class PackageType:
-    CHAT_GPT4_OMNI_MINI = 'GPT4_OMNI_MINI'
-    CHAT_GPT4_OMNI = 'GPT4_OMNI'
-    CHAT_GPT_O_1_MINI = 'CHAT_GPT_O_1_MINI'
-    CHAT_GPT_O_1_PREVIEW = 'CHAT_GPT_O_1_PREVIEW'
-    CLAUDE_3_HAIKU = 'CLAUDE_3_HAIKU'
-    CLAUDE_3_SONNET = 'CLAUDE_3_SONNET'
-    CLAUDE_3_OPUS = 'CLAUDE_3_OPUS'
-    GEMINI_1_FLASH = 'GEMINI_1_FLASH'
-    GEMINI_1_PRO = 'GEMINI_1_PRO'
-    GEMINI_1_ULTRA = 'GEMINI_1_ULTRA'
-    DALL_E = 'DALL_E'
-    MIDJOURNEY = 'MIDJOURNEY'
-    STABLE_DIFFUSION = 'STABLE_DIFFUSION'
-    FLUX = 'FLUX'
-    FACE_SWAP = 'FACE_SWAP'
-    PHOTOSHOP_AI = 'PHOTOSHOP_AI'
-    MUSIC_GEN = 'MUSIC_GEN'
-    SUNO = 'SUNO'
-    CHAT = 'CHAT'
-    ACCESS_TO_CATALOG = 'ACCESS_TO_CATALOG'
-    VOICE_MESSAGES = 'VOICE_MESSAGES'
-    FAST_MESSAGES = 'FAST_MESSAGES'
-
-
 class PackageStatus:
     SUCCESS = 'SUCCESS'
     WAITING = 'WAITING'
@@ -42,8 +16,8 @@ class Package:
 
     id: str
     user_id: str
-    status: PackageStatus
     product_id: str
+    status: PackageStatus
     currency: Currency
     amount: float
     income_amount: float
@@ -58,10 +32,10 @@ class Package:
         self,
         id: str,
         user_id: str,
+        product_id: str,
         status: PackageStatus,
         currency: Currency,
         amount: float,
-        product_id='',
         income_amount=0.00,
         quantity=1,
         payment_method=PaymentMethod.YOOKASSA,

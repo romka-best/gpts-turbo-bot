@@ -1,3 +1,4 @@
+import asyncio
 from typing import Optional, Literal
 
 from aiogram.types import Message, InlineKeyboardMarkup, BufferedInputFile
@@ -36,8 +37,9 @@ async def reply_with_voice(
         },
     )
 
+    file = await asyncio.to_thread(audio_content.read)
     await message.reply_voice(
-        voice=BufferedInputFile(audio_content.read(), filename='answer.ogg'),
+        voice=BufferedInputFile(file, filename='answer.ogg'),
         reply_markup=reply_markup,
         allow_sending_without_reply=True,
     )

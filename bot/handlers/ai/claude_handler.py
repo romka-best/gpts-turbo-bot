@@ -191,9 +191,7 @@ async def handle_claude(message: Message, state: FSMContext, user: User, user_qu
                     image_content = response.content
 
                 image_media_type = 'image/jpeg'
-                image_data = await asyncio.get_running_loop().run_in_executor(
-                    None, lambda: base64.b64encode(image_content).decode('utf-8')
-                )
+                image_data = await asyncio.to_thread(lambda: base64.b64encode(image_content).decode('utf-8'))
                 content.append({
                     'type': 'image',
                     'source': {

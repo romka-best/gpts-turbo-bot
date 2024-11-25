@@ -1401,7 +1401,7 @@ class Russian(Texts):
                         discount,
                         SubscriptionPeriod.MONTH1 if subscription.category == ProductCategory.MONTHLY else SubscriptionPeriod.MONTHS12,
                     )
-                    text_subscriptions += f'<s>{left_part_price}{subscription_price}{right_part_price}</s> {discount_price} {per_period}\n'
+                    text_subscriptions += f'<s>{left_part_price}{subscription_price}{right_part_price}</s> {left_part_price}{discount_price}{right_part_price} {per_period}\n'
                 else:
                     text_subscriptions += f'{left_part_price}{subscription_price}{right_part_price} {per_period}\n'
 

@@ -5,7 +5,6 @@ from google.cloud.firestore_v1 import FieldFilter
 
 from bot.database.main import firebase
 from bot.database.models.common import UTM
-from bot.database.models.subscription import SubscriptionType
 from bot.database.models.user import User
 
 
@@ -117,16 +116,6 @@ async def get_count_of_users_by_referral(referred_by: str) -> int:
 async def get_users_by_language_code(language_code: str) -> list[User]:
     users_stream = firebase.db.collection(User.COLLECTION_NAME) \
         .where(filter=FieldFilter('interface_language_code', '==', language_code)) \
-        .stream()
-
-    return [
-        User(**user.to_dict()) async for user in users_stream
-    ]
-
-# TODO DELETE AFTER MIGRATION
-async def get_users_by_subscription_type(subscription_type: SubscriptionType) -> list[User]:
-    users_stream = firebase.db.collection(User.COLLECTION_NAME) \
-        .where(filter=FieldFilter('subscription_type', '==', subscription_type)) \
         .stream()
 
     return [
