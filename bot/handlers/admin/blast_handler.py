@@ -22,12 +22,37 @@ async def handle_blast(message: Message, user_id: str, state: FSMContext):
 
     reply_markup = build_blast_keyboard(user_language_code)
     await message.edit_text(
-        text=get_localization(user_language_code).BLAST_CHOOSE_LANGUAGE,
+        text=get_localization(user_language_code).BLAST_CHOOSE_USER_TYPE,
         reply_markup=reply_markup,
     )
 
 
 @blast_router.callback_query(lambda c: c.data.startswith('blast:'))
+async def handle_blast_user_type_selection(callback_query: CallbackQuery, state: FSMContext):
+    await callback_query.answer()
+
+    user_language_code = await get_user_language(str(callback_query.from_user.id), state.storage)
+
+    user_type = callback_query.data.split(':')[1]
+    reply_markup = build_cancel_keyboard(user_language_code)
+    if user_type == 'back':
+        reply_markup = build_admin_keyboard(user_language_code)
+        await callback_query.message.edit_text(
+            text=get_localization(user_language_code).ADMIN_INFO,
+            reply_markup=reply_markup,
+        )
+
+        return
+    else:
+        await callback_query.message.edit_text(
+            text=get_localization(user_language_code).BLAST_CHOOSE_USER_TYPE,
+            reply_markup=reply_markup,
+        )
+
+        await state.update_data(blast_user_type=user_type)
+
+
+@blast_router.callback_query(lambda c: c.data.startswith('blast_language:'))
 async def handle_blast_language_selection(callback_query: CallbackQuery, state: FSMContext):
     await callback_query.answer()
 
@@ -97,6 +122,7 @@ async def handle_blast_confirmation_selection(callback_query: CallbackQuery, sta
         user_language_code = await get_user_language(str(callback_query.from_user.id), state.storage)
         user_data = await state.get_data()
 
+        blast_user_type = user_data['blast_user_type']
         blast_language = user_data['blast_language']
         blast_letters = user_data['blast_letters']
 
@@ -106,6 +132,7 @@ async def handle_blast_confirmation_selection(callback_query: CallbackQuery, sta
                 tasks.append(
                     send_message_to_users(
                         bot=callback_query.bot,
+                        user_type=blast_user_type,
                         language_code=language_code,
                         message=blast_letters[language_code],
                     )
@@ -114,6 +141,7 @@ async def handle_blast_confirmation_selection(callback_query: CallbackQuery, sta
             tasks.append(
                 send_message_to_users(
                     bot=callback_query.bot,
+                    user_type=blast_user_type,
                     language_code=blast_language,
                     message=blast_letters[blast_language],
                 )

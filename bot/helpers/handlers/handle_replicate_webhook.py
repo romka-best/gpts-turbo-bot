@@ -74,7 +74,10 @@ async def handle_replicate_webhook(bot: Bot, dp: Dispatcher, prediction: dict):
         logging.error(f'Error in replicate_webhook: {prediction.get("logs")}')
     else:
         generation.result = generation_result[0] if type(generation_result) == list else generation_result
-        if product.details.get('quota') == Quota.PHOTOSHOP_AI and request.details.get('type') == PhotoshopAIAction.COLORIZATION:
+        if (
+            product.details.get('quota') == Quota.PHOTOSHOP_AI and
+            request.details.get('type') == PhotoshopAIAction.COLORIZATION
+        ):
             generation.result = generation.result.get('image')
         await update_generation(generation.id, {
             'status': generation.status,
@@ -83,15 +86,15 @@ async def handle_replicate_webhook(bot: Bot, dp: Dispatcher, prediction: dict):
         })
 
     if product.details.get('quota') == Quota.STABLE_DIFFUSION:
-        await handle_replicate_stable_diffusion(bot, dp, user, request, generation)
+        asyncio.create_task(handle_replicate_stable_diffusion(bot, dp, user, request, generation))
     elif product.details.get('quota') == Quota.FLUX:
-        await handle_replicate_flux(bot, dp, user, request, generation)
+        asyncio.create_task(handle_replicate_flux(bot, dp, user, request, generation))
     elif product.details.get('quota') == Quota.FACE_SWAP:
-        await handle_replicate_face_swap(bot, dp, user, request, generation)
+        asyncio.create_task(handle_replicate_face_swap(bot, dp, user, request, generation))
     elif product.details.get('quota') == Quota.PHOTOSHOP_AI:
-        await handle_replicate_photoshop_ai(bot, dp, user, request, generation)
+        asyncio.create_task(handle_replicate_photoshop_ai(bot, dp, user, request, generation))
     elif product.details.get('quota') == Quota.MUSIC_GEN:
-        await handle_replicate_music_gen(bot, dp, user, request, generation)
+        asyncio.create_task(handle_replicate_music_gen(bot, dp, user, request, generation))
 
     return True
 

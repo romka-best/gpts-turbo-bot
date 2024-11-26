@@ -75,6 +75,7 @@ from bot.helpers.setters.set_description import set_description
 from bot.helpers.updaters.update_daily_limits import update_daily_limits
 from bot.middlewares.AuthMiddleware import AuthMessageMiddleware, AuthCallbackQueryMiddleware
 from bot.middlewares.LoggingMiddleware import LoggingMessageMiddleware, LoggingCallbackQueryMiddleware
+from bot.utils.migrate import migrate
 
 WEBHOOK_BOT_PATH = f'/bot/{config.BOT_TOKEN.get_secret_value()}'
 WEBHOOK_YOOKASSA_PATH = '/payment/yookassa'
@@ -171,8 +172,8 @@ app = FastAPI(lifespan=lifespan)
 
 
 @app.post(WEBHOOK_BOT_PATH)
-async def bot_webhook(update: dict):
-    asyncio.create_task(handle_update(update))
+async def bot_webhook(update: dict, background_tasks: BackgroundTasks):
+    background_tasks.add_task(handle_update, update)
 
 
 async def delayed_handle_update(update: Update, timeout: int):
@@ -266,18 +267,18 @@ async def handle_update(update: dict):
 
 
 @app.post(WEBHOOK_YOOKASSA_PATH)
-async def yookassa_webhook(request: dict):
-    asyncio.create_task(handle_yookassa_webhook(request, bot, dp))
+async def yookassa_webhook(request: dict, background_tasks: BackgroundTasks):
+    background_tasks.add_task(handle_yookassa_webhook, request, bot, dp)
 
 
 @app.post(WEBHOOK_PAY_SELECTION_PATH)
-async def pay_selection_webhook(request: dict):
-    asyncio.create_task(handle_pay_selection_webhook(request, bot, dp))
+async def pay_selection_webhook(request: dict, background_tasks: BackgroundTasks):
+    background_tasks.add_task(handle_pay_selection_webhook, request, bot, dp)
 
 
 @app.post(WEBHOOK_STRIPE_PATH)
-async def stripe_webhook(request: dict):
-    asyncio.create_task(handle_stripe_webhook(request, bot, dp))
+async def stripe_webhook(request: dict, background_tasks: BackgroundTasks):
+    background_tasks.add_task(handle_stripe_webhook, request, bot, dp)
 
 
 @app.post(WEBHOOK_REPLICATE_PATH)
@@ -295,8 +296,8 @@ async def midjourney_webhook(body: dict):
 
 
 @app.get('/migrate')
-async def migrate_webhook():
-    pass
+async def migrate_webhook(background_tasks: BackgroundTasks):
+    background_tasks.add_task(migrate, bot, storage)
 
 
 @app.get('/run-daily-tasks')

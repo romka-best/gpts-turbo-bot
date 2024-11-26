@@ -54,7 +54,7 @@ async def handle_midjourney_webhook(bot: Bot, dp: Dispatcher, body: dict):
     request = await get_request(generation.request_id)
     user = await get_user(request.user_id)
 
-    await handle_midjourney_result(bot, dp, user, request, generation)
+    asyncio.create_task(handle_midjourney_result(bot, dp, user, request, generation))
 
     return True
 

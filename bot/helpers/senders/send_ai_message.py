@@ -21,9 +21,14 @@ async def send_ai_message(message: Message, text: str, reply_markup=None):
             if e.message.startswith('Bad Request: can\'t parse entities'):
                 await message.reply(
                     text=formatted_message,
-                    reply_markup=reply_markup,
+                    reply_markup=reply_markup if i == len(messages) - 1 else None,
                     allow_sending_without_reply=True,
                     parse_mode=None,
                 )
+            elif (
+                e.message.startswith('Bad Request: message text is empty') or
+                e.message.startswith('Bad Request: text must be non-empty')
+            ):
+                pass
             else:
                 raise e

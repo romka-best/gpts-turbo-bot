@@ -49,14 +49,19 @@ async def send_message_to_user(bot: Bot, user: User, message: str):
         logging.error(error)
 
 
-async def send_message_to_users(bot: Bot, language_code: str, message: str):
+async def send_message_to_users(bot: Bot, user_type: str, language_code: str, message: str):
     users = await get_users_by_language_code(language_code)
     for i in range(0, len(users), BATCH_SIZE):
         batch_users = users[i:i + BATCH_SIZE]
 
-        tasks = [
-            send_message_to_user(bot, user, message) for user in batch_users
-        ]
+        tasks = []
+        for user in batch_users:
+            if (
+                user_type == 'all' or
+                (user_type == 'free' and not user.subscription_id) or
+                (user_type == 'paid' and user.subscription_id)
+            ):
+                tasks.append(send_message_to_user(bot, user, message))
 
         await asyncio.gather(*tasks, return_exceptions=True)
 

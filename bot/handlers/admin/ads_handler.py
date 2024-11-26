@@ -128,6 +128,7 @@ async def ads_campaign_name_sent(message: Message, state: FSMContext):
         await message.reply(
             text=get_localization(user_language_code).ADS_SEND_QUANTITY,
             reply_markup=reply_markup,
+            allow_sending_without_reply=True,
         )
         await state.update_data(name=campaign_name)
         await state.set_state(Ads.waiting_for_quantity)
