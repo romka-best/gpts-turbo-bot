@@ -117,6 +117,7 @@ async def handle_dall_e(message: Message, state: FSMContext, user: User):
             await message.reply_photo(
                 caption=f'{get_localization(user_language_code).IMAGE_SUCCESS}{footer_text}',
                 photo=response_url,
+                allow_sending_without_reply=True,
             )
         except openai.BadRequestError as e:
             if e.code == 'content_policy_violation':

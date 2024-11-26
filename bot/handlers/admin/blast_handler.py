@@ -7,7 +7,11 @@ from aiogram.types import Message, CallbackQuery
 from bot.helpers.senders.send_message_to_users import send_message_to_users
 from bot.keyboards.admin.admin import build_admin_keyboard
 from bot.locales.translate_text import translate_text
-from bot.keyboards.admin.blast import build_blast_keyboard, build_blast_confirmation_keyboard
+from bot.keyboards.admin.blast import (
+    build_blast_keyboard,
+    build_blast_language_keyboard,
+    build_blast_confirmation_keyboard,
+)
 from bot.keyboards.common.common import build_cancel_keyboard
 from bot.locales.main import get_localization, localization_classes, get_user_language
 from bot.states.blast import Blast
@@ -22,12 +26,37 @@ async def handle_blast(message: Message, user_id: str, state: FSMContext):
 
     reply_markup = build_blast_keyboard(user_language_code)
     await message.edit_text(
-        text=get_localization(user_language_code).BLAST_CHOOSE_LANGUAGE,
+        text=get_localization(user_language_code).BLAST_CHOOSE_USER_TYPE,
         reply_markup=reply_markup,
     )
 
 
 @blast_router.callback_query(lambda c: c.data.startswith('blast:'))
+async def handle_blast_user_type_selection(callback_query: CallbackQuery, state: FSMContext):
+    await callback_query.answer()
+
+    user_language_code = await get_user_language(str(callback_query.from_user.id), state.storage)
+
+    user_type = callback_query.data.split(':')[1]
+    if user_type == 'back':
+        reply_markup = build_admin_keyboard(user_language_code)
+        await callback_query.message.edit_text(
+            text=get_localization(user_language_code).ADMIN_INFO,
+            reply_markup=reply_markup,
+        )
+
+        return
+    else:
+        reply_markup = build_blast_language_keyboard(user_language_code)
+        await callback_query.message.edit_text(
+            text=get_localization(user_language_code).BLAST_CHOOSE_USER_TYPE,
+            reply_markup=reply_markup,
+        )
+
+        await state.update_data(blast_user_type=user_type)
+
+
+@blast_router.callback_query(lambda c: c.data.startswith('blast_language:'))
 async def handle_blast_language_selection(callback_query: CallbackQuery, state: FSMContext):
     await callback_query.answer()
 
@@ -97,6 +126,7 @@ async def handle_blast_confirmation_selection(callback_query: CallbackQuery, sta
         user_language_code = await get_user_language(str(callback_query.from_user.id), state.storage)
         user_data = await state.get_data()
 
+        blast_user_type = user_data['blast_user_type']
         blast_language = user_data['blast_language']
         blast_letters = user_data['blast_letters']
 
@@ -106,6 +136,7 @@ async def handle_blast_confirmation_selection(callback_query: CallbackQuery, sta
                 tasks.append(
                     send_message_to_users(
                         bot=callback_query.bot,
+                        user_type=blast_user_type,
                         language_code=language_code,
                         message=blast_letters[language_code],
                     )
@@ -114,6 +145,7 @@ async def handle_blast_confirmation_selection(callback_query: CallbackQuery, sta
             tasks.append(
                 send_message_to_users(
                     bot=callback_query.bot,
+                    user_type=blast_user_type,
                     language_code=blast_language,
                     message=blast_letters[blast_language],
                 )

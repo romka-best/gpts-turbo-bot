@@ -520,6 +520,7 @@ async def handle_catalog_selection(callback_query: CallbackQuery, state: FSMCont
         await callback_query.message.reply_photo(
             photo=URLInputFile(role_photo_link, filename=role_photo_path),
             caption=text,
+            allow_sending_without_reply=True,
         )
     else:
         keyboard = callback_query.message.reply_markup.inline_keyboard
@@ -555,6 +556,7 @@ async def handle_catalog_selection(callback_query: CallbackQuery, state: FSMCont
             await callback_query.message.reply_photo(
                 photo=URLInputFile(role_photo_link, filename=role_photo_path),
                 caption=role.translated_descriptions.get(user_language_code, 'en'),
+                allow_sending_without_reply=True,
             )
 
 

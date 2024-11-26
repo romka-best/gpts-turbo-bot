@@ -88,7 +88,7 @@ async def update_user_subscription(bot: Bot, user: User, batch: AsyncWriteBatch)
                     order_items=[
                         OrderItem(
                             product=product,
-                            final_price=current_subscription.amount,
+                            price=current_subscription.amount,
                         ),
                     ],
                 )
@@ -124,7 +124,7 @@ async def update_user_subscription(bot: Bot, user: User, batch: AsyncWriteBatch)
                     order_items=[
                         OrderItem(
                             product=product,
-                            final_price=current_subscription.amount,
+                            price=current_subscription.amount,
                         ),
                     ],
                     order_id=current_subscription.provider_auto_payment_charge_id,

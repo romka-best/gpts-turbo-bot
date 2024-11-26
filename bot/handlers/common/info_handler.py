@@ -48,7 +48,7 @@ async def handle_info_selection(callback_query: CallbackQuery, state: FSMContext
         text = get_localization(user_language_code).INFO_TEXT_MODELS
     elif model_type == ModelType.IMAGE:
         reply_keyboard = build_info_image_models_keyboard(user_language_code)
-        text = get_localization(user_language_code).INFO_IMAGE_MODELS,
+        text = get_localization(user_language_code).INFO_IMAGE_MODELS
     elif model_type == ModelType.MUSIC:
         reply_keyboard = build_info_music_models_keyboard(user_language_code)
         text = get_localization(user_language_code).INFO_MUSIC_MODELS

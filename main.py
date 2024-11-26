@@ -171,8 +171,8 @@ app = FastAPI(lifespan=lifespan)
 
 
 @app.post(WEBHOOK_BOT_PATH)
-async def bot_webhook(update: dict):
-    asyncio.create_task(handle_update(update))
+async def bot_webhook(update: dict, background_tasks: BackgroundTasks):
+    background_tasks.add_task(handle_update, update)
 
 
 async def delayed_handle_update(update: Update, timeout: int):
@@ -266,18 +266,18 @@ async def handle_update(update: dict):
 
 
 @app.post(WEBHOOK_YOOKASSA_PATH)
-async def yookassa_webhook(request: dict):
-    asyncio.create_task(handle_yookassa_webhook(request, bot, dp))
+async def yookassa_webhook(request: dict, background_tasks: BackgroundTasks):
+    background_tasks.add_task(handle_yookassa_webhook, request, bot, dp)
 
 
 @app.post(WEBHOOK_PAY_SELECTION_PATH)
-async def pay_selection_webhook(request: dict):
-    asyncio.create_task(handle_pay_selection_webhook(request, bot, dp))
+async def pay_selection_webhook(request: dict, background_tasks: BackgroundTasks):
+    background_tasks.add_task(handle_pay_selection_webhook, request, bot, dp)
 
 
 @app.post(WEBHOOK_STRIPE_PATH)
-async def stripe_webhook(request: dict):
-    asyncio.create_task(handle_stripe_webhook(request, bot, dp))
+async def stripe_webhook(request: dict, background_tasks: BackgroundTasks):
+    background_tasks.add_task(handle_stripe_webhook, request, bot, dp)
 
 
 @app.post(WEBHOOK_REPLICATE_PATH)
