@@ -7,7 +7,11 @@ from aiogram.types import Message, CallbackQuery
 from bot.helpers.senders.send_message_to_users import send_message_to_users
 from bot.keyboards.admin.admin import build_admin_keyboard
 from bot.locales.translate_text import translate_text
-from bot.keyboards.admin.blast import build_blast_keyboard, build_blast_confirmation_keyboard
+from bot.keyboards.admin.blast import (
+    build_blast_keyboard,
+    build_blast_language_keyboard,
+    build_blast_confirmation_keyboard,
+)
 from bot.keyboards.common.common import build_cancel_keyboard
 from bot.locales.main import get_localization, localization_classes, get_user_language
 from bot.states.blast import Blast
@@ -34,7 +38,6 @@ async def handle_blast_user_type_selection(callback_query: CallbackQuery, state:
     user_language_code = await get_user_language(str(callback_query.from_user.id), state.storage)
 
     user_type = callback_query.data.split(':')[1]
-    reply_markup = build_cancel_keyboard(user_language_code)
     if user_type == 'back':
         reply_markup = build_admin_keyboard(user_language_code)
         await callback_query.message.edit_text(
@@ -44,6 +47,7 @@ async def handle_blast_user_type_selection(callback_query: CallbackQuery, state:
 
         return
     else:
+        reply_markup = build_blast_language_keyboard(user_language_code)
         await callback_query.message.edit_text(
             text=get_localization(user_language_code).BLAST_CHOOSE_USER_TYPE,
             reply_markup=reply_markup,

@@ -7,7 +7,7 @@ def build_blast_keyboard(language_code: str) -> InlineKeyboardMarkup:
     buttons = [
         [
             InlineKeyboardButton(
-                text='🆓 Только бесплатные подписчик',
+                text='🆓 Только бесплатные подписчики',
                 callback_data='blast:free',
             ),
         ],

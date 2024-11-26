@@ -75,7 +75,6 @@ from bot.helpers.setters.set_description import set_description
 from bot.helpers.updaters.update_daily_limits import update_daily_limits
 from bot.middlewares.AuthMiddleware import AuthMessageMiddleware, AuthCallbackQueryMiddleware
 from bot.middlewares.LoggingMiddleware import LoggingMessageMiddleware, LoggingCallbackQueryMiddleware
-from bot.utils.migrate import migrate
 
 WEBHOOK_BOT_PATH = f'/bot/{config.BOT_TOKEN.get_secret_value()}'
 WEBHOOK_YOOKASSA_PATH = '/payment/yookassa'
@@ -296,8 +295,8 @@ async def midjourney_webhook(body: dict):
 
 
 @app.get('/migrate')
-async def migrate_webhook(background_tasks: BackgroundTasks):
-    background_tasks.add_task(migrate, bot, storage)
+async def migrate_webhook():
+    pass
 
 
 @app.get('/run-daily-tasks')
