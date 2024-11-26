@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional
 
-from google.cloud.firestore_v1 import FieldFilter, Query
+from google.cloud.firestore_v1 import FieldFilter
 
 from bot.database.main import firebase
 from bot.database.models.package import Package, PackageStatus
@@ -12,24 +12,6 @@ async def get_package(package_id: str) -> Optional[Package]:
     package = await package_ref.get()
 
     if package.exists:
-        return Package(**package.to_dict())
-
-
-async def get_last_package_with_waiting_payment(
-    user_id: str,
-    product_id: str,
-    package_quantity: int,
-) -> Optional[Package]:
-    package_stream = firebase.db.collection(Package.COLLECTION_NAME) \
-        .where(filter=FieldFilter('user_id', '==', user_id)) \
-        .where(filter=FieldFilter('status', '==', PackageStatus.WAITING)) \
-        .where(filter=FieldFilter('product_id', '==', product_id)) \
-        .where(filter=FieldFilter('quantity', '==', package_quantity)) \
-        .order_by('created_at', direction=Query.DESCENDING) \
-        .limit(1) \
-        .stream()
-
-    async for package in package_stream:
         return Package(**package.to_dict())
 
 

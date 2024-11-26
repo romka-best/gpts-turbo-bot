@@ -955,7 +955,6 @@ Keep unleashing the power of AI and remember, we're here to make your digital dr
     SUBSCRIPTION_END = """
 🛑 <b>Subscription expired!</b>
 
-Hey there, AI enthusiast! 🌟
 Your subscription has come to an end. But don't worry, the AI journey isn't over yet! 🚀
 You can renew your magic pass with /buy or /bonus to keep exploring the AI universe or, if you prefer, take a peek for some tailor-made individual packages 🎁
 
@@ -975,9 +974,7 @@ Oops, it looks like your fast messages (or voice messages, catalog access) packa
 
 Your chats have switched their unique roles to "Personal Assistant" as your access to the role catalog has ended. But don't worry, your AI helpers are still here to keep the conversation going!
 
-🎁 Want your previous roles back? Visit /buy to purchase a new package or subscribe for unlimited access to the catalog.
-
-🌟 Keep exploring! Your chats are always ready for new amazing conversations with AI.
+🎁 Want your previous roles back? Visit /buy or /bonus to purchase a new package or subscribe for unlimited access to the catalog
 """
 
     # Package
@@ -1156,11 +1153,6 @@ Please try again or contact our tech support:
 """
     NETWORK_ERROR = """
 I lost my connection with Telegram 🤒
-
-Please try again 🥺
-"""
-    CONNECTION_ERROR = """
-I lost my connection with my database 🤒
 
 Please try again 🥺
 """

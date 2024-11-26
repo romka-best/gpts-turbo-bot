@@ -8,6 +8,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, URLInputFile, File, ReactionTypeEmoji
 from aiogram.utils.chat_action import ChatActionSender
 
+from bot.config import config, MessageSticker
 from bot.database.main import firebase
 from bot.database.models.common import (
     Model,
@@ -144,9 +145,20 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
     elif current_state == PhotoshopAI.waiting_for_photo.state:
         quota = user.daily_limits[Quota.PHOTOSHOP_AI] + user.additional_usage_quota[Quota.PHOTOSHOP_AI]
         if quota < 1:
-            await message.answer(text=get_localization(user_language_code).REACHED_USAGE_LIMIT)
+            await message.answer_sticker(
+                sticker=config.MESSAGE_STICKERS.get(MessageSticker.SAD),
+            )
+
+            reply_markup = build_cancel_keyboard(user_language_code)
+            await message.answer(
+                text=get_localization(user_language_code).REACHED_USAGE_LIMIT,
+                reply_markup=reply_markup,
+            )
             return
 
+        processing_sticker = await message.answer_sticker(
+            sticker=config.MESSAGE_STICKERS.get(MessageSticker.IMAGE_GENERATION),
+        )
         processing_message = await message.reply(
             text=get_localization(user_language_code).processing_request_image(),
             allow_sending_without_reply=True,
@@ -160,6 +172,8 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
                 text=get_localization(user_language_code).ALREADY_MAKE_REQUEST,
                 allow_sending_without_reply=True,
             )
+
+            await processing_sticker.delete()
             await processing_message.delete()
             return
 
@@ -184,7 +198,7 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
             result = await create_photoshop_ai_image(photoshop_ai_action_name, photo_link)
             request = await write_request(
                 user_id=user_id,
-                message_id=processing_message.message_id,
+                processing_message_ids=[processing_sticker.message_id, processing_message.message_id],
                 product_id=product.id,
                 requested=1,
                 details={
@@ -261,6 +275,9 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
         if quota < quantity:
             await message.answer(text=get_localization(user_language_code).face_swap_package_forbidden(quota))
         else:
+            processing_sticker = await message.answer_sticker(
+                sticker=config.MESSAGE_STICKERS.get(MessageSticker.IMAGE_GENERATION),
+            )
             processing_message = await message.reply(
                 text=get_localization(user_language_code).processing_request_face_swap(),
                 allow_sending_without_reply=True,
@@ -283,7 +300,7 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
                     result = await create_face_swap_image(background_photo_link, user_photo_link)
                     request = await write_request(
                         user_id=user_id,
-                        message_id=processing_message.message_id,
+                        processing_message_ids=[processing_sticker.message_id, processing_message.message_id],
                         product_id=product.id,
                         requested=1,
                         details={

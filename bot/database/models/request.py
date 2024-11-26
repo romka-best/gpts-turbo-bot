@@ -11,7 +11,7 @@ class Request:
 
     id: str
     user_id: str
-    message_id: int
+    processing_message_ids: list[int]
     product_id: str
     requested: int
     status: RequestStatus
@@ -23,9 +23,11 @@ class Request:
         self,
         id: str,
         user_id: str,
-        message_id: int,
         product_id: str,
         requested: int,
+        # TODO DELETE AFTER MIGRATION
+        message_id=0,
+        processing_message_ids: list[int] = None,
         status=RequestStatus.STARTED,
         details=None,
         created_at=None,
@@ -37,6 +39,7 @@ class Request:
         self.message_id = message_id
         self.product_id = product_id
         self.requested = requested
+        self.processing_message_ids = processing_message_ids
         self.status = status
         self.details = details if details is not None else {}
 

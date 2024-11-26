@@ -5,6 +5,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery, URLInputFile, InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.utils.chat_action import ChatActionSender
 
+from bot.config import config, MessageSticker
 from bot.database.main import firebase
 from bot.database.models.common import Quota
 from bot.database.models.face_swap_package import FaceSwapPackageStatus, FaceSwapPackage
@@ -377,6 +378,9 @@ async def handle_face_swap_manage_edit_picture_selection(callback_query: Callbac
         )
         await state.update_data(file_name=file_name)
     elif action == 'example_picture':
+        processing_sticker = await callback_query.message.answer_sticker(
+            sticker=config.MESSAGE_STICKERS.get(MessageSticker.IMAGE_GENERATION),
+        )
         processing_message = await callback_query.message.reply(
             text=get_localization(user_language_code).processing_request_face_swap(),
             allow_sending_without_reply=True,
@@ -397,7 +401,7 @@ async def handle_face_swap_manage_edit_picture_selection(callback_query: Callbac
 
             request = await write_request(
                 user_id=user_id,
-                message_id=processing_message.message_id,
+                processing_message_ids=[processing_sticker.message_id, processing_message.message_id],
                 product_id=product.id,
                 requested=1,
                 details={

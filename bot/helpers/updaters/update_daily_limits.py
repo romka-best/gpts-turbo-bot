@@ -5,7 +5,7 @@ from aiogram import Bot
 from aiogram.exceptions import TelegramForbiddenError
 from google.cloud.firestore_v1 import AsyncWriteBatch
 
-from bot.config import config
+from bot.config import config, MessageSticker
 from bot.database.main import firebase
 from bot.database.models.common import Quota, DEFAULT_ROLE, PaymentMethod
 from bot.database.models.subscription import (
@@ -45,9 +45,8 @@ async def update_daily_limits(bot: Bot):
 
 async def update_user_daily_limits(bot: Bot, user: User, batch: AsyncWriteBatch):
     try:
-        had_subscription = bool(user.subscription_id)
         user = await update_user_subscription(bot, user, batch)
-        await update_user_additional_usage_quota(bot, user, had_subscription, batch)
+        await update_user_additional_usage_quota(bot, user, bool(user.subscription_id), batch)
     except TelegramForbiddenError:
         await update_user(user.id, {
             'is_blocked': True,
@@ -104,6 +103,11 @@ async def update_user_subscription(bot: Bot, user: User, batch: AsyncWriteBatch)
                         'edited_at': current_date,
                     })
 
+                    await bot.send_sticker(
+                        chat_id=user.telegram_chat_id,
+                        sticker=config.MESSAGE_STICKERS.get(MessageSticker.SAD),
+                        disable_notification=True,
+                    )
                     await bot.send_message(
                         chat_id=user.telegram_chat_id,
                         text=get_localization(user.interface_language_code).SUBSCRIPTION_END,
@@ -141,6 +145,11 @@ async def update_user_subscription(bot: Bot, user: User, batch: AsyncWriteBatch)
                         'edited_at': current_date,
                     })
 
+                    await bot.send_sticker(
+                        chat_id=user.telegram_chat_id,
+                        sticker=config.MESSAGE_STICKERS.get(MessageSticker.SAD),
+                        disable_notification=True,
+                    )
                     await bot.send_message(
                         chat_id=user.telegram_chat_id,
                         text=get_localization(user.interface_language_code).SUBSCRIPTION_END,
@@ -160,6 +169,11 @@ async def update_user_subscription(bot: Bot, user: User, batch: AsyncWriteBatch)
                         'edited_at': current_date,
                     })
 
+                    await bot.send_sticker(
+                        chat_id=user.telegram_chat_id,
+                        sticker=config.MESSAGE_STICKERS.get(MessageSticker.SAD),
+                        disable_notification=True,
+                    )
                     await bot.send_message(
                         chat_id=user.telegram_chat_id,
                         text=get_localization(user.interface_language_code).SUBSCRIPTION_END,
@@ -177,6 +191,11 @@ async def update_user_subscription(bot: Bot, user: User, batch: AsyncWriteBatch)
                 'edited_at': current_date,
             })
 
+            await bot.send_sticker(
+                chat_id=user.telegram_chat_id,
+                sticker=config.MESSAGE_STICKERS.get(MessageSticker.SAD),
+                disable_notification=True,
+            )
             await bot.send_message(
                 chat_id=user.telegram_chat_id,
                 text=get_localization(user.interface_language_code).SUBSCRIPTION_END,
@@ -233,6 +252,11 @@ async def update_user_additional_usage_quota(bot: Bot, user: User, had_subscript
         })
 
         if not had_subscription and count_active_packages_before > count_active_packages_after:
+            await bot.send_sticker(
+                chat_id=user.telegram_chat_id,
+                sticker=config.MESSAGE_STICKERS.get(MessageSticker.SAD),
+                disable_notification=True,
+            )
             await bot.send_message(
                 chat_id=user.telegram_chat_id,
                 text=get_localization(user.interface_language_code).PACKAGES_END,
