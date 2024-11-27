@@ -11,9 +11,9 @@ class Request:
 
     id: str
     user_id: str
-    processing_message_ids: list[int]
     product_id: str
     requested: int
+    processing_message_ids: list[int]
     status: RequestStatus
     details: dict
     created_at: datetime
@@ -25,8 +25,6 @@ class Request:
         user_id: str,
         product_id: str,
         requested: int,
-        # TODO DELETE AFTER MIGRATION
-        message_id=0,
         processing_message_ids: list[int] = None,
         status=RequestStatus.STARTED,
         details=None,
@@ -36,7 +34,6 @@ class Request:
     ):
         self.id = id
         self.user_id = user_id
-        self.message_id = message_id
         self.product_id = product_id
         self.requested = requested
         self.processing_message_ids = processing_message_ids
