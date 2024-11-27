@@ -7,7 +7,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
 from aiogram.utils.chat_action import ChatActionSender
 
-from bot.config import config, MessageEffect
+from bot.config import config, MessageEffect, MessageSticker
 from bot.database.models.common import Model, SunoMode, Quota, SunoVersion
 from bot.database.models.generation import GenerationStatus
 from bot.database.models.request import RequestStatus
@@ -143,6 +143,9 @@ async def suno_prompt_sent(message: Message, state: FSMContext):
         )
         return
 
+    processing_sticker = await message.answer_sticker(
+        sticker=config.MESSAGE_STICKERS.get(MessageSticker.MUSIC_GENERATION),
+    )
     processing_message = await message.reply(
         text=get_localization(user_language_code).processing_request_music(),
         allow_sending_without_reply=True,
@@ -151,6 +154,10 @@ async def suno_prompt_sent(message: Message, state: FSMContext):
     async with ChatActionSender.upload_voice(bot=message.bot, chat_id=message.chat.id):
         quota = user.daily_limits[Quota.SUNO] + user.additional_usage_quota[Quota.SUNO]
         if quota < 2:
+            await message.answer_sticker(
+                sticker=config.MESSAGE_STICKERS.get(MessageSticker.SAD),
+            )
+
             reply_markup = build_cancel_keyboard(user_language_code)
             await message.answer(
                 text=get_localization(user_language_code).REACHED_USAGE_LIMIT,
@@ -166,12 +173,14 @@ async def suno_prompt_sent(message: Message, state: FSMContext):
                     text=get_localization(user_language_code).ALREADY_MAKE_REQUEST,
                     allow_sending_without_reply=True,
                 )
+
+                await processing_sticker.delete()
                 await processing_message.delete()
                 return
 
             request = await write_request(
                 user_id=user.id,
-                message_id=processing_message.message_id,
+                processing_message_ids=[processing_sticker.message_id, processing_message.message_id],
                 product_id=product.id,
                 requested=2,
                 details={
@@ -221,6 +230,10 @@ async def suno_prompt_sent(message: Message, state: FSMContext):
 
                     await handle_suno(message.bot, str(message.chat.id), state, user_id)
                 else:
+                    await message.answer_sticker(
+                        sticker=config.MESSAGE_STICKERS.get(MessageSticker.ERROR),
+                    )
+
                     reply_markup = build_error_keyboard(user_language_code)
                     await message.answer(
                         text=get_localization(user_language_code).ERROR,
@@ -252,6 +265,7 @@ async def suno_prompt_sent(message: Message, state: FSMContext):
                         },
                     )
 
+                await processing_sticker.delete()
                 await processing_message.delete()
 
 
@@ -342,6 +356,9 @@ async def suno_genres_sent(message: Message, state: FSMContext):
         )
         return
 
+    processing_sticker = await message.answer_sticker(
+        sticker=config.MESSAGE_STICKERS.get(MessageSticker.MUSIC_GENERATION),
+    )
     processing_message = await message.reply(
         text=get_localization(user_language_code).processing_request_music(),
         allow_sending_without_reply=True,
@@ -351,6 +368,10 @@ async def suno_genres_sent(message: Message, state: FSMContext):
         quota = user.daily_limits[Quota.SUNO] + user.additional_usage_quota[Quota.SUNO]
 
         if quota < 2:
+            await message.answer_sticker(
+                sticker=config.MESSAGE_STICKERS.get(MessageSticker.SAD),
+            )
+
             reply_markup = build_cancel_keyboard(user_language_code)
             await message.answer(
                 text=get_localization(user_language_code).REACHED_USAGE_LIMIT,
@@ -366,6 +387,8 @@ async def suno_genres_sent(message: Message, state: FSMContext):
                     text=get_localization(user_language_code).ALREADY_MAKE_REQUEST,
                     allow_sending_without_reply=True,
                 )
+
+                await processing_sticker.delete()
                 await processing_message.delete()
                 return
 
@@ -375,7 +398,7 @@ async def suno_genres_sent(message: Message, state: FSMContext):
 
                 request = await write_request(
                     user_id=user.id,
-                    message_id=processing_message.message_id,
+                    processing_message_ids=[processing_sticker.message_id, processing_message.message_id],
                     product_id=product.id,
                     requested=2,
                     details={
@@ -432,6 +455,10 @@ async def suno_genres_sent(message: Message, state: FSMContext):
 
                     await handle_suno(message.bot, str(message.chat.id), state, user_id)
                 else:
+                    await message.answer_sticker(
+                        sticker=config.MESSAGE_STICKERS.get(MessageSticker.ERROR),
+                    )
+
                     reply_markup = build_error_keyboard(user_language_code)
                     await message.answer(
                         text=get_localization(user_language_code).ERROR,
@@ -463,6 +490,7 @@ async def suno_genres_sent(message: Message, state: FSMContext):
                         },
                     )
 
+                await processing_sticker.delete()
                 await processing_message.delete()
 
 
@@ -479,7 +507,7 @@ async def handle_suno_example(user: User, prompt: str, message: Message, state: 
 
         request = await write_request(
             user_id=user.id,
-            message_id=message.message_id,
+            processing_message_ids=[message.message_id],
             product_id=product.id,
             requested=2,
             details={

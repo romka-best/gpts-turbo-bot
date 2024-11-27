@@ -5,7 +5,7 @@ from aiogram.filters import Command, CommandStart, ChatMemberUpdatedFilter, KICK
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery, ChatMemberUpdated, URLInputFile, InaccessibleMessage
 
-from bot.config import config, MessageEffect
+from bot.config import config, MessageEffect, MessageSticker
 from bot.database.main import firebase
 from bot.database.models.common import Quota, UTM, ChatGPTVersion, ClaudeGPTVersion, GeminiGPTVersion
 from bot.database.models.generation import Generation
@@ -188,6 +188,10 @@ async def start(message: Message, state: FSMContext):
             message_effect_id=config.MESSAGE_EFFECTS.get(MessageEffect.FIRE),
             disable_notification=True,
         ))
+
+    await message.answer_sticker(
+        sticker=config.MESSAGE_STICKERS.get(MessageSticker.HELLO),
+    )
 
     await message.answer(
         text=get_localization(user_language_code).START,

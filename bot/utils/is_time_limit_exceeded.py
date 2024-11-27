@@ -67,7 +67,7 @@ async def is_time_limit_exceeded(message: Message, state: FSMContext, user: User
                 chat_id=message.chat.id,
                 delay=remaining_time,
                 language_code=user_language_code,
-                reply_to_message_id=message.message_id
+                reply_to_message_id=message.message_id,
             )
         )
     return True

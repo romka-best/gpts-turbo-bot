@@ -6,7 +6,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
 from aiogram.utils.chat_action import ChatActionSender
 
-from bot.config import config, MessageEffect
+from bot.config import config, MessageEffect, MessageSticker
 from bot.database.models.common import Model, Quota, MidjourneyAction, MidjourneyVersion
 from bot.database.models.generation import GenerationStatus
 from bot.database.models.request import RequestStatus
@@ -29,7 +29,7 @@ from bot.integrations.midjourney import (
     create_different_midjourney_image,
     create_different_midjourney_images,
 )
-from bot.keyboards.common.common import build_error_keyboard
+from bot.keyboards.common.common import build_error_keyboard, build_limit_exceeded_keyboard
 from bot.locales.main import get_localization, get_user_language
 
 midjourney_router = Router()
@@ -82,6 +82,9 @@ async def handle_midjourney(
     prompt = user_data.get('recognized_text', prompt)
     version = user.settings[Model.MIDJOURNEY][UserSettings.VERSION]
 
+    processing_sticker = await message.answer_sticker(
+        sticker=config.MESSAGE_STICKERS.get(MessageSticker.IMAGE_GENERATION),
+    )
     processing_message = await message.reply(
         text=get_localization(user_language_code).processing_request_image(),
         allow_sending_without_reply=True,
@@ -90,8 +93,14 @@ async def handle_midjourney(
     async with ChatActionSender.upload_photo(bot=message.bot, chat_id=message.chat.id):
         quota = user.daily_limits[Quota.MIDJOURNEY] + user.additional_usage_quota[Quota.MIDJOURNEY]
         if quota < 1:
+            await message.answer_sticker(
+                sticker=config.MESSAGE_STICKERS.get(MessageSticker.SAD),
+            )
+
+            reply_markup = build_limit_exceeded_keyboard(user_language_code)
             await message.reply(
                 text=get_localization(user_language_code).REACHED_USAGE_LIMIT,
+                reply_markup=reply_markup,
                 allow_sending_without_reply=True,
             )
         else:
@@ -103,12 +112,13 @@ async def handle_midjourney(
                     text=get_localization(user_language_code).ALREADY_MAKE_REQUEST,
                     allow_sending_without_reply=True,
                 )
+                await processing_sticker.delete()
                 await processing_message.delete()
                 return
 
             request = await write_request(
                 user_id=user.id,
-                message_id=processing_message.message_id,
+                processing_message_ids=[processing_sticker.message_id, processing_message.message_id],
                 product_id=product.id,
                 requested=1,
                 details={
@@ -146,6 +156,10 @@ async def handle_midjourney(
                     }
                 )
             except Exception as e:
+                await message.answer_sticker(
+                    sticker=config.MESSAGE_STICKERS.get(MessageSticker.ERROR),
+                )
+
                 reply_markup = build_error_keyboard(user_language_code)
                 await message.answer(
                     text=get_localization(user_language_code).ERROR,
@@ -177,6 +191,7 @@ async def handle_midjourney(
                         },
                     )
 
+                await processing_sticker.delete()
                 await processing_message.delete()
 
 
@@ -240,7 +255,7 @@ async def handle_midjourney_example(user: User, user_language_code: str, prompt:
 
         request = await write_request(
             user_id=user.id,
-            message_id=message.message_id,
+            processing_message_ids=[message.message_id],
             product_id=product.id,
             requested=1,
             details={

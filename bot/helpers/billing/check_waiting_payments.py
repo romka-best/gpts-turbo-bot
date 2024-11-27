@@ -5,6 +5,7 @@ from aiogram import Bot
 
 from bot.database.models.common import Currency
 from bot.database.models.subscription import SubscriptionStatus
+from bot.database.operations.product.getters import get_product
 from bot.database.operations.subscription.getters import get_subscriptions_by_status
 from bot.database.operations.subscription.updaters import update_subscription
 from bot.helpers.senders.send_message_to_admins import send_message_to_admins
@@ -32,13 +33,14 @@ async def check_waiting_payments(bot: Bot):
             )
         )
 
+        product = await get_product(not_finished_subscription.product_id)
         await send_message_to_admins(
             bot=bot,
             message=f'#payment #subscription #declined\n\n'
                     f'❌ <b>Отмена оплаты подписки у пользователя: {not_finished_subscription.user_id}</b>\n\n'
                     f'ℹ️ ID: {not_finished_subscription.id}\n'
                     f'💱 Метод оплаты: {not_finished_subscription.payment_method}\n'
-                    f'💳 Тип подписки: {not_finished_subscription.type}\n'
+                    f'💳 Тип: {product.names.get("ru")}\n'
                     f'💰 Сумма: {not_finished_subscription.amount}{Currency.SYMBOLS[not_finished_subscription.currency]}\n\n'
                     f'Грустно, но что поделать 🤷',
         )

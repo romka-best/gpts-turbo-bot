@@ -15,6 +15,14 @@ async def get_request(request_id: str) -> Optional[Request]:
         return Request(**request.to_dict())
 
 
+async def get_requests() -> list[Request]:
+    requests = firebase.db.collection(Request.COLLECTION_NAME).stream()
+
+    return [
+        Request(**request.to_dict()) async for request in requests
+    ]
+
+
 async def get_started_requests(
     start_date: Optional[datetime] = None,
     end_date: Optional[datetime] = None,

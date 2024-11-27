@@ -4,7 +4,7 @@ from bot.database.models.request import Request, RequestStatus
 
 async def create_request_object(
     user_id: str,
-    message_id: int,
+    processing_message_ids: list[int],
     product_id: str,
     requested: int,
     status=RequestStatus.STARTED,
@@ -14,7 +14,7 @@ async def create_request_object(
     return Request(
         id=request_ref.id,
         user_id=user_id,
-        message_id=message_id,
+        processing_message_ids=processing_message_ids,
         product_id=product_id,
         requested=requested,
         status=status,

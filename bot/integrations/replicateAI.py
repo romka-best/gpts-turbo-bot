@@ -40,7 +40,7 @@ async def create_face_swap_image(target_image: str, source_image: str) -> Option
     except Exception as e:
         # TODO: Send in TG
         error_trace = traceback.format_exc()
-        logging.error(f'Error in create_face_swap_image: {e}\n{error_trace}')
+        logging.exception(f'Error in create_face_swap_image: {e}\n{error_trace}')
 
 
 async def create_photoshop_ai_image(action: PhotoshopAIAction, image_url: str) -> Optional[str]:
@@ -80,7 +80,7 @@ async def create_photoshop_ai_image(action: PhotoshopAIAction, image_url: str) -
     except Exception as e:
         # TODO: Send in TG
         error_trace = traceback.format_exc()
-        logging.error(f'Error in create_photoshop_ai_image: {e}\n{error_trace}')
+        logging.exception(f'Error in create_photoshop_ai_image: {e}\n{error_trace}')
 
 
 async def create_music_gen_melody(prompt: str, duration: int) -> Optional[str]:
@@ -105,7 +105,7 @@ async def create_music_gen_melody(prompt: str, duration: int) -> Optional[str]:
     except Exception as e:
         # TODO: Send in TG
         error_trace = traceback.format_exc()
-        logging.error(f'Error in create_music_gen_melody: {e}\n{error_trace}')
+        logging.exception(f'Error in create_music_gen_melody: {e}\n{error_trace}')
 
 
 async def create_stable_diffusion_image(prompt: str) -> Optional[str]:
@@ -128,7 +128,7 @@ async def create_stable_diffusion_image(prompt: str) -> Optional[str]:
     except Exception as e:
         # TODO: Send in TG
         error_trace = traceback.format_exc()
-        logging.error(f'Error in create_stable_diffusion_image: {e}\n{error_trace}')
+        logging.exception(f'Error in create_stable_diffusion_image: {e}\n{error_trace}')
 
 
 async def create_flux_image(prompt: str, safety_tolerance=3) -> Optional[str]:
@@ -152,4 +152,4 @@ async def create_flux_image(prompt: str, safety_tolerance=3) -> Optional[str]:
     except Exception as e:
         # TODO: Send in TG
         error_trace = traceback.format_exc()
-        logging.error(f'Error in create_flux_image: {e}\n{error_trace}')
+        logging.exception(f'Error in create_flux_image: {e}\n{error_trace}')

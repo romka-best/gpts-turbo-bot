@@ -16,6 +16,21 @@ class MessageEffect(str, Enum):
     POOP = 'POOP'
 
 
+class MessageSticker(str, Enum):
+    LOGO = 'LOGO'
+    HELLO = 'HELLO'
+    LOVE = 'LOVE'
+    FEAR = 'FEAR'
+    SAD = 'SAD'
+    THINKING = 'THINKING'
+    CONNECTION_ERROR = 'CONNECTION_ERROR'
+    ERROR = 'ERROR'
+    TEXT_GENERATION = 'TEXT_GENERATION'
+    IMAGE_GENERATION = 'IMAGE_GENERATION'
+    MUSIC_GENERATION = 'MUSIC_GENERATION'
+    VIDEO_GENERATION = 'VIDEO_GENERATION'
+
+
 class Settings(BaseSettings):
     BASE_DIR: ClassVar[Path] = Path(__file__).resolve().parent.parent
 
@@ -49,7 +64,20 @@ class Settings(BaseSettings):
         MessageEffect.CONGRATS: '5046509860389126442',  # 🎉
         MessageEffect.POOP: '5046589136895476101',  # 💩
     }
-    MESSAGE_STICKERS: dict = {}
+    MESSAGE_STICKERS: dict = {
+        MessageSticker.LOGO: 'CAACAgIAAxkBAAENOatnRjb80J2N4a8yNcN7pKuIutcOwgACE2cAAuj3MUqczl2UrDJzHjYE',
+        MessageSticker.HELLO: 'CAACAgIAAxkBAAENOa1nRjnkK8oIvaOQ2K62WQ0vqQYAAX4AAnhiAALGvjFKvC6IwKVpJ_w2BA',
+        MessageSticker.LOVE: 'CAACAgIAAxkBAAENOa9nRjou7rQg922oE-Rt8ZqoiOzutgACN2EAAi8AATBKj8RV8S_82_Q2BA',
+        MessageSticker.FEAR: 'CAACAgIAAxkBAAENObFnRjo_HjllJHPZMetf2QYvBCI2YAAC5WgAAmqXMUo4nAe67a_KDjYE',
+        MessageSticker.SAD: 'CAACAgIAAxkBAAENObNnRjpKsHPA8_VrJmPEeqyi3dMMdAACXV0AAqRfOUq7PyeeSUYifzYE',
+        MessageSticker.THINKING: 'CAACAgIAAxkBAAENObVnRjpewc6JEr15zJi7USLxUJx77QACfFkAAlP9OEr7tPknrOV-bDYE',
+        MessageSticker.CONNECTION_ERROR: 'CAACAgIAAxkBAAENObdnRjqARgZxXn4x5744y3zg2NgETAACjWYAAm1JMUrazdOO3yTSEjYE',
+        MessageSticker.ERROR: 'CAACAgIAAxkBAAENOblnRjqTY41tWD9M1A60ad94sKX0-QACVmgAAmsaMUoJWMddREGp0TYE',
+        MessageSticker.TEXT_GENERATION: 'CAACAgIAAxkBAAENObtnRjqhyzadBFJzzpFFf_6lS19v4QACY2IAAiNkMErMXAktYqfoqjYE',
+        MessageSticker.IMAGE_GENERATION: 'CAACAgIAAxkBAAENOb1nRjquVRabNePw6b1NlsZPE1w9rgACaGgAApu2MUpD10AUcVst_TYE',
+        MessageSticker.MUSIC_GENERATION: 'CAACAgIAAxkBAAENOb9nRjq8WfEW4G1Zr8pLEsHzQTJm5gACYl0AAubSMUoVqNt3elKw6TYE',
+        MessageSticker.VIDEO_GENERATION: 'CAACAgIAAxkBAAENOcFnRjrVddqaOhU7ZOIooXpNIifTJAAC_WEAAqvsMUpvg5fGNgtAiTYE',
+    }
 
     YOOKASSA_ACCOUNT_ID: SecretStr
     YOOKASSA_SECRET_KEY: SecretStr
@@ -69,8 +97,10 @@ class Settings(BaseSettings):
     MIDJOURNEY_API_TOKEN: SecretStr
     SUNO_TOKEN: SecretStr
 
-    model_config = SettingsConfigDict(env_file=str(BASE_DIR / f'.env.{os.getenv("ENVIRONMENT", "testing")}'),
-                                      env_file_encoding='utf-8')
+    model_config = SettingsConfigDict(
+        env_file=str(BASE_DIR / f'.env.{os.getenv("ENVIRONMENT", "testing")}'),
+        env_file_encoding='utf-8',
+    )
 
 
 config = Settings()

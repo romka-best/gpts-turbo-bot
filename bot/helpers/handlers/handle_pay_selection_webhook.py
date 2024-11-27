@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 
 from aiogram import Bot, Dispatcher
 
-from bot.config import config, MessageEffect
+from bot.config import config, MessageEffect, MessageSticker
 from bot.database.main import firebase
 from bot.database.models.common import PaymentMethod, Currency
 from bot.database.models.package import PackageStatus
@@ -87,6 +87,11 @@ async def handle_pay_selection_webhook(request: dict, bot: Bot, dp: Dispatcher):
                     await update_user(subscription.user_id, {
                         'discount': 0,
                     })
+
+                await bot.send_sticker(
+                    chat_id=user.telegram_chat_id,
+                    sticker=config.MESSAGE_STICKERS.get(MessageSticker.LOVE),
+                )
 
                 user_language_code = await get_user_language(subscription.user_id, dp.storage)
                 await bot.send_message(
@@ -193,11 +198,18 @@ async def handle_pay_selection_webhook(request: dict, bot: Bot, dp: Dispatcher):
                         },
                     )
 
+                    await bot.send_sticker(
+                        chat_id=user.telegram_chat_id,
+                        sticker=config.MESSAGE_STICKERS.get(MessageSticker.LOVE),
+                        disable_notification=True,
+                    )
+
                     user_language_code = await get_user_language(new_subscription.user_id, dp.storage)
                     await bot.send_message(
                         chat_id=new_subscription.user_id,
                         text=get_localization(user_language_code).SUBSCRIPTION_RESET,
                         message_effect_id=config.MESSAGE_EFFECTS.get(MessageEffect.HEART),
+                        disable_notification=True,
                     )
 
                     await send_message_to_admins(
@@ -224,9 +236,16 @@ async def handle_pay_selection_webhook(request: dict, bot: Bot, dp: Dispatcher):
                         'last_subscription_limit_update': current_date,
                     })
 
+                    await bot.send_sticker(
+                        chat_id=user.telegram_chat_id,
+                        sticker=config.MESSAGE_STICKERS.get(MessageSticker.SAD),
+                        disable_notification=True,
+                    )
+
                     await bot.send_message(
                         chat_id=user.telegram_chat_id,
                         text=get_localization(user.interface_language_code).SUBSCRIPTION_END,
+                        disable_notification=True,
                     )
 
                     await send_message_to_admins(
@@ -307,6 +326,11 @@ async def handle_pay_selection_webhook(request: dict, bot: Bot, dp: Dispatcher):
                     await update_user(package.user_id, {
                         'discount': 0,
                     })
+
+                await bot.send_sticker(
+                    chat_id=user.telegram_chat_id,
+                    sticker=config.MESSAGE_STICKERS.get(MessageSticker.LOVE),
+                )
 
                 user_language_code = await get_user_language(package.user_id, dp.storage)
                 await bot.send_message(
@@ -418,6 +442,11 @@ async def handle_pay_selection_webhook(request: dict, bot: Bot, dp: Dispatcher):
                     await update_user(user.id, {
                         'discount': 0,
                     })
+
+                await bot.send_sticker(
+                    chat_id=user.telegram_chat_id,
+                    sticker=config.MESSAGE_STICKERS.get(MessageSticker.LOVE),
+                )
 
                 user_language_code = await get_user_language(user.id, dp.storage)
                 await bot.send_message(

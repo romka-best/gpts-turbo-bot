@@ -5,6 +5,7 @@ from aiogram import Bot, Dispatcher
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.storage.base import StorageKey
 
+from bot.config import config, MessageSticker
 from bot.database.models.common import Model, Currency, Quota, PhotoshopAIAction
 from bot.database.models.generation import Generation, GenerationStatus
 from bot.database.models.request import Request, RequestStatus
@@ -31,6 +32,7 @@ from bot.handlers.ai.photoshop_ai_handler import (
 from bot.handlers.ai.stable_diffusion_handler import PRICE_STABLE_DIFFUSION
 from bot.helpers.senders.send_audio import send_audio
 from bot.helpers.senders.send_document import send_document
+from bot.helpers.senders.send_error_info import send_error_info
 from bot.helpers.senders.send_images import send_image
 from bot.helpers.updaters.update_user_usage_quota import update_user_usage_quota
 from bot.keyboards.common.common import build_reaction_keyboard, build_error_keyboard
@@ -48,17 +50,21 @@ async def handle_replicate_webhook(bot: Bot, dp: Dispatcher, prediction: dict):
     product = await get_product(request.product_id)
     user = await get_user(request.user_id)
 
-    generation_error, generation_result = prediction.get('error', False), prediction.get('output', {})
+    generation_error, generation_result = prediction.get('error', ''), prediction.get('output', {})
     seconds = prediction.get('metrics', {}).get('predict_time', 0)
 
     generation.status = GenerationStatus.FINISHED
     generation.seconds = seconds
-    if generation_error and 'NSFW content detected' in generation_error:
+    if generation_error and 'NSFW content' in generation_error:
         await update_generation(generation.id, {
             'status': generation.status,
             'seconds': generation.seconds,
         })
 
+        await bot.send_sticker(
+            chat_id=user.telegram_chat_id,
+            sticker=config.MESSAGE_STICKERS.get(MessageSticker.FEAR),
+        )
         await bot.send_message(
             chat_id=user.telegram_chat_id,
             text=get_localization(user.interface_language_code).REQUEST_FORBIDDEN_ERROR,
@@ -71,6 +77,12 @@ async def handle_replicate_webhook(bot: Bot, dp: Dispatcher, prediction: dict):
             'seconds': generation.seconds,
         })
 
+        await send_error_info(
+            bot=bot,
+            user_id=user.id,
+            info=generation_error,
+            hashtags=['replicate'],
+        )
         logging.error(f'Error in replicate_webhook: {prediction.get("logs")}')
     else:
         generation.result = generation_result[0] if type(generation_result) == list else generation_result
@@ -110,6 +122,11 @@ async def handle_replicate_photoshop_ai(
         reply_markup = build_reaction_keyboard(generation.id)
         await send_document(bot, user.telegram_chat_id, generation.result, reply_markup)
     elif generation.has_error:
+        await bot.send_sticker(
+            chat_id=user.telegram_chat_id,
+            sticker=config.MESSAGE_STICKERS.get(MessageSticker.ERROR),
+        )
+
         reply_markup = build_error_keyboard(user.interface_language_code)
         await bot.send_message(
             chat_id=user.telegram_chat_id,
@@ -171,7 +188,11 @@ async def handle_replicate_photoshop_ai(
         if user.current_model == Model.PHOTOSHOP_AI:
             await handle_photoshop_ai(bot, user.telegram_chat_id, state, user.id)
 
-        await bot.delete_message(user.telegram_chat_id, request.message_id)
+        for processing_message_id in request.processing_message_ids:
+            try:
+                await bot.delete_message(user.telegram_chat_id, processing_message_id)
+            except Exception:
+                continue
 
 
 async def handle_replicate_face_swap(
@@ -285,7 +306,11 @@ async def handle_replicate_face_swap(
         if total_result == len(request_generations) and user.current_model == Model.FACE_SWAP:
             await handle_face_swap(bot, user.telegram_chat_id, state, user.id)
 
-        await bot.delete_message(user.telegram_chat_id, request.message_id)
+        for processing_message_id in request.processing_message_ids:
+            try:
+                await bot.delete_message(user.telegram_chat_id, processing_message_id)
+            except Exception:
+                continue
 
 
 async def handle_replicate_music_gen(
@@ -313,6 +338,11 @@ async def handle_replicate_music_gen(
             reply_markup,
         )
     elif generation.has_error:
+        await bot.send_sticker(
+            chat_id=user.telegram_chat_id,
+            sticker=config.MESSAGE_STICKERS.get(MessageSticker.ERROR),
+        )
+
         reply_markup = build_error_keyboard(user.interface_language_code)
         await bot.send_message(
             chat_id=user.telegram_chat_id,
@@ -366,7 +396,11 @@ async def handle_replicate_music_gen(
         if user.current_model == Model.MUSIC_GEN:
             await handle_music_gen(bot, user.telegram_chat_id, state, user.id)
 
-        await bot.delete_message(user.telegram_chat_id, request.message_id)
+        for processing_message_id in request.processing_message_ids:
+            try:
+                await bot.delete_message(user.telegram_chat_id, processing_message_id)
+            except Exception:
+                continue
 
 
 async def handle_replicate_stable_diffusion(
@@ -382,6 +416,11 @@ async def handle_replicate_stable_diffusion(
         reply_markup = build_reaction_keyboard(generation.id)
         await send_image(bot, user.telegram_chat_id, generation.result, reply_markup)
     elif generation.has_error:
+        await bot.send_sticker(
+            chat_id=user.telegram_chat_id,
+            sticker=config.MESSAGE_STICKERS.get(MessageSticker.ERROR),
+        )
+
         reply_markup = build_error_keyboard(user.interface_language_code)
         await bot.send_message(
             chat_id=user.telegram_chat_id,
@@ -431,7 +470,11 @@ async def handle_replicate_stable_diffusion(
         )
         await state.clear()
 
-        await bot.delete_message(user.telegram_chat_id, request.message_id)
+        for processing_message_id in request.processing_message_ids:
+            try:
+                await bot.delete_message(user.telegram_chat_id, processing_message_id)
+            except Exception:
+                continue
 
 
 async def handle_replicate_flux(
@@ -447,6 +490,11 @@ async def handle_replicate_flux(
         reply_markup = build_reaction_keyboard(generation.id)
         await send_image(bot, user.telegram_chat_id, generation.result, reply_markup)
     elif generation.has_error:
+        await bot.send_sticker(
+            chat_id=user.telegram_chat_id,
+            sticker=config.MESSAGE_STICKERS.get(MessageSticker.ERROR),
+        )
+
         reply_markup = build_error_keyboard(user.interface_language_code)
         await bot.send_message(
             chat_id=user.telegram_chat_id,
@@ -496,4 +544,8 @@ async def handle_replicate_flux(
         )
         await state.clear()
 
-        await bot.delete_message(user.telegram_chat_id, request.message_id)
+        for processing_message_id in request.processing_message_ids:
+            try:
+                await bot.delete_message(user.telegram_chat_id, processing_message_id)
+            except Exception:
+                continue

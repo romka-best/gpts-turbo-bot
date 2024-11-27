@@ -22,7 +22,7 @@ from bot.database.operations.cart.getters import get_cart_by_user_id
 from bot.database.operations.cart.updaters import update_cart
 from bot.database.operations.package.getters import (
     get_packages_by_user_id_and_status,
-    get_last_package_with_waiting_payment, get_package,
+    get_package,
 )
 from bot.database.operations.package.updaters import update_package
 from bot.database.operations.package.writers import write_package
@@ -39,6 +39,7 @@ from bot.database.operations.user.updaters import update_user
 from bot.handlers.common.info_handler import handle_info_selection
 from bot.handlers.payment.promo_code_handler import handle_promo_code
 from bot.helpers.billing.create_payment import create_payment, OrderItem
+from bot.helpers.billing.unsubscribe import unsubscribe
 from bot.helpers.creaters.create_package import create_package
 from bot.helpers.creaters.create_subscription import create_subscription
 from bot.helpers.getters.get_user_discount import get_user_discount
@@ -1295,39 +1296,14 @@ async def handle_cancel_subscription_selection(callback_query: CallbackQuery, st
 
     action = callback_query.data.split(':')[1]
     if action == 'approve':
-        subscription = await get_last_subscription_by_user_id(user_id)
-        product = await get_product(subscription.product_id)
-        subscription.status = SubscriptionStatus.CANCELED
-        await update_subscription(
-            subscription.id,
-            {
-                'status': subscription.status,
-            }
-        )
+        old_subscription = await get_last_subscription_by_user_id(user_id)
 
-        if subscription.payment_method == PaymentMethod.TELEGRAM_STARS:
-            await callback_query.bot.edit_user_star_subscription(
-                user_id=int(user_id),
-                telegram_payment_charge_id=subscription.provider_payment_charge_id,
-                is_canceled=True,
-            )
+        transaction = firebase.db.transaction()
+        await unsubscribe(transaction, old_subscription, callback_query.bot)
 
         user_language_code = await get_user_language(user_id, state.storage)
         await callback_query.message.edit_text(
             text=get_localization(user_language_code).CANCEL_SUBSCRIPTION_SUCCESS,
-        )
-
-        await send_message_to_admins(
-            bot=callback_query.bot,
-            message=f'#payment #subscription #canceled\n\n'
-                    f'❌ <b>Отмена продления подписки у пользователя: {subscription.user_id}</b>\n\n'
-                    f'ℹ️ ID: {subscription.id}\n'
-                    f'💱 Метод оплаты: {subscription.payment_method}\n'
-                    f'💳 Тип: {product.names.get("ru")}\n'
-                    f'💰 Сумма: {subscription.amount}{Currency.SYMBOLS[subscription.currency]}\n'
-                    f'💸 Чистая сумма: {float(subscription.income_amount)}{Currency.SYMBOLS[subscription.currency]}\n'
-                    f'🗓 Период подписки: {subscription.start_date.strftime("%d.%m.%Y")}-{subscription.end_date.strftime("%d.%m.%Y")}\n\n'
-                    f'Грустно, но что поделать 🤷',
         )
     else:
         await callback_query.message.delete()

@@ -8,7 +8,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.utils.chat_action import ChatActionSender
 
-from bot.config import config, MessageEffect
+from bot.config import config, MessageEffect, MessageSticker
 from bot.database.main import firebase
 from bot.database.models.common import Quota, Currency, Model, ChatGPTVersion
 from bot.database.models.transaction import TransactionType
@@ -208,6 +208,9 @@ async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_q
             'content': content,
         })
 
+    processing_sticker = await message.answer_sticker(
+        sticker=config.MESSAGE_STICKERS.get(MessageSticker.TEXT_GENERATION),
+    )
     processing_message = await message.reply(
         text=get_localization(user_language_code).processing_request_text(),
         allow_sending_without_reply=True,
@@ -289,11 +292,18 @@ async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_q
                 )
         except openai.BadRequestError as e:
             if e.code == 'content_policy_violation':
+                await message.answer_sticker(
+                    sticker=config.MESSAGE_STICKERS.get(MessageSticker.FEAR),
+                )
                 await message.reply(
                     text=get_localization(user_language_code).REQUEST_FORBIDDEN_ERROR,
                     allow_sending_without_reply=True,
                 )
             else:
+                await message.answer_sticker(
+                    sticker=config.MESSAGE_STICKERS.get(MessageSticker.ERROR),
+                )
+
                 reply_markup = build_error_keyboard(user_language_code)
                 await message.answer(
                     text=get_localization(user_language_code).ERROR,
@@ -308,6 +318,10 @@ async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_q
                     hashtags=['chatgpt'],
                 )
         except Exception as e:
+            await message.answer_sticker(
+                sticker=config.MESSAGE_STICKERS.get(MessageSticker.ERROR),
+            )
+
             reply_markup = build_error_keyboard(user_language_code)
             await message.answer(
                 text=get_localization(user_language_code).ERROR,
@@ -321,6 +335,7 @@ async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_q
                 hashtags=['chatgpt'],
             )
         finally:
+            await processing_sticker.delete()
             await processing_message.delete()
             await state.update_data(is_processing=False)
 

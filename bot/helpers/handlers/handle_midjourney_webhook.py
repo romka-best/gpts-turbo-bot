@@ -5,6 +5,7 @@ from aiogram import Bot, Dispatcher
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.storage.base import StorageKey
 
+from bot.config import config, MessageSticker
 from bot.database.models.common import Quota, Currency, Model, MidjourneyAction
 from bot.database.models.generation import GenerationStatus, Generation
 from bot.database.models.request import Request, RequestStatus
@@ -84,12 +85,16 @@ async def handle_midjourney_result(
             generation.result,
             None,
             get_localization(user_language_code).MIDJOURNEY_EXAMPLE,
-            request.message_id,
+            request.processing_message_ids[-1],
         )
     else:
         generation_error = generation.details.get('error', '').lower()
         if 'banned prompt detected' in generation_error:
             if not is_suggestion:
+                await bot.send_sticker(
+                    chat_id=user.telegram_chat_id,
+                    sticker=config.MESSAGE_STICKERS.get(MessageSticker.FEAR),
+                )
                 await bot.send_message(
                     chat_id=user.telegram_chat_id,
                     text=get_localization(user_language_code).REQUEST_FORBIDDEN_ERROR,
@@ -107,6 +112,10 @@ async def handle_midjourney_result(
         else:
             if not is_suggestion:
                 reply_markup = build_error_keyboard(user_language_code)
+                await bot.send_sticker(
+                    chat_id=user.telegram_chat_id,
+                    sticker=config.MESSAGE_STICKERS.get(MessageSticker.ERROR),
+                )
                 await bot.send_message(
                     chat_id=user.telegram_chat_id,
                     text=get_localization(user_language_code).ERROR,
@@ -164,4 +173,8 @@ async def handle_midjourney_result(
     await state.clear()
 
     if not is_suggestion:
-        await bot.delete_message(user.telegram_chat_id, request.message_id)
+        for processing_message_id in request.processing_message_ids:
+            try:
+                await bot.delete_message(user.telegram_chat_id, processing_message_id)
+            except Exception:
+                continue

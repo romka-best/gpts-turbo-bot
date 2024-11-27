@@ -11,9 +11,9 @@ class Request:
 
     id: str
     user_id: str
-    message_id: int
     product_id: str
     requested: int
+    processing_message_ids: list[int]
     status: RequestStatus
     details: dict
     created_at: datetime
@@ -23,9 +23,9 @@ class Request:
         self,
         id: str,
         user_id: str,
-        message_id: int,
         product_id: str,
         requested: int,
+        processing_message_ids: list[int] = None,
         status=RequestStatus.STARTED,
         details=None,
         created_at=None,
@@ -34,9 +34,9 @@ class Request:
     ):
         self.id = id
         self.user_id = user_id
-        self.message_id = message_id
         self.product_id = product_id
         self.requested = requested
+        self.processing_message_ids = processing_message_ids
         self.status = status
         self.details = details if details is not None else {}
 

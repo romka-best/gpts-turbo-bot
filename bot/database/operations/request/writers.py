@@ -5,7 +5,7 @@ from bot.database.operations.request.helpers import create_request_object
 
 async def write_request(
     user_id: str,
-    message_id: int,
+    processing_message_ids: list[int],
     product_id: str,
     requested: int,
     status=RequestStatus.STARTED,
@@ -13,7 +13,7 @@ async def write_request(
 ) -> Request:
     request = await create_request_object(
         user_id,
-        message_id,
+        processing_message_ids,
         product_id,
         requested,
         status,

@@ -5,6 +5,7 @@ from aiogram import Bot, Dispatcher
 from aiogram.exceptions import TelegramRetryAfter
 from aiogram.types import Update
 
+from bot.config import config, MessageSticker
 from bot.database.main import firebase
 from bot.database.operations.user.getters import get_user
 from bot.database.operations.user.initialize_user_for_the_first_time import initialize_user_for_the_first_time
@@ -69,6 +70,11 @@ async def notify_admins_about_error(bot: Bot, telegram_update: Update, dp: Dispa
                     reply_markup=reply_markup,
                 )
             else:
+                await bot.send_sticker(
+                    chat_id=user.telegram_chat_id,
+                    sticker=config.MESSAGE_STICKERS.get(MessageSticker.ERROR),
+                )
+
                 reply_markup = build_error_keyboard(user.interface_language_code)
                 await bot.send_message(
                     chat_id=user.telegram_chat_id,

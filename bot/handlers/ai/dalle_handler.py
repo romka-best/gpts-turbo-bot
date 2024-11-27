@@ -7,7 +7,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 from aiogram.utils.chat_action import ChatActionSender
 
-from bot.config import config, MessageEffect
+from bot.config import config, MessageEffect, MessageSticker
 from bot.database.models.common import Quota, Currency, Model
 from bot.database.models.transaction import TransactionType
 from bot.database.models.user import UserSettings, User
@@ -20,7 +20,7 @@ from bot.helpers.senders.send_error_info import send_error_info
 from bot.helpers.updaters.update_user_usage_quota import update_user_usage_quota
 from bot.integrations.openAI import get_response_image, get_cost_for_image
 from bot.keyboards.ai.mode import build_switched_to_ai_keyboard
-from bot.keyboards.common.common import build_error_keyboard
+from bot.keyboards.common.common import build_error_keyboard, build_limit_exceeded_keyboard
 from bot.locales.main import get_localization, get_user_language
 
 dall_e_router = Router()
@@ -66,6 +66,9 @@ async def handle_dall_e(message: Message, state: FSMContext, user: User):
     if text is None:
         text = message.text
 
+    processing_sticker = await message.answer_sticker(
+        sticker=config.MESSAGE_STICKERS.get(MessageSticker.IMAGE_GENERATION),
+    )
     processing_message = await message.reply(
         text=get_localization(user_language_code).processing_request_image(),
         allow_sending_without_reply=True,
@@ -79,8 +82,14 @@ async def handle_dall_e(message: Message, state: FSMContext, user: User):
             quality = user.settings[Model.DALL_E][UserSettings.QUALITY]
             cost = get_cost_for_image(quality, resolution)
             if maximum_generations < cost:
+                await message.answer_sticker(
+                    sticker=config.MESSAGE_STICKERS.get(MessageSticker.SAD),
+                )
+
+                reply_markup = build_limit_exceeded_keyboard(user_language_code)
                 await message.reply(
                     text=get_localization(user_language_code).REACHED_USAGE_LIMIT,
+                    reply_markup=reply_markup,
                     allow_sending_without_reply=True,
                 )
                 return
@@ -121,11 +130,18 @@ async def handle_dall_e(message: Message, state: FSMContext, user: User):
             )
         except openai.BadRequestError as e:
             if e.code == 'content_policy_violation':
+                await message.answer_sticker(
+                    sticker=config.MESSAGE_STICKERS.get(MessageSticker.FEAR),
+                )
                 await message.reply(
                     text=get_localization(user_language_code).REQUEST_FORBIDDEN_ERROR,
                     allow_sending_without_reply=True,
                 )
         except Exception as e:
+            await message.answer_sticker(
+                sticker=config.MESSAGE_STICKERS.get(MessageSticker.ERROR),
+            )
+
             reply_markup = build_error_keyboard(user_language_code)
             await message.answer(
                 text=get_localization(user_language_code).ERROR,
@@ -139,6 +155,7 @@ async def handle_dall_e(message: Message, state: FSMContext, user: User):
                 hashtags=['dalle'],
             )
         finally:
+            await processing_sticker.delete()
             await processing_message.delete()
             await state.update_data(is_processing=False)
 

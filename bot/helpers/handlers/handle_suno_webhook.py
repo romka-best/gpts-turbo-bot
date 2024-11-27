@@ -6,6 +6,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.storage.base import StorageKey, BaseStorage
 from aiogram.utils.markdown import hlink
 
+from bot.config import config, MessageSticker
 from bot.database.models.common import Quota, Currency, Model, SunoSendType
 from bot.database.models.generation import GenerationStatus, Generation
 from bot.database.models.request import RequestStatus, Request
@@ -143,6 +144,10 @@ async def handle_suno_webhook(bot: Bot, storage: BaseStorage, body: dict):
             error_type, error_message = metadata.get('error_type'), metadata.get('error_message')
             if error_type == 'moderation_failure':
                 if not is_suggestion:
+                    await bot.send_sticker(
+                        chat_id=user.telegram_chat_id,
+                        sticker=config.MESSAGE_STICKERS.get(MessageSticker.FEAR),
+                    )
                     await bot.send_message(
                         chat_id=user.telegram_chat_id,
                         text=get_localization(user_language_code).REQUEST_FORBIDDEN_ERROR,
@@ -194,7 +199,11 @@ async def handle_suno_webhook(bot: Bot, storage: BaseStorage, body: dict):
                 reply_markup=reply_markup,
             )
         if not is_suggestion:
-            await bot.delete_message(user.telegram_chat_id, request.message_id)
+            for processing_message_id in request.processing_message_ids:
+                try:
+                    await bot.delete_message(user.telegram_chat_id, processing_message_id)
+                except Exception:
+                    continue
 
     return True
 
@@ -218,7 +227,7 @@ async def send_suno_example(
             caption=get_localization(user_language_code).SUNO_EXAMPLE,
             filename=body.get('title', '🎸'),
             duration=duration,
-            reply_to_message_id=request.message_id,
+            reply_to_message_id=request.processing_message_ids[-1],
         )
 
         if not is_okay:
@@ -229,7 +238,7 @@ async def send_suno_example(
                 caption=get_localization(user_language_code).SUNO_EXAMPLE,
                 filename=body.get('title', '🎸'),
                 duration=duration,
-                reply_to_message_id=request.message_id,
+                reply_to_message_id=request.processing_message_ids[-1],
             )
     else:
         await send_audio(
@@ -239,5 +248,5 @@ async def send_suno_example(
             caption=get_localization(user_language_code).SUNO_EXAMPLE,
             filename=body.get('title', '🎸'),
             duration=duration,
-            reply_to_message_id=request.message_id,
+            reply_to_message_id=request.processing_message_ids[-1],
         )

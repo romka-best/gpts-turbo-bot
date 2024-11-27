@@ -40,14 +40,14 @@ class Suno:
         await self.session.close()
 
     async def _get_sid(self) -> str:
-        url = 'https://clerk.suno.com/v1/client?_clerk_js_version=5.31.2'
+        url = 'https://clerk.suno.com/v1/client?__clerk_api_version=2021-02-05&_clerk_js_version=5.35.1'
         data = await self.request('GET', url)
         return data['response']['last_active_session_id']
 
-    async def _get_jwt(self) -> str:
-        url = f'https://clerk.suno.com/v1/client/sessions/{self._sid}/tokens/api?_clerk_js_version=5.31.2'
+    async def _get_jwt(self):
+        url = f'https://clerk.suno.com/v1/client/sessions/{self._sid}/touch?__clerk_api_version=2021-02-05&_clerk_js_version=5.35.1'
         data = await self.request('POST', url)
-        return data['jwt']
+        return data['response']['last_active_token']['jwt']
 
     async def _renew(self) -> None:
         jwt = await self._get_jwt()

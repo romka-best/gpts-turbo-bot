@@ -9,7 +9,7 @@ from aiogram.types import Message, CallbackQuery
 from aiogram.utils.chat_action import ChatActionSender
 from google.cloud.firestore_v1 import FieldFilter
 
-from bot.config import config
+from bot.config import config, MessageSticker
 from bot.database.main import firebase
 from bot.database.models.common import Currency
 from bot.database.models.feedback import FeedbackStatus
@@ -826,6 +826,9 @@ async def handle_statistics_selection(callback_query: CallbackQuery, state: FSMC
         await handle_write_transaction(callback_query, user_language_code)
         return
 
+    processing_sticker = await callback_query.message.answer_sticker(
+        sticker=config.MESSAGE_STICKERS.get(MessageSticker.THINKING),
+    )
     processing_message = await callback_query.message.reply(
         text=get_localization(user_language_code).processing_statistics(),
         allow_sending_without_reply=True,
@@ -839,6 +842,7 @@ async def handle_statistics_selection(callback_query: CallbackQuery, state: FSMC
                 protect_content=True,
             )
 
+    await processing_sticker.delete()
     await processing_message.delete()
 
 

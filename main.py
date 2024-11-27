@@ -60,7 +60,6 @@ from bot.handlers.settings.settings_handler import settings_router
 from bot.helpers.billing.check_waiting_payments import check_waiting_payments
 from bot.helpers.billing.update_daily_expenses import update_daily_expenses
 from bot.helpers.check_unresolved_requests import check_unresolved_requests
-from bot.helpers.handlers.handle_connection_error import handle_connection_error
 from bot.helpers.handlers.handle_forbidden_error import handle_forbidden_error
 from bot.helpers.handlers.handle_midjourney_webhook import handle_midjourney_webhook
 from bot.helpers.handlers.handle_network_error import handle_network_error
@@ -75,6 +74,7 @@ from bot.helpers.setters.set_description import set_description
 from bot.helpers.updaters.update_daily_limits import update_daily_limits
 from bot.middlewares.AuthMiddleware import AuthMessageMiddleware, AuthCallbackQueryMiddleware
 from bot.middlewares.LoggingMiddleware import LoggingMessageMiddleware, LoggingCallbackQueryMiddleware
+from bot.utils.migrate import migrate
 
 WEBHOOK_BOT_PATH = f'/bot/{config.BOT_TOKEN.get_secret_value()}'
 WEBHOOK_YOOKASSA_PATH = '/payment/yookassa'
@@ -180,9 +180,7 @@ async def delayed_handle_update(update: Update, timeout: int):
 
     try:
         await dp.feed_update(bot=bot, update=update)
-    except ConnectionError:
-        await handle_connection_error(bot, update)
-    except TelegramNetworkError:
+    except (ConnectionError, TelegramNetworkError, ConnectionResetError, OSError):
         await handle_network_error(bot, update)
     except TelegramForbiddenError:
         await handle_forbidden_error(update)
@@ -222,17 +220,11 @@ async def handle_update(update: dict):
             try:
                 await dp.feed_update(bot=bot, update=telegram_update)
                 break
-            except ConnectionError as e:
+            except (ConnectionError, TelegramNetworkError, ConnectionResetError, OSError) as e:
                 if i == config.MAX_RETRIES - 1:
                     raise e
                 continue
-            except TelegramNetworkError as e:
-                if i == config.MAX_RETRIES - 1:
-                    raise e
-                continue
-    except ConnectionError:
-        await handle_connection_error(bot, telegram_update)
-    except TelegramNetworkError:
+    except (ConnectionError, TelegramNetworkError, ConnectionResetError, OSError):
         await handle_network_error(bot, telegram_update)
     except TelegramForbiddenError:
         await handle_forbidden_error(telegram_update)
@@ -295,8 +287,8 @@ async def midjourney_webhook(body: dict):
 
 
 @app.get('/migrate')
-async def migrate_webhook():
-    pass
+async def migrate_webhook(background_tasks: BackgroundTasks):
+    background_tasks.add_task(migrate, bot)
 
 
 @app.get('/run-daily-tasks')

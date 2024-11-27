@@ -12,7 +12,7 @@ from aiogram.types import (
 )
 from aiogram.utils.chat_action import ChatActionSender
 
-from bot.config import config, MessageEffect
+from bot.config import config, MessageEffect, MessageSticker
 from bot.database.main import firebase
 from bot.database.models.common import Quota, Model
 from bot.database.models.face_swap_package import (
@@ -327,6 +327,9 @@ async def face_swap_quantity_handler(message: Message, state: FSMContext, user_i
 
         return
 
+    processing_sticker = await message.answer_sticker(
+        sticker=config.MESSAGE_STICKERS.get(MessageSticker.IMAGE_GENERATION),
+    )
     processing_message = await message.reply(
         text=get_localization(user_language_code).processing_request_face_swap(),
         allow_sending_without_reply=True,
@@ -339,6 +342,7 @@ async def face_swap_quantity_handler(message: Message, state: FSMContext, user_i
         if not name or not face_swap_package_quantity:
             await handle_face_swap(message.bot, user.telegram_chat_id, state, user_id)
 
+            await processing_sticker.delete()
             await processing_message.delete()
             await message.delete()
             return
@@ -373,6 +377,8 @@ async def face_swap_quantity_handler(message: Message, state: FSMContext, user_i
                     text=get_localization(user_language_code).ALREADY_MAKE_REQUEST,
                     allow_sending_without_reply=True,
                 )
+
+                await processing_sticker.delete()
                 await processing_message.delete()
                 return
 
@@ -385,7 +391,7 @@ async def face_swap_quantity_handler(message: Message, state: FSMContext, user_i
 
             request = await write_request(
                 user_id=user.id,
-                message_id=processing_message.message_id,
+                processing_message_ids=[processing_sticker.message_id, processing_message.message_id],
                 product_id=product.id,
                 requested=quantity,
                 details={
@@ -422,6 +428,10 @@ async def face_swap_quantity_handler(message: Message, state: FSMContext, user_i
 
                 await state.update_data(maximum_quantity=face_swap_package_quantity - quantity)
             except Exception as e:
+                await message.answer_sticker(
+                    sticker=config.MESSAGE_STICKERS.get(MessageSticker.ERROR),
+                )
+
                 reply_markup = build_error_keyboard(user_language_code)
                 await message.answer(
                     text=get_localization(user_language_code).ERROR,
@@ -452,6 +462,9 @@ async def face_swap_quantity_handler(message: Message, state: FSMContext, user_i
                             'has_error': generation.has_error,
                         },
                     )
+
+                await processing_sticker.delete()
+                await processing_message.delete()
 
 
 @face_swap_router.message(FaceSwap.waiting_for_face_swap_quantity, ~F.text.startswith('/'))
