@@ -1,7 +1,7 @@
 from bs4 import BeautifulSoup
 
 
-def split_message(html_text: str, limit=3968):
+def split_message(html_text: str, limit=3840):
     soup = BeautifulSoup(html_text, 'html.parser')
     parts = []
     current_part = ''
