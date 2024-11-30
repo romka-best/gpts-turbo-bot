@@ -783,7 +783,6 @@ class Russian(Texts):
     ┣ ChatGPT 4.0 Omni Mini ✉️
     ┗ ChatGPT 4.0 Omni 💥
 ━ <b>Claude</b>:
-    ┣ Claude 3.5 Haiku 📜
     ┣ Claude 3.5 Sonnet 💫
     ┗ Claude 3.0 Opus 🚀
 ━ <b>Gemini</b>:
@@ -1352,10 +1351,10 @@ class Russian(Texts):
 
 ---------------------------
 
-━ 💬 <b>Тематические чаты</b>: {additional_usage_quota[Quota.ADDITIONAL_CHATS]}
-━ 🎭 <b>Доступ к каталогу с цифровыми сотрудниками</b>: {'✅' if additional_usage_quota[Quota.ACCESS_TO_CATALOG] else '❌'}
-━ 🎙 <b>Голосовые сообщения</b>: {'✅' if additional_usage_quota[Quota.VOICE_MESSAGES] else '❌'}
-━ ⚡ <b>Быстрые ответы</b>: {'✅' if additional_usage_quota[Quota.FAST_MESSAGES] else '❌'}
+━ 💬 <b>Тематические чаты</b>: {daily_limits[Quota.ADDITIONAL_CHATS] + additional_usage_quota[Quota.ADDITIONAL_CHATS]}
+━ 🎭 <b>Доступ к каталогу с цифровыми сотрудниками</b>: {'✅' if daily_limits[Quota.ACCESS_TO_CATALOG] or additional_usage_quota[Quota.ACCESS_TO_CATALOG] else '❌'}
+━ 🎙 <b>Голосовые сообщения</b>: {'✅' if daily_limits[Quota.VOICE_MESSAGES] or additional_usage_quota[Quota.VOICE_MESSAGES] else '❌'}
+━ ⚡ <b>Быстрые ответы</b>: {'✅' if daily_limits[Quota.FAST_MESSAGES] or additional_usage_quota[Quota.FAST_MESSAGES] else '❌'}
 
 ---------------------------
 

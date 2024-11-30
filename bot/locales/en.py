@@ -774,7 +774,6 @@ To start creating songs using <b>Suno</b>, just type the command /suno 🎸
     ┣ ChatGPT 4.0 Omni Mini ✉️
     ┗ ChatGPT 4.0 Omni 💥
 ━ <b>Claude</b>:
-    ┣ Claude 3.5 Haiku 📜
     ┣ Claude 3.5 Sonnet 💫
     ┗ Claude 3.0 Opus 🚀
 ━ <b>Gemini</b>:
@@ -1342,10 +1341,10 @@ Choose action 👇
 
 ---------------------------
 
-━ 💬 <b>Thematic chats</b>: {additional_usage_quota[Quota.ADDITIONAL_CHATS]}
-━ 🎭 <b>Access to a catalog with digital employees</b>: {'✅' if additional_usage_quota[Quota.ACCESS_TO_CATALOG] else '❌'}
-━ 🎙 <b>Voice messages</b>: {'✅' if additional_usage_quota[Quota.VOICE_MESSAGES] else '❌'}
-━ ⚡ <b>Fast answers</b>: {'✅' if additional_usage_quota[Quota.FAST_MESSAGES] else '❌'}
+━ 💬 <b>Thematic chats</b>: {daily_limits[Quota.ADDITIONAL_CHATS] + additional_usage_quota[Quota.ADDITIONAL_CHATS]}
+━ 🎭 <b>Access to a catalog with digital employees</b>: {'✅' if daily_limits[Quota.ACCESS_TO_CATALOG] or additional_usage_quota[Quota.ACCESS_TO_CATALOG] else '❌'}
+━ 🎙 <b>Voice messages</b>: {'✅' if daily_limits[Quota.VOICE_MESSAGES] or additional_usage_quota[Quota.VOICE_MESSAGES] else '❌'}
+━ ⚡ <b>Fast answers</b>: {'✅' if daily_limits[Quota.FAST_MESSAGES] or additional_usage_quota[Quota.FAST_MESSAGES] else '❌'}
 
 ---------------------------
 

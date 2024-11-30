@@ -397,10 +397,12 @@ async def handle_voice_messages_setting_selection(callback_query: CallbackQuery,
 
         return
     elif (
-        chosen_setting == UserSettings.TURN_ON_VOICE_MESSAGES and not user.additional_usage_quota[Quota.VOICE_MESSAGES]
-    ):
+        chosen_setting == UserSettings.TURN_ON_VOICE_MESSAGES and (
+        not user.daily_limits[Quota.VOICE_MESSAGES] and not user.additional_usage_quota[Quota.VOICE_MESSAGES]
+    )):
         user.settings[Model.CHAT_GPT][chosen_setting] = False
         user.settings[Model.CLAUDE][chosen_setting] = False
+        user.settings[Model.GEMINI][chosen_setting] = False
         await handle_buy(callback_query.message, user_id, state)
 
         return
@@ -515,7 +517,7 @@ async def handle_catalog_selection(callback_query: CallbackQuery, state: FSMCont
     role_photo = await firebase.bucket.get_blob(role_photo_path)
     role_photo_link = firebase.get_public_url(role_photo.name)
 
-    if not user.additional_usage_quota[Quota.ACCESS_TO_CATALOG]:
+    if not user.daily_limits[Quota.ACCESS_TO_CATALOG] and not user.additional_usage_quota[Quota.ACCESS_TO_CATALOG]:
         text = get_localization(user_language_code).CATALOG_FORBIDDEN_ERROR
         await callback_query.message.reply_photo(
             photo=URLInputFile(role_photo_link, filename=role_photo_path),
@@ -570,7 +572,7 @@ async def handle_chats(message: Message, user_id: str, state: FSMContext, model:
     text = get_localization(user_language_code).chats(
         current_chat.title,
         len(all_chats),
-        user.additional_usage_quota[Quota.ADDITIONAL_CHATS],
+        user.daily_limits[Quota.ADDITIONAL_CHATS] + user.additional_usage_quota[Quota.ADDITIONAL_CHATS],
     )
     reply_markup = build_chats_keyboard(user_language_code, model)
     await message.edit_text(
@@ -620,7 +622,7 @@ async def handle_chat_selection(callback_query: CallbackQuery, state: FSMContext
 
         await callback_query.message.answer(text=text)
     elif action == 'create':
-        if user.additional_usage_quota[Quota.ADDITIONAL_CHATS] > 0:
+        if user.daily_limits[Quota.ADDITIONAL_CHATS] + user.additional_usage_quota[Quota.ADDITIONAL_CHATS] > 0:
             reply_markup = build_create_chat_keyboard(user_language_code)
 
             await callback_query.message.answer(
@@ -670,7 +672,6 @@ async def handle_switch_chat_selection(callback_query: CallbackQuery, state: FSM
     await callback_query.answer()
 
     user_id = str(callback_query.from_user.id)
-    user = await get_user(user_id)
     user_language_code = await get_user_language(user_id, state.storage)
 
     chat_id = callback_query.data.split(':')[1]

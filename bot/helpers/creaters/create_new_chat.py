@@ -10,7 +10,11 @@ from bot.database.operations.user.updaters import update_user_in_transaction
 async def create_new_chat(transaction, user: User, telegram_chat_id: str, title: str):
     await write_chat_in_transaction(transaction, user.id, telegram_chat_id, title)
 
-    user.additional_usage_quota[Quota.ADDITIONAL_CHATS] -= 1
+    if user.daily_limits[Quota.ADDITIONAL_CHATS]:
+        user.daily_limits[Quota.ADDITIONAL_CHATS] -= 1
+    elif user.additional_usage_quota[Quota.ADDITIONAL_CHATS]:
+        user.additional_usage_quota[Quota.ADDITIONAL_CHATS] -= 1
     await update_user_in_transaction(transaction, user.id, {
+        'daily_limits': user.daily_limits,
         'additional_usage_quota': user.additional_usage_quota,
     })
