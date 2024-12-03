@@ -30,5 +30,12 @@ async def send_ai_message(message: Message, text: str, reply_markup=None):
                 e.message.startswith('Bad Request: text must be non-empty')
             ):
                 pass
+            elif e.message.startswith('Bad Request: message is too long'):
+                await message.reply(
+                    text=formatted_message[:4096],
+                    reply_markup=reply_markup if i == len(messages) - 1 else None,
+                    allow_sending_without_reply=True,
+                    parse_mode=None,
+                )
             else:
                 raise e

@@ -22,8 +22,9 @@ SUNO_TOKEN = config.SUNO_TOKEN.get_secret_value()
 class Suno:
     def __init__(self, cookie: str, session: aiohttp.ClientSession = None) -> None:
         self.headers = {
-            'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36',
-            'cookie': cookie,
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36',
+            'Content-Type': 'application/json',
+            'Cookie': cookie,
         }
         self.session = session
         self._sid = None
@@ -85,13 +86,40 @@ class Songs(APIResource):
         tags: str = ''
     ) -> list:
         url = f'{SUNO_API_URL}/api/generate/v2/'
-        payload = {
-            'mv': version,
-            'prompt': prompt if custom else '',
-            'gpt_description_prompt': '' if custom else prompt,
-            'make_instrumental': instrumental,
-            'tags': tags if custom else '',
-        }
+        if custom:
+            payload = {
+                'mv': version,
+                'prompt': prompt,
+                'tags': tags,
+                'negative_tags': '',
+                'title': '',
+                'generation_type': 'TEXT',
+                'artist_clip_id': None,
+                'artist_end_s': None,
+                'artist_start_s': None,
+                'continue_at': None,
+                'continue_clip_id': None,
+                'continued_aligned_prompt': None,
+                'cover_clip_id': None,
+                'infill_end_s': None,
+                'infill_start_s': None,
+                'persona_id': None,
+                'task': None,
+                'token': None,
+            }
+        else:
+            payload = {
+                'mv': version,
+                'prompt': '',
+                'gpt_description_prompt': '' if custom else prompt,
+                'make_instrumental': instrumental,
+                'generation_type': 'TEXT',
+                'metadata': {
+                    'lyrics_model': 'default',
+                },
+                'token': None,
+                'user_uploaded_images_b64': [],
+            }
         data = await self.request('POST', url, json=payload)
         return data['clips']
 

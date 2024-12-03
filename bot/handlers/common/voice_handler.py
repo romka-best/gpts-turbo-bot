@@ -97,7 +97,7 @@ async def handle_voice(message: Message, state: FSMContext):
     user = await get_user(user_id)
     user_language_code = await get_user_language(user_id, state.storage)
 
-    if user.additional_usage_quota[Quota.VOICE_MESSAGES]:
+    if user.daily_limits[Quota.VOICE_MESSAGES] or user.additional_usage_quota[Quota.VOICE_MESSAGES]:
         current_time = time.time()
 
         if user.current_model == Model.CHAT_GPT:

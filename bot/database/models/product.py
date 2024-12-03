@@ -60,16 +60,9 @@ class Product(BaseModel):
                 SubscriptionPeriod.MONTHS6: discount if discount > 10 else 10,
                 SubscriptionPeriod.MONTHS12: discount if discount > 20 else 20,
             }
-            price_period = {
-                SubscriptionPeriod.MONTH1: 1,
-                SubscriptionPeriod.MONTHS3: 3,
-                SubscriptionPeriod.MONTHS6: 6,
-                SubscriptionPeriod.MONTHS12: 12,
-            }
 
-            price_with_period = price * price_period[subscription_period]
             price_with_discount = round(
-                price_with_period - (price_with_period * (price_discount[subscription_period] / 100.0)),
+                price - (price * (price_discount[subscription_period] / 100.0)),
                 2,
             )
             if currency == Currency.XTR:

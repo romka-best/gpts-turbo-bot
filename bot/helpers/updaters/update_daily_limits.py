@@ -17,7 +17,7 @@ from bot.database.operations.chat.getters import get_chats_by_user_id
 from bot.database.operations.chat.updaters import update_chat
 from bot.database.operations.package.getters import get_packages_by_user_id
 from bot.database.operations.product.getters import get_product
-from bot.database.operations.subscription.getters import get_last_subscription_by_user_id
+from bot.database.operations.subscription.getters import get_last_subscription_by_user_id, get_subscription
 from bot.database.operations.subscription.updaters import update_subscription
 from bot.database.operations.user.getters import get_users
 from bot.database.operations.user.updaters import update_user
@@ -64,7 +64,7 @@ async def update_user_daily_limits(bot: Bot, user: User, batch: AsyncWriteBatch)
 async def update_user_subscription(bot: Bot, user: User, batch: AsyncWriteBatch):
     user_ref = firebase.db.collection(User.COLLECTION_NAME).document(user.id)
     current_date = datetime.now(timezone.utc)
-    current_subscription = await get_last_subscription_by_user_id(user.id)
+    current_subscription = await get_subscription(user.subscription_id)
 
     if (
         current_subscription and
@@ -203,12 +203,17 @@ async def update_user_subscription(bot: Bot, user: User, batch: AsyncWriteBatch)
             )
 
         return user
-
-    if current_subscription and current_subscription.product_id:
+    elif (
+        current_subscription and
+        current_subscription.product_id and
+        current_subscription.end_date >= current_date and
+        current_subscription.status != SubscriptionStatus.FINISHED
+    ):
         product = await get_product(current_subscription.product_id)
         daily_limits = product.details.get('limits')
     else:
         daily_limits = SUBSCRIPTION_FREE_LIMITS
+
     batch.update(user_ref, {
         'daily_limits': daily_limits,
         'edited_at': current_date,

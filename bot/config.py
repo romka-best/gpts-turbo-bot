@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import ClassVar
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from pydantic import SecretStr
+from pydantic import SecretStr, Field
 
 
 class MessageEffect(str, Enum):
@@ -45,9 +45,9 @@ class Settings(BaseSettings):
     LIMIT_PROCESSING_SECONDS: int = 60
 
     SUPER_ADMIN_ID: str = '354543567'
-    ADMIN_IDS: list[str] = ['354543567', '6078317830']
-    DEVELOPER_IDS: list[str] = ['763258583', '5456216473', '789575146']
-    MODERATOR_IDS: list[str] = []
+    ADMIN_IDS: list[str] = Field(default_factory=lambda: ['354543567', '6078317830'])
+    DEVELOPER_IDS: list[str] = Field(default_factory=lambda: ['354543567'])
+    MODERATOR_IDS: list[str] = Field(default_factory=lambda: [])
 
     CERTIFICATE_NAME: SecretStr
     STORAGE_NAME: SecretStr
@@ -56,15 +56,15 @@ class Settings(BaseSettings):
     BOT_URL: str
     BOT_TOKEN: SecretStr
 
-    MESSAGE_EFFECTS: dict[MessageEffect, str] = {
+    MESSAGE_EFFECTS: dict[MessageEffect, str] = Field(default_factory=lambda: {
         MessageEffect.FIRE: '5104841245755180586',  # 🔥
         MessageEffect.LIKE: '5107584321108051014',  # 👍
         MessageEffect.DISLIKE: '5104858069142078462',  # 👎
         MessageEffect.HEART: '5159385139981059251',  # ❤️
         MessageEffect.CONGRATS: '5046509860389126442',  # 🎉
         MessageEffect.POOP: '5046589136895476101',  # 💩
-    }
-    MESSAGE_STICKERS: dict = {
+    })
+    MESSAGE_STICKERS: dict[MessageSticker, str] = Field(default_factory=lambda: {
         MessageSticker.LOGO: 'CAACAgIAAxkBAAENOatnRjb80J2N4a8yNcN7pKuIutcOwgACE2cAAuj3MUqczl2UrDJzHjYE',
         MessageSticker.HELLO: 'CAACAgIAAxkBAAENOa1nRjnkK8oIvaOQ2K62WQ0vqQYAAX4AAnhiAALGvjFKvC6IwKVpJ_w2BA',
         MessageSticker.LOVE: 'CAACAgIAAxkBAAENOa9nRjou7rQg922oE-Rt8ZqoiOzutgACN2EAAi8AATBKj8RV8S_82_Q2BA',
@@ -77,7 +77,7 @@ class Settings(BaseSettings):
         MessageSticker.IMAGE_GENERATION: 'CAACAgIAAxkBAAENOb1nRjquVRabNePw6b1NlsZPE1w9rgACaGgAApu2MUpD10AUcVst_TYE',
         MessageSticker.MUSIC_GENERATION: 'CAACAgIAAxkBAAENOb9nRjq8WfEW4G1Zr8pLEsHzQTJm5gACYl0AAubSMUoVqNt3elKw6TYE',
         MessageSticker.VIDEO_GENERATION: 'CAACAgIAAxkBAAENOcFnRjrVddqaOhU7ZOIooXpNIifTJAAC_WEAAqvsMUpvg5fGNgtAiTYE',
-    }
+    })
 
     YOOKASSA_ACCOUNT_ID: SecretStr
     YOOKASSA_SECRET_KEY: SecretStr

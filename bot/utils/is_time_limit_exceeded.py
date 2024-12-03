@@ -24,6 +24,7 @@ async def notify_user_after_timeout(bot: Bot, chat_id: int, delay: int, language
 
 async def is_time_limit_exceeded(message: Message, state: FSMContext, user: User, current_time: float) -> bool:
     if (
+        user.daily_limits[Quota.FAST_MESSAGES] or
         user.additional_usage_quota[Quota.FAST_MESSAGES] or
         user.current_model == Model.FACE_SWAP or
         user.current_model == Model.PHOTOSHOP_AI or
