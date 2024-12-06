@@ -1,9 +1,10 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 from bot.locales.main import get_localization
+from bot.locales.types import LanguageCode
 
 
-def build_manage_feedback_keyboard(language_code: str, user_id: str, feedback_id: str) -> InlineKeyboardMarkup:
+def build_manage_feedback_keyboard(language_code: LanguageCode, user_id: str, feedback_id: str) -> InlineKeyboardMarkup:
     buttons = [
         [
             InlineKeyboardButton(

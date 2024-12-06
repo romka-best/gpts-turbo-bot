@@ -10,6 +10,7 @@ from bot.config import config, MessageEffect, MessageSticker
 from bot.database.models.common import Model, Quota
 from bot.database.models.generation import GenerationStatus
 from bot.database.models.request import RequestStatus
+from bot.database.models.user import UserSettings
 from bot.database.operations.generation.getters import get_generations_by_request_id
 from bot.database.operations.generation.updaters import update_generation
 from bot.database.operations.generation.writers import write_generation
@@ -20,6 +21,8 @@ from bot.database.operations.request.writers import write_request
 from bot.database.operations.user.getters import get_user
 from bot.database.operations.user.updaters import update_user
 from bot.handlers.ai.suno_handler import handle_suno_example
+from bot.helpers.getters.get_quota_by_model import get_quota_by_model
+from bot.helpers.getters.get_switched_to_ai_model import get_switched_to_ai_model
 from bot.helpers.senders.send_error_info import send_error_info
 from bot.keyboards.ai.mode import build_switched_to_ai_keyboard
 from bot.locales.translate_text import translate_text
@@ -27,6 +30,7 @@ from bot.integrations.replicateAI import create_music_gen_melody
 from bot.keyboards.common.common import build_cancel_keyboard, build_error_keyboard
 from bot.keyboards.ai.music_gen import build_music_gen_keyboard
 from bot.locales.main import get_localization, get_user_language
+from bot.locales.types import LanguageCode
 from bot.states.music_gen import MusicGen
 
 music_gen_router = Router()
@@ -54,9 +58,14 @@ async def music_gen(message: Message, state: FSMContext):
             'current_model': user.current_model,
         })
 
+        text = await get_switched_to_ai_model(
+            user,
+            get_quota_by_model(user.current_model, user.settings[user.current_model][UserSettings.VERSION]),
+            user_language_code,
+        )
         reply_markup = build_switched_to_ai_keyboard(user_language_code, Model.MUSIC_GEN)
         await message.answer(
-            text=get_localization(user_language_code).SWITCHED_TO_MUSIC_GEN,
+            text=text,
             reply_markup=reply_markup,
             message_effect_id=config.MESSAGE_EFFECTS.get(MessageEffect.FIRE),
         )
@@ -153,7 +162,7 @@ async def handle_music_gen_selection(
                 reply_markup=reply_markup,
                 allow_sending_without_reply=True,
             )
-        elif duration > 300:
+        elif duration > 180:
             reply_markup = build_cancel_keyboard(user_language_code)
             await message.reply(
                 text=get_localization(user_language_code).MUSIC_GEN_MAX_ERROR,
@@ -183,8 +192,8 @@ async def handle_music_gen_selection(
             )
 
             try:
-                if user_language_code != 'en':
-                    prompt = await translate_text(prompt, user_language_code, 'en')
+                if user_language_code != LanguageCode.EN:
+                    prompt = await translate_text(prompt, user_language_code, LanguageCode.EN)
                 result_id = await create_music_gen_melody(prompt, duration)
                 await write_generation(
                     id=result_id,

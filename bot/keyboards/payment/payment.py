@@ -3,9 +3,10 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from bot.database.models.common import PaymentType, PaymentMethod, Currency
 from bot.database.models.product import Product, ProductCategory
 from bot.locales.main import get_localization
+from bot.locales.types import LanguageCode
 
 
-def build_buy_keyboard(language_code: str) -> InlineKeyboardMarkup:
+def build_buy_keyboard(language_code: LanguageCode) -> InlineKeyboardMarkup:
     buttons = [
         [
             InlineKeyboardButton(
@@ -34,7 +35,7 @@ def build_subscriptions_keyboard(
     subscriptions: list[Product],
     category: ProductCategory,
     currency: Currency,
-    language_code: str,
+    language_code: LanguageCode,
 ) -> InlineKeyboardMarkup:
     buttons = []
 
@@ -82,7 +83,7 @@ def build_subscriptions_keyboard(
 
 
 def build_payment_method_for_subscription_keyboard(
-    language_code: str,
+    language_code: LanguageCode,
     subscription_id: str,
 ) -> InlineKeyboardMarkup:
     buttons = [
@@ -127,7 +128,7 @@ def build_payment_method_for_subscription_keyboard(
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
-def build_payment_keyboard(language_code: str, payment_link: str) -> InlineKeyboardMarkup:
+def build_payment_keyboard(language_code: LanguageCode, payment_link: str) -> InlineKeyboardMarkup:
     buttons = [
         [
             InlineKeyboardButton(
@@ -141,7 +142,7 @@ def build_payment_keyboard(language_code: str, payment_link: str) -> InlineKeybo
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
-def build_cancel_subscription_keyboard(language_code: str) -> InlineKeyboardMarkup:
+def build_cancel_subscription_keyboard(language_code: LanguageCode) -> InlineKeyboardMarkup:
     buttons = [
         [
             InlineKeyboardButton(
@@ -160,7 +161,7 @@ def build_cancel_subscription_keyboard(language_code: str) -> InlineKeyboardMark
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
-def build_packages_keyboard(language_code: str, products: list[Product], page=0) -> InlineKeyboardMarkup:
+def build_packages_keyboard(language_code: LanguageCode, products: list[Product], page=0) -> InlineKeyboardMarkup:
     buttons = [
         [
             InlineKeyboardButton(
@@ -315,7 +316,7 @@ def build_packages_keyboard(language_code: str, products: list[Product], page=0)
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
-def build_package_selection_keyboard(language_code: str) -> InlineKeyboardMarkup:
+def build_package_selection_keyboard(language_code: LanguageCode) -> InlineKeyboardMarkup:
     buttons = [
         [
             InlineKeyboardButton(
@@ -328,7 +329,7 @@ def build_package_selection_keyboard(language_code: str) -> InlineKeyboardMarkup
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
-def build_package_quantity_sent_keyboard(language_code: str) -> InlineKeyboardMarkup:
+def build_package_quantity_sent_keyboard(language_code: LanguageCode) -> InlineKeyboardMarkup:
     buttons = [
         [
             InlineKeyboardButton(
@@ -347,7 +348,7 @@ def build_package_quantity_sent_keyboard(language_code: str) -> InlineKeyboardMa
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
-def build_package_add_to_cart_selection_keyboard(language_code: str) -> InlineKeyboardMarkup:
+def build_package_add_to_cart_selection_keyboard(language_code: LanguageCode) -> InlineKeyboardMarkup:
     buttons = [
         [
             InlineKeyboardButton(
@@ -366,7 +367,7 @@ def build_package_add_to_cart_selection_keyboard(language_code: str) -> InlineKe
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
-def build_package_cart_keyboard(language_code: str) -> InlineKeyboardMarkup:
+def build_package_cart_keyboard(language_code: LanguageCode) -> InlineKeyboardMarkup:
     buttons = [
         [
             InlineKeyboardButton(
@@ -398,7 +399,7 @@ def build_package_cart_keyboard(language_code: str) -> InlineKeyboardMarkup:
 
 
 def build_payment_method_for_package_keyboard(
-    language_code: str,
+    language_code: LanguageCode,
     package_product_id: str,
     package_quantity: int,
 ) -> InlineKeyboardMarkup:
@@ -444,7 +445,7 @@ def build_payment_method_for_package_keyboard(
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
-def build_payment_method_for_cart_keyboard(language_code: str) -> InlineKeyboardMarkup:
+def build_payment_method_for_cart_keyboard(language_code: LanguageCode) -> InlineKeyboardMarkup:
     buttons = [
         [
             InlineKeyboardButton(
@@ -487,7 +488,7 @@ def build_payment_method_for_cart_keyboard(language_code: str) -> InlineKeyboard
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
-def build_return_to_packages_keyboard(language_code: str) -> InlineKeyboardMarkup:
+def build_return_to_packages_keyboard(language_code: LanguageCode) -> InlineKeyboardMarkup:
     buttons = [
         [
             InlineKeyboardButton(

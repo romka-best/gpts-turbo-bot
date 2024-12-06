@@ -6,7 +6,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.storage.base import StorageKey
 
 from bot.config import config, MessageSticker
-from bot.database.models.common import Model, Currency, Quota, PhotoshopAIAction
+from bot.database.models.common import Model, Currency, Quota, PhotoshopAIAction, SendType
 from bot.database.models.generation import Generation, GenerationStatus
 from bot.database.models.request import Request, RequestStatus
 from bot.database.models.transaction import TransactionType
@@ -120,7 +120,10 @@ async def handle_replicate_photoshop_ai(
 ):
     if generation.result:
         reply_markup = build_reaction_keyboard(generation.id)
-        await send_document(bot, user.telegram_chat_id, generation.result, reply_markup)
+        if user.settings[Model.PHOTOSHOP_AI][UserSettings.SEND_TYPE] == SendType.DOCUMENT:
+            await send_document(bot, user.telegram_chat_id, generation.result, reply_markup)
+        else:
+            await send_image(bot, user.telegram_chat_id, generation.result, reply_markup)
     elif generation.has_error:
         await bot.send_sticker(
             chat_id=user.telegram_chat_id,
@@ -204,7 +207,10 @@ async def handle_replicate_face_swap(
 ):
     if generation.result:
         reply_markup = build_reaction_keyboard(generation.id)
-        await send_image(bot, user.telegram_chat_id, generation.result, reply_markup)
+        if user.settings[Model.FACE_SWAP][UserSettings.SEND_TYPE] == SendType.DOCUMENT:
+            await send_document(bot, user.telegram_chat_id, generation.result, reply_markup)
+        else:
+            await send_image(bot, user.telegram_chat_id, generation.result, reply_markup)
 
     current_count = await dp.storage.redis.incr(request.id)
     if current_count == request.requested and request.status != RequestStatus.FINISHED:
@@ -414,7 +420,10 @@ async def handle_replicate_stable_diffusion(
 
     if generation.result:
         reply_markup = build_reaction_keyboard(generation.id)
-        await send_image(bot, user.telegram_chat_id, generation.result, reply_markup)
+        if user.settings[UserSettings.SEND_TYPE] == SendType.DOCUMENT:
+            await send_document(bot, user.telegram_chat_id, generation.result, reply_markup)
+        else:
+            await send_image(bot, user.telegram_chat_id, generation.result, reply_markup)
     elif generation.has_error:
         await bot.send_sticker(
             chat_id=user.telegram_chat_id,
@@ -488,7 +497,10 @@ async def handle_replicate_flux(
 
     if generation.result:
         reply_markup = build_reaction_keyboard(generation.id)
-        await send_image(bot, user.telegram_chat_id, generation.result, reply_markup)
+        if user.settings[Model.FLUX][UserSettings.SEND_TYPE] == SendType.DOCUMENT:
+            await send_document(bot, user.telegram_chat_id, generation.result, reply_markup)
+        else:
+            await send_image(bot, user.telegram_chat_id, generation.result, reply_markup)
     elif generation.has_error:
         await bot.send_sticker(
             chat_id=user.telegram_chat_id,

@@ -1,5 +1,6 @@
 import logging
 from datetime import datetime, timezone, timedelta
+from typing import cast
 
 from aiogram import Router, F
 from aiogram.filters import Command
@@ -9,8 +10,8 @@ from aiogram.types import Message, CallbackQuery, URLInputFile, LabeledPrice, Pr
 from bot.database.main import firebase
 from bot.database.models.cart import CartItem
 from bot.database.models.common import PaymentType, PaymentMethod, Currency
-from bot.database.models.package import PackageStatus, Package
-from bot.database.models.product import ProductType, ProductCategory, Product
+from bot.database.models.package import Package, PackageStatus
+from bot.database.models.product import Product, ProductType, ProductCategory
 from bot.database.models.subscription import (
     Subscription,
     SubscriptionStatus,
@@ -31,17 +32,18 @@ from bot.database.operations.subscription.getters import (
     get_last_subscription_by_user_id,
     get_subscription,
 )
-from bot.database.operations.subscription.updaters import update_subscription
 from bot.database.operations.subscription.writers import write_subscription
 from bot.database.operations.transaction.writers import write_transaction
 from bot.database.operations.user.getters import get_user
 from bot.database.operations.user.updaters import update_user
 from bot.handlers.common.info_handler import handle_info_selection
 from bot.handlers.payment.promo_code_handler import handle_promo_code
-from bot.helpers.billing.create_payment import create_payment, OrderItem
+from bot.helpers.billing.create_payment import OrderItem, create_payment
 from bot.helpers.billing.unsubscribe import unsubscribe
 from bot.helpers.creaters.create_package import create_package
 from bot.helpers.creaters.create_subscription import create_subscription
+from bot.helpers.getters.get_quota_by_model import get_quota_by_model
+from bot.helpers.getters.get_switched_to_ai_model import get_switched_to_ai_model
 from bot.helpers.getters.get_user_discount import get_user_discount
 from bot.helpers.senders.send_message_to_admins import send_message_to_admins
 from bot.keyboards.ai.mode import build_switched_to_ai_keyboard
@@ -57,9 +59,11 @@ from bot.keyboards.payment.payment import (
     build_cancel_subscription_keyboard,
     build_payment_keyboard,
     build_payment_method_for_package_keyboard,
-    build_payment_method_for_cart_keyboard, build_return_to_packages_keyboard,
+    build_payment_method_for_cart_keyboard,
+    build_return_to_packages_keyboard,
 )
 from bot.locales.main import get_localization, get_user_language
+from bot.locales.types import LanguageCode
 from bot.states.payment import Payment
 
 payment_router = Router()
@@ -126,7 +130,7 @@ async def handle_subscribe(message: Message, user_id: str, state: FSMContext):
         user_language_code,
     )
     await message.answer_photo(
-        photo=URLInputFile(photo_link, filename=photo_path),
+        photo=URLInputFile(photo_link, filename=photo_path, timeout=300),
         caption=text,
         reply_markup=reply_markup,
     )
@@ -143,7 +147,7 @@ async def handle_subscription_selection(callback_query: CallbackQuery, state: FS
         await handle_buy(callback_query.message, user_id, state)
         await callback_query.message.delete()
     elif subscription_type == ProductCategory.MONTHLY or subscription_type == ProductCategory.YEARLY:
-        product_category = subscription_type
+        product_category = cast(ProductCategory, subscription_type)
         user_data = await state.get_data()
         if user_data.get('product_category') == product_category:
             return
@@ -227,7 +231,7 @@ async def handle_subscription_selection(callback_query: CallbackQuery, state: FS
         photo_link = firebase.get_public_url(photo.name)
 
         await callback_query.message.answer_photo(
-            photo=URLInputFile(photo_link, filename=photo_path),
+            photo=URLInputFile(photo_link, filename=photo_path, timeout=300),
             caption=caption,
             reply_markup=reply_markup,
         )
@@ -240,7 +244,7 @@ async def handle_payment_method_subscription_selection(callback_query: CallbackQ
 
     user_id = str(callback_query.from_user.id)
 
-    payment_method = callback_query.data.split(':')[1]
+    payment_method = cast(PaymentMethod, callback_query.data.split(':')[1])
     if payment_method == 'back':
         await handle_subscribe(callback_query.message, user_id, state)
         await callback_query.message.delete()
@@ -410,7 +414,7 @@ async def handle_package(message: Message, user_id: str, state: FSMContext, is_e
         )
     else:
         await message.answer_photo(
-            photo=URLInputFile(photo_link, filename=photo_path),
+            photo=URLInputFile(photo_link, filename=photo_path, timeout=300),
             caption=text,
             reply_markup=reply_markup,
         )
@@ -432,8 +436,6 @@ async def handle_package_selection(callback_query: CallbackQuery, state: FSMCont
     elif package_type == 'next' or package_type == 'prev':
         page = int(callback_query.data.split(':')[2])
         await handle_package(callback_query.message, str(callback_query.from_user.id), state, True, page)
-
-        return
     elif package_type == 'change_currency':
         if user.currency == Currency.RUB:
             user.currency = Currency.USD
@@ -504,7 +506,7 @@ async def quantity_of_package_sent(message: Message, state: FSMContext):
 
         reply_markup = build_package_quantity_sent_keyboard(user_language_code)
         await message.reply_photo(
-            photo=URLInputFile(photo_link, filename=photo_path),
+            photo=URLInputFile(photo_link, filename=photo_path, timeout=300),
             caption=get_localization(user_language_code).ADD_TO_CART_OR_BUY_NOW,
             reply_markup=reply_markup,
             allow_sending_without_reply=True,
@@ -594,7 +596,7 @@ async def handle_package_add_to_cart_selection(callback_query: CallbackQuery, st
         )
         reply_markup = build_package_cart_keyboard(user_language_code)
         await callback_query.message.answer_photo(
-            photo=URLInputFile(photo_link, filename=photo_path),
+            photo=URLInputFile(photo_link, filename=photo_path, timeout=300),
             caption=caption,
             reply_markup=reply_markup,
         )
@@ -710,7 +712,7 @@ async def handle_payment_method_package_selection(callback_query: CallbackQuery,
 
     user_id = str(callback_query.from_user.id)
 
-    payment_method = callback_query.data.split(':')[1]
+    payment_method = cast(PaymentMethod, callback_query.data.split(':')[1])
     if payment_method == 'back':
         await handle_package(callback_query.message, user_id, state, True)
     else:
@@ -858,7 +860,7 @@ async def handle_payment_method_cart_selection(callback_query: CallbackQuery, st
 
     cart = await get_cart_by_user_id(user_id)
 
-    payment_method = callback_query.data.split(':')[1]
+    payment_method = cast(PaymentMethod, callback_query.data.split(':')[1])
     if payment_method == 'back':
         user_subscription = await get_subscription(user.subscription_id)
         if user_subscription:
@@ -1134,7 +1136,7 @@ async def successful_payment(message: Message, state: FSMContext):
                         f'🤑 <b>Успешно оформлена подписка у пользователя: {subscription.user_id}</b>\n\n'
                         f'ℹ️ ID: {subscription.id}\n'
                         f'💱 Метод оплаты: {subscription.payment_method}\n'
-                        f'💳 Тип: {product.names.get("ru")}\n'
+                        f'💳 Тип: {product.names.get(LanguageCode.RU)}\n'
                         f'💰 Сумма: {subscription.amount}{Currency.SYMBOLS[subscription.currency]}\n\n'
                         f'Продолжаем в том же духе 💪',
             )
@@ -1145,7 +1147,7 @@ async def successful_payment(message: Message, state: FSMContext):
                         f'🤑 <b>Успешно продлена подписка у пользователя: {subscription.user_id}</b>\n\n'
                         f'ℹ️ ID: {subscription.id}\n'
                         f'💱 Метод оплаты: {subscription.payment_method}\n'
-                        f'💳 Тип: {product.names.get("ru")}\n'
+                        f'💳 Тип: {product.names.get(LanguageCode.RU)}\n'
                         f'💰 Сумма: {subscription.amount}{Currency.SYMBOLS[subscription.currency]}\n\n'
                         f'Продолжаем в том же духе 💪',
             )
@@ -1198,7 +1200,7 @@ async def successful_payment(message: Message, state: FSMContext):
                     f'🤑 <b>Успешно прошла оплата пакета у пользователя: {package.user_id}</b>\n\n'
                     f'ℹ️ ID: {package.id}\n'
                     f'💱 Метод оплаты: {package.payment_method}\n'
-                    f'💳 Тип: {product.names.get("ru")}\n'
+                    f'💳 Тип: {product.names.get(LanguageCode.RU)}\n'
                     f'🔢 Количество: {package.quantity}\n'
                     f'💰 Сумма: {package.amount}{Currency.SYMBOLS[package.currency]}\n\n'
                     f'Продолжаем в том же духе 💪',
@@ -1261,12 +1263,14 @@ async def successful_payment(message: Message, state: FSMContext):
                     f'Продолжаем в том же духе 💪',
         )
 
+    text = await get_switched_to_ai_model(
+        user,
+        get_quota_by_model(user.current_model, user.settings[user.current_model][UserSettings.VERSION]),
+        user_language_code,
+    )
     reply_markup = build_switched_to_ai_keyboard(user_language_code, user.current_model)
     await message.answer(
-        text=get_localization(user_language_code).switched(
-            user.current_model,
-            user.settings[user.current_model][UserSettings.VERSION],
-        ),
+        text=text,
         reply_markup=reply_markup,
     )
 

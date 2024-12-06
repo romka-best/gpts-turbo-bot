@@ -1,5 +1,5 @@
 import os
-from enum import Enum
+from enum import StrEnum
 from pathlib import Path
 from typing import ClassVar
 
@@ -7,7 +7,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import SecretStr, Field
 
 
-class MessageEffect(str, Enum):
+class MessageEffect(StrEnum):
     FIRE = 'FIRE'
     LIKE = 'LIKE'
     DISLIKE = 'DISLIKE'
@@ -16,7 +16,7 @@ class MessageEffect(str, Enum):
     POOP = 'POOP'
 
 
-class MessageSticker(str, Enum):
+class MessageSticker(StrEnum):
     LOGO = 'LOGO'
     HELLO = 'HELLO'
     LOVE = 'LOVE'
@@ -48,6 +48,8 @@ class Settings(BaseSettings):
     ADMIN_IDS: list[str] = Field(default_factory=lambda: ['354543567', '6078317830'])
     DEVELOPER_IDS: list[str] = Field(default_factory=lambda: ['354543567'])
     MODERATOR_IDS: list[str] = Field(default_factory=lambda: [])
+
+    DEFAULT_ROLE_ID: SecretStr
 
     CERTIFICATE_NAME: SecretStr
     STORAGE_NAME: SecretStr

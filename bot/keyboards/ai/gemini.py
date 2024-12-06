@@ -2,9 +2,10 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 from bot.database.models.common import Model, GeminiGPTVersion
 from bot.locales.main import get_localization
+from bot.locales.types import LanguageCode
 
 
-def build_gemini_keyboard(language_code: str, model: Model, model_version: GeminiGPTVersion) -> InlineKeyboardMarkup:
+def build_gemini_keyboard(language_code: LanguageCode, model: Model, model_version: GeminiGPTVersion) -> InlineKeyboardMarkup:
     buttons = [
         [
             InlineKeyboardButton(

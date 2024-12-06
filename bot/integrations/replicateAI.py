@@ -7,7 +7,7 @@ from typing import Optional
 import replicate
 
 from bot.config import config
-from bot.database.models.common import PhotoshopAIAction
+from bot.database.models.common import PhotoshopAIAction, AspectRatio
 
 os.environ['REPLICATE_API_TOKEN'] = config.REPLICATE_API_TOKEN.get_secret_value()
 WEBHOOK_REPLICATE_URL = config.WEBHOOK_URL + config.WEBHOOK_REPLICATE_PATH
@@ -108,12 +108,13 @@ async def create_music_gen_melody(prompt: str, duration: int) -> Optional[str]:
         logging.exception(f'Error in create_music_gen_melody: {e}\n{error_trace}')
 
 
-async def create_stable_diffusion_image(prompt: str) -> Optional[str]:
+async def create_stable_diffusion_image(prompt: str, aspect_ratio: AspectRatio) -> Optional[str]:
     try:
         input_parameters = {
             'prompt': prompt,
             'output_format': 'png',
             'output_quality': 100,
+            'aspect_ratio': aspect_ratio,
         }
 
         model = await replicate.models.async_get('stability-ai/stable-diffusion-3.5-large-turbo')
@@ -131,12 +132,13 @@ async def create_stable_diffusion_image(prompt: str) -> Optional[str]:
         logging.exception(f'Error in create_stable_diffusion_image: {e}\n{error_trace}')
 
 
-async def create_flux_image(prompt: str, safety_tolerance=3) -> Optional[str]:
+async def create_flux_image(prompt: str, aspect_ratio: AspectRatio, safety_tolerance=3) -> Optional[str]:
     try:
         input_parameters = {
             'prompt': prompt,
             'output_format': 'jpg',
             'output_quality': 100,
+            'aspect_ratio': aspect_ratio,
             'safety_tolerance': safety_tolerance,
         }
 

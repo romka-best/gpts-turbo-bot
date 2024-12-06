@@ -20,6 +20,8 @@ from bot.database.operations.request.updaters import update_request
 from bot.database.operations.request.writers import write_request
 from bot.database.operations.user.getters import get_user
 from bot.database.operations.user.updaters import update_user
+from bot.helpers.getters.get_quota_by_model import get_quota_by_model
+from bot.helpers.getters.get_switched_to_ai_model import get_switched_to_ai_model
 from bot.helpers.senders.send_error_info import send_error_info
 from bot.keyboards.ai.mode import build_switched_to_ai_keyboard
 from bot.locales.translate_text import translate_text
@@ -31,6 +33,7 @@ from bot.integrations.midjourney import (
 )
 from bot.keyboards.common.common import build_error_keyboard, build_limit_exceeded_keyboard
 from bot.locales.main import get_localization, get_user_language
+from bot.locales.types import LanguageCode
 
 midjourney_router = Router()
 
@@ -57,9 +60,14 @@ async def midjourney(message: Message, state: FSMContext):
             'current_model': user.current_model,
         })
 
+        text = await get_switched_to_ai_model(
+            user,
+            get_quota_by_model(user.current_model, user.settings[user.current_model][UserSettings.VERSION]),
+            user_language_code,
+        )
         reply_markup = build_switched_to_ai_keyboard(user_language_code, Model.MIDJOURNEY)
         await message.answer(
-            text=get_localization(user_language_code).SWITCHED_TO_MIDJOURNEY,
+            text=text,
             reply_markup=reply_markup,
             message_effect_id=config.MESSAGE_EFFECTS.get(MessageEffect.FIRE),
         )
@@ -130,10 +138,10 @@ async def handle_midjourney(
             )
 
             try:
-                if user_language_code != 'en':
-                    prompt = await translate_text(prompt, user_language_code, 'en')
+                if user_language_code != LanguageCode.EN:
+                    prompt = await translate_text(prompt, user_language_code, LanguageCode.EN)
                 prompt = prompt.replace('-', '- ')
-                prompt += f' --v {version}'
+                prompt += f' --v {version} --ar {user.settings[Model.MIDJOURNEY][UserSettings.ASPECT_RATIO]}'
 
                 if action == MidjourneyAction.UPSCALE:
                     result_id = await create_midjourney_image(hash_id, choice)
@@ -242,7 +250,7 @@ async def handle_midjourney_selection(callback_query: CallbackQuery, state: FSMC
     await state.clear()
 
 
-async def handle_midjourney_example(user: User, user_language_code: str, prompt: str, message: Message):
+async def handle_midjourney_example(user: User, user_language_code: LanguageCode, prompt: str, message: Message):
     current_date = datetime.now(timezone.utc)
     if (
         not user.subscription_id and
@@ -267,9 +275,9 @@ async def handle_midjourney_example(user: User, user_language_code: str, prompt:
         )
 
         try:
-            if user_language_code != 'en':
-                prompt = await translate_text(prompt, user_language_code, 'en')
-            prompt += f' --v {MidjourneyVersion.V6}'
+            if user_language_code != LanguageCode.EN:
+                prompt = await translate_text(prompt, user_language_code, LanguageCode.EN)
+            prompt += f' --v {MidjourneyVersion.V6} --ar {user.settings[user.current_model][UserSettings.ASPECT_RATIO]}'
 
             result_id = await create_midjourney_images(prompt)
             await write_generation(

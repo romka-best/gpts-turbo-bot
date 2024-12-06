@@ -2,10 +2,11 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 from bot.database.models.user import UserGender
 from bot.locales.main import get_localization
+from bot.locales.types import LanguageCode
 
 
 def build_profile_keyboard(
-    language_code: str,
+    language_code: LanguageCode,
     is_photo_uploaded: bool,
     is_gender_chosen: bool,
     has_active_subscription: bool,
@@ -74,7 +75,7 @@ def build_profile_keyboard(
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
-def build_profile_quota_keyboard(language_code: str):
+def build_profile_quota_keyboard(language_code: LanguageCode):
     buttons = [
         [
             InlineKeyboardButton(
@@ -99,7 +100,7 @@ def build_profile_quota_keyboard(language_code: str):
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
-def build_profile_gender_keyboard(language_code: str) -> InlineKeyboardMarkup:
+def build_profile_gender_keyboard(language_code: LanguageCode) -> InlineKeyboardMarkup:
     buttons = [
         [
             InlineKeyboardButton(

@@ -5,11 +5,15 @@ from aiogram.types import Message, CallbackQuery
 
 from bot.config import config, MessageEffect
 from bot.database.models.common import Model, PhotoshopAIAction
+from bot.database.models.user import UserSettings
 from bot.database.operations.user.getters import get_user
 from bot.database.operations.user.updaters import update_user
+from bot.helpers.getters.get_quota_by_model import get_quota_by_model
+from bot.helpers.getters.get_switched_to_ai_model import get_switched_to_ai_model
 from bot.keyboards.ai.mode import build_switched_to_ai_keyboard
 from bot.keyboards.ai.photoshop_ai import build_photoshop_ai_keyboard, build_photoshop_ai_chosen_keyboard
 from bot.locales.main import get_user_language, get_localization
+from bot.locales.types import LanguageCode
 from bot.states.photoshop_ai import PhotoshopAI
 
 photoshop_ai_router = Router()
@@ -39,9 +43,14 @@ async def photoshop_ai(message: Message, state: FSMContext):
             'current_model': user.current_model,
         })
 
+        text = await get_switched_to_ai_model(
+            user,
+            get_quota_by_model(user.current_model, user.settings[user.current_model][UserSettings.VERSION]),
+            user_language_code,
+        )
         reply_markup = build_switched_to_ai_keyboard(user_language_code, Model.PHOTOSHOP_AI)
         await message.answer(
-            text=get_localization(user_language_code).SWITCHED_TO_PHOTOSHOP_AI,
+            text=text,
             reply_markup=reply_markup,
             message_effect_id=config.MESSAGE_EFFECTS.get(MessageEffect.FIRE),
         )
@@ -74,7 +83,7 @@ async def handle_photoshop_ai_choose_selection(
     bot: Bot,
     chat_id: str,
     message_id: int,
-    language_code: str,
+    language_code: LanguageCode,
     action_name: str,
     state: FSMContext,
 ):

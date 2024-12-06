@@ -1,18 +1,19 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 from bot.locales.main import get_localization
+from bot.locales.types import LanguageCode
 
 
-def build_language_keyboard(language_code: str) -> InlineKeyboardMarkup:
+def build_language_keyboard(language_code: LanguageCode) -> InlineKeyboardMarkup:
     buttons = [
         [
             InlineKeyboardButton(
                 text='🇺🇸 English',
-                callback_data='language:en',
+                callback_data=f'language:{LanguageCode.EN}',
             ),
             InlineKeyboardButton(
                 text='🇷🇺 Русский',
-                callback_data='language:ru',
+                callback_data=f'language:{LanguageCode.RU}',
             ),
         ],
         [

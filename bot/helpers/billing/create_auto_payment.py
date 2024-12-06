@@ -10,6 +10,7 @@ from bot.config import config
 from bot.database.models.common import Currency, PaymentMethod
 from bot.helpers.billing.create_payment import OrderItem
 from bot.helpers.billing.generate_signature import generate_signature
+from bot.locales.types import LanguageCode
 
 Configuration.account_id = config.YOOKASSA_ACCOUNT_ID.get_secret_value()
 Configuration.secret_key = config.YOOKASSA_SECRET_KEY.get_secret_value()
@@ -24,7 +25,7 @@ async def create_auto_payment(
     user_id: str,
     description: str,
     amount: float,
-    language_code: str,
+    language_code: LanguageCode,
     order_items: list[OrderItem],
     order_id=None,
 ) -> dict:

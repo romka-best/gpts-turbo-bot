@@ -2,16 +2,28 @@ import random
 from typing import Union
 
 from bot.database.models.product import Product, ProductCategory, ProductType
+from bot.database.models.prompt import Prompt
 from bot.database.operations.product.getters import get_product
 from bot.helpers.formatters.format_number import format_number
 from bot.helpers.getters.get_user_discount import get_user_discount
 from bot.locales.texts import Texts
-from bot.database.models.common import Currency, Quota, Model, ChatGPTVersion, ClaudeGPTVersion, GeminiGPTVersion
+from bot.database.models.common import (
+    Currency,
+    Quota,
+    Model,
+    ModelType,
+    ChatGPTVersion,
+    ClaudeGPTVersion,
+    GeminiGPTVersion,
+    AspectRatio,
+    SendType,
+)
 from bot.database.models.subscription import (
     SubscriptionPeriod,
     SubscriptionStatus,
 )
-from bot.database.models.user import UserGender
+from bot.database.models.user import UserGender, UserSettings
+from bot.locales.types import LanguageCode
 
 
 class English(Texts):
@@ -39,7 +51,7 @@ I'm your personal gateway to the world of neural networks. Discover the capabili
         ┣ <b>Midjourney 6.1 🎨</b> /midjourney
         ┣ <b>Stable Diffusion 3.5 🎆</b> /stable_diffusion
         ┗ <b>Flux 1.1 Pro 🫐</b> /flux
-    ┣ To exchange faces with someone in a photo, try <b>FaceSwap 📷️</b> /face_swap
+    ┣ Exchange faces with someone in a photo with <b>FaceSwap 📷️</b> /face_swap
     ┗ Edit your images using <b>Photoshop AI 🪄</b> /photoshop
 
 ━ 🎵 <b>Compose Music</b>:
@@ -71,8 +83,8 @@ I am constantly updating myself, implementing the most advanced technologies so 
 
 ━ 😜 <b>Exchange Faces in Photos</b>:
     ┣ 1️⃣ Enter the command /face_swap
-    ┣ 2️⃣ Follow the instructions to help AI create better photos
-    ┗ 3️⃣ Choose images from our unique packages or send your own photos
+    ┣ 2️⃣ Follow the instructions to help me creating better photos
+    ┗ 3️⃣ Choose images from my unique packages or send your own photos
 
 ━ 🪄 <b>Edit Images</b>:
     ┣ 1️⃣ Enter the command /photoshop
@@ -96,31 +108,23 @@ I am constantly updating myself, implementing the most advanced technologies so 
 """
     MAINTENANCE_MODE = "🤖 I'm in maintenance mode. Please wait a little bit 🛠"
 
-    # Promos
-    PROMO_SOCIAL_MEDIA_PROMPTS = """
-🎉 Congratulations! Here’s a library of prompts to create standout social media content — everything you need to make your account grow and shine! 🚀
-
-✨ Collections for social media — get inspired, experiment, and wow your audience!
-
-🔥 Ready to dive in? Let the creativity begin!
-"""
-
     COMMANDS = """
 🤖 <b>Here's what you can explore:</b>
 
 ━ Common commands:
     ┣ 👋 /start - <b>About me</b>: Discover what I can do for you
-    ┣ 👤 /profile - <b>View your profile</b>: Check your subscription details or usage quota and more
-    ┣ 🌍 /language - <b>Switch languages</b>: Set your preferred language for system interface
+    ┣ 👤 /profile - <b>View your profile</b>: Check your usage quota or subscription details and more
+    ┣ 🌍 /language - <b>Switch languages</b>: Set your preferred language for the interface
     ┣ 💳 /buy - <b>Subscribe or buy packages</b>: Get a new level
-    ┣ 🎁 /bonus - Learn about your bonus balance and <b>exchange bonuses for unique generation packages</b>
-    ┣ 🔑 /promo_code - <b>Unleash exclusive AI features</b> and special offers with your <b>promo code</b>
+    ┣ 🎁 /bonus - Learn about your bonus balance and <b>exchange bonuses for generation packages</b>
+    ┣ 🔑 /promo_code - <b>Activate promo code</b> if you have it
     ┣ 📡 /feedback - <b>Leave feedback</b>: Help me improve
     ┗ 📄 /terms - <b>TOS</b>: Terms of Service
 
 ━ AI commands:
     ┣ 🤖 /mode - <b>Swap neural network models</b> on the fly with — <b>ChatGPT</b>, <b>Claude</b>, <b>Gemini</b>, <b>DALL-E</b>, <b>Midjourney</b>, <b>Stable Diffusion</b>, <b>FaceSwap</b>, <b>Photoshop AI</b>, <b>MusicGen</b>, or <b>Suno</b>!
     ┣ ℹ️ /info - <b>Get information about AI</b>: Learn for what and why do you need them
+    ┣ 📁 /catalog - <b>Catalog of roles and prompts</b>: Boost your communication efficiency with me
     ┣ 💥 /chatgpt - <b>Chat with ChatGPT</b>: Start a text conversation and receive advanced AI responses
     ┣ 🚀 /claude - <b>Chat with Claude</b>: Begin a discussion and explore the depth of responses from Claude
     ┣ ✨ /gemini - <b>Chat with Gemini</b>: Start chatting and immerse yourself in advanced answers from the new AI
@@ -140,16 +144,16 @@ Just type away a command to begin your AI journey! 🌟
 🤖 <b>Select the models type you want to get information about:</b>
 """
     INFO_TEXT_MODELS = """
-🤖 <b>Select the model you want to get information about:</b>
+🤖 <b>Select the text model you want to get information about:</b>
 """
     INFO_IMAGE_MODELS = """
-🤖 <b>Select the model you want to get information about:</b>
+🤖 <b>Select the graphic model you want to get information about:</b>
 """
     INFO_MUSIC_MODELS = """
-🤖 <b>Select the model you want to get information about:</b>
+🤖 <b>Select the music model you want to get information about:</b>
 """
     INFO_VIDEO_MODELS = """
-🤖 <b>Select the model you want to get information about:</b>
+🤖 <b>Select the video model you want to get information about:</b>
 """
     INFO_CHATGPT = """
 🤖 <b>There is what each model can do for you:</b>
@@ -319,43 +323,40 @@ Just type away a command to begin your AI journey! 🌟
     FEEDBACK = """
 🌟 <b>Your opinion matters!</b> 🌟
 
-Hey there! We're always looking to improve and your feedback is like gold dust to us 💬✨
+Hey there! I'm always looking to improve and your feedback is like gold dust to me ✨
 
-- Love something about our bot? Let us know!
-- Got a feature request? We're all ears!
-- Something bugging you? We're here to squash those bugs 🐞
+- Love something about me? Let me know 😊
+- Got a feature request? I'm all ears 🦻
+- Something bugging you? I'm here to squash those bugs 🐞
 
-Just type your thoughts and hit send. Your insights help us grow and get better every day.
-And remember, every piece of feedback is a step towards making our bot even more awesome. Can't wait to hear from you! 💌
+And remember, every piece of feedback is a step towards making me even more awesome. Can't wait to hear from you! 💌
 """
     FEEDBACK_SUCCESS = """
 🌟 <b>Feedback received!</b> 🌟
 
-Thank you for sharing your thoughts! 💌
-Your input is the secret sauce to our success. We're cooking up some improvements and your feedback is the key ingredient 🍳🔑
+Your input is the secret sauce to my success. I'm cooking up some improvements and your feedback is the key ingredient 🍳🔑
+I will add 25 credits to your balance after my creators check the content of the feedback, but in the meantime, happy chatting!
 
-Keep an eye out for updates and new features, all inspired by you. We will add 25 credits to your balance after the administrators check the content of the feedback, but in the meantime, happy chatting! 🚀
-
-Your opinion matters a lot to us! 💖
+Your opinion matters a lot to me! 💖
 """
     FEEDBACK_APPROVED = """
-🌟 <b>Feedback received!</b> 🌟
+🌟 <b>Feedback approved!</b> 🌟
 
 As a token of appreciation, your balance has increased by 25 credits 🪙! Use them to access exclusive functions or replenish the number of generations in neural networks 💸
 
 To use the bonus, enter the command /bonus and follow the instructions!
 """
     FEEDBACK_APPROVED_WITH_LIMIT_ERROR = """
-🌟 <b>Feedback received!</b> 🌟
+🌟 <b>Feedback approved!</b> 🌟
 
 Thanks to your efforts, we will improve the boat! But, unfortunately, we cannot award you a reward, as the limit of rewards for feedback has been exceeded
 
 Enter the /bonus command to learn about other ways to earn bonus credits. Keep sharing and enjoy every moment here! 🎉
 """
     FEEDBACK_DENIED = """
-🌟 <b>Feedback received!</b> 🌟
+🌟 <b>Feedback denied!</b> 🌟
 
-Unfortunately, your feedback was not constructive enough and we cannot increase your bonus balance 😢
+Unfortunately, your feedback was not constructive enough and I cannot increase your bonus balance 😢
 
 But don't worry! You can enter the command /bonus to see the other ways to top up the bonus balance!
 """
@@ -403,7 +404,7 @@ Once you've got the perfect shot, <b>upload your photo</b> and let the magic hap
     OPEN_BUY_PACKAGES_INFO = "🛍 Purchase Packages"
     CANCEL_SUBSCRIPTION = "❌ Cancel Subscription"
     CANCEL_SUBSCRIPTION_CONFIRMATION = "❗Are you sure you want to cancel the subscription?"
-    CANCEL_SUBSCRIPTION_SUCCESS = "💸 Subscription cancellation was successful!"
+    CANCEL_SUBSCRIPTION_SUCCESS = "💸 Subscription cancellation was successful"
     NO_ACTIVE_SUBSCRIPTION = "💸 You don't have an active subscription"
 
     # Language
@@ -414,9 +415,9 @@ Once you've got the perfect shot, <b>upload your photo</b> and let the magic hap
     BONUS_ACTIVATED_SUCCESSFUL = """
 🌟 <b>Bonus activated!</b> 🌟
 
-Congratulations! You've successfully used your bonus balance. Now, you can dive deeper into the world of artificial intelligence.
+Congrats! You've successfully used your bonus balance. Now, you can dive deeper into the world of artificial intelligence.
 
-Start using your generations right now and discover new horizons with our neural networks! 🚀
+Start using your generations right now and discover new horizons with my neural networks! 🚀
 """
     BONUS_CHOOSE_PACKAGE = "Choose how to spend your earnings:"
     INVITE_FRIEND = "👥 Invite a friend"
@@ -453,7 +454,7 @@ The dice of luck! If fortune favors you, you'll win 20 credits!
 
 When you hit the "Play" button, I’ll instantly roll the ball into the pins! Your chance of winning is 100%, because you’re guaranteed to earn credits. It all depends on how many pins I knock down — from 1 to 6. The number of pins knocked down equals your credits!
 
-Every throw is a win, but how big will your victory be? Find out now!
+Every throw is a win, but how big will your victory be?
 """
     PLAY_SOCCER_GAME = "⚽️ Play soccer"
     PLAY_SOCCER_GAME_DESCRIPTION = """
@@ -477,7 +478,7 @@ Will I nail this shot like a pro? Let’s find out after the throw!
 
 Hit "Play", and I’ll throw the dart straight at the target! There’s a ~16.67% chance of hitting the bullseye and winning — it’s not easy, but a victory will earn you 15 credits!
 
-Ready to take the risk and see how accurate I am? The dart is already in the air!
+Ready to take the risk and see how accurate I am?
 """
     PLAY_DICE_GAME = "🎲 Roll the dice"
     PLAY_DICE_GAME_CHOOSE = """
@@ -485,7 +486,7 @@ Ready to take the risk and see how accurate I am? The dart is already in the air
 
 Pick a number from 1 to 6, and I’ll roll the dice! If you guess the number that comes up, you’ll win a solid 20 credits. But the odds of winning are 1 in 6.
 
-Can you sense your luck and guess which number will land? One roll, and it’s all decided!
+Can you sense your luck and guess which number will land?
 """
     PLAY_CASINO_GAME = "🎰 Play at casino"
     PLAY_CASINO_GAME_DESCRIPTION = """
@@ -518,16 +519,16 @@ Come back and show us what you’ve got! 👏
 """
     CASH_OUT = "🛍 Cash out credits"
     REFERRAL_SUCCESS = """
-🌟 <b>Congratulations! Your referral magic worked!</b> 🌟
+🌟 <b>Congrats! Your referral magic worked!</b> 🌟
 
-Thanks to you, a new user has joined us, and as a token of our appreciation, your and your friend's balance has been increased by 25 credits 🪙! Use them to access exclusive features or to add more generations in the neural networks 💸
+Thanks to you, a new user has joined, and as a token of my appreciation, your and your friend's balance has been increased by 25 credits 🪙! Use them to access exclusive features or to add more generations in the neural networks 💸
 
 To use the bonus, enter the /bonus command and follow the instructions. Let every invitation bring you not only the joy of communication but also pleasant bonuses!
 """
     REFERRAL_LIMIT_ERROR = """
-🌟 <b>Congratulations! Your referral magic worked!</b> 🌟
+🌟 <b>Congrats! Your referral magic worked!</b> 🌟
 
-Thanks to your efforts, a new user has joined us! Unfortunately, we cannot award you a reward, as the limit of rewards for inviting friends has been exceeded
+Thanks to your efforts, a new user has joined! Unfortunately, we cannot award you a reward, as the limit of rewards for inviting friends has been exceeded
 
 Enter the /bonus command to learn about other ways to earn bonus credits. Keep sharing and enjoy every moment here! 🎉
 """
@@ -544,7 +545,9 @@ If you've got a <b>promo code</b>, just type it in to reveal hidden features and
     PROMO_CODE_SUCCESS = """
 🎉 <b>Your promo code has been successfully activated!</b> 🌟
 
-Get ready to dive into a world of AI wonders with your shiny new perks. Happy exploring! 🚀
+Get ready to dive into a world of AI wonders with your shiny new perks
+
+Happy exploring! 🚀
 """
     PROMO_CODE_ALREADY_HAVE_SUBSCRIPTION = """
 🚫 <b>Whoopsie-daisy!</b> 🙈
@@ -554,26 +557,23 @@ Looks like you're already part of our exclusive subscriber's club! 🌟
     PROMO_CODE_EXPIRED_ERROR = """
 🕒 <b>Whoops, time's up on this promo code!</b>
 
-Looks like this promo code has hit its expiration date 📆. It's like a Cinderella story, but without the glass slipper 🥿
-But hey, don't lose heart! You can still explore our other magical offers with /buy or /bonus. There's always something exciting waiting for you in our AI wonderland! 🎩✨
+Looks like this promo code has hit its expiration date. It's like a Cinderella story, but without the glass slipper 🥿
 
-Stay curious and let the AI adventure continue! 🌟🚀
+But hey, don't lose heart! You can still explore our other magical offers just hit the button below:
 """
     PROMO_CODE_NOT_FOUND_ERROR = """
 🔍 <b>Oops, promo code not found!</b>
 
-It seems like the promo code you entered is playing hide and seek with us 🕵️‍♂️. We couldn't find it in our system 🤔
-Double-check for any typos and give it another go. If it's still a no-show, maybe it's time to hunt for another code or check out our /buy options for some neat deals 🛍️
+It seems like the promo code you entered is playing hide and seek with me cuz I couldn't find it in my system 🕵️‍♂️
 
-Keep your spirits high, and let's keep the AI fun rolling! 🚀🎈
+🤔 Double-check for any typos and give it another go. If it's still a no-show, maybe it's time to hunt for another code or check out our /buy options for some neat deals 🛍️
 """
     PROMO_CODE_ALREADY_USED_ERROR = """
 🚫 <b>Oops, déjà vu!</b>
 
 Looks like you've already used this promo code. It's a one-time magic spell, and it seems you've already cast it! ✨🧙
-No worries, though! You can check out our latest offers with /buy or /bonus. There's always a new trick up our AI sleeve! 🎉🔮
 
-Keep exploring and let the AI surprises continue! 🤖
+No worries, though! You can check out our latest offers with clicking one of the buttons below:
 """
 
     # AI
@@ -581,156 +581,31 @@ Keep exploring and let the AI surprises continue! 🤖
 To change a model click a button below 👇
 """
     CHOOSE_CHATGPT_MODEL = """
-To choose a ChatGPT model click a button below 👇
+To choose a <b>ChatGPT 💭</b> model click a button below 👇
 """
     CHOOSE_CLAUDE_MODEL = """
-To choose a Claude model click a button below 👇
+To choose a <b>Claude 📄</b> model click a button below 👇
 """
     CHOOSE_GEMINI_MODEL = """
-To choose a Gemini model click a button below 👇
+To choose a <b>Gemini ✨</b> model click a button below 👇
 """
     SWITCHED_TO_AI_SETTINGS = "⚙️ Go to Model's Settings"
-    SWITCHED_TO_AI_INFO = "ℹ️ What Can This Model Do"
-    SWITCHED_TO_CHATGPT4_OMNI_MINI = """
-🤖 <b>Welcome to the world of ChatGPT 4.0 Omni Mini!</b>
-
-You've successfully switched to the <b>ChatGPT 4.0 Omni Mini</b> model. Consider this your personal virtual brain, ready to handle all your questions and ideas. Feel free to write anything - from simple queries to complex tasks. And don't worry, your previous conversations are stored in memory, so the context of your dialogue won't be lost
-
-Go ahead, explore the capabilities of <b>ChatGPT 4.0 Omni Mini</b>! 🎉
-"""
-    SWITCHED_TO_CHATGPT4_OMNI = """
-💥 <b>Welcome to a new era with ChatGPT 4.0 Omni!</b>
-
-You have successfully switched to the <b>ChatGPT 4.0 Omni</b> model. This is the pinnacle of artificial intelligence innovation! <b>ChatGPT 4.0 Omni</b> surpasses previous models in depth of understanding and breadth of capabilities. Dive into an enhanced AI interaction experience. Your previous conversation history has been preserved, so we can pick up right where we left off.
-
-Embark on an exciting journey with <b>ChatGPT 4.0 Omni</b>! 🎉
-"""
-    SWITCHED_TO_CHAT_GPT_O_1_MINI = """
-🧩 <b>Welcome to the world of ChatGPT o1-mini!</b>
-
-You have successfully switched to <b>ChatGPT o1-mini</b> — your quick and precise assistant for tackling complex tasks! <b>ChatGPT o1-mini</b> excels at deep analysis and logical reasoning, making it the perfect choice for tasks that require attention to detail and well-structured conclusions. Despite its compact nature, its intellectual capabilities are truly impressive.
-
-Dive into a new level of AI interaction with <b>ChatGPT o1-mini</b>! 🎉
-"""
-    SWITCHED_TO_CHAT_GPT_O_1_PREVIEW = """
-🧪 <b>Welcome to the world of ChatGPT o1-preview!</b>
-
-You have successfully switched to <b>ChatGPT o1-preview</b> — your forward-thinking assistant, specially designed for complex reasoning and analysis! <b>ChatGPT o1-preview</b> offers advanced capabilities in logical solutions and scientific hypotheses, making it indispensable for finding precise and well-thought-out answers.
-
-Explore new horizons with <b>ChatGPT o1-preview</b>! 🎉
-"""
-    SWITCHED_TO_CLAUDE_3_HAIKU = """
-📜 <b>Welcome to the world of Claude 3.5 Haiku!</b>
-
-You have successfully switched to <b>Claude 3.5 Haiku</b> — the master of brevity and precision. <b>Claude 3.5 Haiku</b> is designed for moments when you need quick, concise, and wise answers. Its strength lies in its ability to process information with succinct depth, making it perfect for creative tasks and instant solutions.
-
-Enjoy the art of brevity with <b>Claude 3.5 Haiku</b>! 🎉
-"""
-    SWITCHED_TO_CLAUDE_3_SONNET = """
-💫 <b>Welcome to the world of Claude 3.5 Sonnet!</b>
-
-You have successfully switched to the <b>Claude 3.5 Sonnet</b> model. A master of balanced intelligence and speed! This model is perfectly suited for corporate tasks, combining quick responsiveness with deep analysis. Your experience will be enhanced by the preserved conversation history, allowing you to continue the dialogue without losing context.
-
-Experience a new level of interaction with <b>Claude 3.5 Sonnet</b>! 🎉
-"""
-    SWITCHED_TO_CLAUDE_3_OPUS = """
-🚀 <b>Welcome to the world of Claude 3.0 Opus!</b>
-
-You have successfully switched to the <b>Claude 3.0 Opus</b> model. This is the peak of technological power for the most complex tasks! This model offers unprecedented depth of understanding and the ability to solve the most challenging problems. Your previous conversation history has been preserved, ensuring a seamless continuation of communication.
-
-Prepare for an advanced experience with <b>Claude 3.0 Opus</b>! 🎉
-"""
-    SWITCHED_TO_GEMINI_1_FLASH = """
-🏎 <b>Welcome to the world of Gemini 1.5 Flash!</b>
-
-You’ve successfully switched to the <b>Gemini 1.5 Flash</b> model, designed for those who value speed and efficiency! This model is perfect for tasks requiring instant analysis and quick decisions. Expect rapid responses and seamless performance with <b>Gemini 1.5 Flash</b>!
-
-Get ready for lightning-fast results and a new level of productivity! 🎉
-"""
-    SWITCHED_TO_GEMINI_1_PRO = """
-💼 <b>Welcome to the world of Gemini 1.5 Pro!</b>
-
-You’ve successfully switched to the <b>Gemini 1.5 Pro</b> model — a powerful tool for tackling complex tasks! This model excels at deep analysis, handling large data volumes, and delivering precise solutions. Maximum performance and advanced intelligence are now at your fingertips!
-
-Experience a professional level of productivity with <b>Gemini 1.5 Pro</b>! 🎉
-"""
-    SWITCHED_TO_GEMINI_1_ULTRA = """
-🛡 <b>Welcome to the world of Gemini 1.0 Ultra!</b>
-
-You have successfully switched to <b>Gemini 1.0 Ultra</b> — your powerful ally for the most complex and ambitious tasks! <b>Gemini 1.0 Ultra</b> represents the pinnacle of intellectual strength, ready to tackle deep research, precise calculations, and creative challenges at the highest level.
-
-Unlock a new level of interaction with <b>Gemini 1.0 Ultra</b>! 🎉
-"""
-    SWITCHED_TO_DALL_E = """
-👨‍🎨 <b>Welcome to the world of DALL-E!</b>
-
-You've switched to the <b>DALL-E</b> model — your personal AI artist. Now, you can request to have any image drawn, whatever comes to your mind. Just describe your idea in a single message, and <b>DALL-E</b> will transform it into a visual masterpiece. Note: each new message is processed individually, previous request contexts are not considered
-
-Time to create! 🎉
-"""
-    SWITCHED_TO_MIDJOURNEY = """
-🎨 <b>Welcome to the world of Midjourney!</b>
-
-You have successfully switched to the <b>Midjourney</b> model — this is your personal guide to the world of creative visualizations. Now you can instruct her to create any image that you can think of. Just describe your idea in one message, and <b>Midjourney</b> will bring it to life in a unique visual style. Please note that each of your requests is processed individually and is not related to the previous ones.
-
-Time to create! 🎉
-"""
-    SWITCHED_TO_STABLE_DIFFUSION = """
-🎆 <b>Welcome to the world of Stable Diffusion 3.5!</b>
-
-You've successfully switched to the <b>Stable Diffusion</b> model — the perfect tool for generating unique images! This model allows you to bring visual ideas to life with high detail and a variety of artistic styles. Turn text into masterpieces and push the boundaries of your creativity!
-
-Time to create! 🎉
-"""
-    SWITCHED_TO_FLUX = """
-🫐 <b>Welcome to the world of Flux 1.1 Pro!</b>
-
-You've successfully switched to the <b>Flux</b> model.
-
-Time to create! 🎉
-"""
-    SWITCHED_TO_FACE_SWAP = """
-🎭 <b>Welcome to the world of FaceSwap!</b>
-
-You've switched to the <b>FaceSwap</b> model — where faces switch places as if by magic. Here, you can choose images from our unique packages or send your own photo. Want to see yourself in the guise of a celebrity or a movie character? Just select or send the desired image, and let <b>FaceSwap</b> work its magic
-
-Your new face awaits! 🎉
-"""
-    SWITCHED_TO_PHOTOSHOP_AI = """
-🪄 <b>Welcome to the world of Photoshop AI!</b>
-
-You have successfully switched to <b>Photoshop AI</b> — your personal photo magic expert! <b>Photoshop AI</b> can restore old photos, bring black-and-white images to life with color, and instantly remove backgrounds from your pictures. Harness the power of intelligent editing right now!
-
-It's time to create! 🎉
-"""
-    SWITCHED_TO_MUSIC_GEN = """
-🎺 <b>Welcome to the world of MusicGen!</b>
-
-You've switched to the <b>MusicGen</b> model — a marvelous world where music is born before your eyes. Create a unique melody by sharing your mood or idea for a composition. From a classical symphony to a modern beat, <b>MusicGen</b> will help you turn your musical dreams into reality.
-
-Let every note tell your story! 🎶
-"""
-    SWITCHED_TO_SUNO = """
-🎸 <b>Welcome to the world of Suno!</b>
-
-You've switched to the <b>Suno</b> model — your personal music producer. Here, you can turn your textual descriptions into full-fledged songs. Write a lyrics, specify your desired style, and <b>Suno</b> will craft a unique song for you. From soft ballads to dynamic hits, Suno has the ability to bring your musical vision to life.
-
-It's time to express your emotions through music! 🎶
-"""
+    SWITCHED_TO_AI_INFO = "ℹ️ Learn More About This Model"
+    SWITCHED_TO_AI_EXAMPLES = "💡 Show Examples"
     ALREADY_SWITCHED_TO_THIS_MODEL = """
 🔄 <b>Oops, looks like everything stayed the same!</b>
 
 You've selected the same model that's already active. Don't worry, your digital universe remains unchanged. You can continue chatting or creating as usual. If you want to switch things up, simply choose a different model using /mode
 
-Either way, we're here to help! 🛟
+Either way, I'm here to help! 🛟
 """
     REQUEST_FORBIDDEN_ERROR = """
 <b>Oops! Your request just bumped into our safety guardian!</b> 🚨
 
-It seems there's something in your request that our vigilant content defender decided to block 🛑
+It seems there's something in your request that my coworker vigilant content defender decided to block 🛑
 Please check your text for any forbidden content and try again!
 
-Our goal is safety and respect for every user! 🌟
+My goal is safety and respect for every user! 🌟
 """
     PHOTO_FORBIDDEN_ERROR = "I don't know how to work with photos in this AI model yet 👀"
     ALBUM_FORBIDDEN_ERROR = "In the current AI model, I can't process multiple photos at once, please send one 🙂"
@@ -752,6 +627,13 @@ Your today's quota for the current model has just done a Houdini and disappeared
     REMOVE_RESTRICTION = "⛔️ Remove the Restriction"
     REMOVE_RESTRICTION_INFO = "To remove the restriction, choose one of the actions 👇"
     IMAGE_SUCCESS = "✨ Here's your image creation! 🎨"
+    FILE_TOO_BIG_ERROR = """
+🚧 <b>Oops!</b>
+
+The file you sent is too large. I can only process files smaller than 20MB.
+
+Please try again with a smaller file 😊
+"""
 
     # Examples
     CHATGPT4_OMNI_EXAMPLE = "👇 This is how *ChatGPT 4.0 Omni* would respond to your request 💥"
@@ -832,37 +714,34 @@ To ensure your song in custom mode matches your preferences, please specify the 
     MUSIC_GEN_INFO = """
 Your musical workshop 🎹
 
-Open the door to a world where every idea of yours turns into music! With <b>MusicGen</b>, your imagination is the only limit. We're ready to transform your words and descriptions into unique melodies 🎼
+Open the door to a world where every idea of yours turns into music! With <b>MusicGen</b>, your imagination is the only limit. I'm ready to transform your words and descriptions into unique melodies 🎼
 
-Tell us what kind of music you want to create. Use words to describe its style, mood, and instruments. You don't need to be a professional - just share your idea, and let's bring it to life together! 🎤
+Tell me what kind of music you want to create. Use words to describe its style, mood, and instruments. You don't need to be a professional - just share your idea, and let's bring it to life together! 🎤
 """
     MUSIC_GEN_TYPE_SECONDS = """
 <b>How many seconds in your symphony?</b> ⏳
 
 Fantastic! Your melody idea is ready to come to life. Now, the exciting part: how much time do we give this musical magic to unfold in all its glory? <b>MusicGen</b> awaits your decision 🎼
 
-Write or choose the duration of your composition in seconds. Whether it's a flash of inspiration or an epic odyssey, we're ready to create! ✨
+Write or choose the duration of your composition in seconds. Whether it's a flash of inspiration or an epic odyssey, I'm ready to create! ✨
 """
     MUSIC_GEN_MIN_ERROR = """
 🤨 <b>Hold on there, partner!</b>
 
-Looks like you're trying to request fewer than 1 second. In the world of creativity, we need at least 1 to get the ball rolling!
+Looks like you're trying to request fewer than 1 second. In the world of creativity, I need at least 1 to get the ball rolling!
 
-🌟 <b>Tip</b>: Type a number greater than 0 to start the magic. Let's unleash those creative ideas!
+🌟 <b>Tip</b>: Type a number greater than 0 to start the magic!
 """
     MUSIC_GEN_MAX_ERROR = """
 🤨 <b>Hold on there, partner!</b>
 
-Кажется, вы хотите запросить больше 5 минут, я пока не умею генерировать больше!
-Looks like you're trying to request more than 5 minutes, I can't generate more yet!
+Looks like you're trying to request more than 3 minutes, I can't generate more yet!
 
-🌟 <b>Tip</b>: Type a number less than 300 to start the magic. Let's unleash those creative ideas!
+🌟 <b>Tip</b>: Type a number less than 180 to start the magic!
 """
     SECONDS_30 = "🔹 30 seconds"
     SECONDS_60 = "🔹 60 seconds (1 minute)"
     SECONDS_180 = "🔹 180 seconds (3 minutes)"
-    SECONDS_240 = "🔹 240 seconds (4 minutes)"
-    SECONDS_300 = "🔹 300 seconds (5 minutes)"
 
     # Settings
     SETTINGS_CHOOSE_MODEL_TYPE = """
@@ -887,9 +766,7 @@ Choose the model you want to personalize for yourself below 👇
     VOICE_MESSAGES_FORBIDDEN = """
 🎙 <b>Oops! Seems like your voice went into the AI void!</b>
 
-To unlock the magic of voice-to-text, simply wave your wand with /buy or /bonus
-
-Let's turn those voice messages into text and keep the conversation flowing! 🌟🔮
+To unlock the magic of voice-to-text, simply wave your wand with buttons below:
 """
 
     # Payment
@@ -955,25 +832,22 @@ Keep unleashing the power of AI and remember, we're here to make your digital dr
 🛑 <b>Subscription expired!</b>
 
 Your subscription has come to an end. But don't worry, the AI journey isn't over yet! 🚀
-You can renew your magic pass with /buy or /bonus to keep exploring the AI universe or, if you prefer, take a peek for some tailor-made individual packages 🎁
 
-The AI adventure awaits! Recharge, regroup, and let's continue this exciting journey together. 🤖✨
+You can renew your magic pass with clicking one of the buttons below to keep exploring the AI universe:
 """
     PACKAGES_END = """
 🕒 <b>Your package or packages time is up!</b> ⌛
 
 Oops, it looks like your fast messages (or voice messages, catalog access) package has run its course. But don't worry, new opportunities always await beyond the horizon!
 
-🎁 Want to continue? Check out our offers or consider a subscription via /buy or /bonus. More exciting moments are ahead!
-
-🚀 Ready for a fresh start? Rejoin and dive back into the world of amazing AI possibilities!
+🎁 Want to continue? Check out my offers by hitting one of the buttons below:
 """
     CHATS_RESET = """
 🔄 <b>Chats updated!</b> 💬
 
 Your chats have switched their unique roles to "Personal Assistant" as your access to the role catalog has ended. But don't worry, your AI helpers are still here to keep the conversation going!
 
-🎁 Want your previous roles back? Visit /buy or /bonus to purchase a new package or subscribe for unlimited access to the catalog
+🎁 Want your previous roles back? Click one of the button below to purchase a new package or subscribe for unlimited access
 """
 
     # Package
@@ -1017,20 +891,92 @@ Remember, with great power comes great... well, you know how it goes. Let's make
     # Catalog
     MANAGE_CATALOG = "Manage catalog 🎭"
     CATALOG = """
+📁 <b>Welcome to the Catalog of Possibilities!</b>
+
+Here you’ll find a collection of digital assistant roles and a prompt library for inspiration.
+
+It’s all in your hands – just press the button 👇
+"""
+    CATALOG_DIGITAL_EMPLOYEES = "Roles Catalog 🎭"
+    CATALOG_DIGITAL_EMPLOYEES_INFO = """
 🎭 <b>Step right up to our role catalogue extravaganza!</b> 🌟
 
-Ever dreamt of having an AI sidekick specialized just for you? Our catalog is like a magical wardrobe, each role a unique outfit tailored for your adventures in AI land! 🧙‍♂️✨
-Choose from an array of AI personas, each with its own flair and expertise. Whether you need a brainstorm buddy, a creative muse, or a factual wizard, we've got them all!
+Choose from an array of AI personas, each with its own flair and expertise 🎩
 
-👉 Ready to meet your match? Just hit the button below and let the magic begin! 🎩👇
+Just hit the button below 👇
 """
+    CATALOG_PROMPTS = "Prompts Catalog 🗯"
+    CATALOG_PROMPTS_CHOOSE_MODEL_TYPE = """
+🗯 <b>Welcome to the Prompts Catalog!</b>
+
+Text, graphic, and musical models are ready to inspire you
+
+Simply choose the type you need by clicking the button below 👇
+"""
+    CATALOG_PROMPTS_CHOOSE_CATEGORY = """
+🗯 <b>Prompts Catalog</b>
+
+Select the <b>category</b> you need by clicking the button below 👇
+"""
+    CATALOG_PROMPTS_CHOOSE_SUBCATEGORY = """
+🗯 <b>Prompts Catalog</b>
+
+Select the <b>subcategory</b> you need by clicking the button below 👇
+"""
+
+    @staticmethod
+    def catalog_prompts_choose_prompt(prompts: list[Prompt]):
+        prompt_info = ''
+        for index, prompt in enumerate(prompts):
+            is_last = index == len(prompts) - 1
+            left_part = '┣' if not is_last else '┗'
+            right_part = '\n' if not is_last else ''
+            prompt_info += f'    {left_part} <b>{index + 1}</b>: {prompt.names.get(LanguageCode.EN)}{right_part}'
+
+        return f"""
+🗯 <b>Prompts Catalog</b>
+
+Prompts:
+{prompt_info}
+
+Select the <b>prompt number</b> to get the full prompt by clicking the button below 👇
+"""
+
+    @staticmethod
+    def catalog_prompts_info_prompt(prompt: Prompt):
+        return f"""
+🗯 <b>Prompt Catalog</b>
+
+You have selected the prompt: <b>{prompt.names.get(LanguageCode.EN)}</b>
+
+Choose what you want to do by clicking the button below 👇
+"""
+
+    CATALOG_PROMPTS_GET_SHORT_PROMPT = "Get Short Prompt ⚡️"
+    CATALOG_PROMPTS_GET_LONG_PROMPT = "Get Long Prompt 📜"
+    CATALOG_PROMPTS_GET_EXAMPLES = "Get Prompt Results 👀"
+    CATALOG_PROMPTS_COPY = "Copy This Prompt 📋"
+
+    @staticmethod
+    def catalog_prompts_examples(products: list[Product]):
+        prompt_examples_info = ''
+        for index, product in enumerate(products):
+            is_last = index == len(products) - 1
+            is_first = index == 0
+            left_part = '┣' if not is_last else '┗'
+            right_part = '\n' if not is_last else ''
+            prompt_examples_info += f'{left_part if not is_first else "┏"} <b>{index + 1}</b>: {product.names.get(LanguageCode.EN)}{right_part}'
+
+        return f"""
+{prompt_examples_info}
+"""
+
     CATALOG_FORBIDDEN_ERROR = """
 🔒 <b>Whoops! Looks like you've hit a VIP-only zone!</b> 🌟
 
-You're just a click away from unlocking our treasure trove of AI roles, but it seems you don't have the golden key yet. No worries, though! You can grab it easily.
-🚀 Head over to /buy for some fantastic subscription options, or check out packages if you're in the mood for some a la carte AI delights.
+You're just a click away from unlocking my treasure trove of AI roles, but it seems you don't have the golden key yet
 
-Once you're all set up, our catalog of AI wonders will be waiting for you – your ticket to an extraordinary world of AI possibilities! 🎫✨
+No worries, though! You can grab it easily just hitting one of the buttons below:
 """
     CREATE_ROLE = "Create a new role"
 
@@ -1044,7 +990,7 @@ Once you're all set up, our catalog of AI wonders will be waiting for you – yo
 
 Looks like you've hit the limit for creating new chats. But don't worry, the world of endless chats is just a click away! 🌍✨
 
-Head over to /buy or /bonus to unlock the power of multiple chats. More chats, more fun! 🎉
+To unlock the power of multiple chats just choose one of the buttons below:
 """
     CREATE_CHAT_SUCCESS = "💬 Chat created! 🎉\n👌 Don't forget to switch to a new one using /chats"
     TYPE_CHAT_NAME = "Type your chat name"
@@ -1054,7 +1000,7 @@ Head over to /buy or /bonus to unlock the power of multiple chats. More chats, m
 
 You're currently in your one and only chat universe. It's a cozy place, but why not expand your horizons? 🌌
 
-To hop between multiple thematic chats, just get your pass from /buy or /bonus. Let the chat-hopping begin! 🐇
+To hop between multiple thematic chats, just get your pass by clicking one of the buttons below:
 """
     SWITCH_CHAT_SUCCESS = "Chat successfully switched! 🎉"
     RESET_CHAT = "Reset chat ♻️"
@@ -1075,9 +1021,9 @@ Now, like a goldfish, I don't remember what was said before 🐠
     DELETE_CHAT_FORBIDDEN = """
 🗑️ <b>Delete this chat? That's lonely talk!</b> 💬
 
-This is your sole chat kingdom, and a kingdom needs its king or queen! Deleting it would be like canceling your own party. 🎈
+This is your sole chat kingdom, and a kingdom needs its king or queen! Deleting it would be like canceling your own party 🎈
 
-How about adding more chats to your realm instead? Check out /buy or /bonus to build your chat empire! 👑
+How about adding more chats to your realm instead? Check out buttons below to build your chat empire:
 """
     DELETE_CHAT_SUCCESS = "🗑️ Chat successfully deleted! 🎉"
 
@@ -1093,7 +1039,7 @@ Ready? Let's dive into a world of imagination! 🚀
 🎨 <b>Wow, you've used up all your generations in our packages! Your creativity is astounding!</b> 🌟
 
 What's next?
-- 📷 Send us photos with faces for face swapping in FaceSwap!
+- 📷 Send me photos with faces for face swapping in FaceSwap!
 - 🔄 Or switch models via /mode to continue creating with other AI tools!
 
 Time for new AI discoveries! 🚀
@@ -1101,7 +1047,7 @@ Time for new AI discoveries! 🚀
     FACE_SWAP_MIN_ERROR = """
 🤨 <b>Hold on there, partner!</b>
 
-Looks like you're trying to request fewer than 1 image. In the world of creativity, we need at least 1 to get the ball rolling!
+Looks like you're trying to request fewer than 1 image. In the world of creativity, I need at least 1 to get the ball rolling!
 
 🌟 <b>Tip</b>: Type a number greater than 0 to start the magic. Let's unleash those creative ideas!
 """
@@ -1160,6 +1106,8 @@ Please try again 🥺
     CLOSE = "Close 🚪"
     CANCEL = "Cancel ❌"
     APPROVE = "Approve ✅"
+    IMAGE = "Image 🖼"
+    DOCUMENT = "Document 📄"
     AUDIO = "Audio 🔈"
     VIDEO = "Video 📹"
     SKIP = "Skip ⏩️"
@@ -1253,7 +1201,7 @@ Currently, the total purchase amount is: <b>{left_part_price}{current_price}{rig
 
 💱 <b>Current currency: {current_currency}</b>
 💳 <b>Subscription type:</b> {subscription_name}
-🗓 <b>Subscription renewal date:</b> {renewal_date}
+🗓 <b>Subscription renewal date:</b> {f'{renewal_date}' if subscription_name != '🆓' else 'N/A'}
 {subscription_info}
 
 ---------------------------
@@ -1272,72 +1220,43 @@ Choose action 👇
         return f"""
 <b>Quota:</b>
 
-🔤 Text models:
-━ 💭 <b>ChatGPT</b>:
-    ┣ ✉️ 4.0 Omni Mini:
-        ┣ {format_number(daily_limits[Quota.CHAT_GPT4_OMNI_MINI])}/{format_number(subscription_limits[Quota.CHAT_GPT4_OMNI_MINI])}
-        ┗ Extra: {additional_usage_quota[Quota.CHAT_GPT4_OMNI_MINI]}
-    ┣ 💥 4.0 Omni:
-        ┣ {format_number(daily_limits[Quota.CHAT_GPT4_OMNI])}/{format_number(subscription_limits[Quota.CHAT_GPT4_OMNI])}
-        ┗ Extra: {additional_usage_quota[Quota.CHAT_GPT4_OMNI]}
-    ┣ 🧩 o1-mini:
-        ┣ {format_number(daily_limits[Quota.CHAT_GPT_O_1_MINI])}/{format_number(subscription_limits[Quota.CHAT_GPT_O_1_MINI])}
-        ┗ Extra: {additional_usage_quota[Quota.CHAT_GPT_O_1_MINI]}
-    ┗ 🧪 o1-preview:
-        ┣ {format_number(daily_limits[Quota.CHAT_GPT_O_1_PREVIEW])}/{format_number(subscription_limits[Quota.CHAT_GPT_O_1_PREVIEW])}
-        ┗ Extra: {additional_usage_quota[Quota.CHAT_GPT_O_1_PREVIEW]}
-━ 📄 <b>Claude</b>:
-    ┣ 📜 3.5 Haiku:
-        ┣ {format_number(daily_limits[Quota.CLAUDE_3_HAIKU])}/{format_number(subscription_limits[Quota.CLAUDE_3_HAIKU])}
-        ┗ Extra: {additional_usage_quota[Quota.CLAUDE_3_HAIKU]}
-    ┣ 💫 3.5 Sonnet:
-        ┣ {format_number(daily_limits[Quota.CLAUDE_3_SONNET])}/{format_number(subscription_limits[Quota.CLAUDE_3_SONNET])}
-        ┗ Extra: {additional_usage_quota[Quota.CLAUDE_3_SONNET]}
-    ┗ 🚀 Claude 3.0 Opus:
-        ┣ {format_number(daily_limits[Quota.CLAUDE_3_OPUS])}/{format_number(subscription_limits[Quota.CLAUDE_3_OPUS])}
-        ┗ Extra: {additional_usage_quota[Quota.CLAUDE_3_OPUS]}
-━ ✨ <b>Gemini</b>:
-    ┣ 🏎 Gemini 1.5 Flash:
-        ┣ {format_number(daily_limits[Quota.GEMINI_1_FLASH])}/{format_number(subscription_limits[Quota.GEMINI_1_FLASH])}
-        ┗ Extra: {additional_usage_quota[Quota.GEMINI_1_FLASH]}
-    ┣ 💼 Gemini 1.5 Pro:
-        ┣ {format_number(daily_limits[Quota.GEMINI_1_PRO])}/{format_number(subscription_limits[Quota.GEMINI_1_PRO])}
-        ┗ Extra: {additional_usage_quota[Quota.GEMINI_1_PRO]}
-    ┗ 🛡️ Gemini 1.0 Ultra:
-        ┣ {format_number(daily_limits[Quota.GEMINI_1_ULTRA])}/{format_number(subscription_limits[Quota.GEMINI_1_ULTRA])}
-        ┗ Extra: {additional_usage_quota[Quota.GEMINI_1_ULTRA]}
+🔤 <b>Text Models</b>:
+━ <b>Basic</b>:
+    ┣ Daily Limits: {format_number(daily_limits[Quota.CHAT_GPT4_OMNI_MINI])}/{format_number(subscription_limits[Quota.CHAT_GPT4_OMNI_MINI])}
+    ┣ ✉️ ChatGPT 4.0 Omni Mini{f': extra {additional_usage_quota[Quota.CHAT_GPT4_OMNI_MINI]}' if additional_usage_quota[Quota.CHAT_GPT4_OMNI_MINI] > 0 else ''}
+    ┣ 📜 Claude 3.5 Haiku{f': extra {additional_usage_quota[Quota.CLAUDE_3_HAIKU]}' if additional_usage_quota[Quota.CLAUDE_3_HAIKU] > 0 else ''}
+    ┗ 🏎 Gemini 1.5 Flash{f': extra {additional_usage_quota[Quota.GEMINI_1_FLASH]}' if additional_usage_quota[Quota.GEMINI_1_FLASH] > 0 else ''}
+
+━ <b>Advanced</b>:
+    ┣ Daily Limits: {format_number(daily_limits[Quota.CHAT_GPT4_OMNI])}/{format_number(subscription_limits[Quota.CHAT_GPT4_OMNI])}
+    ┣ 💥 ChatGPT 4.0 Omni{f': extra {additional_usage_quota[Quota.CHAT_GPT4_OMNI]}' if additional_usage_quota[Quota.CHAT_GPT4_OMNI] > 0 else ''}
+    ┣ 🧩 ChatGPT o1-mini{f': extra {additional_usage_quota[Quota.CHAT_GPT_O_1_PREVIEW]}' if additional_usage_quota[Quota.CHAT_GPT_O_1_PREVIEW] > 0 else ''}
+    ┣ 💫 Claude 3.5 Sonnet{f': extra {additional_usage_quota[Quota.CLAUDE_3_SONNET]}' if additional_usage_quota[Quota.CLAUDE_3_SONNET] > 0 else ''}
+    ┗ 💼 Gemini 1.5 Pro{f': extra {additional_usage_quota[Quota.GEMINI_1_PRO]}' if additional_usage_quota[Quota.GEMINI_1_PRO] > 0 else ''}
+
+━ <b>Flagship</b>:
+    ┣ Daily Limits: {format_number(daily_limits[Quota.CHAT_GPT_O_1_PREVIEW])}/{format_number(subscription_limits[Quota.CHAT_GPT_O_1_PREVIEW])}
+    ┣ 🧪 ChatGPT o1-preview{f': extra {additional_usage_quota[Quota.CHAT_GPT_O_1_PREVIEW]}' if additional_usage_quota[Quota.CHAT_GPT_O_1_PREVIEW] > 0 else ''}
+    ┣ 🚀 Claude 3.0 Opus{f': extra {additional_usage_quota[Quota.CLAUDE_3_OPUS]}' if additional_usage_quota[Quota.CLAUDE_3_OPUS] > 0 else ''}
+    ┗ 🛡️ Gemini 1.0 Ultra{f': extra {additional_usage_quota[Quota.GEMINI_1_ULTRA]}' if additional_usage_quota[Quota.GEMINI_1_ULTRA] > 0 else ''}
 
 ---------------------------
 
-🖼 Image models:
-━ 👨‍🎨 <b>DALL-E</b>:
-    ┣ {format_number(daily_limits[Quota.DALL_E])}/{format_number(subscription_limits[Quota.DALL_E])}
-    ┗ Extra: {additional_usage_quota[Quota.DALL_E]}
-━ 🎨 <b>Midjourney</b>:
-    ┣ {format_number(daily_limits[Quota.MIDJOURNEY])}/{format_number(subscription_limits[Quota.MIDJOURNEY])}
-    ┗ Extra: {additional_usage_quota[Quota.MIDJOURNEY]}
-━ 🎆 <b>Stable Diffusion</b>:
-    ┣ {format_number(daily_limits[Quota.STABLE_DIFFUSION])}/{format_number(subscription_limits[Quota.STABLE_DIFFUSION])}
-    ┗ Extra: {additional_usage_quota[Quota.STABLE_DIFFUSION]}
-━ 🫐 <b>Flux</b>:
-    ┣ {format_number(daily_limits[Quota.FLUX])}/{format_number(subscription_limits[Quota.FLUX])}
-    ┗ Extra: {additional_usage_quota[Quota.FLUX]}
-━ 📷 <b>FaceSwap</b>:
-    ┣ {format_number(daily_limits[Quota.FACE_SWAP])}/{format_number(subscription_limits[Quota.FACE_SWAP])}
-    ┗ Extra: {additional_usage_quota[Quota.FACE_SWAP]}
-━ 🪄 <b>Photoshop AI</b>:
-    ┣ {format_number(daily_limits[Quota.PHOTOSHOP_AI])}/{format_number(subscription_limits[Quota.PHOTOSHOP_AI])}
-    ┗ Extra: {additional_usage_quota[Quota.PHOTOSHOP_AI]}
+🖼 <b>Image Models</b>:
+    ┣ Daily Limits: {format_number(daily_limits[Quota.DALL_E])}/{format_number(subscription_limits[Quota.DALL_E])}
+    ┣ 👨‍🎨 DALL-E{f': extra {additional_usage_quota[Quota.DALL_E]}' if additional_usage_quota[Quota.DALL_E] > 0 else ''}
+    ┣ 🎨 Midjourney{f': extra {additional_usage_quota[Quota.MIDJOURNEY]}' if additional_usage_quota[Quota.MIDJOURNEY] > 0 else ''}
+    ┣ 🎆 Stable Diffusion{f': extra {additional_usage_quota[Quota.STABLE_DIFFUSION]}' if additional_usage_quota[Quota.STABLE_DIFFUSION] > 0 else ''}
+    ┣ 🫐 Flux{f': extra {additional_usage_quota[Quota.FLUX]}' if additional_usage_quota[Quota.FLUX] > 0 else ''}
+    ┣ 📷 FaceSwap{f': extra {additional_usage_quota[Quota.FACE_SWAP]}' if additional_usage_quota[Quota.FACE_SWAP] > 0 else ''}
+    ┗ 🪄 Photoshop AI{f': extra {additional_usage_quota[Quota.PHOTOSHOP_AI]}' if additional_usage_quota[Quota.PHOTOSHOP_AI] > 0 else ''}
 
 ---------------------------
 
-🎵 Music models:
-━ 🎺 <b>MusicGen</b>:
-    ┣ {format_number(daily_limits[Quota.MUSIC_GEN])}/{format_number(subscription_limits[Quota.MUSIC_GEN])}
-    ┗ Extra: {additional_usage_quota[Quota.MUSIC_GEN]}
-━ 🎸 <b>Suno</b>:
-    ┣ {format_number(daily_limits[Quota.SUNO])}/{format_number(subscription_limits[Quota.SUNO])}
-    ┗ Extra: {additional_usage_quota[Quota.SUNO]}
+🎵 <b>Music Models</b>:
+    ┣ Daily Limits: {format_number(daily_limits[Quota.SUNO])}/{format_number(subscription_limits[Quota.SUNO])}
+    ┣ 🎺 MusicGen{f': extra {additional_usage_quota[Quota.MUSIC_GEN]}' if additional_usage_quota[Quota.MUSIC_GEN] > 0 else ''}
+    ┗ 🎸 Suno{f': extra {additional_usage_quota[Quota.SUNO]}' if additional_usage_quota[Quota.SUNO] > 0 else ''}
 
 ---------------------------
 
@@ -1350,6 +1269,60 @@ Choose action 👇
 
 🔄 <i>Limit will be updated in: {hours_before_limit_update} h. {minutes_before_limit_update} min.</i>
 """
+
+    @staticmethod
+    def notify_about_quota(
+        subscription_limits: dict,
+    ) -> str:
+        texts = [
+            f"""
+🤖 Hey, it's me! Remember me?
+
+🤓 I'm here to remind you about your daily quotas:
+- {format_number(subscription_limits[Quota.CHAT_GPT4_OMNI_MINI])} text requests waiting to be turned into your masterpieces
+- {format_number(subscription_limits[Quota.DALL_E])} graphic opportunity ready to bring your ideas to life
+
+🔥 Don’t let them go to waste — start now!
+""",
+            f"""
+🤖 Hi, it's Fusi, your personal assistant. Yep, I'm back!
+
+😢 I noticed you haven’t used your quotas for a while. Just a friendly reminder that every day you have:
+- {format_number(subscription_limits[Quota.CHAT_GPT4_OMNI_MINI])} text requests to fuel your ideas
+- {format_number(subscription_limits[Quota.DALL_E])} graphic slot to bring your thoughts to life
+
+✨ Shall we get started? I'm ready right now!
+""",
+            f"""
+🤖 It's me, Fusi, your personal robot, with an important reminder!
+
+🤨 Did you know you have:
+- {format_number(subscription_limits[Quota.CHAT_GPT4_OMNI_MINI])} text requests for your bright ideas
+- {format_number(subscription_limits[Quota.DALL_E])} image slot to visualize your concepts
+
+🔋 I'm fully charged and ready to help you create something amazing!
+""",
+            f"""
+🤖 It’s me again! I missed you...
+
+😢 I was just thinking... Your quotas might miss you too:
+- {format_number(subscription_limits[Quota.CHAT_GPT4_OMNI_MINI])} inspiring text requests are waiting for their moment
+- {format_number(subscription_limits[Quota.DALL_E])} visual idea ready to come to life
+
+💡 Give me the chance to help you create something incredible!
+""",
+            f"""
+🤖 Hi, it’s Fusi! Your quotas won’t use themselves, you know that, right?
+
+🫤 Need a reminder? Here you go:
+- {format_number(subscription_limits[Quota.CHAT_GPT4_OMNI_MINI])} text requests that could be the start of something big
+- {format_number(subscription_limits[Quota.DALL_E])} image slot to sketch out your imagination
+
+✨ Time to create, and I’m here to help. Let’s get started!
+""",
+        ]
+
+        return random.choice(texts)
 
     # Payment
     @staticmethod
@@ -1364,7 +1337,7 @@ Choose action 👇
     def subscribe(subscriptions: list[Product], currency: Currency, user_discount: int):
         text_subscriptions = ''
         for subscription in subscriptions:
-            subscription_name = subscription.names.get('en')
+            subscription_name = subscription.names.get(LanguageCode.EN)
             subscription_price = subscription.prices.get(currency)
             left_part_price = Currency.SYMBOLS[currency] if currency == Currency.USD else ''
             right_part_price = Currency.SYMBOLS[currency] if currency != Currency.USD else ''
@@ -1391,13 +1364,6 @@ Choose action 👇
 {text_subscriptions}
 
 Pick your potion and hit the button below to subscribe:
-"""
-
-    @staticmethod
-    def choose_how_many_months_to_subscribe(subscription_name: str):
-        return f"""
-You're choosing <b>{subscription_name}</b>
-Please select the subscription period by clicking on the button:
 """
 
     @staticmethod
@@ -1472,7 +1438,7 @@ You've selected the <b>{name}</b> package
                 discount,
             )
             total_sum += float(price)
-            text += f"{index + 1}. {product.names.get('en')}: {product_quantity} ({left_price_part}{price}{right_price_part}){right_part}"
+            text += f"{index + 1}. {product.names.get(LanguageCode.EN)}: {product_quantity} ({left_price_part}{price}{right_price_part}){right_part}"
 
         if not text:
             text = "Your cart is empty"
@@ -1499,7 +1465,7 @@ You've selected the <b>{name}</b> package
 
             product = await get_product(product_id)
 
-            text += f"{index + 1}. {product.names.get('en')}: {product_quantity}\n"
+            text += f"{index + 1}. {product.names.get(LanguageCode.EN)}: {product_quantity}\n"
 
         if currency == Currency.USD:
             total_sum = f"{Currency.SYMBOLS[currency]}{price}"
@@ -1570,43 +1536,31 @@ Looks like you've got only <b>{available_seconds} seconds</b> left in your arsen
 
     # AI
     @staticmethod
-    def switched(model: Model, model_version: str):
-        if model == Model.CHAT_GPT and model_version == ChatGPTVersion.V4_Omni_Mini:
-            return English.SWITCHED_TO_CHATGPT4_OMNI_MINI
-        elif model == Model.CHAT_GPT and model_version == ChatGPTVersion.V4_Omni:
-            return English.SWITCHED_TO_CHATGPT4_OMNI
-        elif model == Model.CHAT_GPT and model_version == ChatGPTVersion.V1_O_Mini:
-            return English.SWITCHED_TO_CHAT_GPT_O_1_MINI
-        elif model == Model.CHAT_GPT and model_version == ChatGPTVersion.V1_O_Preview:
-            return English.SWITCHED_TO_CHAT_GPT_O_1_PREVIEW
-        elif model == Model.CLAUDE and model_version == ClaudeGPTVersion.V3_Haiku:
-            return English.SWITCHED_TO_CLAUDE_3_HAIKU
-        elif model == Model.CLAUDE and model_version == ClaudeGPTVersion.V3_Sonnet:
-            return English.SWITCHED_TO_CLAUDE_3_SONNET
-        elif model == Model.CLAUDE and model_version == ClaudeGPTVersion.V3_Opus:
-            return English.SWITCHED_TO_CLAUDE_3_OPUS
-        elif model == Model.GEMINI and model_version == GeminiGPTVersion.V1_Flash:
-            return English.SWITCHED_TO_GEMINI_1_FLASH
-        elif model == Model.GEMINI and model_version == GeminiGPTVersion.V1_Pro:
-            return English.SWITCHED_TO_GEMINI_1_PRO
-        elif model == Model.GEMINI and model_version == GeminiGPTVersion.V1_Ultra:
-            return English.SWITCHED_TO_GEMINI_1_ULTRA
-        elif model == Model.DALL_E:
-            return English.SWITCHED_TO_DALL_E
-        elif model == Model.MIDJOURNEY:
-            return English.SWITCHED_TO_MIDJOURNEY
-        elif model == Model.STABLE_DIFFUSION:
-            return English.SWITCHED_TO_STABLE_DIFFUSION
-        elif model == Model.FLUX:
-            return English.SWITCHED_TO_FLUX
-        elif model == Model.FACE_SWAP:
-            return English.SWITCHED_TO_FACE_SWAP
-        elif model == Model.PHOTOSHOP_AI:
-            return English.SWITCHED_TO_PHOTOSHOP_AI
-        elif model == Model.MUSIC_GEN:
-            return English.SWITCHED_TO_MUSIC_GEN
-        elif model == Model.SUNO:
-            return English.SWITCHED_TO_SUNO
+    def switched(model_name: str, model_type: ModelType, model_info: dict):
+        if model_type == ModelType.TEXT:
+            facts = f"""ℹ️ Facts and Settings:
+    ┣ 📅 Knowledge up to: {model_info.get('training_data')}
+    ┣ 📷 Image support: {'Yes ✅' if model_info.get('support_photos', False) else 'No ❌'}
+    ┣ 📄 Document support: {'Coming Soon 🔜' if model_info.get('support_documents', False) else 'No ❌'}
+    ┣ 🎙 Voice answers: {'Enabled ✅' if model_info.get(UserSettings.TURN_ON_VOICE_MESSAGES, False) else 'Disabled ❌'}
+    ┗ 🎭 Current role: {model_info.get('role')}"""
+        elif model_type == ModelType.IMAGE:
+            facts = f"""ℹ️ Settings:
+    ┣ 📐 Aspect ratio: {'Custom' if model_info.get(UserSettings.ASPECT_RATIO, AspectRatio.CUSTOM) == AspectRatio.CUSTOM else model_info.get(UserSettings.ASPECT_RATIO)}
+    ┗ 🗯 Sending type: {English.DOCUMENT if model_info.get(UserSettings.SEND_TYPE, SendType.IMAGE) == SendType.DOCUMENT else English.IMAGE}"""
+        elif model_type == ModelType.MUSIC:
+            facts = f"""ℹ️ Settings:
+    ┗ 🗯 Sending type: {English.VIDEO if model_info.get(UserSettings.SEND_TYPE, SendType.AUDIO) == SendType.VIDEO else English.AUDIO}"""
+        else:
+            facts = f"ℹ️ Facts and Settings: Coming Soon 🔜"
+
+        return f"""
+🔄 <b>You have successfully switched to the {model_name} model</b>
+
+{facts}
+
+⬇️ Use the buttons below to explore more:
+"""
 
     @staticmethod
     def requests_recommendations() -> list[str]:
@@ -1880,10 +1834,12 @@ To top up your bonus balance, you can:
     ┣ 💸 For each invited user, you and the invited user will get 25 credits each 🪙
     ┣ 🌟 Your personal referral link for invitations: {Texts.referral_link(user_id, False)}
     ┗ 👤 You've invited: {referred_count}
+
 ━ 2️⃣ <b>Leave feedback:</b>
     ┣ 💸 For each constructive feedback, you get 25 credits 🪙
     ┣ 📡 To leave feedback, enter the command /feedback
     ┗ 💭 You've left: {feedback_count}
+
 ━ 3️⃣ <b>Try your luck in one of the games:</b>
     ┣ 🎳 Play bowling and receive as many credits as the number of pins you knock down 1-6 🪙
     ┣ ⚽️ Score a goal and get 5 credits 🪙

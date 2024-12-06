@@ -15,6 +15,7 @@ from bot.database.models.product import Product
 from bot.database.models.user import User
 from bot.helpers.billing.generate_signature import generate_signature
 from bot.locales.main import get_localization
+from bot.locales.types import LanguageCode
 
 Configuration.account_id = config.YOOKASSA_ACCOUNT_ID.get_secret_value()
 Configuration.secret_key = config.YOOKASSA_SECRET_KEY.get_secret_value()
@@ -35,7 +36,7 @@ async def create_payment(
     user: User,
     description: str,
     amount: float,
-    language_code: str,
+    language_code: LanguageCode,
     is_recurring: bool,
     order_items: list[OrderItem],
     order_id=None,
@@ -67,7 +68,7 @@ async def create_payment(
             'confirmation': {
                 'type': 'redirect',
                 'return_url': config.BOT_URL,
-                'locale': 'ru_RU' if language_code == 'ru' else 'en_US',
+                'locale': 'ru_RU' if language_code == LanguageCode.RU else 'en_US',
             },
             'capture': True,
             'save_payment_method': is_recurring,

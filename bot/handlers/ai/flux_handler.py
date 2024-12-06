@@ -18,12 +18,15 @@ from bot.database.operations.request.updaters import update_request
 from bot.database.operations.request.writers import write_request
 from bot.database.operations.user.getters import get_user
 from bot.database.operations.user.updaters import update_user
+from bot.helpers.getters.get_quota_by_model import get_quota_by_model
+from bot.helpers.getters.get_switched_to_ai_model import get_switched_to_ai_model
 from bot.helpers.senders.send_error_info import send_error_info
 from bot.integrations.replicateAI import create_flux_image
 from bot.keyboards.ai.mode import build_switched_to_ai_keyboard
 from bot.keyboards.common.common import build_error_keyboard
 from bot.locales.main import get_user_language, get_localization
 from bot.locales.translate_text import translate_text
+from bot.locales.types import LanguageCode
 
 flux_router = Router()
 
@@ -50,9 +53,14 @@ async def flux(message: Message, state: FSMContext):
             'current_model': user.current_model,
         })
 
+        text = await get_switched_to_ai_model(
+            user,
+            get_quota_by_model(user.current_model, user.settings[user.current_model][UserSettings.VERSION]),
+            user_language_code,
+        )
         reply_markup = build_switched_to_ai_keyboard(user_language_code, Model.FLUX)
         await message.answer(
-            text=get_localization(user_language_code).SWITCHED_TO_FLUX,
+            text=text,
             reply_markup=reply_markup,
             message_effect_id=config.MESSAGE_EFFECTS.get(MessageEffect.FIRE),
         )
@@ -97,9 +105,13 @@ async def handle_flux(message: Message, state: FSMContext, user: User):
         )
 
         try:
-            if user_language_code != 'en':
-                prompt = await translate_text(prompt, user_language_code, 'en')
-            result_id = await create_flux_image(prompt, user.settings[Model.FLUX][UserSettings.SAFETY_TOLERANCE])
+            if user_language_code != LanguageCode.EN:
+                prompt = await translate_text(prompt, user_language_code, LanguageCode.EN)
+            result_id = await create_flux_image(
+                prompt,
+                user.settings[Model.FLUX][UserSettings.ASPECT_RATIO],
+                user.settings[Model.FLUX][UserSettings.SAFETY_TOLERANCE],
+            )
 
             await write_generation(
                 id=result_id,

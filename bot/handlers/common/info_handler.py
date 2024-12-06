@@ -1,9 +1,11 @@
+from typing import cast
+
 from aiogram import Router
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
 
-from bot.database.models.common import ModelType
+from bot.database.models.common import ModelType, Model
 from bot.helpers.getters.get_info_by_model import get_info_by_model
 from bot.keyboards.common.info import (
     build_info_keyboard,
@@ -74,7 +76,7 @@ async def info_text_models_selection(callback_query: CallbackQuery, state: FSMCo
     user_id = str(callback_query.from_user.id)
     user_language_code = await get_user_language(user_id, state.storage)
 
-    model = callback_query.data.split(':')[1]
+    model = cast(Model, callback_query.data.split(':')[1])
     info_text = get_info_by_model(model, user_language_code)
     reply_keyboard = build_info_chosen_model_type_keyboard(user_language_code, ModelType.TEXT)
     if info_text:
@@ -98,7 +100,7 @@ async def info_image_models_selection(callback_query: CallbackQuery, state: FSMC
     user_id = str(callback_query.from_user.id)
     user_language_code = await get_user_language(user_id, state.storage)
 
-    model = callback_query.data.split(':')[1]
+    model = cast(Model, callback_query.data.split(':')[1])
     info_text = get_info_by_model(model, user_language_code)
     reply_keyboard = build_info_chosen_model_type_keyboard(user_language_code, ModelType.IMAGE)
     if info_text:
@@ -122,7 +124,7 @@ async def info_music_models_selection(callback_query: CallbackQuery, state: FSMC
     user_id = str(callback_query.from_user.id)
     user_language_code = await get_user_language(user_id, state.storage)
 
-    model = callback_query.data.split(':')[1]
+    model = cast(Model, callback_query.data.split(':')[1])
     info_text = get_info_by_model(model, user_language_code)
     reply_keyboard = build_info_chosen_model_type_keyboard(user_language_code, ModelType.MUSIC)
     if info_text:

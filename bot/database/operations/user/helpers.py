@@ -6,6 +6,7 @@ from aiogram.types import User as TelegramUser
 from bot.database.models.common import Model, Currency, Quota, ChatGPTVersion, ClaudeGPTVersion, GeminiGPTVersion
 from bot.database.models.subscription import SUBSCRIPTION_FREE_LIMITS
 from bot.database.models.user import User, UserGender, UserSettings
+from bot.locales.types import LanguageCode
 
 
 def create_user_object(
@@ -61,13 +62,13 @@ def create_user_object(
         language_code=telegram_user.language_code,
         interface_language_code=user_data.get(
             'interface_language_code',
-            'ru' if telegram_user.language_code == 'ru' else 'en'
+            LanguageCode.RU if telegram_user.language_code == LanguageCode.RU else LanguageCode.EN,
         ),
         is_premium=telegram_user.is_premium or False,
         is_blocked=False,
         is_banned=False,
         current_model=user_data.get('current_model', default_model),
-        currency=user_data.get('currency', Currency.RUB if telegram_user.language_code == 'ru' else Currency.USD),
+        currency=user_data.get('currency', Currency.RUB if telegram_user.language_code == LanguageCode.RU else Currency.USD),
         balance=user_data.get('balance', 25.00 if is_referred_by_user else 0),
         subscription_id=user_data.get('subscription_id', ''),
         last_subscription_limit_update=user_data.get('last_subscription_limit_update', datetime.now(timezone.utc)),

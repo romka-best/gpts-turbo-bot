@@ -1,7 +1,7 @@
 import asyncio
 import calendar
 from datetime import datetime, timezone, timedelta
-from typing import Optional
+from typing import Optional, cast
 
 from aiogram import Router, F
 from aiogram.fsm.context import FSMContext
@@ -36,6 +36,7 @@ from bot.keyboards.admin.statistics import (
     build_statistics_choose_currency_keyboard,
 )
 from bot.locales.main import get_localization, get_user_language
+from bot.locales.types import LanguageCode
 from bot.utils.is_admin import is_admin
 
 statistics_router = Router()
@@ -51,7 +52,7 @@ async def handle_statistics(message: Message, user_id: str, state: FSMContext):
     )
 
 
-async def handle_write_transaction(callback_query: CallbackQuery, language_code: str):
+async def handle_write_transaction(callback_query: CallbackQuery, language_code: LanguageCode):
     reply_markup = build_statistics_write_transaction_keyboard(language_code)
     await callback_query.message.edit_text(
         text=get_localization(language_code).STATISTICS_WRITE_TRANSACTION,
@@ -102,6 +103,7 @@ async def get_statistics_by_transactions_query(
         }
     }
     count_income_money.update({
+        ServiceType.FREE: 0,
         ServiceType.OTHER: 0,
         'SUBSCRIPTION_ALL': 0,
         'PACKAGES_ALL': 0,
@@ -266,7 +268,7 @@ async def get_statistics_by_transactions_query(
     )
 
 
-async def handle_get_statistics(language_code: str, period: str):
+async def handle_get_statistics(language_code: LanguageCode, period: str):
     current_date = datetime.now(timezone.utc)
     start_date = None
     end_date = None
@@ -362,7 +364,7 @@ async def handle_get_statistics(language_code: str, period: str):
 
     tech_products = {
         product.id: product.names.get(language_code) for product in products
-        if product.type == ProductType.PACKAGE and 'voice answers' in product.names.get('en', '').lower()
+        if product.type == ProductType.PACKAGE and 'voice answers' in product.names.get(LanguageCode.EN, '').lower()
     }
     tech_products[ServiceType.SERVER] = get_localization(language_code).SERVER
     tech_products[ServiceType.DATABASE] = get_localization(language_code).DATABASE
@@ -416,25 +418,25 @@ async def handle_get_statistics(language_code: str, period: str):
         get_count_of_users(
             start_date=start_date,
             end_date=end_date,
-            language_code='en',
+            language_code=LanguageCode.EN,
         ),
         # count_english_users_before
         get_count_of_users(
             start_date=start_date_before,
             end_date=end_date_before,
-            language_code='en',
+            language_code=LanguageCode.EN,
         ) if start_date_before and end_date_before else get_zero(),
         # count_russian_users
         get_count_of_users(
             start_date=start_date,
             end_date=end_date,
-            language_code='ru',
+            language_code=LanguageCode.RU,
         ),
         # count_russian_users_before
         get_count_of_users(
             start_date=start_date_before,
             end_date=end_date_before,
-            language_code='ru',
+            language_code=LanguageCode.RU,
         ) if start_date_before and end_date_before else get_zero(),
     )
     (
@@ -481,7 +483,9 @@ async def handle_get_statistics(language_code: str, period: str):
         count_subscription_users[subscription] = count
         count_subscription_users_before[subscription] = count_before
 
-    subscription_products = {}
+    subscription_products = {
+        ServiceType.FREE: 'Бесплатные 🆓',
+    }
     for product in products:
         if product.type == ProductType.SUBSCRIPTION and product.category == ProductCategory.MONTHLY:
             subscription_products[product.id] = f'{get_localization(language_code).MONTHLY} {product.names.get(language_code)}'
@@ -850,7 +854,7 @@ async def handle_statistics_selection(callback_query: CallbackQuery, state: FSMC
 async def handle_statistics_write_transaction_selection(callback_query: CallbackQuery, state: FSMContext):
     await callback_query.answer()
 
-    transaction_type = callback_query.data.split(':')[1]
+    transaction_type = cast(TransactionType, callback_query.data.split(':')[1])
     if transaction_type == 'back':
         await handle_statistics(
             callback_query.message,

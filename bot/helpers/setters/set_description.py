@@ -1,5 +1,7 @@
 from aiogram import Bot
 
+from bot.locales.types import LanguageCode
+
 
 async def set_description(bot: Bot):
     await bot.set_my_short_description(
@@ -13,7 +15,7 @@ async def set_description(bot: Bot):
 🤖 Доступ к ИИ: ChatGPT | Claude | Gemini | DALL•E | Midjourney | Stable Diffusion | Suno
 🛟 Поддержка: @roman_danilov
 """,
-        language_code='ru',
+        language_code=LanguageCode.RU,
     )
 
     await bot.set_my_description(
@@ -73,5 +75,5 @@ Access to AI:
     ┣ 🎺 MusicGen
     ┗ 🎸 Suno 4.0
 """,
-        language_code='ru',
+        language_code=LanguageCode.RU,
     )

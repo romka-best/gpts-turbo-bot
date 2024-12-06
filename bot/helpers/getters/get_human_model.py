@@ -1,8 +1,9 @@
 from bot.database.models.common import Model
 from bot.locales.main import get_localization
+from bot.locales.types import LanguageCode
 
 
-def get_human_model(model: Model, language_code: str):
+def get_human_model(model: Model, language_code: LanguageCode):
     if model == Model.CHAT_GPT:
         human_model = get_localization(language_code).CHATGPT
     elif model == Model.CLAUDE:

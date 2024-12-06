@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+from enum import StrEnum
 from typing import Optional
 
 from bot.database.models.common import (
@@ -8,9 +9,9 @@ from bot.database.models.common import (
     ChatGPTVersion,
     ClaudeGPTVersion,
     GeminiGPTVersion,
+    DALLEVersion,
     DALLEResolution,
     DALLEQuality,
-    DALLEVersion,
     MidjourneyVersion,
     StableDiffusionVersion,
     FluxVersion,
@@ -18,10 +19,12 @@ from bot.database.models.common import (
     FaceSwapVersion,
     PhotoshopAIVersion,
     MusicGenVersion,
-    SunoSendType,
     SunoVersion,
+    AspectRatio,
+    SendType,
 )
 from bot.database.models.subscription import SUBSCRIPTION_FREE_LIMITS
+from bot.locales.types import LanguageCode
 
 
 class UserSettings:
@@ -32,13 +35,14 @@ class UserSettings:
     TURN_ON_VOICE_MESSAGES = 'turn_on_voice_messages'
     VOICE = 'voice'
     RESOLUTION = 'resolution'
+    ASPECT_RATIO = 'aspect_ratio'
     QUALITY = 'quality'
     VERSION = 'version'
     SEND_TYPE = 'send_type'
     SAFETY_TOLERANCE = 'safety_tolerance'
 
 
-class UserGender:
+class UserGender(StrEnum):
     MALE = 'MALE'
     FEMALE = 'FEMALE'
     UNSPECIFIED = 'UNSPECIFIED'
@@ -55,7 +59,7 @@ class User:
     telegram_chat_id: str
     stripe_id: str
     language_code: str
-    interface_language_code: str
+    interface_language_code: LanguageCode
     gender: UserGender
     is_premium: bool
     is_blocked: bool
@@ -129,35 +133,47 @@ class User:
         },
         Model.DALL_E: {
             UserSettings.SHOW_USAGE_QUOTA: True,
-            UserSettings.RESOLUTION: DALLEResolution.LOW,
-            UserSettings.QUALITY: DALLEQuality.STANDARD,
             UserSettings.VERSION: DALLEVersion.V3,
+            UserSettings.RESOLUTION: DALLEResolution.LOW,
+            UserSettings.ASPECT_RATIO: AspectRatio.SQUARE,
+            UserSettings.QUALITY: DALLEQuality.STANDARD,
+            UserSettings.SEND_TYPE: SendType.IMAGE,
             UserSettings.SHOW_EXAMPLES: True,
         },
         Model.MIDJOURNEY: {
             UserSettings.SHOW_USAGE_QUOTA: True,
             UserSettings.VERSION: MidjourneyVersion.V6,
+            UserSettings.ASPECT_RATIO: AspectRatio.SQUARE,
+            UserSettings.SEND_TYPE: SendType.IMAGE,
             UserSettings.SHOW_EXAMPLES: False,
         },
         Model.STABLE_DIFFUSION: {
             UserSettings.SHOW_USAGE_QUOTA: True,
             UserSettings.VERSION: StableDiffusionVersion.LATEST,
+            UserSettings.ASPECT_RATIO: AspectRatio.SQUARE,
+            UserSettings.SEND_TYPE: SendType.IMAGE,
             UserSettings.SHOW_EXAMPLES: False,
         },
         Model.FLUX: {
             UserSettings.SHOW_USAGE_QUOTA: True,
             UserSettings.VERSION: FluxVersion.LATEST,
             UserSettings.SAFETY_TOLERANCE: FluxSafetyTolerance.MIDDLE,
+            UserSettings.ASPECT_RATIO: AspectRatio.SQUARE,
+            UserSettings.SEND_TYPE: SendType.IMAGE,
             UserSettings.SHOW_EXAMPLES: False,
         },
         Model.FACE_SWAP: {
             UserSettings.SHOW_USAGE_QUOTA: True,
             UserSettings.VERSION: FaceSwapVersion.LATEST,
+            UserSettings.ASPECT_RATIO: AspectRatio.CUSTOM,
+            UserSettings.SEND_TYPE: SendType.IMAGE,
             UserSettings.SHOW_EXAMPLES: False,
         },
         Model.PHOTOSHOP_AI: {
             UserSettings.SHOW_USAGE_QUOTA: False,
             UserSettings.VERSION: PhotoshopAIVersion.LATEST,
+            UserSettings.ASPECT_RATIO: AspectRatio.CUSTOM,
+            UserSettings.SEND_TYPE: SendType.DOCUMENT,
             UserSettings.SHOW_EXAMPLES: False,
         },
         Model.MUSIC_GEN: {
@@ -167,7 +183,7 @@ class User:
         },
         Model.SUNO: {
             UserSettings.SHOW_USAGE_QUOTA: True,
-            UserSettings.SEND_TYPE: SunoSendType.VIDEO,
+            UserSettings.SEND_TYPE: SendType.VIDEO,
             UserSettings.VERSION: SunoVersion.V4,
             UserSettings.SHOW_EXAMPLES: False,
         },
@@ -184,7 +200,7 @@ class User:
         stripe_id: str,
         gender=UserGender.UNSPECIFIED,
         language_code='en',
-        interface_language_code='en',
+        interface_language_code=LanguageCode.EN,
         is_premium=False,
         is_blocked=False,
         is_banned=False,

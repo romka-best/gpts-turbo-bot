@@ -1,32 +1,36 @@
 from datetime import datetime, timezone
 
+from bot.locales.types import LanguageCode
+
 
 class Role:
     COLLECTION_NAME = 'roles'
 
     id: str
-    name: str
-    translated_names: dict
-    translated_descriptions: dict
-    translated_instructions: dict
+    translated_names: dict[LanguageCode, str]
+    translated_descriptions: dict[LanguageCode, str]
+    translated_instructions: dict[LanguageCode, str]
+    photo: str
     created_at: datetime
     edited_at: datetime
 
     def __init__(
         self,
         id: str,
-        name: str,
-        translated_names: dict,
-        translated_descriptions: dict,
-        translated_instructions: dict,
+        translated_names: dict[LanguageCode, str],
+        translated_descriptions: dict[LanguageCode, str],
+        translated_instructions: dict[LanguageCode, str],
+        # TODO
+        photo='',
         created_at=None,
         edited_at=None,
+        **kwargs,
     ):
         self.id = id
-        self.name = name
         self.translated_names = translated_names
         self.translated_descriptions = translated_descriptions
         self.translated_instructions = translated_instructions
+        self.photo = photo
 
         current_time = datetime.now(timezone.utc)
         self.created_at = created_at if created_at is not None else current_time

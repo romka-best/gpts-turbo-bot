@@ -1,19 +1,20 @@
 from datetime import datetime, timezone
-from enum import Enum
+from enum import StrEnum
 from typing import Optional, ClassVar, Union
 
 from pydantic import BaseModel, Field
 
 from bot.database.models.common import Currency, ModelType
 from bot.database.models.subscription import SubscriptionType, SubscriptionPeriod
+from bot.locales.types import LanguageCode
 
 
-class ProductType(str, Enum):
+class ProductType(StrEnum):
     SUBSCRIPTION = 'SUBSCRIPTION'
     PACKAGE = 'PACKAGE'
 
 
-class ProductCategory(str, Enum):
+class ProductCategory(StrEnum):
     MONTHLY = SubscriptionType.MONTHLY
     YEARLY = SubscriptionType.YEARLY
     TEXT = ModelType.TEXT
@@ -31,13 +32,13 @@ class Product(BaseModel):
     is_active: bool
     type: ProductType
     category: ProductCategory
-    names: dict
-    descriptions: dict
+    names: dict[LanguageCode, str]
+    descriptions: dict[LanguageCode, str]
     prices: dict
     photos: Optional[dict] = None
     order: int = -1
     discount: int = 0
-    details: Optional[dict] = {}
+    details: Optional[dict] = Field(default_factory=lambda: {})
     created_at: Optional[datetime] = Field(default_factory=lambda: datetime.now(timezone.utc))
     edited_at: Optional[datetime] = Field(default_factory=lambda: datetime.now(timezone.utc))
 

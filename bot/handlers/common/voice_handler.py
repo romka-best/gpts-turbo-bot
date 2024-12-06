@@ -6,6 +6,7 @@ import tempfile
 import time
 import uuid
 
+from filetype import filetype
 from pydub import AudioSegment
 from aiogram import Router, F, Bot
 from aiogram.fsm.context import FSMContext
@@ -21,7 +22,7 @@ from bot.database.models.common import (
     MidjourneyAction,
 )
 from bot.database.models.transaction import TransactionType
-from bot.database.models.user import UserSettings
+from bot.database.models.user import UserSettings, User
 from bot.database.operations.product.getters import get_product_by_quota
 from bot.database.operations.transaction.writers import write_transaction
 from bot.database.operations.user.getters import get_user
@@ -37,7 +38,9 @@ from bot.handlers.ai.photoshop_ai_handler import handle_photoshop_ai
 from bot.handlers.ai.stable_diffusion_handler import handle_stable_diffusion
 from bot.handlers.ai.suno_handler import handle_suno
 from bot.integrations.openAI import get_response_speech_to_text
+from bot.keyboards.common.common import build_buy_motivation_keyboard
 from bot.locales.main import get_localization, get_user_language
+from bot.locales.types import LanguageCode
 from bot.utils.is_already_processing import is_already_processing
 from bot.utils.is_messages_limit_exceeded import is_messages_limit_exceeded
 from bot.utils.is_time_limit_exceeded import is_time_limit_exceeded
@@ -45,17 +48,18 @@ from bot.utils.is_time_limit_exceeded import is_time_limit_exceeded
 voice_router = Router()
 
 
-async def process_voice_message(bot: Bot, voice: File, user_id: str):
+async def process_voice_message(bot: Bot, voice: File, user: User, user_language_code: LanguageCode):
     unique_id = uuid.uuid4()
     with tempfile.TemporaryDirectory() as tempdir:
         wav_path = os.path.join(tempdir, f'{unique_id}.wav')
 
         voice_ogg = io.BytesIO()
-        await bot.download_file(voice.file_path, voice_ogg)
+        await bot.download_file(voice.file_path, voice_ogg, timeout=300)
+        extension = await asyncio.to_thread(lambda: filetype.guess(voice_ogg.getvalue()).extension)
 
         audio_data = {
             'file': voice_ogg,
-            'format': 'ogg',
+            'format': extension,
         }
         audio = await asyncio.to_thread(AudioSegment.from_file, **audio_data)
         audio_in_seconds = audio.duration_seconds
@@ -67,6 +71,15 @@ async def process_voice_message(bot: Bot, voice: File, user_id: str):
         await asyncio.to_thread(audio.export, **audio_export_data)
 
         audio_file = await asyncio.to_thread(lambda: open(wav_path, 'rb'))
+        audio_file_size = await asyncio.to_thread(lambda: os.path.getsize(wav_path))
+        if audio_file_size > 25 * 1024 * 1024:
+            await asyncio.to_thread(audio_file.close)
+            await bot.send_message(
+                chat_id=user.telegram_chat_id,
+                text=get_localization(user_language_code).FILE_TOO_BIG_ERROR,
+            )
+            return
+
         text = await get_response_speech_to_text(audio_file)
         await asyncio.to_thread(audio_file.close)
 
@@ -74,7 +87,7 @@ async def process_voice_message(bot: Bot, voice: File, user_id: str):
 
         total_price = 0.0001 * math.ceil(audio_in_seconds)
         await write_transaction(
-            user_id=user_id,
+            user_id=user.id,
             type=TransactionType.EXPENSE,
             product_id=product.id,
             amount=total_price,
@@ -91,7 +104,7 @@ async def process_voice_message(bot: Bot, voice: File, user_id: str):
         return text
 
 
-@voice_router.message(F.voice)
+@voice_router.message(F.voice | F.audio | F.video_note)
 async def handle_voice(message: Message, state: FSMContext):
     user_id = str(message.from_user.id)
     user = await get_user(user_id)
@@ -164,9 +177,16 @@ async def handle_voice(message: Message, state: FSMContext):
         if need_exit:
             return
 
-        voice_file = await message.bot.get_file(message.voice.file_id)
+        if message.voice:
+            voice_file = await message.bot.get_file(message.voice.file_id)
+        elif message.video_note:
+            voice_file = await message.bot.get_file(message.video_note.file_id)
+        else:
+            voice_file = await message.bot.get_file(message.audio.file_id)
 
-        text = await process_voice_message(message.bot, voice_file, user_id)
+        text = await process_voice_message(message.bot, voice_file, user, user_language_code)
+        if not text:
+            return
 
         await state.update_data(recognized_text=text)
         if user.current_model == Model.CHAT_GPT:
@@ -198,4 +218,9 @@ async def handle_voice(message: Message, state: FSMContext):
 
         await state.update_data(recognized_text=None)
     else:
-        await message.answer(text=get_localization(user_language_code).VOICE_MESSAGES_FORBIDDEN)
+        text = get_localization(user_language_code).VOICE_MESSAGES_FORBIDDEN
+        reply_markup = build_buy_motivation_keyboard(user_language_code)
+        await message.answer(
+            text=text,
+            reply_markup=reply_markup,
+        )

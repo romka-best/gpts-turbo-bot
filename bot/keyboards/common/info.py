@@ -2,9 +2,10 @@ from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 from bot.database.models.common import Model, ModelType
 from bot.locales.main import get_localization
+from bot.locales.types import LanguageCode
 
 
-def build_info_keyboard(language_code: str) -> InlineKeyboardMarkup:
+def build_info_keyboard(language_code: LanguageCode) -> InlineKeyboardMarkup:
     buttons = [
         [
             InlineKeyboardButton(
@@ -35,7 +36,7 @@ def build_info_keyboard(language_code: str) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
-def build_info_text_models_keyboard(language_code: str) -> InlineKeyboardMarkup:
+def build_info_text_models_keyboard(language_code: LanguageCode) -> InlineKeyboardMarkup:
     buttons = [
         [
             InlineKeyboardButton(
@@ -66,7 +67,7 @@ def build_info_text_models_keyboard(language_code: str) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
-def build_info_image_models_keyboard(language_code: str) -> InlineKeyboardMarkup:
+def build_info_image_models_keyboard(language_code: LanguageCode) -> InlineKeyboardMarkup:
     buttons = [
         [
             InlineKeyboardButton(
@@ -115,7 +116,7 @@ def build_info_image_models_keyboard(language_code: str) -> InlineKeyboardMarkup
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
-def build_info_music_models_keyboard(language_code: str) -> InlineKeyboardMarkup:
+def build_info_music_models_keyboard(language_code: LanguageCode) -> InlineKeyboardMarkup:
     buttons = [
         [
             InlineKeyboardButton(
@@ -140,7 +141,7 @@ def build_info_music_models_keyboard(language_code: str) -> InlineKeyboardMarkup
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
-def build_info_chosen_model_type_keyboard(language_code: str, model_type: str) -> InlineKeyboardMarkup:
+def build_info_chosen_model_type_keyboard(language_code: LanguageCode, model_type: str) -> InlineKeyboardMarkup:
     buttons = [
         [
             InlineKeyboardButton(

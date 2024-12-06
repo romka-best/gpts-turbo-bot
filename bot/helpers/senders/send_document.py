@@ -21,7 +21,7 @@ async def send_document(
         extension = document.rsplit('.', 1)[-1]
         await bot.send_document(
             chat_id=chat_id,
-            document=URLInputFile(document, filename=f'{uuid.uuid4()}.{extension}', timeout=60),
+            document=URLInputFile(document, filename=f'{uuid.uuid4()}.{extension}', timeout=300),
             reply_markup=reply_markup,
             caption=caption,
             reply_to_message_id=reply_to_message_id,

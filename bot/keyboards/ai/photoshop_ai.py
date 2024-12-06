@@ -2,9 +2,10 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 from bot.database.models.common import PhotoshopAIAction
 from bot.locales.main import get_localization
+from bot.locales.types import LanguageCode
 
 
-def build_photoshop_ai_keyboard(language_code: str) -> InlineKeyboardMarkup:
+def build_photoshop_ai_keyboard(language_code: LanguageCode) -> InlineKeyboardMarkup:
     buttons = [
         [
             InlineKeyboardButton(
@@ -29,7 +30,7 @@ def build_photoshop_ai_keyboard(language_code: str) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
-def build_photoshop_ai_chosen_keyboard(language_code: str) -> InlineKeyboardMarkup:
+def build_photoshop_ai_chosen_keyboard(language_code: LanguageCode) -> InlineKeyboardMarkup:
     buttons = [
         [
             InlineKeyboardButton(

@@ -92,7 +92,7 @@ async def handle_profile(message: Message, state: FSMContext, telegram_user: Tel
             )
         else:
             await message.answer_photo(
-                photo=URLInputFile(photo_link, filename=photo_path),
+                photo=URLInputFile(photo_link, filename=photo_path, timeout=300),
                 caption=text,
                 reply_markup=reply_markup,
             )
@@ -166,7 +166,7 @@ async def handle_profile_selection(callback_query: CallbackQuery, state: FSMCont
 
         reply_markup = build_cancel_keyboard(user_language_code)
         await callback_query.message.reply_photo(
-            photo=URLInputFile(photo_link, filename=photo_path),
+            photo=URLInputFile(photo_link, filename=photo_path, timeout=300),
             caption=get_localization(user_language_code).SEND_ME_YOUR_PICTURE,
             reply_markup=reply_markup,
             allow_sending_without_reply=True,

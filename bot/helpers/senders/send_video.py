@@ -21,7 +21,7 @@ async def send_video(
     try:
         await bot.send_video(
             chat_id=chat_id,
-            video=URLInputFile(result, filename=filename, timeout=60),
+            video=URLInputFile(result, filename=filename, timeout=300),
             caption=caption,
             duration=duration,
             reply_markup=reply_markup,

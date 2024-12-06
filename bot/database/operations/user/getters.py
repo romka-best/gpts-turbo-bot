@@ -6,6 +6,7 @@ from google.cloud.firestore_v1 import FieldFilter
 from bot.database.main import firebase
 from bot.database.models.common import UTM
 from bot.database.models.user import User
+from bot.locales.types import LanguageCode
 
 
 async def get_user(user_id: str) -> Optional[User]:
@@ -113,7 +114,7 @@ async def get_count_of_users_by_referral(referred_by: str) -> int:
     return int(users_query[0][0].value)
 
 
-async def get_users_by_language_code(language_code: str) -> list[User]:
+async def get_users_by_language_code(language_code: LanguageCode) -> list[User]:
     users_stream = firebase.db.collection(User.COLLECTION_NAME) \
         .where(filter=FieldFilter('interface_language_code', '==', language_code)) \
         .stream()

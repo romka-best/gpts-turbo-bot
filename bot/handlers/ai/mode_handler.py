@@ -1,10 +1,12 @@
+from typing import cast
+
 from aiogram import Router
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup
 
 from bot.config import config, MessageEffect
-from bot.database.models.common import Model
+from bot.database.models.common import Model, ModelType
 from bot.database.models.user import UserSettings
 from bot.database.operations.user.getters import get_user
 from bot.database.operations.user.updaters import update_user
@@ -12,9 +14,12 @@ from bot.handlers.ai.face_swap_handler import handle_face_swap
 from bot.handlers.ai.music_gen_handler import handle_music_gen
 from bot.handlers.ai.photoshop_ai_handler import handle_photoshop_ai
 from bot.handlers.ai.suno_handler import handle_suno
+from bot.handlers.common.info_handler import handle_info_selection
 from bot.helpers.getters.get_human_model import get_human_model
 from bot.helpers.getters.get_info_by_model import get_info_by_model
 from bot.helpers.getters.get_model_type import get_model_type
+from bot.helpers.getters.get_quota_by_model import get_quota_by_model
+from bot.helpers.getters.get_switched_to_ai_model import get_switched_to_ai_model
 from bot.keyboards.ai.mode import build_mode_keyboard, build_switched_to_ai_keyboard
 from bot.keyboards.settings.settings import build_settings_keyboard
 from bot.locales.main import get_localization, get_user_language
@@ -62,7 +67,10 @@ async def handle_mode_selection(callback_query: CallbackQuery, state: FSMContext
 
     chosen_model = callback_query.data.split(':')[1]
     chosen_version = ''
-    if chosen_model == 'text' or chosen_model == 'page':
+    if chosen_model == 'page':
+        return
+    elif chosen_model == ModelType.TEXT or chosen_model == ModelType.IMAGE or chosen_model == ModelType.MUSIC:
+        await handle_info_selection(callback_query, state, chosen_model)
         return
     elif chosen_model == 'next' or chosen_model == 'back':
         page = int(callback_query.data.split(':')[2])
@@ -114,8 +122,13 @@ async def handle_mode_selection(callback_query: CallbackQuery, state: FSMContext
         })
         await callback_query.message.edit_reply_markup(reply_markup=InlineKeyboardMarkup(inline_keyboard=new_keyboard))
 
+        text = await get_switched_to_ai_model(
+            user,
+            get_quota_by_model(user.current_model, user.settings[user.current_model][UserSettings.VERSION]),
+            user_language_code,
+        )
         await callback_query.message.reply(
-            text=get_localization(user_language_code).switched(user.current_model, chosen_version),
+            text=text,
             reply_markup=reply_markup,
             message_effect_id=config.MESSAGE_EFFECTS.get(MessageEffect.FIRE),
             allow_sending_without_reply=True,
@@ -164,7 +177,7 @@ async def handle_switched_to_ai_selection(callback_query: CallbackQuery, state: 
     user_id = str(callback_query.from_user.id)
     user_language_code = await get_user_language(user_id, state.storage)
 
-    action, model = callback_query.data.split(':')[1], callback_query.data.split(':')[2]
+    action, model = callback_query.data.split(':')[1], cast(Model, callback_query.data.split(':')[2])
     if action == 'settings':
         user = await get_user(user_id)
 

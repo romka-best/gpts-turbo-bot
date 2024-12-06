@@ -7,7 +7,13 @@ from datetime import datetime, timezone, timedelta
 import uvicorn
 from aiogram.client.default import DefaultBotProperties
 from aiogram.client.session.aiohttp import AiohttpSession
-from aiogram.exceptions import TelegramNetworkError, TelegramForbiddenError, TelegramRetryAfter, TelegramBadRequest
+from aiogram.exceptions import (
+    TelegramNetworkError,
+    TelegramForbiddenError,
+    TelegramRetryAfter,
+    TelegramBadRequest,
+    TelegramServerError,
+)
 from aiogram.types import Update
 from fastapi import FastAPI, BackgroundTasks
 from fastapi.responses import JSONResponse
@@ -25,7 +31,7 @@ from bot.handlers.admin.admin_handler import admin_router
 from bot.handlers.admin.ads_handler import ads_router
 from bot.handlers.admin.ban_handler import ban_router
 from bot.handlers.admin.blast_handler import blast_router
-from bot.handlers.admin.catalog_handler import catalog_router
+from bot.handlers.admin.catalog_handler import admin_catalog_router
 from bot.handlers.admin.face_swap_handler import admin_face_swap_router
 from bot.handlers.admin.promo_code import admin_promo_code_router
 from bot.handlers.admin.statistics_handler import statistics_router
@@ -41,6 +47,7 @@ from bot.handlers.ai.music_gen_handler import music_gen_router
 from bot.handlers.ai.photoshop_ai_handler import photoshop_ai_router
 from bot.handlers.ai.stable_diffusion_handler import stable_diffusion_router
 from bot.handlers.ai.suno_handler import suno_router
+from bot.handlers.common.catalog_handler import catalog_router
 from bot.handlers.common.common_handler import common_router
 from bot.handlers.common.document_handler import document_router
 from bot.handlers.common.feedback_handler import feedback_router
@@ -59,7 +66,8 @@ from bot.handlers.settings.language_handler import language_router
 from bot.handlers.settings.settings_handler import settings_router
 from bot.helpers.billing.check_waiting_payments import check_waiting_payments
 from bot.helpers.billing.update_daily_expenses import update_daily_expenses
-from bot.helpers.check_unresolved_requests import check_unresolved_requests
+from bot.helpers.checkers.check_unresolved_requests import check_unresolved_requests
+from bot.helpers.handlers.handle_big_file import handle_big_file
 from bot.helpers.handlers.handle_forbidden_error import handle_forbidden_error
 from bot.helpers.handlers.handle_midjourney_webhook import handle_midjourney_webhook
 from bot.helpers.handlers.handle_network_error import handle_network_error
@@ -67,7 +75,7 @@ from bot.helpers.handlers.handle_pay_selection_webhook import handle_pay_selecti
 from bot.helpers.handlers.handle_replicate_webhook import handle_replicate_webhook
 from bot.helpers.handlers.handle_stripe_webhook import handle_stripe_webhook
 from bot.helpers.handlers.handle_yookassa_webhook import handle_yookassa_webhook
-from bot.helpers.notify_admins_about_error import notify_admins_about_error
+from bot.helpers.notifiers.notify_admins_about_error import notify_admins_about_error
 from bot.helpers.senders.send_statistics import send_statistics
 from bot.helpers.setters.set_commands import set_commands
 from bot.helpers.setters.set_description import set_description
@@ -126,6 +134,8 @@ async def lifespan(_: FastAPI):
         profile_router,
         promo_code_router,
         admin_router,
+        admin_catalog_router,
+        admin_face_swap_router,
         admin_promo_code_router,
         ads_router,
         ban_router,
@@ -141,7 +151,6 @@ async def lifespan(_: FastAPI):
         stable_diffusion_router,
         flux_router,
         face_swap_router,
-        admin_face_swap_router,
         photoshop_ai_router,
         music_gen_router,
         suno_router,
@@ -180,7 +189,7 @@ async def delayed_handle_update(update: Update, timeout: int):
 
     try:
         await dp.feed_update(bot=bot, update=update)
-    except (ConnectionError, TelegramNetworkError, ConnectionResetError, OSError):
+    except (ConnectionError, TelegramServerError, TelegramNetworkError, ConnectionResetError, OSError):
         await handle_network_error(bot, update)
     except TelegramForbiddenError:
         await handle_forbidden_error(update)
@@ -220,7 +229,7 @@ async def handle_update(update: dict):
             try:
                 await dp.feed_update(bot=bot, update=telegram_update)
                 break
-            except (ConnectionError, TelegramNetworkError, ConnectionResetError, OSError) as e:
+            except (ConnectionError, TelegramServerError, TelegramNetworkError, ConnectionResetError, OSError) as e:
                 if i == config.MAX_RETRIES - 1:
                     raise e
                 continue
@@ -239,7 +248,9 @@ async def handle_update(update: dict):
             logging.error(f'Error in bot_webhook telegram retry after: {e}')
             asyncio.create_task(delayed_handle_update(telegram_update, e.retry_after + 30))
     except TelegramBadRequest as e:
-        if e.message.startswith('Bad Request: message can\'t be deleted for everyone'):
+        if e.message.startswith('Bad Request: file is too big'):
+            await handle_big_file(bot, telegram_update)
+        elif e.message.startswith('Bad Request: message can\'t be deleted for everyone'):
             logging.warning(e)
         elif e.message.startswith('Bad Request: message to delete not found'):
             logging.warning(e)
@@ -251,6 +262,12 @@ async def handle_update(update: dict):
             logging.warning(e)
         else:
             logging.error(f'Error in bot_webhook telegram bad request: {e}')
+            await notify_admins_about_error(bot, telegram_update, dp, e)
+    except TelegramServerError as e:
+        if 'Bad Gateway' in e.message:
+            await handle_network_error(bot, telegram_update)
+        else:
+            logging.error(f'Error in bot_webhook telegram server error: {e}')
             await notify_admins_about_error(bot, telegram_update, dp, e)
     except Exception as e:
         logging.exception(f'Error in bot_webhook: {e}')
@@ -299,7 +316,7 @@ async def daily_tasks(background_tasks: BackgroundTasks):
     await check_unresolved_requests(bot)
     await check_waiting_payments(bot)
 
-    background_tasks.add_task(update_daily_limits, bot)
+    background_tasks.add_task(update_daily_limits, bot, storage)
 
     today = datetime.now()
     background_tasks.add_task(send_statistics, bot, 'day')

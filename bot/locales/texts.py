@@ -1,14 +1,16 @@
 import random
 from typing import Protocol, Union
 
-from bot.database.models.common import Currency, Model
+from bot.database.models.common import Currency, Model, ModelType
 from bot.database.models.feedback import FeedbackStatus
 from bot.database.models.game import GameType
 from bot.database.models.generation import GenerationReaction
 from bot.database.models.product import Product, ProductCategory
+from bot.database.models.prompt import Prompt
 from bot.database.models.subscription import SubscriptionStatus
 from bot.database.models.user import UserGender
 from bot.helpers.calculate_percentage_difference import calculate_percentage_difference
+from bot.locales.types import LanguageCode
 
 
 class Texts(Protocol):
@@ -18,9 +20,6 @@ class Texts(Protocol):
     QUICK_GUIDE: str
     ADDITIONAL_FEATURES: str
     MAINTENANCE_MODE: str
-
-    # Promos
-    PROMO_SOCIAL_MEDIA_PROMPTS: str
 
     COMMANDS: str
     INFO: str
@@ -152,7 +151,7 @@ class Texts(Protocol):
     BLAST_WRITE_IN_DEFAULT_LANGUAGE = """
 🚀 <b>Время для масштабной рассылки!</b> 🌍
 
-Вы выбрали "Для всех" и это означает, что ваше сообщение достигнет каждого моего уголка, независимо от языковых предпочтений пользователей. Напишите ваше сообщение на русском, и я автоматически переведу его для всех наших пользователей. Создайте сообщение, которое вдохновит, развлечет или проинформирует - ведь оно полетит к сердцам и умам людей по всему миру.
+Вы выбрали "Для всех" и это означает, что ваше сообщение достигнет каждого моего уголка, независимо от языковых предпочтений пользователей. Напишите ваше сообщение на русском, и я автоматически переведу его для всех наших пользователей Создайте сообщение, которое вдохновит, развлечет или проинформирует - ведь оно полетит к сердцам и умам людей по всему миру.
 
 Помните, ваши слова могут изменить чей-то день к лучшему! 🌟
 """
@@ -326,8 +325,8 @@ class Texts(Protocol):
     GEMINI_1_ULTRA = '🛡️ Gemini 1.0 Ultra'
     DALL_E = '👨‍🎨 DALL-E'
     MIDJOURNEY = '🎨 Midjourney'
-    STABLE_DIFFUSION = '🎆 Stable Diffusion'
-    FLUX = '🫐 Flux'
+    STABLE_DIFFUSION = '🎆 Stable Diffusion 3.5'
+    FLUX = '🫐 Flux 1.1 Pro'
     PHOTOSHOP_AI = '🪄 Photoshop AI'
     FACE_SWAP = '📷️ FaceSwap'
     MUSIC_GEN = '🎺 MusicGen'
@@ -338,24 +337,7 @@ class Texts(Protocol):
     CHOOSE_GEMINI_MODEL: str
     SWITCHED_TO_AI_SETTINGS: str
     SWITCHED_TO_AI_INFO: str
-    SWITCHED_TO_CHATGPT4_OMNI_MINI: str
-    SWITCHED_TO_CHATGPT4_OMNI: str
-    SWITCHED_TO_CHAT_GPT_O_1_MINI: str
-    SWITCHED_TO_CHAT_GPT_O_1_PREVIEW: str
-    SWITCHED_TO_CLAUDE_3_HAIKU: str
-    SWITCHED_TO_CLAUDE_3_SONNET: str
-    SWITCHED_TO_CLAUDE_3_OPUS: str
-    SWITCHED_TO_GEMINI_1_FLASH: str
-    SWITCHED_TO_GEMINI_1_PRO: str
-    SWITCHED_TO_GEMINI_1_ULTRA: str
-    SWITCHED_TO_DALL_E: str
-    SWITCHED_TO_MIDJOURNEY: str
-    SWITCHED_TO_STABLE_DIFFUSION: str
-    SWITCHED_TO_FLUX: str
-    SWITCHED_TO_FACE_SWAP: str
-    SWITCHED_TO_PHOTOSHOP_AI: str
-    SWITCHED_TO_MUSIC_GEN: str
-    SWITCHED_TO_SUNO: str
+    SWITCHED_TO_AI_EXAMPLES: str
     ALREADY_SWITCHED_TO_THIS_MODEL: str
     REQUEST_FORBIDDEN_ERROR: str
     PHOTO_FORBIDDEN_ERROR: str
@@ -372,6 +354,7 @@ class Texts(Protocol):
     REMOVE_RESTRICTION: str
     REMOVE_RESTRICTION_INFO: str
     IMAGE_SUCCESS: str
+    FILE_TOO_BIG_ERROR: str
 
     # Examples
     CHATGPT4_OMNI_EXAMPLE: str
@@ -409,8 +392,6 @@ class Texts(Protocol):
     SECONDS_30: str
     SECONDS_60: str
     SECONDS_180: str
-    SECONDS_240: str
-    SECONDS_300: str
 
     # Settings
     SETTINGS_CHOOSE_MODEL_TYPE: str
@@ -475,6 +456,30 @@ class Texts(Protocol):
     # Catalog
     MANAGE_CATALOG: str
     CATALOG: str
+    CATALOG_DIGITAL_EMPLOYEES: str
+    CATALOG_DIGITAL_EMPLOYEES_INFO: str
+    CATALOG_PROMPTS: str
+    CATALOG_PROMPTS_CHOOSE_MODEL_TYPE: str
+    CATALOG_PROMPTS_CHOOSE_CATEGORY: str
+    CATALOG_PROMPTS_CHOOSE_SUBCATEGORY: str
+
+    @staticmethod
+    def catalog_prompts_choose_prompt(prompts: list[Prompt]):
+        raise NotImplementedError
+
+    @staticmethod
+    def catalog_prompts_info_prompt(prompt: Prompt):
+        raise NotImplementedError
+
+    CATALOG_PROMPTS_GET_SHORT_PROMPT: str
+    CATALOG_PROMPTS_GET_LONG_PROMPT: str
+    CATALOG_PROMPTS_GET_EXAMPLES: str
+    CATALOG_PROMPTS_COPY: str
+
+    @staticmethod
+    def catalog_prompts_examples(products: list[Product]):
+        raise NotImplementedError
+
     CATALOG_FORBIDDEN_ERROR: str
     CATALOG_MANAGE = """
 🎭 <b>Управление каталогом ролей</b> 🌟
@@ -686,6 +691,8 @@ class Texts(Protocol):
     CLOSE: str
     CANCEL: str
     APPROVE: str
+    IMAGE: str
+    DOCUMENT: str
     AUDIO: str
     VIDEO: str
     SKIP: str
@@ -1141,7 +1148,6 @@ class Texts(Protocol):
 
     @staticmethod
     def catalog_manage_create_role_confirmation(
-        role_system_name: str,
         role_names: dict,
         role_descriptions: dict,
         role_instructions: dict,
@@ -1162,9 +1168,6 @@ class Texts(Protocol):
         return f"""
 🎩 <b>Вот что вы создали:</b>
 
-🤖 Системное название:
-{role_system_name}
-
 🌍 Имена:
 {names}
 
@@ -1179,10 +1182,9 @@ class Texts(Protocol):
 
     @staticmethod
     def catalog_manage_role_edit(
-        role_system_name: str,
-        role_names: dict,
-        role_descriptions: dict,
-        role_instructions: dict,
+        role_names: dict[LanguageCode, str],
+        role_descriptions: dict[LanguageCode, str],
+        role_instructions: dict[LanguageCode, str],
     ):
         names = ''
         for i, (language_code, name) in enumerate(role_names.items()):
@@ -1199,8 +1201,6 @@ class Texts(Protocol):
 
         return f"""
 🎨 <b>Настройка роли</b> 🖌️
-
-🔧 Вы решили отполировать <b>{role_system_name}</b>! Настало время превратить его в настоящую звезду AI-мира 🌟
 
 🌍 <b>Имена:</b>
 {names}
@@ -1270,6 +1270,12 @@ class Texts(Protocol):
     ) -> str:
         raise NotImplementedError
 
+    @staticmethod
+    def notify_about_quota(
+        subscription_limits: dict,
+    ) -> str:
+        raise NotImplementedError
+
     # Payment
     @staticmethod
     def payment_description_subscription(user_id: str, name: str):
@@ -1281,10 +1287,6 @@ class Texts(Protocol):
 
     @staticmethod
     def subscribe(subscriptions: list[Product], currency: Currency, user_discount: int) -> str:
-        raise NotImplementedError
-
-    @staticmethod
-    def choose_how_many_months_to_subscribe(subscription_name: str) -> str:
         raise NotImplementedError
 
     @staticmethod
@@ -1349,7 +1351,7 @@ class Texts(Protocol):
 
     # AI
     @staticmethod
-    def switched(model: Model, model_version: str):
+    def switched(model_name: str, model_type: ModelType, model_info: dict):
         raise NotImplementedError
 
     @staticmethod

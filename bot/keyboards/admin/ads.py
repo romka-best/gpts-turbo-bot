@@ -1,9 +1,10 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 from bot.locales.main import get_localization
+from bot.locales.types import LanguageCode
 
 
-def build_ads_keyboard(language_code: str) -> InlineKeyboardMarkup:
+def build_ads_keyboard(language_code: LanguageCode) -> InlineKeyboardMarkup:
     buttons = [
         [
             InlineKeyboardButton(
@@ -28,7 +29,7 @@ def build_ads_keyboard(language_code: str) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
-def build_ads_create_choose_source_keyboard(language_code: str) -> InlineKeyboardMarkup:
+def build_ads_create_choose_source_keyboard(language_code: LanguageCode) -> InlineKeyboardMarkup:
     buttons = [
         [
             InlineKeyboardButton(
@@ -65,7 +66,7 @@ def build_ads_create_choose_source_keyboard(language_code: str) -> InlineKeyboar
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
-def build_ads_create_choose_medium_keyboard(language_code: str) -> InlineKeyboardMarkup:
+def build_ads_create_choose_medium_keyboard(language_code: LanguageCode) -> InlineKeyboardMarkup:
     buttons = [
         [
             InlineKeyboardButton(
@@ -96,7 +97,7 @@ def build_ads_create_choose_medium_keyboard(language_code: str) -> InlineKeyboar
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
-def build_ads_create_keyboard(language_code: str) -> InlineKeyboardMarkup:
+def build_ads_create_keyboard(language_code: LanguageCode) -> InlineKeyboardMarkup:
     buttons = [
         [
             InlineKeyboardButton(
@@ -115,7 +116,7 @@ def build_ads_create_keyboard(language_code: str) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
-def build_ads_get_keyboard(language_code: str) -> InlineKeyboardMarkup:
+def build_ads_get_keyboard(language_code: LanguageCode) -> InlineKeyboardMarkup:
     buttons = [
         [
             InlineKeyboardButton(

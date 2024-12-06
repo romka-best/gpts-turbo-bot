@@ -4,9 +4,10 @@ from bot.database.models.common import Currency
 from bot.database.models.product import Product, ProductType, ProductCategory
 from bot.database.models.transaction import TransactionType
 from bot.locales.main import get_localization
+from bot.locales.types import LanguageCode
 
 
-def build_statistics_keyboard(language_code: str, is_admin: bool) -> InlineKeyboardMarkup:
+def build_statistics_keyboard(language_code: LanguageCode, is_admin: bool) -> InlineKeyboardMarkup:
     buttons = [
         [
             InlineKeyboardButton(
@@ -52,7 +53,7 @@ def build_statistics_keyboard(language_code: str, is_admin: bool) -> InlineKeybo
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
-def build_statistics_write_transaction_keyboard(language_code: str) -> InlineKeyboardMarkup:
+def build_statistics_write_transaction_keyboard(language_code: LanguageCode) -> InlineKeyboardMarkup:
     buttons = [
         [
             InlineKeyboardButton(
@@ -78,7 +79,7 @@ def build_statistics_write_transaction_keyboard(language_code: str) -> InlineKey
 
 
 def build_statistics_choose_service_keyboard(
-    language_code: str,
+    language_code: LanguageCode,
     products: list[Product],
     transaction_type: TransactionType,
 ) -> InlineKeyboardMarkup:
@@ -149,7 +150,7 @@ def build_statistics_choose_service_keyboard(
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
-def build_statistics_choose_currency_keyboard(language_code: str) -> InlineKeyboardMarkup:
+def build_statistics_choose_currency_keyboard(language_code: LanguageCode) -> InlineKeyboardMarkup:
     buttons = [
         [
             InlineKeyboardButton(

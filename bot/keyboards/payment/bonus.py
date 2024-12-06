@@ -1,11 +1,12 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 from bot.database.models.game import GameType
-from bot.database.models.product import Product
+from bot.database.models.product import Product, ProductCategory
 from bot.locales.main import get_localization
+from bot.locales.types import LanguageCode
 
 
-def build_bonus_keyboard(language_code: str, user_id: str) -> InlineKeyboardMarkup:
+def build_bonus_keyboard(language_code: LanguageCode, user_id: str) -> InlineKeyboardMarkup:
     buttons = [
         [
             InlineKeyboardButton(
@@ -43,7 +44,7 @@ def build_bonus_keyboard(language_code: str, user_id: str) -> InlineKeyboardMark
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
-def build_bonus_play_game_keyboard(language_code: str) -> InlineKeyboardMarkup:
+def build_bonus_play_game_keyboard(language_code: LanguageCode) -> InlineKeyboardMarkup:
     buttons = [
         [
             InlineKeyboardButton(
@@ -92,7 +93,7 @@ def build_bonus_play_game_keyboard(language_code: str) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
-def build_bonus_play_game_chosen_keyboard(language_code: str, game_type: GameType) -> InlineKeyboardMarkup:
+def build_bonus_play_game_chosen_keyboard(language_code: LanguageCode, game_type: GameType) -> InlineKeyboardMarkup:
     buttons = []
     if (
         game_type == GameType.BOWLING or
@@ -150,24 +151,141 @@ def build_bonus_play_game_chosen_keyboard(language_code: str, game_type: GameTyp
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
-def build_bonus_cash_out_keyboard(language_code: str, products: list[Product]) -> InlineKeyboardMarkup:
+def build_bonus_cash_out_keyboard(language_code: LanguageCode, products: list[Product], page=0) -> InlineKeyboardMarkup:
     buttons = []
-    for product in products:
+
+    if page == 0:
+        buttons.append([
+            InlineKeyboardButton(
+                text=get_localization(language_code).TEXT_MODELS,
+                callback_data=f'bonus_cash_out:{ProductCategory.TEXT}',
+            ),
+        ])
+        for product in products:
+            buttons.append(
+                [
+                    InlineKeyboardButton(
+                        text=product.names.get(language_code),
+                        callback_data=f'bonus_cash_out:{product.id}'
+                    ),
+                ],
+            )
         buttons.append(
             [
                 InlineKeyboardButton(
-                    text=product.names.get(language_code),
-                    callback_data=f'bonus_cash_out:{product.id}'
+                    text='⬅️',
+                    callback_data='bonus_cash_out:prev:3'
+                ),
+                InlineKeyboardButton(
+                    text='1/4',
+                    callback_data='bonus_cash_out:page:0'
+                ),
+                InlineKeyboardButton(
+                    text='➡️',
+                    callback_data='bonus_cash_out:next:1'
+                ),
+            ]
+        )
+    elif page == 1:
+        buttons.append([
+            InlineKeyboardButton(
+                text=get_localization(language_code).IMAGE_MODELS,
+                callback_data=f'bonus_cash_out:{ProductCategory.IMAGE}',
+            ),
+        ])
+        for product in products:
+            buttons.append(
+                [
+                    InlineKeyboardButton(
+                        text=product.names.get(language_code),
+                        callback_data=f'bonus_cash_out:{product.id}'
+                    ),
+                ],
+            )
+        buttons.append(
+            [
+                InlineKeyboardButton(
+                    text='⬅️',
+                    callback_data='bonus_cash_out:prev:0'
+                ),
+                InlineKeyboardButton(
+                    text='2/4',
+                    callback_data='bonus_cash_out:page:1'
+                ),
+                InlineKeyboardButton(
+                    text='➡️',
+                    callback_data='bonus_cash_out:next:2'
+                ),
+            ]
+        )
+    elif page == 2:
+        buttons.append(
+            [
+                InlineKeyboardButton(
+                    text=get_localization(language_code).MUSIC_MODELS,
+                    callback_data=f'bonus_cash_out:{ProductCategory.MUSIC}',
                 ),
             ],
         )
+        for product in products:
+            buttons.append(
+                [
+                    InlineKeyboardButton(
+                        text=product.names.get(language_code),
+                        callback_data=f'bonus_cash_out:{product.id}'
+                    ),
+                ],
+            )
+        buttons.append(
+            [
+                InlineKeyboardButton(
+                    text='⬅️',
+                    callback_data='bonus_cash_out:prev:1'
+                ),
+                InlineKeyboardButton(
+                    text='3/4',
+                    callback_data='bonus_cash_out:page:2'
+                ),
+                InlineKeyboardButton(
+                    text='➡️',
+                    callback_data='bonus_cash_out:next:3'
+                ),
+            ]
+        )
+    elif page == 3:
+        for product in products:
+            buttons.append(
+                [
+                    InlineKeyboardButton(
+                        text=product.names.get(language_code),
+                        callback_data=f'bonus_cash_out:{product.id}'
+                    ),
+                ],
+            )
+        buttons.append(
+            [
+                InlineKeyboardButton(
+                    text='⬅️',
+                    callback_data='bonus_cash_out:prev:2'
+                ),
+                InlineKeyboardButton(
+                    text='4/4',
+                    callback_data='bonus_cash_out:page:3'
+                ),
+                InlineKeyboardButton(
+                    text='➡️',
+                    callback_data='bonus_cash_out:next:0'
+                ),
+            ]
+        )
+
     buttons.append(
         [
             InlineKeyboardButton(
                 text=get_localization(language_code).BACK,
                 callback_data='bonus_cash_out:back'
             )
-        ]
+        ],
     )
 
     return InlineKeyboardMarkup(inline_keyboard=buttons)
