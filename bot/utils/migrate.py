@@ -135,8 +135,8 @@ async def migrate(bot: Bot):
             ],
             subcategory_ids=[coding_frontend_subcategory.id],
             names={
-                LanguageCode.RU: 'JavaScript calculator for financial site',
-                LanguageCode.EN: 'JavaScript калькулятор для финансового сайта',
+                LanguageCode.RU: 'JavaScript калькулятор для финансового сайта',
+                LanguageCode.EN: 'JavaScript calculator for financial site',
             },
             short_prompts={
                 LanguageCode.RU: """
@@ -294,18 +294,18 @@ Provide a detailed proposal for developing a responsive [App Type] application. 
             },
             short_prompts={
                 LanguageCode.RU: """
-Design a Multilingual E-Commerce platform for the [Category] industry:
-
-- Leverage React and i18next to create a seamless, user-friendly experience across languages.
-- Target a diverse audience with customized content and features for each market.
-- Implement a scalable architecture, translation management, and localization strategies.
-""".strip(),
-                LanguageCode.EN: """
 Разработай мультиязычную E-Commerce платформы для индустрии [Категория]:
 
 - Используй React и i18next для создания удобного и плавного опыта на разных языках.
 - Ориентируйся на разнообразную аудиторию, предлагая персонализированный контент и функции для каждого рынка.
 - Реализуй масштабируемую архитектуру, управление переводами и стратегии локализации.
+""".strip(),
+                LanguageCode.EN: """
+Design a Multilingual E-Commerce platform for the [Category] industry:
+
+- Leverage React and i18next to create a seamless, user-friendly experience across languages.
+- Target a diverse audience with customized content and features for each market.
+- Implement a scalable architecture, translation management, and localization strategies.
 """.strip(),
             },
             long_prompts={
@@ -1837,7 +1837,7 @@ Let me know if you have any other requirements or need further assistance
             ],
             subcategory_ids=[architecture_interior_design_subcategory.id],
             names={
-                LanguageCode.RU: 'Лауреатная Архитектурная Фотография',
+                LanguageCode.RU: 'Архитектурная Фотография Достойная Наград',
                 LanguageCode.EN: 'Award Winning Architectural Photography',
             },
             short_prompts={

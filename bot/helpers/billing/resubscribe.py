@@ -10,12 +10,12 @@ from bot.locales.types import LanguageCode
 
 
 @firestore.async_transactional
-async def unsubscribe_wrapper(transaction, old_subscription: Subscription, bot: Bot):
-    await unsubscribe(transaction, old_subscription, bot)
+async def resubscribe_wrapper(transaction, old_subscription: Subscription, bot: Bot):
+    await resubscribe(transaction, old_subscription, bot)
 
 
-async def unsubscribe(transaction, old_subscription: Subscription, bot: Bot):
-    old_subscription.status = SubscriptionStatus.CANCELED
+async def resubscribe(transaction, old_subscription: Subscription, bot: Bot):
+    old_subscription.status = SubscriptionStatus.ACTIVE
     await update_subscription_in_transaction(transaction, old_subscription.id, {
         'status': old_subscription.status,
     })
@@ -24,20 +24,20 @@ async def unsubscribe(transaction, old_subscription: Subscription, bot: Bot):
         await bot.edit_user_star_subscription(
             user_id=int(old_subscription.user_id),
             telegram_payment_charge_id=old_subscription.provider_payment_charge_id,
-            is_canceled=True,
+            is_canceled=False,
         )
 
     product = await get_product(old_subscription.product_id)
 
     await send_message_to_admins(
         bot=bot,
-        message=f'#payment #subscription #canceled\n\n'
-                f'❌ <b>Отмена продления подписки у пользователя: {old_subscription.user_id}</b>\n\n'
+        message=f'#payment #subscription #resubscribe\n\n'
+                f'🤑 <b>Возобновление продления подписки у пользователя: {old_subscription.user_id}</b>\n\n'
                 f'ℹ️ ID: {old_subscription.id}\n'
                 f'💱 Метод оплаты: {old_subscription.payment_method}\n'
                 f'💳 Тип: {product.names.get(LanguageCode.RU)}\n'
                 f'💰 Сумма: {old_subscription.amount}{Currency.SYMBOLS[old_subscription.currency]}\n'
                 f'💸 Чистая сумма: {float(old_subscription.income_amount)}{Currency.SYMBOLS[old_subscription.currency]}\n'
                 f'🗓 Период подписки: {old_subscription.start_date.strftime("%d.%m.%Y")}-{old_subscription.end_date.strftime("%d.%m.%Y")}\n\n'
-                f'Грустно, но что поделать 🤷',
+                f'Вернулся к нам, продолжаем в том же духе 💪',
     )

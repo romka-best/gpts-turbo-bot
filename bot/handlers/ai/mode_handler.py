@@ -14,6 +14,7 @@ from bot.handlers.ai.face_swap_handler import handle_face_swap
 from bot.handlers.ai.music_gen_handler import handle_music_gen
 from bot.handlers.ai.photoshop_ai_handler import handle_photoshop_ai
 from bot.handlers.ai.suno_handler import handle_suno
+from bot.handlers.common.catalog_handler import handle_catalog_prompts_model_type
 from bot.handlers.common.info_handler import handle_info_selection
 from bot.helpers.getters.get_human_model import get_human_model
 from bot.helpers.getters.get_info_by_model import get_info_by_model
@@ -198,4 +199,15 @@ async def handle_switched_to_ai_selection(callback_query: CallbackQuery, state: 
         info_text = get_info_by_model(model, user_language_code)
         await callback_query.message.answer(
             text=info_text,
+        )
+    elif action == 'examples':
+        model_type = get_model_type(model)
+        await state.update_data(prompt_model_type=model_type)
+        await state.update_data(prompt_has_close_button=True)
+
+        await handle_catalog_prompts_model_type(
+            callback_query.message,
+            user_id,
+            state,
+            False,
         )

@@ -402,6 +402,8 @@ Once you've got the perfect shot, <b>upload your photo</b> and let the magic hap
     OPEN_BONUS_INFO = "🎁 Open Bonus Balance"
     OPEN_BUY_SUBSCRIPTIONS_INFO = "💎 Subscribe"
     OPEN_BUY_PACKAGES_INFO = "🛍 Purchase Packages"
+    RENEW_SUBSCRIPTION = "♻️ Renew Subscription"
+    RENEW_SUBSCRIPTION_SUCCESS = "✅ Subscription renewal was successful"
     CANCEL_SUBSCRIPTION = "❌ Cancel Subscription"
     CANCEL_SUBSCRIPTION_CONFIRMATION = "❗Are you sure you want to cancel the subscription?"
     CANCEL_SUBSCRIPTION_SUCCESS = "💸 Subscription cancellation was successful"
@@ -943,11 +945,20 @@ Select the <b>prompt number</b> to get the full prompt by clicking the button be
 """
 
     @staticmethod
-    def catalog_prompts_info_prompt(prompt: Prompt):
+    def catalog_prompts_info_prompt(prompt: Prompt, products: list[Product]):
+        model_info = ''
+        for index, product in enumerate(products):
+            is_last = index == len(products) - 1
+            left_part = '┣' if not is_last else '┗'
+            right_part = '\n' if not is_last else ''
+            model_info += f'    {left_part} <b>{product.names.get(LanguageCode.EN)}</b>{right_part}'
+
         return f"""
 🗯 <b>Prompt Catalog</b>
 
 You have selected the prompt: <b>{prompt.names.get(LanguageCode.EN)}</b>
+This prompt works well with these models::
+{model_info}
 
 Choose what you want to do by clicking the button below 👇
 """

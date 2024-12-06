@@ -93,6 +93,7 @@ def build_catalog_prompts_model_type_keyboard(
 def build_catalog_prompt_categories_keyboard(
     language_code: LanguageCode,
     categories: list[PromptCategory],
+    has_close_button: bool = False,
 ) -> InlineKeyboardMarkup:
     buttons = []
     for category in categories:
@@ -104,12 +105,21 @@ def build_catalog_prompt_categories_keyboard(
                 )
             ],
         )
-    buttons.append([
-        InlineKeyboardButton(
-            text=get_localization(language_code).BACK,
-            callback_data=f'catalog_prompt_category:back'
-        )
-    ])
+
+    if has_close_button:
+        buttons.append([
+            InlineKeyboardButton(
+                text=get_localization(language_code).CLOSE,
+                callback_data=f'catalog_prompt_category:close'
+            )
+        ])
+    else:
+        buttons.append([
+            InlineKeyboardButton(
+                text=get_localization(language_code).BACK,
+                callback_data=f'catalog_prompt_category:back'
+            )
+        ])
 
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 

@@ -401,6 +401,8 @@ class Russian(Texts):
     OPEN_BONUS_INFO = "🎁 Перейти к бонусному балансу"
     OPEN_BUY_SUBSCRIPTIONS_INFO = "💎 Оформить подписку"
     OPEN_BUY_PACKAGES_INFO = "🛍 Приобрести пакеты"
+    RENEW_SUBSCRIPTION = "♻️ Возобновить подписку"
+    RENEW_SUBSCRIPTION_SUCCESS = "✅ Возобновление подписки прошло успешно"
     CANCEL_SUBSCRIPTION = "❌ Отменить подписку"
     CANCEL_SUBSCRIPTION_CONFIRMATION = "❗Вы уверены, что хотите отменить подписку?"
     CANCEL_SUBSCRIPTION_SUCCESS = "💸 Отмена подписки прошла успешно"
@@ -942,11 +944,20 @@ class Russian(Texts):
 """
 
     @staticmethod
-    def catalog_prompts_info_prompt(prompt: Prompt):
+    def catalog_prompts_info_prompt(prompt: Prompt, products: list[Product]):
+        model_info = ''
+        for index, product in enumerate(products):
+            is_last = index == len(products) - 1
+            left_part = '┣' if not is_last else '┗'
+            right_part = '\n' if not is_last else ''
+            model_info += f'    {left_part} <b>{product.names.get(LanguageCode.RU)}</b>{right_part}'
+
         return f"""
 🗯 <b>Каталог промптов</b>
 
 Вы выбрали промпт: <b>{prompt.names.get(LanguageCode.RU)}</b>
+Этот промпт подходит для моделей:
+{model_info}
 
 Выберите, что вы хотите сделать, нажав на кнопку ниже 👇
 """

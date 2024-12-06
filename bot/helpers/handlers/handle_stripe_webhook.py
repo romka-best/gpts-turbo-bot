@@ -22,6 +22,7 @@ from bot.database.operations.product.getters import get_product
 from bot.database.operations.subscription.getters import (
     get_subscription,
     get_subscription_by_provider_auto_payment_charge_id,
+    get_activated_subscriptions_by_user_id,
 )
 from bot.database.operations.subscription.updaters import update_subscription
 from bot.database.operations.subscription.writers import write_subscription
@@ -259,15 +260,23 @@ async def handle_stripe_webhook(request: dict, bot: Bot, dp: Dispatcher):
                                 f'Продолжаем в том же духе 💪',
                     )
                 elif request_type == 'invoice.payment_failed':
-                    # TODO FIND OLD SUBSCRIPTIONS
                     current_date = datetime.now(timezone.utc)
 
                     old_subscription.status = SubscriptionStatus.FINISHED
-                    user.daily_limits = SUBSCRIPTION_FREE_LIMITS
+                    activated_subscriptions = await get_activated_subscriptions_by_user_id(user.id, current_date)
+                    for activated_subscription in activated_subscriptions:
+                        if activated_subscription.id != old_subscription.id:
+                            activated_subscription_product = await get_product(activated_subscription.product_id)
+                            user.subscription_id = activated_subscription.id
+                            user.daily_limits = activated_subscription_product.details.get('limits')
+                            break
+                    else:
+                        user.subscription_id = ''
+                        user.daily_limits = SUBSCRIPTION_FREE_LIMITS
 
                     await update_subscription(old_subscription.id, {'status': old_subscription.status})
                     await update_user(old_subscription.user_id, {
-                        'subscription_id': '',
+                        'subscription_id': user.subscription_id,
                         'daily_limits': user.daily_limits,
                         'last_subscription_limit_update': current_date,
                     })

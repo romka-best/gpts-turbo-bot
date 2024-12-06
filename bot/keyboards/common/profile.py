@@ -10,6 +10,7 @@ def build_profile_keyboard(
     is_photo_uploaded: bool,
     is_gender_chosen: bool,
     has_active_subscription: bool,
+    has_canceled_subscription: bool,
 ) -> InlineKeyboardMarkup:
     buttons = [
         [
@@ -69,6 +70,13 @@ def build_profile_keyboard(
             InlineKeyboardButton(
                 text=get_localization(language_code).CANCEL_SUBSCRIPTION,
                 callback_data=f'profile:cancel_subscription'
+            )
+        ])
+    elif has_canceled_subscription:
+        buttons.append([
+            InlineKeyboardButton(
+                text=get_localization(language_code).RENEW_SUBSCRIPTION,
+                callback_data=f'profile:renew_subscription'
             )
         ])
 

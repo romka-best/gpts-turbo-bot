@@ -88,6 +88,8 @@ class Texts(Protocol):
     OPEN_BONUS_INFO: str
     OPEN_BUY_SUBSCRIPTIONS_INFO: str
     OPEN_BUY_PACKAGES_INFO: str
+    RENEW_SUBSCRIPTION: str
+    RENEW_SUBSCRIPTION_SUCCESS: str
     CANCEL_SUBSCRIPTION: str
     CANCEL_SUBSCRIPTION_CONFIRMATION: str
     CANCEL_SUBSCRIPTION_SUCCESS: str
@@ -468,7 +470,7 @@ class Texts(Protocol):
         raise NotImplementedError
 
     @staticmethod
-    def catalog_prompts_info_prompt(prompt: Prompt):
+    def catalog_prompts_info_prompt(prompt: Prompt, products: list[Product]):
         raise NotImplementedError
 
     CATALOG_PROMPTS_GET_SHORT_PROMPT: str

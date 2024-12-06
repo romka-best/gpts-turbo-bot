@@ -3,8 +3,14 @@ from typing import Optional, cast
 from aiogram import Router
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
-from aiogram.types import Message, CallbackQuery, URLInputFile, InlineKeyboardButton, InlineKeyboardMarkup, \
-    InputMediaPhoto
+from aiogram.types import (
+    Message,
+    CallbackQuery,
+    URLInputFile,
+    InlineKeyboardButton,
+    InlineKeyboardMarkup,
+    InputMediaPhoto,
+)
 
 from bot.database.main import firebase
 from bot.database.models.common import Model, Quota, ModelType
@@ -230,18 +236,28 @@ async def handle_catalog_prompts_model_type_selection(callback_query: CallbackQu
         )
 
 
-async def handle_catalog_prompts_model_type(message: Message, user_id: str, state: FSMContext):
+async def handle_catalog_prompts_model_type(message: Message, user_id: str, state: FSMContext, is_edit=True):
     user_language_code = await get_user_language(user_id, state.storage)
     user_data = await state.get_data()
 
     prompt_categories = await get_prompt_categories_by_model_type(user_data.get('prompt_model_type'))
 
     text = get_localization(user_language_code).CATALOG_PROMPTS_CHOOSE_CATEGORY
-    reply_markup = build_catalog_prompt_categories_keyboard(user_language_code, prompt_categories)
-    await message.edit_text(
-        text=text,
-        reply_markup=reply_markup,
+    reply_markup = build_catalog_prompt_categories_keyboard(
+        user_language_code,
+        prompt_categories,
+        user_data.get('prompt_has_close_button', False),
     )
+    if is_edit:
+        await message.edit_text(
+            text=text,
+            reply_markup=reply_markup,
+        )
+    else:
+        await message.answer(
+            text=text,
+            reply_markup=reply_markup,
+        )
 
 
 @catalog_router.callback_query(lambda c: c.data.startswith('catalog_prompt_category:'))
@@ -343,8 +359,13 @@ async def handle_catalog_prompt(message: Message, user_id: str, state: FSMContex
     user_data = await state.get_data()
 
     prompt = await get_prompt(user_data.get('prompt_id'))
+    products = []
+    for product_id in prompt.product_ids:
+        product = await get_product(product_id)
+        if product:
+            products.append(product)
 
-    text = get_localization(user_language_code).catalog_prompts_info_prompt(prompt)
+    text = get_localization(user_language_code).catalog_prompts_info_prompt(prompt, products)
     reply_markup = build_prompts_catalog_chosen_keyboard(user_language_code, prompt)
     await message.edit_text(
         text=text,

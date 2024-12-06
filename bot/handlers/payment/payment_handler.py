@@ -7,6 +7,7 @@ from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery, URLInputFile, LabeledPrice, PreCheckoutQuery
 
+from bot.config import config, MessageEffect
 from bot.database.main import firebase
 from bot.database.models.cart import CartItem
 from bot.database.models.common import PaymentType, PaymentMethod, Currency
@@ -28,10 +29,7 @@ from bot.database.operations.package.getters import (
 from bot.database.operations.package.updaters import update_package
 from bot.database.operations.package.writers import write_package
 from bot.database.operations.product.getters import get_active_products_by_product_type_and_category, get_product
-from bot.database.operations.subscription.getters import (
-    get_last_subscription_by_user_id,
-    get_subscription,
-)
+from bot.database.operations.subscription.getters import get_subscription
 from bot.database.operations.subscription.writers import write_subscription
 from bot.database.operations.transaction.writers import write_transaction
 from bot.database.operations.user.getters import get_user
@@ -39,7 +37,8 @@ from bot.database.operations.user.updaters import update_user
 from bot.handlers.common.info_handler import handle_info_selection
 from bot.handlers.payment.promo_code_handler import handle_promo_code
 from bot.helpers.billing.create_payment import OrderItem, create_payment
-from bot.helpers.billing.unsubscribe import unsubscribe
+from bot.helpers.billing.resubscribe import resubscribe_wrapper
+from bot.helpers.billing.unsubscribe import unsubscribe_wrapper
 from bot.helpers.creaters.create_package import create_package
 from bot.helpers.creaters.create_subscription import create_subscription
 from bot.helpers.getters.get_quota_by_model import get_quota_by_model
@@ -1277,8 +1276,9 @@ async def successful_payment(message: Message, state: FSMContext):
 
 async def handle_cancel_subscription(message: Message, user_id: str, state: FSMContext):
     user_language_code = await get_user_language(user_id, state.storage)
+    user = await get_user(user_id)
 
-    subscription = await get_last_subscription_by_user_id(user_id)
+    subscription = await get_subscription(user.subscription_id)
     if subscription and subscription.status == SubscriptionStatus.ACTIVE:
         text = get_localization(user_language_code).CANCEL_SUBSCRIPTION_CONFIRMATION
         reply_markup = build_cancel_subscription_keyboard(user_language_code)
@@ -1292,6 +1292,21 @@ async def handle_cancel_subscription(message: Message, user_id: str, state: FSMC
     )
 
 
+async def handle_renew_subscription(message: Message, user_id: str, state: FSMContext):
+    user_language_code = await get_user_language(user_id, state.storage)
+    user = await get_user(user_id)
+
+    old_subscription = await get_subscription(user.subscription_id)
+
+    transaction = firebase.db.transaction()
+    await resubscribe_wrapper(transaction, old_subscription, message.bot)
+
+    await message.answer(
+        text=get_localization(user_language_code).RENEW_SUBSCRIPTION_SUCCESS,
+        message_effect_id=config.MESSAGE_EFFECTS.get(MessageEffect.HEART),
+    )
+
+
 @payment_router.callback_query(lambda c: c.data.startswith('cancel_subscription:'))
 async def handle_cancel_subscription_selection(callback_query: CallbackQuery, state: FSMContext):
     await callback_query.answer()
@@ -1300,10 +1315,11 @@ async def handle_cancel_subscription_selection(callback_query: CallbackQuery, st
 
     action = callback_query.data.split(':')[1]
     if action == 'approve':
-        old_subscription = await get_last_subscription_by_user_id(user_id)
+        user = await get_user(user_id)
+        old_subscription = await get_subscription(user.subscription_id)
 
         transaction = firebase.db.transaction()
-        await unsubscribe(transaction, old_subscription, callback_query.bot)
+        await unsubscribe_wrapper(transaction, old_subscription, callback_query.bot)
 
         user_language_code = await get_user_language(user_id, state.storage)
         await callback_query.message.edit_text(

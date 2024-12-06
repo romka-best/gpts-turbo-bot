@@ -331,7 +331,7 @@ async def handle_replicate_music_gen(
 
     if generation.result:
         reply_markup = build_reaction_keyboard(generation.id)
-        caption = f'🎵 {(user.daily_limits[Quota.MUSIC_GEN] + user.additional_usage_quota[Quota.MUSIC_GEN]) - duration}' \
+        caption = f'🎵 {(user.daily_limits[Quota.MUSIC_GEN] + user.additional_usage_quota[Quota.MUSIC_GEN]) - 1}' \
             if user.settings[Model.MUSIC_GEN][UserSettings.SHOW_USAGE_QUOTA] and \
                user.daily_limits[Quota.MUSIC_GEN] != float('inf') else '🎵'
         await send_audio(
@@ -420,7 +420,7 @@ async def handle_replicate_stable_diffusion(
 
     if generation.result:
         reply_markup = build_reaction_keyboard(generation.id)
-        if user.settings[UserSettings.SEND_TYPE] == SendType.DOCUMENT:
+        if user.settings[Model.STABLE_DIFFUSION][UserSettings.SEND_TYPE] == SendType.DOCUMENT:
             await send_document(bot, user.telegram_chat_id, generation.result, reply_markup)
         else:
             await send_image(bot, user.telegram_chat_id, generation.result, reply_markup)

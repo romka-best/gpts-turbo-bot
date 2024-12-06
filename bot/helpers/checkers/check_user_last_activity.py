@@ -12,15 +12,16 @@ async def check_user_last_activity(user_id: str, storage: BaseStorage) -> bool:
     last_activity = await get_last_transaction_by_user(user_id)
     notification_stage = await get_notification_stage(user_id, storage)
     if last_activity:
-        if notification_stage >= len(NOTIFICATION_INTERVALS):
+        days_since_last_activity = (current_date - last_activity.created_at).days
+        if days_since_last_activity <= 1:
+            await set_notification_stage(user_id, 0, storage)
             return False
 
-        next_interval = NOTIFICATION_INTERVALS[notification_stage]
-        days_since_last_activity = (current_date - last_activity.created_at).days
-
-        if days_since_last_activity > next_interval:
-            await set_notification_stage(user_id, notification_stage + 1, storage)
-            return True
+        if notification_stage < len(NOTIFICATION_INTERVALS):
+            next_interval = NOTIFICATION_INTERVALS[notification_stage]
+            if days_since_last_activity > next_interval:
+                await set_notification_stage(user_id, notification_stage + 1, storage)
+                return True
         return False
     else:
         await set_notification_stage(user_id, 0, storage)

@@ -185,7 +185,7 @@ async def send_game_status_after_timeout(
     language_code: LanguageCode,
     won: bool,
 ):
-    await asyncio.sleep(5)
+    await asyncio.sleep(3)
 
     text = get_localization(language_code).PLAY_GAME_WON if won else get_localization(language_code).PLAY_GAME_LOST
 
