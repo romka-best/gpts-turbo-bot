@@ -22,7 +22,8 @@ from bot.database.models.common import (
     MidjourneyVersion,
     FluxSafetyTolerance,
     SunoVersion,
-    SendType, AspectRatio,
+    SendType,
+    AspectRatio,
 )
 from bot.database.models.user import UserSettings
 from bot.database.operations.chat.deleters import delete_chat, reset_chat
@@ -288,7 +289,7 @@ async def handle_setting_selection(callback_query: CallbackQuery, state: FSMCont
     ):
         user.settings[chosen_model][UserSettings.SEND_TYPE] = chosen_setting
         what_changed = UserSettings.SEND_TYPE
-    elif chosen_setting == SunoVersion.V3 or chosen_setting == SunoVersion.V3_5:
+    elif chosen_setting == SunoVersion.V3 or chosen_setting == SunoVersion.V3_5 or chosen_setting == SunoVersion.V4:
         user.settings[Model.SUNO][UserSettings.VERSION] = chosen_setting
         what_changed = UserSettings.VERSION
     else:
@@ -314,7 +315,7 @@ async def handle_setting_selection(callback_query: CallbackQuery, state: FSMCont
                 ) or (
                     callback_data == DALLEVersion.V2 or callback_data == DALLEVersion.V3
                 ) or (
-                    callback_data == SunoVersion.V3 or callback_data == SunoVersion.V3_5
+                    callback_data == SunoVersion.V3 or callback_data == SunoVersion.V3_5 or callback_data == SunoVersion.V4
                 ):
                     text = text.replace(' ✅', '')
             elif what_changed == UserSettings.QUALITY:

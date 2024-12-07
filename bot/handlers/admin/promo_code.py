@@ -249,7 +249,7 @@ async def promo_code_date_sent(message: Message, state: FSMContext):
             details['product_id'] = user_data['promo_code_product_id']
             details['subscription_period'] = SubscriptionPeriod.MONTH1
         elif promo_code_type == PromoCodeType.PACKAGE:
-            details['pr/oduct_id'] = user_data['promo_code_product_id']
+            details['product_id'] = user_data['promo_code_product_id']
             details['package_quantity'] = user_data['promo_code_package_quantity']
         elif promo_code_type == PromoCodeType.DISCOUNT:
             details['discount'] = int(user_data['promo_code_discount'])

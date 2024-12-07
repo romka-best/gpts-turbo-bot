@@ -184,7 +184,7 @@ async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_q
     if can_work_with_photos:
         history.append({
             'role': 'system',
-            'content': role.translated_instructions[user_language_code],
+            'content': role.translated_instructions.get(user_language_code, LanguageCode.EN),
         })
 
     for sorted_message in sorted_messages:
