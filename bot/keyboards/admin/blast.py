@@ -1,9 +1,10 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 from bot.locales.main import get_localization
+from bot.locales.types import LanguageCode
 
 
-def build_blast_keyboard(language_code: str) -> InlineKeyboardMarkup:
+def build_blast_keyboard(language_code: LanguageCode) -> InlineKeyboardMarkup:
     buttons = [
         [
             InlineKeyboardButton(
@@ -34,7 +35,7 @@ def build_blast_keyboard(language_code: str) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
-def build_blast_language_keyboard(language_code: str) -> InlineKeyboardMarkup:
+def build_blast_language_keyboard(language_code: LanguageCode) -> InlineKeyboardMarkup:
     buttons = [
         [
             InlineKeyboardButton(
@@ -63,7 +64,7 @@ def build_blast_language_keyboard(language_code: str) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
-def build_blast_confirmation_keyboard(language_code: str) -> InlineKeyboardMarkup:
+def build_blast_confirmation_keyboard(language_code: LanguageCode) -> InlineKeyboardMarkup:
     buttons = [
         [
             InlineKeyboardButton(

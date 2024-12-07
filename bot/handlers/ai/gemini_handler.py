@@ -20,11 +20,12 @@ from bot.database.operations.chat.getters import get_chat
 from bot.database.operations.message.getters import get_messages_by_chat_id
 from bot.database.operations.message.writers import write_message
 from bot.database.operations.product.getters import get_product_by_quota
-from bot.database.operations.role.getters import get_role_by_name
+from bot.database.operations.role.getters import get_role
 from bot.database.operations.transaction.writers import write_transaction
 from bot.database.operations.user.getters import get_user
 from bot.database.operations.user.updaters import update_user
 from bot.helpers.creaters.create_new_message_and_update_user import create_new_message_and_update_user
+from bot.helpers.getters.get_quota_by_model import get_quota_by_model
 from bot.helpers.getters.get_switched_to_ai_model import get_switched_to_ai_model
 from bot.helpers.reply_with_voice import reply_with_voice
 from bot.helpers.senders.send_ai_message import send_ai_message
@@ -34,6 +35,7 @@ from bot.keyboards.ai.gemini import build_gemini_keyboard
 from bot.keyboards.ai.mode import build_switched_to_ai_keyboard
 from bot.keyboards.common.common import build_error_keyboard, build_continue_generating_keyboard
 from bot.locales.main import get_user_language, get_localization
+from bot.locales.types import LanguageCode
 
 gemini_router = Router()
 
@@ -110,9 +112,9 @@ async def handle_gemini_choose_selection(callback_query: CallbackQuery, state: F
                 'settings': user.settings,
             })
 
-            text = get_switched_to_ai_model(
-                user.current_model,
-                user.settings[user.current_model][UserSettings.VERSION],
+            text = await get_switched_to_ai_model(
+                user,
+                get_quota_by_model(user.current_model, user.settings[user.current_model][UserSettings.VERSION]),
                 user_language_code,
             )
             if not text:
@@ -169,9 +171,9 @@ async def handle_gemini(message: Message, state: FSMContext, user: User, user_qu
         chat_id=user.current_chat_id,
         limit=limit,
     )
-    role = await get_role_by_name(chat.role)
+    role = await get_role(chat.role_id)
     sorted_messages = sorted(messages, key=lambda m: m.created_at)
-    system_prompt = role.translated_instructions.get(user_language_code, 'en')
+    system_prompt = role.translated_instructions.get(user_language_code, LanguageCode.EN)
     history = []
     for sorted_message in sorted_messages:
         parts = []
@@ -325,7 +327,7 @@ async def handle_gemini(message: Message, state: FSMContext, user: User, user_qu
 
 async def handle_gemini_1_pro_example(
     user: User,
-    user_language_code: str,
+    user_language_code: LanguageCode,
     prompt: str,
     system_prompt: str,
     history: list,

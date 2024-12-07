@@ -1,9 +1,10 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 from bot.locales.main import get_localization
+from bot.locales.types import LanguageCode
 
 
-def build_music_gen_keyboard(language_code: str) -> InlineKeyboardMarkup:
+def build_music_gen_keyboard(language_code: LanguageCode) -> InlineKeyboardMarkup:
     buttons = [
         [
             InlineKeyboardButton(
@@ -21,18 +22,6 @@ def build_music_gen_keyboard(language_code: str) -> InlineKeyboardMarkup:
             InlineKeyboardButton(
                 text=get_localization(language_code).SECONDS_180,
                 callback_data=f'music_gen:180'
-            )
-        ],
-        [
-            InlineKeyboardButton(
-                text=get_localization(language_code).SECONDS_240,
-                callback_data=f'music_gen:240'
-            )
-        ],
-        [
-            InlineKeyboardButton(
-                text=get_localization(language_code).SECONDS_300,
-                callback_data=f'music_gen:300'
             )
         ],
         [

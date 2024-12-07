@@ -5,10 +5,11 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from bot.database.models.chat import Chat
 from bot.database.models.common import Model
 from bot.locales.main import get_localization
+from bot.locales.types import LanguageCode
 
 
 def build_chats_keyboard(
-    language_code: str,
+    language_code: LanguageCode,
     model: Optional[Model] = None,
 ) -> InlineKeyboardMarkup:
     buttons = [
@@ -53,7 +54,7 @@ def build_chats_keyboard(
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
-def build_create_chat_keyboard(language_code: str) -> InlineKeyboardMarkup:
+def build_create_chat_keyboard(language_code: LanguageCode) -> InlineKeyboardMarkup:
     buttons = [
         [
             InlineKeyboardButton(
@@ -66,7 +67,7 @@ def build_create_chat_keyboard(language_code: str) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
-def build_switch_chat_keyboard(language_code: str, current_chat_id: str, chats: list[Chat]) -> InlineKeyboardMarkup:
+def build_switch_chat_keyboard(language_code: LanguageCode, current_chat_id: str, chats: list[Chat]) -> InlineKeyboardMarkup:
     buttons = []
     for chat in chats:
         buttons.append([
@@ -85,7 +86,7 @@ def build_switch_chat_keyboard(language_code: str, current_chat_id: str, chats: 
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
-def build_delete_chat_keyboard(language_code: str, current_chat_id: str, chats: list[Chat]) -> InlineKeyboardMarkup:
+def build_delete_chat_keyboard(language_code: LanguageCode, current_chat_id: str, chats: list[Chat]) -> InlineKeyboardMarkup:
     buttons = []
     for chat in chats:
         if current_chat_id != chat.id:
@@ -105,7 +106,7 @@ def build_delete_chat_keyboard(language_code: str, current_chat_id: str, chats: 
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
-def build_reset_chat_keyboard(language_code: str) -> InlineKeyboardMarkup:
+def build_reset_chat_keyboard(language_code: LanguageCode) -> InlineKeyboardMarkup:
     buttons = [
         [
             InlineKeyboardButton(

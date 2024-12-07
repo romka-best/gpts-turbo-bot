@@ -7,7 +7,7 @@ from aiogram.fsm.storage.base import StorageKey, BaseStorage
 from aiogram.utils.markdown import hlink
 
 from bot.config import config, MessageSticker
-from bot.database.models.common import Quota, Currency, Model, SunoSendType
+from bot.database.models.common import Quota, Currency, Model, SendType
 from bot.database.models.generation import GenerationStatus, Generation
 from bot.database.models.request import RequestStatus, Request
 from bot.database.models.transaction import TransactionType
@@ -26,6 +26,7 @@ from bot.helpers.updaters.update_user_usage_quota import get_user_with_updated_q
 from bot.keyboards.ai.suno import build_suno_keyboard
 from bot.keyboards.common.common import build_reaction_keyboard
 from bot.locales.main import get_user_language, get_localization
+from bot.locales.types import LanguageCode
 
 
 async def handle_suno_webhook(bot: Bot, storage: BaseStorage, body: dict):
@@ -82,7 +83,7 @@ async def handle_suno_webhook(bot: Bot, storage: BaseStorage, body: dict):
         )
 
         reply_markup = build_reaction_keyboard(generation.id)
-        if user.settings[Model.SUNO][UserSettings.SEND_TYPE] == SunoSendType.VIDEO and video_url:
+        if user.settings[Model.SUNO][UserSettings.SEND_TYPE] == SendType.VIDEO and video_url:
             await send_video(
                 bot,
                 user.telegram_chat_id,
@@ -92,7 +93,7 @@ async def handle_suno_webhook(bot: Bot, storage: BaseStorage, body: dict):
                 duration,
                 reply_markup,
             )
-        elif user.settings[Model.SUNO][UserSettings.SEND_TYPE] == SunoSendType.AUDIO and video_url:
+        elif user.settings[Model.SUNO][UserSettings.SEND_TYPE] == SendType.AUDIO and video_url:
             await send_audio(
                 bot,
                 user.telegram_chat_id,
@@ -211,7 +212,7 @@ async def handle_suno_webhook(bot: Bot, storage: BaseStorage, body: dict):
 async def send_suno_example(
     bot: Bot,
     user: User,
-    user_language_code: str,
+    user_language_code: LanguageCode,
     generation: Generation,
     request: Request,
     body: dict,

@@ -21,6 +21,7 @@ from bot.database.operations.product.getters import get_product
 from bot.database.operations.subscription.getters import (
     get_subscription,
     get_subscription_by_provider_auto_payment_charge_id,
+    get_activated_subscriptions_by_user_id,
 )
 from bot.database.operations.subscription.updaters import update_subscription
 from bot.database.operations.subscription.writers import write_subscription
@@ -29,9 +30,13 @@ from bot.database.operations.user.getters import get_user
 from bot.database.operations.user.updaters import update_user
 from bot.helpers.creaters.create_package import create_package
 from bot.helpers.creaters.create_subscription import create_subscription
+from bot.helpers.getters.get_quota_by_model import get_quota_by_model
+from bot.helpers.getters.get_switched_to_ai_model import get_switched_to_ai_model
 from bot.helpers.senders.send_message_to_admins import send_message_to_admins
 from bot.keyboards.ai.mode import build_switched_to_ai_keyboard
+from bot.keyboards.common.common import build_buy_motivation_keyboard
 from bot.locales.main import get_user_language, get_localization
+from bot.locales.types import LanguageCode
 
 
 async def handle_pay_selection_webhook(request: dict, bot: Bot, dp: Dispatcher):
@@ -100,13 +105,15 @@ async def handle_pay_selection_webhook(request: dict, bot: Bot, dp: Dispatcher):
                     message_effect_id=config.MESSAGE_EFFECTS.get(MessageEffect.HEART),
                 )
 
+                text = await get_switched_to_ai_model(
+                    user,
+                    get_quota_by_model(user.current_model, user.settings[user.current_model][UserSettings.VERSION]),
+                    user_language_code,
+                )
                 reply_markup = build_switched_to_ai_keyboard(user_language_code, user.current_model)
                 await bot.send_message(
                     chat_id=subscription.user_id,
-                    text=get_localization(user_language_code).switched(
-                        user.current_model,
-                        user.settings[user.current_model][UserSettings.VERSION],
-                    ),
+                    text=text,
                     reply_markup=reply_markup,
                     message_effect_id=config.MESSAGE_EFFECTS.get(MessageEffect.FIRE),
                 )
@@ -117,7 +124,7 @@ async def handle_pay_selection_webhook(request: dict, bot: Bot, dp: Dispatcher):
                             f'🤑 <b>Успешно оформлена подписка у пользователя: {subscription.user_id}</b>\n\n'
                             f'ℹ️ ID: {subscription.id}\n'
                             f'💱 Метод оплаты: {subscription.payment_method}\n'
-                            f'💳 Тип: {product.names.get("ru")}\n'
+                            f'💳 Тип: {product.names.get(LanguageCode.RU)}\n'
                             f'💰 Сумма: {subscription.amount}{Currency.SYMBOLS[subscription.currency]}\n'
                             f'💸 Чистая сумма: {float(clear_amount)}{Currency.SYMBOLS[subscription.currency]}\n\n'
                             f'Продолжаем в том же духе 💪',
@@ -137,7 +144,7 @@ async def handle_pay_selection_webhook(request: dict, bot: Bot, dp: Dispatcher):
                             f'❌ <b>Отмена оплаты подписки у пользователя: {subscription.user_id}</b>\n\n'
                             f'ℹ️ ID: {subscription.id}\n'
                             f'💱 Метод оплаты: {subscription.payment_method}\n'
-                            f'💳 Тип: {product.names.get("ru")}\n'
+                            f'💳 Тип: {product.names.get(LanguageCode.RU)}\n'
                             f'💰 Сумма: {subscription.amount}{Currency.SYMBOLS[subscription.currency]}\n\n'
                             f'Грустно, но что поделать 🤷',
                 )
@@ -149,7 +156,7 @@ async def handle_pay_selection_webhook(request: dict, bot: Bot, dp: Dispatcher):
                             f'ℹ️ ID: {subscription.id}\n'
                             f'🛠 Статус: {event}\n'
                             f'💱 Метод оплаты: {subscription.payment_method}\n'
-                            f'💳 Тип: {product.names.get("ru")}\n'
+                            f'💳 Тип: {product.names.get(LanguageCode.RU)}\n'
                             f'💰 Сумма: {subscription.amount}{Currency.SYMBOLS[subscription.currency]}\n\n'
                             f'@roman_danilov, посмотришь? 🤨',
                 )
@@ -218,7 +225,7 @@ async def handle_pay_selection_webhook(request: dict, bot: Bot, dp: Dispatcher):
                                 f'🤑 <b>Успешно продлена подписка у пользователя: {new_subscription.user_id}</b>\n\n'
                                 f'ℹ️ ID: {new_subscription.id}\n'
                                 f'💱 Метод оплаты: {new_subscription.payment_method}\n'
-                                f'💳 Тип: {product.names.get("ru")}\n'
+                                f'💳 Тип: {product.names.get(LanguageCode.RU)}\n'
                                 f'💰 Сумма: {new_subscription.amount}{Currency.SYMBOLS[new_subscription.currency]}\n'
                                 f'💸 Чистая сумма: {float(clear_amount)}{Currency.SYMBOLS[new_subscription.currency]}\n\n'
                                 f'Продолжаем в том же духе 💪',
@@ -227,11 +234,20 @@ async def handle_pay_selection_webhook(request: dict, bot: Bot, dp: Dispatcher):
                     current_date = datetime.now(timezone.utc)
 
                     old_subscription.status = SubscriptionStatus.FINISHED
-                    user.daily_limits = SUBSCRIPTION_FREE_LIMITS
+                    activated_subscriptions = await get_activated_subscriptions_by_user_id(user.id, current_date)
+                    for activated_subscription in activated_subscriptions:
+                        if activated_subscription.id != old_subscription.id:
+                            activated_subscription_product = await get_product(activated_subscription.product_id)
+                            user.subscription_id = activated_subscription.id
+                            user.daily_limits = activated_subscription_product.details.get('limits')
+                            break
+                    else:
+                        user.subscription_id = ''
+                        user.daily_limits = SUBSCRIPTION_FREE_LIMITS
 
                     await update_subscription(old_subscription.id, {'status': old_subscription.status})
                     await update_user(old_subscription.user_id, {
-                        'subscription_id': '',
+                        'subscription_id': user.subscription_id,
                         'daily_limits': user.daily_limits,
                         'last_subscription_limit_update': current_date,
                     })
@@ -245,6 +261,7 @@ async def handle_pay_selection_webhook(request: dict, bot: Bot, dp: Dispatcher):
                     await bot.send_message(
                         chat_id=user.telegram_chat_id,
                         text=get_localization(user.interface_language_code).SUBSCRIPTION_END,
+                        reply_markup=build_buy_motivation_keyboard(user.interface_language_code),
                         disable_notification=True,
                     )
 
@@ -254,7 +271,7 @@ async def handle_pay_selection_webhook(request: dict, bot: Bot, dp: Dispatcher):
                                 f'❌ <b>Не смогли продлить подписку у пользователя: {old_subscription.user_id}</b>\n\n'
                                 f'ℹ️ ID: {old_subscription.id}\n'
                                 f'💱 Метод оплаты: {old_subscription.payment_method}\n'
-                                f'💳 Тип: {product.names.get("ru")}\n'
+                                f'💳 Тип: {product.names.get(LanguageCode.RU)}\n'
                                 f'💰 Сумма: {old_subscription.amount}{Currency.SYMBOLS[old_subscription.currency]}\n\n'
                                 f'Грустно, но что поделать 🤷',
                     )
@@ -266,7 +283,7 @@ async def handle_pay_selection_webhook(request: dict, bot: Bot, dp: Dispatcher):
                                 f'ℹ️ ID: {old_subscription.id}\n'
                                 f'🛠 Статус: {event}\n'
                                 f'💱 Метод оплаты: {old_subscription.payment_method}\n'
-                                f'💳 Тип: {product.names.get("ru")}\n'
+                                f'💳 Тип: {product.names.get(LanguageCode.RU)}\n'
                                 f'💰 Сумма: {old_subscription.amount}{Currency.SYMBOLS[old_subscription.currency]}\n\n'
                                 f'@roman_danilov, посмотришь? 🤨',
                     )
@@ -339,13 +356,15 @@ async def handle_pay_selection_webhook(request: dict, bot: Bot, dp: Dispatcher):
                     message_effect_id=config.MESSAGE_EFFECTS.get(MessageEffect.HEART),
                 )
 
+                text = await get_switched_to_ai_model(
+                    user,
+                    get_quota_by_model(user.current_model, user.settings[user.current_model][UserSettings.VERSION]),
+                    user_language_code,
+                )
                 reply_markup = build_switched_to_ai_keyboard(user_language_code, user.current_model)
                 await bot.send_message(
                     chat_id=package.user_id,
-                    text=get_localization(user_language_code).switched(
-                        user.current_model,
-                        user.settings[user.current_model][UserSettings.VERSION],
-                    ),
+                    text=text,
                     reply_markup=reply_markup,
                     message_effect_id=config.MESSAGE_EFFECTS.get(MessageEffect.FIRE),
                 )
@@ -356,7 +375,7 @@ async def handle_pay_selection_webhook(request: dict, bot: Bot, dp: Dispatcher):
                             f'🤑 <b>Успешно прошла оплата пакета у пользователя: {package.user_id}</b>\n\n'
                             f'ℹ️ ID: {package.id}\n'
                             f'💱 Метод оплаты: {package.payment_method}\n'
-                            f'💳 Тип: {product.names.get("ru")}\n'
+                            f'💳 Тип: {product.names.get(LanguageCode.RU)}\n'
                             f'🔢 Количество: {package.quantity}\n'
                             f'💰 Сумма: {package.amount}{Currency.SYMBOLS[package.currency]}\n'
                             f'💸 Чистая сумма: {float(clear_amount)}{Currency.SYMBOLS[package.currency]}\n\n'
@@ -377,7 +396,7 @@ async def handle_pay_selection_webhook(request: dict, bot: Bot, dp: Dispatcher):
                             f'❌ <b>Отмена оплаты пакета у пользователя: {package.user_id}</b>\n\n'
                             f'ℹ️ ID: {package.id}\n'
                             f'💱 Метод оплаты: {package.payment_method}\n'
-                            f'💳 Тип: {product.names.get("ru")}\n'
+                            f'💳 Тип: {product.names.get(LanguageCode.RU)}\n'
                             f'🔢 Количество: {package.quantity}\n'
                             f'💰 Сумма: {package.amount}{Currency.SYMBOLS[package.currency]}\n\n'
                             f'Грустно, но что поделать 🤷',
@@ -390,7 +409,7 @@ async def handle_pay_selection_webhook(request: dict, bot: Bot, dp: Dispatcher):
                             f'ℹ️ ID: {package.id}\n'
                             f'🛠 Статус: {event}\n'
                             f'💱 Метод оплаты: {package.payment_method}\n'
-                            f'💳 Тип: {product.names.get("ru")}\n'
+                            f'💳 Тип: {product.names.get(LanguageCode.RU)}\n'
                             f'🔢 Количество: {package.quantity}\n'
                             f'💰 Сумма: {package.amount}{Currency.SYMBOLS[package.currency]}\n\n'
                             f'@roman_danilov, посмотришь? 🤨',
@@ -455,13 +474,15 @@ async def handle_pay_selection_webhook(request: dict, bot: Bot, dp: Dispatcher):
                     message_effect_id=config.MESSAGE_EFFECTS.get(MessageEffect.HEART),
                 )
 
+                text = await get_switched_to_ai_model(
+                    user,
+                    get_quota_by_model(user.current_model, user.settings[user.current_model][UserSettings.VERSION]),
+                    user_language_code,
+                )
                 reply_markup = build_switched_to_ai_keyboard(user_language_code, user.current_model)
                 await bot.send_message(
                     chat_id=user.id,
-                    text=get_localization(user_language_code).switched(
-                        user.current_model,
-                        user.settings[user.current_model][UserSettings.VERSION],
-                    ),
+                    text=text,
                     reply_markup=reply_markup,
                     message_effect_id=config.MESSAGE_EFFECTS.get(MessageEffect.FIRE),
                 )

@@ -14,7 +14,7 @@ async def send_image(bot: Bot, chat_id: str, image: str, reply_markup=None, capt
         extension = image.rsplit('.', 1)[-1]
         await bot.send_photo(
             chat_id=chat_id,
-            photo=URLInputFile(image, filename=f'{uuid.uuid4()}.{extension}', timeout=60),
+            photo=URLInputFile(image, filename=f'{uuid.uuid4()}.{extension}', timeout=300),
             reply_markup=reply_markup,
             caption=caption,
             reply_to_message_id=reply_to_message_id,
@@ -61,7 +61,7 @@ async def send_images(bot: Bot, chat_id: str, images: list[str]):
                     extension = image.rsplit('.', 1)[-1]
                     await bot.send_photo(
                         chat_id=chat_id,
-                        photo=URLInputFile(image, filename=f'{uuid.uuid4()}.{extension}'),
+                        photo=URLInputFile(image, filename=f'{uuid.uuid4()}.{extension}', timeout=300),
                     )
                 except Exception as e:
                     logging.error(f'Error in send_images with second try: {e}')

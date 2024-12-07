@@ -16,7 +16,12 @@ from bot.database.operations.user.getters import get_user
 from bot.database.operations.user.updaters import update_user
 from bot.handlers.ai.face_swap_handler import handle_face_swap
 from bot.handlers.payment.bonus_handler import handle_bonus
-from bot.handlers.payment.payment_handler import handle_subscribe, handle_package, handle_cancel_subscription
+from bot.handlers.payment.payment_handler import (
+    handle_subscribe,
+    handle_package,
+    handle_cancel_subscription,
+    handle_renew_subscription,
+)
 from bot.handlers.settings.settings_handler import handle_settings
 from bot.keyboards.common.common import build_cancel_keyboard
 from bot.keyboards.common.profile import (
@@ -83,7 +88,8 @@ async def handle_profile(message: Message, state: FSMContext, telegram_user: Tel
             user_language_code,
             True,
             user.gender != UserGender.UNSPECIFIED,
-            bool(user.subscription_id),
+            subscription.status == SubscriptionStatus.ACTIVE,
+            subscription.status == SubscriptionStatus.CANCELED,
         )
         if is_edit:
             await message.edit_caption(
@@ -92,7 +98,7 @@ async def handle_profile(message: Message, state: FSMContext, telegram_user: Tel
             )
         else:
             await message.answer_photo(
-                photo=URLInputFile(photo_link, filename=photo_path),
+                photo=URLInputFile(photo_link, filename=photo_path, timeout=300),
                 caption=text,
                 reply_markup=reply_markup,
             )
@@ -101,7 +107,8 @@ async def handle_profile(message: Message, state: FSMContext, telegram_user: Tel
             user_language_code,
             False,
             user.gender != UserGender.UNSPECIFIED,
-            bool(user.subscription_id),
+            subscription.status == SubscriptionStatus.ACTIVE,
+            subscription.status == SubscriptionStatus.CANCELED,
         )
         if is_edit:
             await message.edit_text(
@@ -166,7 +173,7 @@ async def handle_profile_selection(callback_query: CallbackQuery, state: FSMCont
 
         reply_markup = build_cancel_keyboard(user_language_code)
         await callback_query.message.reply_photo(
-            photo=URLInputFile(photo_link, filename=photo_path),
+            photo=URLInputFile(photo_link, filename=photo_path, timeout=300),
             caption=get_localization(user_language_code).SEND_ME_YOUR_PICTURE,
             reply_markup=reply_markup,
             allow_sending_without_reply=True,
@@ -205,6 +212,8 @@ async def handle_profile_selection(callback_query: CallbackQuery, state: FSMCont
         await handle_package(callback_query.message, str(callback_query.from_user.id), state)
     elif action == 'cancel_subscription':
         await handle_cancel_subscription(callback_query.message, str(callback_query.from_user.id), state)
+    elif action == 'renew_subscription':
+        await handle_renew_subscription(callback_query.message, str(callback_query.from_user.id), state)
 
 
 @profile_router.callback_query(lambda c: c.data.startswith('profile_gender:'))

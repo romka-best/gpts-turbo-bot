@@ -21,7 +21,7 @@ async def send_audio(
     try:
         await bot.send_audio(
             chat_id=chat_id,
-            audio=URLInputFile(result, filename=filename, timeout=60),
+            audio=URLInputFile(result, filename=filename, timeout=300),
             caption=caption,
             duration=duration,
             reply_markup=reply_markup,

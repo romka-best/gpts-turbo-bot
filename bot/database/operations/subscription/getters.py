@@ -19,9 +19,13 @@ async def get_subscription(subscription_id: str) -> Optional[Subscription]:
         return Subscription(**subscription.to_dict())
 
 
-async def get_last_subscription_by_user_id(user_id: str) -> Optional[Subscription]:
-    subscription_stream = firebase.db.collection(Subscription.COLLECTION_NAME) \
+async def get_activated_subscriptions_by_user_id(
+    user_id: str,
+    end_date=datetime,
+) -> list[Subscription]:
+    subscriptions = firebase.db.collection(Subscription.COLLECTION_NAME) \
         .where(filter=FieldFilter('user_id', '==', user_id)) \
+        .where(filter=FieldFilter('end_date', '>', end_date)) \
         .where(filter=FieldFilter('status', 'not-in',
                                   [
                                       SubscriptionStatus.WAITING,
@@ -29,11 +33,11 @@ async def get_last_subscription_by_user_id(user_id: str) -> Optional[Subscriptio
                                       SubscriptionStatus.DECLINED,
                                   ])) \
         .order_by('created_at', direction=Query.DESCENDING) \
-        .limit(1) \
         .stream()
 
-    async for doc in subscription_stream:
-        return Subscription(**doc.to_dict())
+    return [
+        Subscription(**subscription.to_dict()) async for subscription in subscriptions
+    ]
 
 
 async def get_count_of_subscriptions(

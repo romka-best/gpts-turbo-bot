@@ -21,6 +21,8 @@ from bot.database.operations.request.updaters import update_request
 from bot.database.operations.request.writers import write_request
 from bot.database.operations.user.getters import get_user
 from bot.database.operations.user.updaters import update_user
+from bot.helpers.getters.get_quota_by_model import get_quota_by_model
+from bot.helpers.getters.get_switched_to_ai_model import get_switched_to_ai_model
 from bot.helpers.senders.send_error_info import send_error_info
 from bot.integrations.suno import generate_song, check_song
 from bot.keyboards.ai.mode import build_switched_to_ai_keyboard
@@ -30,9 +32,10 @@ from bot.keyboards.ai.suno import (
     build_suno_custom_mode_lyrics_keyboard,
     build_suno_custom_mode_genres_keyboard,
 )
-from bot.keyboards.common.common import build_cancel_keyboard, build_error_keyboard
+from bot.keyboards.common.common import build_error_keyboard, build_limit_exceeded_keyboard
 from bot.locales.main import get_user_language, get_localization
 from bot.locales.translate_text import translate_text
+from bot.locales.types import LanguageCode
 from bot.states.suno import Suno
 
 suno_router = Router()
@@ -60,9 +63,14 @@ async def suno(message: Message, state: FSMContext):
             'current_model': user.current_model,
         })
 
+        text = await get_switched_to_ai_model(
+            user,
+            get_quota_by_model(user.current_model, user.settings[user.current_model][UserSettings.VERSION]),
+            user_language_code,
+        )
         reply_markup = build_switched_to_ai_keyboard(user_language_code, Model.SUNO)
         await message.answer(
-            text=get_localization(user_language_code).SWITCHED_TO_SUNO,
+            text=text,
             reply_markup=reply_markup,
             message_effect_id=config.MESSAGE_EFFECTS.get(MessageEffect.FIRE),
         )
@@ -158,7 +166,7 @@ async def suno_prompt_sent(message: Message, state: FSMContext):
                 sticker=config.MESSAGE_STICKERS.get(MessageSticker.SAD),
             )
 
-            reply_markup = build_cancel_keyboard(user_language_code)
+            reply_markup = build_limit_exceeded_keyboard(user_language_code)
             await message.answer(
                 text=get_localization(user_language_code).REACHED_USAGE_LIMIT,
                 reply_markup=reply_markup,
@@ -372,7 +380,7 @@ async def suno_genres_sent(message: Message, state: FSMContext):
                 sticker=config.MESSAGE_STICKERS.get(MessageSticker.SAD),
             )
 
-            reply_markup = build_cancel_keyboard(user_language_code)
+            reply_markup = build_limit_exceeded_keyboard(user_language_code)
             await message.answer(
                 text=get_localization(user_language_code).REACHED_USAGE_LIMIT,
                 reply_markup=reply_markup,
@@ -393,8 +401,8 @@ async def suno_genres_sent(message: Message, state: FSMContext):
                 return
 
             try:
-                if user_language_code != 'en':
-                    genres = await translate_text(genres, user_language_code, 'en')
+                if user_language_code != LanguageCode.EN:
+                    genres = await translate_text(genres, user_language_code, LanguageCode.EN)
 
                 request = await write_request(
                     user_id=user.id,

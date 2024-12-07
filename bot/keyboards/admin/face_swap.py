@@ -3,9 +3,10 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from bot.database.models.face_swap_package import FaceSwapPackage, FaceSwapPackageStatus
 from bot.database.models.user import UserGender
 from bot.locales.main import get_localization
+from bot.locales.types import LanguageCode
 
 
-def build_manage_face_swap_keyboard(language_code: str) -> InlineKeyboardMarkup:
+def build_manage_face_swap_keyboard(language_code: LanguageCode) -> InlineKeyboardMarkup:
     buttons = [
         [
             InlineKeyboardButton(
@@ -30,7 +31,7 @@ def build_manage_face_swap_keyboard(language_code: str) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
-def build_manage_face_swap_create_keyboard(language_code: str) -> InlineKeyboardMarkup:
+def build_manage_face_swap_create_keyboard(language_code: LanguageCode) -> InlineKeyboardMarkup:
     buttons = [
         [
             InlineKeyboardButton(
@@ -49,7 +50,7 @@ def build_manage_face_swap_create_keyboard(language_code: str) -> InlineKeyboard
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
-def build_manage_face_swap_create_confirmation_keyboard(language_code: str) -> InlineKeyboardMarkup:
+def build_manage_face_swap_create_confirmation_keyboard(language_code: LanguageCode) -> InlineKeyboardMarkup:
     buttons = [
         [
             InlineKeyboardButton(
@@ -68,7 +69,7 @@ def build_manage_face_swap_create_confirmation_keyboard(language_code: str) -> I
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
-def build_manage_face_swap_edit_choose_gender_keyboard(language_code: str) -> InlineKeyboardMarkup:
+def build_manage_face_swap_edit_choose_gender_keyboard(language_code: LanguageCode) -> InlineKeyboardMarkup:
     buttons = [
         [
             InlineKeyboardButton(
@@ -88,7 +89,7 @@ def build_manage_face_swap_edit_choose_gender_keyboard(language_code: str) -> In
 
 
 def build_manage_face_swap_edit_choose_package_keyboard(
-    language_code: str,
+    language_code: LanguageCode,
     packages: list[FaceSwapPackage],
 ) -> InlineKeyboardMarkup:
     buttons = []
@@ -103,7 +104,7 @@ def build_manage_face_swap_edit_choose_package_keyboard(
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
-def build_manage_face_swap_edit_keyboard(language_code: str) -> InlineKeyboardMarkup:
+def build_manage_face_swap_edit_keyboard(language_code: LanguageCode) -> InlineKeyboardMarkup:
     buttons = [
         [
             InlineKeyboardButton(
@@ -141,7 +142,7 @@ def build_manage_face_swap_edit_keyboard(language_code: str) -> InlineKeyboardMa
 
 
 def build_manage_face_swap_edit_package_change_status_keyboard(
-    language_code: str,
+    language_code: LanguageCode,
     current_status: FaceSwapPackageStatus,
 ) -> InlineKeyboardMarkup:
     buttons = [
@@ -172,7 +173,7 @@ def build_manage_face_swap_edit_package_change_status_keyboard(
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
-def build_manage_face_swap_edit_picture_keyboard(language_code: str, file_name: str) -> InlineKeyboardMarkup:
+def build_manage_face_swap_edit_picture_keyboard(language_code: LanguageCode, file_name: str) -> InlineKeyboardMarkup:
     buttons = [
         [
             InlineKeyboardButton(
@@ -192,7 +193,7 @@ def build_manage_face_swap_edit_picture_keyboard(language_code: str, file_name: 
 
 
 def build_manage_face_swap_edit_picture_change_status_keyboard(
-    language_code: str,
+    language_code: LanguageCode,
     current_status: FaceSwapPackageStatus,
 ) -> InlineKeyboardMarkup:
     buttons = [

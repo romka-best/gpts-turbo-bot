@@ -1,6 +1,7 @@
 from bot.database.main import firebase
 from bot.database.models.product import ProductType, Product, ProductCategory
 from bot.database.operations.product.helpers import create_product_object
+from bot.locales.types import LanguageCode
 
 
 async def write_product(
@@ -8,8 +9,8 @@ async def write_product(
     is_active: bool,
     type: ProductType,
     category: ProductCategory,
-    names: dict,
-    descriptions: dict,
+    names: dict[LanguageCode, str],
+    descriptions: dict[LanguageCode, str],
     prices: dict,
     photos=None,
     order=-1,

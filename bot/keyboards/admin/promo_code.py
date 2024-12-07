@@ -4,9 +4,10 @@ from bot.database.models.product import Product
 from bot.database.models.promo_code import PromoCodeType
 from bot.database.models.subscription import SubscriptionPeriod
 from bot.locales.main import get_localization
+from bot.locales.types import LanguageCode
 
 
-def build_create_promo_code_keyboard(language_code: str) -> InlineKeyboardMarkup:
+def build_create_promo_code_keyboard(language_code: LanguageCode) -> InlineKeyboardMarkup:
     buttons = [
         [
             InlineKeyboardButton(
@@ -37,7 +38,8 @@ def build_create_promo_code_keyboard(language_code: str) -> InlineKeyboardMarkup
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
-def build_create_promo_code_subscription_keyboard(language_code: str, products: list[Product]) -> InlineKeyboardMarkup:
+def build_create_promo_code_subscription_keyboard(language_code: LanguageCode,
+                                                  products: list[Product]) -> InlineKeyboardMarkup:
     buttons = []
     for product in products:
         buttons.append([
@@ -56,47 +58,7 @@ def build_create_promo_code_subscription_keyboard(language_code: str, products: 
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
-def build_create_promo_code_period_of_subscription_keyboard(
-    language_code: str,
-    product_id: str,
-) -> InlineKeyboardMarkup:
-    buttons = [
-        [
-            InlineKeyboardButton(
-                text=f'{get_localization(language_code).MONTH_1}',
-                callback_data=f'create_promo_code_period_of_subscription:{product_id}:{SubscriptionPeriod.MONTH1}'
-            ),
-        ],
-        [
-            InlineKeyboardButton(
-                text=f'{get_localization(language_code).MONTHS_3}',
-                callback_data=f'create_promo_code_period_of_subscription:{product_id}:{SubscriptionPeriod.MONTHS3}'
-            ),
-        ],
-        [
-            InlineKeyboardButton(
-                text=f'{get_localization(language_code).MONTHS_6}',
-                callback_data=f'create_promo_code_period_of_subscription:{product_id}:{SubscriptionPeriod.MONTHS6}'
-            ),
-        ],
-        [
-            InlineKeyboardButton(
-                text=f'{get_localization(language_code).MONTHS_12}',
-                callback_data=f'create_promo_code_period_of_subscription:{product_id}:{SubscriptionPeriod.MONTHS12}'
-            ),
-        ],
-        [
-            InlineKeyboardButton(
-                text=get_localization(language_code).CANCEL,
-                callback_data='create_promo_code_period_of_subscription:cancel'
-            )
-        ]
-    ]
-
-    return InlineKeyboardMarkup(inline_keyboard=buttons)
-
-
-def build_create_promo_code_package_keyboard(language_code: str, products: list[Product]):
+def build_create_promo_code_package_keyboard(language_code: LanguageCode, products: list[Product]):
     buttons = []
     for product in products:
         buttons.append(
@@ -119,7 +81,7 @@ def build_create_promo_code_package_keyboard(language_code: str, products: list[
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
-def build_create_promo_code_discount_keyboard(language_code: str):
+def build_create_promo_code_discount_keyboard(language_code: LanguageCode):
     buttons = [
         [
             InlineKeyboardButton(

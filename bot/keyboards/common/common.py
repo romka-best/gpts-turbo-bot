@@ -9,9 +9,10 @@ from bot.database.models.generation import GenerationReaction
 from bot.database.models.user import UserGender
 from bot.database.operations.face_swap_package.getters import get_face_swap_packages_by_gender
 from bot.locales.main import get_localization
+from bot.locales.types import LanguageCode
 
 
-def build_start_keyboard(language_code: str) -> InlineKeyboardMarkup:
+def build_start_keyboard(language_code: LanguageCode) -> InlineKeyboardMarkup:
     buttons = [
         [
             InlineKeyboardButton(
@@ -30,7 +31,7 @@ def build_start_keyboard(language_code: str) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
-def build_start_chosen_keyboard(language_code: str) -> InlineKeyboardMarkup:
+def build_start_chosen_keyboard(language_code: LanguageCode) -> InlineKeyboardMarkup:
     buttons = [
         [
             InlineKeyboardButton(
@@ -45,7 +46,7 @@ def build_start_chosen_keyboard(language_code: str) -> InlineKeyboardMarkup:
 
 async def build_recommendations_keyboard(
     current_model: Model,
-    language_code: str,
+    language_code: LanguageCode,
     gender: Optional[UserGender] = UserGender.UNSPECIFIED,
 ) -> ReplyKeyboardMarkup:
     buttons = []
@@ -111,7 +112,7 @@ async def build_recommendations_keyboard(
     )
 
 
-def build_continue_generating_keyboard(language_code: str) -> InlineKeyboardMarkup:
+def build_continue_generating_keyboard(language_code: LanguageCode) -> InlineKeyboardMarkup:
     buttons = [
         [
             InlineKeyboardButton(
@@ -141,7 +142,32 @@ def build_reaction_keyboard(generation_id: str) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
-def build_limit_exceeded_keyboard(language_code: str) -> InlineKeyboardMarkup:
+def build_buy_motivation_keyboard(language_code: LanguageCode) -> InlineKeyboardMarkup:
+    buttons = [
+        [
+            InlineKeyboardButton(
+                text=get_localization(language_code).OPEN_BONUS_INFO,
+                callback_data='buy_motivation:open_bonus_info'
+            )
+        ],
+        [
+            InlineKeyboardButton(
+                text=get_localization(language_code).OPEN_BUY_SUBSCRIPTIONS_INFO,
+                callback_data='buy_motivation:open_buy_subscriptions_info'
+            )
+        ],
+        [
+            InlineKeyboardButton(
+                text=get_localization(language_code).OPEN_BUY_PACKAGES_INFO,
+                callback_data='buy_motivation:open_buy_packages_info'
+            )
+        ],
+    ]
+
+    return InlineKeyboardMarkup(inline_keyboard=buttons)
+
+
+def build_limit_exceeded_keyboard(language_code: LanguageCode) -> InlineKeyboardMarkup:
     buttons = [
         [
             InlineKeyboardButton(
@@ -172,7 +198,7 @@ def build_limit_exceeded_keyboard(language_code: str) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
-def build_time_limit_exceeded_keyboard(language_code: str) -> InlineKeyboardMarkup:
+def build_time_limit_exceeded_keyboard(language_code: LanguageCode) -> InlineKeyboardMarkup:
     buttons = [
         [
             InlineKeyboardButton(
@@ -185,7 +211,7 @@ def build_time_limit_exceeded_keyboard(language_code: str) -> InlineKeyboardMark
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
-def build_time_limit_exceeded_chosen_keyboard(language_code: str) -> InlineKeyboardMarkup:
+def build_time_limit_exceeded_chosen_keyboard(language_code: LanguageCode) -> InlineKeyboardMarkup:
     buttons = [
         [
             InlineKeyboardButton(
@@ -210,7 +236,7 @@ def build_time_limit_exceeded_chosen_keyboard(language_code: str) -> InlineKeybo
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
-def build_cancel_keyboard(language_code: str) -> InlineKeyboardMarkup:
+def build_cancel_keyboard(language_code: LanguageCode) -> InlineKeyboardMarkup:
     buttons = [
         [
             InlineKeyboardButton(
@@ -223,7 +249,7 @@ def build_cancel_keyboard(language_code: str) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
-def build_error_keyboard(language_code: str) -> InlineKeyboardMarkup:
+def build_error_keyboard(language_code: LanguageCode) -> InlineKeyboardMarkup:
     buttons = [
         [
             InlineKeyboardButton(

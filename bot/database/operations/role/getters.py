@@ -15,16 +15,6 @@ async def get_role(role_id: str) -> Optional[Role]:
         return Role(**role.to_dict())
 
 
-async def get_role_by_name(name: str) -> Optional[Role]:
-    role_stream = firebase.db.collection(Role.COLLECTION_NAME) \
-        .where(filter=FieldFilter('name', '==', name)) \
-        .limit(1) \
-        .stream()
-
-    async for doc in role_stream:
-        return Role(**doc.to_dict())
-
-
 async def get_roles(
     start_date: Optional[datetime] = None,
     end_date: Optional[datetime] = None,

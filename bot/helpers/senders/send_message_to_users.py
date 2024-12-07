@@ -7,6 +7,7 @@ from aiogram.exceptions import TelegramBadRequest, TelegramRetryAfter, TelegramF
 from bot.database.models.user import User
 from bot.database.operations.user.getters import get_users_by_language_code
 from bot.database.operations.user.updaters import update_user
+from bot.locales.types import LanguageCode
 
 BATCH_SIZE = 30
 DELAY_SECONDS = 1
@@ -49,7 +50,7 @@ async def send_message_to_user(bot: Bot, user: User, message: str):
         logging.error(error)
 
 
-async def send_message_to_users(bot: Bot, user_type: str, language_code: str, message: str):
+async def send_message_to_users(bot: Bot, user_type: str, language_code: LanguageCode, message: str):
     users = await get_users_by_language_code(language_code)
     for i in range(0, len(users), BATCH_SIZE):
         batch_users = users[i:i + BATCH_SIZE]

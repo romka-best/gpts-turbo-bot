@@ -2,9 +2,10 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 from bot.database.models.common import Model, ChatGPTVersion
 from bot.locales.main import get_localization
+from bot.locales.types import LanguageCode
 
 
-def build_chat_gpt_keyboard(language_code: str, model: Model, model_version: ChatGPTVersion) -> InlineKeyboardMarkup:
+def build_chat_gpt_keyboard(language_code: LanguageCode, model: Model, model_version: ChatGPTVersion) -> InlineKeyboardMarkup:
     buttons = [
         [
             InlineKeyboardButton(

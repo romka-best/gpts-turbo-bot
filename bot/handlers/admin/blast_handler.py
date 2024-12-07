@@ -14,6 +14,7 @@ from bot.keyboards.admin.blast import (
 )
 from bot.keyboards.common.common import build_cancel_keyboard
 from bot.locales.main import get_localization, localization_classes, get_user_language
+from bot.locales.types import LanguageCode
 from bot.states.blast import Blast
 
 blast_router = Router()
@@ -98,10 +99,10 @@ async def blast_letter_sent(message: Message, state: FSMContext):
         blast_letters[blast_language] = message.text
     else:
         for language_code in localization_classes.keys():
-            if language_code == 'ru':
+            if language_code == LanguageCode.RU:
                 blast_letters[language_code] = message.text
             else:
-                translated_blast_letter = await translate_text(message.text, 'ru', language_code)
+                translated_blast_letter = await translate_text(message.text, LanguageCode.RU, language_code)
                 if translated_blast_letter:
                     blast_letters[language_code] = translated_blast_letter
                 else:

@@ -1,8 +1,9 @@
 from bot.database.models.common import Model
 from bot.locales.main import get_localization
+from bot.locales.types import LanguageCode
 
 
-def get_info_by_model(model: Model, language_code: str):
+def get_info_by_model(model: Model, language_code: LanguageCode):
     info = None
 
     if model == Model.CHAT_GPT:

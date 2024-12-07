@@ -3,11 +3,12 @@ from datetime import datetime, timezone
 
 from aiogram import Bot
 from aiogram.exceptions import TelegramForbiddenError
+from aiogram.fsm.storage.base import BaseStorage
 from google.cloud.firestore_v1 import AsyncWriteBatch
 
 from bot.config import config, MessageSticker
 from bot.database.main import firebase
-from bot.database.models.common import Quota, DEFAULT_ROLE, PaymentMethod
+from bot.database.models.common import Quota, PaymentMethod
 from bot.database.models.subscription import (
     SubscriptionStatus,
     SUBSCRIPTION_FREE_LIMITS,
@@ -17,18 +18,21 @@ from bot.database.operations.chat.getters import get_chats_by_user_id
 from bot.database.operations.chat.updaters import update_chat
 from bot.database.operations.package.getters import get_packages_by_user_id
 from bot.database.operations.product.getters import get_product
-from bot.database.operations.subscription.getters import get_last_subscription_by_user_id, get_subscription
+from bot.database.operations.subscription.getters import get_subscription, get_activated_subscriptions_by_user_id
 from bot.database.operations.subscription.updaters import update_subscription
 from bot.database.operations.user.getters import get_users
 from bot.database.operations.user.updaters import update_user
 from bot.helpers.billing.create_auto_payment import create_auto_payment
 from bot.helpers.billing.create_payment import OrderItem
+from bot.helpers.checkers.check_user_last_activity import check_user_last_activity
+from bot.helpers.notifiers.notify_user_about_quota import notify_user_about_quota
 from bot.helpers.senders.send_error_info import send_error_info
 from bot.helpers.senders.send_message_to_admins_and_developers import send_message_to_admins_and_developers
-from bot.locales.main import get_localization
+from bot.keyboards.common.common import build_buy_motivation_keyboard
+from bot.locales.main import get_localization, get_user_language
 
 
-async def update_daily_limits(bot: Bot):
+async def update_daily_limits(bot: Bot, storage: BaseStorage):
     all_users = await get_users(is_blocked=False)
 
     for i in range(0, len(all_users), config.BATCH_SIZE):
@@ -36,17 +40,22 @@ async def update_daily_limits(bot: Bot):
         user_batch = all_users[i:i + config.BATCH_SIZE]
 
         for user in user_batch:
-            await update_user_daily_limits(bot, user, batch)
+            await update_user_daily_limits(bot, user, batch, storage)
+
+            if not user.subscription_id:
+                should_notify = await check_user_last_activity(user.id, storage)
+                if should_notify:
+                    await notify_user_about_quota(bot, user, storage)
 
         await batch.commit()
 
     await send_message_to_admins_and_developers(bot, f'<b>Updated daily limits successfully</b> 🎉')
 
 
-async def update_user_daily_limits(bot: Bot, user: User, batch: AsyncWriteBatch):
+async def update_user_daily_limits(bot: Bot, user: User, batch: AsyncWriteBatch, storage: BaseStorage):
     try:
-        user = await update_user_subscription(bot, user, batch)
-        await update_user_additional_usage_quota(bot, user, bool(user.subscription_id), batch)
+        user = await update_user_subscription(bot, user, batch, storage)
+        await update_user_additional_usage_quota(bot, user, bool(user.subscription_id), batch, storage)
     except TelegramForbiddenError:
         await update_user(user.id, {
             'is_blocked': True,
@@ -61,7 +70,7 @@ async def update_user_daily_limits(bot: Bot, user: User, batch: AsyncWriteBatch)
         )
 
 
-async def update_user_subscription(bot: Bot, user: User, batch: AsyncWriteBatch):
+async def update_user_subscription(bot: Bot, user: User, batch: AsyncWriteBatch, storage: BaseStorage):
     user_ref = firebase.db.collection(User.COLLECTION_NAME).document(user.id)
     current_date = datetime.now(timezone.utc)
     current_subscription = await get_subscription(user.subscription_id)
@@ -71,6 +80,7 @@ async def update_user_subscription(bot: Bot, user: User, batch: AsyncWriteBatch)
         current_subscription.end_date <= current_date and
         current_subscription.status != SubscriptionStatus.FINISHED
     ):
+        user_language_code = await get_user_language(user.id, storage)
         if current_subscription.provider_auto_payment_charge_id and current_subscription.status != SubscriptionStatus.CANCELED:
             product = await get_product(current_subscription.product_id)
             if current_subscription.payment_method == PaymentMethod.YOOKASSA:
@@ -78,12 +88,12 @@ async def update_user_subscription(bot: Bot, user: User, batch: AsyncWriteBatch)
                     payment_method=current_subscription.payment_method,
                     provider_auto_payment_charge_id=current_subscription.provider_auto_payment_charge_id,
                     user_id=current_subscription.user_id,
-                    description=get_localization(user.interface_language_code).payment_description_renew_subscription(
+                    description=get_localization(user_language_code).payment_description_renew_subscription(
                         current_subscription.user_id,
-                        product.names.get(user.interface_language_code),
+                        product.names.get(user_language_code),
                     ),
                     amount=current_subscription.amount,
-                    language_code=user.interface_language_code,
+                    language_code=user_language_code,
                     order_items=[
                         OrderItem(
                             product=product,
@@ -93,38 +103,50 @@ async def update_user_subscription(bot: Bot, user: User, batch: AsyncWriteBatch)
                 )
                 if not payment:
                     current_subscription.status = SubscriptionStatus.FINISHED
-                    user.daily_limits = SUBSCRIPTION_FREE_LIMITS
+
+                    activated_subscriptions = await get_activated_subscriptions_by_user_id(user.id, current_date)
+                    for activated_subscription in activated_subscriptions:
+                        if activated_subscription.id != current_subscription.id:
+                            activated_subscription_product = await get_product(activated_subscription.product_id)
+                            user.subscription_id = activated_subscription.id
+                            user.daily_limits = activated_subscription_product.details.get('limits')
+                            break
+                    else:
+                        user.subscription_id = ''
+                        user.daily_limits = SUBSCRIPTION_FREE_LIMITS
 
                     await update_subscription(current_subscription.id, {'status': current_subscription.status})
                     batch.update(user_ref, {
-                        'subscription_id': '',
+                        'subscription_id': user.subscription_id,
                         'daily_limits': user.daily_limits,
                         'last_subscription_limit_update': current_date,
                         'edited_at': current_date,
                     })
 
-                    await bot.send_sticker(
-                        chat_id=user.telegram_chat_id,
-                        sticker=config.MESSAGE_STICKERS.get(MessageSticker.SAD),
-                        disable_notification=True,
-                    )
-                    await bot.send_message(
-                        chat_id=user.telegram_chat_id,
-                        text=get_localization(user.interface_language_code).SUBSCRIPTION_END,
-                        disable_notification=True,
-                    )
+                    if not user.subscription_id:
+                        await bot.send_sticker(
+                            chat_id=user.telegram_chat_id,
+                            sticker=config.MESSAGE_STICKERS.get(MessageSticker.SAD),
+                            disable_notification=True,
+                        )
+                        await bot.send_message(
+                            chat_id=user.telegram_chat_id,
+                            text=get_localization(user_language_code).SUBSCRIPTION_END,
+                            reply_markup=build_buy_motivation_keyboard(user_language_code),
+                            disable_notification=True,
+                        )
                 return user
             elif current_subscription.payment_method == PaymentMethod.PAY_SELECTION:
                 payment = await create_auto_payment(
                     payment_method=current_subscription.payment_method,
                     provider_auto_payment_charge_id=current_subscription.provider_auto_payment_charge_id,
                     user_id=current_subscription.user_id,
-                    description=get_localization(user.interface_language_code).payment_description_renew_subscription(
+                    description=get_localization(user_language_code).payment_description_renew_subscription(
                         current_subscription.user_id,
-                        product.names.get(user.interface_language_code),
+                        product.names.get(user_language_code),
                     ),
                     amount=current_subscription.amount,
-                    language_code=user.interface_language_code,
+                    language_code=user_language_code,
                     order_items=[
                         OrderItem(
                             product=product,
@@ -135,72 +157,108 @@ async def update_user_subscription(bot: Bot, user: User, batch: AsyncWriteBatch)
                 )
                 if not payment:
                     current_subscription.status = SubscriptionStatus.FINISHED
-                    user.daily_limits = SUBSCRIPTION_FREE_LIMITS
+
+                    activated_subscriptions = await get_activated_subscriptions_by_user_id(user.id, current_date)
+                    for activated_subscription in activated_subscriptions:
+                        if activated_subscription.id != current_subscription.id:
+                            activated_subscription_product = await get_product(activated_subscription.product_id)
+                            user.subscription_id = activated_subscription.id
+                            user.daily_limits = activated_subscription_product.details.get('limits')
+                            break
+                    else:
+                        user.subscription_id = ''
+                        user.daily_limits = SUBSCRIPTION_FREE_LIMITS
 
                     await update_subscription(current_subscription.id, {'status': current_subscription.status})
                     batch.update(user_ref, {
-                        'subscription_id': '',
+                        'subscription_id': user.subscription_id,
                         'daily_limits': user.daily_limits,
                         'last_subscription_limit_update': current_date,
                         'edited_at': current_date,
                     })
 
-                    await bot.send_sticker(
-                        chat_id=user.telegram_chat_id,
-                        sticker=config.MESSAGE_STICKERS.get(MessageSticker.SAD),
-                        disable_notification=True,
-                    )
-                    await bot.send_message(
-                        chat_id=user.telegram_chat_id,
-                        text=get_localization(user.interface_language_code).SUBSCRIPTION_END,
-                        disable_notification=True,
-                    )
+                    if not user.subscription_id:
+                        await bot.send_sticker(
+                            chat_id=user.telegram_chat_id,
+                            sticker=config.MESSAGE_STICKERS.get(MessageSticker.SAD),
+                            disable_notification=True,
+                        )
+                        await bot.send_message(
+                            chat_id=user.telegram_chat_id,
+                            text=get_localization(user_language_code).SUBSCRIPTION_END,
+                            reply_markup=build_buy_motivation_keyboard(user_language_code),
+                            disable_notification=True,
+                        )
             elif current_subscription.payment_method == PaymentMethod.STRIPE or current_subscription.payment_method == PaymentMethod.TELEGRAM_STARS:
                 days_difference = (current_date - current_subscription.end_date).days
                 if days_difference > 3:
                     current_subscription.status = SubscriptionStatus.FINISHED if current_subscription.status != SubscriptionStatus.CANCELED else current_subscription.status
-                    user.daily_limits = SUBSCRIPTION_FREE_LIMITS
+
+                    activated_subscriptions = await get_activated_subscriptions_by_user_id(user.id, current_date)
+                    for activated_subscription in activated_subscriptions:
+                        if activated_subscription.id != current_subscription.id:
+                            activated_subscription_product = await get_product(activated_subscription.product_id)
+                            user.subscription_id = activated_subscription.id
+                            user.daily_limits = activated_subscription_product.details.get('limits')
+                            break
+                    else:
+                        user.subscription_id = ''
+                        user.daily_limits = SUBSCRIPTION_FREE_LIMITS
 
                     await update_subscription(current_subscription.id, {'status': current_subscription.status})
                     batch.update(user_ref, {
-                        'subscription_id': '',
+                        'subscription_id': user.subscription_id,
                         'daily_limits': user.daily_limits,
                         'last_subscription_limit_update': current_date,
                         'edited_at': current_date,
                     })
 
-                    await bot.send_sticker(
-                        chat_id=user.telegram_chat_id,
-                        sticker=config.MESSAGE_STICKERS.get(MessageSticker.SAD),
-                        disable_notification=True,
-                    )
-                    await bot.send_message(
-                        chat_id=user.telegram_chat_id,
-                        text=get_localization(user.interface_language_code).SUBSCRIPTION_END,
-                        disable_notification=True,
-                    )
+                    if not user.subscription_id:
+                        await bot.send_sticker(
+                            chat_id=user.telegram_chat_id,
+                            sticker=config.MESSAGE_STICKERS.get(MessageSticker.SAD),
+                            disable_notification=True,
+                        )
+                        await bot.send_message(
+                            chat_id=user.telegram_chat_id,
+                            text=get_localization(user_language_code).SUBSCRIPTION_END,
+                            reply_markup=build_buy_motivation_keyboard(user_language_code),
+                            disable_notification=True,
+                        )
         else:
             current_subscription.status = SubscriptionStatus.FINISHED if current_subscription.status != SubscriptionStatus.CANCELED else current_subscription.status
-            user.daily_limits = SUBSCRIPTION_FREE_LIMITS
+
+            activated_subscriptions = await get_activated_subscriptions_by_user_id(user.id, current_date)
+            for activated_subscription in activated_subscriptions:
+                if activated_subscription.id != current_subscription.id:
+                    activated_subscription_product = await get_product(activated_subscription.product_id)
+                    user.subscription_id = activated_subscription.id
+                    user.daily_limits = activated_subscription_product.details.get('limits')
+                    break
+            else:
+                user.subscription_id = ''
+                user.daily_limits = SUBSCRIPTION_FREE_LIMITS
 
             await update_subscription(current_subscription.id, {'status': current_subscription.status})
             batch.update(user_ref, {
-                'subscription_id': '',
+                'subscription_id': user.subscription_id,
                 'daily_limits': user.daily_limits,
                 'last_subscription_limit_update': current_date,
                 'edited_at': current_date,
             })
 
-            await bot.send_sticker(
-                chat_id=user.telegram_chat_id,
-                sticker=config.MESSAGE_STICKERS.get(MessageSticker.SAD),
-                disable_notification=True,
-            )
-            await bot.send_message(
-                chat_id=user.telegram_chat_id,
-                text=get_localization(user.interface_language_code).SUBSCRIPTION_END,
-                disable_notification=True,
-            )
+            if not user.subscription_id:
+                await bot.send_sticker(
+                    chat_id=user.telegram_chat_id,
+                    sticker=config.MESSAGE_STICKERS.get(MessageSticker.SAD),
+                    disable_notification=True,
+                )
+                await bot.send_message(
+                    chat_id=user.telegram_chat_id,
+                    text=get_localization(user_language_code).SUBSCRIPTION_END,
+                    reply_markup=build_buy_motivation_keyboard(user_language_code),
+                    disable_notification=True,
+                )
 
         return user
     elif (
@@ -222,7 +280,13 @@ async def update_user_subscription(bot: Bot, user: User, batch: AsyncWriteBatch)
     return user
 
 
-async def update_user_additional_usage_quota(bot: Bot, user: User, had_subscription: bool, batch: AsyncWriteBatch):
+async def update_user_additional_usage_quota(
+    bot: Bot,
+    user: User,
+    had_subscription: bool,
+    batch: AsyncWriteBatch,
+    storage: BaseStorage,
+):
     need_update = False
 
     count_active_packages_before = 0
@@ -248,7 +312,7 @@ async def update_user_additional_usage_quota(bot: Bot, user: User, had_subscript
             user.settings[user.current_model][UserSettings.TURN_ON_VOICE_MESSAGES] = False
 
         if not user.additional_usage_quota[Quota.ACCESS_TO_CATALOG]:
-            await reset_user_chats(user, bot)
+            await reset_user_chats(user, bot, storage)
 
         batch.update(user_ref, {
             'additional_usage_quota': user.additional_usage_quota,
@@ -257,6 +321,7 @@ async def update_user_additional_usage_quota(bot: Bot, user: User, had_subscript
         })
 
         if not had_subscription and count_active_packages_before > count_active_packages_after:
+            user_language_code = await get_user_language(user.id, storage)
             await bot.send_sticker(
                 chat_id=user.telegram_chat_id,
                 sticker=config.MESSAGE_STICKERS.get(MessageSticker.SAD),
@@ -264,25 +329,28 @@ async def update_user_additional_usage_quota(bot: Bot, user: User, had_subscript
             )
             await bot.send_message(
                 chat_id=user.telegram_chat_id,
-                text=get_localization(user.interface_language_code).PACKAGES_END,
+                text=get_localization(user_language_code).PACKAGES_END,
+                reply_markup=build_buy_motivation_keyboard(user_language_code),
                 disable_notification=True,
             )
 
 
-async def reset_user_chats(user: User, bot: Bot):
+async def reset_user_chats(user: User, bot: Bot, storage: BaseStorage):
     chats = await get_chats_by_user_id(user.id)
 
     need_to_send_message = False
     for chat in chats:
-        if chat.role != DEFAULT_ROLE:
+        if chat.role_id != config.DEFAULT_ROLE_ID.get_secret_value():
             await update_chat(chat.id, {
-                'role': DEFAULT_ROLE,
+                'role_id': config.DEFAULT_ROLE_ID.get_secret_value(),
             })
             need_to_send_message = True
 
     if need_to_send_message:
+        user_language_code = await get_user_language(user.id, storage)
         await bot.send_message(
             chat_id=user.telegram_chat_id,
-            text=get_localization(user.interface_language_code).CHATS_RESET,
+            text=get_localization(user_language_code).CHATS_RESET,
+            reply_markup=build_buy_motivation_keyboard(user_language_code),
             disable_notification=True,
         )

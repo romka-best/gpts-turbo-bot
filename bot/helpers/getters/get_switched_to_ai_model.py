@@ -1,48 +1,44 @@
-from bot.database.models.common import Model, ChatGPTVersion, ClaudeGPTVersion, GeminiGPTVersion
+from datetime import datetime, timezone
+from typing import cast
+
+from babel.dates import format_date
+
+from bot.database.models.common import Quota, ModelType
+from bot.database.models.user import User
+from bot.database.operations.chat.getters import get_chat
+from bot.database.operations.product.getters import get_product_by_quota
+from bot.database.operations.role.getters import get_role
+from bot.helpers.getters.get_model_type import get_model_type
 from bot.locales.main import get_localization
+from bot.locales.types import LanguageCode
 
 
-def get_switched_to_ai_model(model: Model, version: str, language_code: str):
-    text = None
+async def get_switched_to_ai_model(user: User, quota: Quota, language_code: LanguageCode):
+    product = await get_product_by_quota(quota)
 
-    if model == Model.CHAT_GPT:
-        if version == ChatGPTVersion.V4_Omni_Mini:
-            text = get_localization(language_code).SWITCHED_TO_CHATGPT4_OMNI_MINI
-        elif version == ChatGPTVersion.V4_Omni:
-            text = get_localization(language_code).SWITCHED_TO_CHATGPT4_OMNI
-        elif version == ChatGPTVersion.V1_O_Mini:
-            text = get_localization(language_code).SWITCHED_TO_CHAT_GPT_O_1_MINI
-        elif version == ChatGPTVersion.V1_O_Preview:
-            text = get_localization(language_code).SWITCHED_TO_CHAT_GPT_O_1_PREVIEW
-    elif model == Model.CLAUDE:
-        if version == ClaudeGPTVersion.V3_Haiku:
-            text = get_localization(language_code).SWITCHED_TO_CLAUDE_3_HAIKU
-        elif version == ClaudeGPTVersion.V3_Sonnet:
-            text = get_localization(language_code).SWITCHED_TO_CLAUDE_3_SONNET
-        elif version == ClaudeGPTVersion.V3_Opus:
-            text = get_localization(language_code).SWITCHED_TO_CLAUDE_3_OPUS
-    elif model == Model.GEMINI:
-        if version == GeminiGPTVersion.V1_Flash:
-            text = get_localization(language_code).SWITCHED_TO_GEMINI_1_FLASH
-        elif version == GeminiGPTVersion.V1_Pro:
-            text = get_localization(language_code).SWITCHED_TO_GEMINI_1_PRO
-        elif version == GeminiGPTVersion.V1_Ultra:
-            text = get_localization(language_code).SWITCHED_TO_GEMINI_1_ULTRA
-    elif model == Model.DALL_E:
-        text = get_localization(language_code).SWITCHED_TO_DALL_E
-    elif model == Model.MIDJOURNEY:
-        text = get_localization(language_code).SWITCHED_TO_MIDJOURNEY
-    elif model == Model.STABLE_DIFFUSION:
-        text = get_localization(language_code).SWITCHED_TO_STABLE_DIFFUSION
-    elif model == Model.FLUX:
-        text = get_localization(language_code).SWITCHED_TO_FLUX
-    elif model == Model.FACE_SWAP:
-        text = get_localization(language_code).SWITCHED_TO_FACE_SWAP
-    elif model == Model.PHOTOSHOP_AI:
-        text = get_localization(language_code).SWITCHED_TO_PHOTOSHOP_AI
-    elif model == Model.MUSIC_GEN:
-        text = get_localization(language_code).SWITCHED_TO_MUSIC_GEN
-    elif model == Model.SUNO:
-        text = get_localization(language_code).SWITCHED_TO_SUNO
+    role_info = {}
+    model_type = get_model_type(user.current_model)
+    if model_type == ModelType.TEXT:
+        chat = await get_chat(user.current_chat_id)
+        role = await get_role(chat.role_id)
+        role_info = {'role': role.translated_names[language_code]}
+
+    current_date = datetime.now(timezone.utc)
+    training_data = product.details.get('training_data', current_date)
+    formatted_date = format_date(date=training_data, format='LLLL, yyyy', locale=language_code).capitalize()
+    product.details['training_data'] = formatted_date
+
+    product_info = product.details
+    settings_info = user.settings[user.current_model]
+
+    model_name = product.names[language_code]
+    model_type = cast(ModelType, product.category)
+    model_info = product_info | role_info | settings_info
+
+    text = get_localization(language_code).switched(
+        model_name,
+        model_type,
+        model_info,
+    )
 
     return text

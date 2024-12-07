@@ -6,7 +6,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.storage.base import StorageKey
 
 from bot.config import config, MessageSticker
-from bot.database.models.common import Quota, Currency, Model, MidjourneyAction
+from bot.database.models.common import Quota, Currency, Model, MidjourneyAction, SendType
 from bot.database.models.generation import GenerationStatus, Generation
 from bot.database.models.request import Request, RequestStatus
 from bot.database.models.transaction import TransactionType
@@ -18,6 +18,7 @@ from bot.database.operations.request.updaters import update_request
 from bot.database.operations.transaction.writers import write_transaction
 from bot.database.operations.user.getters import get_user
 from bot.handlers.ai.midjourney_handler import PRICE_MIDJOURNEY_REQUEST
+from bot.helpers.senders.send_document import send_document
 from bot.helpers.senders.send_error_info import send_error_info
 from bot.helpers.senders.send_images import send_image
 from bot.helpers.updaters.update_user_usage_quota import update_user_usage_quota
@@ -77,7 +78,10 @@ async def handle_midjourney_result(
             if user.settings[Model.MIDJOURNEY][UserSettings.SHOW_USAGE_QUOTA] and \
                user.daily_limits[Quota.MIDJOURNEY] != float('inf') else ''
         caption = f'{get_localization(user_language_code).IMAGE_SUCCESS}{footer_text}'
-        await send_image(bot, user.telegram_chat_id, generation.result, reply_markup, caption)
+        if user.settings[Model.MIDJOURNEY][UserSettings.SEND_TYPE] == SendType.DOCUMENT:
+            await send_document(bot, user.telegram_chat_id, generation.result, reply_markup, caption)
+        else:
+            await send_image(bot, user.telegram_chat_id, generation.result, reply_markup, caption)
     elif not generation.has_error and is_suggestion:
         await send_image(
             bot,
@@ -89,7 +93,7 @@ async def handle_midjourney_result(
         )
     else:
         generation_error = generation.details.get('error', '').lower()
-        if 'banned prompt detected' in generation_error:
+        if 'banned prompt detected' in generation_error or 'prompt might be against' in generation_error:
             if not is_suggestion:
                 await bot.send_sticker(
                     chat_id=user.telegram_chat_id,

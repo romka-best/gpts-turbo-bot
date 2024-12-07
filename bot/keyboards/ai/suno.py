@@ -2,9 +2,10 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 from bot.database.models.common import SunoMode
 from bot.locales.main import get_localization
+from bot.locales.types import LanguageCode
 
 
-def build_suno_keyboard(language_code: str) -> InlineKeyboardMarkup:
+def build_suno_keyboard(language_code: LanguageCode) -> InlineKeyboardMarkup:
     buttons = [
         [
             InlineKeyboardButton(
@@ -23,7 +24,7 @@ def build_suno_keyboard(language_code: str) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
-def build_suno_simple_mode_keyboard(language_code: str) -> InlineKeyboardMarkup:
+def build_suno_simple_mode_keyboard(language_code: LanguageCode) -> InlineKeyboardMarkup:
     buttons = [
         [
             InlineKeyboardButton(
@@ -36,7 +37,7 @@ def build_suno_simple_mode_keyboard(language_code: str) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
-def build_suno_custom_mode_lyrics_keyboard(language_code: str) -> InlineKeyboardMarkup:
+def build_suno_custom_mode_lyrics_keyboard(language_code: LanguageCode) -> InlineKeyboardMarkup:
     buttons = [
         [
             InlineKeyboardButton(
@@ -55,7 +56,7 @@ def build_suno_custom_mode_lyrics_keyboard(language_code: str) -> InlineKeyboard
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
-def build_suno_custom_mode_genres_keyboard(language_code: str) -> InlineKeyboardMarkup:
+def build_suno_custom_mode_genres_keyboard(language_code: LanguageCode) -> InlineKeyboardMarkup:
     buttons = [
         [
             InlineKeyboardButton(

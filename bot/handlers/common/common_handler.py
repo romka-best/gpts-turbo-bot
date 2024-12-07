@@ -3,7 +3,7 @@ import asyncio
 from aiogram import Router
 from aiogram.filters import Command, CommandStart, ChatMemberUpdatedFilter, KICKED, MEMBER
 from aiogram.fsm.context import FSMContext
-from aiogram.types import Message, CallbackQuery, ChatMemberUpdated, URLInputFile, InaccessibleMessage
+from aiogram.types import Message, CallbackQuery, ChatMemberUpdated, InaccessibleMessage
 
 from bot.config import config, MessageEffect, MessageSticker
 from bot.database.main import firebase
@@ -20,6 +20,7 @@ from bot.handlers.ai.gemini_handler import handle_gemini
 from bot.handlers.ai.mode_handler import handle_mode
 from bot.handlers.payment.bonus_handler import handle_bonus
 from bot.handlers.payment.payment_handler import handle_subscribe, handle_package
+from bot.helpers.getters.get_quota_by_model import get_quota_by_model
 from bot.helpers.getters.get_switched_to_ai_model import get_switched_to_ai_model
 from bot.helpers.updaters.update_daily_limits import update_user_daily_limits
 from bot.keyboards.ai.mode import build_switched_to_ai_keyboard
@@ -163,7 +164,7 @@ async def start(message: Message, state: FSMContext):
         })
 
         batch = firebase.db.batch()
-        await update_user_daily_limits(message.bot, user, batch)
+        await update_user_daily_limits(message.bot, user, batch, state.storage)
         await batch.commit()
     elif user and len(params) > 1:
         sub_params = params[1].split('_')
@@ -177,18 +178,6 @@ async def start(message: Message, state: FSMContext):
 
     user_language_code = await get_user_language(user_id, state.storage)
 
-    if user_utm.get(UTM.CAMPAIGN, '').startswith('prompts'):
-        promo_file_path = f'promos/social_media_prompts.pdf'
-        promo_file = await firebase.bucket.get_blob(promo_file_path)
-        promo_file_link = firebase.get_public_url(promo_file.name)
-        tasks.append(message.bot.send_document(
-            chat_id=message.chat.id,
-            document=URLInputFile(promo_file_link, filename=promo_file_path, timeout=60),
-            caption=get_localization(user_language_code).PROMO_SOCIAL_MEDIA_PROMPTS,
-            message_effect_id=config.MESSAGE_EFFECTS.get(MessageEffect.FIRE),
-            disable_notification=True,
-        ))
-
     await message.answer_sticker(
         sticker=config.MESSAGE_STICKERS.get(MessageSticker.HELLO),
     )
@@ -200,9 +189,9 @@ async def start(message: Message, state: FSMContext):
     )
 
     await message.answer(
-        text=get_switched_to_ai_model(
-            user.current_model,
-            user.settings[user.current_model][UserSettings.VERSION],
+        text=await get_switched_to_ai_model(
+            user,
+            get_quota_by_model(user.current_model, user.settings[user.current_model][UserSettings.VERSION]),
             user_language_code,
         ),
         reply_markup=build_switched_to_ai_keyboard(user_language_code, user.current_model),
@@ -254,7 +243,7 @@ async def user_blocked_bot(event: ChatMemberUpdated):
 @common_router.my_chat_member(
     ChatMemberUpdatedFilter(member_status_changed=MEMBER)
 )
-async def user_unblocked_bot(event: ChatMemberUpdated):
+async def user_unblocked_bot(event: ChatMemberUpdated, state: FSMContext):
     user = await get_user(str(event.from_user.id))
     user.is_blocked = False
     await update_user(user.id, {
@@ -262,7 +251,7 @@ async def user_unblocked_bot(event: ChatMemberUpdated):
     })
 
     batch = firebase.db.batch()
-    await update_user_daily_limits(event.bot, user, batch)
+    await update_user_daily_limits(event.bot, user, batch, state.storage)
     await batch.commit()
 
 
@@ -380,6 +369,19 @@ async def limit_exceeded_selection(callback_query: CallbackQuery, state: FSMCont
     if action == 'change_ai_model':
         await handle_mode(callback_query.message, state, str(callback_query.from_user.id))
     elif action == 'open_bonus_info':
+        await handle_bonus(callback_query.message, str(callback_query.from_user.id), state)
+    elif action == 'open_buy_subscriptions_info':
+        await handle_subscribe(callback_query.message, str(callback_query.from_user.id), state)
+    elif action == 'open_buy_packages_info':
+        await handle_package(callback_query.message, str(callback_query.from_user.id), state)
+
+
+@common_router.callback_query(lambda c: c.data.startswith('buy_motivation:'))
+async def buy_motivation_selection(callback_query: CallbackQuery, state: FSMContext):
+    await callback_query.answer()
+
+    action = callback_query.data.split(':')[1]
+    if action == 'open_bonus_info':
         await handle_bonus(callback_query.message, str(callback_query.from_user.id), state)
     elif action == 'open_buy_subscriptions_info':
         await handle_subscribe(callback_query.message, str(callback_query.from_user.id), state)

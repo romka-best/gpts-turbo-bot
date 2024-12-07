@@ -9,9 +9,10 @@ from bot.database.models.common import Quota, Model
 from bot.database.models.user import User
 from bot.keyboards.common.common import build_time_limit_exceeded_keyboard
 from bot.locales.main import get_localization, get_user_language
+from bot.locales.types import LanguageCode
 
 
-async def notify_user_after_timeout(bot: Bot, chat_id: int, delay: int, language_code: str, reply_to_message_id: int):
+async def notify_user_after_timeout(bot: Bot, chat_id: int, delay: int, language_code: LanguageCode, reply_to_message_id: int):
     await asyncio.sleep(delay)
 
     await bot.send_message(

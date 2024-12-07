@@ -1,3 +1,6 @@
+from enum import StrEnum
+
+
 class Currency:
     RUB = 'RUB'
     USD = 'USD'
@@ -24,7 +27,7 @@ class Model:
     SUNO = 'suno'
 
 
-class ModelType:
+class ModelType(StrEnum):
     TEXT = 'TEXT'
     IMAGE = 'IMAGE'
     MUSIC = 'MUSIC'
@@ -75,6 +78,11 @@ class GeminiGPTVersion:
     V1_Ultra = 'gemini-1.0-ultra'
 
 
+class DALLEVersion:
+    V2 = 'dall-e-2'
+    V3 = 'dall-e-3'
+
+
 class DALLEResolution:
     LOW = '1024x1024'
     MEDIUM = '1024×1792'
@@ -84,11 +92,6 @@ class DALLEResolution:
 class DALLEQuality:
     STANDARD = 'standard'
     HD = 'hd'
-
-
-class DALLEVersion:
-    V2 = 'dall-e-2'
-    V3 = 'dall-e-3'
 
 
 class MidjourneyVersion:
@@ -144,20 +147,38 @@ class MusicGenVersion:
     LATEST = 'LATEST'
 
 
+class SunoVersion:
+    V3 = 'chirp-v3-0'
+    V3_5 = 'chirp-v3-5'
+    V4 = 'chirp-v4'
+
+
 class SunoMode:
     SIMPLE = 'SIMPLE'
     CUSTOM = 'CUSTOM'
 
 
-class SunoSendType:
-    VIDEO = 'VIDEO'
+class AspectRatio:
+    SQUARE = '1:1'
+    LANDSCAPE = '16:9'
+    PORTRAIT = '9:16'
+    CINEMASCOPE_HORIZONTAL = '21:9'
+    CINEMASCOPE_VERTICAL = '9:21'
+    STANDARD_HORIZONTAL = '3:2'
+    STANDARD_VERTICAL = '2:3'
+    BANNER_HORIZONTAL = '5:4'
+    BANNER_VERTICAL = '4:5'
+    CLASSIC_HORIZONTAL = '4:3'
+    CLASSIC_VERTICAL = '3:4'
+    CUSTOM = 'CUSTOM'
+
+
+class SendType:
+    TEXT = 'TEXT'
+    IMAGE = 'IMAGE'
+    DOCUMENT = 'DOCUMENT'
     AUDIO = 'AUDIO'
-
-
-class SunoVersion:
-    V3 = 'chirp-v3-0'
-    V3_5 = 'chirp-v3-5'
-    V4 = 'chirp-v4'
+    VIDEO = 'VIDEO'
 
 
 class PaymentType:
@@ -194,6 +215,3 @@ class UTM:
     CAMPAIGN = 'campaign'
     TERM = 'term'
     CONTENT = 'content'
-
-
-DEFAULT_ROLE = 'PERSONAL_ASSISTANT'

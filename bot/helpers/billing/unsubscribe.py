@@ -1,10 +1,17 @@
 from aiogram import Bot
+from google.cloud import firestore
 
 from bot.database.models.common import Currency, PaymentMethod
 from bot.database.models.subscription import Subscription, SubscriptionStatus
 from bot.database.operations.product.getters import get_product
 from bot.database.operations.subscription.updaters import update_subscription_in_transaction
 from bot.helpers.senders.send_message_to_admins import send_message_to_admins
+from bot.locales.types import LanguageCode
+
+
+@firestore.async_transactional
+async def unsubscribe_wrapper(transaction, old_subscription: Subscription, bot: Bot):
+    await unsubscribe(transaction, old_subscription, bot)
 
 
 async def unsubscribe(transaction, old_subscription: Subscription, bot: Bot):
@@ -28,7 +35,7 @@ async def unsubscribe(transaction, old_subscription: Subscription, bot: Bot):
                 f'❌ <b>Отмена продления подписки у пользователя: {old_subscription.user_id}</b>\n\n'
                 f'ℹ️ ID: {old_subscription.id}\n'
                 f'💱 Метод оплаты: {old_subscription.payment_method}\n'
-                f'💳 Тип: {product.names.get("ru")}\n'
+                f'💳 Тип: {product.names.get(LanguageCode.RU)}\n'
                 f'💰 Сумма: {old_subscription.amount}{Currency.SYMBOLS[old_subscription.currency]}\n'
                 f'💸 Чистая сумма: {float(old_subscription.income_amount)}{Currency.SYMBOLS[old_subscription.currency]}\n'
                 f'🗓 Период подписки: {old_subscription.start_date.strftime("%d.%m.%Y")}-{old_subscription.end_date.strftime("%d.%m.%Y")}\n\n'

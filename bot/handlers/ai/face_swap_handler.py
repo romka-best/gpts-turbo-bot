@@ -23,7 +23,7 @@ from bot.database.models.face_swap_package import (
 )
 from bot.database.models.generation import GenerationStatus
 from bot.database.models.request import RequestStatus
-from bot.database.models.user import UserGender, User
+from bot.database.models.user import User, UserGender, UserSettings
 from bot.database.operations.face_swap_package.getters import (
     get_face_swap_package,
     get_face_swap_packages_by_gender,
@@ -41,6 +41,8 @@ from bot.database.operations.request.updaters import update_request
 from bot.database.operations.request.writers import write_request
 from bot.database.operations.user.getters import get_user
 from bot.database.operations.user.updaters import update_user
+from bot.helpers.getters.get_quota_by_model import get_quota_by_model
+from bot.helpers.getters.get_switched_to_ai_model import get_switched_to_ai_model
 from bot.helpers.senders.send_error_info import send_error_info
 from bot.integrations.replicateAI import create_face_swap_images
 from bot.keyboards.ai.face_swap import (
@@ -87,9 +89,14 @@ async def face_swap(message: Message, state: FSMContext):
             'current_model': user.current_model,
         })
 
+        text = await get_switched_to_ai_model(
+            user,
+            get_quota_by_model(user.current_model, user.settings[user.current_model][UserSettings.VERSION]),
+            user_language_code,
+        )
         reply_markup = build_switched_to_ai_keyboard(user_language_code, Model.FACE_SWAP)
         await message.answer(
-            text=get_localization(user_language_code).SWITCHED_TO_FACE_SWAP,
+            text=text,
             reply_markup=reply_markup,
             message_effect_id=config.MESSAGE_EFFECTS.get(MessageEffect.FIRE),
         )
@@ -160,7 +167,7 @@ async def handle_face_swap(bot: Bot, chat_id: str, state: FSMContext, user_id: s
             reply_markup = build_cancel_keyboard(user_language_code)
             await bot.send_photo(
                 chat_id=chat_id,
-                photo=URLInputFile(photo_link, filename=photo_path),
+                photo=URLInputFile(photo_link, filename=photo_path, timeout=300),
                 caption=get_localization(user_language_code).SEND_ME_YOUR_PICTURE,
                 reply_markup=reply_markup
             )

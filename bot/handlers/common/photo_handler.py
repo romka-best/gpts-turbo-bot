@@ -37,7 +37,7 @@ from bot.handlers.ai.face_swap_handler import handle_face_swap
 from bot.handlers.ai.gemini_handler import handle_gemini
 from bot.integrations.replicateAI import create_face_swap_image, create_photoshop_ai_image
 from bot.keyboards.admin.catalog import build_manage_catalog_create_role_confirmation_keyboard
-from bot.keyboards.common.common import build_cancel_keyboard
+from bot.keyboards.common.common import build_cancel_keyboard, build_limit_exceeded_keyboard
 from bot.locales.main import get_localization, get_user_language
 from bot.middlewares.AlbumMiddleware import AlbumMiddleware
 from bot.states.catalog import Catalog
@@ -64,7 +64,7 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
             allow_sending_without_reply=True,
         )
 
-        photo_data_io = await message.bot.download_file(photo_file.file_path)
+        photo_data_io = await message.bot.download_file(photo_file.file_path, timeout=300)
         photo_data = photo_data_io.read()
 
         blob_path = f'users/avatars/{user_id}.jpeg'
@@ -97,7 +97,7 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
     elif current_state == Catalog.waiting_for_role_photo.state:
         user_data = await state.get_data()
 
-        photo_data_io = await message.bot.download_file(photo_file.file_path)
+        photo_data_io = await message.bot.download_file(photo_file.file_path, timeout=300)
         photo_data = photo_data_io.read()
 
         photo_name = f'{user_data["system_role_name"]}.png'
@@ -108,7 +108,6 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
         reply_markup = build_manage_catalog_create_role_confirmation_keyboard(user_language_code)
         await message.answer(
             text=get_localization(user_language_code).catalog_manage_create_role_confirmation(
-                role_system_name=user_data.get('system_role_name', ''),
                 role_names=user_data.get('role_names', {}),
                 role_descriptions=user_data.get('role_descriptions', {}),
                 role_instructions=user_data.get('role_instructions', {}),
@@ -120,7 +119,7 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
         face_swap_package_id = user_data['face_swap_package_id']
         face_swap_picture_name = user_data['face_swap_picture_name']
 
-        photo_data_io = await message.bot.download_file(photo_file.file_path)
+        photo_data_io = await message.bot.download_file(photo_file.file_path, timeout=300)
         photo_data = photo_data_io.read()
 
         face_swap_package = await get_face_swap_package(face_swap_package_id)
@@ -149,7 +148,7 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
                 sticker=config.MESSAGE_STICKERS.get(MessageSticker.SAD),
             )
 
-            reply_markup = build_cancel_keyboard(user_language_code)
+            reply_markup = build_limit_exceeded_keyboard(user_language_code)
             await message.answer(
                 text=get_localization(user_language_code).REACHED_USAGE_LIMIT,
                 reply_markup=reply_markup,
@@ -187,7 +186,7 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
             return
 
         async with ChatActionSender.upload_photo(bot=message.bot, chat_id=message.chat.id):
-            photo_data_io = await message.bot.download_file(photo_file.file_path)
+            photo_data_io = await message.bot.download_file(photo_file.file_path, timeout=300)
             photo_data = photo_data_io.read()
             photo_name = f'{uuid.uuid4()}.jpeg'
             photo_path = f'users/photoshop/{photoshop_ai_action_name}/{user_id}/{photo_name}'
@@ -255,7 +254,7 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
         if need_exit:
             return
 
-        photo_data_io = await message.bot.download_file(photo_file.file_path)
+        photo_data_io = await message.bot.download_file(photo_file.file_path, timeout=300)
         photo_data = photo_data_io.read()
 
         photo_vision_filename = f'{uuid.uuid4()}.jpeg'
@@ -287,7 +286,7 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
                 try:
                     user_photo = await firebase.bucket.get_blob(f'users/avatars/{user_id}.jpeg')
                     user_photo_link = firebase.get_public_url(user_photo.name)
-                    photo_data_io = await message.bot.download_file(photo_file.file_path)
+                    photo_data_io = await message.bot.download_file(photo_file.file_path, timeout=300)
                     photo_data = photo_data_io.read()
 
                     background_path = f'users/backgrounds/{user_id}/{uuid.uuid4()}.jpeg'
@@ -322,7 +321,7 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
 
                     reply_markup = build_cancel_keyboard(user_language_code)
                     await message.answer_photo(
-                        photo=URLInputFile(photo_link, filename=photo_path),
+                        photo=URLInputFile(photo_link, filename=photo_path, timeout=300),
                         caption=get_localization(user_language_code).SEND_ME_YOUR_PICTURE,
                         reply_markup=reply_markup
                     )
@@ -387,7 +386,7 @@ async def handle_album(message: Message, state: FSMContext, album: list[Message]
             else:
                 continue
 
-            photo_data_io = await message.bot.download_file(photo_file.file_path)
+            photo_data_io = await message.bot.download_file(photo_file.file_path, timeout=300)
             photo_data = photo_data_io.read()
 
             photo_vision_filename = f'{uuid.uuid4()}.jpeg'

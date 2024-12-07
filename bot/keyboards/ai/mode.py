@@ -1,10 +1,11 @@
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
-from bot.database.models.common import Model, ChatGPTVersion, ClaudeGPTVersion, GeminiGPTVersion
+from bot.database.models.common import Model, ChatGPTVersion, ClaudeGPTVersion, GeminiGPTVersion, ModelType
 from bot.locales.main import get_localization
+from bot.locales.types import LanguageCode
 
 
-def build_mode_keyboard(language_code: str, model: Model, model_version: str, page=0) -> InlineKeyboardMarkup:
+def build_mode_keyboard(language_code: LanguageCode, model: Model, model_version: str, page=0) -> InlineKeyboardMarkup:
     buttons = []
     if page == 0:
         buttons.extend(
@@ -12,7 +13,7 @@ def build_mode_keyboard(language_code: str, model: Model, model_version: str, pa
                 [
                     InlineKeyboardButton(
                         text=get_localization(language_code).TEXT_MODELS,
-                        callback_data='mode:text',
+                        callback_data=f'mode:{ModelType.TEXT}',
                     ),
                 ],
                 [
@@ -113,7 +114,7 @@ def build_mode_keyboard(language_code: str, model: Model, model_version: str, pa
             [
                 InlineKeyboardButton(
                     text=get_localization(language_code).IMAGE_MODELS,
-                    callback_data='mode:text',
+                    callback_data=f'mode:{ModelType.IMAGE}',
                 ),
             ],
             [
@@ -176,7 +177,7 @@ def build_mode_keyboard(language_code: str, model: Model, model_version: str, pa
             [
                 InlineKeyboardButton(
                     text=get_localization(language_code).MUSIC_MODELS,
-                    callback_data='mode:text',
+                    callback_data=f'mode:{ModelType.MUSIC}',
                 ),
             ],
             [
@@ -210,7 +211,7 @@ def build_mode_keyboard(language_code: str, model: Model, model_version: str, pa
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
-def build_switched_to_ai_keyboard(language_code: str, model: Model) -> InlineKeyboardMarkup:
+def build_switched_to_ai_keyboard(language_code: LanguageCode, model: Model) -> InlineKeyboardMarkup:
     buttons = [
         [
             InlineKeyboardButton(
@@ -225,5 +226,15 @@ def build_switched_to_ai_keyboard(language_code: str, model: Model) -> InlineKey
             ),
         ],
     ]
+
+    if model not in [Model.FACE_SWAP, Model.PHOTOSHOP_AI]:
+        buttons.append(
+            [
+                InlineKeyboardButton(
+                    text=get_localization(language_code).SWITCHED_TO_AI_EXAMPLES,
+                    callback_data=f'switched_to_ai:examples:{model}'
+                )
+            ],
+        )
 
     return InlineKeyboardMarkup(inline_keyboard=buttons)

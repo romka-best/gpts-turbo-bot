@@ -2,9 +2,10 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 from bot.database.models.face_swap_package import FaceSwapPackage
 from bot.locales.main import get_localization
+from bot.locales.types import LanguageCode
 
 
-def build_face_swap_choose_keyboard(language_code: str, packages: list[FaceSwapPackage]) -> InlineKeyboardMarkup:
+def build_face_swap_choose_keyboard(language_code: LanguageCode, packages: list[FaceSwapPackage]) -> InlineKeyboardMarkup:
     buttons = []
     for package in packages:
         buttons.append(
@@ -19,7 +20,7 @@ def build_face_swap_choose_keyboard(language_code: str, packages: list[FaceSwapP
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
-def build_face_swap_package_keyboard(language_code: str, quantities: list[int]) -> InlineKeyboardMarkup:
+def build_face_swap_package_keyboard(language_code: LanguageCode, quantities: list[int]) -> InlineKeyboardMarkup:
     buttons = []
     for quantity in quantities:
         buttons.append(

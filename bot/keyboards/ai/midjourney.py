@@ -2,6 +2,7 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 # from bot.database.models.common import MidjourneyVersion
 # from bot.locales.main import get_localization
+# from bot.locales.types import LanguageCode
 
 
 def build_midjourney_keyboard(hash_id: str) -> InlineKeyboardMarkup:
@@ -54,7 +55,7 @@ def build_midjourney_keyboard(hash_id: str) -> InlineKeyboardMarkup:
 
 
 # def build_midjourney_image_keyboard(
-#     language_code: str,
+#     language_code: LanguageCode,
 #     hash_id: str,
 #     version: MidjourneyVersion,
 # ) -> InlineKeyboardMarkup:

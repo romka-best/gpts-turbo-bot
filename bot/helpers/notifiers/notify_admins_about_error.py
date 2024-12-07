@@ -11,7 +11,7 @@ from bot.database.operations.user.getters import get_user
 from bot.database.operations.user.initialize_user_for_the_first_time import initialize_user_for_the_first_time
 from bot.helpers.senders.send_error_info import send_error_info
 from bot.keyboards.common.common import build_error_keyboard, build_start_keyboard
-from bot.locales.main import get_localization, get_user_language
+from bot.locales.main import get_localization, get_user_language, set_user_language
 
 
 async def delayed_notify_admins_about_error(
@@ -48,7 +48,7 @@ async def notify_admins_about_error(bot: Bot, telegram_update: Update, dp: Dispa
                 else:
                     raise
 
-                await dp.storage.redis.set(f'user:{user_id}:language', language_code)
+                await set_user_language(user_id, language_code, dp.storage)
 
                 chat_title = get_localization(language_code).DEFAULT_CHAT_TITLE
                 transaction = firebase.db.transaction()

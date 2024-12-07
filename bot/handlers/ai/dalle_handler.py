@@ -8,7 +8,7 @@ from aiogram.types import Message
 from aiogram.utils.chat_action import ChatActionSender
 
 from bot.config import config, MessageEffect, MessageSticker
-from bot.database.models.common import Quota, Currency, Model
+from bot.database.models.common import Quota, Currency, Model, SendType
 from bot.database.models.transaction import TransactionType
 from bot.database.models.user import UserSettings, User
 from bot.database.operations.product.getters import get_product_by_quota
@@ -16,6 +16,8 @@ from bot.database.operations.transaction.writers import write_transaction
 from bot.database.operations.user.getters import get_user
 from bot.database.operations.user.updaters import update_user
 from bot.handlers.ai.midjourney_handler import handle_midjourney_example
+from bot.helpers.getters.get_quota_by_model import get_quota_by_model
+from bot.helpers.getters.get_switched_to_ai_model import get_switched_to_ai_model
 from bot.helpers.senders.send_error_info import send_error_info
 from bot.helpers.updaters.update_user_usage_quota import update_user_usage_quota
 from bot.integrations.openAI import get_response_image, get_cost_for_image
@@ -48,9 +50,14 @@ async def dall_e(message: Message, state: FSMContext):
             'current_model': user.current_model,
         })
 
+        text = await get_switched_to_ai_model(
+            user,
+            get_quota_by_model(user.current_model, user.settings[user.current_model][UserSettings.VERSION]),
+            user_language_code,
+        )
         reply_markup = build_switched_to_ai_keyboard(user_language_code, Model.DALL_E)
         await message.answer(
-            text=get_localization(user_language_code).SWITCHED_TO_DALL_E,
+            text=text,
             reply_markup=reply_markup,
             message_effect_id=config.MESSAGE_EFFECTS.get(MessageEffect.FIRE),
         )
@@ -121,13 +128,20 @@ async def handle_dall_e(message: Message, state: FSMContext, user: User):
             )
 
             footer_text = f'\n\n🖼 {user.daily_limits[Quota.DALL_E] + user.additional_usage_quota[Quota.DALL_E] + 1}' \
-                if user.settings[user.current_model][UserSettings.SHOW_USAGE_QUOTA] and \
+                if user.settings[Model.DALL_E][UserSettings.SHOW_USAGE_QUOTA] and \
                    user.daily_limits[Quota.DALL_E] != float('inf') else ''
-            await message.reply_photo(
-                caption=f'{get_localization(user_language_code).IMAGE_SUCCESS}{footer_text}',
-                photo=response_url,
-                allow_sending_without_reply=True,
-            )
+            if user.settings[Model.DALL_E][UserSettings.SEND_TYPE] == SendType.DOCUMENT:
+                await message.reply_document(
+                    caption=f'{get_localization(user_language_code).IMAGE_SUCCESS}{footer_text}',
+                    document=response_url,
+                    allow_sending_without_reply=True,
+                )
+            else:
+                await message.reply_photo(
+                    caption=f'{get_localization(user_language_code).IMAGE_SUCCESS}{footer_text}',
+                    photo=response_url,
+                    allow_sending_without_reply=True,
+                )
         except openai.BadRequestError as e:
             if e.code == 'content_policy_violation':
                 await message.answer_sticker(

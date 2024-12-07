@@ -1,4 +1,5 @@
 import asyncio
+from typing import cast
 
 from aiogram import Router, F
 from aiogram.fsm.context import FSMContext
@@ -36,6 +37,7 @@ from bot.keyboards.admin.face_swap import (
 )
 from bot.keyboards.common.common import build_cancel_keyboard
 from bot.locales.main import get_localization, localization_classes, get_user_language
+from bot.locales.types import LanguageCode
 from bot.states.face_swap import FaceSwap
 
 admin_face_swap_router = Router()
@@ -131,10 +133,10 @@ async def face_swap_manage_name_sent(message: Message, state: FSMContext):
 
     face_swap_package_names = {}
     for language_code in localization_classes.keys():
-        if language_code == 'ru':
+        if language_code == LanguageCode.RU:
             face_swap_package_names[language_code] = message.text
         else:
-            translated_face_swap_package_name = await translate_text(message.text, 'ru', language_code)
+            translated_face_swap_package_name = await translate_text(message.text, LanguageCode.RU, language_code)
             if translated_face_swap_package_name:
                 face_swap_package_names[language_code] = translated_face_swap_package_name
             else:
@@ -190,7 +192,7 @@ async def handle_face_swap_manage_edit_choose_gender_selection(callback_query: C
 
     user_language_code = await get_user_language(str(callback_query.from_user.id), state.storage)
 
-    gender = callback_query.data.split(':')[1]
+    gender = cast(UserGender, callback_query.data.split(':')[1])
 
     face_swap_packages = await get_face_swap_packages_by_gender(gender)
     reply_markup = build_manage_face_swap_edit_choose_package_keyboard(user_language_code, face_swap_packages)
@@ -222,7 +224,7 @@ async def handle_face_swap_manage_edit_choose_package_selection(callback_query: 
 
 async def show_picture(
     file: dict,
-    language_code: str,
+    language_code: LanguageCode,
     face_swap_package: FaceSwapPackage,
     callback_query: CallbackQuery,
 ):
@@ -235,7 +237,7 @@ async def show_picture(
         photo_link = firebase.get_public_url(photo.name)
 
         await callback_query.message.answer_photo(
-            photo=URLInputFile(photo_link, filename=photo_path),
+            photo=URLInputFile(photo_link, filename=photo_path, timeout=300),
             caption=f'<b>{file_name}</b>\n\n{file_status}',
             reply_markup=reply_markup,
         )
@@ -246,7 +248,7 @@ async def show_picture(
         )
 
 
-async def show_pictures(face_swap_package: FaceSwapPackage, language_code: str, callback_query: CallbackQuery):
+async def show_pictures(face_swap_package: FaceSwapPackage, language_code: LanguageCode, callback_query: CallbackQuery):
     tasks = [
         show_picture(
             file,
@@ -430,7 +432,7 @@ async def handle_face_swap_manage_edit_picture_change_status_selection(
     user_language_code = await get_user_language(str(callback_query.from_user.id), state.storage)
     user_data = await state.get_data()
 
-    status = callback_query.data.split(':')[1]
+    status = cast(FaceSwapPackageStatus, callback_query.data.split(':')[1])
     if status == 'back':
         reply_markup = build_manage_face_swap_edit_picture_keyboard(user_language_code, user_data['file_name'])
         await callback_query.message.edit_reply_markup(reply_markup=reply_markup)

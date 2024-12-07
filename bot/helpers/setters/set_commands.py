@@ -5,6 +5,7 @@ from aiogram.exceptions import TelegramBadRequest
 from aiogram.types import BotCommand, BotCommandScopeChat
 
 from bot.config import config
+from bot.locales.types import LanguageCode
 
 commands_en = [
     BotCommand(
@@ -38,6 +39,10 @@ commands_en = [
     BotCommand(
         command='info',
         description='ℹ️ Get info about AI models',
+    ),
+    BotCommand(
+        command='catalog',
+        description='📂 Open catalog with prompts and digital employees',
     ),
     BotCommand(
         command='chatgpt',
@@ -135,6 +140,10 @@ commands_ru = [
         description='ℹ️ Получить информацию про модели ИИ',
     ),
     BotCommand(
+        command='catalog',
+        description='📂 Открыть каталог с промптами и цифровыми сотрудниками',
+    ),
+    BotCommand(
         command='chatgpt',
         description='💥 Переключиться на ChatGPT модель',
     ),
@@ -203,7 +212,7 @@ commands_admin = commands_ru + [
 
 async def set_commands(bot: Bot):
     await bot.set_my_commands(commands=commands_en)
-    await bot.set_my_commands(commands=commands_ru, language_code='ru')
+    await bot.set_my_commands(commands=commands_ru, language_code=LanguageCode.RU)
 
     for chat_id in config.ADMIN_IDS:
         try:
@@ -215,9 +224,9 @@ async def set_commands(bot: Bot):
                 raise error
 
 
-async def set_commands_for_user(bot: Bot, chat_id: str, language='en'):
+async def set_commands_for_user(bot: Bot, chat_id: str, language=LanguageCode):
     try:
-        if language == 'ru':
+        if language == LanguageCode.RU:
             await bot.set_my_commands(commands=commands_ru, scope=BotCommandScopeChat(chat_id=chat_id))
         else:
             await bot.set_my_commands(commands=commands_en, scope=BotCommandScopeChat(chat_id=chat_id))
