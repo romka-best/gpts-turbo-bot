@@ -214,7 +214,6 @@ async def handle_music_gen_selection(
                 await message.answer(
                     text=get_localization(user_language_code).ERROR,
                     reply_markup=reply_markup,
-                    parse_mode=None,
                 )
 
                 await send_error_info(

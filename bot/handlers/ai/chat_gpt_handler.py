@@ -30,7 +30,8 @@ from bot.helpers.senders.send_ai_message import send_ai_message
 from bot.integrations.openAI import get_response_message
 from bot.keyboards.ai.chat_gpt import build_chat_gpt_keyboard
 from bot.keyboards.ai.mode import build_switched_to_ai_keyboard
-from bot.keyboards.common.common import build_error_keyboard, build_continue_generating_keyboard
+from bot.keyboards.common.common import build_error_keyboard, build_continue_generating_keyboard, \
+    build_buy_motivation_keyboard
 from bot.locales.main import get_localization, get_user_language
 from bot.locales.types import LanguageCode
 
@@ -312,7 +313,6 @@ async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_q
                 await message.answer(
                     text=get_localization(user_language_code).ERROR,
                     reply_markup=reply_markup,
-                    parse_mode=None,
                 )
 
                 await send_error_info(
@@ -330,7 +330,6 @@ async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_q
             await message.answer(
                 text=get_localization(user_language_code).ERROR,
                 reply_markup=reply_markup,
-                parse_mode=None,
             )
             await send_error_info(
                 bot=message.bot,
@@ -354,7 +353,13 @@ async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_q
     )
 
 
-async def handle_chatgpt4_example(user: User, user_language_code: LanguageCode, prompt: str, history: list, message: Message):
+async def handle_chatgpt4_example(
+    user: User,
+    user_language_code: LanguageCode,
+    prompt: str,
+    history: list,
+    message: Message,
+):
     try:
         current_date = datetime.now(timezone.utc)
         if (
@@ -392,10 +397,13 @@ async def handle_chatgpt4_example(user: User, user_language_code: LanguageCode, 
             )
 
             header_text = f'{get_localization(user_language_code).CHATGPT4_OMNI_EXAMPLE}\n\n'
-            full_text = f'{header_text}{message_content}'
+            footer_text = f'\n\n{get_localization(user_language_code).EXAMPLE_INFO}'
+            full_text = f'{header_text}{message_content}{footer_text}'
+            reply_markup = build_buy_motivation_keyboard(user_language_code)
             await send_ai_message(
                 message=message,
                 text=full_text,
+                reply_markup=reply_markup,
             )
     except Exception as e:
         await send_error_info(

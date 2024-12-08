@@ -32,7 +32,8 @@ from bot.helpers.senders.send_ai_message import send_ai_message
 from bot.integrations.anthropic import get_response_message
 from bot.keyboards.ai.claude import build_claude_keyboard
 from bot.keyboards.ai.mode import build_switched_to_ai_keyboard
-from bot.keyboards.common.common import build_error_keyboard, build_continue_generating_keyboard
+from bot.keyboards.common.common import build_error_keyboard, build_continue_generating_keyboard, \
+    build_buy_motivation_keyboard
 from bot.locales.main import get_user_language, get_localization
 from bot.locales.types import LanguageCode
 
@@ -312,7 +313,6 @@ async def handle_claude(message: Message, state: FSMContext, user: User, user_qu
                 await message.answer(
                     text=get_localization(user_language_code).ERROR,
                     reply_markup=reply_markup,
-                    parse_mode=None,
                 )
 
                 await send_error_info(
@@ -336,7 +336,6 @@ async def handle_claude(message: Message, state: FSMContext, user: User, user_qu
                 await message.answer(
                     text=get_localization(user_language_code).ERROR,
                     reply_markup=reply_markup,
-                    parse_mode=None,
                 )
 
                 await send_error_info(
@@ -354,7 +353,6 @@ async def handle_claude(message: Message, state: FSMContext, user: User, user_qu
             await message.answer(
                 text=get_localization(user_language_code).ERROR,
                 reply_markup=reply_markup,
-                parse_mode=None,
             )
 
             await send_error_info(
@@ -428,10 +426,13 @@ async def handle_claude_3_sonnet_example(
             )
 
             header_text = f'{get_localization(user_language_code).CLAUDE_3_SONNET_EXAMPLE}\n\n'
-            full_text = f'{header_text}{message_content}'
+            footer_text = f'\n\n{get_localization(user_language_code).EXAMPLE_INFO}'
+            full_text = f'{header_text}{message_content}{footer_text}'
+            reply_markup = build_buy_motivation_keyboard(user_language_code)
             await send_ai_message(
                 message=message,
                 text=full_text,
+                reply_markup=reply_markup,
             )
     except Exception as e:
         await send_error_info(

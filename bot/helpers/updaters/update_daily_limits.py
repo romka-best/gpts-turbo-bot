@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from datetime import datetime, timezone
 
@@ -24,7 +25,6 @@ from bot.database.operations.user.getters import get_users
 from bot.database.operations.user.updaters import update_user
 from bot.helpers.billing.create_auto_payment import create_auto_payment
 from bot.helpers.billing.create_payment import OrderItem
-from bot.helpers.checkers.check_user_last_activity import check_user_last_activity
 from bot.helpers.notifiers.notify_user_about_quota import notify_user_about_quota
 from bot.helpers.senders.send_error_info import send_error_info
 from bot.helpers.senders.send_message_to_admins_and_developers import send_message_to_admins_and_developers
@@ -43,9 +43,13 @@ async def update_daily_limits(bot: Bot, storage: BaseStorage):
             await update_user_daily_limits(bot, user, batch, storage)
 
             if not user.subscription_id:
-                should_notify = await check_user_last_activity(user.id, storage)
-                if should_notify:
-                    await notify_user_about_quota(bot, user, storage)
+                asyncio.create_task(
+                    notify_user_about_quota(
+                        bot=bot,
+                        user=user,
+                        storage=storage,
+                    )
+                )
 
         await batch.commit()
 

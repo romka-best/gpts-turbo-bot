@@ -25,7 +25,7 @@ class Firebase:
         cred = credentials.Certificate(self.path_to_credentials)
         initialize_app(cred, {
             'storageBucket': config.STORAGE_NAME.get_secret_value(),
-            'httpTimeout': 300,
+            'httpTimeout': 600,
         })
 
         scopes = ['https://www.googleapis.com/auth/cloud-platform']

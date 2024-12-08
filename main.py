@@ -15,6 +15,7 @@ from aiogram.exceptions import (
     TelegramServerError,
 )
 from aiogram.types import Update
+from aiohttp import ClientOSError, ClientTimeout
 from fastapi import FastAPI, BackgroundTasks
 from fastapi.responses import JSONResponse
 from aiogram import Bot, Dispatcher, types
@@ -67,6 +68,7 @@ from bot.handlers.settings.settings_handler import settings_router
 from bot.helpers.billing.check_waiting_payments import check_waiting_payments
 from bot.helpers.billing.update_daily_expenses import update_daily_expenses
 from bot.helpers.checkers.check_unresolved_requests import check_unresolved_requests
+from bot.helpers.getters.get_user_id_from_telegram_update import get_user_id_from_telegram_update
 from bot.helpers.handlers.handle_big_file import handle_big_file
 from bot.helpers.handlers.handle_forbidden_error import handle_forbidden_error
 from bot.helpers.handlers.handle_midjourney_webhook import handle_midjourney_webhook
@@ -97,7 +99,10 @@ WEBHOOK_REPLICATE_URL = config.WEBHOOK_URL + config.WEBHOOK_REPLICATE_PATH
 bot = Bot(
     token=config.BOT_TOKEN.get_secret_value(),
     session=AiohttpSession(
-        timeout=300,
+        timeout=ClientTimeout(
+            total=600,
+            sock_connect=60,
+        ),
     ),
     default=DefaultBotProperties(
         parse_mode=ParseMode.HTML,
@@ -189,8 +194,9 @@ async def delayed_handle_update(update: Update, timeout: int):
 
     try:
         await dp.feed_update(bot=bot, update=update)
-    except (ConnectionError, TelegramServerError, TelegramNetworkError, ConnectionResetError, OSError):
-        await handle_network_error(bot, update)
+    except (ConnectionResetError, OSError, ClientOSError, ConnectionError, TelegramServerError, TelegramNetworkError):
+        user_id = get_user_id_from_telegram_update(update)
+        await handle_network_error(bot, user_id)
     except TelegramForbiddenError:
         await handle_forbidden_error(update)
     except TelegramRetryAfter as e:
@@ -229,12 +235,20 @@ async def handle_update(update: dict):
             try:
                 await dp.feed_update(bot=bot, update=telegram_update)
                 break
-            except (ConnectionError, TelegramServerError, TelegramNetworkError, ConnectionResetError, OSError) as e:
+            except (
+                ConnectionResetError,
+                OSError,
+                ClientOSError,
+                ConnectionError,
+                TelegramServerError,
+                TelegramNetworkError,
+            ) as e:
                 if i == config.MAX_RETRIES - 1:
                     raise e
                 continue
-    except (ConnectionError, TelegramNetworkError, ConnectionResetError, OSError):
-        await handle_network_error(bot, telegram_update)
+    except (ConnectionResetError, OSError, ClientOSError, ConnectionError, TelegramNetworkError):
+        user_id = get_user_id_from_telegram_update(telegram_update)
+        await handle_network_error(bot, user_id)
     except TelegramForbiddenError:
         await handle_forbidden_error(telegram_update)
     except TelegramRetryAfter as e:
@@ -265,7 +279,8 @@ async def handle_update(update: dict):
             await notify_admins_about_error(bot, telegram_update, dp, e)
     except TelegramServerError as e:
         if 'Bad Gateway' in e.message:
-            await handle_network_error(bot, telegram_update)
+            user_id = get_user_id_from_telegram_update(telegram_update)
+            await handle_network_error(bot, user_id)
         else:
             logging.error(f'Error in bot_webhook telegram server error: {e}')
             await notify_admins_about_error(bot, telegram_update, dp, e)
@@ -330,4 +345,4 @@ async def daily_tasks(background_tasks: BackgroundTasks):
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
-    uvicorn.run(app, host='0.0.0.0', port=os.getenv('PORT', 8080), timeout_keep_alive=300)
+    uvicorn.run(app, host='0.0.0.0', port=os.getenv('PORT', 8080), timeout_keep_alive=600)

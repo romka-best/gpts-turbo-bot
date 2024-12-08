@@ -160,7 +160,6 @@ async def handle_dall_e(message: Message, state: FSMContext, user: User):
             await message.answer(
                 text=get_localization(user_language_code).ERROR,
                 reply_markup=reply_markup,
-                parse_mode=None,
             )
             await send_error_info(
                 bot=message.bot,

@@ -5,7 +5,9 @@ import openai
 from bot.config import config
 from bot.database.models.common import ChatGPTVersion, DALLEResolution, DALLEQuality, DALLEVersion
 
-client = openai.AsyncOpenAI(api_key=config.OPENAI_API_KEY.get_secret_value())
+client = openai.AsyncOpenAI(
+    api_key=config.OPENAI_API_KEY.get_secret_value(),
+)
 
 
 def get_default_max_tokens(model_version: ChatGPTVersion) -> int:

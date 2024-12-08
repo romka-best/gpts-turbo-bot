@@ -1,7 +1,10 @@
-from aiogram.exceptions import TelegramBadRequest
+from aiogram.exceptions import TelegramBadRequest, TelegramNetworkError
 from aiogram.types import Message
+from aiohttp import ClientOSError
 from chatgpt_md_converter import telegram_format
+from redis.exceptions import ConnectionError
 
+from bot.config import config
 from bot.helpers.split_message import split_message
 
 
@@ -12,11 +15,18 @@ async def send_ai_message(message: Message, text: str, reply_markup=None):
     for i in range(len(messages)):
         formatted_message = messages[i]
         try:
-            await message.reply(
-                text=formatted_message,
-                reply_markup=reply_markup if i == len(messages) - 1 else None,
-                allow_sending_without_reply=True,
-            )
+            for j in range(config.MAX_RETRIES):
+                try:
+                    await message.reply(
+                        text=formatted_message,
+                        reply_markup=reply_markup if j == len(messages) - 1 else None,
+                        allow_sending_without_reply=True,
+                    )
+                    break
+                except (ConnectionResetError, OSError, ClientOSError, ConnectionError, TelegramNetworkError) as e:
+                    if j == config.MAX_RETRIES - 1:
+                        raise e
+                    continue
         except TelegramBadRequest as e:
             if e.message.startswith('Bad Request: can\'t parse entities'):
                 await message.reply(

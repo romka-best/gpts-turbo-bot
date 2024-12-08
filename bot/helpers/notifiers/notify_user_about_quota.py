@@ -6,12 +6,17 @@ from bot.database.models.subscription import SUBSCRIPTION_FREE_LIMITS
 from bot.database.models.user import User
 from bot.database.operations.product.getters import get_product
 from bot.database.operations.subscription.getters import get_subscription
+from bot.helpers.checkers.check_user_last_activity import check_user_last_activity
 from bot.helpers.senders.send_message_to_users import send_message_to_user
 from bot.helpers.senders.send_sticker import send_sticker
 from bot.locales.main import get_user_language, get_localization
 
 
 async def notify_user_about_quota(bot: Bot, user: User, storage: BaseStorage):
+    should_notify = await check_user_last_activity(user.id, storage)
+    if not should_notify:
+        return
+
     user_language_code = await get_user_language(user.id, storage)
 
     if user.subscription_id:

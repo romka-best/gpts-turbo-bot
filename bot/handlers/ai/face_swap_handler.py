@@ -443,7 +443,6 @@ async def face_swap_quantity_handler(message: Message, state: FSMContext, user_i
                 await message.answer(
                     text=get_localization(user_language_code).ERROR,
                     reply_markup=reply_markup,
-                    parse_mode=None,
                 )
 
                 await send_error_info(
