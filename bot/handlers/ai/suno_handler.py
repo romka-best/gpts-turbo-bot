@@ -171,6 +171,9 @@ async def suno_prompt_sent(message: Message, state: FSMContext):
                 text=get_localization(user_language_code).REACHED_USAGE_LIMIT,
                 reply_markup=reply_markup,
             )
+
+            await processing_sticker.delete()
+            await processing_message.delete()
         else:
             product = await get_product_by_quota(Quota.SUNO)
 
@@ -384,6 +387,9 @@ async def suno_genres_sent(message: Message, state: FSMContext):
                 text=get_localization(user_language_code).REACHED_USAGE_LIMIT,
                 reply_markup=reply_markup,
             )
+
+            await processing_sticker.delete()
+            await processing_message.delete()
         else:
             product = await get_product_by_quota(Quota.SUNO)
 

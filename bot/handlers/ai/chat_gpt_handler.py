@@ -30,8 +30,11 @@ from bot.helpers.senders.send_ai_message import send_ai_message
 from bot.integrations.openAI import get_response_message
 from bot.keyboards.ai.chat_gpt import build_chat_gpt_keyboard
 from bot.keyboards.ai.mode import build_switched_to_ai_keyboard
-from bot.keyboards.common.common import build_error_keyboard, build_continue_generating_keyboard, \
-    build_buy_motivation_keyboard
+from bot.keyboards.common.common import (
+    build_error_keyboard,
+    build_continue_generating_keyboard,
+    build_buy_motivation_keyboard,
+)
 from bot.locales.main import get_localization, get_user_language
 from bot.locales.types import LanguageCode
 
