@@ -1,3 +1,5 @@
+import logging
+
 from aiogram import Bot
 from aiogram.fsm.storage.base import BaseStorage
 
@@ -13,26 +15,29 @@ from bot.locales.main import get_user_language, get_localization
 
 
 async def notify_user_about_quota(bot: Bot, user: User, storage: BaseStorage):
-    should_notify = await check_user_last_activity(user.id, storage)
-    if not should_notify:
-        return
+    try:
+        should_notify = await check_user_last_activity(user.id, storage)
+        if not should_notify:
+            return
 
-    user_language_code = await get_user_language(user.id, storage)
+        user_language_code = await get_user_language(user.id, storage)
 
-    if user.subscription_id:
-        user_subscription = await get_subscription(user.subscription_id)
-        product_subscription = await get_product(user_subscription.product_id)
-        subscription_limits = product_subscription.details.get('limits')
-    else:
-        subscription_limits = SUBSCRIPTION_FREE_LIMITS
+        if user.subscription_id:
+            user_subscription = await get_subscription(user.subscription_id)
+            product_subscription = await get_product(user_subscription.product_id)
+            subscription_limits = product_subscription.details.get('limits')
+        else:
+            subscription_limits = SUBSCRIPTION_FREE_LIMITS
 
-    await send_sticker(
-        bot,
-        user.id,
-        config.MESSAGE_STICKERS.get(MessageSticker.HELLO),
-    )
-    await send_message_to_user(
-        bot,
-        user,
-        get_localization(user_language_code).notify_about_quota(subscription_limits),
-    )
+        await send_sticker(
+            bot,
+            user.id,
+            config.MESSAGE_STICKERS.get(MessageSticker.HELLO),
+        )
+        await send_message_to_user(
+            bot,
+            user,
+            get_localization(user_language_code).notify_about_quota(subscription_limits),
+        )
+    except Exception as e:
+        logging.exception(f'error in notify_user_about_quota: {e}')

@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import traceback
 
 from aiogram import Bot, Dispatcher
 from aiogram.exceptions import TelegramRetryAfter
@@ -90,7 +91,8 @@ async def notify_admins_about_error(bot: Bot, telegram_update: Update, dp: Dispa
     except TelegramRetryAfter as e:
         asyncio.create_task(delayed_notify_admins_about_error(bot, telegram_update, dp, error_info, e.retry_after + 30))
     except Exception as e:
-        logging.exception(f'Error in notify_admins_about_error: {e}')
+        error_trace = traceback.format_exc()
+        logging.exception(f'Error in notify_admins_about_error: {error_trace}')
 
         await send_error_info(
             bot=bot,

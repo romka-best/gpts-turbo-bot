@@ -1,11 +1,11 @@
 import asyncio
 import logging
+import traceback
 
 from aiogram import Bot
 from aiogram.exceptions import TelegramForbiddenError, TelegramRetryAfter, TelegramNetworkError, TelegramBadRequest
 
 from bot.database.operations.user.updaters import update_user
-from bot.helpers.senders.send_error_info import send_error_info
 
 
 async def delayed_send_sticker(bot: Bot, chat_id: str, sticker_id: str, timeout: int):
@@ -24,7 +24,10 @@ async def delayed_send_sticker(bot: Bot, chat_id: str, sticker_id: str, timeout:
     except TelegramNetworkError as error:
         logging.error(error)
     except TelegramBadRequest as error:
-        logging.error(error)
+        logging.exception(error)
+    except Exception:
+        error_trace = traceback.format_exc()
+        logging.exception(f'Error in delayed_send_sticker: {error_trace}')
 
 
 async def send_sticker(
@@ -47,13 +50,7 @@ async def send_sticker(
     except TelegramNetworkError:
         asyncio.create_task(delayed_send_sticker(bot, chat_id, sticker_id, 60))
     except TelegramBadRequest as error:
-        logging.error(error)
-    except Exception as e:
-        logging.error(f'Error in send_sticker: {e}')
-
-        await send_error_info(
-            bot=bot,
-            user_id=chat_id,
-            info=str(e),
-            hashtags=['sticker']
-        )
+        logging.exception(error)
+    except Exception:
+        error_trace = traceback.format_exc()
+        logging.exception(f'Error in send_sticker: {error_trace}')

@@ -49,7 +49,7 @@ async def handle_suno_webhook(bot: Bot, storage: BaseStorage, body: dict):
         })
 
         error_type, error_message = metadata.get('error_type'), metadata.get('error_message')
-        logging.error(f'Error in suno_webhook: {error_type}: {error_message}')
+        logging.exception(f'Error in suno_webhook: {error_type}: {error_message}')
     else:
         generation.result = generation_result
         new_details = {

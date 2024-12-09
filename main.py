@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import os
+import traceback
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone, timedelta
 
@@ -224,7 +225,8 @@ async def delayed_handle_update(update: Update, timeout: int):
             logging.error(f'Error in bot_delayed_webhook telegram bad request: {e}')
             await notify_admins_about_error(bot, update, dp, e)
     except Exception as e:
-        logging.exception(f'Error in bot_delayed_webhook: {e}')
+        error_trace = traceback.format_exc()
+        logging.exception(f'Error in bot_delayed_webhook: {error_trace}')
         await notify_admins_about_error(bot, update, dp, e)
 
 
@@ -285,7 +287,8 @@ async def handle_update(update: dict):
             logging.error(f'Error in bot_webhook telegram server error: {e}')
             await notify_admins_about_error(bot, telegram_update, dp, e)
     except Exception as e:
-        logging.exception(f'Error in bot_webhook: {e}')
+        error_trace = traceback.format_exc()
+        logging.exception(f'Error in bot_webhook: {error_trace}')
         await notify_admins_about_error(bot, telegram_update, dp, e)
 
 

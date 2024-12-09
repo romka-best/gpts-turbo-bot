@@ -83,7 +83,7 @@ async def handle_replicate_webhook(bot: Bot, dp: Dispatcher, prediction: dict):
             info=generation_error,
             hashtags=['replicate'],
         )
-        logging.error(f'Error in replicate_webhook: {prediction.get("logs")}')
+        logging.exception(f'Error in replicate_webhook: {prediction.get("logs")}')
     else:
         generation.result = generation_result[0] if type(generation_result) == list else generation_result
         if (

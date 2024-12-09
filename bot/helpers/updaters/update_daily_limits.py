@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import traceback
 from datetime import datetime, timezone
 
 from aiogram import Bot
@@ -26,7 +27,6 @@ from bot.database.operations.user.updaters import update_user
 from bot.helpers.billing.create_auto_payment import create_auto_payment
 from bot.helpers.billing.create_payment import OrderItem
 from bot.helpers.notifiers.notify_user_about_quota import notify_user_about_quota
-from bot.helpers.senders.send_error_info import send_error_info
 from bot.helpers.senders.send_message_to_admins_and_developers import send_message_to_admins_and_developers
 from bot.keyboards.common.common import build_buy_motivation_keyboard
 from bot.locales.main import get_localization, get_user_language
@@ -36,6 +36,8 @@ async def update_daily_limits(bot: Bot, storage: BaseStorage):
     all_users = await get_users(is_blocked=False)
 
     for i in range(0, len(all_users), config.BATCH_SIZE):
+        tasks = []
+
         batch = firebase.db.batch()
         user_batch = all_users[i:i + config.BATCH_SIZE]
 
@@ -43,7 +45,7 @@ async def update_daily_limits(bot: Bot, storage: BaseStorage):
             await update_user_daily_limits(bot, user, batch, storage)
 
             if not user.subscription_id:
-                asyncio.create_task(
+                tasks.append(
                     notify_user_about_quota(
                         bot=bot,
                         user=user,
@@ -52,6 +54,7 @@ async def update_daily_limits(bot: Bot, storage: BaseStorage):
                 )
 
         await batch.commit()
+        await asyncio.gather(*tasks, return_exceptions=True)
 
     await send_message_to_admins_and_developers(bot, f'<b>Updated daily limits successfully</b> 🎉')
 
@@ -64,14 +67,9 @@ async def update_user_daily_limits(bot: Bot, user: User, batch: AsyncWriteBatch,
         await update_user(user.id, {
             'is_blocked': True,
         })
-    except Exception as e:
-        logging.error(f'Error updating user {user.id}: {e}')
-        await send_error_info(
-            bot=bot,
-            user_id=user.id,
-            info=str(e),
-            hashtags=['user', 'update'],
-        )
+    except Exception:
+        error_trace = traceback.format_exc()
+        logging.exception(f'Error updating user {user.id}: {error_trace}')
 
 
 async def update_user_subscription(bot: Bot, user: User, batch: AsyncWriteBatch, storage: BaseStorage):

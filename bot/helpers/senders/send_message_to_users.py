@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import traceback
 
 from aiogram import Bot
 from aiogram.exceptions import TelegramBadRequest, TelegramRetryAfter, TelegramForbiddenError, TelegramNetworkError
@@ -30,6 +31,9 @@ async def delayed_send_message_to_user(bot: Bot, chat_id: str, text: str, timeou
         logging.error(error)
     except TelegramBadRequest as error:
         logging.error(error)
+    except Exception:
+        error_trace = traceback.format_exc()
+        logging.exception(f'Error in delayed_send_message: {error_trace}')
 
 
 async def send_message_to_user(bot: Bot, user: User, message: str):
@@ -47,7 +51,10 @@ async def send_message_to_user(bot: Bot, user: User, message: str):
     except TelegramNetworkError:
         asyncio.create_task(delayed_send_message_to_user(bot, user.telegram_chat_id, message, 60))
     except TelegramBadRequest as error:
-        logging.error(error)
+        logging.exception(error)
+    except Exception:
+        error_trace = traceback.format_exc()
+        logging.exception(f'Error in send_message: {error_trace}')
 
 
 async def send_message_to_users(bot: Bot, user_type: str, language_code: LanguageCode, message: str):

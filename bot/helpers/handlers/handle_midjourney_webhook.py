@@ -44,7 +44,7 @@ async def handle_midjourney_webhook(bot: Bot, dp: Dispatcher, body: dict):
             'status': generation.status,
             'has_error': generation.has_error,
         })
-        logging.error(f'Error in midjourney_webhook: {generation_error}')
+        logging.exception(f'Error in midjourney_webhook: {generation_error}')
     else:
         generation.status = GenerationStatus.FINISHED
         generation.result = generation_result.get('url', '')
