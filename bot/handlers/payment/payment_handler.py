@@ -1,4 +1,5 @@
 import logging
+import traceback
 from datetime import datetime, timezone, timedelta
 from typing import cast
 
@@ -1033,7 +1034,8 @@ async def pre_checkout(pre_checkout_query: PreCheckoutQuery):
         try:
             await pre_checkout_query.answer(ok=True)
         except Exception as e:
-            logging.error(f'Error in payment_handler: {e}')
+            error_trace = traceback.format_exc()
+            logging.exception(f'Error in payment_handler: {error_trace}')
 
             await pre_checkout_query.answer(ok=False)
 
@@ -1050,7 +1052,8 @@ async def pre_checkout(pre_checkout_query: PreCheckoutQuery):
         try:
             await pre_checkout_query.answer(ok=True)
         except Exception as e:
-            logging.error(f'Error in payment_handler: {e}')
+            error_trace = traceback.format_exc()
+            logging.error(f'Error in payment_handler: {error_trace}')
 
             await pre_checkout_query.answer(ok=False)
 

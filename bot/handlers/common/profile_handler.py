@@ -71,7 +71,7 @@ async def handle_profile(message: Message, state: FSMContext, telegram_user: Tel
 
     text = get_localization(user_language_code).profile(
         subscription_name,
-        subscription.status if subscription and subscription.status else SubscriptionStatus.ACTIVE,
+        subscription.status if subscription else SubscriptionStatus.ACTIVE,
         user.gender,
         user.current_model,
         user.settings[user.current_model][UserSettings.VERSION],
@@ -88,8 +88,8 @@ async def handle_profile(message: Message, state: FSMContext, telegram_user: Tel
             user_language_code,
             True,
             user.gender != UserGender.UNSPECIFIED,
-            subscription.status == SubscriptionStatus.ACTIVE,
-            subscription.status == SubscriptionStatus.CANCELED,
+            subscription.status == SubscriptionStatus.ACTIVE if subscription else False,
+            subscription.status == SubscriptionStatus.CANCELED if subscription else False,
         )
         if is_edit:
             await message.edit_caption(
@@ -107,8 +107,8 @@ async def handle_profile(message: Message, state: FSMContext, telegram_user: Tel
             user_language_code,
             False,
             user.gender != UserGender.UNSPECIFIED,
-            subscription.status == SubscriptionStatus.ACTIVE,
-            subscription.status == SubscriptionStatus.CANCELED,
+            subscription.status == SubscriptionStatus.ACTIVE if subscription else False,
+            subscription.status == SubscriptionStatus.CANCELED if subscription else False,
         )
         if is_edit:
             await message.edit_text(

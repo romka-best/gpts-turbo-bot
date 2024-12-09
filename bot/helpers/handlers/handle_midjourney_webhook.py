@@ -23,7 +23,7 @@ from bot.helpers.senders.send_error_info import send_error_info
 from bot.helpers.senders.send_images import send_image
 from bot.helpers.updaters.update_user_usage_quota import update_user_usage_quota
 from bot.keyboards.ai.midjourney import build_midjourney_keyboard
-from bot.keyboards.common.common import build_reaction_keyboard, build_error_keyboard
+from bot.keyboards.common.common import build_reaction_keyboard, build_error_keyboard, build_buy_motivation_keyboard
 from bot.locales.main import get_localization, get_user_language
 
 
@@ -44,7 +44,7 @@ async def handle_midjourney_webhook(bot: Bot, dp: Dispatcher, body: dict):
             'status': generation.status,
             'has_error': generation.has_error,
         })
-        logging.error(f'Error in midjourney_webhook: {generation_error}')
+        logging.exception(f'Error in midjourney_webhook: {generation_error}')
     else:
         generation.status = GenerationStatus.FINISHED
         generation.result = generation_result.get('url', '')
@@ -83,12 +83,16 @@ async def handle_midjourney_result(
         else:
             await send_image(bot, user.telegram_chat_id, generation.result, reply_markup, caption)
     elif not generation.has_error and is_suggestion:
+        header_text = f'{get_localization(user_language_code).MIDJOURNEY_EXAMPLE}\n'
+        footer_text = f'\n{get_localization(user_language_code).EXAMPLE_INFO}'
+        full_text = f'{header_text}{footer_text}'
+        reply_markup = build_buy_motivation_keyboard(user_language_code)
         await send_image(
             bot,
             user.telegram_chat_id,
             generation.result,
-            None,
-            get_localization(user_language_code).MIDJOURNEY_EXAMPLE,
+            reply_markup,
+            full_text,
             request.processing_message_ids[-1],
         )
     else:

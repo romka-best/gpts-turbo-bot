@@ -24,7 +24,7 @@ from bot.helpers.senders.send_audio import send_audio
 from bot.helpers.senders.send_video import send_video
 from bot.helpers.updaters.update_user_usage_quota import get_user_with_updated_quota
 from bot.keyboards.ai.suno import build_suno_keyboard
-from bot.keyboards.common.common import build_reaction_keyboard
+from bot.keyboards.common.common import build_reaction_keyboard, build_buy_motivation_keyboard
 from bot.locales.main import get_user_language, get_localization
 from bot.locales.types import LanguageCode
 
@@ -49,7 +49,7 @@ async def handle_suno_webhook(bot: Bot, storage: BaseStorage, body: dict):
         })
 
         error_type, error_message = metadata.get('error_type'), metadata.get('error_message')
-        logging.error(f'Error in suno_webhook: {error_type}: {error_message}')
+        logging.exception(f'Error in suno_webhook: {error_type}: {error_message}')
     else:
         generation.result = generation_result
         new_details = {
@@ -219,15 +219,20 @@ async def send_suno_example(
     duration: int,
 ):
     await asyncio.sleep(60)
+    header_text = f'{get_localization(user_language_code).SUNO_EXAMPLE}\n'
+    footer_text = f'\n{get_localization(user_language_code).EXAMPLE_INFO}'
+    full_text = f'{header_text}{footer_text}'
+    reply_markup = build_buy_motivation_keyboard(user_language_code)
 
     if body.get('video_url'):
         is_okay = await send_video(
             bot=bot,
             chat_id=user.telegram_chat_id,
             result=body.get('video_url'),
-            caption=get_localization(user_language_code).SUNO_EXAMPLE,
+            caption=full_text,
             filename=body.get('title', '🎸'),
             duration=duration,
+            reply_markup=reply_markup,
             reply_to_message_id=request.processing_message_ids[-1],
         )
 
@@ -236,9 +241,10 @@ async def send_suno_example(
                 bot=bot,
                 chat_id=user.telegram_chat_id,
                 result=generation.result,
-                caption=get_localization(user_language_code).SUNO_EXAMPLE,
+                caption=full_text,
                 filename=body.get('title', '🎸'),
                 duration=duration,
+                reply_markup=reply_markup,
                 reply_to_message_id=request.processing_message_ids[-1],
             )
     else:
@@ -246,8 +252,9 @@ async def send_suno_example(
             bot=bot,
             chat_id=user.telegram_chat_id,
             result=generation.result,
-            caption=get_localization(user_language_code).SUNO_EXAMPLE,
+            caption=full_text,
             filename=body.get('title', '🎸'),
             duration=duration,
+            reply_markup=reply_markup,
             reply_to_message_id=request.processing_message_ids[-1],
         )

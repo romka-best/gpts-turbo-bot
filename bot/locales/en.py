@@ -641,16 +641,9 @@ Please try again with a smaller file 😊
     CHATGPT4_OMNI_EXAMPLE = "👇 This is how *ChatGPT 4.0 Omni* would respond to your request 💥"
     CLAUDE_3_SONNET_EXAMPLE = "👇 This is how *Claude 3.5 Sonnet* would respond to your request 🚀"
     GEMINI_1_PRO_EXAMPLE = "👇 This is how *Gemini 1.5 Pro* would respond to your request 💼"
-    MIDJOURNEY_EXAMPLE = """
-☝️ These are the images that <b>Midjourney</b> would draw for your request
-
-To start drawing using <b>Midjourney</b>, just type the command /midjourney 🎨
-"""
-    SUNO_EXAMPLE = """
-☝️ This is the song that <b>Suno</b> would create for your request
-
-To start creating songs using <b>Suno</b>, just type the command /suno 🎸
-"""
+    MIDJOURNEY_EXAMPLE = "☝️ These are the images that <b>Midjourney 🎨</b> would draw for your request"
+    SUNO_EXAMPLE = "☝️ This is the song that <b>Suno 🎸</b> would create for your request"
+    EXAMPLE_INFO = "Here's what you can do to gain access to this AI:"
 
     PHOTO_FEATURE_FORBIDDEN = """
 ⚠️ Sending photos is only available in models:
@@ -1552,7 +1545,6 @@ Looks like you've got only <b>{available_seconds} seconds</b> left in your arsen
             facts = f"""ℹ️ Facts and Settings:
     ┣ 📅 Knowledge up to: {model_info.get('training_data')}
     ┣ 📷 Image support: {'Yes ✅' if model_info.get('support_photos', False) else 'No ❌'}
-    ┣ 📄 Document support: {'Coming Soon 🔜' if model_info.get('support_documents', False) else 'No ❌'}
     ┣ 🎙 Voice answers: {'Enabled ✅' if model_info.get(UserSettings.TURN_ON_VOICE_MESSAGES, False) else 'Disabled ❌'}
     ┗ 🎭 Current role: {model_info.get('role')}"""
         elif model_type == ModelType.IMAGE:

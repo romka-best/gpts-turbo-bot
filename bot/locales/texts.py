@@ -364,6 +364,7 @@ class Texts(Protocol):
     GEMINI_1_PRO_EXAMPLE: str
     MIDJOURNEY_EXAMPLE: str
     SUNO_EXAMPLE: str
+    EXAMPLE_INFO: str
 
     PHOTO_FEATURE_FORBIDDEN: str
 
