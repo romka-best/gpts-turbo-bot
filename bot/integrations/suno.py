@@ -170,7 +170,7 @@ async def check_song(bot: Bot, storage: BaseStorage, song_id: str):
                     else:
                         await asyncio.sleep(60)
                 except Exception as e:
-                    logging.error(f'Error in check_song: {e}')
+                    logging.exception(f'Error in check_song: {e}')
                     break
             if need_to_reset:
                 generation = await get_generation(song_id)

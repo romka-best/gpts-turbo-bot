@@ -7,7 +7,7 @@ from bot.database.operations.transaction.getters import get_last_transaction_by_
 NOTIFICATION_INTERVALS = [1, 3, 7, 14, 30]
 
 
-async def check_user_last_activity(user_id: str, storage: BaseStorage) -> bool:
+async def check_user_last_activity(user_id: str, created_at: datetime, storage: BaseStorage) -> bool:
     current_date = datetime.now(timezone.utc)
     last_activity = await get_last_transaction_by_user(user_id)
     notification_stage = await get_notification_stage(user_id, storage)
@@ -24,8 +24,13 @@ async def check_user_last_activity(user_id: str, storage: BaseStorage) -> bool:
                 return True
         return False
     else:
-        await set_notification_stage(user_id, 0, storage)
-        return True
+        days_since_registration = (current_date - created_at).days
+        if notification_stage < len(NOTIFICATION_INTERVALS):
+            next_interval = NOTIFICATION_INTERVALS[notification_stage]
+            if days_since_registration > next_interval:
+                await set_notification_stage(user_id, notification_stage + 1, storage)
+                return True
+        return False
 
 
 async def set_notification_stage(user_id: str, notification_stage: int, storage: BaseStorage):

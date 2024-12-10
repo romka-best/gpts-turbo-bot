@@ -5,6 +5,8 @@ import traceback
 from aiogram import Bot
 from aiogram.exceptions import TelegramForbiddenError, TelegramRetryAfter, TelegramNetworkError
 from aiogram.types import URLInputFile
+from aiohttp import ClientOSError
+from redis.exceptions import ConnectionError
 
 from bot.database.operations.user.updaters import update_user
 from bot.helpers.senders.send_error_info import send_error_info
@@ -51,8 +53,20 @@ async def delayed_send_video(
                 reply_to_message_id,
             )
         )
-    except TelegramNetworkError as error:
-        logging.error(error)
+    except (ConnectionResetError, OSError, ClientOSError, ConnectionError, TelegramNetworkError):
+        asyncio.create_task(
+            delayed_send_video(
+                bot,
+                chat_id,
+                result,
+                caption,
+                filename,
+                duration,
+                60,
+                reply_markup,
+                reply_to_message_id,
+            )
+        )
     except Exception:
         error_trace = traceback.format_exc()
         logging.exception(f'Error in delayed_send_video: {error_trace}')
@@ -94,7 +108,7 @@ async def send_video(
                 reply_to_message_id,
             )
         )
-    except TelegramNetworkError:
+    except (ConnectionResetError, OSError, ClientOSError, ConnectionError, TelegramNetworkError):
         asyncio.create_task(
             delayed_send_video(
                 bot,
@@ -110,7 +124,7 @@ async def send_video(
         )
     except Exception as e:
         error_trace = traceback.format_exc()
-        logging.error(f'Error in send_video: {error_trace}')
+        logging.exception(f'Error in send_video: {error_trace}')
 
         await bot.send_message(
             chat_id=chat_id,

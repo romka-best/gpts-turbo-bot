@@ -236,6 +236,19 @@ def build_time_limit_exceeded_chosen_keyboard(language_code: LanguageCode) -> In
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
+def build_notify_about_quota_keyboard(language_code: LanguageCode) -> InlineKeyboardMarkup:
+    buttons = [
+        [
+            InlineKeyboardButton(
+                text=get_localization(language_code).SWITCHED_TO_AI_EXAMPLES,
+                callback_data=f'notify_about_quota:examples'
+            )
+        ],
+    ]
+
+    return InlineKeyboardMarkup(inline_keyboard=buttons)
+
+
 def build_cancel_keyboard(language_code: LanguageCode) -> InlineKeyboardMarkup:
     buttons = [
         [

@@ -277,14 +277,16 @@ async def handle_update(update: dict):
         elif e.message.startswith('Bad Request: query is too old and response timeout expired or query ID is invalid'):
             logging.warning(e)
         else:
-            logging.error(f'Error in bot_webhook telegram bad request: {e}')
+            error_trace = traceback.format_exc()
+            logging.exception(f'Error in bot_webhook telegram bad request: {error_trace}')
             await notify_admins_about_error(bot, telegram_update, dp, e)
     except TelegramServerError as e:
         if 'Bad Gateway' in e.message:
             user_id = get_user_id_from_telegram_update(telegram_update)
             await handle_network_error(bot, user_id)
         else:
-            logging.error(f'Error in bot_webhook telegram server error: {e}')
+            error_trace = traceback.format_exc()
+            logging.exception(f'Error in bot_webhook telegram server error: {error_trace}')
             await notify_admins_about_error(bot, telegram_update, dp, e)
     except Exception as e:
         error_trace = traceback.format_exc()
@@ -327,14 +329,12 @@ async def migrate_webhook(background_tasks: BackgroundTasks):
 
 
 @app.get('/run-daily-tasks')
-async def daily_tasks(background_tasks: BackgroundTasks):
+async def run_daily_tasks(background_tasks: BackgroundTasks):
     yesterday_utc_day = datetime.now(timezone.utc) - timedelta(days=1)
     await update_daily_expenses(yesterday_utc_day)
 
     await check_unresolved_requests(bot)
     await check_waiting_payments(bot)
-
-    background_tasks.add_task(update_daily_limits, bot, storage)
 
     today = datetime.now()
     background_tasks.add_task(send_statistics, bot, 'day')
@@ -342,6 +342,11 @@ async def daily_tasks(background_tasks: BackgroundTasks):
         background_tasks.add_task(send_statistics, bot, 'week')
     if today.day == 1:
         background_tasks.add_task(send_statistics, bot, 'month')
+
+
+@app.get('/update-daily-limits')
+async def daily_tasks(background_tasks: BackgroundTasks):
+    background_tasks.add_task(update_daily_limits, bot, storage)
 
     return {'code': 200}
 

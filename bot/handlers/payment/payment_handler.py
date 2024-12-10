@@ -1011,13 +1011,13 @@ async def handle_payment_method_cart_selection(callback_query: CallbackQuery, st
 
 
 @payment_router.pre_checkout_query()
-async def pre_checkout(pre_checkout_query: PreCheckoutQuery):
+async def handle_pre_checkout(pre_checkout_query: PreCheckoutQuery):
     payment_type = pre_checkout_query.invoice_payload.split(':')[0]
     if payment_type == PaymentType.SUBSCRIPTION:
         try:
             await pre_checkout_query.answer(ok=True)
         except Exception as e:
-            logging.error(f'Error in pre_checkout: {e}')
+            logging.exception(f'Error in pre_checkout: {e}')
 
             await pre_checkout_query.answer(ok=False)
 
@@ -1071,7 +1071,7 @@ async def pre_checkout(pre_checkout_query: PreCheckoutQuery):
 
 
 @payment_router.message(F.successful_payment)
-async def successful_payment(message: Message, state: FSMContext):
+async def handle_successful_payment(message: Message, state: FSMContext):
     user_id = str(message.from_user.id)
     user = await get_user(user_id)
     user_language_code = await get_user_language(user_id, state.storage)

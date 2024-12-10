@@ -30,7 +30,7 @@ async def create_midjourney_images(prompt: str):
                 return data.get('hash', '')
             else:
                 error_message = await response.text()
-                logging.error(f'Error in create_midjourney_images: {error_message}')
+                logging.exception(f'Error in create_midjourney_images: {error_message}')
                 return ''
 
 
@@ -54,7 +54,7 @@ async def create_midjourney_image(hash_id: str, choice: int) -> Optional[str]:
                 return data.get('hash', '')
             else:
                 error_message = await response.text()
-                logging.error(f'Error in create_midjourney_image: {error_message}')
+                logging.exception(f'Error in create_midjourney_image: {error_message}')
                 return ''
 
 
@@ -77,7 +77,7 @@ async def create_different_midjourney_images(hash_id: str) -> Optional[str]:
                 return data.get('hash', '')
             else:
                 error_message = await response.text()
-                logging.error(f'Error in create_different_midjourney_images: {error_message}')
+                logging.exception(f'Error in create_different_midjourney_images: {error_message}')
                 return ''
 
 
@@ -101,5 +101,5 @@ async def create_different_midjourney_image(hash_id: str, choice: int) -> Option
                 return data.get('hash', '')
             else:
                 error_message = await response.text()
-                logging.error(f'Error in create_different_midjourney_image: {error_message}')
+                logging.exception(f'Error in create_different_midjourney_image: {error_message}')
                 return ''

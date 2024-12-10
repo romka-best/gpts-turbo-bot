@@ -214,11 +214,22 @@ async def handle_bonus_play_game_chosen_selection(callback_query: CallbackQuery,
         )
         return
 
-    current_date = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
-    count_of_games = await get_count_of_games_by_user_id(user_id, current_date)
+    current_date = datetime.now(timezone.utc)
+    current_date_beginning = current_date.replace(hour=0, minute=0, second=0, microsecond=0)
+    count_of_games = await get_count_of_games_by_user_id(user_id, current_date_beginning)
     if count_of_games > 0:
+        update_date = datetime(
+            current_date.year,
+            current_date.month,
+            current_date.day,
+            tzinfo=timezone.utc
+        ) + timedelta(days=1)
+        time_left = update_date - current_date
+        hours, remainder = divmod(time_left.seconds, 3600)
+        minutes = remainder // 60
+
         await callback_query.message.answer(
-            text=get_localization(user_language_code).PLAY_GAME_REACHED_LIMIT,
+            text=get_localization(user_language_code).play_game_reached_limit(hours, minutes),
         )
         return
 

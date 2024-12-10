@@ -18,6 +18,7 @@ from bot.handlers.ai.chat_gpt_handler import handle_chatgpt
 from bot.handlers.ai.claude_handler import handle_claude
 from bot.handlers.ai.gemini_handler import handle_gemini
 from bot.handlers.ai.mode_handler import handle_mode
+from bot.handlers.common.catalog_handler import handle_catalog_prompts
 from bot.handlers.payment.bonus_handler import handle_bonus
 from bot.handlers.payment.payment_handler import handle_subscribe, handle_package
 from bot.helpers.getters.get_quota_by_model import get_quota_by_model
@@ -404,6 +405,20 @@ async def time_limit_exceeded_selection(callback_query: CallbackQuery, state: FS
             text=text,
             reply_markup=reply_markup,
             allow_sending_without_reply=True,
+        )
+
+
+@common_router.callback_query(lambda c: c.data.startswith('notify_about_quota:'))
+async def notify_about_quota_selection(callback_query: CallbackQuery, state: FSMContext):
+    await callback_query.answer()
+
+    action = callback_query.data.split(':')[1]
+    if action == 'examples':
+        await handle_catalog_prompts(
+            callback_query.message,
+            str(callback_query.from_user.id),
+            state,
+            False,
         )
 
 
