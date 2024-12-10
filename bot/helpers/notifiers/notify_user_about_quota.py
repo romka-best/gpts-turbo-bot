@@ -17,7 +17,7 @@ from bot.locales.main import get_user_language, get_localization
 
 async def notify_user_about_quota(bot: Bot, user: User, storage: BaseStorage):
     try:
-        should_notify = await check_user_last_activity(user.id, storage)
+        should_notify = await check_user_last_activity(user.id, user.created_at, storage)
         if not should_notify:
             return
 
