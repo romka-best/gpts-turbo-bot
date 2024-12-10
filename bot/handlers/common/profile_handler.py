@@ -142,7 +142,7 @@ async def handle_profile_selection(callback_query: CallbackQuery, state: FSMCont
             current_date.month,
             current_date.day,
             tzinfo=timezone.utc
-        ) + timedelta(days=1)
+        ) + timedelta(days=1, hours=6)
         time_left = update_date - current_date
         hours, remainder = divmod(time_left.seconds, 3600)
         minutes = remainder // 60

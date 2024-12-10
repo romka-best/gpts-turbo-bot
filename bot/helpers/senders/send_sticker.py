@@ -4,6 +4,8 @@ import traceback
 
 from aiogram import Bot
 from aiogram.exceptions import TelegramForbiddenError, TelegramRetryAfter, TelegramNetworkError, TelegramBadRequest
+from aiohttp import ClientOSError
+from redis.exceptions import ConnectionError
 
 from bot.database.operations.user.updaters import update_user
 
@@ -21,8 +23,10 @@ async def delayed_send_sticker(bot: Bot, chat_id: str, sticker_id: str, timeout:
         asyncio.create_task(update_user(chat_id, {'is_blocked': True}))
     except TelegramRetryAfter as e:
         asyncio.create_task(delayed_send_sticker(bot, chat_id, sticker_id, e.retry_after + 30))
-    except TelegramNetworkError as error:
-        logging.error(error)
+    except (ConnectionResetError, OSError, ClientOSError, ConnectionError, TelegramNetworkError):
+        asyncio.create_task(
+            delayed_send_sticker(bot, chat_id, sticker_id, 60)
+        )
     except TelegramBadRequest as error:
         logging.exception(error)
     except Exception:
@@ -47,8 +51,10 @@ async def send_sticker(
         })
     except TelegramRetryAfter as e:
         asyncio.create_task(delayed_send_sticker(bot, chat_id, sticker_id, e.retry_after + 30))
-    except TelegramNetworkError:
-        asyncio.create_task(delayed_send_sticker(bot, chat_id, sticker_id, 60))
+    except (ConnectionResetError, OSError, ClientOSError, ConnectionError, TelegramNetworkError):
+        asyncio.create_task(
+            delayed_send_sticker(bot, chat_id, sticker_id, 60)
+        )
     except TelegramBadRequest as error:
         logging.exception(error)
     except Exception:

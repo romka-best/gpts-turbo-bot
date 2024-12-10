@@ -201,15 +201,22 @@ async def handle_catalog_prompts(
     message: Message,
     user_id: str,
     state: FSMContext,
+    is_edit=True,
 ):
     user_language_code = await get_user_language(user_id, state.storage)
 
     text = get_localization(user_language_code).CATALOG_PROMPTS_CHOOSE_MODEL_TYPE
     reply_markup = build_catalog_prompts_model_type_keyboard(user_language_code)
-    await message.edit_text(
-        text=text,
-        reply_markup=reply_markup,
-    )
+    if is_edit:
+        await message.edit_text(
+            text=text,
+            reply_markup=reply_markup,
+        )
+    else:
+        await message.answer(
+            text=text,
+            reply_markup=reply_markup,
+        )
 
 
 @catalog_router.callback_query(lambda c: c.data.startswith('catalog_prompts_model_type:'))

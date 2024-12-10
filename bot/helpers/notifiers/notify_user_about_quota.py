@@ -11,6 +11,7 @@ from bot.database.operations.subscription.getters import get_subscription
 from bot.helpers.checkers.check_user_last_activity import check_user_last_activity
 from bot.helpers.senders.send_message_to_users import send_message_to_user
 from bot.helpers.senders.send_sticker import send_sticker
+from bot.keyboards.common.common import build_notify_about_quota_keyboard
 from bot.locales.main import get_user_language, get_localization
 
 
@@ -38,6 +39,7 @@ async def notify_user_about_quota(bot: Bot, user: User, storage: BaseStorage):
             bot,
             user,
             get_localization(user_language_code).notify_about_quota(subscription_limits),
+            build_notify_about_quota_keyboard(user_language_code),
         )
     except Exception as e:
         logging.exception(f'error in notify_user_about_quota: {e}')

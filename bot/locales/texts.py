@@ -127,7 +127,14 @@ class Texts(Protocol):
     PLAY_CASINO_GAME_DESCRIPTION: str
     PLAY_GAME_WON: str
     PLAY_GAME_LOST: str
-    PLAY_GAME_REACHED_LIMIT: str
+
+    @staticmethod
+    def play_game_reached_limit(
+        hours_before_limit_update: int,
+        minutes_before_limit_update: int,
+    ):
+        raise NotImplementedError
+
     CASH_OUT: str
     REFERRAL_SUCCESS: str
     REFERRAL_LIMIT_ERROR: str

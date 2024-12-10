@@ -512,13 +512,20 @@ Luck is all about timing! Don’t worry, or I’ll start worrying too!
 
 Try again tomorrow, and maybe fortune will smile on you even brighter! 🍀
 """
-    PLAY_GAME_REACHED_LIMIT = """
+
+    @staticmethod
+    def play_game_reached_limit(
+        hours_before_limit_update: int,
+        minutes_before_limit_update: int,
+    ):
+        return f"""
 ⏳ <b>Oops, looks like you've already played today!</b>
 
 But don’t worry — tomorrow brings a new chance to test your luck!
 
-Come back and show us what you’ve got! 👏
+Come back in <i>{hours_before_limit_update} h. {minutes_before_limit_update} min.</i> and show me what you’ve got! 👏
 """
+
     CASH_OUT = "🛍 Cash out credits"
     REFERRAL_SUCCESS = """
 🌟 <b>Congrats! Your referral magic worked!</b> 🌟
