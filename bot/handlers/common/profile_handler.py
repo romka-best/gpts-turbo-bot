@@ -80,7 +80,10 @@ async def handle_profile(message: Message, state: FSMContext, telegram_user: Tel
     )
 
     blobs = await firebase.bucket.list_blobs(prefix=f'users/avatars/{user.id}.')
-    photo_path = blobs[-1]
+    if len(blobs) > 0:
+        photo_path = blobs[-1]
+    else:
+        photo_path = f'users/avatars/{user.id}.jpeg'
     try:
         photo = await firebase.bucket.get_blob(photo_path)
         photo_link = firebase.get_public_url(photo.name)

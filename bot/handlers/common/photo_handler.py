@@ -331,7 +331,11 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
             async with ChatActionSender.upload_photo(bot=message.bot, chat_id=message.chat.id):
                 try:
                     user_photo_blobs = await firebase.bucket.list_blobs(prefix=f'users/avatars/{user_id}.')
-                    user_photo = await firebase.bucket.get_blob(user_photo_blobs[-1])
+                    if len(user_photo_blobs) > 0:
+                        user_photo_blob = user_photo_blobs[-1]
+                    else:
+                        user_photo_blob = f'users/avatars/{user_id}.jpeg'
+                    user_photo = await firebase.bucket.get_blob(user_photo_blob)
                     user_photo_link = firebase.get_public_url(user_photo.name)
                     photo_data_io = await message.bot.download_file(photo_file.file_path, timeout=300)
                     photo_data = photo_data_io.read()

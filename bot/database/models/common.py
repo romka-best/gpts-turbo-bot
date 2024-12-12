@@ -85,8 +85,8 @@ class DALLEVersion:
 
 class DALLEResolution:
     LOW = '1024x1024'
-    MEDIUM = '1024×1792'
-    HIGH = '1792×1024'
+    MEDIUM = '1024x1792'
+    HIGH = '1792x1024'
 
 
 class DALLEQuality:
