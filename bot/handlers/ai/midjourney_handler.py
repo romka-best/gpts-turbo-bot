@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+from typing import Optional
 
 from aiogram import Router
 from aiogram.filters import Command
@@ -7,6 +8,7 @@ from aiogram.types import Message, CallbackQuery
 from aiogram.utils.chat_action import ChatActionSender
 
 from bot.config import config, MessageEffect, MessageSticker
+from bot.database.main import firebase
 from bot.database.models.common import Model, Quota, MidjourneyAction, MidjourneyVersion
 from bot.database.models.generation import GenerationStatus
 from bot.database.models.request import RequestStatus
@@ -81,13 +83,16 @@ async def handle_midjourney(
     action: MidjourneyAction,
     hash_id='',
     choice=0,
+    image_filename: Optional[str] = None,
 ):
     await state.update_data(is_processing=True)
 
     user_language_code = await get_user_language(user.id, state.storage)
     user_data = await state.get_data()
 
-    prompt = user_data.get('recognized_text', prompt)
+    if not prompt:
+        prompt = user_data.get('recognized_text', '')
+
     version = user.settings[Model.MIDJOURNEY][UserSettings.VERSION]
 
     processing_sticker = await message.answer_sticker(
@@ -141,6 +146,11 @@ async def handle_midjourney(
                 if user_language_code != LanguageCode.EN:
                     prompt = await translate_text(prompt, user_language_code, LanguageCode.EN)
                 prompt = prompt.replace('-', '- ')
+                if image_filename:
+                    image_path = f'users/vision/{user.id}/{image_filename}'
+                    image = await firebase.bucket.get_blob(image_path)
+                    image_link = firebase.get_public_url(image.name)
+                    prompt = f'{image_link} {prompt}'
                 prompt += f' --v {version} --ar {user.settings[Model.MIDJOURNEY][UserSettings.ASPECT_RATIO]}'
 
                 if action == MidjourneyAction.UPSCALE:

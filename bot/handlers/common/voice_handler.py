@@ -198,7 +198,7 @@ async def handle_voice(message: Message, state: FSMContext):
         elif user.current_model == Model.DALL_E:
             await handle_dall_e(message, state, user)
         elif user.current_model == Model.MIDJOURNEY:
-            await handle_midjourney(message, state, user, message.text, MidjourneyAction.IMAGINE)
+            await handle_midjourney(message, state, user, text, MidjourneyAction.IMAGINE)
         elif user.current_model == Model.STABLE_DIFFUSION:
             await handle_stable_diffusion(message, state, user)
         elif user.current_model == Model.FLUX:

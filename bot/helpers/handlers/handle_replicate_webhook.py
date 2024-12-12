@@ -37,6 +37,7 @@ from bot.helpers.senders.send_images import send_image
 from bot.helpers.updaters.update_user_usage_quota import update_user_usage_quota
 from bot.keyboards.common.common import build_reaction_keyboard, build_error_keyboard
 from bot.locales.main import get_user_language, get_localization
+from bot.locales.types import LanguageCode
 
 
 async def handle_replicate_webhook(bot: Bot, dp: Dispatcher, prediction: dict):
@@ -49,6 +50,8 @@ async def handle_replicate_webhook(bot: Bot, dp: Dispatcher, prediction: dict):
     request = await get_request(generation.request_id)
     product = await get_product(request.product_id)
     user = await get_user(request.user_id)
+
+    user_language_code = await get_user_language(user.id, dp.storage)
 
     generation_error, generation_result = prediction.get('error', ''), prediction.get('output', {})
     seconds = prediction.get('metrics', {}).get('predict_time', 0)
@@ -67,7 +70,7 @@ async def handle_replicate_webhook(bot: Bot, dp: Dispatcher, prediction: dict):
         )
         await bot.send_message(
             chat_id=user.telegram_chat_id,
-            text=get_localization(user.interface_language_code).REQUEST_FORBIDDEN_ERROR,
+            text=get_localization(user_language_code).REQUEST_FORBIDDEN_ERROR,
         )
     elif generation_error or not generation_result:
         generation.has_error = True
@@ -98,15 +101,15 @@ async def handle_replicate_webhook(bot: Bot, dp: Dispatcher, prediction: dict):
         })
 
     if product.details.get('quota') == Quota.STABLE_DIFFUSION:
-        asyncio.create_task(handle_replicate_stable_diffusion(bot, dp, user, request, generation))
+        asyncio.create_task(handle_replicate_stable_diffusion(bot, dp, user, user_language_code, request, generation))
     elif product.details.get('quota') == Quota.FLUX:
-        asyncio.create_task(handle_replicate_flux(bot, dp, user, request, generation))
+        asyncio.create_task(handle_replicate_flux(bot, dp, user, user_language_code, request, generation))
     elif product.details.get('quota') == Quota.FACE_SWAP:
-        asyncio.create_task(handle_replicate_face_swap(bot, dp, user, request, generation))
+        asyncio.create_task(handle_replicate_face_swap(bot, dp, user, user_language_code, request, generation))
     elif product.details.get('quota') == Quota.PHOTOSHOP_AI:
-        asyncio.create_task(handle_replicate_photoshop_ai(bot, dp, user, request, generation))
+        asyncio.create_task(handle_replicate_photoshop_ai(bot, dp, user, user_language_code, request, generation))
     elif product.details.get('quota') == Quota.MUSIC_GEN:
-        asyncio.create_task(handle_replicate_music_gen(bot, dp, user, request, generation))
+        asyncio.create_task(handle_replicate_music_gen(bot, dp, user, user_language_code, request, generation))
 
     return True
 
@@ -115,25 +118,31 @@ async def handle_replicate_photoshop_ai(
     bot: Bot,
     dp: Dispatcher,
     user: User,
+    user_language_code: LanguageCode,
     request: Request,
     generation: Generation,
 ):
     if generation.result:
+        footer_text = f'\n\n🖼 {user.daily_limits[Quota.PHOTOSHOP_AI] + user.additional_usage_quota[Quota.PHOTOSHOP_AI]}' \
+            if user.settings[Model.PHOTOSHOP_AI][UserSettings.SHOW_USAGE_QUOTA] and \
+               user.daily_limits[Quota.PHOTOSHOP_AI] != float('inf') else ''
+        caption = f'{get_localization(user_language_code).IMAGE_SUCCESS}{footer_text}'
+
         reply_markup = build_reaction_keyboard(generation.id)
         if user.settings[Model.PHOTOSHOP_AI][UserSettings.SEND_TYPE] == SendType.DOCUMENT:
-            await send_document(bot, user.telegram_chat_id, generation.result, reply_markup)
+            await send_document(bot, user.telegram_chat_id, generation.result, reply_markup, caption)
         else:
-            await send_image(bot, user.telegram_chat_id, generation.result, reply_markup)
+            await send_image(bot, user.telegram_chat_id, generation.result, reply_markup, caption)
     elif generation.has_error:
         await bot.send_sticker(
             chat_id=user.telegram_chat_id,
             sticker=config.MESSAGE_STICKERS.get(MessageSticker.ERROR),
         )
 
-        reply_markup = build_error_keyboard(user.interface_language_code)
+        reply_markup = build_error_keyboard(user_language_code)
         await bot.send_message(
             chat_id=user.telegram_chat_id,
-            text=get_localization(user.interface_language_code).ERROR,
+            text=get_localization(user_language_code).ERROR,
             reply_markup=reply_markup,
             parse_mode=None,
         )
@@ -202,6 +211,7 @@ async def handle_replicate_face_swap(
     bot: Bot,
     dp: Dispatcher,
     user: User,
+    user_language_code: LanguageCode,
     request: Request,
     generation: Generation,
 ):
@@ -234,7 +244,6 @@ async def handle_replicate_face_swap(
 
         total_result = len(success_generations)
         if total_result != len(request_generations):
-            user_language_code = await get_user_language(user.id, dp.storage)
             await bot.send_message(
                 user.telegram_chat_id,
                 get_localization(user_language_code).FACE_SWAP_NO_FACE_FOUND_ERROR,
@@ -323,6 +332,7 @@ async def handle_replicate_music_gen(
     bot: Bot,
     dp: Dispatcher,
     user: User,
+    user_language_code: LanguageCode,
     request: Request,
     generation: Generation,
 ):
@@ -349,10 +359,10 @@ async def handle_replicate_music_gen(
             sticker=config.MESSAGE_STICKERS.get(MessageSticker.ERROR),
         )
 
-        reply_markup = build_error_keyboard(user.interface_language_code)
+        reply_markup = build_error_keyboard(user_language_code)
         await bot.send_message(
             chat_id=user.telegram_chat_id,
-            text=get_localization(user.interface_language_code).ERROR,
+            text=get_localization(user_language_code).ERROR,
             reply_markup=reply_markup,
             parse_mode=None,
         )
@@ -413,27 +423,33 @@ async def handle_replicate_stable_diffusion(
     bot: Bot,
     dp: Dispatcher,
     user: User,
+    user_language_code: LanguageCode,
     request: Request,
     generation: Generation,
 ):
     prompt = generation.details.get('prompt')
 
     if generation.result:
+        footer_text = f'\n\n🖼 {user.daily_limits[Quota.STABLE_DIFFUSION] + user.additional_usage_quota[Quota.STABLE_DIFFUSION]}' \
+            if user.settings[Model.STABLE_DIFFUSION][UserSettings.SHOW_USAGE_QUOTA] and \
+               user.daily_limits[Quota.STABLE_DIFFUSION] != float('inf') else ''
+        caption = f'{get_localization(user_language_code).IMAGE_SUCCESS}{footer_text}'
+
         reply_markup = build_reaction_keyboard(generation.id)
         if user.settings[Model.STABLE_DIFFUSION][UserSettings.SEND_TYPE] == SendType.DOCUMENT:
-            await send_document(bot, user.telegram_chat_id, generation.result, reply_markup)
+            await send_document(bot, user.telegram_chat_id, generation.result, reply_markup, caption)
         else:
-            await send_image(bot, user.telegram_chat_id, generation.result, reply_markup)
+            await send_image(bot, user.telegram_chat_id, generation.result, reply_markup, caption)
     elif generation.has_error:
         await bot.send_sticker(
             chat_id=user.telegram_chat_id,
             sticker=config.MESSAGE_STICKERS.get(MessageSticker.ERROR),
         )
 
-        reply_markup = build_error_keyboard(user.interface_language_code)
+        reply_markup = build_error_keyboard(user_language_code)
         await bot.send_message(
             chat_id=user.telegram_chat_id,
-            text=get_localization(user.interface_language_code).ERROR,
+            text=get_localization(user_language_code).ERROR,
             reply_markup=reply_markup,
             parse_mode=None,
         )
@@ -490,27 +506,33 @@ async def handle_replicate_flux(
     bot: Bot,
     dp: Dispatcher,
     user: User,
+    user_language_code: LanguageCode,
     request: Request,
     generation: Generation,
 ):
     prompt = generation.details.get('prompt')
 
     if generation.result:
+        footer_text = f'\n\n🖼 {user.daily_limits[Quota.FLUX] + user.additional_usage_quota[Quota.FLUX]}' \
+            if user.settings[Model.FLUX][UserSettings.SHOW_USAGE_QUOTA] and \
+               user.daily_limits[Quota.FLUX] != float('inf') else ''
+        caption = f'{get_localization(user_language_code).IMAGE_SUCCESS}{footer_text}'
+
         reply_markup = build_reaction_keyboard(generation.id)
         if user.settings[Model.FLUX][UserSettings.SEND_TYPE] == SendType.DOCUMENT:
-            await send_document(bot, user.telegram_chat_id, generation.result, reply_markup)
+            await send_document(bot, user.telegram_chat_id, generation.result, reply_markup, caption)
         else:
-            await send_image(bot, user.telegram_chat_id, generation.result, reply_markup)
+            await send_image(bot, user.telegram_chat_id, generation.result, reply_markup, caption)
     elif generation.has_error:
         await bot.send_sticker(
             chat_id=user.telegram_chat_id,
             sticker=config.MESSAGE_STICKERS.get(MessageSticker.ERROR),
         )
 
-        reply_markup = build_error_keyboard(user.interface_language_code)
+        reply_markup = build_error_keyboard(user_language_code)
         await bot.send_message(
             chat_id=user.telegram_chat_id,
-            text=get_localization(user.interface_language_code).ERROR,
+            text=get_localization(user_language_code).ERROR,
             reply_markup=reply_markup,
             parse_mode=None,
         )

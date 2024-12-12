@@ -107,6 +107,7 @@ bot = Bot(
     ),
     default=DefaultBotProperties(
         parse_mode=ParseMode.HTML,
+        allow_sending_without_reply=True,
     ),
 )
 storage = RedisStorage.from_url(config.REDIS_URL, {
@@ -342,6 +343,8 @@ async def run_daily_tasks(background_tasks: BackgroundTasks):
         background_tasks.add_task(send_statistics, bot, 'week')
     if today.day == 1:
         background_tasks.add_task(send_statistics, bot, 'month')
+
+    return {'code': 200}
 
 
 @app.get('/update-daily-limits')

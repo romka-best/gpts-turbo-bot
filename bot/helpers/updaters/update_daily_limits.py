@@ -28,6 +28,8 @@ from bot.helpers.billing.create_auto_payment import create_auto_payment
 from bot.helpers.billing.create_payment import OrderItem
 from bot.helpers.notifiers.notify_user_about_quota import notify_user_about_quota
 from bot.helpers.senders.send_message_to_admins_and_developers import send_message_to_admins_and_developers
+from bot.helpers.senders.send_message_to_users import send_message_to_user
+from bot.helpers.senders.send_sticker import send_sticker
 from bot.keyboards.common.common import build_buy_motivation_keyboard
 from bot.locales.main import get_localization, get_user_language
 
@@ -126,16 +128,16 @@ async def update_user_subscription(bot: Bot, user: User, batch: AsyncWriteBatch,
                     })
 
                     if not user.subscription_id:
-                        await bot.send_sticker(
-                            chat_id=user.telegram_chat_id,
-                            sticker=config.MESSAGE_STICKERS.get(MessageSticker.SAD),
-                            disable_notification=True,
+                        await send_sticker(
+                            bot,
+                            user.telegram_chat_id,
+                            config.MESSAGE_STICKERS.get(MessageSticker.SAD),
                         )
-                        await bot.send_message(
-                            chat_id=user.telegram_chat_id,
-                            text=get_localization(user_language_code).SUBSCRIPTION_END,
-                            reply_markup=build_buy_motivation_keyboard(user_language_code),
-                            disable_notification=True,
+                        await send_message_to_user(
+                            bot,
+                            user,
+                            get_localization(user_language_code).SUBSCRIPTION_END,
+                            build_buy_motivation_keyboard(user_language_code),
                         )
                 return user
             elif current_subscription.payment_method == PaymentMethod.PAY_SELECTION:
@@ -180,16 +182,16 @@ async def update_user_subscription(bot: Bot, user: User, batch: AsyncWriteBatch,
                     })
 
                     if not user.subscription_id:
-                        await bot.send_sticker(
-                            chat_id=user.telegram_chat_id,
-                            sticker=config.MESSAGE_STICKERS.get(MessageSticker.SAD),
-                            disable_notification=True,
+                        await send_sticker(
+                            bot,
+                            user.telegram_chat_id,
+                            config.MESSAGE_STICKERS.get(MessageSticker.SAD),
                         )
-                        await bot.send_message(
-                            chat_id=user.telegram_chat_id,
-                            text=get_localization(user_language_code).SUBSCRIPTION_END,
-                            reply_markup=build_buy_motivation_keyboard(user_language_code),
-                            disable_notification=True,
+                        await send_message_to_user(
+                            bot,
+                            user,
+                            get_localization(user_language_code).SUBSCRIPTION_END,
+                            build_buy_motivation_keyboard(user_language_code),
                         )
             elif current_subscription.payment_method == PaymentMethod.STRIPE or current_subscription.payment_method == PaymentMethod.TELEGRAM_STARS:
                 days_difference = (current_date - current_subscription.end_date).days
@@ -216,16 +218,16 @@ async def update_user_subscription(bot: Bot, user: User, batch: AsyncWriteBatch,
                     })
 
                     if not user.subscription_id:
-                        await bot.send_sticker(
-                            chat_id=user.telegram_chat_id,
-                            sticker=config.MESSAGE_STICKERS.get(MessageSticker.SAD),
-                            disable_notification=True,
+                        await send_sticker(
+                            bot,
+                            user.telegram_chat_id,
+                            config.MESSAGE_STICKERS.get(MessageSticker.SAD),
                         )
-                        await bot.send_message(
-                            chat_id=user.telegram_chat_id,
-                            text=get_localization(user_language_code).SUBSCRIPTION_END,
-                            reply_markup=build_buy_motivation_keyboard(user_language_code),
-                            disable_notification=True,
+                        await send_message_to_user(
+                            bot,
+                            user,
+                            get_localization(user_language_code).SUBSCRIPTION_END,
+                            build_buy_motivation_keyboard(user_language_code),
                         )
         else:
             current_subscription.status = SubscriptionStatus.FINISHED if current_subscription.status != SubscriptionStatus.CANCELED else current_subscription.status
@@ -250,16 +252,16 @@ async def update_user_subscription(bot: Bot, user: User, batch: AsyncWriteBatch,
             })
 
             if not user.subscription_id:
-                await bot.send_sticker(
-                    chat_id=user.telegram_chat_id,
-                    sticker=config.MESSAGE_STICKERS.get(MessageSticker.SAD),
-                    disable_notification=True,
+                await send_sticker(
+                    bot,
+                    user.telegram_chat_id,
+                    config.MESSAGE_STICKERS.get(MessageSticker.SAD),
                 )
-                await bot.send_message(
-                    chat_id=user.telegram_chat_id,
-                    text=get_localization(user_language_code).SUBSCRIPTION_END,
-                    reply_markup=build_buy_motivation_keyboard(user_language_code),
-                    disable_notification=True,
+                await send_message_to_user(
+                    bot,
+                    user,
+                    get_localization(user_language_code).SUBSCRIPTION_END,
+                    build_buy_motivation_keyboard(user_language_code),
                 )
 
         return user
@@ -324,16 +326,16 @@ async def update_user_additional_usage_quota(
 
         if not had_subscription and count_active_packages_before > count_active_packages_after:
             user_language_code = await get_user_language(user.id, storage)
-            await bot.send_sticker(
-                chat_id=user.telegram_chat_id,
-                sticker=config.MESSAGE_STICKERS.get(MessageSticker.SAD),
-                disable_notification=True,
+            await send_sticker(
+                bot,
+                user.telegram_chat_id,
+                config.MESSAGE_STICKERS.get(MessageSticker.SAD),
             )
-            await bot.send_message(
-                chat_id=user.telegram_chat_id,
-                text=get_localization(user_language_code).PACKAGES_END,
-                reply_markup=build_buy_motivation_keyboard(user_language_code),
-                disable_notification=True,
+            await send_message_to_user(
+                bot,
+                user,
+                get_localization(user_language_code).PACKAGES_END,
+                build_buy_motivation_keyboard(user_language_code),
             )
 
 
@@ -350,9 +352,9 @@ async def reset_user_chats(user: User, bot: Bot, storage: BaseStorage):
 
     if need_to_send_message:
         user_language_code = await get_user_language(user.id, storage)
-        await bot.send_message(
-            chat_id=user.telegram_chat_id,
-            text=get_localization(user_language_code).CHATS_RESET,
-            reply_markup=build_buy_motivation_keyboard(user_language_code),
-            disable_notification=True,
+        await send_message_to_user(
+            bot,
+            user,
+            get_localization(user_language_code).CHATS_RESET,
+            build_buy_motivation_keyboard(user_language_code),
         )

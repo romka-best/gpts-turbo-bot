@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+from typing import Optional
 
 from aiogram import Bot
 from google.cloud import firestore
@@ -21,6 +22,7 @@ async def create_subscription(
     income_amount: float,
     provider_payment_charge_id: str,
     provider_auto_payment_charge_id: str,
+    stripe_id: Optional[str] = None,
 ):
     user = await get_user(user_id)
     subscription = await get_subscription(subscription_id)
@@ -37,6 +39,7 @@ async def create_subscription(
         'provider_payment_charge_id': provider_payment_charge_id,
         'provider_auto_payment_charge_id': provider_auto_payment_charge_id,
         'income_amount': income_amount,
+        **({'stripe_id': stripe_id} if stripe_id else {}),
     })
 
     user.daily_limits.update(product.details.get('limits'))

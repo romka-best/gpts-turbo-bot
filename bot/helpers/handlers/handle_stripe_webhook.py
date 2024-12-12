@@ -97,6 +97,7 @@ async def handle_stripe_webhook(request: dict, bot: Bot, dp: Dispatcher):
                     float(clear_amount),
                     request_id,
                     subscription.id,
+                    request_object.get('subscription', ''),
                 )
                 await write_transaction(
                     user_id=subscription.user_id,
@@ -217,6 +218,7 @@ async def handle_stripe_webhook(request: dict, bot: Bot, dp: Dispatcher):
                         float(clear_amount),
                         request_id,
                         order_id,
+                        old_subscription.stripe_id,
                     )
                     await write_transaction(
                         user_id=new_subscription.user_id,

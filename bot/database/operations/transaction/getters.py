@@ -29,6 +29,7 @@ async def get_last_transaction_by_user(user_id: str) -> Optional[Transaction]:
 async def get_transactions_by_product_id_and_created_time(
     product_id: str,
     created_time: datetime,
+    is_payment=False,
 ) -> list[Transaction]:
     start_date = created_time.replace(
         hour=0,
@@ -43,11 +44,15 @@ async def get_transactions_by_product_id_and_created_time(
         microsecond=999999,
     )
 
-    transaction_stream = firebase.db.collection(Transaction.COLLECTION_NAME) \
+    transaction_query = firebase.db.collection(Transaction.COLLECTION_NAME) \
         .where(filter=FieldFilter('product_id', '==', product_id)) \
         .where(filter=FieldFilter('created_at', '>=', start_date)) \
-        .where(filter=FieldFilter('created_at', '<=', end_date)) \
-        .stream()
+        .where(filter=FieldFilter('created_at', '<=', end_date))
+
+    if is_payment:
+        transaction_query = transaction_query.where(filter=FieldFilter('details.type', '==', 'payment'))
+
+    transaction_stream = transaction_query.stream()
 
     return [
         Transaction(**transaction.to_dict()) async for transaction in transaction_stream

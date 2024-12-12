@@ -1,3 +1,5 @@
+from typing import Optional
+
 from aiogram import Router
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
@@ -5,6 +7,7 @@ from aiogram.types import Message
 from aiogram.utils.chat_action import ChatActionSender
 
 from bot.config import config, MessageEffect, MessageSticker
+from bot.database.main import firebase
 from bot.database.models.common import Model, Quota
 from bot.database.models.generation import GenerationStatus
 from bot.database.models.request import RequestStatus
@@ -66,13 +69,29 @@ async def flux(message: Message, state: FSMContext):
         )
 
 
-async def handle_flux(message: Message, state: FSMContext, user: User):
+async def handle_flux(
+    message: Message,
+    state: FSMContext,
+    user: User,
+    image_filename: Optional[str] = None,
+):
     user_language_code = await get_user_language(user.id, state.storage)
     user_data = await state.get_data()
 
     prompt = user_data.get('recognized_text', None)
     if prompt is None:
-        prompt = message.text
+        if message.caption:
+            prompt = message.caption
+        elif message.text:
+            prompt = message.text
+        else:
+            prompt = ''
+
+    image_link = None
+    if image_filename:
+        image_path = f'users/vision/{user.id}/{image_filename}'
+        image = await firebase.bucket.get_blob(image_path)
+        image_link = firebase.get_public_url(image.name)
 
     processing_sticker = await message.answer_sticker(
         sticker=config.MESSAGE_STICKERS.get(MessageSticker.IMAGE_GENERATION),
@@ -111,6 +130,7 @@ async def handle_flux(message: Message, state: FSMContext, user: User):
                 prompt,
                 user.settings[Model.FLUX][UserSettings.ASPECT_RATIO],
                 user.settings[Model.FLUX][UserSettings.SAFETY_TOLERANCE],
+                image_link,
             )
 
             await write_generation(

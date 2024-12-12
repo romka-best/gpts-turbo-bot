@@ -1551,16 +1551,17 @@ Looks like you've got only <b>{available_seconds} seconds</b> left in your arsen
         if model_type == ModelType.TEXT:
             facts = f"""ℹ️ Facts and Settings:
     ┣ 📅 Knowledge up to: {model_info.get('training_data')}
-    ┣ 📷 Image support: {'Yes ✅' if model_info.get('support_photos', False) else 'No ❌'}
-    ┣ 🎙 Voice answers: {'Enabled ✅' if model_info.get(UserSettings.TURN_ON_VOICE_MESSAGES, False) else 'Disabled ❌'}
-    ┗ 🎭 Current role: {model_info.get('role')}"""
+    ┣ 📷 Image Support: {'Yes ✅' if model_info.get('support_photos', False) else 'No ❌'}
+    ┣ 🎙 Voice Answers: {'Enabled ✅' if model_info.get(UserSettings.TURN_ON_VOICE_MESSAGES, False) else 'Disabled ❌'}
+    ┗ 🎭 Current Role: {model_info.get('role')}"""
         elif model_type == ModelType.IMAGE:
             facts = f"""ℹ️ Settings:
-    ┣ 📐 Aspect ratio: {'Custom' if model_info.get(UserSettings.ASPECT_RATIO, AspectRatio.CUSTOM) == AspectRatio.CUSTOM else model_info.get(UserSettings.ASPECT_RATIO)}
-    ┗ 🗯 Sending type: {English.DOCUMENT if model_info.get(UserSettings.SEND_TYPE, SendType.IMAGE) == SendType.DOCUMENT else English.IMAGE}"""
+    ┣ 📐 Aspect Ratio: {'Custom' if model_info.get(UserSettings.ASPECT_RATIO, AspectRatio.CUSTOM) == AspectRatio.CUSTOM else model_info.get(UserSettings.ASPECT_RATIO)}
+    ┣ 📷 Image Support: {'Yes ✅' if model_info.get('support_photos', False) else 'No ❌'}
+    ┗ 🗯 Sending Type: {English.DOCUMENT if model_info.get(UserSettings.SEND_TYPE, SendType.IMAGE) == SendType.DOCUMENT else English.IMAGE}"""
         elif model_type == ModelType.MUSIC:
             facts = f"""ℹ️ Settings:
-    ┗ 🗯 Sending type: {English.VIDEO if model_info.get(UserSettings.SEND_TYPE, SendType.AUDIO) == SendType.VIDEO else English.AUDIO}"""
+    ┗ 🗯 Sending Type: {English.VIDEO if model_info.get(UserSettings.SEND_TYPE, SendType.AUDIO) == SendType.VIDEO else English.AUDIO}"""
         else:
             facts = f"ℹ️ Facts and Settings: Coming Soon 🔜"
 
