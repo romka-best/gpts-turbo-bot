@@ -21,6 +21,7 @@ from bot.helpers.getters.get_info_by_model import get_info_by_model
 from bot.helpers.getters.get_model_type import get_model_type
 from bot.helpers.getters.get_quota_by_model import get_quota_by_model
 from bot.helpers.getters.get_switched_to_ai_model import get_switched_to_ai_model
+from bot.integrations.openAI import get_cost_for_image
 from bot.keyboards.ai.mode import build_mode_keyboard, build_switched_to_ai_keyboard
 from bot.keyboards.settings.settings import build_settings_keyboard
 from bot.locales.main import get_localization, get_user_language
@@ -182,6 +183,12 @@ async def handle_switched_to_ai_selection(callback_query: CallbackQuery, state: 
     if action == 'settings':
         user = await get_user(user_id)
 
+        dall_e_cost = 1
+        if model == Model.DALL_E:
+            dall_e_cost = get_cost_for_image(
+                user.settings[Model.DALL_E][UserSettings.QUALITY],
+                user.settings[Model.DALL_E][UserSettings.RESOLUTION],
+            )
         human_model = get_human_model(model, user_language_code)
         reply_markup = build_settings_keyboard(
             language_code=user_language_code,
@@ -192,7 +199,7 @@ async def handle_switched_to_ai_selection(callback_query: CallbackQuery, state: 
             show_advanced_settings=True,
         )
         await callback_query.message.answer(
-            text=get_localization(user_language_code).settings(human_model, model),
+            text=get_localization(user_language_code).settings(human_model, model, dall_e_cost),
             reply_markup=reply_markup,
         )
     elif action == 'info':
