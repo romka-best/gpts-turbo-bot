@@ -1,3 +1,4 @@
+import stripe
 from aiogram import Bot
 from google.cloud import firestore
 
@@ -20,7 +21,11 @@ async def unsubscribe(transaction, old_subscription: Subscription, bot: Bot):
         'status': old_subscription.status,
     })
 
-    if old_subscription.payment_method == PaymentMethod.TELEGRAM_STARS:
+    if old_subscription.payment_method == PaymentMethod.STRIPE:
+        await stripe.Subscription.cancel_async(
+            old_subscription.stripe_id,
+        )
+    elif old_subscription.payment_method == PaymentMethod.TELEGRAM_STARS:
         await bot.edit_user_star_subscription(
             user_id=int(old_subscription.user_id),
             telegram_payment_charge_id=old_subscription.provider_payment_charge_id,

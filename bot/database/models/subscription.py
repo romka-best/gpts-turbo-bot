@@ -65,6 +65,7 @@ class Subscription:
     payment_method: PaymentMethod
     provider_payment_charge_id: Optional[str]
     provider_auto_payment_charge_id: str
+    stripe_id: Optional[str]
     start_date: datetime
     end_date: datetime
     created_at: datetime
@@ -83,6 +84,7 @@ class Subscription:
         payment_method=PaymentMethod.YOOKASSA,
         provider_payment_charge_id='',
         provider_auto_payment_charge_id='',
+        stripe_id=None,
         start_date=None,
         end_date=None,
         created_at=None,
@@ -100,6 +102,7 @@ class Subscription:
         self.payment_method = payment_method
         self.provider_payment_charge_id = provider_payment_charge_id
         self.provider_auto_payment_charge_id = provider_auto_payment_charge_id
+        self.stripe_id = stripe_id
 
         self.start_date = start_date if start_date is not None else datetime.now(timezone.utc)
         if not end_date and period == SubscriptionPeriod.MONTH1:

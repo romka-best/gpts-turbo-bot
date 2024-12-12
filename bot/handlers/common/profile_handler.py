@@ -79,7 +79,8 @@ async def handle_profile(message: Message, state: FSMContext, telegram_user: Tel
         renewal_date.strftime('%d.%m.%Y'),
     )
 
-    photo_path = f'users/avatars/{user.id}.jpeg'
+    blobs = await firebase.bucket.list_blobs(prefix=f'users/avatars/{user.id}.')
+    photo_path = blobs[-1]
     try:
         photo = await firebase.bucket.get_blob(photo_path)
         photo_link = firebase.get_public_url(photo.name)

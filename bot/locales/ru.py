@@ -1556,6 +1556,7 @@ class Russian(Texts):
         elif model_type == ModelType.IMAGE:
             facts = f"""ℹ️ Настройки:
     ┣ 📐 Соотношение сторон: {'Пользовательское' if model_info.get(UserSettings.ASPECT_RATIO, AspectRatio.CUSTOM) == AspectRatio.CUSTOM else model_info.get(UserSettings.ASPECT_RATIO)}
+    ┣ 📷 Работа с фото: {'Да ✅' if model_info.get('support_photos', False) else 'Нет ❌'}
     ┗ 🗯 Тип отправки: {Russian.DOCUMENT if model_info.get(UserSettings.SEND_TYPE, SendType.IMAGE) == SendType.DOCUMENT else Russian.IMAGE}"""
         elif model_type == ModelType.MUSIC:
             facts = f"""ℹ️ Настройки:

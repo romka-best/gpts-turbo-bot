@@ -16,6 +16,7 @@ from bot.database.models.common import (
     ChatGPTVersion,
     ClaudeGPTVersion,
     GeminiGPTVersion,
+    MidjourneyAction,
     PhotoshopAIAction,
 )
 from bot.database.models.face_swap_package import FaceSwapPackageStatus
@@ -34,7 +35,11 @@ from bot.handlers.admin.face_swap_handler import handle_manage_face_swap
 from bot.handlers.ai.chat_gpt_handler import handle_chatgpt
 from bot.handlers.ai.claude_handler import handle_claude
 from bot.handlers.ai.face_swap_handler import handle_face_swap
+from bot.handlers.ai.flux_handler import handle_flux
 from bot.handlers.ai.gemini_handler import handle_gemini
+from bot.handlers.ai.midjourney_handler import handle_midjourney
+from bot.handlers.ai.stable_diffusion_handler import handle_stable_diffusion
+from bot.helpers.getters.get_quota_by_model import get_quota_by_model
 from bot.integrations.replicateAI import create_face_swap_image, create_photoshop_ai_image
 from bot.keyboards.admin.catalog import build_manage_catalog_create_role_confirmation_keyboard
 from bot.keyboards.common.common import build_cancel_keyboard, build_limit_exceeded_keyboard
@@ -66,8 +71,9 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
 
         photo_data_io = await message.bot.download_file(photo_file.file_path, timeout=300)
         photo_data = photo_data_io.read()
+        photo_extension = photo_file.file_path.split('.')[-1]
 
-        blob_path = f'users/avatars/{user_id}.jpeg'
+        blob_path = f'users/avatars/{user_id}.{photo_extension}'
         try:
             blob = await firebase.bucket.get_blob(blob_path)
             await blob.upload(photo_data)
@@ -121,9 +127,10 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
 
         photo_data_io = await message.bot.download_file(photo_file.file_path, timeout=300)
         photo_data = photo_data_io.read()
+        photo_extension = photo_file.file_path.split('.')[-1]
 
         face_swap_package = await get_face_swap_package(face_swap_package_id)
-        photo_name = f'{len(face_swap_package.files) + 1}_{face_swap_picture_name}.jpeg'
+        photo_name = f'{len(face_swap_package.files) + 1}_{face_swap_picture_name}.{photo_extension}'
         photo_path = f'face_swap/{user_data["gender"].lower()}/{user_data["package_name"].lower()}/{photo_name}'
         photo_blob = firebase.bucket.new_blob(photo_path)
         await photo_blob.upload(photo_data)
@@ -188,7 +195,8 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
         async with ChatActionSender.upload_photo(bot=message.bot, chat_id=message.chat.id):
             photo_data_io = await message.bot.download_file(photo_file.file_path, timeout=300)
             photo_data = photo_data_io.read()
-            photo_name = f'{uuid.uuid4()}.jpeg'
+            photo_extension = photo_file.file_path.split('.')[-1]
+            photo_name = f'{uuid.uuid4()}.{photo_extension}'
             photo_path = f'users/photoshop/{photoshop_ai_action_name}/{user_id}/{photo_name}'
             photo_link = firebase.get_public_url(photo_path)
             photo_photoshop = firebase.bucket.new_blob(photo_path)
@@ -256,8 +264,9 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
 
         photo_data_io = await message.bot.download_file(photo_file.file_path, timeout=300)
         photo_data = photo_data_io.read()
+        photo_extension = photo_file.file_path.split('.')[-1]
 
-        photo_vision_filename = f'{uuid.uuid4()}.jpeg'
+        photo_vision_filename = f'{uuid.uuid4()}.{photo_extension}'
         photo_vision_path = f'users/vision/{user_id}/{photo_vision_filename}'
         photo_vision = firebase.bucket.new_blob(photo_vision_path)
         await photo_vision.upload(photo_data)
@@ -268,6 +277,43 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
             await handle_claude(message, state, user, quota, [photo_vision_filename])
         elif user.current_model == Model.GEMINI:
             await handle_gemini(message, state, user, quota, [photo_vision_filename])
+    elif user.current_model == Model.MIDJOURNEY or user.current_model == Model.STABLE_DIFFUSION or user.current_model == Model.FLUX:
+        current_time = time.time()
+
+        user_quota = get_quota_by_model(user.current_model, user.settings[user.current_model][UserSettings.VERSION])
+        need_exit = (
+            await is_already_processing(message, state, current_time) or
+            await is_messages_limit_exceeded(message, state, user, user_quota) or
+            await is_time_limit_exceeded(message, state, user, current_time)
+        )
+        if need_exit:
+            return
+        await state.update_data(last_request_time=current_time)
+
+        photo_data_io = await message.bot.download_file(photo_file.file_path, timeout=300)
+        photo_data = photo_data_io.read()
+        photo_extension = photo_file.file_path.split('.')[-1]
+
+        photo_vision_filename = f'{uuid.uuid4()}.{photo_extension}'
+        photo_vision_path = f'users/vision/{user_id}/{photo_vision_filename}'
+        photo_vision = firebase.bucket.new_blob(photo_vision_path)
+        await photo_vision.upload(photo_data)
+
+        if user.current_model == Model.MIDJOURNEY:
+            await handle_midjourney(
+                message,
+                state,
+                user,
+                message.caption,
+                MidjourneyAction.IMAGINE,
+                '',
+                0,
+                photo_vision_filename,
+            )
+        elif user.current_model == Model.STABLE_DIFFUSION:
+            await handle_stable_diffusion(message, state, user, photo_vision_filename)
+        elif user.current_model == Model.FLUX:
+            await handle_flux(message, state, user, photo_vision_filename)
     elif user.current_model == Model.FACE_SWAP:
         quota = user.daily_limits[Quota.FACE_SWAP] + user.additional_usage_quota[Quota.FACE_SWAP]
         quantity = 1
@@ -284,12 +330,14 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
 
             async with ChatActionSender.upload_photo(bot=message.bot, chat_id=message.chat.id):
                 try:
-                    user_photo = await firebase.bucket.get_blob(f'users/avatars/{user_id}.jpeg')
+                    user_photo_blobs = await firebase.bucket.list_blobs(prefix=f'users/avatars/{user_id}.')
+                    user_photo = await firebase.bucket.get_blob(user_photo_blobs[-1])
                     user_photo_link = firebase.get_public_url(user_photo.name)
                     photo_data_io = await message.bot.download_file(photo_file.file_path, timeout=300)
                     photo_data = photo_data_io.read()
+                    photo_extension = photo_file.file_path.split('.')[-1]
 
-                    background_path = f'users/backgrounds/{user_id}/{uuid.uuid4()}.jpeg'
+                    background_path = f'users/backgrounds/{user_id}/{uuid.uuid4()}.{photo_extension}'
                     background_photo = firebase.bucket.new_blob(background_path)
                     await background_photo.upload(photo_data)
                     background_photo_link = firebase.get_public_url(background_path)
@@ -388,8 +436,9 @@ async def handle_album(message: Message, state: FSMContext, album: list[Message]
 
             photo_data_io = await message.bot.download_file(photo_file.file_path, timeout=300)
             photo_data = photo_data_io.read()
+            photo_extension = photo_file.file_path.split('.')[-1]
 
-            photo_vision_filename = f'{uuid.uuid4()}.jpeg'
+            photo_vision_filename = f'{uuid.uuid4()}.{photo_extension}'
             photo_vision_path = f'users/vision/{user_id}/{photo_vision_filename}'
             photo_vision = firebase.bucket.new_blob(photo_vision_path)
             await photo_vision.upload(photo_data)

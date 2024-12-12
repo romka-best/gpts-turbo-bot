@@ -20,8 +20,7 @@ class Role:
         translated_names: dict[LanguageCode, str],
         translated_descriptions: dict[LanguageCode, str],
         translated_instructions: dict[LanguageCode, str],
-        # TODO
-        photo='',
+        photo: str,
         created_at=None,
         edited_at=None,
         **kwargs,
