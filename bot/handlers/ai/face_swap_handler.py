@@ -117,7 +117,8 @@ async def handle_face_swap(bot: Bot, chat_id: str, state: FSMContext, user_id: s
         )
     else:
         try:
-            await firebase.bucket.get_blob(f'users/avatars/{user_id}.jpeg')
+            blobs = await firebase.bucket.list_blobs(prefix=f'users/avatars/{user_id}.')
+            await firebase.bucket.get_blob(blobs[-1])
 
             used_face_swap_packages = await get_used_face_swap_packages_by_user_id(user_id)
             face_swap_packages = await get_face_swap_packages_by_gender(
@@ -389,7 +390,8 @@ async def face_swap_quantity_handler(message: Message, state: FSMContext, user_i
                 await processing_message.delete()
                 return
 
-            user_photo = await firebase.bucket.get_blob(f'users/avatars/{user.id}.jpeg')
+            user_photo_blobs = await firebase.bucket.list_blobs(prefix=f'users/avatars/{user_id}.')
+            user_photo = await firebase.bucket.get_blob(user_photo_blobs[-1])
             user_photo_link = firebase.get_public_url(user_photo.name)
             used_face_swap_package = await get_used_face_swap_package_by_user_id_and_package_id(
                 user.id,

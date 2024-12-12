@@ -71,8 +71,9 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
 
         photo_data_io = await message.bot.download_file(photo_file.file_path, timeout=300)
         photo_data = photo_data_io.read()
+        photo_extension = photo_file.file_path.split('.')[-1]
 
-        blob_path = f'users/avatars/{user_id}.jpeg'
+        blob_path = f'users/avatars/{user_id}.{photo_extension}'
         try:
             blob = await firebase.bucket.get_blob(blob_path)
             await blob.upload(photo_data)
@@ -126,9 +127,10 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
 
         photo_data_io = await message.bot.download_file(photo_file.file_path, timeout=300)
         photo_data = photo_data_io.read()
+        photo_extension = photo_file.file_path.split('.')[-1]
 
         face_swap_package = await get_face_swap_package(face_swap_package_id)
-        photo_name = f'{len(face_swap_package.files) + 1}_{face_swap_picture_name}.jpeg'
+        photo_name = f'{len(face_swap_package.files) + 1}_{face_swap_picture_name}.{photo_extension}'
         photo_path = f'face_swap/{user_data["gender"].lower()}/{user_data["package_name"].lower()}/{photo_name}'
         photo_blob = firebase.bucket.new_blob(photo_path)
         await photo_blob.upload(photo_data)
@@ -328,7 +330,8 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
 
             async with ChatActionSender.upload_photo(bot=message.bot, chat_id=message.chat.id):
                 try:
-                    user_photo = await firebase.bucket.get_blob(f'users/avatars/{user_id}.jpeg')
+                    user_photo_blobs = await firebase.bucket.list_blobs(prefix=f'users/avatars/{user_id}.')
+                    user_photo = await firebase.bucket.get_blob(user_photo_blobs[-1])
                     user_photo_link = firebase.get_public_url(user_photo.name)
                     photo_data_io = await message.bot.download_file(photo_file.file_path, timeout=300)
                     photo_data = photo_data_io.read()

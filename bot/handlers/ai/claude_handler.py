@@ -9,6 +9,7 @@ from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.utils.chat_action import ChatActionSender
+from filetype import filetype
 
 from bot.config import config, MessageEffect, MessageSticker
 from bot.database.main import firebase
@@ -196,7 +197,11 @@ async def handle_claude(message: Message, state: FSMContext, user: User, user_qu
                     response = await client.get(photo_link)
                     image_content = response.content
 
-                image_media_type = 'image/jpeg'
+                kind = await asyncio.to_thread(lambda: filetype.guess(image_content))
+                if kind:
+                    image_media_type = kind.mime
+                else:
+                    image_media_type = 'image/jpeg'
                 image_data = await asyncio.to_thread(lambda: base64.b64encode(image_content).decode('utf-8'))
                 content.append({
                     'type': 'image',

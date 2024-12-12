@@ -392,7 +392,8 @@ async def handle_face_swap_manage_edit_picture_selection(callback_query: Callbac
             bot=callback_query.message.bot,
             chat_id=callback_query.message.chat.id,
         ):
-            user_photo = await firebase.bucket.get_blob(f'users/avatars/{user_id}.jpeg')
+            user_photo_blobs = await firebase.bucket.list_blobs(prefix=f'users/avatars/{user_id}.')
+            user_photo = await firebase.bucket.get_blob(user_photo_blobs[-1])
             user_photo_link = firebase.get_public_url(user_photo.name)
 
             image_path = f'face_swap/{face_swap_package.gender.lower()}/{face_swap_package.name.lower()}/{file_name}'
