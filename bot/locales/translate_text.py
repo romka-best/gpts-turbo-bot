@@ -44,3 +44,4 @@ async def translate_text(text: str, source_language_code: str, target_language_c
             else:
                 error_message = await response.text()
                 logging.exception(f'Error in translate_text: {error_message}')
+                return ''

@@ -118,7 +118,11 @@ async def handle_face_swap(bot: Bot, chat_id: str, state: FSMContext, user_id: s
     else:
         try:
             blobs = await firebase.bucket.list_blobs(prefix=f'users/avatars/{user_id}.')
-            await firebase.bucket.get_blob(blobs[-1])
+            if len(blobs) > 0:
+                user_photo = blobs[-1]
+            else:
+                user_photo = f'users/avatars/{user_id}.jpeg'
+            await firebase.bucket.get_blob(user_photo)
 
             used_face_swap_packages = await get_used_face_swap_packages_by_user_id(user_id)
             face_swap_packages = await get_face_swap_packages_by_gender(
