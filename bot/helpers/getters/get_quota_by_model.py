@@ -25,6 +25,8 @@ def get_quota_by_model(model: Model, version: str):
             return Quota.GEMINI_1_PRO
         elif version == GeminiGPTVersion.V1_Ultra:
             return Quota.GEMINI_1_ULTRA
+    elif model == Model.EIGHTIFY:
+        return Quota.EIGHTIFY
     elif model == Model.DALL_E:
         return Quota.DALL_E
     elif model == Model.MIDJOURNEY:

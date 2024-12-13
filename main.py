@@ -40,6 +40,7 @@ from bot.handlers.admin.statistics_handler import statistics_router
 from bot.handlers.ai.chat_gpt_handler import chat_gpt_router
 from bot.handlers.ai.claude_handler import claude_router
 from bot.handlers.ai.dalle_handler import dall_e_router
+from bot.handlers.ai.eightify_handler import eightify_router
 from bot.handlers.ai.face_swap_handler import face_swap_router
 from bot.handlers.ai.flux_handler import flux_router
 from bot.handlers.ai.gemini_handler import gemini_router
@@ -153,6 +154,7 @@ async def lifespan(_: FastAPI):
         chat_gpt_router,
         claude_router,
         gemini_router,
+        eightify_router,
         dall_e_router,
         midjourney_router,
         stable_diffusion_router,

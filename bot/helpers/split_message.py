@@ -1,20 +1,15 @@
-from bs4 import BeautifulSoup
-
-
-def split_message(html_text: str, limit=3840):
-    soup = BeautifulSoup(html_text, 'html.parser')
+def split_message(markdown_text: str, limit=4096):
     parts = []
     current_part = ''
 
-    for element in soup.children:
-        element_str = str(element)
-        if len(current_part) + len(element_str) <= limit:
-            current_part += element_str
+    for line in markdown_text.splitlines(keepends=True):
+        if len(current_part) + len(line) <= limit:
+            current_part += line
         else:
             parts.append(current_part)
-            current_part = element_str
+            current_part = line
 
     if current_part:
         parts.append(current_part)
 
-    return parts
+    return [part.strip() for part in parts]

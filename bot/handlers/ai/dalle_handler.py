@@ -108,8 +108,6 @@ async def handle_dall_e(message: Message, state: FSMContext, user: User):
                 quality,
             )
 
-            await update_user_usage_quota(user, Quota.DALL_E, cost)
-
             product = await get_product_by_quota(Quota.DALL_E)
 
             total_price = PRICE_DALL_E * cost
@@ -142,6 +140,8 @@ async def handle_dall_e(message: Message, state: FSMContext, user: User):
                     photo=response_url,
                     allow_sending_without_reply=True,
                 )
+
+            await update_user_usage_quota(user, Quota.DALL_E, cost)
         except openai.BadRequestError as e:
             if e.code == 'content_policy_violation':
                 await message.answer_sticker(

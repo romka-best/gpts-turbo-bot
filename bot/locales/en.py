@@ -15,6 +15,9 @@ from bot.database.models.common import (
     ChatGPTVersion,
     ClaudeGPTVersion,
     GeminiGPTVersion,
+    EightifyFocus,
+    EightifyFormat,
+    EightifyAmount,
     AspectRatio,
     SendType,
 )
@@ -35,7 +38,8 @@ I'm your personal gateway to the world of neural networks. Discover the capabili
     ┣ Communicate free with:
         ┣ <b>ChatGPT 4.0 Omni Mini ✉️</b> /chatgpt
         ┣ <b>Claude 3.5 Haiku 📜</b> /claude
-        ┗ <b>Gemini 1.5 Flash 🏎</b> /gemini
+        ┣ <b>Gemini 1.5 Flash 🏎</b> /gemini
+        ┗ <b>Eightify 👀</b> /eightify
     ┣ Unleash the full potential of AI with:
         ┣ <b>ChatGPT 4.0 Omni 💥</b> and <b>ChatGPT o1-mini 🧩</b> /chatgpt
         ┣ <b>Claude 3.5 Sonnet 💫</b> /claude
@@ -68,8 +72,9 @@ I am constantly updating myself, implementing the most advanced technologies so 
 ━ 💭 <b>Text Responses</b>:
     ┣ 1️⃣ Enter one of the commands:
         ┣ /chatgpt 💥
-        ┣ /claude 🚀
-        ┗ /gemini 💼
+        ┣ /claude 💫
+        ┣ /gemini 💼
+        ┗ /eightify 👀
     ┣ 2️⃣ Select the version
     ┗ 3️⃣ Write your requests into the chat
 
@@ -122,12 +127,13 @@ I am constantly updating myself, implementing the most advanced technologies so 
     ┗ 📄 /terms - <b>TOS</b>: Terms of Service
 
 ━ AI commands:
-    ┣ 🤖 /mode - <b>Swap neural network models</b> on the fly with — <b>ChatGPT</b>, <b>Claude</b>, <b>Gemini</b>, <b>DALL-E</b>, <b>Midjourney</b>, <b>Stable Diffusion</b>, <b>FaceSwap</b>, <b>Photoshop AI</b>, <b>MusicGen</b>, or <b>Suno</b>!
+    ┣ 🤖 /mode - <b>Swap neural network models</b> on the fly with — <b>ChatGPT</b>, <b>Claude</b>, <b>Gemini</b>, <b>Eightify</b>, <b>DALL-E</b>, <b>Midjourney</b>, <b>Stable Diffusion</b>, <b>FaceSwap</b>, <b>Photoshop AI</b>, <b>MusicGen</b>, or <b>Suno</b>!
     ┣ ℹ️ /info - <b>Get information about AI</b>: Learn for what and why do you need them
     ┣ 📁 /catalog - <b>Catalog of roles and prompts</b>: Boost your communication efficiency with me
     ┣ 💥 /chatgpt - <b>Chat with ChatGPT</b>: Start a text conversation and receive advanced AI responses
     ┣ 🚀 /claude - <b>Chat with Claude</b>: Begin a discussion and explore the depth of responses from Claude
     ┣ ✨ /gemini - <b>Chat with Gemini</b>: Start chatting and immerse yourself in advanced answers from the new AI
+    ┣ 👀 /eightify - <b>Summarization with Eightify</b>: Just send me a link and you'll get the video's summary
     ┣ 👨‍🎨 /dalle - <b>Draw with DALL-E</b>: Turn your ideas into drawings
     ┣ 🎨 /midjourney - <b>Create with DALL-E 3</b>: Bring your imaginations to life with images
     ┣ 🎆 /stable_diffusion - <b>Uniqueness with Stable Diffusion</b>: Create unique images
@@ -668,6 +674,28 @@ Please try again with a smaller file 😊
 Use /mode to switch to a model that supports image vision 👀
 """
 
+    # Eightify
+    EIGHTIFY_INFO = """
+Using <b>Eightify</b> you can get a concise text summary of any YouTube video
+
+<b>How does it work?</b>
+🔗 Send me the link to the YouTube video you need
+✅ I'll analyze the video and provide you with a text summary
+
+Looking forward to your link! 😊
+"""
+    EIGHTIFY_FOCUS_INSIGHTFUL = "Insightful 💡"
+    EIGHTIFY_FOCUS_FUNNY = "Funny 😄"
+    EIGHTIFY_FOCUS_ACTIONABLE = "Actionable 🛠"
+    EIGHTIFY_FOCUS_CONTROVERSIAL = "Controversial 🔥"
+    EIGHTIFY_FORMAT_LIST = "List 📋"
+    EIGHTIFY_FORMAT_FAQ = "Q&A 🗯"
+    EIGHTIFY_AMOUNT_AUTO = "Auto ⚙️"
+    EIGHTIFY_AMOUNT_SHORT = "Short ✂️"
+    EIGHTIFY_AMOUNT_DETAILED = "Detailed 📚"
+    EIGHTIFY_VALUE_ERROR = "This doesn't seem to be a YouTube link 🧐\n\nPlease send me a different one"
+    EIGHTIFY_VIDEO_ERROR = "Unfortunately, I can't process this YouTube video 😢\n\nPlease send another link"
+
     # Midjourney
     MIDJOURNEY_ALREADY_CHOSE_UPSCALE = "You've already chosen this image, try a new one 🙂"
 
@@ -778,7 +806,7 @@ To unlock the magic of voice-to-text, simply wave your wand with buttons below:
 You’re stepping into a world of exclusive possibilities! What will it be today?
 
 🌟 <b>Subscriptions: Everything All at Once — Your VIP pass to all AI tools and beyond!</b>
-Chat with ChatGPT, Claude, and Gemini; Create with DALL-E, Midjourney, Stable Diffusion, Flux, FaceSwap, and Photoshop AI; Make music with MusicGen and Suno; Enjoy voice messages, quick replies, themed chats, and much more. Everything is included in the subscription for your convenience and daily discoveries!
+Chat with ChatGPT, Claude, Gemini and Eightify; Create with DALL-E, Midjourney, Stable Diffusion, Flux, FaceSwap, and Photoshop AI; Make music with MusicGen and Suno; Enjoy voice messages, quick replies, themed chats, and much more. Everything is included in the subscription for your convenience and daily discoveries!
 
 🛍 <b>Packages: Pay only for the generations you need!</b>
 Need specific generations for particular tasks? Packages let you choose a set number of requests and AI tools — pay only for what you truly need.
@@ -1142,7 +1170,6 @@ Currently, the total purchase amount is: <b>{left_part_price}{current_price}{rig
         subscription_status,
         gender,
         current_model,
-        current_model_version,
         current_currency,
         renewal_date,
     ) -> str:
@@ -1157,43 +1184,6 @@ Currently, the total purchase amount is: <b>{left_part_price}{current_price}{rig
             gender_info = f"<b>Gender:</b> {English.FEMALE}"
         else:
             gender_info = f"<b>Gender:</b> {English.UNSPECIFIED}"
-
-        if current_model == Model.CHAT_GPT and current_model_version == ChatGPTVersion.V4_Omni_Mini:
-            current_model = English.CHATGPT4_OMNI_MINI
-        elif current_model == Model.CHAT_GPT and current_model_version == ChatGPTVersion.V4_Omni:
-            current_model = English.CHATGPT4_OMNI
-        elif current_model == Model.CHAT_GPT and current_model_version == ChatGPTVersion.V1_O_Mini:
-            current_model = English.CHAT_GPT_O_1_MINI
-        elif current_model == Model.CHAT_GPT and current_model_version == ChatGPTVersion.V1_O_Preview:
-            current_model = English.CHAT_GPT_O_1_PREVIEW
-        elif current_model == Model.CLAUDE and current_model_version == ClaudeGPTVersion.V3_Haiku:
-            current_model = English.CLAUDE_3_HAIKU
-        elif current_model == Model.CLAUDE and current_model_version == ClaudeGPTVersion.V3_Sonnet:
-            current_model = English.CLAUDE_3_SONNET
-        elif current_model == Model.CLAUDE and current_model_version == ClaudeGPTVersion.V3_Opus:
-            current_model = English.CLAUDE_3_OPUS
-        elif current_model == Model.GEMINI and current_model_version == GeminiGPTVersion.V1_Flash:
-            current_model = English.GEMINI_1_FLASH
-        elif current_model == Model.GEMINI and current_model_version == GeminiGPTVersion.V1_Pro:
-            current_model = English.GEMINI_1_PRO
-        elif current_model == Model.GEMINI and current_model_version == GeminiGPTVersion.V1_Ultra:
-            current_model = English.GEMINI_1_ULTRA
-        elif current_model == Model.DALL_E:
-            current_model = English.DALL_E
-        elif current_model == Model.MIDJOURNEY:
-            current_model = English.MIDJOURNEY
-        elif current_model == Model.STABLE_DIFFUSION:
-            current_model = English.STABLE_DIFFUSION
-        elif current_model == Model.FLUX:
-            current_model = English.FLUX
-        elif current_model == Model.FACE_SWAP:
-            current_model = English.FACE_SWAP
-        elif current_model == Model.PHOTOSHOP_AI:
-            current_model = English.PHOTOSHOP_AI
-        elif current_model == Model.MUSIC_GEN:
-            current_model = English.MUSIC_GEN
-        elif current_model == Model.SUNO:
-            current_model = English.SUNO
 
         if current_currency == Currency.XTR:
             current_currency = f'Telegram Stars {Currency.SYMBOLS[current_currency]}'
@@ -1236,7 +1226,8 @@ Choose action 👇
     ┣ Daily Limits: {format_number(daily_limits[Quota.CHAT_GPT4_OMNI_MINI])}/{format_number(subscription_limits[Quota.CHAT_GPT4_OMNI_MINI])}
     ┣ ✉️ ChatGPT 4.0 Omni Mini{f': extra {additional_usage_quota[Quota.CHAT_GPT4_OMNI_MINI]}' if additional_usage_quota[Quota.CHAT_GPT4_OMNI_MINI] > 0 else ''}
     ┣ 📜 Claude 3.5 Haiku{f': extra {additional_usage_quota[Quota.CLAUDE_3_HAIKU]}' if additional_usage_quota[Quota.CLAUDE_3_HAIKU] > 0 else ''}
-    ┗ 🏎 Gemini 1.5 Flash{f': extra {additional_usage_quota[Quota.GEMINI_1_FLASH]}' if additional_usage_quota[Quota.GEMINI_1_FLASH] > 0 else ''}
+    ┣ 🏎 Gemini 1.5 Flash{f': extra {additional_usage_quota[Quota.GEMINI_1_FLASH]}' if additional_usage_quota[Quota.GEMINI_1_FLASH] > 0 else ''}
+    ┗ 👀 Eightify{f': extra {additional_usage_quota[Quota.EIGHTIFY]}' if additional_usage_quota[Quota.EIGHTIFY] > 0 else ''}
 
 ━ <b>Advanced</b>:
     ┣ Daily Limits: {format_number(daily_limits[Quota.CHAT_GPT4_OMNI])}/{format_number(subscription_limits[Quota.CHAT_GPT4_OMNI])}
@@ -1554,10 +1545,40 @@ Looks like you've got only <b>{available_seconds} seconds</b> left in your arsen
     ┣ 📷 Image Support: {'Yes ✅' if model_info.get('support_photos', False) else 'No ❌'}
     ┣ 🎙 Voice Answers: {'Enabled ✅' if model_info.get(UserSettings.TURN_ON_VOICE_MESSAGES, False) else 'Disabled ❌'}
     ┗ 🎭 Current Role: {model_info.get('role')}"""
-        elif model_type == ModelType.IMAGE:
+        elif model_type == ModelType.SUMMARY:
+            model_focus = model_info.get(UserSettings.FOCUS, EightifyFocus.INSIGHTFUL)
+            if model_focus == EightifyFocus.INSIGHTFUL:
+                model_focus = English.EIGHTIFY_FOCUS_INSIGHTFUL
+            elif model_focus == EightifyFocus.FUNNY:
+                model_focus = English.EIGHTIFY_FOCUS_FUNNY
+            elif model_focus == EightifyFocus.ACTIONABLE:
+                model_focus = English.EIGHTIFY_FOCUS_ACTIONABLE
+            elif model_focus == EightifyFocus.CONTROVERSIAL:
+                model_focus = English.EIGHTIFY_FOCUS_CONTROVERSIAL
+
+            model_format = model_info.get(UserSettings.FORMAT, EightifyFormat.LIST)
+            if model_format == EightifyFormat.LIST:
+                model_format = English.EIGHTIFY_FORMAT_LIST
+            elif model_format == EightifyFormat.FAQ:
+                model_format = English.EIGHTIFY_FORMAT_FAQ
+
+            model_amount = model_info.get(UserSettings.AMOUNT, EightifyAmount.AUTO)
+            if model_amount == EightifyAmount.AUTO:
+                model_amount = English.EIGHTIFY_AMOUNT_AUTO
+            elif model_amount == EightifyAmount.SHORT:
+                model_amount = English.EIGHTIFY_AMOUNT_SHORT
+            elif model_amount == EightifyAmount.DETAILED:
+                model_amount = English.EIGHTIFY_AMOUNT_DETAILED
+
             facts = f"""ℹ️ Settings:
-    ┣ 📐 Aspect Ratio: {'Custom' if model_info.get(UserSettings.ASPECT_RATIO, AspectRatio.CUSTOM) == AspectRatio.CUSTOM else model_info.get(UserSettings.ASPECT_RATIO)}
+    ┣ 🎯 Focus: {model_focus}
+    ┣ 🎛 Format: {model_format}
+    ┣ 📏 Number of Items: {model_amount}
+    ┗ 🎙 Voice Answers: {'Enabled ✅' if model_info.get(UserSettings.TURN_ON_VOICE_MESSAGES, False) else 'Disabled ❌'}"""
+        elif model_type == ModelType.IMAGE:
+            facts = f"""ℹ️ Facts and Settings:
     ┣ 📷 Image Support: {'Yes ✅' if model_info.get('support_photos', False) else 'No ❌'}
+    ┣ 📐 Aspect Ratio: {'Custom' if model_info.get(UserSettings.ASPECT_RATIO, AspectRatio.CUSTOM) == AspectRatio.CUSTOM else model_info.get(UserSettings.ASPECT_RATIO)}
     ┗ 🗯 Sending Type: {English.DOCUMENT if model_info.get(UserSettings.SEND_TYPE, SendType.IMAGE) == SendType.DOCUMENT else English.IMAGE}"""
         elif model_type == ModelType.MUSIC:
             facts = f"""ℹ️ Settings:
@@ -1829,6 +1850,8 @@ Looks like you've got only <b>{available_seconds} seconds</b> left in your arsen
 
         return f"""
 ⚙️ <b>Settings for model:</b> {human_model}
+
+Here you can customize the selected model to suit your tasks and preferences
 {additional_text}
 """
 

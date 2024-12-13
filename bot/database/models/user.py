@@ -9,6 +9,10 @@ from bot.database.models.common import (
     ChatGPTVersion,
     ClaudeGPTVersion,
     GeminiGPTVersion,
+    EightifyVersion,
+    EightifyFocus,
+    EightifyFormat,
+    EightifyAmount,
     DALLEVersion,
     DALLEResolution,
     DALLEQuality,
@@ -40,6 +44,9 @@ class UserSettings:
     VERSION = 'version'
     SEND_TYPE = 'send_type'
     SAFETY_TOLERANCE = 'safety_tolerance'
+    FOCUS = 'focus'
+    FORMAT = 'format'
+    AMOUNT = 'amount'
 
 
 class UserGender(StrEnum):
@@ -89,6 +96,7 @@ class User:
         Quota.GEMINI_1_FLASH: 0,
         Quota.GEMINI_1_PRO: 0,
         Quota.GEMINI_1_ULTRA: 0,
+        Quota.EIGHTIFY: 0,
         Quota.ADDITIONAL_CHATS: 0,
         Quota.DALL_E: 0,
         Quota.MIDJOURNEY: 0,
@@ -130,6 +138,16 @@ class User:
             UserSettings.VOICE: 'alloy',
             UserSettings.VERSION: GeminiGPTVersion.V1_Flash,
             UserSettings.SHOW_EXAMPLES: True,
+        },
+        Model.EIGHTIFY: {
+            UserSettings.SHOW_USAGE_QUOTA: False,
+            UserSettings.TURN_ON_VOICE_MESSAGES: False,
+            UserSettings.VOICE: 'alloy',
+            UserSettings.VERSION: EightifyVersion.LATEST,
+            UserSettings.FOCUS: EightifyFocus.INSIGHTFUL,
+            UserSettings.FORMAT: EightifyFormat.LIST,
+            UserSettings.AMOUNT: EightifyAmount.AUTO,
+            UserSettings.SHOW_EXAMPLES: False,
         },
         Model.DALL_E: {
             UserSettings.SHOW_USAGE_QUOTA: True,

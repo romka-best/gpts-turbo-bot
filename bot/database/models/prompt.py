@@ -1,5 +1,4 @@
 from datetime import datetime, timezone
-from enum import StrEnum
 from typing import Optional, ClassVar
 
 from pydantic import BaseModel, Field

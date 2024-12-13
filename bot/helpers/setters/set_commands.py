@@ -57,6 +57,10 @@ commands_en = [
         description='✨ Switch to Gemini model',
     ),
     BotCommand(
+        command='eightify',
+        description='👀 Switch to Eightify model',
+    ),
+    BotCommand(
         command='dalle',
         description='👨‍🎨 Switch to DALL-E model',
     ),
@@ -154,6 +158,10 @@ commands_ru = [
     BotCommand(
         command='gemini',
         description='✨ Переключиться на Gemini модель',
+    ),
+    BotCommand(
+        command='eightify',
+        description='👀 Переключиться на Eightify модель',
     ),
     BotCommand(
         command='dalle',

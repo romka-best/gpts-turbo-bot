@@ -17,6 +17,7 @@ class Model:
     CHAT_GPT = 'chat-gpt'
     CLAUDE = 'claude'
     GEMINI = 'gemini'
+    EIGHTIFY = 'eightify'
     DALL_E = 'dall-e'
     MIDJOURNEY = 'midjourney'
     STABLE_DIFFUSION = 'stable-diffusion'
@@ -29,6 +30,7 @@ class Model:
 
 class ModelType(StrEnum):
     TEXT = 'TEXT'
+    SUMMARY = 'SUMMARY'
     IMAGE = 'IMAGE'
     MUSIC = 'MUSIC'
     VIDEO = 'VIDEO'
@@ -45,6 +47,7 @@ class Quota:
     GEMINI_1_FLASH = 'gemini_1_flash'
     GEMINI_1_PRO = 'gemini_1_pro'
     GEMINI_1_ULTRA = 'gemini_1_ultra'
+    EIGHTIFY = 'eightify'
     DALL_E = 'dall_e'
     MIDJOURNEY = 'midjourney'
     STABLE_DIFFUSION = 'stable_diffusion'
@@ -76,6 +79,28 @@ class GeminiGPTVersion:
     V1_Flash = 'gemini-1.5-flash'
     V1_Pro = 'gemini-1.5-pro'
     V1_Ultra = 'gemini-1.0-ultra'
+
+
+class EightifyVersion:
+    LATEST = 'LATEST'
+
+
+class EightifyFocus:
+    INSIGHTFUL = 'insightful'
+    FUNNY = 'funny'
+    ACTIONABLE = 'actionable'
+    CONTROVERSIAL = 'controversial'
+
+
+class EightifyFormat:
+    LIST = 'list'
+    FAQ = 'faq'
+
+
+class EightifyAmount:
+    AUTO = 'auto'
+    SHORT = 'short'
+    DETAILED = 'detailed'
 
 
 class DALLEVersion:

@@ -18,6 +18,7 @@ class ProductCategory(StrEnum):
     MONTHLY = SubscriptionType.MONTHLY
     YEARLY = SubscriptionType.YEARLY
     TEXT = ModelType.TEXT
+    SUMMARY = ModelType.SUMMARY
     IMAGE = ModelType.IMAGE
     MUSIC = ModelType.MUSIC
     VIDEO = ModelType.VIDEO

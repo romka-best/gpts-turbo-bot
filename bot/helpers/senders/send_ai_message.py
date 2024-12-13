@@ -1,10 +1,11 @@
 import asyncio
 
+from aiogram.enums import ParseMode
 from aiogram.exceptions import TelegramBadRequest, TelegramNetworkError, TelegramRetryAfter
 from aiogram.types import Message
 from aiohttp import ClientOSError
-from chatgpt_md_converter import telegram_format
 from redis.exceptions import ConnectionError
+from telegramify_markdown import markdownify
 
 from bot.config import config
 from bot.helpers.split_message import split_message
@@ -24,7 +25,10 @@ async def delayed_send_ai_message(message: Message, text: str, timeout: int, rep
 
 
 async def send_ai_message(message: Message, text: str, reply_markup=None):
-    formatted_text = telegram_format(text)
+    formatted_text = markdownify(
+        text,
+        normalize_whitespace=True,
+    )
 
     messages = split_message(formatted_text)
     for i in range(len(messages)):
@@ -36,6 +40,7 @@ async def send_ai_message(message: Message, text: str, reply_markup=None):
                         text=formatted_message,
                         reply_markup=reply_markup if i == len(messages) - 1 else None,
                         allow_sending_without_reply=True,
+                        parse_mode=ParseMode.MARKDOWN_V2,
                     )
                     break
                 except (ConnectionResetError, OSError, ClientOSError, ConnectionError, TelegramNetworkError) as e:

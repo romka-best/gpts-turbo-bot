@@ -32,7 +32,8 @@ Access to AI:
     ┣ 🚀 Claude 3.0 Opus
     ┣ 🏎 Gemini 1.5 Flash
     ┣ 💼 Gemini 1.5 Pro
-    ┗ 🛡️ Gemini 1.0 Ultra
+    ┣ 🛡️ Gemini 1.0 Ultra
+    ┗ 👀️ Eightify
 
 ━ 🖼 Image Models
     ┣ 👨‍🎨 DALL•E 3
@@ -61,7 +62,8 @@ Access to AI:
     ┣ 🚀 Claude 3.0 Opus
     ┣ 🏎 Gemini 1.5 Flash
     ┣ 💼 Gemini 1.5 Pro
-    ┗ 🛡️ Gemini 1.0 Ultra
+    ┣ 🛡️ Gemini 1.0 Ultra
+    ┗ 👀️ Eightify
 
 ━ 🖼 Графические
     ┣ 👨‍🎨 DALL•E 3

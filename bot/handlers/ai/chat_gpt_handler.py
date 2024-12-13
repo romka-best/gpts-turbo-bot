@@ -369,7 +369,7 @@ async def handle_chatgpt4_example(
             not user.subscription_id and
             user.current_model == Model.CHAT_GPT and
             user.settings[user.current_model][UserSettings.SHOW_EXAMPLES] and
-            user.daily_limits[Quota.CHAT_GPT4_OMNI_MINI] + 1 in [3, 10] and
+            user.daily_limits[Quota.CHAT_GPT4_OMNI_MINI] + 1 in [3, 7] and
             (current_date - user.last_subscription_limit_update).days <= 3
         ):
             response = await get_response_message(ChatGPTVersion.V4_Omni, history)

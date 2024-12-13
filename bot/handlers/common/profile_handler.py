@@ -10,7 +10,7 @@ from bot.database.main import firebase
 from bot.database.models.common import Model, Currency
 from bot.database.models.subscription import SubscriptionStatus, SUBSCRIPTION_FREE_LIMITS
 from bot.database.models.user import UserGender, UserSettings
-from bot.database.operations.product.getters import get_product
+from bot.database.operations.product.getters import get_product, get_product_by_quota
 from bot.database.operations.subscription.getters import get_subscription
 from bot.database.operations.user.getters import get_user
 from bot.database.operations.user.updaters import update_user
@@ -23,6 +23,7 @@ from bot.handlers.payment.payment_handler import (
     handle_renew_subscription,
 )
 from bot.handlers.settings.settings_handler import handle_settings
+from bot.helpers.getters.get_quota_by_model import get_quota_by_model
 from bot.keyboards.common.common import build_cancel_keyboard
 from bot.keyboards.common.profile import (
     build_profile_keyboard,
@@ -69,12 +70,14 @@ async def handle_profile(message: Message, state: FSMContext, telegram_user: Tel
         subscription_name = '🆓'
     renewal_date = (user.last_subscription_limit_update + timedelta(days=30))
 
+    user_current_quota = get_quota_by_model(user.current_model, user.settings[user.current_model][UserSettings.VERSION])
+    user_current_model = await get_product_by_quota(user_current_quota)
+
     text = get_localization(user_language_code).profile(
         subscription_name,
         subscription.status if subscription else SubscriptionStatus.ACTIVE,
         user.gender,
-        user.current_model,
-        user.settings[user.current_model][UserSettings.VERSION],
+        user_current_model.names.get(user_language_code),
         user.currency,
         renewal_date.strftime('%d.%m.%Y'),
     )

@@ -15,6 +15,9 @@ from bot.database.models.common import (
     ChatGPTVersion,
     ClaudeGPTVersion,
     GeminiGPTVersion,
+    EightifyFocus,
+    EightifyFormat,
+    EightifyAmount,
     AspectRatio,
     SendType,
 )
@@ -35,7 +38,8 @@ class Russian(Texts):
     ┣ Бесплатно общайтесь с:
         ┣ <b>ChatGPT 4.0 Omni Mini ✉️</b> /chatgpt
         ┣ <b>Claude 3.5 Haiku 📜</b> /claude
-        ┗ <b>Gemini 1.5 Flash 🏎</b> /gemini
+        ┣ <b>Gemini 1.5 Flash 🏎</b> /gemini
+        ┗ <b>Eightify 👀</b> /eightify
     ┣ Исследуйте продвинутый уровень интеллекта с:
         ┣ <b>ChatGPT 4.0 Omni 💥</b> и <b>ChatGPT o1-mini 🧩</b> /chatgpt
         ┣ <b>Claude 3.5 Sonnet 💫</b> /claude
@@ -69,7 +73,8 @@ class Russian(Texts):
     ┣ 1️⃣ Введите одну из команд:
         ┣ /chatgpt 💥
         ┣ /claude 🚀
-        ┗ /gemini 💼
+        ┣ /gemini 💫
+        ┗ /eightify 👀
     ┣ 2️⃣ Выберите версию модели
     ┗ 3️⃣ Пишите ваши запросы в чат
 
@@ -122,12 +127,13 @@ class Russian(Texts):
     ┗ 📄 /terms - <b>Пользовательское соглашение</b>
 
 ━ ИИ команды:
-    ┣ 🤖 /mode - <b>Переключение между нейросетеми</b> на лету — <b>ChatGPT</b>, <b>Claude</b>, <b>Gemini</b>, <b>DALL-E</b>, <b>Midjourney</b>, <b>Stable Diffusion</b>, <b>FaceSwap</b>, <b>Photoshop AI</b>, <b>MusicGen</b> или <b>Suno</b>!
+    ┣ 🤖 /mode - <b>Переключение между нейросетеми</b> на лету — <b>ChatGPT</b>, <b>Claude</b>, <b>Gemini</b>, <b>Eightify</b>, <b>DALL-E</b>, <b>Midjourney</b>, <b>Stable Diffusion</b>, <b>FaceSwap</b>, <b>Photoshop AI</b>, <b>MusicGen</b> или <b>Suno</b>!
     ┣ ℹ️ /info - <b>Получить информацию про модели ИИ</b>: Узнайте для чего они и зачем
     ┣ 📁 /catalog - <b>Каталог ролей и промптов</b>: Увеличьте эффективность общения со мной
     ┣ 💥 /chatgpt - <b>Общение с ChatGPT</b>: Начните текстовый диалог и получайте продвинутые AI-ответы
     ┣ 🚀 /claude - <b>Общение с Claude</b>: Начните беседу и исследуйте глубину ответов от Claude
     ┣ ✨ /gemini - <b>Общение с Gemini</b>: Начните общение и погрузитесь в продвинутые ответы от нового AI
+    ┣ 👀 /eightify - <b>Суммаризация с Eightify</b>: Пришлите ссылку на видео и получите резюме
     ┣ 👨‍🎨 /dalle - <b>Рисование с DALL-E</b>: Превратите ваши идеи в рисунки
     ┣ 🎨 /midjourney - <b>Творчество с Midjourney</b>: Воплотите ваши мысли в изображения
     ┣ 🎆 /stable_diffusion - <b>Неповторимость с Stable Diffusion</b>: Создайте уникальные картинки
@@ -310,8 +316,8 @@ class Russian(Texts):
 - <i>Быстрое создание музыки</i>: Опишите свои эмоции или сценарий, и Suno немедленно оживит ваше описание в виде песни.
 """
 
-    SERVER = "💻 Сервер"
-    DATABASE = "🗄 База Данных"
+    SERVER = "Сервер 💻"
+    DATABASE = "База Данных 🗄"
 
     TEXT_MODELS = "🔤 Текстовые модели"
     IMAGE_MODELS = "🖼 Графические модели"
@@ -667,6 +673,28 @@ class Russian(Texts):
 Используйте /mode, чтобы переключиться на модель, которая поддерживает чтение изображений 👀
 """
 
+    # Eightify
+    EIGHTIFY_INFO = """
+С помощью <b>Eightify</b> вы можете получить краткое текстовое саммари видео из YouTube
+
+<b>Как это работает?</b>
+🔗 Отправьте ссылку на нужное YouTube-видео
+✅ Я проанализирую видео и верну вам текстовое резюме
+
+Жду ссылку 😊
+"""
+    EIGHTIFY_FOCUS_INSIGHTFUL = "Содержательный 💡"
+    EIGHTIFY_FOCUS_FUNNY = "Забавный 😄"
+    EIGHTIFY_FOCUS_ACTIONABLE = "Полезный 🛠"
+    EIGHTIFY_FOCUS_CONTROVERSIAL = "Спорный 🔥"
+    EIGHTIFY_FORMAT_LIST = "Список 📋"
+    EIGHTIFY_FORMAT_FAQ = "Вопросы и Ответы 🗯"
+    EIGHTIFY_AMOUNT_AUTO = "Авто ⚙️"
+    EIGHTIFY_AMOUNT_SHORT = "Кратко ✂️"
+    EIGHTIFY_AMOUNT_DETAILED = "Детально 📚"
+    EIGHTIFY_VALUE_ERROR = "Это не похоже на ссылку YouTube 🧐\n\nОтправьте, пожалуйста, другую ссылку"
+    EIGHTIFY_VIDEO_ERROR = "К сожалению, это YouTube видео я не могу обработать 😢\n\nПожалуйста, отправьте другую ссылку"
+
     # Midjourney
     MIDJOURNEY_ALREADY_CHOSE_UPSCALE = "Вы уже выбирали эту картинку, попробуйте новую 🙂"
 
@@ -777,7 +805,7 @@ class Russian(Texts):
 Перед вами открываются врата в мир эксклюзивных возможностей! Что же будет сегодня?
 
 🌟 <b>Подписки: Всё и сразу — VIP-пропуск открывает доступ ко всем нейросетям и не только!</b>
-Общение с ChatGPT, Claude, Gemini; Креатив с DALL-E, Midjourney, Stable Diffusion, Flux, FaceSwap, Photoshop AI; Создание музыки с MusicGen, Suno; Голосовые сообщения, Быстрые ответы, Тематические чаты и многое другое. Всё включено в подписке для вашего удобства и новых открытий каждый день!
+Общение с ChatGPT, Claude, Gemini, Eightify; Креатив с DALL-E, Midjourney, Stable Diffusion, Flux, FaceSwap, Photoshop AI; Создание музыки с MusicGen, Suno; Голосовые сообщения, Быстрые ответы, Тематические чаты и многое другое. Всё включено в подписке для вашего удобства и новых открытий каждый день!
 
 🛍 <b>Пакеты: Только нужные вам генерации!</b>
 Нужны отдельные генерации под конкретные задачи? Пакеты позволяют выбрать определённое количество запросов и нейросетей — оплачивайте только то, что действительно необходимо
@@ -1141,7 +1169,6 @@ class Russian(Texts):
         subscription_status,
         gender,
         current_model,
-        current_model_version,
         current_currency,
         renewal_date,
     ) -> str:
@@ -1156,43 +1183,6 @@ class Russian(Texts):
             gender_info = f"<b>Пол:</b> {Russian.FEMALE}"
         else:
             gender_info = f"<b>Пол:</b> {Russian.UNSPECIFIED}"
-
-        if current_model == Model.CHAT_GPT and current_model_version == ChatGPTVersion.V4_Omni_Mini:
-            current_model = Russian.CHATGPT4_OMNI_MINI
-        elif current_model == Model.CHAT_GPT and current_model_version == ChatGPTVersion.V4_Omni:
-            current_model = Russian.CHATGPT4_OMNI
-        elif current_model == Model.CHAT_GPT and current_model_version == ChatGPTVersion.V1_O_Mini:
-            current_model = Russian.CHAT_GPT_O_1_MINI
-        elif current_model == Model.CHAT_GPT and current_model_version == ChatGPTVersion.V1_O_Preview:
-            current_model = Russian.CHAT_GPT_O_1_PREVIEW
-        elif current_model == Model.CLAUDE and current_model_version == ClaudeGPTVersion.V3_Haiku:
-            current_model = Russian.CLAUDE_3_HAIKU
-        elif current_model == Model.CLAUDE and current_model_version == ClaudeGPTVersion.V3_Sonnet:
-            current_model = Russian.CLAUDE_3_SONNET
-        elif current_model == Model.CLAUDE and current_model_version == ClaudeGPTVersion.V3_Opus:
-            current_model = Russian.CLAUDE_3_OPUS
-        elif current_model == Model.GEMINI and current_model_version == GeminiGPTVersion.V1_Flash:
-            current_model = Russian.GEMINI_1_FLASH
-        elif current_model == Model.GEMINI and current_model_version == GeminiGPTVersion.V1_Pro:
-            current_model = Russian.GEMINI_1_PRO
-        elif current_model == Model.GEMINI and current_model_version == GeminiGPTVersion.V1_Ultra:
-            current_model = Russian.GEMINI_1_ULTRA
-        elif current_model == Model.DALL_E:
-            current_model = Russian.DALL_E
-        elif current_model == Model.MIDJOURNEY:
-            current_model = Russian.MIDJOURNEY
-        elif current_model == Model.STABLE_DIFFUSION:
-            current_model = Russian.STABLE_DIFFUSION
-        elif current_model == Model.FLUX:
-            current_model = Russian.FLUX
-        elif current_model == Model.FACE_SWAP:
-            current_model = Russian.FACE_SWAP
-        elif current_model == Model.PHOTOSHOP_AI:
-            current_model = Russian.PHOTOSHOP_AI
-        elif current_model == Model.MUSIC_GEN:
-            current_model = Russian.MUSIC_GEN
-        elif current_model == Model.SUNO:
-            current_model = Russian.SUNO
 
         if current_currency == Currency.XTR:
             current_currency = f'Telegram Stars {Currency.SYMBOLS[current_currency]}'
@@ -1235,7 +1225,8 @@ class Russian(Texts):
     ┣ Дневной лимит: {format_number(daily_limits[Quota.CHAT_GPT4_OMNI_MINI])}/{format_number(subscription_limits[Quota.CHAT_GPT4_OMNI_MINI])}
     ┣ ✉️ ChatGPT 4.0 Omni Mini{f': доп. {additional_usage_quota[Quota.CHAT_GPT4_OMNI_MINI]}' if additional_usage_quota[Quota.CHAT_GPT4_OMNI_MINI] > 0 else ''}
     ┣ 📜 Claude 3.5 Haiku{f': доп. {additional_usage_quota[Quota.CLAUDE_3_HAIKU]}' if additional_usage_quota[Quota.CLAUDE_3_HAIKU] > 0 else ''}
-    ┗ 🏎 Gemini 1.5 Flash{f': доп. {additional_usage_quota[Quota.GEMINI_1_FLASH]}' if additional_usage_quota[Quota.GEMINI_1_FLASH] > 0 else ''}
+    ┣ 🏎 Gemini 1.5 Flash{f': доп. {additional_usage_quota[Quota.GEMINI_1_FLASH]}' if additional_usage_quota[Quota.GEMINI_1_FLASH] > 0 else ''}
+    ┗ 👀 Eightify{f': доп. {additional_usage_quota[Quota.EIGHTIFY]}' if additional_usage_quota[Quota.EIGHTIFY] > 0 else ''}
 
 ━ <b>Продвинутые</b>:
     ┣ Дневной лимит: {format_number(daily_limits[Quota.CHAT_GPT4_OMNI])}/{format_number(subscription_limits[Quota.CHAT_GPT4_OMNI])}
@@ -1553,10 +1544,40 @@ class Russian(Texts):
     ┣ 📷 Работа с фото: {'Да ✅' if model_info.get('support_photos', False) else 'Нет ❌'}
     ┣ 🎙 Голосовые ответы: {'Вкл. ✅' if model_info.get(UserSettings.TURN_ON_VOICE_MESSAGES, False) else 'Выкл. ❌'}
     ┗ 🎭 Текущая роль: {model_info.get('role')}"""
-        elif model_type == ModelType.IMAGE:
+        elif model_type == ModelType.SUMMARY:
+            model_focus = model_info.get(UserSettings.FOCUS, EightifyFocus.INSIGHTFUL)
+            if model_focus == EightifyFocus.INSIGHTFUL:
+                model_focus = Russian.EIGHTIFY_FOCUS_INSIGHTFUL
+            elif model_focus == EightifyFocus.FUNNY:
+                model_focus = Russian.EIGHTIFY_FOCUS_FUNNY
+            elif model_focus == EightifyFocus.ACTIONABLE:
+                model_focus = Russian.EIGHTIFY_FOCUS_ACTIONABLE
+            elif model_focus == EightifyFocus.CONTROVERSIAL:
+                model_focus = Russian.EIGHTIFY_FOCUS_CONTROVERSIAL
+
+            model_format = model_info.get(UserSettings.FORMAT, EightifyFormat.LIST)
+            if model_format == EightifyFormat.LIST:
+                model_format = Russian.EIGHTIFY_FORMAT_LIST
+            elif model_format == EightifyFormat.FAQ:
+                model_format = Russian.EIGHTIFY_FORMAT_FAQ
+
+            model_amount = model_info.get(UserSettings.AMOUNT, EightifyAmount.AUTO)
+            if model_amount == EightifyAmount.AUTO:
+                model_amount = Russian.EIGHTIFY_AMOUNT_AUTO
+            elif model_amount == EightifyAmount.SHORT:
+                model_amount = Russian.EIGHTIFY_AMOUNT_SHORT
+            elif model_amount == EightifyAmount.DETAILED:
+                model_amount = Russian.EIGHTIFY_AMOUNT_DETAILED
+
             facts = f"""ℹ️ Настройки:
-    ┣ 📐 Соотношение сторон: {'Пользовательское' if model_info.get(UserSettings.ASPECT_RATIO, AspectRatio.CUSTOM) == AspectRatio.CUSTOM else model_info.get(UserSettings.ASPECT_RATIO)}
+    ┣ 🎯 Фокус: {model_focus}
+    ┣ 🎛 Формат: {model_format}
+    ┣ 📏 Длина результата: {model_amount}
+    ┗ 🎙 Голосовые ответы: {'Вкл. ✅' if model_info.get(UserSettings.TURN_ON_VOICE_MESSAGES, False) else 'Выкл. ❌'}"""
+        elif model_type == ModelType.IMAGE:
+            facts = f"""ℹ️ Факты и настройки:
     ┣ 📷 Работа с фото: {'Да ✅' if model_info.get('support_photos', False) else 'Нет ❌'}
+    ┣ 📐 Соотношение сторон: {'Пользовательское' if model_info.get(UserSettings.ASPECT_RATIO, AspectRatio.CUSTOM) == AspectRatio.CUSTOM else model_info.get(UserSettings.ASPECT_RATIO)}
     ┗ 🗯 Тип отправки: {Russian.DOCUMENT if model_info.get(UserSettings.SEND_TYPE, SendType.IMAGE) == SendType.DOCUMENT else Russian.IMAGE}"""
         elif model_type == ModelType.MUSIC:
             facts = f"""ℹ️ Настройки:
@@ -1828,6 +1849,8 @@ class Russian(Texts):
 
         return f"""
 ⚙️ <b>Настройки для модели:</b> {human_model}
+
+Здесь вы можете настроить выбранную модель под свои задачи и предпочтения
 {additional_text}
 """
 

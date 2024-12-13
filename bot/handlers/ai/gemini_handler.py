@@ -342,7 +342,7 @@ async def handle_gemini_1_pro_example(
             not user.subscription_id and
             user.current_model == Model.GEMINI and
             user.settings[user.current_model][UserSettings.SHOW_EXAMPLES] and
-            user.daily_limits[Quota.GEMINI_1_FLASH] + 1 in [3, 10] and
+            user.daily_limits[Quota.GEMINI_1_FLASH] + 1 in [3, 7] and
             (current_date - user.last_subscription_limit_update).days <= 3
         ):
             response = await get_response_message(
