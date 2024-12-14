@@ -1083,10 +1083,10 @@ class Texts(Protocol):
                 count_expense_money[ai_product_id]['AVERAGE_EXAMPLE_PRICE']
             ):
                 ai_info += f"""    {left_part} {ai_product_name}:
-                ┣ 🎁 Средняя цена примера: ${round(count_expense_money[ai_product_id]['AVERAGE_EXAMPLE_PRICE'], 4)} {calculate_percentage_difference(is_all_time, count_expense_money[ai_product_id]['AVERAGE_EXAMPLE_PRICE'], count_expense_money_before[ai_product_id]['AVERAGE_EXAMPLE_PRICE'])}
-                ┣ 🚀 Всего за примеры: ${round(count_expense_money[ai_product_id]['EXAMPLE_ALL'], 4)} {calculate_percentage_difference(is_all_time, count_expense_money[ai_product_id]['EXAMPLE_ALL'], count_expense_money_before[ai_product_id]['EXAMPLE_ALL'])}
-                ┣ 💸 Средняя цена запроса: ${round(count_expense_money[ai_product_id]['AVERAGE_PRICE'], 4)} {calculate_percentage_difference(is_all_time, count_expense_money[ai_product_id]['AVERAGE_PRICE'], count_expense_money_before[ai_product_id]['AVERAGE_PRICE'])}
-                ┗ 💰 Всего: ${round(count_expense_money[ai_product_id]['ALL'], 4)} {calculate_percentage_difference(is_all_time, count_expense_money[ai_product_id]['ALL'], count_expense_money_before[ai_product_id]['ALL'])}{right_part}"""
+        ┣ 🎁 Средняя цена примера: ${round(count_expense_money[ai_product_id]['AVERAGE_EXAMPLE_PRICE'], 4)} {calculate_percentage_difference(is_all_time, count_expense_money[ai_product_id]['AVERAGE_EXAMPLE_PRICE'], count_expense_money_before[ai_product_id]['AVERAGE_EXAMPLE_PRICE'])}
+        ┣ 🚀 Всего за примеры: ${round(count_expense_money[ai_product_id]['EXAMPLE_ALL'], 4)} {calculate_percentage_difference(is_all_time, count_expense_money[ai_product_id]['EXAMPLE_ALL'], count_expense_money_before[ai_product_id]['EXAMPLE_ALL'])}
+        ┣ 💸 Средняя цена запроса: ${round(count_expense_money[ai_product_id]['AVERAGE_PRICE'], 4)} {calculate_percentage_difference(is_all_time, count_expense_money[ai_product_id]['AVERAGE_PRICE'], count_expense_money_before[ai_product_id]['AVERAGE_PRICE'])}
+        ┗ 💰 Всего: ${round(count_expense_money[ai_product_id]['ALL'], 4)} {calculate_percentage_difference(is_all_time, count_expense_money[ai_product_id]['ALL'], count_expense_money_before[ai_product_id]['ALL'])}{right_part}"""
                 continue
 
             ai_info += f"""    {left_part} {ai_product_name}:
