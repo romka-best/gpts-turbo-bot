@@ -7,7 +7,7 @@ from aiogram.types import Message, CallbackQuery, ChatMemberUpdated, Inaccessibl
 
 from bot.config import config, MessageEffect, MessageSticker
 from bot.database.main import firebase
-from bot.database.models.common import Quota, UTM, ChatGPTVersion, ClaudeGPTVersion, GeminiGPTVersion
+from bot.database.models.common import Quota, UTM, ChatGPTVersion, ClaudeGPTVersion, GeminiGPTVersion, Model
 from bot.database.models.generation import Generation
 from bot.database.models.user import UserSettings
 from bot.database.operations.generation.updaters import update_generation
@@ -16,8 +16,13 @@ from bot.database.operations.user.initialize_user_for_the_first_time import init
 from bot.database.operations.user.updaters import update_user
 from bot.handlers.ai.chat_gpt_handler import handle_chatgpt
 from bot.handlers.ai.claude_handler import handle_claude
+from bot.handlers.ai.eightify_handler import handle_eightify
+from bot.handlers.ai.face_swap_handler import handle_face_swap
 from bot.handlers.ai.gemini_handler import handle_gemini
 from bot.handlers.ai.mode_handler import handle_mode
+from bot.handlers.ai.music_gen_handler import handle_music_gen
+from bot.handlers.ai.photoshop_ai_handler import handle_photoshop_ai
+from bot.handlers.ai.suno_handler import handle_suno
 from bot.handlers.common.catalog_handler import handle_catalog_prompts
 from bot.handlers.payment.bonus_handler import handle_bonus
 from bot.handlers.payment.payment_handler import handle_subscribe, handle_package
@@ -198,6 +203,42 @@ async def start(message: Message, state: FSMContext):
         reply_markup=build_switched_to_ai_keyboard(user_language_code, user.current_model),
         message_effect_id=config.MESSAGE_EFFECTS.get(MessageEffect.FIRE),
     )
+
+    if user.current_model == Model.EIGHTIFY:
+        await handle_eightify(
+            bot=message.bot,
+            chat_id=user.telegram_chat_id,
+            state=state,
+            user_id=user.id,
+        )
+    elif user.current_model == Model.FACE_SWAP:
+        await handle_face_swap(
+            bot=message.bot,
+            chat_id=user.telegram_chat_id,
+            state=state,
+            user_id=user.id,
+        )
+    elif user.current_model == Model.PHOTOSHOP_AI:
+        await handle_photoshop_ai(
+            bot=message.bot,
+            chat_id=user.telegram_chat_id,
+            state=state,
+            user_id=user.id,
+        )
+    elif user.current_model == Model.MUSIC_GEN:
+        await handle_music_gen(
+            bot=message.bot,
+            chat_id=user.telegram_chat_id,
+            state=state,
+            user_id=user.id,
+        )
+    elif user.current_model == Model.SUNO:
+        await handle_suno(
+            bot=message.bot,
+            chat_id=user.telegram_chat_id,
+            state=state,
+            user_id=user.id,
+        )
 
     if len(tasks) > 0:
         await asyncio.gather(*tasks)
