@@ -3,10 +3,12 @@ from datetime import datetime, timezone
 
 import stripe
 from aiogram import Bot, Dispatcher
+from aiogram.fsm.context import FSMContext
+from aiogram.fsm.storage.base import StorageKey
 
 from bot.config import MessageEffect, config, MessageSticker
 from bot.database.main import firebase
-from bot.database.models.common import PaymentMethod, Currency
+from bot.database.models.common import Model, Currency, PaymentMethod
 from bot.database.models.package import PackageStatus
 from bot.database.models.subscription import (
     SubscriptionStatus,
@@ -29,6 +31,11 @@ from bot.database.operations.subscription.writers import write_subscription
 from bot.database.operations.transaction.writers import write_transaction
 from bot.database.operations.user.getters import get_user
 from bot.database.operations.user.updaters import update_user
+from bot.handlers.ai.eightify_handler import handle_eightify
+from bot.handlers.ai.face_swap_handler import handle_face_swap
+from bot.handlers.ai.music_gen_handler import handle_music_gen
+from bot.handlers.ai.photoshop_ai_handler import handle_photoshop_ai
+from bot.handlers.ai.suno_handler import handle_suno
 from bot.helpers.creaters.create_package import create_package
 from bot.helpers.creaters.create_subscription import create_subscription
 from bot.helpers.getters.get_quota_by_model import get_quota_by_model
@@ -144,6 +151,50 @@ async def handle_stripe_webhook(request: dict, bot: Bot, dp: Dispatcher):
                     reply_markup=reply_markup,
                     message_effect_id=config.MESSAGE_EFFECTS.get('FIRE'),
                 )
+
+                state = FSMContext(
+                    storage=dp.storage,
+                    key=StorageKey(
+                        chat_id=int(user.telegram_chat_id),
+                        user_id=int(user.id),
+                        bot_id=bot.id,
+                    )
+                )
+                if user.current_model == Model.EIGHTIFY:
+                    await handle_eightify(
+                        bot=bot,
+                        chat_id=user.telegram_chat_id,
+                        state=state,
+                        user_id=user.id,
+                    )
+                elif user.current_model == Model.FACE_SWAP:
+                    await handle_face_swap(
+                        bot=bot,
+                        chat_id=user.telegram_chat_id,
+                        state=state,
+                        user_id=user.id,
+                    )
+                elif user.current_model == Model.PHOTOSHOP_AI:
+                    await handle_photoshop_ai(
+                        bot=bot,
+                        chat_id=user.telegram_chat_id,
+                        state=state,
+                        user_id=user.id,
+                    )
+                elif user.current_model == Model.MUSIC_GEN:
+                    await handle_music_gen(
+                        bot=bot,
+                        chat_id=user.telegram_chat_id,
+                        state=state,
+                        user_id=user.id,
+                    )
+                elif user.current_model == Model.SUNO:
+                    await handle_suno(
+                        bot=bot,
+                        chat_id=user.telegram_chat_id,
+                        state=state,
+                        user_id=user.id,
+                    )
 
                 await send_message_to_admins(
                     bot=bot,
@@ -400,6 +451,50 @@ async def handle_stripe_webhook(request: dict, bot: Bot, dp: Dispatcher):
                     message_effect_id=config.MESSAGE_EFFECTS.get(MessageEffect.FIRE),
                 )
 
+                state = FSMContext(
+                    storage=dp.storage,
+                    key=StorageKey(
+                        chat_id=int(user.telegram_chat_id),
+                        user_id=int(user.id),
+                        bot_id=bot.id,
+                    )
+                )
+                if user.current_model == Model.EIGHTIFY:
+                    await handle_eightify(
+                        bot=bot,
+                        chat_id=user.telegram_chat_id,
+                        state=state,
+                        user_id=user.id,
+                    )
+                elif user.current_model == Model.FACE_SWAP:
+                    await handle_face_swap(
+                        bot=bot,
+                        chat_id=user.telegram_chat_id,
+                        state=state,
+                        user_id=user.id,
+                    )
+                elif user.current_model == Model.PHOTOSHOP_AI:
+                    await handle_photoshop_ai(
+                        bot=bot,
+                        chat_id=user.telegram_chat_id,
+                        state=state,
+                        user_id=user.id,
+                    )
+                elif user.current_model == Model.MUSIC_GEN:
+                    await handle_music_gen(
+                        bot=bot,
+                        chat_id=user.telegram_chat_id,
+                        state=state,
+                        user_id=user.id,
+                    )
+                elif user.current_model == Model.SUNO:
+                    await handle_suno(
+                        bot=bot,
+                        chat_id=user.telegram_chat_id,
+                        state=state,
+                        user_id=user.id,
+                    )
+
                 await send_message_to_admins(
                     bot=bot,
                     message=f'#payment #package #success\n\n'
@@ -517,6 +612,50 @@ async def handle_stripe_webhook(request: dict, bot: Bot, dp: Dispatcher):
                     reply_markup=reply_markup,
                     message_effect_id=config.MESSAGE_EFFECTS.get(MessageEffect.FIRE),
                 )
+
+                state = FSMContext(
+                    storage=dp.storage,
+                    key=StorageKey(
+                        chat_id=int(user.telegram_chat_id),
+                        user_id=int(user.id),
+                        bot_id=bot.id,
+                    )
+                )
+                if user.current_model == Model.EIGHTIFY:
+                    await handle_eightify(
+                        bot=bot,
+                        chat_id=user.telegram_chat_id,
+                        state=state,
+                        user_id=user.id,
+                    )
+                elif user.current_model == Model.FACE_SWAP:
+                    await handle_face_swap(
+                        bot=bot,
+                        chat_id=user.telegram_chat_id,
+                        state=state,
+                        user_id=user.id,
+                    )
+                elif user.current_model == Model.PHOTOSHOP_AI:
+                    await handle_photoshop_ai(
+                        bot=bot,
+                        chat_id=user.telegram_chat_id,
+                        state=state,
+                        user_id=user.id,
+                    )
+                elif user.current_model == Model.MUSIC_GEN:
+                    await handle_music_gen(
+                        bot=bot,
+                        chat_id=user.telegram_chat_id,
+                        state=state,
+                        user_id=user.id,
+                    )
+                elif user.current_model == Model.SUNO:
+                    await handle_suno(
+                        bot=bot,
+                        chat_id=user.telegram_chat_id,
+                        state=state,
+                        user_id=user.id,
+                    )
 
                 await send_message_to_admins(
                     bot=bot,

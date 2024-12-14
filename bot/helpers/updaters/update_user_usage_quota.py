@@ -12,7 +12,7 @@ MUSIC_QUOTA = [Quota.MUSIC_GEN, Quota.SUNO]
 def get_user_with_updated_quota(user: User, user_quota: Quota, quantity_to_delete: int) -> User:
     quantity_deleted = 0
     while quantity_deleted != quantity_to_delete:
-        if user.daily_limits[user_quota] != 0:
+        if user.daily_limits[user_quota] > 0:
             chosen_quota = [user_quota]
             if user_quota in TEXT_SIMPLE_QUOTA:
                 chosen_quota = TEXT_SIMPLE_QUOTA
@@ -29,7 +29,7 @@ def get_user_with_updated_quota(user: User, user_quota: Quota, quantity_to_delet
                 user.daily_limits[quota] -= 1
 
             quantity_deleted += 1
-        elif user.additional_usage_quota[user_quota] != 0:
+        elif user.additional_usage_quota[user_quota] > 0:
             user.additional_usage_quota[user_quota] -= 1
             quantity_deleted += 1
         else:

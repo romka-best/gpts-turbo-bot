@@ -330,6 +330,8 @@ async def midjourney_webhook(body: dict):
 async def migrate_webhook(background_tasks: BackgroundTasks):
     background_tasks.add_task(migrate, bot)
 
+    return {'code': 200}
+
 
 @app.get('/run-daily-tasks')
 async def run_daily_tasks(background_tasks: BackgroundTasks):
