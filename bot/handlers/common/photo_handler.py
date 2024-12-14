@@ -74,12 +74,16 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
         photo_extension = photo_file.file_path.split('.')[-1]
 
         blob_path = f'users/avatars/{user_id}.{photo_extension}'
-        try:
-            blob = await firebase.bucket.get_blob(blob_path)
-            await blob.upload(photo_data)
-        except aiohttp.ClientResponseError:
-            blob = firebase.bucket.new_blob(blob_path)
-            await blob.upload(photo_data)
+        existing_blobs = await firebase.bucket.list_blobs(prefix=f'users/avatars/{user_id}.')
+        for existing_blob_name in existing_blobs:
+            await firebase.storage.delete(
+                bucket=firebase.bucket.name,
+                object_name=existing_blob_name,
+                timeout=300,
+            )
+
+        blob = firebase.bucket.new_blob(blob_path)
+        await blob.upload(photo_data)
 
         await message.bot.set_message_reaction(
             message.chat.id,

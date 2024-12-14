@@ -11,7 +11,7 @@ from aiogram.types import Message, CallbackQuery, URLInputFile, LabeledPrice, Pr
 from bot.config import config, MessageEffect
 from bot.database.main import firebase
 from bot.database.models.cart import CartItem
-from bot.database.models.common import PaymentType, PaymentMethod, Currency
+from bot.database.models.common import Model, Currency, PaymentType, PaymentMethod
 from bot.database.models.package import Package, PackageStatus
 from bot.database.models.product import Product, ProductType, ProductCategory
 from bot.database.models.subscription import (
@@ -35,6 +35,11 @@ from bot.database.operations.subscription.writers import write_subscription
 from bot.database.operations.transaction.writers import write_transaction
 from bot.database.operations.user.getters import get_user
 from bot.database.operations.user.updaters import update_user
+from bot.handlers.ai.eightify_handler import handle_eightify
+from bot.handlers.ai.face_swap_handler import handle_face_swap
+from bot.handlers.ai.music_gen_handler import handle_music_gen
+from bot.handlers.ai.photoshop_ai_handler import handle_photoshop_ai
+from bot.handlers.ai.suno_handler import handle_suno
 from bot.handlers.common.info_handler import handle_info_selection
 from bot.handlers.payment.promo_code_handler import handle_promo_code
 from bot.helpers.billing.create_payment import OrderItem, create_payment
@@ -397,6 +402,13 @@ async def handle_package(message: Message, user_id: str, state: FSMContext, is_e
         ProductType.PACKAGE,
         product_category,
     )
+    if product_category == ProductCategory.TEXT:
+        additional_products = await get_active_products_by_product_type_and_category(
+            ProductType.PACKAGE,
+            ProductCategory.SUMMARY,
+        )
+        products.extend(additional_products)
+
     cost = Product.get_discount_price(
         ProductType.PACKAGE,
         1,
@@ -1275,6 +1287,42 @@ async def handle_successful_payment(message: Message, state: FSMContext):
         text=text,
         reply_markup=reply_markup,
     )
+
+    if user.current_model == Model.EIGHTIFY:
+        await handle_eightify(
+            bot=message.bot,
+            chat_id=user.telegram_chat_id,
+            state=state,
+            user_id=user.id,
+        )
+    elif user.current_model == Model.FACE_SWAP:
+        await handle_face_swap(
+            bot=message.bot,
+            chat_id=user.telegram_chat_id,
+            state=state,
+            user_id=user.id,
+        )
+    elif user.current_model == Model.PHOTOSHOP_AI:
+        await handle_photoshop_ai(
+            bot=message.bot,
+            chat_id=user.telegram_chat_id,
+            state=state,
+            user_id=user.id,
+        )
+    elif user.current_model == Model.MUSIC_GEN:
+        await handle_music_gen(
+            bot=message.bot,
+            chat_id=user.telegram_chat_id,
+            state=state,
+            user_id=user.id,
+        )
+    elif user.current_model == Model.SUNO:
+        await handle_suno(
+            bot=message.bot,
+            chat_id=user.telegram_chat_id,
+            state=state,
+            user_id=user.id,
+        )
 
 
 async def handle_cancel_subscription(message: Message, user_id: str, state: FSMContext):

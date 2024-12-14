@@ -4,6 +4,9 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 from bot.database.models.common import (
     Model,
+    EightifyFocus,
+    EightifyFormat,
+    EightifyAmount,
     DALLEVersion,
     DALLEResolution,
     DALLEQuality,
@@ -53,20 +56,26 @@ def build_settings_choose_text_model_keyboard(language_code: LanguageCode) -> In
     buttons = [
         [
             InlineKeyboardButton(
-                text=f'{get_localization(language_code).CHATGPT}',
+                text=get_localization(language_code).CHATGPT,
                 callback_data=f'settings_choose_text_model:{Model.CHAT_GPT}'
             ),
         ],
         [
             InlineKeyboardButton(
-                text=f'{get_localization(language_code).CLAUDE}',
+                text=get_localization(language_code).CLAUDE,
                 callback_data=f'settings_choose_text_model:{Model.CLAUDE}'
             ),
         ],
         [
             InlineKeyboardButton(
-                text=f'{get_localization(language_code).GEMINI}',
+                text=get_localization(language_code).GEMINI,
                 callback_data=f'settings_choose_text_model:{Model.GEMINI}'
+            ),
+        ],
+        [
+            InlineKeyboardButton(
+                text=get_localization(language_code).EIGHTIFY,
+                callback_data=f'settings_choose_text_model:{Model.EIGHTIFY}'
             ),
         ],
         [
@@ -228,6 +237,91 @@ def build_settings_keyboard(
                         InlineKeyboardButton(
                             text=get_localization(language_code).MANAGE_CATALOG,
                             callback_data=f'setting:manage_catalog:{model}'
+                        ),
+                    ],
+                ]
+            )
+    elif model == Model.EIGHTIFY:
+        buttons = [
+            [
+                InlineKeyboardButton(
+                    text=get_localization(language_code).SHOW_USAGE_QUOTA_IN_MESSAGES + (
+                        ' ✅' if settings[model][UserSettings.SHOW_USAGE_QUOTA] else ' ❌'
+                    ),
+                    callback_data=f'setting:{UserSettings.SHOW_USAGE_QUOTA}:{model}'
+                ),
+            ],
+            [
+                InlineKeyboardButton(
+                    text=get_localization(language_code).EIGHTIFY_FOCUS_INSIGHTFUL + (
+                        ' ✅' if settings[model][UserSettings.FOCUS] == EightifyFocus.INSIGHTFUL else ''
+                    ),
+                    callback_data=f'setting:{EightifyFocus.INSIGHTFUL}:{model}'
+                ),
+                InlineKeyboardButton(
+                    text=get_localization(language_code).EIGHTIFY_FOCUS_FUNNY + (
+                        ' ✅' if settings[model][UserSettings.FOCUS] == EightifyFocus.FUNNY else ''
+                    ),
+                    callback_data=f'setting:{EightifyFocus.FUNNY}:{model}'
+                ),
+            ],
+            [
+                InlineKeyboardButton(
+                    text=get_localization(language_code).EIGHTIFY_FOCUS_ACTIONABLE + (
+                        ' ✅' if settings[model][UserSettings.FOCUS] == EightifyFocus.ACTIONABLE else ''
+                    ),
+                    callback_data=f'setting:{EightifyFocus.ACTIONABLE}:{model}'
+                ),
+                InlineKeyboardButton(
+                    text=get_localization(language_code).EIGHTIFY_FOCUS_CONTROVERSIAL + (
+                        ' ✅' if settings[model][UserSettings.FOCUS] == EightifyFocus.CONTROVERSIAL else ''
+                    ),
+                    callback_data=f'setting:{EightifyFocus.CONTROVERSIAL}:{model}'
+                ),
+            ],
+            [
+                InlineKeyboardButton(
+                    text=get_localization(language_code).EIGHTIFY_FORMAT_LIST + (
+                        ' ✅' if settings[model][UserSettings.FORMAT] == EightifyFormat.LIST else ''
+                    ),
+                    callback_data=f'setting:{EightifyFormat.LIST}:{model}'
+                ),
+                InlineKeyboardButton(
+                    text=get_localization(language_code).EIGHTIFY_FORMAT_FAQ + (
+                        ' ✅' if settings[model][UserSettings.FORMAT] == EightifyFormat.FAQ else ''
+                    ),
+                    callback_data=f'setting:{EightifyFormat.FAQ}:{model}'
+                ),
+            ],
+            [
+                InlineKeyboardButton(
+                    text=get_localization(language_code).EIGHTIFY_AMOUNT_SHORT + (
+                        ' ✅' if settings[model][UserSettings.AMOUNT] == EightifyAmount.SHORT else ''
+                    ),
+                    callback_data=f'setting:{EightifyAmount.SHORT}:{model}'
+                ),
+                InlineKeyboardButton(
+                    text=get_localization(language_code).EIGHTIFY_AMOUNT_AUTO + (
+                        ' ✅' if settings[model][UserSettings.AMOUNT] == EightifyAmount.AUTO else ''
+                    ),
+                    callback_data=f'setting:{EightifyAmount.AUTO}:{model}'
+                ),
+                InlineKeyboardButton(
+                    text=get_localization(language_code).EIGHTIFY_AMOUNT_DETAILED + (
+                        ' ✅' if settings[model][UserSettings.AMOUNT] == EightifyAmount.DETAILED else ''
+                    ),
+                    callback_data=f'setting:{EightifyAmount.DETAILED}:{model}'
+                ),
+            ],
+        ]
+
+        if show_advanced_settings:
+            buttons.extend(
+                [
+                    [
+                        InlineKeyboardButton(
+                            text=get_localization(language_code).VOICE_MESSAGES,
+                            callback_data=f'setting:voice_messages:{model}'
                         ),
                     ],
                 ]

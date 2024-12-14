@@ -10,6 +10,7 @@ from bot.database.models.common import Model, ModelType
 from bot.database.models.user import UserSettings
 from bot.database.operations.user.getters import get_user
 from bot.database.operations.user.updaters import update_user
+from bot.handlers.ai.eightify_handler import handle_eightify
 from bot.handlers.ai.face_swap_handler import handle_face_swap
 from bot.handlers.ai.music_gen_handler import handle_music_gen
 from bot.handlers.ai.photoshop_ai_handler import handle_photoshop_ai
@@ -142,7 +143,14 @@ async def handle_mode_selection(callback_query: CallbackQuery, state: FSMContext
             allow_sending_without_reply=True,
         )
 
-    if chosen_model == Model.FACE_SWAP:
+    if chosen_model == Model.EIGHTIFY:
+        await handle_eightify(
+            bot=callback_query.bot,
+            chat_id=str(callback_query.message.chat.id),
+            state=state,
+            user_id=user_id,
+        )
+    elif chosen_model == Model.FACE_SWAP:
         await handle_face_swap(
             bot=callback_query.bot,
             chat_id=str(callback_query.message.chat.id),

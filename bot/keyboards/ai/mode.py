@@ -67,7 +67,8 @@ def build_mode_keyboard(language_code: LanguageCode, model: Model, model_version
                 [
                     InlineKeyboardButton(
                         text=get_localization(language_code).CLAUDE_3_OPUS + (
-                            ' ✅' if model == Model.CLAUDE and model_version == ClaudeGPTVersion.V3_Opus else ''),
+                            ' ✅' if model == Model.CLAUDE and model_version == ClaudeGPTVersion.V3_Opus else ''
+                        ),
                         callback_data=f'mode:{Model.CLAUDE}:{ClaudeGPTVersion.V3_Opus}'
                     ),
                 ],
@@ -82,15 +83,25 @@ def build_mode_keyboard(language_code: LanguageCode, model: Model, model_version
                 [
                     InlineKeyboardButton(
                         text=get_localization(language_code).GEMINI_1_PRO + (
-                            ' ✅' if model == Model.GEMINI and model_version == GeminiGPTVersion.V1_Pro else ''),
+                            ' ✅' if model == Model.GEMINI and model_version == GeminiGPTVersion.V1_Pro else ''
+                        ),
                         callback_data=f'mode:{Model.GEMINI}:{GeminiGPTVersion.V1_Pro}'
                     ),
                 ],
                 [
                     InlineKeyboardButton(
                         text=get_localization(language_code).GEMINI_1_ULTRA + (
-                            ' ✅' if model == Model.GEMINI and model_version == GeminiGPTVersion.V1_Ultra else ''),
+                            ' ✅' if model == Model.GEMINI and model_version == GeminiGPTVersion.V1_Ultra else ''
+                        ),
                         callback_data=f'mode:{Model.GEMINI}:{GeminiGPTVersion.V1_Ultra}'
+                    ),
+                ],
+                [
+                    InlineKeyboardButton(
+                        text=get_localization(language_code).EIGHTIFY + (
+                            ' ✅' if model == Model.EIGHTIFY else ''
+                        ),
+                        callback_data=f'mode:{Model.EIGHTIFY}'
                     ),
                 ],
                 [
@@ -219,15 +230,19 @@ def build_switched_to_ai_keyboard(language_code: LanguageCode, model: Model) -> 
                 callback_data=f'switched_to_ai:settings:{model}'
             ),
         ],
-        [
-            InlineKeyboardButton(
-                text=get_localization(language_code).SWITCHED_TO_AI_INFO,
-                callback_data=f'switched_to_ai:info:{model}'
-            ),
-        ],
     ]
 
-    if model not in [Model.FACE_SWAP, Model.PHOTOSHOP_AI]:
+    if model not in [Model.EIGHTIFY]:
+        buttons.append(
+            [
+                InlineKeyboardButton(
+                    text=get_localization(language_code).SWITCHED_TO_AI_INFO,
+                    callback_data=f'switched_to_ai:info:{model}'
+                ),
+            ],
+        )
+
+    if model not in [Model.EIGHTIFY, Model.FACE_SWAP, Model.PHOTOSHOP_AI]:
         buttons.append(
             [
                 InlineKeyboardButton(

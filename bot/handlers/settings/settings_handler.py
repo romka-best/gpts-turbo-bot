@@ -16,6 +16,9 @@ from bot.database.models.common import (
     Model,
     ModelType,
     Quota,
+    EightifyFocus,
+    EightifyFormat,
+    EightifyAmount,
     DALLEVersion,
     DALLEResolution,
     DALLEQuality,
@@ -236,7 +239,21 @@ async def handle_setting_selection(callback_query: CallbackQuery, state: FSMCont
         await handle_catalog_digital_employees(callback_query.message, user_id, state, chosen_model, True)
         return
 
-    if chosen_setting == DALLEResolution.LOW or chosen_setting == DALLEResolution.MEDIUM or chosen_setting == DALLEResolution.HIGH:
+    if (
+        chosen_setting == EightifyFocus.INSIGHTFUL or
+        chosen_setting == EightifyFocus.FUNNY or
+        chosen_setting == EightifyFocus.ACTIONABLE or
+        chosen_setting == EightifyFocus.CONTROVERSIAL
+    ):
+        user.settings[Model.EIGHTIFY][UserSettings.FOCUS] = chosen_setting
+        what_changed = UserSettings.FOCUS
+    elif chosen_setting == EightifyFormat.LIST or chosen_setting == EightifyFormat.FAQ:
+        user.settings[Model.EIGHTIFY][UserSettings.FORMAT] = chosen_setting
+        what_changed = UserSettings.FORMAT
+    elif chosen_setting == EightifyAmount.SHORT or chosen_setting == EightifyAmount.AUTO or chosen_setting == EightifyAmount.DETAILED:
+        user.settings[Model.EIGHTIFY][UserSettings.AMOUNT] = chosen_setting
+        what_changed = UserSettings.AMOUNT
+    elif chosen_setting == DALLEResolution.LOW or chosen_setting == DALLEResolution.MEDIUM or chosen_setting == DALLEResolution.HIGH:
         user.settings[Model.DALL_E][UserSettings.RESOLUTION] = chosen_setting
         if chosen_setting == DALLEResolution.LOW:
             user.settings[Model.DALL_E][UserSettings.ASPECT_RATIO] = AspectRatio.SQUARE
@@ -316,6 +333,36 @@ async def handle_setting_selection(callback_query: CallbackQuery, state: FSMCont
                     callback_data == DALLEVersion.V2 or callback_data == DALLEVersion.V3
                 ) or (
                     callback_data == SunoVersion.V3 or callback_data == SunoVersion.V3_5 or callback_data == SunoVersion.V4
+                ):
+                    text = text.replace(' ✅', '')
+            elif what_changed == UserSettings.FOCUS:
+                if callback_data == chosen_setting and '✅' not in text:
+                    text += ' ✅'
+                    keyboard_changed = True
+                elif (
+                    callback_data == EightifyFocus.INSIGHTFUL or
+                    callback_data == EightifyFocus.FUNNY or
+                    callback_data == EightifyFocus.ACTIONABLE or
+                    callback_data == EightifyFocus.CONTROVERSIAL
+                ):
+                    text = text.replace(' ✅', '')
+            elif what_changed == UserSettings.FORMAT:
+                if callback_data == chosen_setting and '✅' not in text:
+                    text += ' ✅'
+                    keyboard_changed = True
+                elif (
+                    callback_data == EightifyFormat.LIST or
+                    callback_data == EightifyFormat.FAQ
+                ):
+                    text = text.replace(' ✅', '')
+            elif what_changed == UserSettings.AMOUNT:
+                if callback_data == chosen_setting and '✅' not in text:
+                    text += ' ✅'
+                    keyboard_changed = True
+                elif (
+                    callback_data == EightifyAmount.SHORT or
+                    callback_data == EightifyAmount.AUTO or
+                    callback_data == EightifyAmount.DETAILED
                 ):
                     text = text.replace(' ✅', '')
             elif what_changed == UserSettings.QUALITY:
@@ -451,12 +498,14 @@ async def handle_voice_messages_setting_selection(callback_query: CallbackQuery,
 
         return
     elif (
-        chosen_setting == UserSettings.TURN_ON_VOICE_MESSAGES and (
-        not user.daily_limits[Quota.VOICE_MESSAGES] and not user.additional_usage_quota[Quota.VOICE_MESSAGES]
-    )):
+        chosen_setting == UserSettings.TURN_ON_VOICE_MESSAGES and
+        not user.daily_limits[Quota.VOICE_MESSAGES] and
+        not user.additional_usage_quota[Quota.VOICE_MESSAGES]
+    ):
         user.settings[Model.CHAT_GPT][chosen_setting] = False
         user.settings[Model.CLAUDE][chosen_setting] = False
         user.settings[Model.GEMINI][chosen_setting] = False
+        user.settings[Model.EIGHTIFY][chosen_setting] = False
         await handle_buy(callback_query.message, user_id, state)
 
         return
@@ -505,11 +554,13 @@ async def handle_voice_messages_setting_selection(callback_query: CallbackQuery,
             user.settings[Model.CHAT_GPT][UserSettings.VOICE] = chosen_setting
             user.settings[Model.CLAUDE][UserSettings.VOICE] = chosen_setting
             user.settings[Model.GEMINI][UserSettings.VOICE] = chosen_setting
+            user.settings[Model.EIGHTIFY][UserSettings.VOICE] = chosen_setting
         else:
             new_setting = not user.settings[Model.CHAT_GPT][chosen_setting]
             user.settings[Model.CHAT_GPT][chosen_setting] = new_setting
             user.settings[Model.CLAUDE][chosen_setting] = new_setting
             user.settings[Model.GEMINI][chosen_setting] = new_setting
+            user.settings[Model.EIGHTIFY][chosen_setting] = new_setting
 
         await update_user(
             user_id, {

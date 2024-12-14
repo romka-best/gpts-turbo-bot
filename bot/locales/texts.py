@@ -332,6 +332,7 @@ class Texts(Protocol):
     GEMINI_1_FLASH = '🏎 Gemini 1.5 Flash'
     GEMINI_1_PRO = '💼 Gemini 1.5 Pro'
     GEMINI_1_ULTRA = '🛡️ Gemini 1.0 Ultra'
+    EIGHTIFY = '👀 Eightify'
     DALL_E = '👨‍🎨 DALL-E'
     MIDJOURNEY = '🎨 Midjourney'
     STABLE_DIFFUSION = '🎆 Stable Diffusion 3.5'
@@ -374,6 +375,20 @@ class Texts(Protocol):
     EXAMPLE_INFO: str
 
     PHOTO_FEATURE_FORBIDDEN: str
+
+    # Eightify
+    EIGHTIFY_INFO: str
+    EIGHTIFY_FOCUS_INSIGHTFUL: str
+    EIGHTIFY_FOCUS_FUNNY: str
+    EIGHTIFY_FOCUS_ACTIONABLE: str
+    EIGHTIFY_FOCUS_CONTROVERSIAL: str
+    EIGHTIFY_FORMAT_LIST: str
+    EIGHTIFY_FORMAT_FAQ: str
+    EIGHTIFY_AMOUNT_AUTO: str
+    EIGHTIFY_AMOUNT_SHORT: str
+    EIGHTIFY_AMOUNT_DETAILED: str
+    EIGHTIFY_VALUE_ERROR: str
+    EIGHTIFY_VIDEO_ERROR: str
 
     # Midjourney
     MIDJOURNEY_ALREADY_CHOSE_UPSCALE: str
@@ -1062,15 +1077,29 @@ class Texts(Protocol):
             is_last = index == len(ai_products) - 1
             left_part = '┣' if not is_last else '┗'
             right_part = '\n' if not is_last else ''
+
+            if (
+                count_expense_money[ai_product_id]['EXAMPLE_ALL'] or
+                count_expense_money[ai_product_id]['AVERAGE_EXAMPLE_PRICE']
+            ):
+                ai_info += f"""    {left_part} {ai_product_name}:
+                ┣ 🎁 Средняя цена примера: ${round(count_expense_money[ai_product_id]['AVERAGE_EXAMPLE_PRICE'], 4)} {calculate_percentage_difference(is_all_time, count_expense_money[ai_product_id]['AVERAGE_EXAMPLE_PRICE'], count_expense_money_before[ai_product_id]['AVERAGE_EXAMPLE_PRICE'])}
+                ┣ 🚀 Всего за примеры: ${round(count_expense_money[ai_product_id]['EXAMPLE_ALL'], 4)} {calculate_percentage_difference(is_all_time, count_expense_money[ai_product_id]['EXAMPLE_ALL'], count_expense_money_before[ai_product_id]['EXAMPLE_ALL'])}
+                ┣ 💸 Средняя цена запроса: ${round(count_expense_money[ai_product_id]['AVERAGE_PRICE'], 4)} {calculate_percentage_difference(is_all_time, count_expense_money[ai_product_id]['AVERAGE_PRICE'], count_expense_money_before[ai_product_id]['AVERAGE_PRICE'])}
+                ┗ 💰 Всего: ${round(count_expense_money[ai_product_id]['ALL'], 4)} {calculate_percentage_difference(is_all_time, count_expense_money[ai_product_id]['ALL'], count_expense_money_before[ai_product_id]['ALL'])}{right_part}"""
+                continue
+
             ai_info += f"""    {left_part} {ai_product_name}:
         ┣ 💸 Средняя цена запроса: ${round(count_expense_money[ai_product_id]['AVERAGE_PRICE'], 4)} {calculate_percentage_difference(is_all_time, count_expense_money[ai_product_id]['AVERAGE_PRICE'], count_expense_money_before[ai_product_id]['AVERAGE_PRICE'])}
         ┗ 💰 Всего: ${round(count_expense_money[ai_product_id]['ALL'], 4)} {calculate_percentage_difference(is_all_time, count_expense_money[ai_product_id]['ALL'], count_expense_money_before[ai_product_id]['ALL'])}{right_part}"""
+
         tech_info = ''
         for index, (tech_product_id, tech_product_name) in enumerate(tech_products.items()):
             is_last = index == len(tech_products) - 1
             left_part = '┣' if not is_last else '┗'
             right_part = '\n' if not is_last else ''
             tech_info += f"    {left_part} {tech_product_name}: ${round(count_expense_money[tech_product_id]['ALL'], 4)} {calculate_percentage_difference(is_all_time, count_expense_money[tech_product_id]['ALL'], count_expense_money_before[tech_product_id]['ALL'])}{right_part}"
+
         subscription_info = ''
         for index, (subscription_product_id, subscription_product_name) in enumerate(subscription_products.items()):
             is_last = index == len(subscription_products) - 1
@@ -1263,8 +1292,7 @@ class Texts(Protocol):
         subscription_name: str,
         subscription_status: SubscriptionStatus,
         gender: UserGender,
-        current_model: Model,
-        current_model_version: str,
+        current_model: str,
         current_currency: Currency,
         renewal_date,
     ) -> str:

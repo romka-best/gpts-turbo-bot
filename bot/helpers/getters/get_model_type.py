@@ -2,8 +2,14 @@ from bot.database.models.common import Model, ModelType
 
 
 def get_model_type(model: Model):
-    if model == Model.CHAT_GPT or model == Model.CLAUDE or model == Model.GEMINI:
+    if (
+        model == Model.CHAT_GPT or
+        model == Model.CLAUDE or
+        model == Model.GEMINI
+    ):
         return ModelType.TEXT
+    elif model == Model.EIGHTIFY:
+        return ModelType.SUMMARY
     elif (
         model == Model.DALL_E or
         model == Model.MIDJOURNEY or

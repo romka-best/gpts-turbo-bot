@@ -159,6 +159,7 @@ async def handle_claude(message: Message, state: FSMContext, user: User, user_qu
         else:
             text = ''
 
+    can_work_with_photos = user_quota != Quota.CLAUDE_3_HAIKU
     if filenames and len(filenames):
         await write_message(user.current_chat_id, 'user', user.id, text, True, filenames)
     else:
@@ -187,7 +188,7 @@ async def handle_claude(message: Message, state: FSMContext, user: User, user_qu
                 'text': sorted_message.content,
             })
 
-        if sorted_message.photo_filenames:
+        if sorted_message.photo_filenames and can_work_with_photos:
             for photo_filename in sorted_message.photo_filenames:
                 photo_path = f'users/vision/{user.id}/{photo_filename}'
                 photo = await firebase.bucket.get_blob(photo_path)
@@ -400,7 +401,7 @@ async def handle_claude_3_sonnet_example(
             not user.subscription_id and
             user.current_model == Model.CLAUDE and
             user.settings[user.current_model][UserSettings.SHOW_EXAMPLES] and
-            user.daily_limits[Quota.CLAUDE_3_HAIKU] + 1 in [3, 10] and
+            user.daily_limits[Quota.CLAUDE_3_HAIKU] + 1 in [3, 7] and
             (current_date - user.last_subscription_limit_update).days <= 3
         ):
             history = get_history_without_duplicates(history)

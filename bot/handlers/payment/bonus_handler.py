@@ -109,6 +109,12 @@ async def handle_bonus_cash_out(message: Message, user_id: str, state: FSMContex
         ProductType.PACKAGE,
         product_category,
     )
+    if product_category == ProductCategory.TEXT:
+        additional_products = await get_active_products_by_product_type_and_category(
+            ProductType.PACKAGE,
+            ProductCategory.SUMMARY,
+        )
+        products.extend(additional_products)
 
     text = get_localization(user_language_code).BONUS_CHOOSE_PACKAGE
     reply_markup = build_bonus_cash_out_keyboard(user_language_code, products, page)
@@ -362,6 +368,7 @@ async def quantity_of_bonus_package_sent(message: Message, state: FSMContext):
             )
         else:
             user.balance -= price
+            user.additional_usage_quota[product.details.get('quota')] += package_product_quantity
             until_at = None
             if product.details.get('is_recurring', False):
                 current_date = datetime.now(timezone.utc)

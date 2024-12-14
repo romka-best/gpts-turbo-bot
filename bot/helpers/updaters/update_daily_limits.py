@@ -58,7 +58,7 @@ async def update_daily_limits(bot: Bot, storage: BaseStorage):
         await batch.commit()
         await asyncio.gather(*tasks, return_exceptions=True)
 
-    await send_message_to_admins_and_developers(bot, f'<b>Updated daily limits successfully</b> 🎉')
+    await send_message_to_admins_and_developers(bot, f'<b>Updated Daily Limits Successfully</b> 🎉')
 
 
 async def update_user_daily_limits(bot: Bot, user: User, batch: AsyncWriteBatch, storage: BaseStorage):
