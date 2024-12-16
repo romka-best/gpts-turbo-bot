@@ -7,7 +7,6 @@ from bot.database.models.common import (
     EightifyFocus,
     EightifyFormat,
     EightifyAmount,
-    DALLEVersion,
     DALLEResolution,
     DALLEQuality,
     MidjourneyVersion,
@@ -16,7 +15,7 @@ from bot.database.models.common import (
     SendType,
     AspectRatio,
 )
-from bot.database.models.user import UserSettings
+from bot.database.models.user import UserSettings, UserGender
 from bot.locales.main import get_localization
 from bot.locales.types import LanguageCode
 
@@ -80,25 +79,7 @@ def build_settings_choose_text_model_keyboard(language_code: LanguageCode) -> In
         ],
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).VOICE_MESSAGES,
-                callback_data=f'settings_choose_text_model:voice_messages'
-            ),
-        ],
-        [
-            InlineKeyboardButton(
-                text=get_localization(language_code).MANAGE_CHATS,
-                callback_data=f'settings_choose_text_model:manage_chats'
-            ),
-        ],
-        [
-            InlineKeyboardButton(
-                text=get_localization(language_code).MANAGE_CATALOG,
-                callback_data=f'settings_choose_text_model:manage_catalog'
-            ),
-        ],
-        [
-            InlineKeyboardButton(
-                text=get_localization(language_code).BACK,
+                text=get_localization(language_code).SETTINGS_TO_OTHER_TYPE_MODELS,
                 callback_data='settings_choose_text_model:back'
             ),
         ],
@@ -186,8 +167,6 @@ def build_settings_keyboard(
     model: Model,
     model_type: str,
     settings: dict,
-    show_back_button=True,
-    show_advanced_settings=False,
 ) -> InlineKeyboardMarkup:
     buttons = []
     if model == Model.CHAT_GPT or model == Model.CLAUDE or model == Model.GEMINI:
@@ -216,31 +195,25 @@ def build_settings_keyboard(
                     callback_data=f'setting:{UserSettings.SHOW_THE_NAME_OF_THE_ROLES}:{model}'
                 ),
             ],
+            [
+                InlineKeyboardButton(
+                    text=get_localization(language_code).VOICE_MESSAGES,
+                    callback_data=f'setting:voice_messages:{model}'
+                ),
+            ],
+            [
+                InlineKeyboardButton(
+                    text=get_localization(language_code).MANAGE_CHATS,
+                    callback_data=f'setting:manage_chats:{model}'
+                ),
+            ],
+            [
+                InlineKeyboardButton(
+                    text=get_localization(language_code).MANAGE_CATALOG,
+                    callback_data=f'setting:manage_catalog:{model}'
+                ),
+            ],
         ]
-
-        if show_advanced_settings:
-            buttons.extend(
-                [
-                    [
-                        InlineKeyboardButton(
-                            text=get_localization(language_code).VOICE_MESSAGES,
-                            callback_data=f'setting:voice_messages:{model}'
-                        ),
-                    ],
-                    [
-                        InlineKeyboardButton(
-                            text=get_localization(language_code).MANAGE_CHATS,
-                            callback_data=f'setting:manage_chats:{model}'
-                        ),
-                    ],
-                    [
-                        InlineKeyboardButton(
-                            text=get_localization(language_code).MANAGE_CATALOG,
-                            callback_data=f'setting:manage_catalog:{model}'
-                        ),
-                    ],
-                ]
-            )
     elif model == Model.EIGHTIFY:
         buttons = [
             [
@@ -249,6 +222,12 @@ def build_settings_keyboard(
                         ' ✅' if settings[model][UserSettings.SHOW_USAGE_QUOTA] else ' ❌'
                     ),
                     callback_data=f'setting:{UserSettings.SHOW_USAGE_QUOTA}:{model}'
+                ),
+            ],
+            [
+                InlineKeyboardButton(
+                    text=get_localization(language_code).SETTINGS_FOCUS,
+                    callback_data=f'setting:nothing:{model}'
                 ),
             ],
             [
@@ -281,6 +260,12 @@ def build_settings_keyboard(
             ],
             [
                 InlineKeyboardButton(
+                    text=get_localization(language_code).SETTINGS_FORMAT,
+                    callback_data=f'setting:nothing:{model}'
+                ),
+            ],
+            [
+                InlineKeyboardButton(
                     text=get_localization(language_code).EIGHTIFY_FORMAT_LIST + (
                         ' ✅' if settings[model][UserSettings.FORMAT] == EightifyFormat.LIST else ''
                     ),
@@ -291,6 +276,12 @@ def build_settings_keyboard(
                         ' ✅' if settings[model][UserSettings.FORMAT] == EightifyFormat.FAQ else ''
                     ),
                     callback_data=f'setting:{EightifyFormat.FAQ}:{model}'
+                ),
+            ],
+            [
+                InlineKeyboardButton(
+                    text=get_localization(language_code).SETTINGS_AMOUNT,
+                    callback_data=f'setting:nothing:{model}'
                 ),
             ],
             [
@@ -313,19 +304,13 @@ def build_settings_keyboard(
                     callback_data=f'setting:{EightifyAmount.DETAILED}:{model}'
                 ),
             ],
+            [
+                InlineKeyboardButton(
+                    text=get_localization(language_code).VOICE_MESSAGES,
+                    callback_data=f'setting:voice_messages:{model}'
+                ),
+            ],
         ]
-
-        if show_advanced_settings:
-            buttons.extend(
-                [
-                    [
-                        InlineKeyboardButton(
-                            text=get_localization(language_code).VOICE_MESSAGES,
-                            callback_data=f'setting:voice_messages:{model}'
-                        ),
-                    ],
-                ]
-            )
     elif model == Model.DALL_E:
         buttons = [
             [
@@ -334,6 +319,12 @@ def build_settings_keyboard(
                         ' ✅' if settings[model][UserSettings.SHOW_USAGE_QUOTA] else ' ❌'
                     ),
                     callback_data=f'setting:{UserSettings.SHOW_USAGE_QUOTA}:{model}'
+                ),
+            ],
+            [
+                InlineKeyboardButton(
+                    text=get_localization(language_code).SETTINGS_SEND_TYPE,
+                    callback_data=f'setting:nothing:{model}'
                 ),
             ],
             [
@@ -352,22 +343,34 @@ def build_settings_keyboard(
             ],
             [
                 InlineKeyboardButton(
-                    text=DALLEResolution.LOW + (
+                    text=get_localization(language_code).SETTINGS_ASPECT_RATIO,
+                    callback_data=f'setting:nothing:{model}'
+                ),
+            ],
+            [
+                InlineKeyboardButton(
+                    text=AspectRatio.SQUARE + (
                         ' ✅' if settings[model][UserSettings.RESOLUTION] == DALLEResolution.LOW else ''
                     ),
                     callback_data=f'setting:{DALLEResolution.LOW}:{model}'
                 ),
                 InlineKeyboardButton(
-                    text=DALLEResolution.MEDIUM + (
+                    text=AspectRatio.PORTRAIT + (
                         ' ✅' if settings[model][UserSettings.RESOLUTION] == DALLEResolution.MEDIUM else ''
                     ),
                     callback_data=f'setting:{DALLEResolution.MEDIUM}:{model}'
                 ),
                 InlineKeyboardButton(
-                    text=DALLEResolution.HIGH + (
+                    text=AspectRatio.LANDSCAPE + (
                         ' ✅' if settings[model][UserSettings.RESOLUTION] == DALLEResolution.HIGH else ''
                     ),
                     callback_data=f'setting:{DALLEResolution.HIGH}:{model}'
+                ),
+            ],
+            [
+                InlineKeyboardButton(
+                    text=get_localization(language_code).SETTINGS_QUALITY,
+                    callback_data=f'setting:nothing:{model}'
                 ),
             ],
             [
@@ -384,18 +387,6 @@ def build_settings_keyboard(
                     callback_data=f'setting:{DALLEQuality.HD}:{model}'
                 ),
             ],
-            [
-                InlineKeyboardButton(
-                    text=DALLEVersion.V2 + (
-                        ' ✅' if settings[model][UserSettings.VERSION] == DALLEVersion.V2 else ''),
-                    callback_data=f'setting:{DALLEVersion.V2}:{model}'
-                ),
-                InlineKeyboardButton(
-                    text=DALLEVersion.V3 + (
-                        ' ✅' if settings[model][UserSettings.VERSION] == DALLEVersion.V3 else ''),
-                    callback_data=f'setting:{DALLEVersion.V3}:{model}'
-                ),
-            ],
         ]
     elif model == Model.MIDJOURNEY:
         buttons = [
@@ -405,6 +396,12 @@ def build_settings_keyboard(
                         ' ✅' if settings[model][UserSettings.SHOW_USAGE_QUOTA] else ' ❌'
                     ),
                     callback_data=f'setting:{UserSettings.SHOW_USAGE_QUOTA}:{model}'
+                ),
+            ],
+            [
+                InlineKeyboardButton(
+                    text=get_localization(language_code).SETTINGS_SEND_TYPE,
+                    callback_data=f'setting:nothing:{model}'
                 ),
             ],
             [
@@ -419,6 +416,12 @@ def build_settings_keyboard(
                         ' ✅' if settings[model][UserSettings.SEND_TYPE] == SendType.DOCUMENT else ''
                     ),
                     callback_data=f'setting:{SendType.DOCUMENT}:{model}'
+                ),
+            ],
+            [
+                InlineKeyboardButton(
+                    text=get_localization(language_code).SETTINGS_ASPECT_RATIO,
+                    callback_data=f'setting:nothing:{model}'
                 ),
             ],
             [
@@ -495,6 +498,12 @@ def build_settings_keyboard(
             ],
             [
                 InlineKeyboardButton(
+                    text=get_localization(language_code).SETTINGS_VERSION,
+                    callback_data=f'setting:nothing:{model}'
+                ),
+            ],
+            [
+                InlineKeyboardButton(
                     text=MidjourneyVersion.V5 + (
                         ' ✅' if settings[model][UserSettings.VERSION] == MidjourneyVersion.V5 else ''
                     ),
@@ -520,6 +529,12 @@ def build_settings_keyboard(
             ],
             [
                 InlineKeyboardButton(
+                    text=get_localization(language_code).SETTINGS_SEND_TYPE,
+                    callback_data=f'setting:nothing:{model}'
+                ),
+            ],
+            [
+                InlineKeyboardButton(
                     text=get_localization(language_code).IMAGE + (
                         ' ✅' if settings[model][UserSettings.SEND_TYPE] == SendType.IMAGE else ''
                     ),
@@ -530,6 +545,12 @@ def build_settings_keyboard(
                         ' ✅' if settings[model][UserSettings.SEND_TYPE] == SendType.DOCUMENT else ''
                     ),
                     callback_data=f'setting:{SendType.DOCUMENT}:{model}'
+                ),
+            ],
+            [
+                InlineKeyboardButton(
+                    text=get_localization(language_code).SETTINGS_ASPECT_RATIO,
+                    callback_data=f'setting:nothing:{model}'
                 ),
             ],
             [
@@ -590,6 +611,12 @@ def build_settings_keyboard(
                         ' ✅' if settings[model][UserSettings.ASPECT_RATIO] == AspectRatio.CLASSIC_VERTICAL else ''
                     ),
                     callback_data=f'setting:CLASSIC_VERTICAL:{model}'
+                ),
+            ],
+            [
+                InlineKeyboardButton(
+                    text=get_localization(language_code).SETTINGS_PROMPT_SAFETY,
+                    callback_data=f'setting:nothing:{model}'
                 ),
             ],
             [
@@ -628,6 +655,12 @@ def build_settings_keyboard(
             ],
             [
                 InlineKeyboardButton(
+                    text=get_localization(language_code).SETTINGS_SEND_TYPE,
+                    callback_data=f'setting:nothing:{model}'
+                ),
+            ],
+            [
+                InlineKeyboardButton(
                     text=get_localization(language_code).IMAGE + (
                         ' ✅' if settings[model][UserSettings.SEND_TYPE] == SendType.IMAGE else ''
                     ),
@@ -638,6 +671,12 @@ def build_settings_keyboard(
                         ' ✅' if settings[model][UserSettings.SEND_TYPE] == SendType.DOCUMENT else ''
                     ),
                     callback_data=f'setting:{SendType.DOCUMENT}:{model}'
+                ),
+            ],
+            [
+                InlineKeyboardButton(
+                    text=get_localization(language_code).SETTINGS_ASPECT_RATIO,
+                    callback_data=f'setting:nothing:{model}'
                 ),
             ],
             [
@@ -713,16 +752,69 @@ def build_settings_keyboard(
                 ),
             ],
         ]
-    elif (
-        model == Model.FACE_SWAP or
-        model == Model.PHOTOSHOP_AI
-    ):
+    elif model == Model.FACE_SWAP:
         buttons = [
             [
                 InlineKeyboardButton(
                     text=get_localization(language_code).SHOW_USAGE_QUOTA_IN_MESSAGES + (
                         ' ✅' if settings[model][UserSettings.SHOW_USAGE_QUOTA] else ' ❌'),
                     callback_data=f'setting:{UserSettings.SHOW_USAGE_QUOTA}:{model}'
+                ),
+            ],
+            [
+                InlineKeyboardButton(
+                    text=get_localization(language_code).SETTINGS_SEND_TYPE,
+                    callback_data=f'setting:nothing:{model}'
+                ),
+            ],
+            [
+                InlineKeyboardButton(
+                    text=get_localization(language_code).IMAGE + (
+                        ' ✅' if settings[model][UserSettings.SEND_TYPE] == SendType.IMAGE else ''
+                    ),
+                    callback_data=f'setting:{SendType.IMAGE}:{model}'
+                ),
+                InlineKeyboardButton(
+                    text=get_localization(language_code).DOCUMENT + (
+                        ' ✅' if settings[model][UserSettings.SEND_TYPE] == SendType.DOCUMENT else ''
+                    ),
+                    callback_data=f'setting:{SendType.DOCUMENT}:{model}'
+                ),
+            ],
+            [
+                InlineKeyboardButton(
+                    text=get_localization(language_code).SETTINGS_GENDER,
+                    callback_data=f'setting:nothing:{model}'
+                ),
+            ],
+            [
+                InlineKeyboardButton(
+                    text=get_localization(language_code).MALE + (
+                        ' ✅' if settings[model][UserSettings.GENDER] == UserGender.MALE else ''
+                    ),
+                    callback_data=f'setting:{UserGender.MALE}:{model}'
+                ),
+                InlineKeyboardButton(
+                    text=get_localization(language_code).FEMALE + (
+                        ' ✅' if settings[model][UserSettings.GENDER] == UserGender.FEMALE else ''
+                    ),
+                    callback_data=f'setting:{UserGender.FEMALE}:{model}'
+                ),
+            ],
+        ]
+    elif model == Model.PHOTOSHOP_AI:
+        buttons = [
+            [
+                InlineKeyboardButton(
+                    text=get_localization(language_code).SHOW_USAGE_QUOTA_IN_MESSAGES + (
+                        ' ✅' if settings[model][UserSettings.SHOW_USAGE_QUOTA] else ' ❌'),
+                    callback_data=f'setting:{UserSettings.SHOW_USAGE_QUOTA}:{model}'
+                ),
+            ],
+            [
+                InlineKeyboardButton(
+                    text=get_localization(language_code).SETTINGS_SEND_TYPE,
+                    callback_data=f'setting:nothing:{model}'
                 ),
             ],
             [
@@ -761,6 +853,12 @@ def build_settings_keyboard(
             ],
             [
                 InlineKeyboardButton(
+                    text=get_localization(language_code).SETTINGS_SEND_TYPE,
+                    callback_data=f'setting:nothing:{model}'
+                ),
+            ],
+            [
+                InlineKeyboardButton(
                     text=get_localization(language_code).AUDIO + (
                         ' ✅' if settings[model][UserSettings.SEND_TYPE] == SendType.AUDIO else ''
                     ),
@@ -771,6 +869,12 @@ def build_settings_keyboard(
                         ' ✅' if settings[model][UserSettings.SEND_TYPE] == SendType.VIDEO else ''
                     ),
                     callback_data=f'setting:{SendType.VIDEO}:{model}'
+                ),
+            ],
+            [
+                InlineKeyboardButton(
+                    text=get_localization(language_code).SETTINGS_VERSION,
+                    callback_data=f'setting:nothing:{model}'
                 ),
             ],
             [
@@ -797,15 +901,14 @@ def build_settings_keyboard(
             ],
         ]
 
-    if show_back_button:
-        buttons.append(
-            [
-                InlineKeyboardButton(
-                    text=get_localization(language_code).BACK,
-                    callback_data=f'setting:back:{model_type}'
-                )
-            ],
-        )
+    buttons.append(
+        [
+            InlineKeyboardButton(
+                text=get_localization(language_code).SETTINGS_TO_OTHER_MODELS,
+                callback_data=f'setting:back:{model_type}'
+            )
+        ],
+    )
 
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 

@@ -78,6 +78,7 @@ from bot.helpers.handlers.handle_network_error import handle_network_error
 from bot.helpers.handlers.handle_pay_selection_webhook import handle_pay_selection_webhook
 from bot.helpers.handlers.handle_replicate_webhook import handle_replicate_webhook
 from bot.helpers.handlers.handle_stripe_webhook import handle_stripe_webhook
+from bot.helpers.handlers.handle_suno_webhook import handle_suno_webhook
 from bot.helpers.handlers.handle_yookassa_webhook import handle_yookassa_webhook
 from bot.helpers.notifiers.notify_admins_about_error import notify_admins_about_error
 from bot.helpers.senders.send_statistics import send_statistics
@@ -94,6 +95,7 @@ WEBHOOK_PAY_SELECTION_PATH = '/payment/pay-selection'
 WEBHOOK_STRIPE_PATH = '/payment/stripe'
 WEBHOOK_REPLICATE_PATH = config.WEBHOOK_REPLICATE_PATH
 WEBHOOK_MIDJOURNEY_PATH = config.WEBHOOK_MIDJOURNEY_PATH
+WEBHOOK_SUNO_PATH = config.WEBHOOK_SUNO_PATH
 
 WEBHOOK_BOT_URL = config.WEBHOOK_URL + WEBHOOK_BOT_PATH
 WEBHOOK_REPLICATE_URL = config.WEBHOOK_URL + config.WEBHOOK_REPLICATE_PATH
@@ -322,6 +324,13 @@ async def replicate_webhook(prediction: dict):
 @app.post(WEBHOOK_MIDJOURNEY_PATH)
 async def midjourney_webhook(body: dict):
     is_ok = await handle_midjourney_webhook(bot, dp, body)
+    if not is_ok:
+        return JSONResponse(content={}, status_code=500)
+
+
+@app.post(WEBHOOK_SUNO_PATH)
+async def suno_webhook(body: dict):
+    is_ok = await handle_suno_webhook(bot, dp, body)
     if not is_ok:
         return JSONResponse(content={}, status_code=500)
 

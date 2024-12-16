@@ -8,7 +8,6 @@ from bot.locales.types import LanguageCode
 def build_profile_keyboard(
     language_code: LanguageCode,
     is_photo_uploaded: bool,
-    is_gender_chosen: bool,
     has_active_subscription: bool,
     has_canceled_subscription: bool,
 ) -> InlineKeyboardMarkup:
@@ -27,16 +26,9 @@ def build_profile_keyboard(
         ],
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).CHANGE_PHOTO if is_photo_uploaded else get_localization(
-                    language_code).UPLOAD_PHOTO,
+                text=get_localization(language_code).CHANGE_PHOTO if is_photo_uploaded
+                else get_localization(language_code).UPLOAD_PHOTO,
                 callback_data=f'profile:change_photo'
-            ),
-        ],
-        [
-            InlineKeyboardButton(
-                text=get_localization(language_code).CHANGE_GENDER if is_gender_chosen else get_localization(
-                    language_code).CHOOSE_GENDER,
-                callback_data=f'profile:change_gender'
             ),
         ],
         [

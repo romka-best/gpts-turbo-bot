@@ -28,7 +28,6 @@ from bot.keyboards.common.common import build_cancel_keyboard
 from bot.keyboards.common.profile import (
     build_profile_keyboard,
     build_profile_quota_keyboard,
-    build_profile_gender_keyboard,
 )
 from bot.locales.main import get_localization, get_user_language
 from bot.states.profile import Profile
@@ -76,7 +75,6 @@ async def handle_profile(message: Message, state: FSMContext, telegram_user: Tel
     text = get_localization(user_language_code).profile(
         subscription_name,
         subscription.status if subscription else SubscriptionStatus.ACTIVE,
-        user.gender,
         user_current_model.names.get(user_language_code),
         user.currency,
         renewal_date.strftime('%d.%m.%Y'),
@@ -94,7 +92,6 @@ async def handle_profile(message: Message, state: FSMContext, telegram_user: Tel
         reply_markup = build_profile_keyboard(
             user_language_code,
             True,
-            user.gender != UserGender.UNSPECIFIED,
             subscription.status == SubscriptionStatus.ACTIVE if subscription else False,
             subscription.status == SubscriptionStatus.CANCELED if subscription else False,
         )
@@ -113,7 +110,6 @@ async def handle_profile(message: Message, state: FSMContext, telegram_user: Tel
         reply_markup = build_profile_keyboard(
             user_language_code,
             False,
-            user.gender != UserGender.UNSPECIFIED,
             subscription.status == SubscriptionStatus.ACTIVE if subscription else False,
             subscription.status == SubscriptionStatus.CANCELED if subscription else False,
         )
@@ -187,13 +183,6 @@ async def handle_profile_selection(callback_query: CallbackQuery, state: FSMCont
         )
 
         await state.set_state(Profile.waiting_for_photo)
-    elif action == 'change_gender':
-        reply_markup = build_profile_gender_keyboard(user_language_code)
-        await callback_query.message.reply(
-            text=get_localization(user_language_code).TELL_ME_YOUR_GENDER,
-            reply_markup=reply_markup,
-            allow_sending_without_reply=True,
-        )
     elif action == 'change_currency':
         user = await get_user(user_id)
 
@@ -232,17 +221,17 @@ async def handle_profile_gender_selection(callback_query: CallbackQuery, state: 
 
     gender = callback_query.data.split(':')[1]
 
-    if user.gender != gender:
-        user.gender = gender
+    if user.settings[Model.FACE_SWAP][UserSettings.GENDER] != gender:
+        user.settings[Model.FACE_SWAP][UserSettings.GENDER] = gender
         await update_user(user.id, {
-            'gender': user.gender,
+            'settings': user.settings,
         })
 
     text_your_gender = get_localization(user_language_code).YOUR_GENDER
     text_gender_male = get_localization(user_language_code).MALE
     text_gender_female = get_localization(user_language_code).FEMALE
     await callback_query.message.edit_text(
-        f'{text_your_gender} {text_gender_male if user.gender == UserGender.MALE else text_gender_female}'
+        f'{text_your_gender} {text_gender_male if user.settings[Model.FACE_SWAP][UserSettings.GENDER] == UserGender.MALE else text_gender_female}'
     )
 
     if user.current_model == Model.FACE_SWAP:

@@ -38,6 +38,7 @@ class UserSettings:
     SHOW_EXAMPLES = 'show_examples'
     TURN_ON_VOICE_MESSAGES = 'turn_on_voice_messages'
     VOICE = 'voice'
+    GENDER = 'gender'
     RESOLUTION = 'resolution'
     ASPECT_RATIO = 'aspect_ratio'
     QUALITY = 'quality'
@@ -216,6 +217,7 @@ class User:
         current_chat_id: str,
         telegram_chat_id: str,
         stripe_id: str,
+        # TODO DELETE
         gender=UserGender.UNSPECIFIED,
         language_code='en',
         interface_language_code=LanguageCode.EN,

@@ -96,18 +96,6 @@ commands_en = [
         command='bonus',
         description='🎁 Bonus balance',
     ),
-    BotCommand(
-        command='promo_code',
-        description='🔑 Type promo code to get magic',
-    ),
-    BotCommand(
-        command='feedback',
-        description='📡 Give a feedback',
-    ),
-    BotCommand(
-        command='terms',
-        description='📄 Terms of Service',
-    ),
 ]
 
 commands_ru = [
@@ -198,18 +186,6 @@ commands_ru = [
     BotCommand(
         command='bonus',
         description='🎁 Бонусный баланс',
-    ),
-    BotCommand(
-        command='promo_code',
-        description='🔑 Написать промокод для получения магии',
-    ),
-    BotCommand(
-        command='feedback',
-        description='📡 Оставить обратную связь',
-    ),
-    BotCommand(
-        command='terms',
-        description='📄 Пользовательское соглашение',
     ),
 ]
 

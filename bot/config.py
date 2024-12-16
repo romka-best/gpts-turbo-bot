@@ -38,6 +38,7 @@ class Settings(BaseSettings):
     WEBHOOK_URL: str
     WEBHOOK_REPLICATE_PATH: str
     WEBHOOK_MIDJOURNEY_PATH: str
+    WEBHOOK_SUNO_PATH: str
     REDIS_URL: str
 
     MAX_RETRIES: int = 2

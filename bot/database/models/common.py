@@ -104,7 +104,6 @@ class EightifyAmount:
 
 
 class DALLEVersion:
-    V2 = 'dall-e-2'
     V3 = 'dall-e-3'
 
 

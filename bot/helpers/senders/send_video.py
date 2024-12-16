@@ -3,6 +3,7 @@ import logging
 import traceback
 
 from aiogram import Bot
+from aiogram.enums import ParseMode
 from aiogram.exceptions import TelegramForbiddenError, TelegramRetryAfter, TelegramNetworkError
 from aiogram.types import URLInputFile
 from aiohttp import ClientOSError
@@ -22,6 +23,7 @@ async def delayed_send_video(
     timeout: int,
     reply_markup=None,
     reply_to_message_id=None,
+    parse_mode=ParseMode.HTML,
 ):
     await asyncio.sleep(timeout)
 
@@ -34,6 +36,7 @@ async def delayed_send_video(
             reply_markup=reply_markup,
             reply_to_message_id=reply_to_message_id,
             allow_sending_without_reply=True,
+            parse_mode=parse_mode,
         )
     except TelegramForbiddenError:
         asyncio.create_task(
@@ -51,6 +54,7 @@ async def delayed_send_video(
                 e.retry_after + 30,
                 reply_markup,
                 reply_to_message_id,
+                parse_mode,
             )
         )
     except (ConnectionResetError, OSError, ClientOSError, ConnectionError, TelegramNetworkError):
@@ -65,6 +69,7 @@ async def delayed_send_video(
                 60,
                 reply_markup,
                 reply_to_message_id,
+                parse_mode,
             )
         )
     except Exception:
@@ -81,6 +86,7 @@ async def send_video(
     duration: int,
     reply_markup=None,
     reply_to_message_id=None,
+    parse_mode=ParseMode.HTML,
 ):
     try:
         await bot.send_video(
@@ -91,6 +97,7 @@ async def send_video(
             reply_markup=reply_markup,
             reply_to_message_id=reply_to_message_id,
             allow_sending_without_reply=True,
+            parse_mode=parse_mode,
         )
     except TelegramForbiddenError:
         asyncio.create_task(update_user(chat_id, {'is_blocked': True}))
@@ -106,6 +113,7 @@ async def send_video(
                 e.retry_after + 30,
                 reply_markup,
                 reply_to_message_id,
+                parse_mode,
             )
         )
     except (ConnectionResetError, OSError, ClientOSError, ConnectionError, TelegramNetworkError):
@@ -120,6 +128,7 @@ async def send_video(
                 60,
                 reply_markup,
                 reply_to_message_id,
+                parse_mode,
             )
         )
     except Exception as e:

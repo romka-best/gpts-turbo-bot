@@ -6,7 +6,7 @@ from datetime import datetime, timezone
 from aiogram import Bot
 from aiogram.exceptions import TelegramForbiddenError
 from aiogram.fsm.storage.base import BaseStorage
-from google.cloud.firestore_v1 import AsyncWriteBatch
+from google.cloud.firestore_v1 import AsyncWriteBatch, FieldFilter
 
 from bot.config import config, MessageSticker
 from bot.database.main import firebase
@@ -22,7 +22,6 @@ from bot.database.operations.package.getters import get_packages_by_user_id
 from bot.database.operations.product.getters import get_product
 from bot.database.operations.subscription.getters import get_subscription, get_activated_subscriptions_by_user_id
 from bot.database.operations.subscription.updaters import update_subscription
-from bot.database.operations.user.getters import get_users
 from bot.database.operations.user.updaters import update_user
 from bot.helpers.billing.create_auto_payment import create_auto_payment
 from bot.helpers.billing.create_payment import OrderItem
@@ -35,15 +34,27 @@ from bot.locales.main import get_localization, get_user_language
 
 
 async def update_daily_limits(bot: Bot, storage: BaseStorage):
-    all_users = await get_users(is_blocked=False)
+    users_query = firebase.db.collection(User.COLLECTION_NAME) \
+        .where(filter=FieldFilter('is_blocked', '==', False)) \
+        .limit(config.BATCH_SIZE)
+    is_running = True
+    last_doc = None
 
-    for i in range(0, len(all_users), config.BATCH_SIZE):
+    while is_running:
+        if last_doc:
+            users_query = users_query.start_after(last_doc)
+
+        docs = users_query.stream()
+
         tasks = []
-
         batch = firebase.db.batch()
-        user_batch = all_users[i:i + config.BATCH_SIZE]
 
-        for user in user_batch:
+        count = 0
+        async for doc in docs:
+            count += 1
+
+            user = User(**doc.to_dict())
+
             await update_user_daily_limits(bot, user, batch, storage)
 
             if not user.subscription_id:
@@ -57,6 +68,12 @@ async def update_daily_limits(bot: Bot, storage: BaseStorage):
 
         await batch.commit()
         await asyncio.gather(*tasks, return_exceptions=True)
+
+        if count < config.BATCH_SIZE:
+            is_running = False
+            break
+
+        last_doc = doc
 
     await send_message_to_admins_and_developers(bot, f'<b>Updated Daily Limits Successfully</b> 🎉')
 

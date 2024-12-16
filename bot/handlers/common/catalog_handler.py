@@ -124,7 +124,6 @@ async def handle_catalog_digital_employees_selection(callback_query: CallbackQue
                     model=chosen_model,
                     model_type=get_model_type(chosen_model),
                     settings=user.settings,
-                    show_back_button=False,
                     show_advanced_settings=True,
                 )
                 await callback_query.message.edit_text(

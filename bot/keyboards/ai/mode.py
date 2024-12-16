@@ -1,11 +1,17 @@
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
-from bot.database.models.common import Model, ChatGPTVersion, ClaudeGPTVersion, GeminiGPTVersion, ModelType
+from bot.database.models.common import Model, ModelType, ChatGPTVersion, ClaudeGPTVersion, GeminiGPTVersion
 from bot.locales.main import get_localization
 from bot.locales.types import LanguageCode
 
 
-def build_mode_keyboard(language_code: LanguageCode, model: Model, model_version: str, page=0) -> InlineKeyboardMarkup:
+def build_mode_keyboard(
+    language_code: LanguageCode,
+    model: Model,
+    model_version: ChatGPTVersion | ClaudeGPTVersion | GeminiGPTVersion,
+    page=0,
+    chosen_model=None,
+) -> InlineKeyboardMarkup:
     buttons = []
     if page == 0:
         buttons.extend(
@@ -16,110 +22,166 @@ def build_mode_keyboard(language_code: LanguageCode, model: Model, model_version
                         callback_data=f'mode:{ModelType.TEXT}',
                     ),
                 ],
-                [
-                    InlineKeyboardButton(
-                        text=get_localization(language_code).CHATGPT4_OMNI_MINI + (
-                            ' ✅' if model == Model.CHAT_GPT and model_version == ChatGPTVersion.V4_Omni_Mini else ''
-                        ),
-                        callback_data=f'mode:{Model.CHAT_GPT}:{ChatGPTVersion.V4_Omni_Mini}'
-                    ),
-                ],
-                [
-                    InlineKeyboardButton(
-                        text=get_localization(language_code).CHATGPT4_OMNI + (
-                            ' ✅' if model == Model.CHAT_GPT and model_version == ChatGPTVersion.V4_Omni else ''
-                        ),
-                        callback_data=f'mode:{Model.CHAT_GPT}:{ChatGPTVersion.V4_Omni}'
-                    ),
-                ],
-                [
-                    InlineKeyboardButton(
-                        text=get_localization(language_code).CHAT_GPT_O_1_MINI + (
-                            ' ✅' if model == Model.CHAT_GPT and model_version == ChatGPTVersion.V1_O_Mini else ''
-                        ),
-                        callback_data=f'mode:{Model.CHAT_GPT}:{ChatGPTVersion.V1_O_Mini}'
-                    ),
-                ],
-                [
-                    InlineKeyboardButton(
-                        text=get_localization(language_code).CHAT_GPT_O_1_PREVIEW + (
-                            ' ✅' if model == Model.CHAT_GPT and model_version == ChatGPTVersion.V1_O_Preview else ''
-                        ),
-                        callback_data=f'mode:{Model.CHAT_GPT}:{ChatGPTVersion.V1_O_Preview}'
-                    ),
-                ],
-                [
-                    InlineKeyboardButton(
-                        text=get_localization(language_code).CLAUDE_3_HAIKU + (
-                            ' ✅' if model == Model.CLAUDE and model_version == ClaudeGPTVersion.V3_Haiku else ''
-                        ),
-                        callback_data=f'mode:{Model.CLAUDE}:{ClaudeGPTVersion.V3_Haiku}'
-                    ),
-                ],
-                [
-                    InlineKeyboardButton(
-                        text=get_localization(language_code).CLAUDE_3_SONNET + (
-                            ' ✅' if model == Model.CLAUDE and model_version == ClaudeGPTVersion.V3_Sonnet else ''
-                        ),
-                        callback_data=f'mode:{Model.CLAUDE}:{ClaudeGPTVersion.V3_Sonnet}'
-                    ),
-                ],
-                [
-                    InlineKeyboardButton(
-                        text=get_localization(language_code).CLAUDE_3_OPUS + (
-                            ' ✅' if model == Model.CLAUDE and model_version == ClaudeGPTVersion.V3_Opus else ''
-                        ),
-                        callback_data=f'mode:{Model.CLAUDE}:{ClaudeGPTVersion.V3_Opus}'
-                    ),
-                ],
-                [
-                    InlineKeyboardButton(
-                        text=get_localization(language_code).GEMINI_1_FLASH + (
-                            ' ✅' if model == Model.GEMINI and model_version == GeminiGPTVersion.V1_Flash else ''
-                        ),
-                        callback_data=f'mode:{Model.GEMINI}:{GeminiGPTVersion.V1_Flash}'
-                    ),
-                ],
-                [
-                    InlineKeyboardButton(
-                        text=get_localization(language_code).GEMINI_1_PRO + (
-                            ' ✅' if model == Model.GEMINI and model_version == GeminiGPTVersion.V1_Pro else ''
-                        ),
-                        callback_data=f'mode:{Model.GEMINI}:{GeminiGPTVersion.V1_Pro}'
-                    ),
-                ],
-                [
-                    InlineKeyboardButton(
-                        text=get_localization(language_code).GEMINI_1_ULTRA + (
-                            ' ✅' if model == Model.GEMINI and model_version == GeminiGPTVersion.V1_Ultra else ''
-                        ),
-                        callback_data=f'mode:{Model.GEMINI}:{GeminiGPTVersion.V1_Ultra}'
-                    ),
-                ],
-                [
-                    InlineKeyboardButton(
-                        text=get_localization(language_code).EIGHTIFY + (
-                            ' ✅' if model == Model.EIGHTIFY else ''
-                        ),
-                        callback_data=f'mode:{Model.EIGHTIFY}'
-                    ),
-                ],
-                [
-                    InlineKeyboardButton(
-                        text='⬅️',
-                        callback_data='mode:back:2'
-                    ),
-                    InlineKeyboardButton(
-                        text='1/3',
-                        callback_data='mode:page:0'
-                    ),
-                    InlineKeyboardButton(
-                        text='➡️',
-                        callback_data='mode:next:1'
-                    ),
-                ]
             ]
         )
+        if chosen_model == Model.CHAT_GPT:
+            buttons.extend(
+                [
+                    [
+                        InlineKeyboardButton(
+                            text=get_localization(language_code).CHATGPT4_OMNI_MINI + (
+                                ' ✅' if model == Model.CHAT_GPT and model_version == ChatGPTVersion.V4_Omni_Mini else ''
+                            ),
+                            callback_data=f'mode:{Model.CHAT_GPT}:{ChatGPTVersion.V4_Omni_Mini}'
+                        ),
+                    ],
+                    [
+                        InlineKeyboardButton(
+                            text=get_localization(language_code).CHATGPT4_OMNI + (
+                                ' ✅' if model == Model.CHAT_GPT and model_version == ChatGPTVersion.V4_Omni else ''
+                            ),
+                            callback_data=f'mode:{Model.CHAT_GPT}:{ChatGPTVersion.V4_Omni}'
+                        ),
+                    ],
+                    [
+                        InlineKeyboardButton(
+                            text=get_localization(language_code).CHAT_GPT_O_1_MINI + (
+                                ' ✅' if model == Model.CHAT_GPT and model_version == ChatGPTVersion.V1_O_Mini else ''
+                            ),
+                            callback_data=f'mode:{Model.CHAT_GPT}:{ChatGPTVersion.V1_O_Mini}'
+                        ),
+                    ],
+                    [
+                        InlineKeyboardButton(
+                            text=get_localization(language_code).CHAT_GPT_O_1_PREVIEW + (
+                                ' ✅' if model == Model.CHAT_GPT and model_version == ChatGPTVersion.V1_O_Preview else ''
+                            ),
+                            callback_data=f'mode:{Model.CHAT_GPT}:{ChatGPTVersion.V1_O_Preview}'
+                        ),
+                    ],
+                    [
+                        InlineKeyboardButton(
+                            text=get_localization(language_code).BACK,
+                            callback_data=f'mode:{Model.CHAT_GPT}:back'
+                        ),
+                    ],
+                ]
+            )
+        elif chosen_model == Model.CLAUDE:
+            buttons.extend(
+                [
+                    [
+                        InlineKeyboardButton(
+                            text=get_localization(language_code).CLAUDE_3_HAIKU + (
+                                ' ✅' if model == Model.CLAUDE and model_version == ClaudeGPTVersion.V3_Haiku else ''
+                            ),
+                            callback_data=f'mode:{Model.CLAUDE}:{ClaudeGPTVersion.V3_Haiku}'
+                        ),
+                    ],
+                    [
+                        InlineKeyboardButton(
+                            text=get_localization(language_code).CLAUDE_3_SONNET + (
+                                ' ✅' if model == Model.CLAUDE and model_version == ClaudeGPTVersion.V3_Sonnet else ''
+                            ),
+                            callback_data=f'mode:{Model.CLAUDE}:{ClaudeGPTVersion.V3_Sonnet}'
+                        ),
+                    ],
+                    [
+                        InlineKeyboardButton(
+                            text=get_localization(language_code).CLAUDE_3_OPUS + (
+                                ' ✅' if model == Model.CLAUDE and model_version == ClaudeGPTVersion.V3_Opus else ''
+                            ),
+                            callback_data=f'mode:{Model.CLAUDE}:{ClaudeGPTVersion.V3_Opus}'
+                        ),
+                    ],
+                    [
+                        InlineKeyboardButton(
+                            text=get_localization(language_code).BACK,
+                            callback_data=f'mode:{Model.CLAUDE}:back'
+                        ),
+                    ],
+                ]
+            )
+        elif chosen_model == Model.GEMINI:
+            buttons.extend(
+                [
+                    [
+                        InlineKeyboardButton(
+                            text=get_localization(language_code).GEMINI_1_FLASH + (
+                                ' ✅' if model == Model.GEMINI and model_version == GeminiGPTVersion.V1_Flash else ''
+                            ),
+                            callback_data=f'mode:{Model.GEMINI}:{GeminiGPTVersion.V1_Flash}'
+                        ),
+                    ],
+                    [
+                        InlineKeyboardButton(
+                            text=get_localization(language_code).GEMINI_1_PRO + (
+                                ' ✅' if model == Model.GEMINI and model_version == GeminiGPTVersion.V1_Pro else ''
+                            ),
+                            callback_data=f'mode:{Model.GEMINI}:{GeminiGPTVersion.V1_Pro}'
+                        ),
+                    ],
+                    [
+                        InlineKeyboardButton(
+                            text=get_localization(language_code).GEMINI_1_ULTRA + (
+                                ' ✅' if model == Model.GEMINI and model_version == GeminiGPTVersion.V1_Ultra else ''
+                            ),
+                            callback_data=f'mode:{Model.GEMINI}:{GeminiGPTVersion.V1_Ultra}'
+                        ),
+                    ],
+                    [
+                        InlineKeyboardButton(
+                            text=get_localization(language_code).BACK,
+                            callback_data=f'mode:{Model.GEMINI}:back'
+                        ),
+                    ],
+                ]
+            )
+        else:
+            buttons.extend(
+                [
+                    [
+                        InlineKeyboardButton(
+                            text=get_localization(language_code).CHATGPT,
+                            callback_data=f'mode:{Model.CHAT_GPT}',
+                        ),
+                    ],
+                    [
+                        InlineKeyboardButton(
+                            text=get_localization(language_code).CLAUDE,
+                            callback_data=f'mode:{Model.CLAUDE}',
+                        ),
+                    ],
+                    [
+                        InlineKeyboardButton(
+                            text=get_localization(language_code).GEMINI,
+                            callback_data=f'mode:{Model.GEMINI}',
+                        ),
+                    ],
+                    [
+                        InlineKeyboardButton(
+                            text=get_localization(language_code).EIGHTIFY + (
+                                ' ✅' if model == Model.EIGHTIFY else ''
+                            ),
+                            callback_data=f'mode:{Model.EIGHTIFY}'
+                        ),
+                    ],
+                    [
+                        InlineKeyboardButton(
+                            text='⬅️',
+                            callback_data='mode:back:2'
+                        ),
+                        InlineKeyboardButton(
+                            text='1/3',
+                            callback_data='mode:page:0'
+                        ),
+                        InlineKeyboardButton(
+                            text='➡️',
+                            callback_data='mode:next:1'
+                        ),
+                    ]
+                ]
+            )
     elif page == 1:
         buttons.extend([
             [
