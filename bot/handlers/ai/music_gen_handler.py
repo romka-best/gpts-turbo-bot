@@ -1,5 +1,3 @@
-import asyncio
-
 from aiogram import Router, Bot, F
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
@@ -20,7 +18,6 @@ from bot.database.operations.request.updaters import update_request
 from bot.database.operations.request.writers import write_request
 from bot.database.operations.user.getters import get_user
 from bot.database.operations.user.updaters import update_user
-from bot.handlers.ai.suno_handler import handle_suno_example
 from bot.helpers.getters.get_quota_by_model import get_quota_by_model
 from bot.helpers.getters.get_switched_to_ai_model import get_switched_to_ai_model
 from bot.helpers.senders.send_error_info import send_error_info
@@ -242,15 +239,6 @@ async def handle_music_gen_selection(
 
                 await processing_sticker.delete()
                 await processing_message.delete()
-
-    asyncio.create_task(
-        handle_suno_example(
-            user=user,
-            prompt=prompt,
-            message=message,
-            state=state,
-        )
-    )
 
 
 @music_gen_router.message(MusicGen.waiting_for_music_gen_duration, ~F.text.startswith('/'))

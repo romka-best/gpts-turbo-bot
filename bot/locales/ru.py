@@ -12,9 +12,6 @@ from bot.database.models.common import (
     Quota,
     Model,
     ModelType,
-    ChatGPTVersion,
-    ClaudeGPTVersion,
-    GeminiGPTVersion,
     EightifyFocus,
     EightifyFormat,
     EightifyAmount,
@@ -25,7 +22,7 @@ from bot.database.models.subscription import (
     SubscriptionPeriod,
     SubscriptionStatus,
 )
-from bot.database.models.user import UserGender, UserSettings
+from bot.database.models.user import UserSettings
 from bot.locales.types import LanguageCode
 
 
@@ -368,7 +365,7 @@ class Russian(Texts):
 
     # Profile
     SHOW_QUOTA = "🔄 Показать квоту"
-    TELL_ME_YOUR_GENDER = "Скажите ваш пол:"
+    TELL_ME_YOUR_GENDER = "Укажите ваш пол:"
     YOUR_GENDER = "Ваш пол:"
     UNSPECIFIED = "Не указан 🤷"
     MALE = "Мужской 👕"
@@ -683,12 +680,12 @@ class Russian(Texts):
 
 Жду ссылку 😊
 """
-    EIGHTIFY_FOCUS_INSIGHTFUL = "Содержательный 💡"
+    EIGHTIFY_FOCUS_INSIGHTFUL = "Глубокий 💡"
     EIGHTIFY_FOCUS_FUNNY = "Забавный 😄"
     EIGHTIFY_FOCUS_ACTIONABLE = "Полезный 🛠"
     EIGHTIFY_FOCUS_CONTROVERSIAL = "Спорный 🔥"
     EIGHTIFY_FORMAT_LIST = "Список 📋"
-    EIGHTIFY_FORMAT_FAQ = "Вопросы и Ответы 🗯"
+    EIGHTIFY_FORMAT_FAQ = "Впр/Отв 🗯"
     EIGHTIFY_AMOUNT_AUTO = "Авто ⚙️"
     EIGHTIFY_AMOUNT_SHORT = "Кратко ✂️"
     EIGHTIFY_AMOUNT_DETAILED = "Детально 📚"
@@ -699,9 +696,9 @@ class Russian(Texts):
     MIDJOURNEY_ALREADY_CHOSE_UPSCALE = "Вы уже выбирали эту картинку, попробуйте новую 🙂"
 
     # Flux
-    STRICT_SAFETY_TOLERANCE = "🔒 Сильная промпт-защита"
-    MIDDLE_SAFETY_TOLERANCE = "🔏 Средняя промпт-защита"
-    PERMISSIVE_SAFETY_TOLERANCE = "🔓 Слабая промпт-защита"
+    STRICT_SAFETY_TOLERANCE = "🔒 Сильная"
+    MIDDLE_SAFETY_TOLERANCE = "🔏 Средняя"
+    PERMISSIVE_SAFETY_TOLERANCE = "🔓 Слабая"
 
     # Suno
     SUNO_INFO = """
@@ -774,7 +771,7 @@ class Russian(Texts):
 
     # Settings
     SETTINGS_CHOOSE_MODEL_TYPE = """
-⚙️ <b>Добро пожаловать в настройки!</b> ⚙️
+⚙️ <b>Добро пожаловать в настройки!</b>
 
 🌍 Для смены языка интерфейса, введите команду /language
 🤖 Для смены модели, введите команду /mode
@@ -782,8 +779,27 @@ class Russian(Texts):
 Тут вы - художник, а настройки - ваша палитра. Выберите ниже тип модели, которую вы хотите настроить под себя 👇
 """
     SETTINGS_CHOOSE_MODEL = """
+⚙️ <b>Добро пожаловать в настройки!</b>
+
 Выберите ниже модель, которую вы хотите настроить под себя 👇
 """
+    SETTINGS_TO_OTHER_MODELS = "К другим моделям ◀️"
+    SETTINGS_TO_OTHER_TYPE_MODELS = "К другим типам моделей ◀️"
+    SETTINGS_VOICE_MESSAGES = """
+⚙️ <b>Добро пожаловать в настройки!</b>
+
+Ниже настройки голосовых ответов ко всем текстовым моделям 🎙
+"""
+    SETTINGS_VERSION = "Версия 🤖"
+    SETTINGS_FOCUS = "Фокус 🎯"
+    SETTINGS_FORMAT = "Формат 🎛"
+    SETTINGS_AMOUNT = "Длина Ответа 📏"
+    SETTINGS_SEND_TYPE = "Тип отправки 🗯"
+    SETTINGS_ASPECT_RATIO = "Соотношение сторон 📐"
+    SETTINGS_QUALITY = "Качество ✨"
+    SETTINGS_PROMPT_SAFETY = "Промпт-Защита 🔐"
+    SETTINGS_GENDER = "Пол 👕/👚"
+
     SHOW_THE_NAME_OF_THE_CHATS = "Названия чатов в сообщениях"
     SHOW_THE_NAME_OF_THE_ROLES = "Названия ролей в сообщениях"
     SHOW_USAGE_QUOTA_IN_MESSAGES = "Квота в сообщениях"
@@ -1144,7 +1160,7 @@ class Russian(Texts):
     CLOSE = "Закрыть 🚪"
     CANCEL = "Отменить ❌"
     APPROVE = "Подтвердить ✅"
-    IMAGE = "Изображение 🖼"
+    IMAGE = "Картинка 🖼"
     DOCUMENT = "Документ 📄"
     AUDIO = "Аудио 🔈"
     VIDEO = "Видео 📹"
@@ -1167,7 +1183,6 @@ class Russian(Texts):
     def profile(
         subscription_name,
         subscription_status,
-        gender,
         current_model,
         current_currency,
         renewal_date,
@@ -1176,13 +1191,6 @@ class Russian(Texts):
             subscription_info = f"📫 <b>Статус подписки:</b> Отменена. Действует до {renewal_date}"
         else:
             subscription_info = "📫 <b>Статус подписки:</b> Активна"
-
-        if gender == UserGender.MALE:
-            gender_info = f"<b>Пол:</b> {Russian.MALE}"
-        elif gender == UserGender.FEMALE:
-            gender_info = f"<b>Пол:</b> {Russian.FEMALE}"
-        else:
-            gender_info = f"<b>Пол:</b> {Russian.UNSPECIFIED}"
 
         if current_currency == Currency.XTR:
             current_currency = f'Telegram Stars {Currency.SYMBOLS[current_currency]}'
@@ -1195,10 +1203,6 @@ class Russian(Texts):
 ---------------------------
 
 🤖 <b>Текущая модель: {current_model}</b>
-{gender_info}
-
----------------------------
-
 💱 <b>Текущая валюта: {current_currency}</b>
 💳 <b>Тип подписки:</b> {subscription_name}
 🗓 <b>Дата обновления подписки:</b> {f'{renewal_date}' if subscription_name != '🆓' else 'N/A'}
@@ -1543,7 +1547,7 @@ class Russian(Texts):
     ┣ 📅 Знания до: {model_info.get('training_data')}
     ┣ 📷 Работа с фото: {'Да ✅' if model_info.get('support_photos', False) else 'Нет ❌'}
     ┣ 🎙 Голосовые ответы: {'Вкл. ✅' if model_info.get(UserSettings.TURN_ON_VOICE_MESSAGES, False) else 'Выкл. ❌'}
-    ┗ 🎭 Текущая роль: {model_info.get('role')}"""
+    ┗ 🎭 Роль: {model_info.get('role')}"""
         elif model_type == ModelType.SUMMARY:
             model_focus = model_info.get(UserSettings.FOCUS, EightifyFocus.INSIGHTFUL)
             if model_focus == EightifyFocus.INSIGHTFUL:
@@ -1836,13 +1840,7 @@ class Russian(Texts):
     # Settings
     @staticmethod
     def settings(human_model: str, current_model: Model, dall_e_cost=1) -> str:
-        if current_model == Model.CHAT_GPT:
-            additional_text = f"\n<b>Версия ChatGPT 4.0 Omni Mini</b>: {ChatGPTVersion.V4_Omni_Mini}\n<b>Версия ChatGPT 4.0 Omni</b>: {ChatGPTVersion.V4_Omni}\n<b>Версия ChatGPT o1-mini</b>: {ChatGPTVersion.V1_O_Mini}\n<b>Версия ChatGPT o1-preview</b>: {ChatGPTVersion.V1_O_Preview}"
-        elif current_model == Model.CLAUDE:
-            additional_text = f"\n<b>Версия Claude 3.5 Haiku</b>: {ClaudeGPTVersion.V3_Haiku}\n<b>Версия Claude 3.5 Sonnet</b>: {ClaudeGPTVersion.V3_Sonnet}\n<b>Версия Claude 3.0 Opus</b>: {ClaudeGPTVersion.V3_Opus}"
-        elif current_model == Model.GEMINI:
-            additional_text = f"\n<b>Версия Gemini 1.5 Flash</b>: {GeminiGPTVersion.V1_Flash}\n<b>Версия Gemini 1.5 Pro</b>: {GeminiGPTVersion.V1_Pro}\n<b>Версия Gemini 1.0 Ultra</b>: {GeminiGPTVersion.V1_Ultra}"
-        elif current_model == Model.DALL_E:
+        if current_model == Model.DALL_E:
             additional_text = f"\nПри текущих настройках 1 запрос стоит: {dall_e_cost} 🖼"
         else:
             additional_text = ""

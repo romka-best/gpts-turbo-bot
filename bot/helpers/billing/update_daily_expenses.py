@@ -32,28 +32,6 @@ async def update_daily_expenses(date: datetime):
                 created_at=date,
             )
 
-    if date.day == 3:
-        suno_product = await get_product_by_quota(Quota.SUNO)
-        suno_transactions = await get_transactions_by_product_id_and_created_time(
-            suno_product.id,
-            date,
-            True,
-        )
-        if not len(suno_transactions):
-            await write_transaction(
-                user_id=config.SUPER_ADMIN_ID,
-                type=TransactionType.EXPENSE,
-                product_id=suno_product.id,
-                amount=10,
-                clear_amount=10,
-                currency=Currency.USD,
-                quantity=1,
-                details={
-                    'type': 'payment',
-                },
-                created_at=date,
-            )
-
     need_count_server_expenses = True
     need_count_database_expenses = True
 

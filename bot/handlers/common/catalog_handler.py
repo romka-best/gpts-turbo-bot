@@ -117,15 +117,13 @@ async def handle_catalog_digital_employees_selection(callback_query: CallbackQue
         from_settings = callback_query.data.split(':')[2] == 'True'
         if from_settings:
             if len(callback_query.data.split(':')) == 4:
-                chosen_model = cast(Model, callback_query.data.split(':')[2])
+                chosen_model = cast(Model, callback_query.data.split(':')[-1])
                 human_model = get_human_model(chosen_model, user_language_code)
                 reply_markup = build_settings_keyboard(
                     language_code=user_language_code,
                     model=chosen_model,
                     model_type=get_model_type(chosen_model),
                     settings=user.settings,
-                    show_back_button=False,
-                    show_advanced_settings=True,
                 )
                 await callback_query.message.edit_text(
                     text=get_localization(user_language_code).settings(human_model, chosen_model),

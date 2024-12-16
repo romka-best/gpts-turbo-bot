@@ -16,7 +16,6 @@ class Eightify:
             'Authorization': f'Bearer {EIGHTIFY_TOKEN}'
         }
         self.session = session
-        self._sid = None
 
     async def __aenter__(self):
         if not self.session:

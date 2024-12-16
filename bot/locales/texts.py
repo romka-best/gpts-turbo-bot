@@ -8,7 +8,6 @@ from bot.database.models.generation import GenerationReaction
 from bot.database.models.product import Product, ProductCategory
 from bot.database.models.prompt import Prompt
 from bot.database.models.subscription import SubscriptionStatus
-from bot.database.models.user import UserGender
 from bot.helpers.calculate_percentage_difference import calculate_percentage_difference
 from bot.locales.types import LanguageCode
 
@@ -421,6 +420,18 @@ class Texts(Protocol):
     # Settings
     SETTINGS_CHOOSE_MODEL_TYPE: str
     SETTINGS_CHOOSE_MODEL: str
+    SETTINGS_TO_OTHER_MODELS: str
+    SETTINGS_TO_OTHER_TYPE_MODELS: str
+    SETTINGS_VOICE_MESSAGES: str
+    SETTINGS_VERSION: str
+    SETTINGS_FOCUS: str
+    SETTINGS_FORMAT: str
+    SETTINGS_AMOUNT: str
+    SETTINGS_SEND_TYPE: str
+    SETTINGS_ASPECT_RATIO: str
+    SETTINGS_QUALITY: str
+    SETTINGS_PROMPT_SAFETY: str
+    SETTINGS_GENDER: str
     SHOW_THE_NAME_OF_THE_CHATS: str
     SHOW_THE_NAME_OF_THE_ROLES: str
     SHOW_USAGE_QUOTA_IN_MESSAGES: str
@@ -1291,7 +1302,6 @@ class Texts(Protocol):
     def profile(
         subscription_name: str,
         subscription_status: SubscriptionStatus,
-        gender: UserGender,
         current_model: str,
         current_currency: Currency,
         renewal_date,

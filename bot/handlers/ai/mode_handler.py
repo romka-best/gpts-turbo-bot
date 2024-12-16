@@ -37,7 +37,7 @@ async def mode(message: Message, state: FSMContext):
     await handle_mode(message, state, str(message.from_user.id), False, 0)
 
 
-async def handle_mode(message: Message, state: FSMContext, user_id: str, is_edit=False, page=0):
+async def handle_mode(message: Message, state: FSMContext, user_id: str, is_edit=False, page=0, chosen_model=None):
     user = await get_user(user_id)
     user_language_code = await get_user_language(user_id, state.storage)
 
@@ -50,6 +50,7 @@ async def handle_mode(message: Message, state: FSMContext, user_id: str, is_edit
            user.current_model == Model.GEMINI
         else '',
         page,
+        chosen_model,
     )
 
     if is_edit:
@@ -81,7 +82,23 @@ async def handle_mode_selection(callback_query: CallbackQuery, state: FSMContext
 
         return
     elif chosen_model == Model.CHAT_GPT or chosen_model == Model.CLAUDE or chosen_model == Model.GEMINI:
-        chosen_version = callback_query.data.split(':')[2]
+        if len(callback_query.data.split(':')) > 2:
+            action = callback_query.data.split(':')[2]
+            if action == 'back':
+                await handle_mode(
+                    callback_query.message,
+                    state,
+                    str(callback_query.from_user.id),
+                    True,
+                    0,
+                    None,
+                )
+                return
+            else:
+                chosen_version = callback_query.data.split(':')[2]
+        else:
+            await handle_mode(callback_query.message, state, str(callback_query.from_user.id), True, 0, chosen_model)
+            return
 
     keyboard = callback_query.message.reply_markup.inline_keyboard
     keyboard_changed = False
@@ -203,8 +220,6 @@ async def handle_switched_to_ai_selection(callback_query: CallbackQuery, state: 
             model=model,
             model_type=get_model_type(model),
             settings=user.settings,
-            show_back_button=False,
-            show_advanced_settings=True,
         )
         await callback_query.message.answer(
             text=get_localization(user_language_code).settings(human_model, model, dall_e_cost),

@@ -1,5 +1,4 @@
 import asyncio
-from datetime import datetime, timezone
 
 from aiogram import Router, Bot, F
 from aiogram.filters import Command
@@ -8,10 +7,10 @@ from aiogram.types import Message, CallbackQuery
 from aiogram.utils.chat_action import ChatActionSender
 
 from bot.config import config, MessageEffect, MessageSticker
-from bot.database.models.common import Model, SunoMode, Quota, SunoVersion
+from bot.database.models.common import Model, SunoMode, Quota
 from bot.database.models.generation import GenerationStatus
 from bot.database.models.request import RequestStatus
-from bot.database.models.user import User, UserSettings
+from bot.database.models.user import UserSettings
 from bot.database.operations.generation.getters import get_generations_by_request_id
 from bot.database.operations.generation.updaters import update_generation
 from bot.database.operations.generation.writers import write_generation
@@ -24,7 +23,7 @@ from bot.database.operations.user.updaters import update_user
 from bot.helpers.getters.get_quota_by_model import get_quota_by_model
 from bot.helpers.getters.get_switched_to_ai_model import get_switched_to_ai_model
 from bot.helpers.senders.send_error_info import send_error_info
-from bot.integrations.suno import generate_song, check_song
+from bot.integrations.suno import generate_song
 from bot.keyboards.ai.mode import build_switched_to_ai_keyboard
 from bot.keyboards.ai.suno import (
     build_suno_keyboard,
@@ -202,39 +201,42 @@ async def suno_prompt_sent(message: Message, state: FSMContext):
             )
 
             try:
-                results = await generate_song(user.settings[Model.SUNO][UserSettings.VERSION], prompt)
-                tasks = []
-                for (i, result) in enumerate(results):
-                    if result is not None:
-                        tasks.append(
-                            write_generation(
-                                id=result,
-                                request_id=request.id,
-                                product_id=product.id,
-                                has_error=result is None,
-                                details={
-                                    'mode': SunoMode.SIMPLE,
-                                    'prompt': prompt,
-                                    'is_suggestion': False,
-                                }
-                            )
+                task_id = await generate_song(user.settings[Model.SUNO][UserSettings.VERSION], prompt)
+                if task_id:
+                    tasks = [
+                        write_generation(
+                            id=f'{task_id}-1',
+                            request_id=request.id,
+                            product_id=product.id,
+                            has_error=False,
+                            details={
+                                'mode': SunoMode.SIMPLE,
+                                'prompt': prompt,
+                                'is_suggestion': False,
+                            }
+                        ),
+                        write_generation(
+                            id=f'{task_id}-2',
+                            request_id=request.id,
+                            product_id=product.id,
+                            has_error=False,
+                            details={
+                                'mode': SunoMode.SIMPLE,
+                                'prompt': prompt,
+                                'is_suggestion': False,
+                            }
                         )
+                    ]
 
-                        asyncio.create_task(
-                            check_song(
-                                bot=message.bot,
-                                storage=state.storage,
-                                song_id=result,
-                            )
-                        )
-
-                await asyncio.gather(*tasks)
+                    await asyncio.gather(*tasks)
+                else:
+                    raise NotImplementedError('No Task Id Found in Suno Generation')
             except Exception as e:
-                if 'Too Many Requests' in str(e):
+                if 'Too Many Requests' in str(e) or 'You have exceeded the rate limit' in str(e):
                     await message.answer(
                         text=get_localization(user_language_code).SERVER_OVERLOADED_ERROR,
                     )
-                elif 'Bad Request' in str(e):
+                elif 'Bad Request' in str(e) or 'The API is not implemented' in str(e):
                     await message.answer(
                         text=get_localization(user_language_code).SUNO_TOO_MANY_WORDS,
                     )
@@ -422,40 +424,44 @@ async def suno_genres_sent(message: Message, state: FSMContext):
                     },
                 )
 
-                results = await generate_song(
+                task_id = await generate_song(
                     user.settings[Model.SUNO][UserSettings.VERSION],
                     lyrics,
                     False,
                     True,
                     genres,
                 )
-                tasks = []
-                for (i, result) in enumerate(results):
-                    if result is not None:
-                        tasks.append(
-                            write_generation(
-                                id=result,
-                                request_id=request.id,
-                                product_id=product.id,
-                                has_error=result is None,
-                                details={
-                                    'mode': SunoMode.CUSTOM,
-                                    'lyrics': lyrics,
-                                    'genres': genres,
-                                    'is_suggestion': False,
-                                }
-                            )
+                if task_id:
+                    tasks = [
+                        write_generation(
+                            id=f'{task_id}-1',
+                            request_id=request.id,
+                            product_id=product.id,
+                            has_error=False,
+                            details={
+                                'mode': SunoMode.CUSTOM,
+                                'lyrics': lyrics,
+                                'genres': genres,
+                                'is_suggestion': False,
+                            }
+                        ),
+                        write_generation(
+                            id=f'{task_id}-2',
+                            request_id=request.id,
+                            product_id=product.id,
+                            has_error=False,
+                            details={
+                                'mode': SunoMode.CUSTOM,
+                                'lyrics': lyrics,
+                                'genres': genres,
+                                'is_suggestion': False,
+                            }
                         )
+                    ]
 
-                        asyncio.create_task(
-                            check_song(
-                                bot=message.bot,
-                                storage=state.storage,
-                                song_id=result,
-                            )
-                        )
-
-                await asyncio.gather(*tasks)
+                    await asyncio.gather(*tasks)
+                else:
+                    raise NotImplementedError('No Task Id Found in Suno Generation')
             except Exception as e:
                 if 'Too Many Requests' in str(e):
                     await message.answer(
@@ -504,80 +510,3 @@ async def suno_genres_sent(message: Message, state: FSMContext):
 
                 await processing_sticker.delete()
                 await processing_message.delete()
-
-
-async def handle_suno_example(user: User, prompt: str, message: Message, state: FSMContext):
-    current_date = datetime.now(timezone.utc)
-    if (
-        not user.subscription_id and
-        user.current_model == Model.MUSIC_GEN and
-        user.settings[user.current_model][UserSettings.SHOW_EXAMPLES] and
-        user.daily_limits[Quota.MUSIC_GEN] in [1] and
-        (current_date - user.last_subscription_limit_update).days <= 3
-    ):
-        product = await get_product_by_quota(Quota.SUNO)
-
-        request = await write_request(
-            user_id=user.id,
-            processing_message_ids=[message.message_id],
-            product_id=product.id,
-            requested=2,
-            details={
-                'mode': SunoMode.SIMPLE,
-                'prompt': prompt,
-                'is_suggestion': True,
-            },
-        )
-
-        try:
-            results = await generate_song(SunoVersion.V3_5, prompt)
-            tasks = []
-            for (i, result) in enumerate(results):
-                if result is not None:
-                    tasks.append(
-                        write_generation(
-                            id=result,
-                            request_id=request.id,
-                            product_id=product.id,
-                            has_error=result is None,
-                            details={
-                                'mode': SunoMode.SIMPLE,
-                                'prompt': prompt,
-                                'is_suggestion': True,
-                            }
-                        )
-                    )
-
-                    asyncio.create_task(
-                        check_song(
-                            bot=message.bot,
-                            storage=state.storage,
-                            song_id=result,
-                        )
-                    )
-
-            await asyncio.gather(*tasks)
-        except Exception as e:
-            await send_error_info(
-                bot=message.bot,
-                user_id=user.id,
-                info=str(e),
-                hashtags=['suno', 'example'],
-            )
-
-            request.status = RequestStatus.FINISHED
-            await update_request(request.id, {
-                'status': request.status
-            })
-
-            generations = await get_generations_by_request_id(request.id)
-            for generation in generations:
-                generation.status = GenerationStatus.FINISHED
-                generation.has_error = True
-                await update_generation(
-                    generation.id,
-                    {
-                        'status': generation.status,
-                        'has_error': generation.has_error,
-                    },
-                )

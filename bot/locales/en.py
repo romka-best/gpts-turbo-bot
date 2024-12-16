@@ -12,9 +12,6 @@ from bot.database.models.common import (
     Quota,
     Model,
     ModelType,
-    ChatGPTVersion,
-    ClaudeGPTVersion,
-    GeminiGPTVersion,
     EightifyFocus,
     EightifyFormat,
     EightifyAmount,
@@ -25,7 +22,7 @@ from bot.database.models.subscription import (
     SubscriptionPeriod,
     SubscriptionStatus,
 )
-from bot.database.models.user import UserGender, UserSettings
+from bot.database.models.user import UserSettings
 from bot.locales.types import LanguageCode
 
 
@@ -700,9 +697,9 @@ Looking forward to your link! 😊
     MIDJOURNEY_ALREADY_CHOSE_UPSCALE = "You've already chosen this image, try a new one 🙂"
 
     # Flux
-    STRICT_SAFETY_TOLERANCE = "🔒 Strict Prompt Security"
-    MIDDLE_SAFETY_TOLERANCE = "🔏 Average Prompt Security"
-    PERMISSIVE_SAFETY_TOLERANCE = "🔓 Weak Prompt Security"
+    STRICT_SAFETY_TOLERANCE = "🔒 Strict"
+    MIDDLE_SAFETY_TOLERANCE = "🔏 Average"
+    PERMISSIVE_SAFETY_TOLERANCE = "🔓 Weak"
 
     # Suno
     SUNO_INFO = """
@@ -775,7 +772,7 @@ Looks like you're trying to request more than 3 minutes, I can't generate more y
 
     # Settings
     SETTINGS_CHOOSE_MODEL_TYPE = """
-⚙️ <b>Welcome to settings!</b> ⚙️
+⚙️ <b>Welcome to Settings!</b>
 
 🌍 To change the interface language, enter the command /language
 🤖 To change the model, enter the command /mode
@@ -783,8 +780,27 @@ Looks like you're trying to request more than 3 minutes, I can't generate more y
 Here you are the artist, and settings are your palette. Choose the model type you want to personalize for yourself below 👇
 """
     SETTINGS_CHOOSE_MODEL = """
+⚙️ <b>Welcome to Settings!</b>
+
 Choose the model you want to personalize for yourself below 👇
 """
+    SETTINGS_TO_OTHER_MODELS = "To Other Models ◀️"
+    SETTINGS_TO_OTHER_TYPE_MODELS = "To Other Models Type ◀️"
+    SETTINGS_VOICE_MESSAGES = """
+⚙️ <b>Welcome to Settings!</b>
+
+Below are the voice response settings for all text models 🎙
+"""
+    SETTINGS_VERSION = "Version 🤖"
+    SETTINGS_FOCUS = "Focus 🎯"
+    SETTINGS_FORMAT = "Format 🎛"
+    SETTINGS_AMOUNT = "Number of Items 📏"
+    SETTINGS_SEND_TYPE = "Send Type 🗯"
+    SETTINGS_ASPECT_RATIO = "Aspect Ratio 📐"
+    SETTINGS_QUALITY = "Quality ✨"
+    SETTINGS_PROMPT_SAFETY = "Prompt Security 🔐"
+    SETTINGS_GENDER = "Gender 👕/👚"
+
     SHOW_THE_NAME_OF_THE_CHATS = "Show the name of the chats"
     SHOW_THE_NAME_OF_THE_ROLES = "Show the name of the roles"
     SHOW_USAGE_QUOTA_IN_MESSAGES = "Show usage quota in messages"
@@ -1168,7 +1184,6 @@ Currently, the total purchase amount is: <b>{left_part_price}{current_price}{rig
     def profile(
         subscription_name,
         subscription_status,
-        gender,
         current_model,
         current_currency,
         renewal_date,
@@ -1177,13 +1192,6 @@ Currently, the total purchase amount is: <b>{left_part_price}{current_price}{rig
             subscription_info = f"📫 <b>Subscription Status:</b> Canceled. Active until {renewal_date}"
         else:
             subscription_info = "📫 <b>Subscription Status:</b> Active"
-
-        if gender == UserGender.MALE:
-            gender_info = f"<b>Gender:</b> {English.MALE}"
-        elif gender == UserGender.FEMALE:
-            gender_info = f"<b>Gender:</b> {English.FEMALE}"
-        else:
-            gender_info = f"<b>Gender:</b> {English.UNSPECIFIED}"
 
         if current_currency == Currency.XTR:
             current_currency = f'Telegram Stars {Currency.SYMBOLS[current_currency]}'
@@ -1196,10 +1204,6 @@ Currently, the total purchase amount is: <b>{left_part_price}{current_price}{rig
 ---------------------------
 
 🤖 <b>Current model: {current_model}</b>
-{gender_info}
-
----------------------------
-
 💱 <b>Current currency: {current_currency}</b>
 💳 <b>Subscription type:</b> {subscription_name}
 🗓 <b>Subscription renewal date:</b> {f'{renewal_date}' if subscription_name != '🆓' else 'N/A'}
@@ -1544,7 +1548,7 @@ Looks like you've got only <b>{available_seconds} seconds</b> left in your arsen
     ┣ 📅 Knowledge up to: {model_info.get('training_data')}
     ┣ 📷 Image Support: {'Yes ✅' if model_info.get('support_photos', False) else 'No ❌'}
     ┣ 🎙 Voice Answers: {'Enabled ✅' if model_info.get(UserSettings.TURN_ON_VOICE_MESSAGES, False) else 'Disabled ❌'}
-    ┗ 🎭 Current Role: {model_info.get('role')}"""
+    ┗ 🎭 Role: {model_info.get('role')}"""
         elif model_type == ModelType.SUMMARY:
             model_focus = model_info.get(UserSettings.FOCUS, EightifyFocus.INSIGHTFUL)
             if model_focus == EightifyFocus.INSIGHTFUL:
@@ -1837,13 +1841,7 @@ Looks like you've got only <b>{available_seconds} seconds</b> left in your arsen
     # Settings
     @staticmethod
     def settings(human_model: str, current_model: Model, dall_e_cost=1) -> str:
-        if current_model == Model.CHAT_GPT:
-            additional_text = f"\n<b>Version ChatGPT 4.0 Omni Mini</b>: {ChatGPTVersion.V4_Omni_Mini}\n<b>Version ChatGPT 4.0 Omni</b>: {ChatGPTVersion.V4_Omni}\n<b>Version ChatGPT o1-mini</b>: {ChatGPTVersion.V1_O_Mini}\n<b>Version ChatGPT o1-preview</b>: {ChatGPTVersion.V1_O_Preview}"
-        elif current_model == Model.CLAUDE:
-            additional_text = f"\n<b>Version Claude 3.5 Haiku</b>: {ClaudeGPTVersion.V3_Haiku}\n<b>Version Claude 3.5 Sonnet</b>: {ClaudeGPTVersion.V3_Sonnet}\n<b>Version Claude 3.0 Opus</b>: {ClaudeGPTVersion.V3_Opus}"
-        elif current_model == Model.GEMINI:
-            additional_text = f"\n<b>Version Gemini 1.5 Flash</b>: {GeminiGPTVersion.V1_Flash}\n<b>Version Gemini 1.5 Pro</b>: {GeminiGPTVersion.V1_Pro}\n<b>Version Gemini 1.0 Ultra</b>: {GeminiGPTVersion.V1_Ultra}"
-        elif current_model == Model.DALL_E:
+        if current_model == Model.DALL_E:
             additional_text = f"\nAt the current settings, 1 request costs: {dall_e_cost} 🖼"
         else:
             additional_text = ""

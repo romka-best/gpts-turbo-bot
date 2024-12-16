@@ -345,7 +345,7 @@ async def handle_get_statistics(language_code: LanguageCode, period: str):
 
     text_products = {
         product.id: product.names.get(language_code) for product in products
-        if product.category == ProductCategory.TEXT
+        if product.category == ProductCategory.TEXT or product.category == ProductCategory.SUMMARY
     }
     image_products = {
         product.id: product.names.get(language_code) for product in products

@@ -108,7 +108,7 @@ async def handle_face_swap(bot: Bot, chat_id: str, state: FSMContext, user_id: s
     user = await get_user(str(user_id))
     user_language_code = await get_user_language(str(user_id), state.storage)
 
-    if user.gender == UserGender.UNSPECIFIED:
+    if user.settings[Model.FACE_SWAP][UserSettings.GENDER] == UserGender.UNSPECIFIED:
         reply_markup = build_profile_gender_keyboard(user_language_code)
         await bot.send_message(
             chat_id=chat_id,
@@ -126,7 +126,7 @@ async def handle_face_swap(bot: Bot, chat_id: str, state: FSMContext, user_id: s
 
             used_face_swap_packages = await get_used_face_swap_packages_by_user_id(user_id)
             face_swap_packages = await get_face_swap_packages_by_gender(
-                user.gender,
+                gender=user.settings[Model.FACE_SWAP][UserSettings.GENDER],
                 status=FaceSwapPackageStatus.PUBLIC,
             )
             has_more = False
@@ -140,7 +140,7 @@ async def handle_face_swap(bot: Bot, chat_id: str, state: FSMContext, user_id: s
                     break
             if has_more or not used_face_swap_packages or len(face_swap_packages) > len(used_face_swap_packages):
                 face_swap_packages = await get_face_swap_packages_by_gender(
-                    gender=user.gender,
+                    gender=user.settings[Model.FACE_SWAP][UserSettings.GENDER],
                     status=FaceSwapPackageStatus.PUBLIC,
                 )
                 chosen_package = next(
@@ -190,7 +190,10 @@ async def handle_face_swap_choose_selection(
     user_language_code = await get_user_language(user.id, state.storage)
     user_available_images = user.daily_limits[Quota.FACE_SWAP] + user.additional_usage_quota[Quota.FACE_SWAP]
 
-    face_swap_package = await get_face_swap_package_by_name_and_gender(package_name, user.gender)
+    face_swap_package = await get_face_swap_package_by_name_and_gender(
+        package_name,
+        user.settings[Model.FACE_SWAP][UserSettings.GENDER],
+    )
     used_face_swap_package = await get_used_face_swap_package_by_user_id_and_package_id(user.id, face_swap_package.id)
     if used_face_swap_package is None:
         used_face_swap_package = await write_used_face_swap_package(user.id, face_swap_package.id, [])
@@ -267,7 +270,7 @@ async def handle_face_swap_package_selection(callback_query: CallbackQuery, stat
         user_language_code = await get_user_language(user_id, state.storage)
 
         face_swap_packages = await get_face_swap_packages_by_gender(
-            gender=user.gender,
+            gender=user.settings[Model.FACE_SWAP][UserSettings.GENDER],
             status=FaceSwapPackageStatus.PUBLIC,
         )
         reply_markup = build_face_swap_choose_keyboard(user_language_code, face_swap_packages)
@@ -359,7 +362,10 @@ async def face_swap_quantity_handler(message: Message, state: FSMContext, user_i
             await message.delete()
             return
 
-        face_swap_package = await get_face_swap_package_by_name_and_gender(name, user.gender)
+        face_swap_package = await get_face_swap_package_by_name_and_gender(
+            name,
+            user.settings[Model.FACE_SWAP][UserSettings.GENDER]
+        )
 
         if quota < quantity:
             reply_markup = build_cancel_keyboard(user_language_code)
@@ -417,7 +423,7 @@ async def face_swap_quantity_handler(message: Message, state: FSMContext, user_i
             try:
                 results, random_names = await generate_face_swap_images(
                     quantity,
-                    user.gender.lower(),
+                    user.settings[Model.FACE_SWAP][UserSettings.GENDER].lower(),
                     face_swap_package,
                     used_face_swap_package,
                     user_photo_link,
