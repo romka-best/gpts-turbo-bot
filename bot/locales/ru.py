@@ -1547,7 +1547,7 @@ class Russian(Texts):
     ┣ 📅 Знания до: {model_info.get('training_data')}
     ┣ 📷 Работа с фото: {'Да ✅' if model_info.get('support_photos', False) else 'Нет ❌'}
     ┣ 🎙 Голосовые ответы: {'Вкл. ✅' if model_info.get(UserSettings.TURN_ON_VOICE_MESSAGES, False) else 'Выкл. ❌'}
-    ┗ 🎭 Текущая роль: {model_info.get('role')}"""
+    ┗ 🎭 Роль: {model_info.get('role')}"""
         elif model_type == ModelType.SUMMARY:
             model_focus = model_info.get(UserSettings.FOCUS, EightifyFocus.INSIGHTFUL)
             if model_focus == EightifyFocus.INSIGHTFUL:

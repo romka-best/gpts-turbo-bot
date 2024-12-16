@@ -1548,7 +1548,7 @@ Looks like you've got only <b>{available_seconds} seconds</b> left in your arsen
     ┣ 📅 Knowledge up to: {model_info.get('training_data')}
     ┣ 📷 Image Support: {'Yes ✅' if model_info.get('support_photos', False) else 'No ❌'}
     ┣ 🎙 Voice Answers: {'Enabled ✅' if model_info.get(UserSettings.TURN_ON_VOICE_MESSAGES, False) else 'Disabled ❌'}
-    ┗ 🎭 Current Role: {model_info.get('role')}"""
+    ┗ 🎭 Role: {model_info.get('role')}"""
         elif model_type == ModelType.SUMMARY:
             model_focus = model_info.get(UserSettings.FOCUS, EightifyFocus.INSIGHTFUL)
             if model_focus == EightifyFocus.INSIGHTFUL:
