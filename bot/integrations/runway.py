@@ -38,12 +38,10 @@ async def get_response_video(
     task_id = response.id
 
     await asyncio.sleep(10)
-    attempts = 0
     task = await client.tasks.retrieve(task_id)
-    for i in range(30):
+    for i in range(60):
         await asyncio.sleep(10)
         task = await client.tasks.retrieve(task_id)
-        attempts += 1
         if task.status in ['SUCCEEDED', 'FAILED', 'CANCELLED']:
             break
 

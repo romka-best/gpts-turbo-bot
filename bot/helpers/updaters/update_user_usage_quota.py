@@ -7,6 +7,7 @@ TEXT_ADVANCED_QUOTA = [Quota.CHAT_GPT4_OMNI, Quota.CHAT_GPT_O_1_MINI, Quota.CLAU
 TEXT_SUPER_ADVANCED_QUOTA = [Quota.CHAT_GPT_O_1, Quota.CLAUDE_3_OPUS, Quota.GEMINI_1_ULTRA]
 IMAGE_QUOTA = [Quota.DALL_E, Quota.MIDJOURNEY, Quota.STABLE_DIFFUSION, Quota.FLUX, Quota.FACE_SWAP, Quota.PHOTOSHOP_AI]
 MUSIC_QUOTA = [Quota.MUSIC_GEN, Quota.SUNO]
+VIDEO_QUOTA = [Quota.RUNWAY]
 
 
 def get_user_with_updated_quota(user: User, user_quota: Quota, quantity_to_delete: int) -> User:
@@ -24,6 +25,8 @@ def get_user_with_updated_quota(user: User, user_quota: Quota, quantity_to_delet
                 chosen_quota = IMAGE_QUOTA
             elif user_quota in MUSIC_QUOTA:
                 chosen_quota = MUSIC_QUOTA
+            elif user_quota in VIDEO_QUOTA:
+                chosen_quota = VIDEO_QUOTA
 
             for quota in chosen_quota:
                 user.daily_limits[quota] -= 1

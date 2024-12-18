@@ -40,7 +40,7 @@ class ModelType(StrEnum):
 class Quota:
     CHAT_GPT4_OMNI = 'gpt4_omni'
     CHAT_GPT4_OMNI_MINI = 'gpt4_omni_mini'
-    CHAT_GPT_O_1_MINI = 'o1-mini'
+    CHAT_GPT_O_1_MINI = 'o1_mini'
     CHAT_GPT_O_1 = 'o1'
     CLAUDE_3_HAIKU = 'claude_3_haiku'
     CLAUDE_3_SONNET = 'claude_3_sonnet'

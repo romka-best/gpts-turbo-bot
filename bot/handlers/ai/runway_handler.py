@@ -1,3 +1,5 @@
+from typing import Optional
+
 import runwayml
 from aiogram import Router
 from aiogram.filters import Command
@@ -21,6 +23,8 @@ from bot.integrations.runway import get_response_video, get_cost_for_video
 from bot.keyboards.ai.mode import build_switched_to_ai_keyboard
 from bot.keyboards.common.common import build_limit_exceeded_keyboard, build_error_keyboard
 from bot.locales.main import get_user_language, get_localization
+from bot.locales.translate_text import translate_text
+from bot.locales.types import LanguageCode
 
 runway_router = Router()
 
@@ -60,7 +64,7 @@ async def runway(message: Message, state: FSMContext):
         )
 
 
-async def handle_runway(message: Message, state: FSMContext, user: User, video_frame_link: str):
+async def handle_runway(message: Message, state: FSMContext, user: User, video_frame_link: Optional[str] = None):
     await state.update_data(is_processing=True)
 
     user_language_code = await get_user_language(user.id, state.storage)
@@ -71,10 +75,11 @@ async def handle_runway(message: Message, state: FSMContext, user: User, video_f
             text=get_localization(user_language_code).PHOTO_REQUIRED_ERROR,
             allow_sending_without_reply=True,
         )
+        await state.update_data(is_processing=False)
         return
 
-    prompt = user_data.get('recognized_text', None)
-    if prompt is None:
+    prompt = user_data.get('recognized_text', '')
+    if not prompt:
         if message.caption:
             prompt = message.caption
         elif message.text:
@@ -110,6 +115,9 @@ async def handle_runway(message: Message, state: FSMContext, user: User, video_f
                     allow_sending_without_reply=True,
                 )
                 return
+
+            if prompt and user_language_code != LanguageCode.EN:
+                prompt = await translate_text(prompt, user_language_code, LanguageCode.EN)
 
             response = await get_response_video(
                 model_version,

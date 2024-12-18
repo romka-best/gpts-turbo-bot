@@ -107,6 +107,7 @@ async def start(message: Message, state: FSMContext):
                     'dalle',
                     'midjourney',
                     'stablediffusion',
+                    'flux',
                     'faceswap',
                     'photoshopai',
                     'suno',
@@ -141,6 +142,8 @@ async def start(message: Message, state: FSMContext):
                         default_quota = Quota.MIDJOURNEY
                     elif sub_param_value == 'stablediffusion':
                         default_quota = Quota.STABLE_DIFFUSION
+                    elif sub_param_value == 'flux':
+                        default_quota = Quota.FLUX
                     elif sub_param_value == 'faceswap':
                         default_quota = Quota.FACE_SWAP
                     elif sub_param_value == 'photoshopai':
