@@ -174,10 +174,10 @@ def build_bonus_cash_out_keyboard(language_code: LanguageCode, products: list[Pr
             [
                 InlineKeyboardButton(
                     text='⬅️',
-                    callback_data='bonus_cash_out:prev:3'
+                    callback_data='bonus_cash_out:prev:4'
                 ),
                 InlineKeyboardButton(
-                    text='1/4',
+                    text='1/5',
                     callback_data='bonus_cash_out:page:0'
                 ),
                 InlineKeyboardButton(
@@ -209,7 +209,7 @@ def build_bonus_cash_out_keyboard(language_code: LanguageCode, products: list[Pr
                     callback_data='bonus_cash_out:prev:0'
                 ),
                 InlineKeyboardButton(
-                    text='2/4',
+                    text='2/5',
                     callback_data='bonus_cash_out:page:1'
                 ),
                 InlineKeyboardButton(
@@ -243,7 +243,7 @@ def build_bonus_cash_out_keyboard(language_code: LanguageCode, products: list[Pr
                     callback_data='bonus_cash_out:prev:1'
                 ),
                 InlineKeyboardButton(
-                    text='3/4',
+                    text='3/5',
                     callback_data='bonus_cash_out:page:2'
                 ),
                 InlineKeyboardButton(
@@ -253,6 +253,14 @@ def build_bonus_cash_out_keyboard(language_code: LanguageCode, products: list[Pr
             ]
         )
     elif page == 3:
+        buttons.append(
+            [
+                InlineKeyboardButton(
+                    text=get_localization(language_code).VIDEO_MODELS,
+                    callback_data=f'bonus_cash_out:{ProductCategory.VIDEO}',
+                ),
+            ],
+        )
         for product in products:
             buttons.append(
                 [
@@ -269,8 +277,34 @@ def build_bonus_cash_out_keyboard(language_code: LanguageCode, products: list[Pr
                     callback_data='bonus_cash_out:prev:2'
                 ),
                 InlineKeyboardButton(
-                    text='4/4',
+                    text='4/5',
                     callback_data='bonus_cash_out:page:3'
+                ),
+                InlineKeyboardButton(
+                    text='➡️',
+                    callback_data='bonus_cash_out:next:4'
+                ),
+            ]
+        )
+    elif page == 4:
+        for product in products:
+            buttons.append(
+                [
+                    InlineKeyboardButton(
+                        text=product.names.get(language_code),
+                        callback_data=f'bonus_cash_out:{product.id}'
+                    ),
+                ],
+            )
+        buttons.append(
+            [
+                InlineKeyboardButton(
+                    text='⬅️',
+                    callback_data='bonus_cash_out:prev:3'
+                ),
+                InlineKeyboardButton(
+                    text='5/5',
+                    callback_data='bonus_cash_out:page:4'
                 ),
                 InlineKeyboardButton(
                     text='➡️',

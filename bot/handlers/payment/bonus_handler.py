@@ -101,6 +101,8 @@ async def handle_bonus_cash_out(message: Message, user_id: str, state: FSMContex
     elif page == 2:
         product_category = ProductCategory.MUSIC
     elif page == 3:
+        product_category = ProductCategory.VIDEO
+    elif page == 4:
         product_category = ProductCategory.OTHER
     else:
         product_category = None
@@ -305,7 +307,12 @@ async def handle_bonus_cash_out_selection(callback_query: CallbackQuery, state: 
     product_id = callback_query.data.split(':')[1]
     if product_id == 'page':
         return
-    elif product_id == ProductCategory.TEXT or product_id == ProductCategory.IMAGE or product_id == ProductCategory.MUSIC:
+    elif (
+        product_id == ProductCategory.TEXT or
+        product_id == ProductCategory.IMAGE or
+        product_id == ProductCategory.MUSIC or
+        product_id == ProductCategory.VIDEO
+    ):
         await handle_info_selection(callback_query, state, product_id)
     elif product_id == 'next' or product_id == 'prev':
         page = int(callback_query.data.split(':')[2])

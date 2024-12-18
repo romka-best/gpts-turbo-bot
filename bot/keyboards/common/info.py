@@ -27,6 +27,12 @@ def build_info_keyboard(language_code: LanguageCode) -> InlineKeyboardMarkup:
         ],
         [
             InlineKeyboardButton(
+                text=get_localization(language_code).VIDEO_MODELS,
+                callback_data=f'info:{ModelType.VIDEO}'
+            ),
+        ],
+        [
+            InlineKeyboardButton(
                 text=get_localization(language_code).CLOSE,
                 callback_data='info:close'
             ),
@@ -108,7 +114,7 @@ def build_info_image_models_keyboard(language_code: LanguageCode) -> InlineKeybo
         [
             InlineKeyboardButton(
                 text=get_localization(language_code).BACK,
-                callback_data='info_text_models:back'
+                callback_data='info_image_models:back'
             ),
         ],
     ]
@@ -133,7 +139,26 @@ def build_info_music_models_keyboard(language_code: LanguageCode) -> InlineKeybo
         [
             InlineKeyboardButton(
                 text=get_localization(language_code).BACK,
-                callback_data='info_text_models:back'
+                callback_data='info_music_models:back'
+            ),
+        ],
+    ]
+
+    return InlineKeyboardMarkup(inline_keyboard=buttons)
+
+
+def build_info_video_models_keyboard(language_code: LanguageCode) -> InlineKeyboardMarkup:
+    buttons = [
+        [
+            InlineKeyboardButton(
+                text=get_localization(language_code).RUNWAY,
+                callback_data=f'info_video_models:{Model.RUNWAY}'
+            ),
+        ],
+        [
+            InlineKeyboardButton(
+                text=get_localization(language_code).BACK,
+                callback_data='info_video_models:back'
             ),
         ],
     ]

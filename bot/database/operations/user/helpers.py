@@ -5,7 +5,7 @@ from aiogram.types import User as TelegramUser
 
 from bot.database.models.common import Model, Currency, Quota, ChatGPTVersion, ClaudeGPTVersion, GeminiGPTVersion
 from bot.database.models.subscription import SUBSCRIPTION_FREE_LIMITS
-from bot.database.models.user import User, UserGender, UserSettings
+from bot.database.models.user import User, UserSettings
 from bot.locales.types import LanguageCode
 
 
@@ -58,7 +58,6 @@ def create_user_object(
         current_chat_id=chat_id,
         telegram_chat_id=telegram_chat_id,
         stripe_id=stripe_id,
-        gender=user_data.get('gender', UserGender.UNSPECIFIED),
         language_code=telegram_user.language_code,
         interface_language_code=user_data.get(
             'interface_language_code',

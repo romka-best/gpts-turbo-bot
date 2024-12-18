@@ -93,6 +93,10 @@ commands_en = [
         description='🎸 Switch to Suno model',
     ),
     BotCommand(
+        command='runway',
+        description='🎥 Switch to Runway model',
+    ),
+    BotCommand(
         command='bonus',
         description='🎁 Bonus balance',
     ),
@@ -182,6 +186,10 @@ commands_ru = [
     BotCommand(
         command='suno',
         description='🎸 Переключиться на Suno модель',
+    ),
+    BotCommand(
+        command='runway',
+        description='🎥 Переключиться на Runway модель',
     ),
     BotCommand(
         command='bonus',

@@ -39,7 +39,7 @@ from bot.states.suno import Suno
 
 suno_router = Router()
 
-PRICE_SUNO = 0
+PRICE_SUNO = 0.0348
 
 
 @suno_router.message(Command('suno'))

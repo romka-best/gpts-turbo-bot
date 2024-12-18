@@ -37,6 +37,7 @@ class Texts(Protocol):
     INFO_PHOTOSHOP_AI: str
     INFO_MUSIC_GEN: str
     INFO_SUNO: str
+    INFO_RUNWAY: str
 
     ADMIN_INFO = '👨‍💻 Выберите действие, админ 👩‍💻'
     ADS_INFO = 'Выберите, что хотите сделать:'
@@ -322,7 +323,7 @@ class Texts(Protocol):
     CHATGPT4_TURBO = '🧠 ChatGPT 4.0 Turbo'
     CHATGPT4_OMNI = '💥 ChatGPT 4.0 Omni'
     CHAT_GPT_O_1_MINI = '🧩 ChatGPT o1-mini'
-    CHAT_GPT_O_1_PREVIEW = '🧪 ChatGPT o1-preview'
+    CHAT_GPT_O_1 = '🧪 ChatGPT o1'
     CLAUDE = '📄 Claude'
     CLAUDE_3_HAIKU = '📜 Claude 3.5 Haiku'
     CLAUDE_3_SONNET = '💫 Claude 3.5 Sonnet'
@@ -340,6 +341,7 @@ class Texts(Protocol):
     FACE_SWAP = '📷️ FaceSwap'
     MUSIC_GEN = '🎺 MusicGen'
     SUNO = '🎸 Suno'
+    RUNWAY = '🎥 Runway'
     MODE: str
     CHOOSE_CHATGPT_MODEL: str
     CHOOSE_CLAUDE_MODEL: str
@@ -350,6 +352,7 @@ class Texts(Protocol):
     ALREADY_SWITCHED_TO_THIS_MODEL: str
     REQUEST_FORBIDDEN_ERROR: str
     PHOTO_FORBIDDEN_ERROR: str
+    PHOTO_REQUIRED_ERROR: str
     ALBUM_FORBIDDEN_ERROR: str
     VIDEO_FORBIDDEN_ERROR: str
     DOCUMENT_FORBIDDEN_ERROR: str
@@ -363,6 +366,7 @@ class Texts(Protocol):
     REMOVE_RESTRICTION: str
     REMOVE_RESTRICTION_INFO: str
     IMAGE_SUCCESS: str
+    VIDEO_SUCCESS: str
     FILE_TOO_BIG_ERROR: str
 
     # Examples
@@ -432,6 +436,7 @@ class Texts(Protocol):
     SETTINGS_QUALITY: str
     SETTINGS_PROMPT_SAFETY: str
     SETTINGS_GENDER: str
+    SETTINGS_DURATION: str
     SHOW_THE_NAME_OF_THE_CHATS: str
     SHOW_THE_NAME_OF_THE_ROLES: str
     SHOW_USAGE_QUOTA_IN_MESSAGES: str
@@ -1436,6 +1441,10 @@ class Texts(Protocol):
 
     @staticmethod
     def processing_request_music() -> str:
+        raise NotImplementedError
+
+    @staticmethod
+    def processing_request_video() -> str:
         raise NotImplementedError
 
     @staticmethod

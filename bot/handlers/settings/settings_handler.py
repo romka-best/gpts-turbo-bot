@@ -16,6 +16,8 @@ from bot.database.models.common import (
     Model,
     ModelType,
     Quota,
+    SendType,
+    AspectRatio,
     EightifyFocus,
     EightifyFormat,
     EightifyAmount,
@@ -24,8 +26,8 @@ from bot.database.models.common import (
     MidjourneyVersion,
     FluxSafetyTolerance,
     SunoVersion,
-    SendType,
-    AspectRatio,
+    RunwayResolution,
+    RunwayDuration,
 )
 from bot.database.models.user import UserSettings, UserGender
 from bot.database.operations.chat.deleters import delete_chat, reset_chat
@@ -38,6 +40,7 @@ from bot.helpers.creaters.create_new_chat import create_new_chat
 from bot.helpers.getters.get_human_model import get_human_model
 from bot.helpers.getters.get_model_type import get_model_type
 from bot.integrations.openAI import get_cost_for_image
+from bot.integrations.runway import get_cost_for_video
 from bot.keyboards.common.common import build_buy_motivation_keyboard
 from bot.keyboards.settings.chats import (
     build_chats_keyboard,
@@ -51,6 +54,7 @@ from bot.keyboards.settings.settings import (
     build_settings_choose_text_model_keyboard,
     build_settings_choose_image_model_keyboard,
     build_settings_choose_music_model_keyboard,
+    build_settings_choose_video_model_keyboard,
     build_settings_keyboard,
     build_voice_messages_settings_keyboard,
 )
@@ -73,11 +77,15 @@ async def handle_settings(message: Message, user_id: str, state: FSMContext, adv
     if advanced_mode:
         user = await get_user(user_id)
 
-        dall_e_cost = 1
+        generation_cost = 1
         if user.current_model == Model.DALL_E:
-            dall_e_cost = get_cost_for_image(
+            generation_cost = get_cost_for_image(
                 user.settings[Model.DALL_E][UserSettings.QUALITY],
                 user.settings[Model.DALL_E][UserSettings.RESOLUTION],
+            )
+        elif user.current_model == Model.RUNWAY:
+            generation_cost = get_cost_for_video(
+                user.settings[Model.RUNWAY][UserSettings.DURATION],
             )
         human_model = get_human_model(user.current_model, user_language_code)
         reply_markup = build_settings_keyboard(
@@ -87,7 +95,7 @@ async def handle_settings(message: Message, user_id: str, state: FSMContext, adv
             settings=user.settings,
         )
         await message.answer(
-            text=get_localization(user_language_code).settings(human_model, user.current_model, dall_e_cost),
+            text=get_localization(user_language_code).settings(human_model, user.current_model, generation_cost),
             reply_markup=reply_markup,
         )
     else:
@@ -107,22 +115,19 @@ async def handle_settings_choose_model_type_selection(callback_query: CallbackQu
     chosen_model_type = callback_query.data.split(':')[1]
     if chosen_model_type == 'text_models':
         reply_markup = build_settings_choose_text_model_keyboard(user_language_code)
-        await callback_query.message.edit_text(
-            text=get_localization(user_language_code).SETTINGS_CHOOSE_MODEL,
-            reply_markup=reply_markup,
-        )
     elif chosen_model_type == 'image_models':
         reply_markup = build_settings_choose_image_model_keyboard(user_language_code)
-        await callback_query.message.edit_text(
-            text=get_localization(user_language_code).SETTINGS_CHOOSE_MODEL,
-            reply_markup=reply_markup,
-        )
     elif chosen_model_type == 'music_models':
         reply_markup = build_settings_choose_music_model_keyboard(user_language_code)
-        await callback_query.message.edit_text(
-            text=get_localization(user_language_code).SETTINGS_CHOOSE_MODEL,
-            reply_markup=reply_markup,
-        )
+    elif chosen_model_type == 'video_models':
+        reply_markup = build_settings_choose_video_model_keyboard(user_language_code)
+    else:
+        return
+
+    await callback_query.message.edit_text(
+        text=get_localization(user_language_code).SETTINGS_CHOOSE_MODEL,
+        reply_markup=reply_markup,
+    )
 
 
 @settings_router.callback_query(lambda c: c.data.startswith('settings_choose_text_model:'))
@@ -158,7 +163,7 @@ async def handle_settings_choose_image_model_selection(callback_query: CallbackQ
     user = await get_user(user_id)
     user_language_code = await get_user_language(str(callback_query.from_user.id), state.storage)
 
-    dall_e_cost = 1
+    generation_cost = 1
     chosen_model = cast(Model, callback_query.data.split(':')[1])
     if chosen_model == 'back':
         reply_markup = build_settings_choose_model_type_keyboard(user_language_code)
@@ -168,7 +173,7 @@ async def handle_settings_choose_image_model_selection(callback_query: CallbackQ
         )
         return
     elif chosen_model == Model.DALL_E:
-        dall_e_cost = get_cost_for_image(
+        generation_cost = get_cost_for_image(
             user.settings[Model.DALL_E][UserSettings.QUALITY],
             user.settings[Model.DALL_E][UserSettings.RESOLUTION],
         )
@@ -176,7 +181,7 @@ async def handle_settings_choose_image_model_selection(callback_query: CallbackQ
     human_model = get_human_model(chosen_model, user_language_code)
     reply_markup = build_settings_keyboard(user_language_code, chosen_model, ModelType.IMAGE, user.settings)
     await callback_query.message.edit_text(
-        text=get_localization(user_language_code).settings(human_model, chosen_model, dall_e_cost),
+        text=get_localization(user_language_code).settings(human_model, chosen_model, generation_cost),
         reply_markup=reply_markup,
     )
 
@@ -206,6 +211,36 @@ async def handle_settings_choose_music_model_selection(callback_query: CallbackQ
     )
 
 
+@settings_router.callback_query(lambda c: c.data.startswith('settings_choose_video_model:'))
+async def handle_settings_choose_video_model_selection(callback_query: CallbackQuery, state: FSMContext):
+    await callback_query.answer()
+
+    user_id = str(callback_query.from_user.id)
+    user = await get_user(user_id)
+    user_language_code = await get_user_language(str(callback_query.from_user.id), state.storage)
+
+    generation_cost = 1
+    chosen_model = cast(Model, callback_query.data.split(':')[1])
+    if chosen_model == 'back':
+        reply_markup = build_settings_choose_model_type_keyboard(user_language_code)
+        await callback_query.message.edit_text(
+            text=get_localization(user_language_code).SETTINGS_CHOOSE_MODEL_TYPE,
+            reply_markup=reply_markup,
+        )
+        return
+    elif chosen_model == Model.RUNWAY:
+        generation_cost = get_cost_for_video(
+            user.settings[Model.RUNWAY][UserSettings.DURATION],
+        )
+
+    human_model = get_human_model(chosen_model, user_language_code)
+    reply_markup = build_settings_keyboard(user_language_code, chosen_model, ModelType.VIDEO, user.settings)
+    await callback_query.message.edit_text(
+        text=get_localization(user_language_code).settings(human_model, chosen_model, generation_cost),
+        reply_markup=reply_markup,
+    )
+
+
 @settings_router.callback_query(lambda c: c.data.startswith('setting:'))
 async def handle_setting_selection(callback_query: CallbackQuery, state: FSMContext):
     await callback_query.answer()
@@ -220,22 +255,19 @@ async def handle_setting_selection(callback_query: CallbackQuery, state: FSMCont
         model_type = callback_query.data.split(':')[2]
         if model_type == ModelType.TEXT or model_type == ModelType.SUMMARY:
             reply_markup = build_settings_choose_text_model_keyboard(user_language_code)
-            await callback_query.message.edit_text(
-                text=get_localization(user_language_code).SETTINGS_CHOOSE_MODEL,
-                reply_markup=reply_markup,
-            )
         elif model_type == ModelType.IMAGE:
             reply_markup = build_settings_choose_image_model_keyboard(user_language_code)
-            await callback_query.message.edit_text(
-                text=get_localization(user_language_code).SETTINGS_CHOOSE_MODEL,
-                reply_markup=reply_markup,
-            )
         elif model_type == ModelType.MUSIC:
             reply_markup = build_settings_choose_music_model_keyboard(user_language_code)
-            await callback_query.message.edit_text(
-                text=get_localization(user_language_code).SETTINGS_CHOOSE_MODEL,
-                reply_markup=reply_markup,
-            )
+        elif model_type == ModelType.VIDEO:
+            reply_markup = build_settings_choose_video_model_keyboard(user_language_code)
+        else:
+            return
+
+        await callback_query.message.edit_text(
+            text=get_localization(user_language_code).SETTINGS_CHOOSE_MODEL,
+            reply_markup=reply_markup,
+        )
         return
     elif chosen_setting == 'nothing':
         return
@@ -292,6 +324,12 @@ async def handle_setting_selection(callback_query: CallbackQuery, state: FSMCont
         user.settings[Model.FACE_SWAP][UserSettings.GENDER] = chosen_setting
         what_changed = UserSettings.GENDER
     elif (
+        chosen_setting == str(RunwayDuration.SECONDS_5) or
+        chosen_setting == str(RunwayDuration.SECONDS_10)
+    ):
+        user.settings[Model.RUNWAY][UserSettings.DURATION] = int(chosen_setting)
+        what_changed = UserSettings.DURATION
+    elif (
         chosen_setting == 'SQUARE' or
         chosen_setting == 'LANDSCAPE' or
         chosen_setting == 'PORTRAIT' or
@@ -309,6 +347,11 @@ async def handle_setting_selection(callback_query: CallbackQuery, state: FSMCont
             chosen_setting,
             AspectRatio.SQUARE,
         )
+        if chosen_model == Model.RUNWAY:
+            if user.settings[chosen_model][UserSettings.ASPECT_RATIO] == AspectRatio.PORTRAIT:
+                user.settings[chosen_model][UserSettings.RESOLUTION] = RunwayResolution.PORTRAIT
+            else:
+                user.settings[chosen_model][UserSettings.RESOLUTION] = RunwayResolution.LANDSCAPE
         what_changed = UserSettings.ASPECT_RATIO
     elif (
         chosen_setting == SendType.TEXT or
@@ -434,6 +477,15 @@ async def handle_setting_selection(callback_query: CallbackQuery, state: FSMCont
                     keyboard_changed = True
                 elif callback_data == UserGender.MALE or callback_data == UserGender.FEMALE:
                     text = text.replace(' ✅', '')
+            elif what_changed == UserSettings.DURATION:
+                if callback_data == chosen_setting and '✅' not in text:
+                    text += ' ✅'
+                    keyboard_changed = True
+                elif (
+                    callback_data == str(RunwayDuration.SECONDS_5) or
+                    callback_data == str(RunwayDuration.SECONDS_10)
+                ):
+                    text = text.replace(' ✅', '')
             elif (
                 chosen_setting == callback_data and
                 callback_data != DALLEQuality.STANDARD and callback_data != DALLEQuality.HD and
@@ -455,16 +507,20 @@ async def handle_setting_selection(callback_query: CallbackQuery, state: FSMCont
             },
         )
 
-        dall_e_cost = 1
+        generation_cost = 1
         if chosen_model == Model.DALL_E:
-            dall_e_cost = get_cost_for_image(
+            generation_cost = get_cost_for_image(
                 user.settings[Model.DALL_E][UserSettings.QUALITY],
                 user.settings[Model.DALL_E][UserSettings.RESOLUTION],
+            )
+        elif chosen_model == Model.RUNWAY:
+            generation_cost = get_cost_for_video(
+                user.settings[Model.RUNWAY][UserSettings.DURATION],
             )
         human_model = get_human_model(chosen_model, user_language_code)
 
         await callback_query.message.edit_text(
-            text=get_localization(user_language_code).settings(human_model, chosen_model, dall_e_cost),
+            text=get_localization(user_language_code).settings(human_model, chosen_model, generation_cost),
             reply_markup=InlineKeyboardMarkup(inline_keyboard=new_keyboard),
         )
 

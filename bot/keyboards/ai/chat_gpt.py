@@ -33,10 +33,10 @@ def build_chat_gpt_keyboard(language_code: LanguageCode, model: Model, model_ver
         ],
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).CHAT_GPT_O_1_PREVIEW + (
-                    ' ✅' if model == Model.CHAT_GPT and model_version == ChatGPTVersion.V1_O_Preview else ''
+                text=get_localization(language_code).CHAT_GPT_O_1 + (
+                    ' ✅' if model == Model.CHAT_GPT and model_version == ChatGPTVersion.V1_O else ''
                 ),
-                callback_data=f'chat_gpt:{ChatGPTVersion.V1_O_Preview}'
+                callback_data=f'chat_gpt:{ChatGPTVersion.V1_O}'
             ),
         ],
     ]

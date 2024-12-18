@@ -386,6 +386,8 @@ async def handle_package(message: Message, user_id: str, state: FSMContext, is_e
     elif page == 2:
         product_category = ProductCategory.MUSIC
     elif page == 3:
+        product_category = ProductCategory.VIDEO
+    elif page == 4:
         product_category = ProductCategory.OTHER
     else:
         product_category = None
@@ -443,7 +445,12 @@ async def handle_package_selection(callback_query: CallbackQuery, state: FSMCont
     package_type = callback_query.data.split(':')[1]
     if package_type == 'page':
         return
-    elif package_type == ProductCategory.TEXT or package_type == ProductCategory.IMAGE or package_type == ProductCategory.MUSIC:
+    elif (
+        package_type == ProductCategory.TEXT or
+        package_type == ProductCategory.IMAGE or
+        package_type == ProductCategory.MUSIC or
+        package_type == ProductCategory.VIDEO
+    ):
         await handle_info_selection(callback_query, state, package_type)
     elif package_type == 'next' or package_type == 'prev':
         page = int(callback_query.data.split(':')[2])

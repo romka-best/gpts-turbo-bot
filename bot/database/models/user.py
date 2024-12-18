@@ -26,6 +26,9 @@ from bot.database.models.common import (
     SunoVersion,
     AspectRatio,
     SendType,
+    RunwayVersion,
+    RunwayResolution,
+    RunwayDuration,
 )
 from bot.database.models.subscription import SUBSCRIPTION_FREE_LIMITS
 from bot.locales.types import LanguageCode
@@ -48,6 +51,7 @@ class UserSettings:
     FOCUS = 'focus'
     FORMAT = 'format'
     AMOUNT = 'amount'
+    DURATION = 'duration'
 
 
 class UserGender(StrEnum):
@@ -68,7 +72,6 @@ class User:
     stripe_id: str
     language_code: str
     interface_language_code: LanguageCode
-    gender: UserGender
     is_premium: bool
     is_blocked: bool
     is_banned: bool
@@ -90,7 +93,7 @@ class User:
         Quota.CHAT_GPT4_OMNI_MINI: 0,
         Quota.CHAT_GPT4_OMNI: 0,
         Quota.CHAT_GPT_O_1_MINI: 0,
-        Quota.CHAT_GPT_O_1_PREVIEW: 0,
+        Quota.CHAT_GPT_O_1: 0,
         Quota.CLAUDE_3_HAIKU: 0,
         Quota.CLAUDE_3_SONNET: 0,
         Quota.CLAUDE_3_OPUS: 0,
@@ -186,6 +189,7 @@ class User:
             UserSettings.VERSION: FaceSwapVersion.LATEST,
             UserSettings.ASPECT_RATIO: AspectRatio.CUSTOM,
             UserSettings.SEND_TYPE: SendType.IMAGE,
+            UserSettings.GENDER: UserGender.UNSPECIFIED,
             UserSettings.SHOW_EXAMPLES: False,
         },
         Model.PHOTOSHOP_AI: {
@@ -206,6 +210,15 @@ class User:
             UserSettings.VERSION: SunoVersion.V4,
             UserSettings.SHOW_EXAMPLES: False,
         },
+        Model.RUNWAY: {
+            UserSettings.SHOW_USAGE_QUOTA: True,
+            UserSettings.SEND_TYPE: SendType.VIDEO,
+            UserSettings.VERSION: RunwayVersion.V3_Alpha_Turbo,
+            UserSettings.RESOLUTION: RunwayResolution.LANDSCAPE,
+            UserSettings.ASPECT_RATIO: AspectRatio.LANDSCAPE,
+            UserSettings.DURATION: RunwayDuration.SECONDS_5,
+            UserSettings.SHOW_EXAMPLES: False,
+        },
     }
 
     def __init__(
@@ -217,8 +230,6 @@ class User:
         current_chat_id: str,
         telegram_chat_id: str,
         stripe_id: str,
-        # TODO DELETE
-        gender=UserGender.UNSPECIFIED,
         language_code='en',
         interface_language_code=LanguageCode.EN,
         is_premium=False,
@@ -243,7 +254,6 @@ class User:
         self.first_name = first_name
         self.last_name = last_name
         self.username = username
-        self.gender = gender
         self.language_code = language_code
         self.interface_language_code = interface_language_code
         self.is_premium = is_premium

@@ -96,13 +96,14 @@ async def start(message: Message, state: FSMContext):
                     'chatgpt4omnimini',
                     'chatgpt4omni',
                     'chatgpto1mini',
-                    'chatgpto1preview',
+                    'chatgpto1',
                     'claude3haiku',
                     'claude3sonnet',
                     'claude3opus',
                     'gemini1flash',
                     'gemini1pro',
                     'gemini1ultra',
+                    'eightify',
                     'dalle',
                     'midjourney',
                     'stablediffusion',
@@ -110,6 +111,7 @@ async def start(message: Message, state: FSMContext):
                     'photoshopai',
                     'suno',
                     'musicgen',
+                    'runway',
                 ]:
                     if sub_param_value == 'chatgpt4omnimini':
                         default_quota = Quota.CHAT_GPT4_OMNI_MINI
@@ -117,8 +119,8 @@ async def start(message: Message, state: FSMContext):
                         default_quota = Quota.CHAT_GPT4_OMNI
                     elif sub_param_value == 'chatgpto1mini':
                         default_quota = Quota.CHAT_GPT_O_1_MINI
-                    elif sub_param_value == 'chatgpto1preview':
-                        default_quota = Quota.CHAT_GPT_O_1_PREVIEW
+                    elif sub_param_value == 'chatgpto1':
+                        default_quota = Quota.CHAT_GPT_O_1
                     elif sub_param_value == 'claude3haiku':
                         default_quota = Quota.CLAUDE_3_HAIKU
                     elif sub_param_value == 'claude3sonnet':
@@ -131,12 +133,14 @@ async def start(message: Message, state: FSMContext):
                         default_quota = Quota.GEMINI_1_PRO
                     elif sub_param_value == 'gemini1ultra':
                         default_quota = Quota.GEMINI_1_ULTRA
-                    elif sub_param_value == 'stablediffusion':
-                        default_quota = Quota.STABLE_DIFFUSION
+                    elif sub_param_value == 'eightify':
+                        default_quota = Quota.EIGHTIFY
                     elif sub_param_value == 'dalle':
                         default_quota = Quota.DALL_E
                     elif sub_param_value == 'midjourney':
                         default_quota = Quota.MIDJOURNEY
+                    elif sub_param_value == 'stablediffusion':
+                        default_quota = Quota.STABLE_DIFFUSION
                     elif sub_param_value == 'faceswap':
                         default_quota = Quota.FACE_SWAP
                     elif sub_param_value == 'photoshopai':
@@ -145,6 +149,8 @@ async def start(message: Message, state: FSMContext):
                         default_quota = Quota.SUNO
                     elif sub_param_value == 'musicgen':
                         default_quota = Quota.MUSIC_GEN
+                    elif sub_param_value == 'runway':
+                        default_quota = Quota.RUNWAY
                 elif sub_param_key in utm:
                     user_utm[sub_param_key] = sub_param_value.lower()
 
@@ -340,8 +346,8 @@ async def handle_continue_generation_choose_selection(callback_query: CallbackQu
             user_quota = Quota.CHAT_GPT4_OMNI
         elif user.settings[user.current_model][UserSettings.VERSION] == ChatGPTVersion.V1_O_Mini:
             user_quota = Quota.CHAT_GPT_O_1_MINI
-        elif user.settings[user.current_model][UserSettings.VERSION] == ChatGPTVersion.V1_O_Preview:
-            user_quota = Quota.CHAT_GPT_O_1_PREVIEW
+        elif user.settings[user.current_model][UserSettings.VERSION] == ChatGPTVersion.V1_O:
+            user_quota = Quota.CHAT_GPT_O_1
         elif user.settings[user.current_model][UserSettings.VERSION] == ClaudeGPTVersion.V3_Haiku:
             user_quota = Quota.CLAUDE_3_HAIKU
         elif user.settings[user.current_model][UserSettings.VERSION] == ClaudeGPTVersion.V3_Sonnet:
@@ -363,7 +369,7 @@ async def handle_continue_generation_choose_selection(callback_query: CallbackQu
             Quota.CHAT_GPT4_OMNI_MINI,
             Quota.CHAT_GPT4_OMNI,
             Quota.CHAT_GPT_O_1_MINI,
-            Quota.CHAT_GPT_O_1_PREVIEW,
+            Quota.CHAT_GPT_O_1,
         ]:
             await handle_chatgpt(callback_query.message, state, user, user_quota)
         elif user_quota in [

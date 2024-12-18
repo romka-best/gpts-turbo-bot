@@ -1,6 +1,4 @@
-import asyncio
-
-import openai
+import runwayml
 from aiogram import Router
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
@@ -8,44 +6,43 @@ from aiogram.types import Message
 from aiogram.utils.chat_action import ChatActionSender
 
 from bot.config import config, MessageEffect, MessageSticker
-from bot.database.models.common import Quota, Currency, Model, SendType
+from bot.database.models.common import Model, Quota, Currency, SendType
 from bot.database.models.transaction import TransactionType
 from bot.database.models.user import UserSettings, User
 from bot.database.operations.product.getters import get_product_by_quota
 from bot.database.operations.transaction.writers import write_transaction
 from bot.database.operations.user.getters import get_user
 from bot.database.operations.user.updaters import update_user
-from bot.handlers.ai.midjourney_handler import handle_midjourney_example
 from bot.helpers.getters.get_quota_by_model import get_quota_by_model
 from bot.helpers.getters.get_switched_to_ai_model import get_switched_to_ai_model
 from bot.helpers.senders.send_error_info import send_error_info
 from bot.helpers.updaters.update_user_usage_quota import update_user_usage_quota
-from bot.integrations.openAI import get_response_image, get_cost_for_image
+from bot.integrations.runway import get_response_video, get_cost_for_video
 from bot.keyboards.ai.mode import build_switched_to_ai_keyboard
-from bot.keyboards.common.common import build_error_keyboard, build_limit_exceeded_keyboard
-from bot.locales.main import get_localization, get_user_language
+from bot.keyboards.common.common import build_limit_exceeded_keyboard, build_error_keyboard
+from bot.locales.main import get_user_language, get_localization
 
-dall_e_router = Router()
+runway_router = Router()
 
-PRICE_DALL_E = 0.04
+PRICE_RUNWAY = 0.25
 
 
-@dall_e_router.message(Command('dalle'))
-async def dall_e(message: Message, state: FSMContext):
+@runway_router.message(Command('runway'))
+async def runway(message: Message, state: FSMContext):
     await state.clear()
 
     user_id = str(message.from_user.id)
     user = await get_user(user_id)
     user_language_code = await get_user_language(user_id, state.storage)
 
-    if user.current_model == Model.DALL_E:
-        reply_markup = build_switched_to_ai_keyboard(user_language_code, Model.DALL_E)
+    if user.current_model == Model.RUNWAY:
+        reply_markup = build_switched_to_ai_keyboard(user_language_code, Model.RUNWAY)
         await message.answer(
             text=get_localization(user_language_code).ALREADY_SWITCHED_TO_THIS_MODEL,
             reply_markup=reply_markup,
         )
     else:
-        user.current_model = Model.DALL_E
+        user.current_model = Model.RUNWAY
         await update_user(user_id, {
             'current_model': user.current_model,
         })
@@ -55,7 +52,7 @@ async def dall_e(message: Message, state: FSMContext):
             get_quota_by_model(user.current_model, user.settings[user.current_model][UserSettings.VERSION]),
             user_language_code,
         )
-        reply_markup = build_switched_to_ai_keyboard(user_language_code, Model.DALL_E)
+        reply_markup = build_switched_to_ai_keyboard(user_language_code, Model.RUNWAY)
         await message.answer(
             text=text,
             reply_markup=reply_markup,
@@ -63,31 +60,44 @@ async def dall_e(message: Message, state: FSMContext):
         )
 
 
-async def handle_dall_e(message: Message, state: FSMContext, user: User):
+async def handle_runway(message: Message, state: FSMContext, user: User, video_frame_link: str):
     await state.update_data(is_processing=True)
 
     user_language_code = await get_user_language(user.id, state.storage)
     user_data = await state.get_data()
 
-    text = user_data.get('recognized_text', None)
-    if text is None:
-        text = message.text
+    if not video_frame_link:
+        await message.reply(
+            text=get_localization(user_language_code).PHOTO_REQUIRED_ERROR,
+            allow_sending_without_reply=True,
+        )
+        return
+
+    prompt = user_data.get('recognized_text', None)
+    if prompt is None:
+        if message.caption:
+            prompt = message.caption
+        elif message.text:
+            prompt = message.text
+        else:
+            prompt = ''
 
     processing_sticker = await message.answer_sticker(
-        sticker=config.MESSAGE_STICKERS.get(MessageSticker.IMAGE_GENERATION),
+        sticker=config.MESSAGE_STICKERS.get(MessageSticker.VIDEO_GENERATION),
     )
     processing_message = await message.reply(
-        text=get_localization(user_language_code).processing_request_image(),
+        text=get_localization(user_language_code).processing_request_video(),
         allow_sending_without_reply=True,
     )
 
-    async with ChatActionSender.upload_photo(bot=message.bot, chat_id=message.chat.id):
+    async with ChatActionSender.upload_video(bot=message.bot, chat_id=message.chat.id):
         try:
-            maximum_generations = user.daily_limits[Quota.DALL_E] + user.additional_usage_quota[Quota.DALL_E]
-            model_version = user.settings[Model.DALL_E][UserSettings.VERSION]
-            resolution = user.settings[Model.DALL_E][UserSettings.RESOLUTION]
-            quality = user.settings[Model.DALL_E][UserSettings.QUALITY]
-            cost = get_cost_for_image(quality, resolution)
+            maximum_generations = user.daily_limits[Quota.RUNWAY] + user.additional_usage_quota[Quota.RUNWAY]
+            model_version = user.settings[Model.RUNWAY][UserSettings.VERSION]
+            resolution = user.settings[Model.RUNWAY][UserSettings.RESOLUTION]
+            duration = user.settings[Model.RUNWAY][UserSettings.DURATION]
+
+            cost = get_cost_for_video(duration)
             if maximum_generations < cost:
                 await message.answer_sticker(
                     sticker=config.MESSAGE_STICKERS.get(MessageSticker.SAD),
@@ -101,16 +111,17 @@ async def handle_dall_e(message: Message, state: FSMContext, user: User):
                 )
                 return
 
-            response_url = await get_response_image(
+            response = await get_response_video(
                 model_version,
-                text,
+                prompt,
+                video_frame_link,
                 resolution,
-                quality,
+                duration,
             )
 
-            product = await get_product_by_quota(Quota.DALL_E)
+            product = await get_product_by_quota(Quota.RUNWAY)
 
-            total_price = PRICE_DALL_E * cost
+            total_price = PRICE_RUNWAY * cost
             await write_transaction(
                 user_id=user.id,
                 type=TransactionType.EXPENSE,
@@ -120,53 +131,36 @@ async def handle_dall_e(message: Message, state: FSMContext, user: User):
                 currency=Currency.USD,
                 quantity=1,
                 details={
-                    'text': text,
+                    'prompt_text': prompt,
+                    'prompt_image': video_frame_link,
+                    'resolution': resolution,
+                    'duration': duration,
                     'has_error': False,
                 },
             )
 
-            footer_text = f'\n\n🖼 {user.daily_limits[Quota.DALL_E] + user.additional_usage_quota[Quota.DALL_E]}' \
-                if user.settings[Model.DALL_E][UserSettings.SHOW_USAGE_QUOTA] and \
-                   user.daily_limits[Quota.DALL_E] != float('inf') else ''
-            if user.settings[Model.DALL_E][UserSettings.SEND_TYPE] == SendType.DOCUMENT:
+            footer_text = f'\n\n📹 {user.daily_limits[Quota.RUNWAY] + user.additional_usage_quota[Quota.RUNWAY]}' \
+                if user.settings[Model.RUNWAY][UserSettings.SHOW_USAGE_QUOTA] and \
+                   user.daily_limits[Quota.RUNWAY] != float('inf') else ''
+            if user.settings[Model.RUNWAY][UserSettings.SEND_TYPE] == SendType.DOCUMENT:
                 await message.reply_document(
-                    caption=f'{get_localization(user_language_code).IMAGE_SUCCESS}{footer_text}',
-                    document=response_url,
+                    caption=f'{get_localization(user_language_code).VIDEO_SUCCESS}{footer_text}',
+                    document=response.get('result', [])[0],
                     allow_sending_without_reply=True,
                 )
             else:
-                await message.reply_photo(
-                    caption=f'{get_localization(user_language_code).IMAGE_SUCCESS}{footer_text}',
-                    photo=response_url,
+                await message.reply_video(
+                    caption=f'{get_localization(user_language_code).VIDEO_SUCCESS}{footer_text}',
+                    video=response.get('result', [])[0],
                     allow_sending_without_reply=True,
                 )
 
-            await update_user_usage_quota(user, Quota.DALL_E, cost)
-        except openai.BadRequestError as e:
-            if e.code == 'content_policy_violation':
-                await message.answer_sticker(
-                    sticker=config.MESSAGE_STICKERS.get(MessageSticker.FEAR),
-                )
-                await message.reply(
-                    text=get_localization(user_language_code).REQUEST_FORBIDDEN_ERROR,
-                    allow_sending_without_reply=True,
-                )
-            else:
-                await message.answer_sticker(
-                    sticker=config.MESSAGE_STICKERS.get(MessageSticker.ERROR),
-                )
-
-                reply_markup = build_error_keyboard(user_language_code)
-                await message.answer(
-                    text=get_localization(user_language_code).ERROR,
-                    reply_markup=reply_markup,
-                )
-                await send_error_info(
-                    bot=message.bot,
-                    user_id=user.id,
-                    info=str(e),
-                    hashtags=['dalle'],
-                )
+            await update_user_usage_quota(user, Quota.RUNWAY, cost)
+        except runwayml.RateLimitError:
+            await message.reply(
+                text=get_localization(user_language_code).SERVER_OVERLOADED_ERROR,
+                allow_sending_without_reply=True,
+            )
         except Exception as e:
             await message.answer_sticker(
                 sticker=config.MESSAGE_STICKERS.get(MessageSticker.ERROR),
@@ -181,18 +175,9 @@ async def handle_dall_e(message: Message, state: FSMContext, user: User):
                 bot=message.bot,
                 user_id=user.id,
                 info=str(e),
-                hashtags=['dalle'],
+                hashtags=['runway'],
             )
         finally:
             await processing_sticker.delete()
             await processing_message.delete()
             await state.update_data(is_processing=False)
-
-    asyncio.create_task(
-        handle_midjourney_example(
-            user=user,
-            user_language_code=user_language_code,
-            prompt=text,
-            message=message,
-        )
-    )

@@ -26,6 +26,7 @@ class Model:
     PHOTOSHOP_AI = 'photoshop-ai'
     MUSIC_GEN = 'music-gen'
     SUNO = 'suno'
+    RUNWAY = 'runway'
 
 
 class ModelType(StrEnum):
@@ -40,7 +41,7 @@ class Quota:
     CHAT_GPT4_OMNI = 'gpt4_omni'
     CHAT_GPT4_OMNI_MINI = 'gpt4_omni_mini'
     CHAT_GPT_O_1_MINI = 'o1-mini'
-    CHAT_GPT_O_1_PREVIEW = 'o1-preview'
+    CHAT_GPT_O_1 = 'o1'
     CLAUDE_3_HAIKU = 'claude_3_haiku'
     CLAUDE_3_SONNET = 'claude_3_sonnet'
     CLAUDE_3_OPUS = 'claude_3_opus'
@@ -56,6 +57,7 @@ class Quota:
     PHOTOSHOP_AI = 'photoshop_ai'
     MUSIC_GEN = 'music_gen'
     SUNO = 'suno'
+    RUNWAY = 'runway'
     ADDITIONAL_CHATS = 'additional_chats'
     FAST_MESSAGES = 'fast_messages'
     VOICE_MESSAGES = 'voice_messages'
@@ -66,7 +68,7 @@ class ChatGPTVersion:
     V4_Omni = 'gpt-4o'
     V4_Omni_Mini = 'gpt-4o-mini'
     V1_O_Mini = 'o1-mini'
-    V1_O_Preview = 'o1-preview'
+    V1_O = 'o1'
 
 
 class ClaudeGPTVersion:
@@ -180,6 +182,20 @@ class SunoVersion:
 class SunoMode:
     SIMPLE = 'SIMPLE'
     CUSTOM = 'CUSTOM'
+
+
+class RunwayVersion:
+    V3_Alpha_Turbo = 'gen3a_turbo'
+
+
+class RunwayDuration:
+    SECONDS_5 = 5
+    SECONDS_10 = 10
+
+
+class RunwayResolution:
+    LANDSCAPE = '1280:768'
+    PORTRAIT = '768:1280'
 
 
 class AspectRatio:

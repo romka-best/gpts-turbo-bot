@@ -20,6 +20,7 @@ from bot.handlers.ai.gemini_handler import handle_gemini
 from bot.handlers.ai.midjourney_handler import handle_midjourney
 from bot.handlers.ai.music_gen_handler import handle_music_gen
 from bot.handlers.ai.photoshop_ai_handler import handle_photoshop_ai
+from bot.handlers.ai.runway_handler import handle_runway
 from bot.handlers.ai.stable_diffusion_handler import handle_stable_diffusion
 from bot.handlers.ai.suno_handler import handle_suno
 from bot.handlers.common.common_handler import handle_help
@@ -76,6 +77,8 @@ async def handle_text(message: Message, state: FSMContext):
         await handle_music_gen(message.bot, str(message.chat.id), state, user.id, message.text)
     elif user.current_model == Model.SUNO:
         await handle_suno(message.bot, str(message.chat.id), state, user.id)
+    elif user.current_model == Model.RUNWAY:
+        await handle_runway(message, state, user)
     else:
         raise NotImplementedError(
             f'User model is not found: {user.current_model}'

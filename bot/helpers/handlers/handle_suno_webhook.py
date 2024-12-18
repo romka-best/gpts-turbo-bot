@@ -20,6 +20,7 @@ from bot.database.operations.request.updaters import update_request
 from bot.database.operations.transaction.writers import write_transaction
 from bot.database.operations.user.getters import get_user
 from bot.database.operations.user.updaters import update_user
+from bot.handlers.ai.suno_handler import PRICE_SUNO
 from bot.helpers.senders.send_audio import send_audio
 from bot.helpers.senders.send_video import send_video
 from bot.helpers.updaters.update_user_usage_quota import get_user_with_updated_quota
@@ -160,8 +161,8 @@ async def handle_suno_webhook(bot: Bot, dp: Dispatcher, body: dict):
                 user_id=user.id,
                 type=TransactionType.EXPENSE,
                 product_id=product.id,
-                amount=0.0348,
-                clear_amount=0.0348,
+                amount=PRICE_SUNO,
+                clear_amount=PRICE_SUNO,
                 currency=Currency.USD,
                 quantity=quantity_to_delete,
                 details={
