@@ -28,5 +28,7 @@ def get_info_by_model(model: Model, language_code: LanguageCode):
         info = get_localization(language_code).INFO_MUSIC_GEN
     elif model == Model.SUNO:
         info = get_localization(language_code).INFO_SUNO
+    elif model == Model.RUNWAY:
+        info = get_localization(language_code).INFO_RUNWAY
 
     return info

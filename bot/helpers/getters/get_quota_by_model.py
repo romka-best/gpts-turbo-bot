@@ -9,8 +9,8 @@ def get_quota_by_model(model: Model, version: str):
             return Quota.CHAT_GPT4_OMNI
         elif version == ChatGPTVersion.V1_O_Mini:
             return Quota.CHAT_GPT_O_1_MINI
-        elif version == ChatGPTVersion.V1_O_Preview:
-            return Quota.CHAT_GPT_O_1_PREVIEW
+        elif version == ChatGPTVersion.V1_O:
+            return Quota.CHAT_GPT_O_1
     elif model == Model.CLAUDE:
         if version == ClaudeGPTVersion.V3_Haiku:
             return Quota.CLAUDE_3_HAIKU
@@ -43,3 +43,5 @@ def get_quota_by_model(model: Model, version: str):
         return Quota.MUSIC_GEN
     elif model == Model.SUNO:
         return Quota.SUNO
+    elif model == Model.RUNWAY:
+        return Quota.RUNWAY

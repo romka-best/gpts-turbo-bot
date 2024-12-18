@@ -191,10 +191,10 @@ def build_packages_keyboard(language_code: LanguageCode, products: list[Product]
             [
                 InlineKeyboardButton(
                     text='⬅️',
-                    callback_data='package:prev:3'
+                    callback_data='package:prev:4'
                 ),
                 InlineKeyboardButton(
-                    text='1/4',
+                    text='1/5',
                     callback_data='package:page:0'
                 ),
                 InlineKeyboardButton(
@@ -226,7 +226,7 @@ def build_packages_keyboard(language_code: LanguageCode, products: list[Product]
                     callback_data='package:prev:0'
                 ),
                 InlineKeyboardButton(
-                    text='2/4',
+                    text='2/5',
                     callback_data='package:page:1'
                 ),
                 InlineKeyboardButton(
@@ -260,7 +260,7 @@ def build_packages_keyboard(language_code: LanguageCode, products: list[Product]
                     callback_data='package:prev:1'
                 ),
                 InlineKeyboardButton(
-                    text='3/4',
+                    text='3/5',
                     callback_data='package:page:2'
                 ),
                 InlineKeyboardButton(
@@ -270,6 +270,14 @@ def build_packages_keyboard(language_code: LanguageCode, products: list[Product]
             ]
         )
     elif page == 3:
+        buttons.append(
+            [
+                InlineKeyboardButton(
+                    text=get_localization(language_code).VIDEO_MODELS,
+                    callback_data=f'package:{ProductCategory.VIDEO}',
+                ),
+            ],
+        )
         for product in products:
             buttons.append(
                 [
@@ -286,8 +294,34 @@ def build_packages_keyboard(language_code: LanguageCode, products: list[Product]
                     callback_data='package:prev:2'
                 ),
                 InlineKeyboardButton(
-                    text='4/4',
+                    text='4/5',
                     callback_data='package:page:3'
+                ),
+                InlineKeyboardButton(
+                    text='➡️',
+                    callback_data='package:next:4'
+                ),
+            ]
+        )
+    elif page == 4:
+        for product in products:
+            buttons.append(
+                [
+                    InlineKeyboardButton(
+                        text=product.names.get(language_code),
+                        callback_data=f'package:{product.id}'
+                    ),
+                ],
+            )
+        buttons.append(
+            [
+                InlineKeyboardButton(
+                    text='⬅️',
+                    callback_data='package:prev:3'
+                ),
+                InlineKeyboardButton(
+                    text='5/5',
+                    callback_data='package:page:4'
                 ),
                 InlineKeyboardButton(
                     text='➡️',

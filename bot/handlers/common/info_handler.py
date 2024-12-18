@@ -12,6 +12,7 @@ from bot.keyboards.common.info import (
     build_info_text_models_keyboard,
     build_info_image_models_keyboard,
     build_info_music_models_keyboard,
+    build_info_video_models_keyboard,
     build_info_chosen_model_type_keyboard,
 )
 from bot.locales.main import get_user_language, get_localization
@@ -54,6 +55,9 @@ async def handle_info_selection(callback_query: CallbackQuery, state: FSMContext
     elif model_type == ModelType.MUSIC:
         reply_keyboard = build_info_music_models_keyboard(user_language_code)
         text = get_localization(user_language_code).INFO_MUSIC_MODELS
+    elif model_type == ModelType.VIDEO:
+        reply_keyboard = build_info_video_models_keyboard(user_language_code)
+        text = get_localization(user_language_code).INFO_VIDEO_MODELS
     else:
         return
 
@@ -141,6 +145,30 @@ async def info_music_models_selection(callback_query: CallbackQuery, state: FSMC
         )
 
 
+@info_router.callback_query(lambda c: c.data.startswith('info_video_models:'))
+async def info_video_models_selection(callback_query: CallbackQuery, state: FSMContext):
+    await callback_query.answer()
+
+    user_id = str(callback_query.from_user.id)
+    user_language_code = await get_user_language(user_id, state.storage)
+
+    model = cast(Model, callback_query.data.split(':')[1])
+    info_text = get_info_by_model(model, user_language_code)
+    reply_keyboard = build_info_chosen_model_type_keyboard(user_language_code, ModelType.VIDEO)
+    if info_text:
+        await callback_query.message.edit_text(
+            text=info_text,
+            reply_markup=reply_keyboard,
+        )
+    else:
+        text = get_localization(user_language_code).INFO
+        reply_markup = build_info_keyboard(user_language_code)
+        await callback_query.message.edit_text(
+            text=text,
+            reply_markup=reply_markup,
+        )
+
+
 @info_router.callback_query(lambda c: c.data.startswith('info_chosen_model_type:'))
 async def info_model_type_selection(callback_query: CallbackQuery, state: FSMContext):
     await callback_query.answer()
@@ -152,28 +180,20 @@ async def info_model_type_selection(callback_query: CallbackQuery, state: FSMCon
     if action == 'back' and model_type == ModelType.TEXT:
         text = get_localization(user_language_code).INFO_TEXT_MODELS
         reply_markup = build_info_text_models_keyboard(user_language_code)
-        await callback_query.message.edit_text(
-            text=text,
-            reply_markup=reply_markup,
-        )
     elif action == 'back' and model_type == ModelType.IMAGE:
         text = get_localization(user_language_code).INFO_IMAGE_MODELS
         reply_markup = build_info_image_models_keyboard(user_language_code)
-        await callback_query.message.edit_text(
-            text=text,
-            reply_markup=reply_markup,
-        )
     elif action == 'back' and model_type == ModelType.MUSIC:
         text = get_localization(user_language_code).INFO_MUSIC_MODELS
         reply_markup = build_info_music_models_keyboard(user_language_code)
-        await callback_query.message.edit_text(
-            text=text,
-            reply_markup=reply_markup,
-        )
+    elif action == 'back' and model_type == ModelType.VIDEO:
+        text = get_localization(user_language_code).INFO_VIDEO_MODELS
+        reply_markup = build_info_video_models_keyboard(user_language_code)
     else:
         text = get_localization(user_language_code).INFO
         reply_markup = build_info_keyboard(user_language_code)
-        await callback_query.message.edit_text(
-            text=text,
-            reply_markup=reply_markup,
-        )
+
+    await callback_query.message.edit_text(
+        text=text,
+        reply_markup=reply_markup,
+    )

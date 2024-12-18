@@ -28,6 +28,8 @@ def get_human_model(model: Model, language_code: LanguageCode):
         human_model = get_localization(language_code).MUSIC_GEN
     elif model == Model.SUNO:
         human_model = get_localization(language_code).SUNO
+    elif model == Model.RUNWAY:
+        human_model = get_localization(language_code).RUNWAY
     else:
         human_model = model
 

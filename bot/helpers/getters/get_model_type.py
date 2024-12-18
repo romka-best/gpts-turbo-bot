@@ -21,3 +21,5 @@ def get_model_type(model: Model):
         return ModelType.IMAGE
     elif model == Model.MUSIC_GEN or model == Model.SUNO:
         return ModelType.MUSIC
+    elif model == Model.RUNWAY:
+        return ModelType.VIDEO

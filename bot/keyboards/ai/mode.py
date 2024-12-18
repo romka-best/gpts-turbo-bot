@@ -53,10 +53,10 @@ def build_mode_keyboard(
                     ],
                     [
                         InlineKeyboardButton(
-                            text=get_localization(language_code).CHAT_GPT_O_1_PREVIEW + (
-                                ' ✅' if model == Model.CHAT_GPT and model_version == ChatGPTVersion.V1_O_Preview else ''
+                            text=get_localization(language_code).CHAT_GPT_O_1 + (
+                                ' ✅' if model == Model.CHAT_GPT and model_version == ChatGPTVersion.V1_O else ''
                             ),
-                            callback_data=f'mode:{Model.CHAT_GPT}:{ChatGPTVersion.V1_O_Preview}'
+                            callback_data=f'mode:{Model.CHAT_GPT}:{ChatGPTVersion.V1_O}'
                         ),
                     ],
                     [
@@ -172,7 +172,7 @@ def build_mode_keyboard(
                             callback_data='mode:back:2'
                         ),
                         InlineKeyboardButton(
-                            text='1/3',
+                            text='1/4',
                             callback_data='mode:page:0'
                         ),
                         InlineKeyboardButton(
@@ -236,7 +236,7 @@ def build_mode_keyboard(
                     callback_data='mode:back:0'
                 ),
                 InlineKeyboardButton(
-                    text='2/3',
+                    text='2/4',
                     callback_data='mode:page:1'
                 ),
                 InlineKeyboardButton(
@@ -271,8 +271,37 @@ def build_mode_keyboard(
                     callback_data='mode:back:1'
                 ),
                 InlineKeyboardButton(
-                    text='3/3',
+                    text='3/4',
                     callback_data='mode:page:2'
+                ),
+                InlineKeyboardButton(
+                    text='➡️',
+                    callback_data='mode:next:3'
+                ),
+            ]
+        ])
+    elif page == 3:
+        buttons.extend([
+            [
+                InlineKeyboardButton(
+                    text=get_localization(language_code).VIDEO_MODELS,
+                    callback_data=f'mode:{ModelType.VIDEO}',
+                ),
+            ],
+            [
+                InlineKeyboardButton(
+                    text=get_localization(language_code).RUNWAY + (' ✅' if model == Model.RUNWAY else ''),
+                    callback_data=f'mode:{Model.RUNWAY}'
+                ),
+            ],
+            [
+                InlineKeyboardButton(
+                    text='⬅️',
+                    callback_data='mode:back:2'
+                ),
+                InlineKeyboardButton(
+                    text='4/4',
+                    callback_data='mode:page:3'
                 ),
                 InlineKeyboardButton(
                     text='➡️',
@@ -304,7 +333,7 @@ def build_switched_to_ai_keyboard(language_code: LanguageCode, model: Model) -> 
             ],
         )
 
-    if model not in [Model.EIGHTIFY, Model.FACE_SWAP, Model.PHOTOSHOP_AI]:
+    if model not in [Model.EIGHTIFY, Model.FACE_SWAP, Model.PHOTOSHOP_AI, Model.RUNWAY]:
         buttons.append(
             [
                 InlineKeyboardButton(

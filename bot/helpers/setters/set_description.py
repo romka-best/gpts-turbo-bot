@@ -6,14 +6,14 @@ from bot.locales.types import LanguageCode
 async def set_description(bot: Bot):
     await bot.set_my_short_description(
         short_description="""
-🤖 Access to AI: ChatGPT | Claude | Gemini | DALL•E | Midjourney | Stable Diffusion | Suno
-🛟 Support: @roman_danilov
+🤖 Access to AI: ChatGPT | Claude | Gemini | DALL•E | Midjourney | Stable Diffusion | Suno | Runway
+🛟 @roman_danilov
 """,
     )
     await bot.set_my_short_description(
         short_description="""
-🤖 Доступ к ИИ: ChatGPT | Claude | Gemini | DALL•E | Midjourney | Stable Diffusion | Suno
-🛟 Поддержка: @roman_danilov
+🤖 Доступ к ИИ: ChatGPT | Claude | Gemini | DALL•E | Midjourney | Stable Diffusion | Suno | Runway
+🛟 @roman_danilov
 """,
         language_code=LanguageCode.RU,
     )
@@ -22,11 +22,11 @@ async def set_description(bot: Bot):
         description="""
 Access to AI:
 
-━ 🔤 Text Models:
+━ 🔤 Text
     ┣ ✉️ ChatGPT 4.0 Omni Mini
     ┣ 💥 ChatGPT 4.0 Omni
     ┣ 🧩 ChatGPT o1-mini
-    ┣ 🧪 ChatGPT o1-preview
+    ┣ 🧪 ChatGPT o1
     ┣ 📜 Claude 3.5 Haiku
     ┣ 💫 Claude 3.5 Sonnet
     ┣ 🚀 Claude 3.0 Opus
@@ -35,28 +35,31 @@ Access to AI:
     ┣ 🛡️ Gemini 1.0 Ultra
     ┗ 👀️ Eightify
 
-━ 🖼 Image Models
-    ┣ 👨‍🎨 DALL•E 3
-    ┣ 🎨 Midjourney 6.1
-    ┣ 🎆 Stable Diffusion 3.5
-    ┣ 🫐 Flux 1.1 Pro
+━ 🖼 Image
+    ┣ 👨‍🎨 DALL•E
+    ┣ 🎨 Midjourney
+    ┣ 🎆 Stable Diffusion
+    ┣ 🫐 Flux Pro
     ┣ 😜 FaceSwap
     ┗ 🪄 Photoshop AI
 
-━ 🎵 Music Models
+━ 🎵 Music
     ┣ 🎺 MusicGen
-    ┗ 🎸 Suno 4.0
+    ┗ 🎸 Suno
+
+━ 📹 Video
+    ┗ 🎥 Runway
 """,
     )
     await bot.set_my_description(
         description="""
-Доступ к нейронным сетям:
+Доступ к ИИ:
 
 ━ 🔤 Текстовые
     ┣ ✉️ ChatGPT 4.0 Omni Mini
     ┣ 💥 ChatGPT 4.0 Omni
     ┣ 🧩 ChatGPT o1-mini
-    ┣ 🧪 ChatGPT o1-preview
+    ┣ 🧪 ChatGPT o1
     ┣ 📜 Claude 3.5 Haiku
     ┣ 💫 Claude 3.5 Sonnet
     ┣ 🚀 Claude 3.0 Opus
@@ -66,16 +69,19 @@ Access to AI:
     ┗ 👀️ Eightify
 
 ━ 🖼 Графические
-    ┣ 👨‍🎨 DALL•E 3
-    ┣ 🎨 Midjourney 6.1
-    ┣ 🎆 Stable Diffusion 3.5
-    ┣ 🫐 Flux 1.1 Pro
+    ┣ 👨‍🎨 DALL•E
+    ┣ 🎨 Midjourney
+    ┣ 🎆 Stable Diffusion
+    ┣ 🫐 Flux Pro
     ┣ 😜 FaceSwap
     ┗ 🪄 Photoshop AI
 
 ━ 🎵 Музыкальные
     ┣ 🎺 MusicGen
-    ┗ 🎸 Suno 4.0
+    ┗ 🎸 Suno
+
+━ 📹 Видео
+    ┗ 🎥 Runway
 """,
         language_code=LanguageCode.RU,
     )

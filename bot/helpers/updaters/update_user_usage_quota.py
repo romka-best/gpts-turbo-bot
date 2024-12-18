@@ -4,9 +4,10 @@ from bot.database.operations.user.updaters import update_user, update_user_in_tr
 
 TEXT_SIMPLE_QUOTA = [Quota.CHAT_GPT4_OMNI_MINI, Quota.CLAUDE_3_HAIKU, Quota.GEMINI_1_FLASH, Quota.EIGHTIFY]
 TEXT_ADVANCED_QUOTA = [Quota.CHAT_GPT4_OMNI, Quota.CHAT_GPT_O_1_MINI, Quota.CLAUDE_3_SONNET, Quota.GEMINI_1_PRO]
-TEXT_SUPER_ADVANCED_QUOTA = [Quota.CHAT_GPT_O_1_PREVIEW, Quota.CLAUDE_3_OPUS, Quota.GEMINI_1_ULTRA]
+TEXT_SUPER_ADVANCED_QUOTA = [Quota.CHAT_GPT_O_1, Quota.CLAUDE_3_OPUS, Quota.GEMINI_1_ULTRA]
 IMAGE_QUOTA = [Quota.DALL_E, Quota.MIDJOURNEY, Quota.STABLE_DIFFUSION, Quota.FLUX, Quota.FACE_SWAP, Quota.PHOTOSHOP_AI]
 MUSIC_QUOTA = [Quota.MUSIC_GEN, Quota.SUNO]
+VIDEO_QUOTA = [Quota.RUNWAY]
 
 
 def get_user_with_updated_quota(user: User, user_quota: Quota, quantity_to_delete: int) -> User:
@@ -24,6 +25,8 @@ def get_user_with_updated_quota(user: User, user_quota: Quota, quantity_to_delet
                 chosen_quota = IMAGE_QUOTA
             elif user_quota in MUSIC_QUOTA:
                 chosen_quota = MUSIC_QUOTA
+            elif user_quota in VIDEO_QUOTA:
+                chosen_quota = VIDEO_QUOTA
 
             for quota in chosen_quota:
                 user.daily_limits[quota] -= 1

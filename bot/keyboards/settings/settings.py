@@ -4,6 +4,8 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 from bot.database.models.common import (
     Model,
+    SendType,
+    AspectRatio,
     EightifyFocus,
     EightifyFormat,
     EightifyAmount,
@@ -12,8 +14,8 @@ from bot.database.models.common import (
     MidjourneyVersion,
     FluxSafetyTolerance,
     SunoVersion,
-    SendType,
-    AspectRatio,
+    RunwayResolution,
+    RunwayDuration,
 )
 from bot.database.models.user import UserSettings, UserGender
 from bot.locales.main import get_localization
@@ -38,6 +40,12 @@ def build_settings_choose_model_type_keyboard(language_code: LanguageCode) -> In
             InlineKeyboardButton(
                 text=get_localization(language_code).MUSIC_MODELS,
                 callback_data=f'settings_choose_model_type:music_models'
+            ),
+        ],
+        [
+            InlineKeyboardButton(
+                text=get_localization(language_code).VIDEO_MODELS,
+                callback_data=f'settings_choose_model_type:video_models'
             ),
         ],
         [
@@ -149,6 +157,25 @@ def build_settings_choose_music_model_keyboard(language_code: LanguageCode) -> I
             InlineKeyboardButton(
                 text=get_localization(language_code).SUNO,
                 callback_data=f'settings_choose_music_model:{Model.SUNO}'
+            ),
+        ],
+        [
+            InlineKeyboardButton(
+                text=get_localization(language_code).BACK,
+                callback_data='settings_choose_music_model:back'
+            ),
+        ],
+    ]
+
+    return InlineKeyboardMarkup(inline_keyboard=buttons)
+
+
+def build_settings_choose_video_model_keyboard(language_code: LanguageCode) -> InlineKeyboardMarkup:
+    buttons = [
+        [
+            InlineKeyboardButton(
+                text=get_localization(language_code).RUNWAY,
+                callback_data=f'settings_choose_video_model:{Model.RUNWAY}'
             ),
         ],
         [
@@ -897,6 +924,76 @@ def build_settings_keyboard(
                         ' ✅' if settings[model][UserSettings.VERSION] == SunoVersion.V4 else ''
                     ),
                     callback_data=f'setting:{SunoVersion.V4}:{model}'
+                ),
+            ],
+        ]
+    elif model == Model.RUNWAY:
+        buttons = [
+            [
+                InlineKeyboardButton(
+                    text=get_localization(language_code).SHOW_USAGE_QUOTA_IN_MESSAGES + (
+                        ' ✅' if settings[model][UserSettings.SHOW_USAGE_QUOTA] else ' ❌'),
+                    callback_data=f'setting:{UserSettings.SHOW_USAGE_QUOTA}:{model}'
+                ),
+            ],
+            [
+                InlineKeyboardButton(
+                    text=get_localization(language_code).SETTINGS_SEND_TYPE,
+                    callback_data=f'setting:nothing:{model}'
+                ),
+            ],
+            [
+                InlineKeyboardButton(
+                    text=get_localization(language_code).VIDEO + (
+                        ' ✅' if settings[model][UserSettings.SEND_TYPE] == SendType.VIDEO else ''
+                    ),
+                    callback_data=f'setting:{SendType.VIDEO}:{model}'
+                ),
+                InlineKeyboardButton(
+                    text=get_localization(language_code).DOCUMENT + (
+                        ' ✅' if settings[model][UserSettings.SEND_TYPE] == SendType.DOCUMENT else ''
+                    ),
+                    callback_data=f'setting:{SendType.DOCUMENT}:{model}'
+                ),
+            ],
+            [
+                InlineKeyboardButton(
+                    text=get_localization(language_code).SETTINGS_ASPECT_RATIO,
+                    callback_data=f'setting:nothing:{model}'
+                ),
+            ],
+            [
+                InlineKeyboardButton(
+                    text=AspectRatio.LANDSCAPE + (
+                        ' ✅' if settings[model][UserSettings.RESOLUTION] == RunwayResolution.LANDSCAPE else ''
+                    ),
+                    callback_data=f'setting:LANDSCAPE:{model}'
+                ),
+                InlineKeyboardButton(
+                    text=AspectRatio.PORTRAIT + (
+                        ' ✅' if settings[model][UserSettings.RESOLUTION] == RunwayResolution.PORTRAIT else ''
+                    ),
+                    callback_data=f'setting:PORTRAIT:{model}'
+                ),
+            ],
+            [
+                InlineKeyboardButton(
+                    text=get_localization(language_code).SETTINGS_DURATION,
+                    callback_data=f'setting:nothing:{model}'
+                ),
+            ],
+            [
+                InlineKeyboardButton(
+                    text='5' + (
+                        ' ✅' if settings[model][UserSettings.DURATION] == RunwayDuration.SECONDS_5 else ''
+                    ),
+                    callback_data=f'setting:{RunwayDuration.SECONDS_5}:{model}'
+                ),
+                InlineKeyboardButton(
+                    text='10' + (
+                        ' ✅' if settings[model][UserSettings.DURATION] == RunwayDuration.SECONDS_10 else ''
+                    ),
+                    callback_data=f'setting:{RunwayDuration.SECONDS_10}:{model}'
                 ),
             ],
         ]

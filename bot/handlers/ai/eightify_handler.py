@@ -168,7 +168,7 @@ async def eightify_link_sent(message: Message, state: FSMContext):
                         voice=user.settings[user.current_model][UserSettings.VOICE],
                     )
                 else:
-                    footer_text = f'\n\n✉️ {user.daily_limits[Quota.EIGHTIFY] + user.additional_usage_quota[Quota.EIGHTIFY] + 1}' \
+                    footer_text = f'\n\n✉️ {user.daily_limits[Quota.EIGHTIFY] + user.additional_usage_quota[Quota.EIGHTIFY]}' \
                         if user.settings[user.current_model][UserSettings.SHOW_USAGE_QUOTA] and \
                            user.daily_limits[Quota.EIGHTIFY] != float('inf') else ''
                     full_text = f"{response_summary}{footer_text}"

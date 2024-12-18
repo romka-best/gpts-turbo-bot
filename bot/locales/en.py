@@ -42,7 +42,7 @@ I'm your personal gateway to the world of neural networks. Discover the capabili
         ┣ <b>Claude 3.5 Sonnet 💫</b> /claude
         ┗ <b>Gemini 1.5 Pro 💼</b> /gemini
     ┗ Explore the most advanced level of intelligence with:
-        ┣ <b>ChatGPT o1-preview 🧪</b> /chatgpt
+        ┣ <b>ChatGPT o1 🧪</b> /chatgpt
         ┣ <b>Claude 3.0 Opus 🚀</b> /claude
         ┗ <b>Gemini 1.0 Ultra 🛡️</b> /gemini
 
@@ -58,6 +58,9 @@ I'm your personal gateway to the world of neural networks. Discover the capabili
 ━ 🎵 <b>Compose Music</b>:
     ┣ Compose original melodies with <b>MusicGen 🎺</b> /music_gen
     ┗ Record your own songs with <b>Suno 4.0 🎸</b> /suno
+
+━ 📹 <b>Video Creativity</b>:
+    ┗ Generate videos with <b>Runway Gen-3 Alpha Turbo 🎥</b> /runway
 
 I am constantly updating myself, implementing the most advanced technologies so that you can fully leverage the possibilities of artificial intelligence. <b>I am the only bot with emotional intelligence</b>, ready to help you with any questions and creative endeavors 🚀
 """
@@ -98,6 +101,10 @@ I am constantly updating myself, implementing the most advanced technologies so 
         ┣ /music_gen 🎺
         ┗ /suno 🎸
     ┗ 2️⃣ Write a description of the music or send your own lyrics
+
+━ 📹 <b>Video Creation</b>:
+    ┣ 1️⃣ Enter the command /runway
+    ┗ 2️⃣ Write a video description and attach a photo
 """
     ADDITIONAL_FEATURES = """
 🔮 <b>Additional Features</b>:
@@ -105,6 +112,7 @@ I am constantly updating myself, implementing the most advanced technologies so 
 ━ 🔄 /mode - One command for switching between all AI models
 ━ 📊 /profile - I'll show your profile and quotes
 ━ 🔍 /info - Useful information about each AI model
+━ 📂 /catalog - Catalog of digital assistants and prompts
 ━ 🎁 /bonus - Learn how to get free access to all AI models for free
 ━ 🎭️ /settings - Personalization and settings. Digital employees and thematic chats for text models
 """
@@ -139,6 +147,7 @@ I am constantly updating myself, implementing the most advanced technologies so 
     ┣ 🪄 /photoshop - <b>Magic with Photoshop AI</b>: Retouch and edit your photos with one touch
     ┣ 🎺 /music_gen - <b>Melodies with MusicGen</b>: Create music without copyrights
     ┣ 🎸 /suno - <b>Songs with Suno</b>: Create your own song with your lyrics and different genres
+    ┣ 🎥 /runway - <b>Video with Runway</b>: Generate creative videos from a photo
     ┗ 🔧 /settings - <b>Customize your experience</b>: Tailor model to fit your needs. There you can also <b>select a digital employee</b> with <b>context-specific chats management</b>
 
 Just type away a command to begin your AI journey! 🌟
@@ -182,7 +191,7 @@ Just type away a command to begin your AI journey! 🌟
 - <i>Educational Assistant</i>: Helps with solutions in programming, mathematics, or scientific research.
 - <i>Efficiency</i>: Provides quick and accurate answers to both practical and theoretical questions.
 
-🧪 <b>ChatGPT o1-preview: A Revolution in Reasoning</b>
+🧪 <b>ChatGPT o1: A Revolution in Reasoning</b>
 - <i>Advanced Data Analysis</i>: Suitable for processing and analyzing large volumes of information.
 - <i>Argumentative Problem Solving</i>: Ideal for tasks that require well-justified conclusions and complex logical structures.
 - <i>Hypothesis Generation</i>: Perfect for scientific research and experimentation.
@@ -312,6 +321,16 @@ Just type away a command to begin your AI journey! 🌟
 - <i>Explore musical genres</i>: Discover new musical horizons by experimenting with different styles and sounds.
 - <i>Music education and inspiration</i>: Learn about music theory and the history of genres through the practice of composition.
 - <i>Instant music creation</i>: Describe your emotions or scenario, and Suno will immediately bring your description to life as a song.
+"""
+    INFO_RUNWAY = """
+🤖 <b>There is what the model can do for you:</b>
+
+🎥 <b>Runway: Video Generation</b>
+- <i>Create short video clips</i>: Describe an idea or a script, and Runway will produce a unique video clip.
+- <i>Generate videos from photos + text</i>: Turn an image and text description into dynamic videos.
+- <i>Animations and visual effects</i>: Generate visually appealing and creative animations based on your ideas.
+- <i>AI content for social media</i>: Quickly create engaging videos for platforms and projects.
+- <i>Experiment with video formats</i>: Explore AI capabilities to create new styles and video content.
 """
 
     SERVER = "💻 Server"
@@ -620,6 +639,7 @@ Please check your text for any forbidden content and try again!
 My goal is safety and respect for every user! 🌟
 """
     PHOTO_FORBIDDEN_ERROR = "I don't know how to work with photos in this AI model yet 👀"
+    PHOTO_REQUIRED_ERROR = "A photo is required for this model ⚠️\n\nPlease send a photo together with your prompt"
     ALBUM_FORBIDDEN_ERROR = "In the current AI model, I can't process multiple photos at once, please send one 🙂"
     VIDEO_FORBIDDEN_ERROR = "I don't know how to work with videos yet 👀"
     DOCUMENT_FORBIDDEN_ERROR = "I don't know how to work with such documents yet 👀"
@@ -638,7 +658,8 @@ Your today's quota for the current model has just done a Houdini and disappeared
     CHANGE_AI_MODEL = "🤖 Change AI Model"
     REMOVE_RESTRICTION = "⛔️ Remove the Restriction"
     REMOVE_RESTRICTION_INFO = "To remove the restriction, choose one of the actions 👇"
-    IMAGE_SUCCESS = "✨ Here's your image creation! 🎨"
+    IMAGE_SUCCESS = "✨ Here's your image creation 🎨"
+    VIDEO_SUCCESS = "✨ Here's your video creation 🎞"
     FILE_TOO_BIG_ERROR = """
 🚧 <b>Oops!</b>
 
@@ -657,18 +678,28 @@ Please try again with a smaller file 😊
 
     PHOTO_FEATURE_FORBIDDEN = """
 ⚠️ Sending photos is only available in models:
-━ <b>ChatGPT</b>:
+
+🔤 <b>Text Models</b>:
     ┣ ChatGPT 4.0 Omni Mini ✉️
-    ┗ ChatGPT 4.0 Omni 💥
-━ <b>Claude</b>:
+    ┣ ChatGPT 4.0 Omni 💥
+    ┣ ChatGPT o1 🧪
     ┣ Claude 3.5 Sonnet 💫
-    ┗ Claude 3.0 Opus 🚀
-━ <b>Gemini</b>:
+    ┣ Claude 3.0 Opus 🚀
     ┣ Gemini 1.5 Flash 🏎
     ┣ Gemini 1.5 Pro 💼
     ┗ Gemini 1.0 Ultra 🛡️
 
-Use /mode to switch to a model that supports image vision 👀
+🖼 <b>Image Models</b>:
+    ┣ 🎨 Midjourney
+    ┣ 🎆 Stable Diffusion
+    ┣ 🫐 Flux
+    ┣ 📷 FaceSwap
+    ┗ 🪄 Photoshop AI
+
+📹 <b>Video Models</b>:
+    ┗ 🎥 Runway
+
+Use the button below to switch to a model that supports image vision 👀
 """
 
     # Eightify
@@ -800,6 +831,7 @@ Below are the voice response settings for all text models 🎙
     SETTINGS_QUALITY = "Quality ✨"
     SETTINGS_PROMPT_SAFETY = "Prompt Security 🔐"
     SETTINGS_GENDER = "Gender 👕/👚"
+    SETTINGS_DURATION = "Duration in Seconds 📏"
 
     SHOW_THE_NAME_OF_THE_CHATS = "Show the name of the chats"
     SHOW_THE_NAME_OF_THE_ROLES = "Show the name of the roles"
@@ -822,7 +854,7 @@ To unlock the magic of voice-to-text, simply wave your wand with buttons below:
 You’re stepping into a world of exclusive possibilities! What will it be today?
 
 🌟 <b>Subscriptions: Everything All at Once — Your VIP pass to all AI tools and beyond!</b>
-Chat with ChatGPT, Claude, Gemini and Eightify; Create with DALL-E, Midjourney, Stable Diffusion, Flux, FaceSwap, and Photoshop AI; Make music with MusicGen and Suno; Enjoy voice messages, quick replies, themed chats, and much more. Everything is included in the subscription for your convenience and daily discoveries!
+Chatting, image/music/video creation, and much more. All included in the subscription for your convenience and new discoveries every day!
 
 🛍 <b>Packages: Pay only for the generations you need!</b>
 Need specific generations for particular tasks? Packages let you choose a set number of requests and AI tools — pay only for what you truly need.
@@ -1163,8 +1195,8 @@ Please try again 🥺
     APPROVE = "Approve ✅"
     IMAGE = "Image 🖼"
     DOCUMENT = "Document 📄"
-    AUDIO = "Audio 🔈"
-    VIDEO = "Video 📹"
+    AUDIO = "Audio 🎤"
+    VIDEO = "Video 📺"
     SKIP = "Skip ⏩️"
 
     TERMS_LINK = "https://telegra.ph/Terms-of-Service-in-GPTsTurboBot-05-07"
@@ -1236,13 +1268,13 @@ Choose action 👇
 ━ <b>Advanced</b>:
     ┣ Daily Limits: {format_number(daily_limits[Quota.CHAT_GPT4_OMNI])}/{format_number(subscription_limits[Quota.CHAT_GPT4_OMNI])}
     ┣ 💥 ChatGPT 4.0 Omni{f': extra {additional_usage_quota[Quota.CHAT_GPT4_OMNI]}' if additional_usage_quota[Quota.CHAT_GPT4_OMNI] > 0 else ''}
-    ┣ 🧩 ChatGPT o1-mini{f': extra {additional_usage_quota[Quota.CHAT_GPT_O_1_PREVIEW]}' if additional_usage_quota[Quota.CHAT_GPT_O_1_PREVIEW] > 0 else ''}
+    ┣ 🧩 ChatGPT o1-mini{f': extra {additional_usage_quota[Quota.CHAT_GPT_O_1_MINI]}' if additional_usage_quota[Quota.CHAT_GPT_O_1_MINI] > 0 else ''}
     ┣ 💫 Claude 3.5 Sonnet{f': extra {additional_usage_quota[Quota.CLAUDE_3_SONNET]}' if additional_usage_quota[Quota.CLAUDE_3_SONNET] > 0 else ''}
     ┗ 💼 Gemini 1.5 Pro{f': extra {additional_usage_quota[Quota.GEMINI_1_PRO]}' if additional_usage_quota[Quota.GEMINI_1_PRO] > 0 else ''}
 
 ━ <b>Flagship</b>:
-    ┣ Daily Limits: {format_number(daily_limits[Quota.CHAT_GPT_O_1_PREVIEW])}/{format_number(subscription_limits[Quota.CHAT_GPT_O_1_PREVIEW])}
-    ┣ 🧪 ChatGPT o1-preview{f': extra {additional_usage_quota[Quota.CHAT_GPT_O_1_PREVIEW]}' if additional_usage_quota[Quota.CHAT_GPT_O_1_PREVIEW] > 0 else ''}
+    ┣ Daily Limits: {format_number(daily_limits[Quota.CHAT_GPT_O_1])}/{format_number(subscription_limits[Quota.CHAT_GPT_O_1])}
+    ┣ 🧪 ChatGPT o1{f': extra {additional_usage_quota[Quota.CHAT_GPT_O_1]}' if additional_usage_quota[Quota.CHAT_GPT_O_1] > 0 else ''}
     ┣ 🚀 Claude 3.0 Opus{f': extra {additional_usage_quota[Quota.CLAUDE_3_OPUS]}' if additional_usage_quota[Quota.CLAUDE_3_OPUS] > 0 else ''}
     ┗ 🛡️ Gemini 1.0 Ultra{f': extra {additional_usage_quota[Quota.GEMINI_1_ULTRA]}' if additional_usage_quota[Quota.GEMINI_1_ULTRA] > 0 else ''}
 
@@ -1263,6 +1295,12 @@ Choose action 👇
     ┣ Daily Limits: {format_number(daily_limits[Quota.SUNO])}/{format_number(subscription_limits[Quota.SUNO])}
     ┣ 🎺 MusicGen{f': extra {additional_usage_quota[Quota.MUSIC_GEN]}' if additional_usage_quota[Quota.MUSIC_GEN] > 0 else ''}
     ┗ 🎸 Suno{f': extra {additional_usage_quota[Quota.SUNO]}' if additional_usage_quota[Quota.SUNO] > 0 else ''}
+
+---------------------------
+
+📹 <b>Видео Модели</b>:
+    ┣ Дневной лимит: {format_number(daily_limits[Quota.RUNWAY])}/{format_number(subscription_limits[Quota.RUNWAY])}
+    ┗ 🎥 Runway{f': доп. {additional_usage_quota[Quota.RUNWAY]}' if additional_usage_quota[Quota.RUNWAY] > 0 else ''}
 
 ---------------------------
 
@@ -1587,6 +1625,12 @@ Looks like you've got only <b>{available_seconds} seconds</b> left in your arsen
         elif model_type == ModelType.MUSIC:
             facts = f"""ℹ️ Settings:
     ┗ 🗯 Sending Type: {English.VIDEO if model_info.get(UserSettings.SEND_TYPE, SendType.AUDIO) == SendType.VIDEO else English.AUDIO}"""
+        elif model_type == ModelType.VIDEO:
+            facts = f"""ℹ️ Facts and Settings:
+    ┣ 📷 Image Support: {'Yes ✅' if model_info.get('support_photos', False) else 'No ❌'}
+    ┣ 📐 Aspect Ratio: {'Custom' if model_info.get(UserSettings.ASPECT_RATIO, AspectRatio.CUSTOM) == AspectRatio.CUSTOM else model_info.get(UserSettings.ASPECT_RATIO)}
+    ┣ 📏 Duration: {model_info.get(UserSettings.DURATION, 5)} seconds
+    ┗ 🗯 Sending Type: {English.DOCUMENT if model_info.get(UserSettings.SEND_TYPE, SendType.VIDEO) == SendType.DOCUMENT else English.VIDEO}"""
         else:
             facts = f"ℹ️ Facts and Settings: Coming Soon 🔜"
 
@@ -1831,6 +1875,31 @@ Looks like you've got only <b>{available_seconds} seconds</b> left in your arsen
         return text
 
     @staticmethod
+    def processing_request_video():
+        texts = [
+            "Loading the movie premiere, almost ready... 🎬🍿",
+            "The rocket of video creativity is taking off! Fasten your seatbelts... 🚀🎥",
+            "Frames are coming to life, camera, action... 🎬💥",
+            "Generating a masterpiece frame by frame... 🎥✨",
+            "Not just a video, but a cinematic wonder is on its way... 🎞️🌟",
+            "Assembling the puzzle of the best shots for your WOW moment... 🤩🎞️",
+            "Connecting pixels — expect a video masterpiece... 🎇🎥",
+            "Reeling in the best shots, a masterpiece is in progress... 🎥🎣",
+            "The editing table is on fire, creating a video masterpiece... 🔥✂️",
+            "Loading video content into your dimension... 🖥️🎞️",
+            "AI bees are working on your video honey... Get ready for a sweet result... 🐝🍯",
+            "The magic projector is already starting up... 🎥✨",
+            "The pizza is baking in the oven... oh wait, it’s your video... 🍕🎞️",
+            "Casting visual spells, the video will be magical... ✨🎩",
+            "Delivering your video on the rails of creativity... 🚉🎥",
+        ]
+
+        text = random.choice(texts)
+        text += "\n\n⚠️ Generation can take up to 20 minutes"
+
+        return text
+
+    @staticmethod
     def photoshop_ai_actions() -> list[str]:
         return [
             English.PHOTOSHOP_AI_RESTORATION,
@@ -1840,9 +1909,11 @@ Looks like you've got only <b>{available_seconds} seconds</b> left in your arsen
 
     # Settings
     @staticmethod
-    def settings(human_model: str, current_model: Model, dall_e_cost=1) -> str:
+    def settings(human_model: str, current_model: Model, generation_cost=1) -> str:
         if current_model == Model.DALL_E:
-            additional_text = f"\nAt the current settings, 1 request costs: {dall_e_cost} 🖼"
+            additional_text = f"\nAt the current settings, 1 request costs: {generation_cost} 🖼"
+        elif current_model == Model.RUNWAY:
+            additional_text = f"\nAt the current settings, 1 request costs: {generation_cost} 📹"
         else:
             additional_text = ""
 

@@ -38,6 +38,7 @@ from bot.handlers.ai.face_swap_handler import handle_face_swap
 from bot.handlers.ai.flux_handler import handle_flux
 from bot.handlers.ai.gemini_handler import handle_gemini
 from bot.handlers.ai.midjourney_handler import handle_midjourney
+from bot.handlers.ai.runway_handler import handle_runway
 from bot.handlers.ai.stable_diffusion_handler import handle_stable_diffusion
 from bot.helpers.getters.get_quota_by_model import get_quota_by_model
 from bot.integrations.replicateAI import create_face_swap_image, create_photoshop_ai_image
@@ -382,6 +383,17 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
                         reply_markup=reply_markup
                     )
                     await state.set_state(Profile.waiting_for_photo)
+    elif user.current_model == Model.RUNWAY:
+        photo_data_io = await message.bot.download_file(photo_file.file_path, timeout=300)
+        photo_data = photo_data_io.read()
+        photo_extension = photo_file.file_path.split('.')[-1]
+
+        video_frame_path = f'users/video_frames/runway/{user_id}/{uuid.uuid4()}.{photo_extension}'
+        video_frame_photo = firebase.bucket.new_blob(video_frame_path)
+        await video_frame_photo.upload(photo_data)
+        video_frame_photo_link = firebase.get_public_url(video_frame_path)
+
+        await handle_runway(message, state, user, video_frame_photo_link)
     else:
         await message.reply(
             text=get_localization(user_language_code).PHOTO_FORBIDDEN_ERROR,

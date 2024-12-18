@@ -48,6 +48,7 @@ from bot.handlers.ai.midjourney_handler import midjourney_router
 from bot.handlers.ai.mode_handler import mode_router
 from bot.handlers.ai.music_gen_handler import music_gen_router
 from bot.handlers.ai.photoshop_ai_handler import photoshop_ai_router
+from bot.handlers.ai.runway_handler import runway_router
 from bot.handlers.ai.stable_diffusion_handler import stable_diffusion_router
 from bot.handlers.ai.suno_handler import suno_router
 from bot.handlers.common.catalog_handler import catalog_router
@@ -165,6 +166,7 @@ async def lifespan(_: FastAPI):
         photoshop_ai_router,
         music_gen_router,
         suno_router,
+        runway_router,
         document_router,
         photo_router,
         video_router,

@@ -43,7 +43,7 @@ class Settings(BaseSettings):
 
     MAX_RETRIES: int = 2
     BATCH_SIZE: int = 500
-    LIMIT_BETWEEN_REQUESTS_SECONDS: int = 30
+    LIMIT_BETWEEN_REQUESTS_SECONDS: int = 20
     LIMIT_PROCESSING_SECONDS: int = 60
 
     SUPER_ADMIN_ID: str = '354543567'
@@ -101,7 +101,8 @@ class Settings(BaseSettings):
     EIGHTIFY_API_TOKEN: SecretStr
     REPLICATE_API_TOKEN: SecretStr
     MIDJOURNEY_API_TOKEN: SecretStr
-    SUNO_TOKEN: SecretStr
+    SUNO_API_TOKEN: SecretStr
+    RUNWAYML_API_TOKEN: SecretStr
 
     model_config = SettingsConfigDict(
         env_file=str(BASE_DIR / f'.env.{os.getenv("ENVIRONMENT", "testing")}'),
