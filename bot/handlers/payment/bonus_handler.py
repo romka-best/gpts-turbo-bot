@@ -305,6 +305,7 @@ async def handle_bonus_cash_out_selection(callback_query: CallbackQuery, state: 
         return
     elif (
         product_id == ProductCategory.TEXT or
+        product_id == ProductCategory.SUMMARY or
         product_id == ProductCategory.IMAGE or
         product_id == ProductCategory.MUSIC or
         product_id == ProductCategory.VIDEO

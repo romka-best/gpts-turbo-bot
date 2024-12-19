@@ -443,6 +443,7 @@ async def handle_package_selection(callback_query: CallbackQuery, state: FSMCont
         return
     elif (
         package_type == ProductCategory.TEXT or
+        package_type == ProductCategory.SUMMARY or
         package_type == ProductCategory.IMAGE or
         package_type == ProductCategory.MUSIC or
         package_type == ProductCategory.VIDEO

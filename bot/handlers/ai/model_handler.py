@@ -108,7 +108,7 @@ async def handle_model_selection(callback_query: CallbackQuery, state: FSMContex
     chosen_version = ''
     if chosen_model == 'page':
         return
-    elif chosen_model == ModelType.TEXT or chosen_model == ModelType.IMAGE or chosen_model == ModelType.MUSIC:
+    elif chosen_model == ModelType.TEXT or chosen_model == ModelType.SUMMARY or chosen_model == ModelType.IMAGE or chosen_model == ModelType.MUSIC:
         await handle_info_selection(callback_query, state, chosen_model)
         return
     elif chosen_model == 'next' or chosen_model == 'back':
