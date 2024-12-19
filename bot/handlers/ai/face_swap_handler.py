@@ -49,7 +49,7 @@ from bot.keyboards.ai.face_swap import (
     build_face_swap_choose_keyboard,
     build_face_swap_package_keyboard,
 )
-from bot.keyboards.ai.mode import build_switched_to_ai_keyboard
+from bot.keyboards.ai.model import build_switched_to_ai_keyboard
 from bot.keyboards.common.common import build_cancel_keyboard, build_error_keyboard
 from bot.keyboards.common.profile import build_profile_gender_keyboard
 from bot.locales.main import get_localization, get_user_language

@@ -2,9 +2,10 @@ from bot.database.models.common import Quota
 from bot.database.models.user import User
 from bot.database.operations.user.updaters import update_user, update_user_in_transaction
 
-TEXT_SIMPLE_QUOTA = [Quota.CHAT_GPT4_OMNI_MINI, Quota.CLAUDE_3_HAIKU, Quota.GEMINI_1_FLASH, Quota.EIGHTIFY]
+TEXT_SIMPLE_QUOTA = [Quota.CHAT_GPT4_OMNI_MINI, Quota.CLAUDE_3_HAIKU, Quota.GEMINI_1_FLASH]
 TEXT_ADVANCED_QUOTA = [Quota.CHAT_GPT4_OMNI, Quota.CHAT_GPT_O_1_MINI, Quota.CLAUDE_3_SONNET, Quota.GEMINI_1_PRO]
 TEXT_SUPER_ADVANCED_QUOTA = [Quota.CHAT_GPT_O_1, Quota.CLAUDE_3_OPUS, Quota.GEMINI_1_ULTRA]
+SUMMARY_QUOTA = [Quota.EIGHTIFY]
 IMAGE_QUOTA = [Quota.DALL_E, Quota.MIDJOURNEY, Quota.STABLE_DIFFUSION, Quota.FLUX, Quota.FACE_SWAP, Quota.PHOTOSHOP_AI]
 MUSIC_QUOTA = [Quota.MUSIC_GEN, Quota.SUNO]
 VIDEO_QUOTA = [Quota.RUNWAY]
@@ -21,6 +22,8 @@ def get_user_with_updated_quota(user: User, user_quota: Quota, quantity_to_delet
                 chosen_quota = TEXT_ADVANCED_QUOTA
             elif user_quota in TEXT_SUPER_ADVANCED_QUOTA:
                 chosen_quota = TEXT_SUPER_ADVANCED_QUOTA
+            elif user_quota in SUMMARY_QUOTA:
+                chosen_quota = SUMMARY_QUOTA
             elif user_quota in IMAGE_QUOTA:
                 chosen_quota = IMAGE_QUOTA
             elif user_quota in MUSIC_QUOTA:

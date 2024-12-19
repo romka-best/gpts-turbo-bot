@@ -40,7 +40,7 @@ from bot.helpers.creaters.create_subscription import create_subscription
 from bot.helpers.getters.get_quota_by_model import get_quota_by_model
 from bot.helpers.getters.get_switched_to_ai_model import get_switched_to_ai_model
 from bot.helpers.senders.send_message_to_admins import send_message_to_admins
-from bot.keyboards.ai.mode import build_switched_to_ai_keyboard
+from bot.keyboards.ai.model import build_switched_to_ai_keyboard
 from bot.keyboards.common.common import build_buy_motivation_keyboard
 from bot.locales.main import get_user_language, get_localization
 from bot.locales.types import LanguageCode

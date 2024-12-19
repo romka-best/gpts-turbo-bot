@@ -19,7 +19,7 @@ from bot.handlers.ai.claude_handler import handle_claude
 from bot.handlers.ai.eightify_handler import handle_eightify
 from bot.handlers.ai.face_swap_handler import handle_face_swap
 from bot.handlers.ai.gemini_handler import handle_gemini
-from bot.handlers.ai.mode_handler import handle_mode
+from bot.handlers.ai.model_handler import handle_model
 from bot.handlers.ai.music_gen_handler import handle_music_gen
 from bot.handlers.ai.photoshop_ai_handler import handle_photoshop_ai
 from bot.handlers.ai.suno_handler import handle_suno
@@ -29,7 +29,7 @@ from bot.handlers.payment.payment_handler import handle_subscribe, handle_packag
 from bot.helpers.getters.get_quota_by_model import get_quota_by_model
 from bot.helpers.getters.get_switched_to_ai_model import get_switched_to_ai_model
 from bot.helpers.updaters.update_daily_limits import update_user_daily_limits
-from bot.keyboards.ai.mode import build_switched_to_ai_keyboard
+from bot.keyboards.ai.model import build_switched_to_ai_keyboard
 from bot.keyboards.common.common import (
     build_start_keyboard,
     build_start_chosen_keyboard,
@@ -418,7 +418,7 @@ async def limit_exceeded_selection(callback_query: CallbackQuery, state: FSMCont
 
     action = callback_query.data.split(':')[1]
     if action == 'change_ai_model':
-        await handle_mode(callback_query.message, state, str(callback_query.from_user.id))
+        await handle_model(callback_query.message, state, str(callback_query.from_user.id))
     elif action == 'open_bonus_info':
         await handle_bonus(callback_query.message, str(callback_query.from_user.id), state)
     elif action == 'open_buy_subscriptions_info':

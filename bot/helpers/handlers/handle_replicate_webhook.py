@@ -341,7 +341,7 @@ async def handle_replicate_music_gen(
 
     if generation.result:
         reply_markup = build_reaction_keyboard(generation.id)
-        caption = f'🎵 {(user.daily_limits[Quota.MUSIC_GEN] + user.additional_usage_quota[Quota.MUSIC_GEN]) - 1}' \
+        caption = f'🎵 {(user.daily_limits[Quota.MUSIC_GEN] + user.additional_usage_quota[Quota.MUSIC_GEN]) - duration // 10}' \
             if user.settings[Model.MUSIC_GEN][UserSettings.SHOW_USAGE_QUOTA] and \
                user.daily_limits[Quota.MUSIC_GEN] != float('inf') else '🎵'
         await send_audio(
@@ -393,7 +393,7 @@ async def handle_replicate_music_gen(
             update_user_usage_quota(
                 user,
                 Quota.MUSIC_GEN,
-                1 if generation.result else 0,
+                duration // 10 if generation.result else 0,
             ),
         ]
 

@@ -5,7 +5,7 @@ from bot.locales.main import get_localization
 from bot.locales.types import LanguageCode
 
 
-def build_mode_keyboard(
+def build_model_keyboard(
     language_code: LanguageCode,
     model: Model,
     model_version: ChatGPTVersion | ClaudeGPTVersion | GeminiGPTVersion,
@@ -19,7 +19,7 @@ def build_mode_keyboard(
                 [
                     InlineKeyboardButton(
                         text=get_localization(language_code).TEXT_MODELS,
-                        callback_data=f'mode:{ModelType.TEXT}',
+                        callback_data=f'model:{ModelType.TEXT}',
                     ),
                 ],
             ]
@@ -32,7 +32,7 @@ def build_mode_keyboard(
                             text=get_localization(language_code).CHATGPT4_OMNI_MINI + (
                                 ' ✅' if model == Model.CHAT_GPT and model_version == ChatGPTVersion.V4_Omni_Mini else ''
                             ),
-                            callback_data=f'mode:{Model.CHAT_GPT}:{ChatGPTVersion.V4_Omni_Mini}'
+                            callback_data=f'model:{Model.CHAT_GPT}:{ChatGPTVersion.V4_Omni_Mini}'
                         ),
                     ],
                     [
@@ -40,7 +40,7 @@ def build_mode_keyboard(
                             text=get_localization(language_code).CHATGPT4_OMNI + (
                                 ' ✅' if model == Model.CHAT_GPT and model_version == ChatGPTVersion.V4_Omni else ''
                             ),
-                            callback_data=f'mode:{Model.CHAT_GPT}:{ChatGPTVersion.V4_Omni}'
+                            callback_data=f'model:{Model.CHAT_GPT}:{ChatGPTVersion.V4_Omni}'
                         ),
                     ],
                     [
@@ -48,7 +48,7 @@ def build_mode_keyboard(
                             text=get_localization(language_code).CHAT_GPT_O_1_MINI + (
                                 ' ✅' if model == Model.CHAT_GPT and model_version == ChatGPTVersion.V1_O_Mini else ''
                             ),
-                            callback_data=f'mode:{Model.CHAT_GPT}:{ChatGPTVersion.V1_O_Mini}'
+                            callback_data=f'model:{Model.CHAT_GPT}:{ChatGPTVersion.V1_O_Mini}'
                         ),
                     ],
                     [
@@ -56,13 +56,13 @@ def build_mode_keyboard(
                             text=get_localization(language_code).CHAT_GPT_O_1 + (
                                 ' ✅' if model == Model.CHAT_GPT and model_version == ChatGPTVersion.V1_O else ''
                             ),
-                            callback_data=f'mode:{Model.CHAT_GPT}:{ChatGPTVersion.V1_O}'
+                            callback_data=f'model:{Model.CHAT_GPT}:{ChatGPTVersion.V1_O}'
                         ),
                     ],
                     [
                         InlineKeyboardButton(
                             text=get_localization(language_code).BACK,
-                            callback_data=f'mode:{Model.CHAT_GPT}:back'
+                            callback_data=f'model:{Model.CHAT_GPT}:back'
                         ),
                     ],
                 ]
@@ -75,7 +75,7 @@ def build_mode_keyboard(
                             text=get_localization(language_code).CLAUDE_3_HAIKU + (
                                 ' ✅' if model == Model.CLAUDE and model_version == ClaudeGPTVersion.V3_Haiku else ''
                             ),
-                            callback_data=f'mode:{Model.CLAUDE}:{ClaudeGPTVersion.V3_Haiku}'
+                            callback_data=f'model:{Model.CLAUDE}:{ClaudeGPTVersion.V3_Haiku}'
                         ),
                     ],
                     [
@@ -83,7 +83,7 @@ def build_mode_keyboard(
                             text=get_localization(language_code).CLAUDE_3_SONNET + (
                                 ' ✅' if model == Model.CLAUDE and model_version == ClaudeGPTVersion.V3_Sonnet else ''
                             ),
-                            callback_data=f'mode:{Model.CLAUDE}:{ClaudeGPTVersion.V3_Sonnet}'
+                            callback_data=f'model:{Model.CLAUDE}:{ClaudeGPTVersion.V3_Sonnet}'
                         ),
                     ],
                     [
@@ -91,13 +91,13 @@ def build_mode_keyboard(
                             text=get_localization(language_code).CLAUDE_3_OPUS + (
                                 ' ✅' if model == Model.CLAUDE and model_version == ClaudeGPTVersion.V3_Opus else ''
                             ),
-                            callback_data=f'mode:{Model.CLAUDE}:{ClaudeGPTVersion.V3_Opus}'
+                            callback_data=f'model:{Model.CLAUDE}:{ClaudeGPTVersion.V3_Opus}'
                         ),
                     ],
                     [
                         InlineKeyboardButton(
                             text=get_localization(language_code).BACK,
-                            callback_data=f'mode:{Model.CLAUDE}:back'
+                            callback_data=f'model:{Model.CLAUDE}:back'
                         ),
                     ],
                 ]
@@ -110,7 +110,7 @@ def build_mode_keyboard(
                             text=get_localization(language_code).GEMINI_1_FLASH + (
                                 ' ✅' if model == Model.GEMINI and model_version == GeminiGPTVersion.V1_Flash else ''
                             ),
-                            callback_data=f'mode:{Model.GEMINI}:{GeminiGPTVersion.V1_Flash}'
+                            callback_data=f'model:{Model.GEMINI}:{GeminiGPTVersion.V1_Flash}'
                         ),
                     ],
                     [
@@ -118,7 +118,7 @@ def build_mode_keyboard(
                             text=get_localization(language_code).GEMINI_1_PRO + (
                                 ' ✅' if model == Model.GEMINI and model_version == GeminiGPTVersion.V1_Pro else ''
                             ),
-                            callback_data=f'mode:{Model.GEMINI}:{GeminiGPTVersion.V1_Pro}'
+                            callback_data=f'model:{Model.GEMINI}:{GeminiGPTVersion.V1_Pro}'
                         ),
                     ],
                     [
@@ -126,13 +126,13 @@ def build_mode_keyboard(
                             text=get_localization(language_code).GEMINI_1_ULTRA + (
                                 ' ✅' if model == Model.GEMINI and model_version == GeminiGPTVersion.V1_Ultra else ''
                             ),
-                            callback_data=f'mode:{Model.GEMINI}:{GeminiGPTVersion.V1_Ultra}'
+                            callback_data=f'model:{Model.GEMINI}:{GeminiGPTVersion.V1_Ultra}'
                         ),
                     ],
                     [
                         InlineKeyboardButton(
                             text=get_localization(language_code).BACK,
-                            callback_data=f'mode:{Model.GEMINI}:back'
+                            callback_data=f'model:{Model.GEMINI}:back'
                         ),
                     ],
                 ]
@@ -143,41 +143,33 @@ def build_mode_keyboard(
                     [
                         InlineKeyboardButton(
                             text=get_localization(language_code).CHATGPT,
-                            callback_data=f'mode:{Model.CHAT_GPT}',
+                            callback_data=f'model:{Model.CHAT_GPT}',
                         ),
                     ],
                     [
                         InlineKeyboardButton(
                             text=get_localization(language_code).CLAUDE,
-                            callback_data=f'mode:{Model.CLAUDE}',
+                            callback_data=f'model:{Model.CLAUDE}',
                         ),
                     ],
                     [
                         InlineKeyboardButton(
                             text=get_localization(language_code).GEMINI,
-                            callback_data=f'mode:{Model.GEMINI}',
-                        ),
-                    ],
-                    [
-                        InlineKeyboardButton(
-                            text=get_localization(language_code).EIGHTIFY + (
-                                ' ✅' if model == Model.EIGHTIFY else ''
-                            ),
-                            callback_data=f'mode:{Model.EIGHTIFY}'
+                            callback_data=f'model:{Model.GEMINI}',
                         ),
                     ],
                     [
                         InlineKeyboardButton(
                             text='⬅️',
-                            callback_data='mode:back:2'
+                            callback_data='model:back:4'
                         ),
                         InlineKeyboardButton(
-                            text='1/4',
-                            callback_data='mode:page:0'
+                            text='1/5',
+                            callback_data='model:page:0'
                         ),
                         InlineKeyboardButton(
                             text='➡️',
-                            callback_data='mode:next:1'
+                            callback_data='model:next:1'
                         ),
                     ]
                 ]
@@ -186,62 +178,30 @@ def build_mode_keyboard(
         buttons.extend([
             [
                 InlineKeyboardButton(
-                    text=get_localization(language_code).IMAGE_MODELS,
-                    callback_data=f'mode:{ModelType.IMAGE}',
+                    text=get_localization(language_code).SUMMARY_MODELS,
+                    callback_data=f'model:{ModelType.SUMMARY}',
                 ),
             ],
             [
                 InlineKeyboardButton(
-                    text=get_localization(language_code).DALL_E + (' ✅' if model == Model.DALL_E else ''),
-                    callback_data=f'mode:{Model.DALL_E}'
-                ),
-            ],
-            [
-                InlineKeyboardButton(
-                    text=get_localization(language_code).MIDJOURNEY + (' ✅' if model == Model.MIDJOURNEY else ''),
-                    callback_data=f'mode:{Model.MIDJOURNEY}'
-                ),
-            ],
-            [
-                InlineKeyboardButton(
-                    text=get_localization(language_code).STABLE_DIFFUSION + (
-                        ' ✅' if model == Model.STABLE_DIFFUSION else ''
+                    text=get_localization(language_code).EIGHTIFY + (
+                        ' ✅' if model == Model.EIGHTIFY else ''
                     ),
-                    callback_data=f'mode:{Model.STABLE_DIFFUSION}'
-                ),
-            ],
-            [
-                InlineKeyboardButton(
-                    text=get_localization(language_code).FLUX + (
-                        ' ✅' if model == Model.FLUX else ''
-                    ),
-                    callback_data=f'mode:{Model.FLUX}'
-                ),
-            ],
-            [
-                InlineKeyboardButton(
-                    text=get_localization(language_code).FACE_SWAP + (' ✅' if model == Model.FACE_SWAP else ''),
-                    callback_data=f'mode:{Model.FACE_SWAP}'
-                ),
-            ],
-            [
-                InlineKeyboardButton(
-                    text=get_localization(language_code).PHOTOSHOP_AI + (' ✅' if model == Model.PHOTOSHOP_AI else ''),
-                    callback_data=f'mode:{Model.PHOTOSHOP_AI}'
+                    callback_data=f'model:{Model.EIGHTIFY}'
                 ),
             ],
             [
                 InlineKeyboardButton(
                     text='⬅️',
-                    callback_data='mode:back:0'
+                    callback_data='model:back:0'
                 ),
                 InlineKeyboardButton(
-                    text='2/4',
-                    callback_data='mode:page:1'
+                    text='2/5',
+                    callback_data='model:page:1'
                 ),
                 InlineKeyboardButton(
                     text='➡️',
-                    callback_data='mode:next:2'
+                    callback_data='model:next:2'
                 ),
             ]
         ])
@@ -249,34 +209,62 @@ def build_mode_keyboard(
         buttons.extend([
             [
                 InlineKeyboardButton(
-                    text=get_localization(language_code).MUSIC_MODELS,
-                    callback_data=f'mode:{ModelType.MUSIC}',
+                    text=get_localization(language_code).IMAGE_MODELS,
+                    callback_data=f'model:{ModelType.IMAGE}',
                 ),
             ],
             [
                 InlineKeyboardButton(
-                    text=get_localization(language_code).MUSIC_GEN + (' ✅' if model == Model.MUSIC_GEN else ''),
-                    callback_data=f'mode:{Model.MUSIC_GEN}'
+                    text=get_localization(language_code).DALL_E + (' ✅' if model == Model.DALL_E else ''),
+                    callback_data=f'model:{Model.DALL_E}'
                 ),
             ],
             [
                 InlineKeyboardButton(
-                    text=get_localization(language_code).SUNO + (' ✅' if model == Model.SUNO else ''),
-                    callback_data=f'mode:{Model.SUNO}'
+                    text=get_localization(language_code).MIDJOURNEY + (' ✅' if model == Model.MIDJOURNEY else ''),
+                    callback_data=f'model:{Model.MIDJOURNEY}'
+                ),
+            ],
+            [
+                InlineKeyboardButton(
+                    text=get_localization(language_code).STABLE_DIFFUSION + (
+                        ' ✅' if model == Model.STABLE_DIFFUSION else ''
+                    ),
+                    callback_data=f'model:{Model.STABLE_DIFFUSION}'
+                ),
+            ],
+            [
+                InlineKeyboardButton(
+                    text=get_localization(language_code).FLUX + (
+                        ' ✅' if model == Model.FLUX else ''
+                    ),
+                    callback_data=f'model:{Model.FLUX}'
+                ),
+            ],
+            [
+                InlineKeyboardButton(
+                    text=get_localization(language_code).FACE_SWAP + (' ✅' if model == Model.FACE_SWAP else ''),
+                    callback_data=f'model:{Model.FACE_SWAP}'
+                ),
+            ],
+            [
+                InlineKeyboardButton(
+                    text=get_localization(language_code).PHOTOSHOP_AI + (' ✅' if model == Model.PHOTOSHOP_AI else ''),
+                    callback_data=f'model:{Model.PHOTOSHOP_AI}'
                 ),
             ],
             [
                 InlineKeyboardButton(
                     text='⬅️',
-                    callback_data='mode:back:1'
+                    callback_data='model:back:1'
                 ),
                 InlineKeyboardButton(
-                    text='3/4',
-                    callback_data='mode:page:2'
+                    text='3/5',
+                    callback_data='model:page:2'
                 ),
                 InlineKeyboardButton(
                     text='➡️',
-                    callback_data='mode:next:3'
+                    callback_data='model:next:3'
                 ),
             ]
         ])
@@ -284,28 +272,63 @@ def build_mode_keyboard(
         buttons.extend([
             [
                 InlineKeyboardButton(
-                    text=get_localization(language_code).VIDEO_MODELS,
-                    callback_data=f'mode:{ModelType.VIDEO}',
+                    text=get_localization(language_code).MUSIC_MODELS,
+                    callback_data=f'model:{ModelType.MUSIC}',
                 ),
             ],
             [
                 InlineKeyboardButton(
-                    text=get_localization(language_code).RUNWAY + (' ✅' if model == Model.RUNWAY else ''),
-                    callback_data=f'mode:{Model.RUNWAY}'
+                    text=get_localization(language_code).MUSIC_GEN + (' ✅' if model == Model.MUSIC_GEN else ''),
+                    callback_data=f'model:{Model.MUSIC_GEN}'
+                ),
+            ],
+            [
+                InlineKeyboardButton(
+                    text=get_localization(language_code).SUNO + (' ✅' if model == Model.SUNO else ''),
+                    callback_data=f'model:{Model.SUNO}'
                 ),
             ],
             [
                 InlineKeyboardButton(
                     text='⬅️',
-                    callback_data='mode:back:2'
+                    callback_data='model:back:2'
                 ),
                 InlineKeyboardButton(
-                    text='4/4',
-                    callback_data='mode:page:3'
+                    text='4/5',
+                    callback_data='model:page:3'
                 ),
                 InlineKeyboardButton(
                     text='➡️',
-                    callback_data='mode:next:0'
+                    callback_data='model:next:4'
+                ),
+            ]
+        ])
+    elif page == 4:
+        buttons.extend([
+            [
+                InlineKeyboardButton(
+                    text=get_localization(language_code).VIDEO_MODELS,
+                    callback_data=f'model:{ModelType.VIDEO}',
+                ),
+            ],
+            [
+                InlineKeyboardButton(
+                    text=get_localization(language_code).RUNWAY + (' ✅' if model == Model.RUNWAY else ''),
+                    callback_data=f'model:{Model.RUNWAY}'
+                ),
+            ],
+            [
+                InlineKeyboardButton(
+                    text='⬅️',
+                    callback_data='model:back:3'
+                ),
+                InlineKeyboardButton(
+                    text='5/5',
+                    callback_data='model:page:4'
+                ),
+                InlineKeyboardButton(
+                    text='➡️',
+                    callback_data='model:next:0'
                 ),
             ]
         ])

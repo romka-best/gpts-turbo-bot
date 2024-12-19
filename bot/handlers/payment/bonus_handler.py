@@ -97,12 +97,14 @@ async def handle_bonus_cash_out(message: Message, user_id: str, state: FSMContex
     if page == 0:
         product_category = ProductCategory.TEXT
     elif page == 1:
-        product_category = ProductCategory.IMAGE
+        product_category = ProductCategory.SUMMARY
     elif page == 2:
-        product_category = ProductCategory.MUSIC
+        product_category = ProductCategory.IMAGE
     elif page == 3:
-        product_category = ProductCategory.VIDEO
+        product_category = ProductCategory.MUSIC
     elif page == 4:
+        product_category = ProductCategory.VIDEO
+    elif page == 5:
         product_category = ProductCategory.OTHER
     else:
         product_category = None
@@ -111,12 +113,6 @@ async def handle_bonus_cash_out(message: Message, user_id: str, state: FSMContex
         ProductType.PACKAGE,
         product_category,
     )
-    if product_category == ProductCategory.TEXT:
-        additional_products = await get_active_products_by_product_type_and_category(
-            ProductType.PACKAGE,
-            ProductCategory.SUMMARY,
-        )
-        products.extend(additional_products)
 
     text = get_localization(user_language_code).BONUS_CHOOSE_PACKAGE
     reply_markup = build_bonus_cash_out_keyboard(user_language_code, products, page)

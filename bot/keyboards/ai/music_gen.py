@@ -26,6 +26,18 @@ def build_music_gen_keyboard(language_code: LanguageCode) -> InlineKeyboardMarku
         ],
         [
             InlineKeyboardButton(
+                text=get_localization(language_code).SECONDS_300,
+                callback_data=f'music_gen:300'
+            )
+        ],
+        [
+            InlineKeyboardButton(
+                text=get_localization(language_code).SECONDS_600,
+                callback_data=f'music_gen:600'
+            )
+        ],
+        [
+            InlineKeyboardButton(
                 text=get_localization(language_code).CANCEL,
                 callback_data=f'music_gen:cancel'
             )

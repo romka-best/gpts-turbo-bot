@@ -52,6 +52,7 @@ from bot.keyboards.settings.chats import (
 from bot.keyboards.settings.settings import (
     build_settings_choose_model_type_keyboard,
     build_settings_choose_text_model_keyboard,
+    build_settings_choose_summary_model_keyboard,
     build_settings_choose_image_model_keyboard,
     build_settings_choose_music_model_keyboard,
     build_settings_choose_video_model_keyboard,
@@ -115,6 +116,8 @@ async def handle_settings_choose_model_type_selection(callback_query: CallbackQu
     chosen_model_type = callback_query.data.split(':')[1]
     if chosen_model_type == 'text_models':
         reply_markup = build_settings_choose_text_model_keyboard(user_language_code)
+    elif chosen_model_type == 'summary_models':
+        reply_markup = build_settings_choose_summary_model_keyboard(user_language_code)
     elif chosen_model_type == 'image_models':
         reply_markup = build_settings_choose_image_model_keyboard(user_language_code)
     elif chosen_model_type == 'music_models':
@@ -149,6 +152,31 @@ async def handle_settings_choose_text_model_selection(callback_query: CallbackQu
 
     human_model = get_human_model(chosen_model, user_language_code)
     reply_markup = build_settings_keyboard(user_language_code, chosen_model, ModelType.TEXT, user.settings)
+    await callback_query.message.edit_text(
+        text=get_localization(user_language_code).settings(human_model, chosen_model),
+        reply_markup=reply_markup,
+    )
+
+
+@settings_router.callback_query(lambda c: c.data.startswith('settings_choose_summary_model:'))
+async def handle_settings_choose_summary_model_selection(callback_query: CallbackQuery, state: FSMContext):
+    await callback_query.answer()
+
+    user_id = str(callback_query.from_user.id)
+    user = await get_user(user_id)
+    user_language_code = await get_user_language(str(callback_query.from_user.id), state.storage)
+
+    chosen_model = cast(Model, callback_query.data.split(':')[1])
+    if chosen_model == 'back':
+        reply_markup = build_settings_choose_model_type_keyboard(user_language_code)
+        await callback_query.message.edit_text(
+            text=get_localization(user_language_code).SETTINGS_CHOOSE_MODEL_TYPE,
+            reply_markup=reply_markup,
+        )
+        return
+
+    human_model = get_human_model(chosen_model, user_language_code)
+    reply_markup = build_settings_keyboard(user_language_code, chosen_model, ModelType.SUMMARY, user.settings)
     await callback_query.message.edit_text(
         text=get_localization(user_language_code).settings(human_model, chosen_model),
         reply_markup=reply_markup,
@@ -253,8 +281,10 @@ async def handle_setting_selection(callback_query: CallbackQuery, state: FSMCont
 
     if chosen_setting == 'back':
         model_type = callback_query.data.split(':')[2]
-        if model_type == ModelType.TEXT or model_type == ModelType.SUMMARY:
+        if model_type == ModelType.TEXT:
             reply_markup = build_settings_choose_text_model_keyboard(user_language_code)
+        elif model_type == ModelType.SUMMARY:
+            reply_markup = build_settings_choose_summary_model_keyboard(user_language_code)
         elif model_type == ModelType.IMAGE:
             reply_markup = build_settings_choose_image_model_keyboard(user_language_code)
         elif model_type == ModelType.MUSIC:
