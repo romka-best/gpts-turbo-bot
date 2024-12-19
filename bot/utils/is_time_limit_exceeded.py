@@ -30,8 +30,7 @@ async def is_time_limit_exceeded(message: Message, state: FSMContext, user: User
         user.current_model == Model.FACE_SWAP or
         user.current_model == Model.PHOTOSHOP_AI or
         user.current_model == Model.MUSIC_GEN or
-        user.current_model == Model.SUNO or
-        user.current_model == Model.RUNWAY
+        user.current_model == Model.SUNO
     ):
         return False
 

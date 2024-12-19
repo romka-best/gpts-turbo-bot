@@ -21,7 +21,7 @@ from bot.database.operations.user.updaters import update_user
 from bot.helpers.getters.get_quota_by_model import get_quota_by_model
 from bot.helpers.getters.get_switched_to_ai_model import get_switched_to_ai_model
 from bot.helpers.senders.send_error_info import send_error_info
-from bot.keyboards.ai.mode import build_switched_to_ai_keyboard
+from bot.keyboards.ai.model import build_switched_to_ai_keyboard
 from bot.locales.translate_text import translate_text
 from bot.integrations.replicateAI import create_music_gen_melody
 from bot.keyboards.common.common import build_cancel_keyboard, build_error_keyboard
@@ -32,7 +32,7 @@ from bot.states.music_gen import MusicGen
 
 music_gen_router = Router()
 
-PRICE_MUSIC_GEN = 0.00115
+PRICE_MUSIC_GEN = 0.0014
 
 
 @music_gen_router.message(Command('music_gen'))
@@ -114,7 +114,7 @@ async def handle_music_gen_selection(
     user_data = await state.get_data()
 
     try:
-        duration = int(duration)
+        duration = (int(duration) // 10) * 10
     except (TypeError, ValueError):
         reply_markup = build_cancel_keyboard(user_language_code)
         await message.reply(
@@ -145,27 +145,36 @@ async def handle_music_gen_selection(
             await message.delete()
             return
 
-        if quota < 1:
+        if quota * 10 < duration:
             reply_markup = build_cancel_keyboard(user_language_code)
             await message.reply(
-                text=get_localization(user_language_code).music_gen_forbidden(quota),
+                text=get_localization(user_language_code).music_gen_forbidden(quota * 10),
                 reply_markup=reply_markup,
                 allow_sending_without_reply=True,
             )
-        elif duration < 1:
+
+            await processing_sticker.delete()
+            await processing_message.delete()
+        elif duration < 10:
             reply_markup = build_cancel_keyboard(user_language_code)
             await message.reply(
                 text=get_localization(user_language_code).MUSIC_GEN_MIN_ERROR,
                 reply_markup=reply_markup,
                 allow_sending_without_reply=True,
             )
-        elif duration > 180:
+
+            await processing_sticker.delete()
+            await processing_message.delete()
+        elif duration > 600:
             reply_markup = build_cancel_keyboard(user_language_code)
             await message.reply(
                 text=get_localization(user_language_code).MUSIC_GEN_MAX_ERROR,
                 reply_markup=reply_markup,
                 allow_sending_without_reply=True,
             )
+
+            await processing_sticker.delete()
+            await processing_message.delete()
         else:
             product = await get_product_by_quota(Quota.MUSIC_GEN)
 

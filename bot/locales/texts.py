@@ -56,6 +56,7 @@ class Texts(Protocol):
     DATABASE: str
 
     TEXT_MODELS: str
+    SUMMARY_MODELS: str
     IMAGE_MODELS: str
     MUSIC_MODELS: str
     VIDEO_MODELS: str
@@ -332,7 +333,7 @@ class Texts(Protocol):
     GEMINI_1_FLASH = '🏎 Gemini 1.5 Flash'
     GEMINI_1_PRO = '💼 Gemini 1.5 Pro'
     GEMINI_1_ULTRA = '🛡️ Gemini 1.0 Ultra'
-    EIGHTIFY = '👀 Eightify'
+    EIGHTIFY = '👀 YouTube'
     DALL_E = '👨‍🎨 DALL-E'
     MIDJOURNEY = '🎨 Midjourney'
     STABLE_DIFFUSION = '🎆 Stable Diffusion 3.5'
@@ -342,7 +343,7 @@ class Texts(Protocol):
     MUSIC_GEN = '🎺 MusicGen'
     SUNO = '🎸 Suno'
     RUNWAY = '🎥 Runway'
-    MODE: str
+    MODEL: str
     CHOOSE_CHATGPT_MODEL: str
     CHOOSE_CLAUDE_MODEL: str
     CHOOSE_GEMINI_MODEL: str
@@ -420,6 +421,8 @@ class Texts(Protocol):
     SECONDS_30: str
     SECONDS_60: str
     SECONDS_180: str
+    SECONDS_300: str
+    SECONDS_600: str
 
     # Settings
     SETTINGS_CHOOSE_MODEL_TYPE: str

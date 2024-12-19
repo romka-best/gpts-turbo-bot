@@ -73,7 +73,7 @@ async def create_photoshop_ai_image(action: PhotoshopAIAction, image_url: str) -
 
 async def create_music_gen_melody(prompt: str, duration: int) -> Optional[str]:
     input_parameters = {
-        'model_version': 'stereo-large',
+        'model_version': 'stereo-melody-large',
         'output_format': 'mp3',
         'prompt': prompt,
         'duration': duration,

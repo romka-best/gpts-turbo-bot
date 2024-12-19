@@ -45,7 +45,7 @@ from bot.handlers.ai.face_swap_handler import face_swap_router
 from bot.handlers.ai.flux_handler import flux_router
 from bot.handlers.ai.gemini_handler import gemini_router
 from bot.handlers.ai.midjourney_handler import midjourney_router
-from bot.handlers.ai.mode_handler import mode_router
+from bot.handlers.ai.model_handler import model_router
 from bot.handlers.ai.music_gen_handler import music_gen_router
 from bot.handlers.ai.photoshop_ai_handler import photoshop_ai_router
 from bot.handlers.ai.runway_handler import runway_router
@@ -140,7 +140,7 @@ async def lifespan(_: FastAPI):
         catalog_router,
         feedback_router,
         language_router,
-        mode_router,
+        model_router,
         payment_router,
         profile_router,
         promo_code_router,

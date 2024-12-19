@@ -25,7 +25,7 @@ from bot.database.operations.user.updaters import update_user
 from bot.helpers.getters.get_quota_by_model import get_quota_by_model
 from bot.helpers.getters.get_switched_to_ai_model import get_switched_to_ai_model
 from bot.helpers.senders.send_error_info import send_error_info
-from bot.keyboards.ai.mode import build_switched_to_ai_keyboard
+from bot.keyboards.ai.model import build_switched_to_ai_keyboard
 from bot.locales.translate_text import translate_text
 from bot.integrations.midjourney import (
     create_midjourney_images,

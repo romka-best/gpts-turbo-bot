@@ -20,7 +20,7 @@ from bot.helpers.getters.get_switched_to_ai_model import get_switched_to_ai_mode
 from bot.helpers.senders.send_error_info import send_error_info
 from bot.helpers.updaters.update_user_usage_quota import update_user_usage_quota
 from bot.integrations.runway import get_response_video, get_cost_for_video
-from bot.keyboards.ai.mode import build_switched_to_ai_keyboard
+from bot.keyboards.ai.model import build_switched_to_ai_keyboard
 from bot.keyboards.common.common import build_limit_exceeded_keyboard, build_error_keyboard
 from bot.locales.main import get_user_language, get_localization
 from bot.locales.translate_text import translate_text

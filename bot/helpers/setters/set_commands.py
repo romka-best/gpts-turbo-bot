@@ -13,20 +13,44 @@ commands_en = [
         description='👋 About this bot',
     ),
     BotCommand(
-        command='help',
-        description='🛟 Detailed information about commands',
+        command='model',
+        description='🤖 Select AI model',
     ),
     BotCommand(
-        command='mode',
-        description='🤖 Choose AI model',
+        command='profile',
+        description='👤 Profile',
     ),
     BotCommand(
         command='buy',
         description='💎 Buy a subscription or packages',
     ),
     BotCommand(
-        command='profile',
-        description='👤 Profile',
+        command='text',
+        description='🔤 Generate Text with: ChatGPT, Claude, Gemini',
+    ),
+    BotCommand(
+        command='summary',
+        description='📝 Generate Summary in: YouTube',
+    ),
+    BotCommand(
+        command='image',
+        description='🖼 Generate Images with: DALL-E, Midjourney, Stable Diffusion, Flux, FaceSwap, Photoshop AI',
+    ),
+    BotCommand(
+        command='music',
+        description='🎵 Generate Music with: MusicGen, Suno',
+    ),
+    BotCommand(
+        command='video',
+        description='📹 Generate Videos with: Runway',
+    ),
+    BotCommand(
+        command='info',
+        description='ℹ️ Info about AI models',
+    ),
+    BotCommand(
+        command='catalog',
+        description='📂 Catalog with prompts and digital employees',
     ),
     BotCommand(
         command='settings',
@@ -34,71 +58,15 @@ commands_en = [
     ),
     BotCommand(
         command='language',
-        description='🌍 Change language',
-    ),
-    BotCommand(
-        command='info',
-        description='ℹ️ Get info about AI models',
-    ),
-    BotCommand(
-        command='catalog',
-        description='📂 Open catalog with prompts and digital employees',
-    ),
-    BotCommand(
-        command='chatgpt',
-        description='💥 Switch to ChatGPT model',
-    ),
-    BotCommand(
-        command='claude',
-        description='🚀 Switch to Claude model',
-    ),
-    BotCommand(
-        command='gemini',
-        description='✨ Switch to Gemini model',
-    ),
-    BotCommand(
-        command='eightify',
-        description='👀 Switch to Eightify model',
-    ),
-    BotCommand(
-        command='dalle',
-        description='👨‍🎨 Switch to DALL-E model',
-    ),
-    BotCommand(
-        command='midjourney',
-        description='🎨 Switch to Midjourney model',
-    ),
-    BotCommand(
-        command='stable_diffusion',
-        description='🎆 Switch to Stable Diffusion model',
-    ),
-    BotCommand(
-        command='flux',
-        description='🫐 Switch to Flux model',
-    ),
-    BotCommand(
-        command='face_swap',
-        description='📷️ Switch to FaceSwap model',
-    ),
-    BotCommand(
-        command='photoshop',
-        description='🪄 Switch to Photoshop AI model',
-    ),
-    BotCommand(
-        command='music_gen',
-        description='🎺 Switch to MusicGen model',
-    ),
-    BotCommand(
-        command='suno',
-        description='🎸 Switch to Suno model',
-    ),
-    BotCommand(
-        command='runway',
-        description='🎥 Switch to Runway model',
+        description='🌍 Select language',
     ),
     BotCommand(
         command='bonus',
         description='🎁 Bonus balance',
+    ),
+    BotCommand(
+        command='help',
+        description='🛟 Detailed information about commands',
     ),
 ]
 
@@ -108,92 +76,60 @@ commands_ru = [
         description='👋 Что умеет этот бот',
     ),
     BotCommand(
-        command='help',
-        description='🛟 Детальная информация про команды',
-    ),
-    BotCommand(
-        command='mode',
-        description='🤖 Выбрать модель ИИ',
-    ),
-    BotCommand(
-        command='buy',
-        description='💎 Приобрести подписку или пакеты',
+        command='model',
+        description='🤖 Выбрать AI модель',
     ),
     BotCommand(
         command='profile',
         description='👤 Профиль',
     ),
     BotCommand(
-        command='settings',
-        description='🔧 Настроить модель ИИ под себя',
+        command='buy',
+        description='💎 Приобрести подписку или пакеты',
     ),
     BotCommand(
-        command='language',
-        description='🌍 Изменить язык',
+        command='text',
+        description='🔤 Генерация текста с: ChatGPT, Claude, Gemini',
+    ),
+    BotCommand(
+        command='summary',
+        description='📝 Генерация резюме в: YouTube',
+    ),
+    BotCommand(
+        command='image',
+        description='🖼 Генерация изображений с: DALL-E, Midjourney, Stable Diffusion, Flux, FaceSwap, Photoshop AI',
+    ),
+    BotCommand(
+        command='music',
+        description='🎵 Генерация музыки с: MusicGen, Suno',
+    ),
+    BotCommand(
+        command='video',
+        description='📹 Генерация видео с: Runway',
     ),
     BotCommand(
         command='info',
-        description='ℹ️ Получить информацию про модели ИИ',
+        description='ℹ️ Информация про модели ИИ',
     ),
     BotCommand(
         command='catalog',
-        description='📂 Открыть каталог с промптами и цифровыми сотрудниками',
+        description='📂 Каталог с промптами и цифровыми сотрудниками',
     ),
     BotCommand(
-        command='chatgpt',
-        description='💥 Переключиться на ChatGPT модель',
+        command='settings',
+        description='🔧 Настроить модель под себя',
     ),
     BotCommand(
-        command='claude',
-        description='🚀 Переключиться на Claude модель',
-    ),
-    BotCommand(
-        command='gemini',
-        description='✨ Переключиться на Gemini модель',
-    ),
-    BotCommand(
-        command='eightify',
-        description='👀 Переключиться на Eightify модель',
-    ),
-    BotCommand(
-        command='dalle',
-        description='👨‍🎨 Переключиться на DALL-E модель',
-    ),
-    BotCommand(
-        command='midjourney',
-        description='🎨 Переключиться на Midjourney модель',
-    ),
-    BotCommand(
-        command='stable_diffusion',
-        description='🎆 Переключиться на Stable Diffusion модель',
-    ),
-    BotCommand(
-        command='flux',
-        description='🫐 Переключиться на Flux модель',
-    ),
-    BotCommand(
-        command='face_swap',
-        description='📷️ Переключиться на FaceSwap модель',
-    ),
-    BotCommand(
-        command='photoshop',
-        description='🪄 Переключиться на Photoshop AI модель',
-    ),
-    BotCommand(
-        command='music_gen',
-        description='🎺 Переключиться на MusicGen модель',
-    ),
-    BotCommand(
-        command='suno',
-        description='🎸 Переключиться на Suno модель',
-    ),
-    BotCommand(
-        command='runway',
-        description='🎥 Переключиться на Runway модель',
+        command='language',
+        description='🌍 Поменять язык',
     ),
     BotCommand(
         command='bonus',
         description='🎁 Бонусный баланс',
+    ),
+    BotCommand(
+        command='help',
+        description='🛟 Детальная информация про команды',
     ),
 ]
 

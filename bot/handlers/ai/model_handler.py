@@ -23,25 +23,60 @@ from bot.helpers.getters.get_model_type import get_model_type
 from bot.helpers.getters.get_quota_by_model import get_quota_by_model
 from bot.helpers.getters.get_switched_to_ai_model import get_switched_to_ai_model
 from bot.integrations.openAI import get_cost_for_image
-from bot.keyboards.ai.mode import build_mode_keyboard, build_switched_to_ai_keyboard
+from bot.keyboards.ai.model import build_model_keyboard, build_switched_to_ai_keyboard
 from bot.keyboards.settings.settings import build_settings_keyboard
 from bot.locales.main import get_localization, get_user_language
 
-mode_router = Router()
+model_router = Router()
 
 
-@mode_router.message(Command('mode'))
-async def mode(message: Message, state: FSMContext):
+@model_router.message(Command('model'))
+async def model(message: Message, state: FSMContext):
     await state.clear()
 
-    await handle_mode(message, state, str(message.from_user.id), False, 0)
+    await handle_model(message, state, str(message.from_user.id), False, 0)
 
 
-async def handle_mode(message: Message, state: FSMContext, user_id: str, is_edit=False, page=0, chosen_model=None):
+@model_router.message(Command('text'))
+async def model_text(message: Message, state: FSMContext):
+    await state.clear()
+
+    await handle_model(message, state, str(message.from_user.id), False, 0)
+
+
+@model_router.message(Command('summary'))
+async def model_text(message: Message, state: FSMContext):
+    await state.clear()
+
+    await handle_model(message, state, str(message.from_user.id), False, 1)
+
+
+@model_router.message(Command('image'))
+async def model_image(message: Message, state: FSMContext):
+    await state.clear()
+
+    await handle_model(message, state, str(message.from_user.id), False, 2)
+
+
+@model_router.message(Command('music'))
+async def model_music(message: Message, state: FSMContext):
+    await state.clear()
+
+    await handle_model(message, state, str(message.from_user.id), False, 3)
+
+
+@model_router.message(Command('video'))
+async def model_video(message: Message, state: FSMContext):
+    await state.clear()
+
+    await handle_model(message, state, str(message.from_user.id), False, 4)
+
+
+async def handle_model(message: Message, state: FSMContext, user_id: str, is_edit=False, page=0, chosen_model=None):
     user = await get_user(user_id)
     user_language_code = await get_user_language(user_id, state.storage)
 
-    reply_markup = build_mode_keyboard(
+    reply_markup = build_model_keyboard(
         user_language_code,
         user.current_model,
         user.settings[user.current_model][UserSettings.VERSION]
@@ -55,37 +90,37 @@ async def handle_mode(message: Message, state: FSMContext, user_id: str, is_edit
 
     if is_edit:
         await message.edit_text(
-            text=get_localization(user_language_code).MODE,
+            text=get_localization(user_language_code).MODEL,
             reply_markup=reply_markup,
         )
     else:
         await message.answer(
-            text=get_localization(user_language_code).MODE,
+            text=get_localization(user_language_code).MODEL,
             reply_markup=reply_markup,
         )
 
 
-@mode_router.callback_query(lambda c: c.data.startswith('mode:'))
-async def handle_mode_selection(callback_query: CallbackQuery, state: FSMContext):
+@model_router.callback_query(lambda c: c.data.startswith('model:'))
+async def handle_model_selection(callback_query: CallbackQuery, state: FSMContext):
     await callback_query.answer()
 
     chosen_model = callback_query.data.split(':')[1]
     chosen_version = ''
     if chosen_model == 'page':
         return
-    elif chosen_model == ModelType.TEXT or chosen_model == ModelType.IMAGE or chosen_model == ModelType.MUSIC:
+    elif chosen_model == ModelType.TEXT or chosen_model == ModelType.SUMMARY or chosen_model == ModelType.IMAGE or chosen_model == ModelType.MUSIC:
         await handle_info_selection(callback_query, state, chosen_model)
         return
     elif chosen_model == 'next' or chosen_model == 'back':
         page = int(callback_query.data.split(':')[2])
-        await handle_mode(callback_query.message, state, str(callback_query.from_user.id), True, page)
+        await handle_model(callback_query.message, state, str(callback_query.from_user.id), True, page)
 
         return
     elif chosen_model == Model.CHAT_GPT or chosen_model == Model.CLAUDE or chosen_model == Model.GEMINI:
         if len(callback_query.data.split(':')) > 2:
             action = callback_query.data.split(':')[2]
             if action == 'back':
-                await handle_mode(
+                await handle_model(
                     callback_query.message,
                     state,
                     str(callback_query.from_user.id),
@@ -97,7 +132,7 @@ async def handle_mode_selection(callback_query: CallbackQuery, state: FSMContext
             else:
                 chosen_version = callback_query.data.split(':')[2]
         else:
-            await handle_mode(callback_query.message, state, str(callback_query.from_user.id), True, 0, chosen_model)
+            await handle_model(callback_query.message, state, str(callback_query.from_user.id), True, 0, chosen_model)
             return
 
     keyboard = callback_query.message.reply_markup.inline_keyboard
@@ -197,7 +232,7 @@ async def handle_mode_selection(callback_query: CallbackQuery, state: FSMContext
         )
 
 
-@mode_router.callback_query(lambda c: c.data.startswith('switched_to_ai:'))
+@model_router.callback_query(lambda c: c.data.startswith('switched_to_ai:'))
 async def handle_switched_to_ai_selection(callback_query: CallbackQuery, state: FSMContext):
     await callback_query.answer()
 

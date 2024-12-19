@@ -81,14 +81,27 @@ def build_settings_choose_text_model_keyboard(language_code: LanguageCode) -> In
         ],
         [
             InlineKeyboardButton(
+                text=get_localization(language_code).SETTINGS_TO_OTHER_TYPE_MODELS,
+                callback_data='settings_choose_text_model:back'
+            ),
+        ],
+    ]
+
+    return InlineKeyboardMarkup(inline_keyboard=buttons)
+
+
+def build_settings_choose_summary_model_keyboard(language_code: LanguageCode) -> InlineKeyboardMarkup:
+    buttons = [
+        [
+            InlineKeyboardButton(
                 text=get_localization(language_code).EIGHTIFY,
-                callback_data=f'settings_choose_text_model:{Model.EIGHTIFY}'
+                callback_data=f'settings_choose_summary_model:{Model.EIGHTIFY}'
             ),
         ],
         [
             InlineKeyboardButton(
                 text=get_localization(language_code).SETTINGS_TO_OTHER_TYPE_MODELS,
-                callback_data='settings_choose_text_model:back'
+                callback_data='settings_choose_summary_model:back'
             ),
         ],
     ]

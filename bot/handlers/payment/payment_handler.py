@@ -51,7 +51,7 @@ from bot.helpers.getters.get_quota_by_model import get_quota_by_model
 from bot.helpers.getters.get_switched_to_ai_model import get_switched_to_ai_model
 from bot.helpers.getters.get_user_discount import get_user_discount
 from bot.helpers.senders.send_message_to_admins import send_message_to_admins
-from bot.keyboards.ai.mode import build_switched_to_ai_keyboard
+from bot.keyboards.ai.model import build_switched_to_ai_keyboard
 from bot.keyboards.payment.payment import (
     build_buy_keyboard,
     build_subscriptions_keyboard,
@@ -382,12 +382,14 @@ async def handle_package(message: Message, user_id: str, state: FSMContext, is_e
     if page == 0:
         product_category = ProductCategory.TEXT
     elif page == 1:
-        product_category = ProductCategory.IMAGE
+        product_category = ProductCategory.SUMMARY
     elif page == 2:
-        product_category = ProductCategory.MUSIC
+        product_category = ProductCategory.IMAGE
     elif page == 3:
-        product_category = ProductCategory.VIDEO
+        product_category = ProductCategory.MUSIC
     elif page == 4:
+        product_category = ProductCategory.VIDEO
+    elif page == 5:
         product_category = ProductCategory.OTHER
     else:
         product_category = None
@@ -404,12 +406,6 @@ async def handle_package(message: Message, user_id: str, state: FSMContext, is_e
         ProductType.PACKAGE,
         product_category,
     )
-    if product_category == ProductCategory.TEXT:
-        additional_products = await get_active_products_by_product_type_and_category(
-            ProductType.PACKAGE,
-            ProductCategory.SUMMARY,
-        )
-        products.extend(additional_products)
 
     cost = Product.get_discount_price(
         ProductType.PACKAGE,
@@ -447,6 +443,7 @@ async def handle_package_selection(callback_query: CallbackQuery, state: FSMCont
         return
     elif (
         package_type == ProductCategory.TEXT or
+        package_type == ProductCategory.SUMMARY or
         package_type == ProductCategory.IMAGE or
         package_type == ProductCategory.MUSIC or
         package_type == ProductCategory.VIDEO
@@ -766,7 +763,11 @@ async def handle_payment_method_package_selection(callback_query: CallbackQuery,
             current_date = datetime.now(timezone.utc)
             until_at = current_date + timedelta(days=30 * int(package_quantity))
 
-        if float(package_amount) < 1:
+        if (
+            (currency == Currency.USD and float(package_amount) < 1) or
+            (currency == Currency.RUB and float(package_amount) < 50) or
+            (currency == Currency.XTR and float(package_amount) < 50)
+        ):
             reply_markup = build_return_to_packages_keyboard(user_language_code)
             await callback_query.message.edit_caption(
                 caption=get_localization(user_language_code).purchase_minimal_price(currency, package_amount),
@@ -957,7 +958,11 @@ async def handle_payment_method_cart_selection(callback_query: CallbackQuery, st
             )
 
         amount = round(amount, 2)
-        if amount < 1:
+        if (
+            (currency == Currency.USD and amount < 1) or
+            (currency == Currency.RUB and amount < 50) or
+            (currency == Currency.XTR and amount < 50)
+        ):
             reply_markup = build_return_to_packages_keyboard(user_language_code)
             await callback_query.message.edit_caption(
                 caption=get_localization(user_language_code).purchase_minimal_price(currency, amount),

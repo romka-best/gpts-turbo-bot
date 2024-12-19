@@ -35,8 +35,7 @@ I'm your personal gateway to the world of neural networks. Discover the capabili
     ┣ Communicate free with:
         ┣ <b>ChatGPT 4.0 Omni Mini ✉️</b> /chatgpt
         ┣ <b>Claude 3.5 Haiku 📜</b> /claude
-        ┣ <b>Gemini 1.5 Flash 🏎</b> /gemini
-        ┗ <b>Eightify 👀</b> /eightify
+        ┗ <b>Gemini 1.5 Flash 🏎</b> /gemini
     ┣ Unleash the full potential of AI with:
         ┣ <b>ChatGPT 4.0 Omni 💥</b> and <b>ChatGPT o1-mini 🧩</b> /chatgpt
         ┣ <b>Claude 3.5 Sonnet 💫</b> /claude
@@ -45,6 +44,9 @@ I'm your personal gateway to the world of neural networks. Discover the capabili
         ┣ <b>ChatGPT o1 🧪</b> /chatgpt
         ┣ <b>Claude 3.0 Opus 🚀</b> /claude
         ┗ <b>Gemini 1.0 Ultra 🛡️</b> /gemini
+
+━ 📝 <b>Summary</b>:
+    ┗ <b>YouTube 👀</b> /youtube
 
 ━ 🖼 <b>Create Images</b>:
     ┣ Draw beautiful, unforgettable pictures with:
@@ -73,10 +75,13 @@ I am constantly updating myself, implementing the most advanced technologies so 
     ┣ 1️⃣ Enter one of the commands:
         ┣ /chatgpt 💥
         ┣ /claude 💫
-        ┣ /gemini 💼
-        ┗ /eightify 👀
+        ┗ /gemini 💼
     ┣ 2️⃣ Select the version
     ┗ 3️⃣ Write your requests into the chat
+
+━ 📝 <b>Summary</b>:
+    ┣ 1️⃣ Enter the command /youtube
+    ┗ 2️⃣ Send me a YouTube video link
 
 ━ 🖼 <b>Create Images</b>:
     ┣ 1️⃣ Enter one of the commands:
@@ -132,13 +137,13 @@ I am constantly updating myself, implementing the most advanced technologies so 
     ┗ 📄 /terms - <b>TOS</b>: Terms of Service
 
 ━ AI commands:
-    ┣ 🤖 /mode - <b>Swap neural network models</b> on the fly with — <b>ChatGPT</b>, <b>Claude</b>, <b>Gemini</b>, <b>Eightify</b>, <b>DALL-E</b>, <b>Midjourney</b>, <b>Stable Diffusion</b>, <b>FaceSwap</b>, <b>Photoshop AI</b>, <b>MusicGen</b>, or <b>Suno</b>!
+    ┣ 🤖 /mode - <b>Swap neural network models</b> on the fly with — <b>ChatGPT</b>, <b>Claude</b>, <b>Gemini</b>, <b>YouTube Summary</b>, <b>DALL-E</b>, <b>Midjourney</b>, <b>Stable Diffusion</b>, <b>FaceSwap</b>, <b>Photoshop AI</b>, <b>MusicGen</b>, or <b>Suno</b>!
     ┣ ℹ️ /info - <b>Get information about AI</b>: Learn for what and why do you need them
     ┣ 📁 /catalog - <b>Catalog of roles and prompts</b>: Boost your communication efficiency with me
     ┣ 💥 /chatgpt - <b>Chat with ChatGPT</b>: Start a text conversation and receive advanced AI responses
     ┣ 🚀 /claude - <b>Chat with Claude</b>: Begin a discussion and explore the depth of responses from Claude
     ┣ ✨ /gemini - <b>Chat with Gemini</b>: Start chatting and immerse yourself in advanced answers from the new AI
-    ┣ 👀 /eightify - <b>Summarization with Eightify</b>: Just send me a link and you'll get the video's summary
+    ┣ 👀 /youtube - <b>Summarization in YouTube</b>: Just send me a link and you'll get the video's summary
     ┣ 👨‍🎨 /dalle - <b>Draw with DALL-E</b>: Turn your ideas into drawings
     ┣ 🎨 /midjourney - <b>Create with DALL-E 3</b>: Bring your imaginations to life with images
     ┣ 🎆 /stable_diffusion - <b>Uniqueness with Stable Diffusion</b>: Create unique images
@@ -336,10 +341,11 @@ Just type away a command to begin your AI journey! 🌟
     SERVER = "💻 Server"
     DATABASE = "🗄 Database"
 
-    TEXT_MODELS = "🔤 Text models"
-    IMAGE_MODELS = "🖼 Image models"
-    MUSIC_MODELS = "🎵 Music models"
-    VIDEO_MODELS = "📹 Video models"
+    TEXT_MODELS = "🔤 Text Models"
+    SUMMARY_MODELS = "📝 Summary Models"
+    IMAGE_MODELS = "🖼 Image Models"
+    MUSIC_MODELS = "🎵 Music Models"
+    VIDEO_MODELS = "📹 Video Models"
 
     # Feedback
     FEEDBACK = """
@@ -608,7 +614,7 @@ No worries, though! You can check out our latest offers with clicking one of the
 """
 
     # AI
-    MODE = """
+    MODEL = """
 To change a model click a button below 👇
 """
     CHOOSE_CHATGPT_MODEL = """
@@ -704,7 +710,7 @@ Use the button below to switch to a model that supports image vision 👀
 
     # Eightify
     EIGHTIFY_INFO = """
-Using <b>Eightify</b> you can get a concise text summary of any YouTube video
+Using <b>YouTube Summary</b> you can get a concise text summary of any YouTube video
 
 <b>How does it work?</b>
 🔗 Send me the link to the YouTube video you need
@@ -779,16 +785,17 @@ Tell me what kind of music you want to create. Use words to describe its style, 
     MUSIC_GEN_TYPE_SECONDS = """
 <b>How many seconds in your symphony?</b> ⏳
 
-Fantastic! Your melody idea is ready to come to life. Now, the exciting part: how much time do we give this musical magic to unfold in all its glory? <b>MusicGen</b> awaits your decision 🎼
+Fantastic! Your melody idea is ready to come to life. Now, the exciting part: how much time do we give this musical magic to unfold in all its glory?
+<i>Every 10 seconds consume 1 generation</i> 🎼
 
 Write or choose the duration of your composition in seconds. Whether it's a flash of inspiration or an epic odyssey, I'm ready to create! ✨
 """
     MUSIC_GEN_MIN_ERROR = """
 🤨 <b>Hold on there, partner!</b>
 
-Looks like you're trying to request fewer than 1 second. In the world of creativity, I need at least 1 to get the ball rolling!
+Looks like you're trying to request fewer than 10 seconds. In the world of creativity, I need at least 10 to get the ball rolling!
 
-🌟 <b>Tip</b>: Type a number greater than 0 to start the magic!
+🌟 <b>Tip</b>: Type a number equal or greater than 10 to start the magic!
 """
     MUSIC_GEN_MAX_ERROR = """
 🤨 <b>Hold on there, partner!</b>
@@ -800,6 +807,8 @@ Looks like you're trying to request more than 3 minutes, I can't generate more y
     SECONDS_30 = "🔹 30 seconds"
     SECONDS_60 = "🔹 60 seconds (1 minute)"
     SECONDS_180 = "🔹 180 seconds (3 minutes)"
+    SECONDS_300 = "🔹 300 seconds (5 minutes)"
+    SECONDS_600 = "🔹 600 seconds (10 minutes)"
 
     # Settings
     SETTINGS_CHOOSE_MODEL_TYPE = """
@@ -1262,8 +1271,7 @@ Choose action 👇
     ┣ Daily Limits: {format_number(daily_limits[Quota.CHAT_GPT4_OMNI_MINI])}/{format_number(subscription_limits[Quota.CHAT_GPT4_OMNI_MINI])}
     ┣ ✉️ ChatGPT 4.0 Omni Mini{f': extra {additional_usage_quota[Quota.CHAT_GPT4_OMNI_MINI]}' if additional_usage_quota[Quota.CHAT_GPT4_OMNI_MINI] > 0 else ''}
     ┣ 📜 Claude 3.5 Haiku{f': extra {additional_usage_quota[Quota.CLAUDE_3_HAIKU]}' if additional_usage_quota[Quota.CLAUDE_3_HAIKU] > 0 else ''}
-    ┣ 🏎 Gemini 1.5 Flash{f': extra {additional_usage_quota[Quota.GEMINI_1_FLASH]}' if additional_usage_quota[Quota.GEMINI_1_FLASH] > 0 else ''}
-    ┗ 👀 Eightify{f': extra {additional_usage_quota[Quota.EIGHTIFY]}' if additional_usage_quota[Quota.EIGHTIFY] > 0 else ''}
+    ┗ 🏎 Gemini 1.5 Flash{f': extra {additional_usage_quota[Quota.GEMINI_1_FLASH]}' if additional_usage_quota[Quota.GEMINI_1_FLASH] > 0 else ''}
 
 ━ <b>Advanced</b>:
     ┣ Daily Limits: {format_number(daily_limits[Quota.CHAT_GPT4_OMNI])}/{format_number(subscription_limits[Quota.CHAT_GPT4_OMNI])}
@@ -1277,6 +1285,12 @@ Choose action 👇
     ┣ 🧪 ChatGPT o1{f': extra {additional_usage_quota[Quota.CHAT_GPT_O_1]}' if additional_usage_quota[Quota.CHAT_GPT_O_1] > 0 else ''}
     ┣ 🚀 Claude 3.0 Opus{f': extra {additional_usage_quota[Quota.CLAUDE_3_OPUS]}' if additional_usage_quota[Quota.CLAUDE_3_OPUS] > 0 else ''}
     ┗ 🛡️ Gemini 1.0 Ultra{f': extra {additional_usage_quota[Quota.GEMINI_1_ULTRA]}' if additional_usage_quota[Quota.GEMINI_1_ULTRA] > 0 else ''}
+
+---------------------------
+
+📝 <b>Summary Models</b>:
+    ┣ Daily Limits: {format_number(daily_limits[Quota.EIGHTIFY])}/{format_number(subscription_limits[Quota.EIGHTIFY])}
+    ┗ 👀 YouTube{f': extra {additional_usage_quota[Quota.EIGHTIFY]}' if additional_usage_quota[Quota.EIGHTIFY] > 0 else ''}
 
 ---------------------------
 

@@ -29,7 +29,7 @@ from bot.helpers.senders.send_error_info import send_error_info
 from bot.helpers.senders.send_ai_message import send_ai_message
 from bot.integrations.openAI import get_response_message
 from bot.keyboards.ai.chat_gpt import build_chat_gpt_keyboard
-from bot.keyboards.ai.mode import build_switched_to_ai_keyboard
+from bot.keyboards.ai.model import build_switched_to_ai_keyboard
 from bot.keyboards.common.common import (
     build_error_keyboard,
     build_continue_generating_keyboard,
@@ -155,7 +155,7 @@ async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_q
     user_data = await state.get_data()
 
     text = user_data.get('recognized_text', None)
-    if text is None:
+    if not text:
         if message.caption:
             text = message.caption
         elif message.text:
