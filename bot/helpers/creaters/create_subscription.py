@@ -23,6 +23,7 @@ async def create_subscription(
     provider_payment_charge_id: str,
     provider_auto_payment_charge_id: str,
     stripe_id: Optional[str] = None,
+    is_trial=False,
 ):
     user = await get_user(user_id)
     subscription = await get_subscription(subscription_id)
@@ -33,7 +34,7 @@ async def create_subscription(
         if old_subscription.id != subscription.id and old_subscription.status == SubscriptionStatus.ACTIVE:
             await unsubscribe(transaction, old_subscription, bot)
 
-    subscription.status = SubscriptionStatus.ACTIVE
+    subscription.status = SubscriptionStatus.TRIAL if is_trial else SubscriptionStatus.ACTIVE
     await update_subscription_in_transaction(transaction, subscription_id, {
         'status': subscription.status,
         'provider_payment_charge_id': provider_payment_charge_id,

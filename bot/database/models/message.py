@@ -11,7 +11,6 @@ class Message:
     content: str
     is_in_context: bool
     photo_filenames: list[str]
-    documents: list[str]
     created_at: datetime
     edited_at: datetime
 
@@ -24,9 +23,9 @@ class Message:
         content: str,
         is_in_context=True,
         photo_filenames=None,
-        documents=None,
         created_at=None,
         edited_at=None,
+        **kwargs,
     ):
         self.id = str(id)
         self.chat_id = str(chat_id)
@@ -35,7 +34,6 @@ class Message:
         self.content = content
         self.is_in_context = is_in_context
         self.photo_filenames = photo_filenames if photo_filenames else []
-        self.documents = documents if documents else []
 
         current_time = datetime.now(timezone.utc)
         self.created_at = created_at if created_at is not None else current_time

@@ -6,13 +6,13 @@ from bot.locales.types import LanguageCode
 async def set_description(bot: Bot):
     await bot.set_my_short_description(
         short_description="""
-🤖 Access to AI: ChatGPT | Claude | Gemini | DALL•E | Midjourney | Stable Diffusion | Suno | Runway
+ChatGPT | Claude | Gemini | Grok | DALL•E | Midjourney | Stable Diffusion | Flux | Suno | Runway | Luma
 🛟 @roman_danilov
 """,
     )
     await bot.set_my_short_description(
         short_description="""
-🤖 Доступ к ИИ: ChatGPT | Claude | Gemini | DALL•E | Midjourney | Stable Diffusion | Suno | Runway
+ChatGPT | Claude | Gemini | Grok | DALL•E | Midjourney | Stable Diffusion | Flux | Suno | Runway | Luma
 🛟 @roman_danilov
 """,
         language_code=LanguageCode.RU,
@@ -22,70 +22,82 @@ async def set_description(bot: Bot):
         description="""
 Access to AI:
 
-━ 🔤 Text
-    ┣ ✉️ ChatGPT 4.0 Omni Mini
-    ┣ 💥 ChatGPT 4.0 Omni
-    ┣ 🧩 ChatGPT o1-mini
-    ┣ 🧪 ChatGPT o1
-    ┣ 📜 Claude 3.5 Haiku
-    ┣ 💫 Claude 3.5 Sonnet
-    ┣ 🚀 Claude 3.0 Opus
-    ┣ 🏎 Gemini 1.5 Flash
-    ┣ 💼 Gemini 1.5 Pro
-    ┗ 🛡️ Gemini 1.0 Ultra
+🔤 Text
+━ ChatGPT 4 Omni Mini
+━ ChatGPT 4 Omni
+━ ChatGPT o1-mini
+━ ChatGPT o1
+━ Claude 3.5 Haiku
+━ Claude 3.5 Sonnet
+━ Claude 3 Opus
+━ Gemini 2 Flash
+━ Gemini 1.5 Pro
+━ Gemini 1 Ultra
+━ Grok 2
+━ Perplexity
 
-━ 📝 Summary
-    ┗ 👀️ YouTube
+📝 Summary
+━ YouTube
+━ Video
 
-━ 🖼 Image
-    ┣ 👨‍🎨 DALL•E
-    ┣ 🎨 Midjourney
-    ┣ 🎆 Stable Diffusion
-    ┣ 🫐 Flux Pro
-    ┣ 😜 FaceSwap
-    ┗ 🪄 Photoshop AI
+🖼 Image
+━ DALL•E
+━ Midjourney
+━ Stable Diffusion
+━ Flux Pro
+━ Luma Photon
+━ FaceSwap
+━ Photoshop AI
 
-━ 🎵 Music
-    ┣ 🎺 MusicGen
-    ┗ 🎸 Suno
+🎵 Music
+━ MusicGen
+━ Suno
 
-━ 📹 Video
-    ┗ 🎥 Runway
+📹 Video
+━ Kling
+━ Runway
+━ Luma Ray
 """,
     )
     await bot.set_my_description(
         description="""
-Доступ к ИИ:
+Доступ к нейросетям:
 
-━ 🔤 Текстовые
-    ┣ ✉️ ChatGPT 4.0 Omni Mini
-    ┣ 💥 ChatGPT 4.0 Omni
-    ┣ 🧩 ChatGPT o1-mini
-    ┣ 🧪 ChatGPT o1
-    ┣ 📜 Claude 3.5 Haiku
-    ┣ 💫 Claude 3.5 Sonnet
-    ┣ 🚀 Claude 3.0 Opus
-    ┣ 🏎 Gemini 1.5 Flash
-    ┣ 💼 Gemini 1.5 Pro
-    ┗ 🛡️ Gemini 1.0 Ultra
+🔤 Текстовые
+━ ChatGPT 4 Omni Mini
+━ ChatGPT 4 Omni
+━ ChatGPT o1-mini
+━ ChatGPT o1
+━ Claude 3.5 Haiku
+━ Claude 3.5 Sonnet
+━ Claude 3 Opus
+━ Gemini 2 Flash
+━ Gemini 1.5 Pro
+━ Gemini 1 Ultra
+━ Grok 2
+━ Perplexity
 
-━ 📝 Резюме
-    ┗ 👀️ YouTube
+📝 Резюме
+━ YouTube
+━ Видео
 
-━ 🖼 Графические
-    ┣ 👨‍🎨 DALL•E
-    ┣ 🎨 Midjourney
-    ┣ 🎆 Stable Diffusion
-    ┣ 🫐 Flux Pro
-    ┣ 😜 FaceSwap
-    ┗ 🪄 Photoshop AI
+🖼 Графические
+━ DALL•E
+━ Midjourney
+━ Stable Diffusion
+━ Flux Pro
+━ Luma Photon
+━ FaceSwap
+━ Photoshop AI
 
-━ 🎵 Музыкальные
-    ┣ 🎺 MusicGen
-    ┗ 🎸 Suno
+🎵 Музыкальные
+━ MusicGen
+━ Suno
 
-━ 📹 Видео
-    ┗ 🎥 Runway
+📹 Видео
+━ Kling
+━ Luma Ray
+━ Runway
 """,
         language_code=LanguageCode.RU,
     )

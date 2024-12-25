@@ -99,12 +99,6 @@ def build_payment_method_for_subscription_keyboard(
                 callback_data=f'pms:{PaymentMethod.STRIPE}:{subscription_id}'
             ),
         ],
-        # [
-        #     InlineKeyboardButton(
-        #         text=f'{get_localization(language_code).PAY_SELECTION_PAYMENT_METHOD}',
-        #         callback_data=f'pms:{PaymentMethod.PAY_SELECTION}:{subscription_id}'
-        #     ),
-        # ],
         [
             InlineKeyboardButton(
                 text=f'{get_localization(language_code).TELEGRAM_STARS_PAYMENT_METHOD}',
@@ -482,12 +476,6 @@ def build_payment_method_for_package_keyboard(
                 callback_data=f'pmp:{PaymentMethod.STRIPE}:{package_product_id}:{package_quantity}'
             ),
         ],
-        # [
-        #     InlineKeyboardButton(
-        #         text=f'{get_localization(language_code).PAY_SELECTION_PAYMENT_METHOD}',
-        #         callback_data=f'pmp:{PaymentMethod.PAY_SELECTION}:{package_product_id}:{package_quantity}'
-        #     ),
-        # ],
         [
             InlineKeyboardButton(
                 text=f'{get_localization(language_code).TELEGRAM_STARS_PAYMENT_METHOD}',
@@ -525,12 +513,6 @@ def build_payment_method_for_cart_keyboard(language_code: LanguageCode) -> Inlin
                 callback_data=f'pmc:{PaymentMethod.STRIPE}'
             ),
         ],
-        # [
-        #     InlineKeyboardButton(
-        #         text=f'{get_localization(language_code).PAY_SELECTION_PAYMENT_METHOD}',
-        #         callback_data=f'pmc:{PaymentMethod.PAY_SELECTION}'
-        #     ),
-        # ],
         [
             InlineKeyboardButton(
                 text=f'{get_localization(language_code).TELEGRAM_STARS_PAYMENT_METHOD}',

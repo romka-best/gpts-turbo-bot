@@ -34,7 +34,7 @@ from bot.keyboards.payment.bonus import (
 from bot.keyboards.common.common import build_cancel_keyboard
 from bot.locales.main import get_localization, get_user_language
 from bot.locales.types import LanguageCode
-from bot.states.bonus import Bonus
+from bot.states.payment.bonus import Bonus
 
 bonus_router = Router()
 

@@ -1,7 +1,7 @@
 import re
 
 import aiohttp
-from aiogram import Router, Bot, F
+from aiogram import Router
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
@@ -10,7 +10,7 @@ from aiogram.utils.chat_action import ChatActionSender
 from bot.config import config, MessageEffect, MessageSticker
 from bot.database.models.common import Model, Quota, Currency
 from bot.database.models.transaction import TransactionType
-from bot.database.models.user import UserSettings
+from bot.database.models.user import UserSettings, User
 from bot.database.operations.product.getters import get_product_by_quota
 from bot.database.operations.transaction.writers import write_transaction
 from bot.database.operations.user.getters import get_user
@@ -25,12 +25,11 @@ from bot.integrations.eightify import generate_summary
 from bot.keyboards.ai.model import build_switched_to_ai_keyboard
 from bot.keyboards.common.common import build_limit_exceeded_keyboard, build_error_keyboard
 from bot.locales.main import get_user_language, get_localization
-from bot.states.eightify import Eightify
 
 eightify_router = Router()
 
 
-@eightify_router.message(Command('youtube'))
+@eightify_router.message(Command('youtube_summary'))
 async def eightify(message: Message, state: FSMContext):
     await state.clear()
 
@@ -56,32 +55,24 @@ async def eightify(message: Message, state: FSMContext):
             user_language_code,
         )
         reply_markup = build_switched_to_ai_keyboard(user_language_code, Model.EIGHTIFY)
-        await message.answer(
+        answered_message = await message.answer(
             text=text,
             reply_markup=reply_markup,
             message_effect_id=config.MESSAGE_EFFECTS.get(MessageEffect.FIRE),
         )
 
-    await handle_eightify(message.bot, str(message.chat.id), state, user_id)
+        await message.bot.unpin_all_chat_messages(user.telegram_chat_id)
+        await message.bot.pin_chat_message(user.telegram_chat_id, answered_message.message_id)
 
-
-async def handle_eightify(bot: Bot, chat_id: str, state: FSMContext, user_id: str):
-    user_language_code = await get_user_language(str(user_id), state.storage)
-
-    await bot.send_message(
-        chat_id=chat_id,
+    await message.answer(
         text=get_localization(user_language_code).EIGHTIFY_INFO,
     )
-    await state.set_state(Eightify.waiting_for_link)
 
 
-@eightify_router.message(Eightify.waiting_for_link, ~F.text.startswith('/'))
-async def eightify_link_sent(message: Message, state: FSMContext):
+async def handle_eightify(message: Message, state: FSMContext, user: User):
     await state.update_data(is_processing=True)
 
-    user_id = str(message.from_user.id)
-    user = await get_user(str(user_id))
-    user_language_code = await get_user_language(str(user_id), state.storage)
+    user_language_code = await get_user_language(str(user.id), state.storage)
 
     link = message.text
     if link is None:
@@ -127,7 +118,7 @@ async def eightify_link_sent(message: Message, state: FSMContext):
 
                 reply_markup = build_limit_exceeded_keyboard(user_language_code)
                 await message.answer(
-                    text=get_localization(user_language_code).REACHED_USAGE_LIMIT,
+                    text=get_localization(user_language_code).reached_usage_limit(),
                     reply_markup=reply_markup,
                 )
 
@@ -209,5 +200,3 @@ async def eightify_link_sent(message: Message, state: FSMContext):
             await state.update_data(is_processing=False)
 
             await state.clear()
-
-            await handle_eightify(message.bot, str(message.chat.id), state, user_id)

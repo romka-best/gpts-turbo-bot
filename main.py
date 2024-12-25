@@ -44,9 +44,14 @@ from bot.handlers.ai.eightify_handler import eightify_router
 from bot.handlers.ai.face_swap_handler import face_swap_router
 from bot.handlers.ai.flux_handler import flux_router
 from bot.handlers.ai.gemini_handler import gemini_router
+from bot.handlers.ai.gemini_video_handler import gemini_video_router
+from bot.handlers.ai.grok_handler import grok_router
+from bot.handlers.ai.kling_handler import kling_router
+from bot.handlers.ai.luma_handler import luma_router
 from bot.handlers.ai.midjourney_handler import midjourney_router
 from bot.handlers.ai.model_handler import model_router
 from bot.handlers.ai.music_gen_handler import music_gen_router
+from bot.handlers.ai.perplexity_handler import perplexity_router
 from bot.handlers.ai.photoshop_ai_handler import photoshop_ai_router
 from bot.handlers.ai.runway_handler import runway_router
 from bot.handlers.ai.stable_diffusion_handler import stable_diffusion_router
@@ -74,9 +79,10 @@ from bot.helpers.checkers.check_unresolved_requests import check_unresolved_requ
 from bot.helpers.getters.get_user_id_from_telegram_update import get_user_id_from_telegram_update
 from bot.helpers.handlers.handle_big_file import handle_big_file
 from bot.helpers.handlers.handle_forbidden_error import handle_forbidden_error
+from bot.helpers.handlers.handle_kling_webhook import handle_kling_webhook
+from bot.helpers.handlers.handle_luma_webhook import handle_luma_webhook
 from bot.helpers.handlers.handle_midjourney_webhook import handle_midjourney_webhook
 from bot.helpers.handlers.handle_network_error import handle_network_error
-from bot.helpers.handlers.handle_pay_selection_webhook import handle_pay_selection_webhook
 from bot.helpers.handlers.handle_replicate_webhook import handle_replicate_webhook
 from bot.helpers.handlers.handle_stripe_webhook import handle_stripe_webhook
 from bot.helpers.handlers.handle_suno_webhook import handle_suno_webhook
@@ -92,11 +98,12 @@ from bot.utils.migrate import migrate
 
 WEBHOOK_BOT_PATH = f'/bot/{config.BOT_TOKEN.get_secret_value()}'
 WEBHOOK_YOOKASSA_PATH = '/payment/yookassa'
-WEBHOOK_PAY_SELECTION_PATH = '/payment/pay-selection'
 WEBHOOK_STRIPE_PATH = '/payment/stripe'
 WEBHOOK_REPLICATE_PATH = config.WEBHOOK_REPLICATE_PATH
 WEBHOOK_MIDJOURNEY_PATH = config.WEBHOOK_MIDJOURNEY_PATH
 WEBHOOK_SUNO_PATH = config.WEBHOOK_SUNO_PATH
+WEBHOOK_KLING_PATH = config.WEBHOOK_KLING_PATH
+WEBHOOK_LUMA_PATH = config.WEBHOOK_LUMA_PATH
 
 WEBHOOK_BOT_URL = config.WEBHOOK_URL + WEBHOOK_BOT_PATH
 WEBHOOK_REPLICATE_URL = config.WEBHOOK_URL + config.WEBHOOK_REPLICATE_PATH
@@ -157,7 +164,10 @@ async def lifespan(_: FastAPI):
         chat_gpt_router,
         claude_router,
         gemini_router,
+        grok_router,
+        perplexity_router,
         eightify_router,
+        gemini_video_router,
         dall_e_router,
         midjourney_router,
         stable_diffusion_router,
@@ -166,7 +176,9 @@ async def lifespan(_: FastAPI):
         photoshop_ai_router,
         music_gen_router,
         suno_router,
+        kling_router,
         runway_router,
+        luma_router,
         document_router,
         photo_router,
         video_router,
@@ -306,11 +318,6 @@ async def yookassa_webhook(request: dict, background_tasks: BackgroundTasks):
     background_tasks.add_task(handle_yookassa_webhook, request, bot, dp)
 
 
-@app.post(WEBHOOK_PAY_SELECTION_PATH)
-async def pay_selection_webhook(request: dict, background_tasks: BackgroundTasks):
-    background_tasks.add_task(handle_pay_selection_webhook, request, bot, dp)
-
-
 @app.post(WEBHOOK_STRIPE_PATH)
 async def stripe_webhook(request: dict, background_tasks: BackgroundTasks):
     background_tasks.add_task(handle_stripe_webhook, request, bot, dp)
@@ -335,6 +342,16 @@ async def suno_webhook(body: dict):
     is_ok = await handle_suno_webhook(bot, dp, body)
     if not is_ok:
         return JSONResponse(content={}, status_code=500)
+
+
+@app.post(WEBHOOK_KLING_PATH)
+async def kling_webhook(body: dict, background_tasks: BackgroundTasks):
+    background_tasks.add_task(handle_kling_webhook, bot, dp, body)
+
+
+@app.post(WEBHOOK_LUMA_PATH)
+async def luma_webhook(body: dict, background_tasks: BackgroundTasks):
+    background_tasks.add_task(handle_luma_webhook, bot, dp, body)
 
 
 @app.get('/migrate')

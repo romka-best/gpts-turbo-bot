@@ -14,7 +14,7 @@ from bot.keyboards.ai.model import build_switched_to_ai_keyboard
 from bot.keyboards.ai.photoshop_ai import build_photoshop_ai_keyboard, build_photoshop_ai_chosen_keyboard
 from bot.locales.main import get_user_language, get_localization
 from bot.locales.types import LanguageCode
-from bot.states.photoshop_ai import PhotoshopAI
+from bot.states.ai.photoshop_ai import PhotoshopAI
 
 photoshop_ai_router = Router()
 
@@ -49,11 +49,14 @@ async def photoshop_ai(message: Message, state: FSMContext):
             user_language_code,
         )
         reply_markup = build_switched_to_ai_keyboard(user_language_code, Model.PHOTOSHOP_AI)
-        await message.answer(
+        answered_message = await message.answer(
             text=text,
             reply_markup=reply_markup,
             message_effect_id=config.MESSAGE_EFFECTS.get(MessageEffect.FIRE),
         )
+
+        await message.bot.unpin_all_chat_messages(user.telegram_chat_id)
+        await message.bot.pin_chat_message(user.telegram_chat_id, answered_message.message_id)
 
     await handle_photoshop_ai(message.bot, user.telegram_chat_id, state, user_id)
 

@@ -22,7 +22,7 @@ from bot.keyboards.admin.ads import (
 )
 from bot.keyboards.common.common import build_cancel_keyboard
 from bot.locales.main import get_user_language, get_localization
-from bot.states.ads import Ads
+from bot.states.admin.ads import Ads
 
 ads_router = Router()
 

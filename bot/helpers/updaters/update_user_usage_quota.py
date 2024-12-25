@@ -2,13 +2,46 @@ from bot.database.models.common import Quota
 from bot.database.models.user import User
 from bot.database.operations.user.updaters import update_user, update_user_in_transaction
 
-TEXT_SIMPLE_QUOTA = [Quota.CHAT_GPT4_OMNI_MINI, Quota.CLAUDE_3_HAIKU, Quota.GEMINI_1_FLASH]
-TEXT_ADVANCED_QUOTA = [Quota.CHAT_GPT4_OMNI, Quota.CHAT_GPT_O_1_MINI, Quota.CLAUDE_3_SONNET, Quota.GEMINI_1_PRO]
-TEXT_SUPER_ADVANCED_QUOTA = [Quota.CHAT_GPT_O_1, Quota.CLAUDE_3_OPUS, Quota.GEMINI_1_ULTRA]
-SUMMARY_QUOTA = [Quota.EIGHTIFY]
-IMAGE_QUOTA = [Quota.DALL_E, Quota.MIDJOURNEY, Quota.STABLE_DIFFUSION, Quota.FLUX, Quota.FACE_SWAP, Quota.PHOTOSHOP_AI]
-MUSIC_QUOTA = [Quota.MUSIC_GEN, Quota.SUNO]
-VIDEO_QUOTA = [Quota.RUNWAY]
+TEXT_SIMPLE_QUOTA = [
+    Quota.CHAT_GPT4_OMNI_MINI,
+    Quota.CLAUDE_3_HAIKU,
+    Quota.GEMINI_2_FLASH,
+]
+TEXT_ADVANCED_QUOTA = [
+    Quota.CHAT_GPT4_OMNI,
+    Quota.CHAT_GPT_O_1_MINI,
+    Quota.CLAUDE_3_SONNET,
+    Quota.GEMINI_1_PRO,
+    Quota.GROK_2,
+    Quota.PERPLEXITY,
+]
+TEXT_SUPER_ADVANCED_QUOTA = [
+    Quota.CHAT_GPT_O_1,
+    Quota.CLAUDE_3_OPUS,
+    Quota.GEMINI_1_ULTRA,
+]
+SUMMARY_QUOTA = [
+    Quota.EIGHTIFY,
+    Quota.GEMINI_VIDEO,
+]
+IMAGE_QUOTA = [
+    Quota.DALL_E,
+    Quota.MIDJOURNEY,
+    Quota.STABLE_DIFFUSION,
+    Quota.FLUX,
+    Quota.LUMA_PHOTON,
+    Quota.FACE_SWAP,
+    Quota.PHOTOSHOP_AI,
+]
+MUSIC_QUOTA = [
+    Quota.MUSIC_GEN,
+    Quota.SUNO,
+]
+VIDEO_QUOTA = [
+    Quota.KLING,
+    Quota.RUNWAY,
+    Quota.LUMA_RAY,
+]
 
 
 def get_user_with_updated_quota(user: User, user_quota: Quota, quantity_to_delete: int) -> User:

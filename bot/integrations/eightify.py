@@ -1,7 +1,7 @@
 import aiohttp
 
 from bot.config import config
-from bot.database.models.common import EightifyFocus, EightifyFormat, EightifyAmount
+from bot.database.models.common import VideoSummaryFocus, VideoSummaryFormat, VideoSummaryAmount
 from bot.locales.types import LanguageCode
 
 EIGHTIFY_API_URL = 'https://backend.eightify.app'
@@ -43,12 +43,12 @@ class APIResource:
 
 class Summary(APIResource):
     async def generate(
-            self,
-            language_code: LanguageCode,
-            video_id: str,
-            focus: EightifyFocus,
-            format: EightifyFormat,
-            amount: EightifyAmount,
+        self,
+        language_code: LanguageCode,
+        video_id: str,
+        focus: VideoSummaryFocus,
+        format: VideoSummaryFormat,
+        amount: VideoSummaryAmount,
     ) -> str:
         url = f'{EIGHTIFY_API_URL}/api/summarization/flexible-insights'
         payload = {
@@ -70,11 +70,11 @@ class Summary(APIResource):
 
 
 async def generate_summary(
-        language_code: LanguageCode,
-        video_id: str,
-        focus: EightifyFocus,
-        format: EightifyFormat,
-        amount: EightifyAmount,
+    language_code: LanguageCode,
+    video_id: str,
+    focus: VideoSummaryFocus,
+    format: VideoSummaryFormat,
+    amount: VideoSummaryAmount,
 ) -> str:
     async with Eightify() as client:
         summary = await client.summary.generate(

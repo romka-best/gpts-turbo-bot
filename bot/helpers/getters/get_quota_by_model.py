@@ -19,14 +19,20 @@ def get_quota_by_model(model: Model, version: str):
         elif version == ClaudeGPTVersion.V3_Opus:
             return Quota.CLAUDE_3_OPUS
     elif model == Model.GEMINI:
-        if version == GeminiGPTVersion.V1_Flash:
-            return Quota.GEMINI_1_FLASH
+        if version == GeminiGPTVersion.V2_Flash:
+            return Quota.GEMINI_2_FLASH
         elif version == GeminiGPTVersion.V1_Pro:
             return Quota.GEMINI_1_PRO
         elif version == GeminiGPTVersion.V1_Ultra:
             return Quota.GEMINI_1_ULTRA
+    elif model == Model.GROK:
+        return Quota.GROK_2
+    elif model == Model.PERPLEXITY:
+        return Quota.PERPLEXITY
     elif model == Model.EIGHTIFY:
         return Quota.EIGHTIFY
+    elif model == Model.GEMINI_VIDEO:
+        return Quota.GEMINI_VIDEO
     elif model == Model.DALL_E:
         return Quota.DALL_E
     elif model == Model.MIDJOURNEY:
@@ -35,6 +41,8 @@ def get_quota_by_model(model: Model, version: str):
         return Quota.STABLE_DIFFUSION
     elif model == Model.FLUX:
         return Quota.FLUX
+    elif model == Model.LUMA_PHOTON:
+        return Quota.LUMA_PHOTON
     elif model == Model.FACE_SWAP:
         return Quota.FACE_SWAP
     elif model == Model.PHOTOSHOP_AI:
@@ -43,5 +51,11 @@ def get_quota_by_model(model: Model, version: str):
         return Quota.MUSIC_GEN
     elif model == Model.SUNO:
         return Quota.SUNO
+    elif model == Model.KLING:
+        return Quota.KLING
     elif model == Model.RUNWAY:
         return Quota.RUNWAY
+    elif model == Model.LUMA_RAY:
+        return Quota.LUMA_RAY
+    else:
+        raise NotImplementedError(f'User Model is not Implemented: {model}')

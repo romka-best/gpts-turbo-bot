@@ -1,10 +1,11 @@
 import os
+from dataclasses import field
 from enum import StrEnum
 from pathlib import Path
 from typing import ClassVar
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from pydantic import SecretStr, Field
+from pydantic import SecretStr
 
 
 class MessageEffect(StrEnum):
@@ -39,6 +40,9 @@ class Settings(BaseSettings):
     WEBHOOK_REPLICATE_PATH: str
     WEBHOOK_MIDJOURNEY_PATH: str
     WEBHOOK_SUNO_PATH: str
+    WEBHOOK_KLING_PATH: str
+    WEBHOOK_LUMA_PATH: str
+
     REDIS_URL: str
 
     MAX_RETRIES: int = 2
@@ -47,9 +51,9 @@ class Settings(BaseSettings):
     LIMIT_PROCESSING_SECONDS: int = 60
 
     SUPER_ADMIN_ID: str = '354543567'
-    ADMIN_IDS: list[str] = Field(default_factory=lambda: ['354543567', '6078317830'])
-    DEVELOPER_IDS: list[str] = Field(default_factory=lambda: ['354543567'])
-    MODERATOR_IDS: list[str] = Field(default_factory=lambda: [])
+    ADMIN_IDS: list[str] = field(default_factory=lambda: ['354543567', '6078317830'])
+    DEVELOPER_IDS: list[str] = field(default_factory=lambda: ['354543567'])
+    MODERATOR_IDS: list[str] = field(default_factory=lambda: [])
 
     DEFAULT_ROLE_ID: SecretStr
 
@@ -60,7 +64,7 @@ class Settings(BaseSettings):
     BOT_URL: str
     BOT_TOKEN: SecretStr
 
-    MESSAGE_EFFECTS: dict[MessageEffect, str] = Field(default_factory=lambda: {
+    MESSAGE_EFFECTS: dict[MessageEffect, str] = field(default_factory=lambda: {
         MessageEffect.FIRE: '5104841245755180586',  # 🔥
         MessageEffect.LIKE: '5107584321108051014',  # 👍
         MessageEffect.DISLIKE: '5104858069142078462',  # 👎
@@ -68,7 +72,7 @@ class Settings(BaseSettings):
         MessageEffect.CONGRATS: '5046509860389126442',  # 🎉
         MessageEffect.POOP: '5046589136895476101',  # 💩
     })
-    MESSAGE_STICKERS: dict[MessageSticker, str] = Field(default_factory=lambda: {
+    MESSAGE_STICKERS: dict[MessageSticker, str] = field(default_factory=lambda: {
         MessageSticker.LOGO: 'CAACAgIAAxkBAAENOatnRjb80J2N4a8yNcN7pKuIutcOwgACE2cAAuj3MUqczl2UrDJzHjYE',
         MessageSticker.HELLO: 'CAACAgIAAxkBAAENOa1nRjnkK8oIvaOQ2K62WQ0vqQYAAX4AAnhiAALGvjFKvC6IwKVpJ_w2BA',
         MessageSticker.LOVE: 'CAACAgIAAxkBAAENOa9nRjou7rQg922oE-Rt8ZqoiOzutgACN2EAAi8AATBKj8RV8S_82_Q2BA',
@@ -95,14 +99,24 @@ class Settings(BaseSettings):
     STRIPE_SECRET_KEY: SecretStr
 
     OAUTH_YANDEX_TOKEN: SecretStr
+
     OPENAI_API_KEY: SecretStr
     ANTHROPIC_API_KEY: SecretStr
     GEMINI_API_KEY: SecretStr
+    GROK_API_KEY: SecretStr
+    PERPLEXITY_API_KEY: SecretStr
+
     EIGHTIFY_API_TOKEN: SecretStr
+
     REPLICATE_API_TOKEN: SecretStr
+
     MIDJOURNEY_API_TOKEN: SecretStr
+
     SUNO_API_TOKEN: SecretStr
+
+    KLING_API_KEY: SecretStr
     RUNWAYML_API_TOKEN: SecretStr
+    LUMA_API_KEY: SecretStr
 
     model_config = SettingsConfigDict(
         env_file=str(BASE_DIR / f'.env.{os.getenv("ENVIRONMENT", "testing")}'),

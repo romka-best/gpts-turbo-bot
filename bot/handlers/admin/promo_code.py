@@ -20,7 +20,7 @@ from bot.keyboards.admin.promo_code import (
 )
 from bot.keyboards.common.common import build_cancel_keyboard
 from bot.locales.main import get_localization, get_user_language
-from bot.states.promo_code import PromoCode
+from bot.states.payment.promo_code import PromoCode
 
 admin_promo_code_router = Router()
 

@@ -30,12 +30,11 @@ from bot.database.operations.package.getters import (
 from bot.database.operations.package.updaters import update_package
 from bot.database.operations.package.writers import write_package
 from bot.database.operations.product.getters import get_active_products_by_product_type_and_category, get_product
-from bot.database.operations.subscription.getters import get_subscription
+from bot.database.operations.subscription.getters import get_subscription, get_activated_subscriptions_by_user_id
 from bot.database.operations.subscription.writers import write_subscription
 from bot.database.operations.transaction.writers import write_transaction
 from bot.database.operations.user.getters import get_user
 from bot.database.operations.user.updaters import update_user
-from bot.handlers.ai.eightify_handler import handle_eightify
 from bot.handlers.ai.face_swap_handler import handle_face_swap
 from bot.handlers.ai.music_gen_handler import handle_music_gen
 from bot.handlers.ai.photoshop_ai_handler import handle_photoshop_ai
@@ -69,7 +68,7 @@ from bot.keyboards.payment.payment import (
 )
 from bot.locales.main import get_localization, get_user_language
 from bot.locales.types import LanguageCode
-from bot.states.payment import Payment
+from bot.states.payment.payment import Payment
 
 payment_router = Router()
 
@@ -123,10 +122,16 @@ async def handle_subscribe(message: Message, user_id: str, state: FSMContext):
     )
     await state.update_data(product_category=ProductCategory.MONTHLY)
 
+    last_user_subscriptions = await get_activated_subscriptions_by_user_id(
+        user.id,
+        datetime(2024, 1, 1),
+    )
+
     text = get_localization(user_language_code).subscribe(
         subscriptions,
         user.currency,
         user.discount,
+        len(last_user_subscriptions) == 0,
     )
     reply_markup = build_subscriptions_keyboard(
         subscriptions,
@@ -167,10 +172,16 @@ async def handle_subscription_selection(callback_query: CallbackQuery, state: FS
             product_category,
         )
 
+        last_user_subscriptions = await get_activated_subscriptions_by_user_id(
+            user.id,
+            datetime(2024, 1, 1),
+        )
+
         text = get_localization(user_language_code).subscribe(
             subscriptions,
             user.currency,
             user.discount,
+            len(last_user_subscriptions) == 0,
         )
         reply_markup = build_subscriptions_keyboard(
             subscriptions,
@@ -209,10 +220,16 @@ async def handle_subscription_selection(callback_query: CallbackQuery, state: FS
             product_category,
         )
 
+        last_user_subscriptions = await get_activated_subscriptions_by_user_id(
+            user.id,
+            datetime(2024, 1, 1),
+        )
+
         text = get_localization(user_language_code).subscribe(
             subscriptions,
             user.currency,
             user.discount,
+            len(last_user_subscriptions) == 0,
         )
         reply_markup = build_subscriptions_keyboard(
             subscriptions,
@@ -274,6 +291,12 @@ async def handle_payment_method_subscription_selection(callback_query: CallbackQ
             subscription_period,
         )
 
+        last_user_subscriptions = await get_activated_subscriptions_by_user_id(
+            user.id,
+            datetime(2024, 1, 1),
+        )
+        is_trial = len(last_user_subscriptions) == 0 and payment_method != PaymentMethod.TELEGRAM_STARS
+
         if payment_method == PaymentMethod.TELEGRAM_STARS:
             subscription_ref = await write_subscription(
                 None,
@@ -324,14 +347,12 @@ async def handle_payment_method_subscription_selection(callback_query: CallbackQ
                 ],
                 order_id=subscription_ref.id if payment_method == PaymentMethod.STRIPE else None,
                 order_interval='month' if subscription_period == SubscriptionPeriod.MONTH1 else 'year',
+                is_trial=is_trial,
             )
 
         if payment_method == PaymentMethod.YOOKASSA:
             payment_url = payment.get('confirmation').get('confirmation_url')
             provider_payment_charge_id = payment.get('id')
-        elif payment_method == PaymentMethod.PAY_SELECTION:
-            payment_url = payment.get('Url')
-            provider_payment_charge_id = payment.get('Id')
         elif payment_method == PaymentMethod.STRIPE:
             payment_url = payment.get('url')
             provider_payment_charge_id = None
@@ -346,6 +367,7 @@ async def handle_payment_method_subscription_selection(callback_query: CallbackQ
             subscription.category,
             currency,
             amount,
+            is_trial,
         )
         reply_markup = build_payment_keyboard(
             user_language_code,
@@ -358,7 +380,7 @@ async def handle_payment_method_subscription_selection(callback_query: CallbackQ
 
         if payment_method != PaymentMethod.TELEGRAM_STARS:
             await write_subscription(
-                subscription_ref.id if payment_method == PaymentMethod.PAY_SELECTION or payment_method == PaymentMethod.STRIPE else None,
+                subscription_ref.id if payment_method == PaymentMethod.STRIPE else None,
                 user_id,
                 subscription_id,
                 subscription_period,
@@ -822,15 +844,12 @@ async def handle_payment_method_package_selection(callback_query: CallbackQuery,
                         quantity=package_quantity,
                     ),
                 ],
-                order_id=package_ref.id if payment_method == PaymentMethod.PAY_SELECTION or payment_method == PaymentMethod.STRIPE else None,
+                order_id=package_ref.id if payment_method == PaymentMethod.STRIPE else None,
             )
 
         if payment_method == PaymentMethod.YOOKASSA:
             payment_url = payment.get('confirmation').get('confirmation_url')
             provider_payment_charge_id = payment.get('id')
-        elif payment_method == PaymentMethod.PAY_SELECTION:
-            payment_url = payment.get('Url')
-            provider_payment_charge_id = package_ref.id
         elif payment_method == PaymentMethod.STRIPE:
             payment_url = payment.get('url')
             provider_payment_charge_id = package_ref.id
@@ -994,15 +1013,12 @@ async def handle_payment_method_cart_selection(callback_query: CallbackQuery, st
                 language_code=user_language_code,
                 is_recurring=False,
                 order_items=order_items,
-                order_id=package_ref.id if payment_method == PaymentMethod.PAY_SELECTION or payment_method == PaymentMethod.STRIPE else None,
+                order_id=package_ref.id if payment_method == PaymentMethod.STRIPE else None,
             )
 
         if payment_method == PaymentMethod.YOOKASSA:
             payment_url = payment.get('confirmation').get('confirmation_url')
             provider_payment_charge_id = payment.get('id')
-        elif payment_method == PaymentMethod.PAY_SELECTION:
-            payment_url = payment.get('Url')
-            provider_payment_charge_id = package_ref.id
         elif payment_method == PaymentMethod.STRIPE:
             payment_url = payment.get('url')
             provider_payment_charge_id = package_ref.id
@@ -1295,17 +1311,17 @@ async def handle_successful_payment(message: Message, state: FSMContext):
         user_language_code,
     )
     reply_markup = build_switched_to_ai_keyboard(user_language_code, user.current_model)
-    await message.answer(
+    answered_message = await message.answer(
         text=text,
         reply_markup=reply_markup,
     )
 
+    await message.bot.unpin_all_chat_messages(user.telegram_chat_id)
+    await message.bot.pin_chat_message(user.telegram_chat_id, answered_message.message_id)
+
     if user.current_model == Model.EIGHTIFY:
-        await handle_eightify(
-            bot=message.bot,
-            chat_id=user.telegram_chat_id,
-            state=state,
-            user_id=user.id,
+        await message.answer(
+            text=get_localization(user_language_code).EIGHTIFY_INFO,
         )
     elif user.current_model == Model.FACE_SWAP:
         await handle_face_swap(
@@ -1342,7 +1358,9 @@ async def handle_cancel_subscription(message: Message, user_id: str, state: FSMC
     user = await get_user(user_id)
 
     subscription = await get_subscription(user.subscription_id)
-    if subscription and subscription.status == SubscriptionStatus.ACTIVE:
+    if subscription and (
+        subscription.status == SubscriptionStatus.ACTIVE or subscription.status == SubscriptionStatus.TRIAL
+    ):
         text = get_localization(user_language_code).CANCEL_SUBSCRIPTION_CONFIRMATION
         reply_markup = build_cancel_subscription_keyboard(user_language_code)
     else:

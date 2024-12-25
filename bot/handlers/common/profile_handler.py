@@ -1,5 +1,3 @@
-from datetime import timedelta, datetime, timezone
-
 import aiohttp
 from aiogram import Router
 from aiogram.filters import Command
@@ -30,7 +28,7 @@ from bot.keyboards.common.profile import (
     build_profile_quota_keyboard,
 )
 from bot.locales.main import get_localization, get_user_language
-from bot.states.profile import Profile
+from bot.states.common.profile import Profile
 
 profile_router = Router()
 
@@ -67,7 +65,6 @@ async def handle_profile(message: Message, state: FSMContext, telegram_user: Tel
         subscription_name = product_subscription.names.get(user_language_code)
     else:
         subscription_name = '🆓'
-    renewal_date = (user.last_subscription_limit_update + timedelta(days=30))
 
     user_current_quota = get_quota_by_model(user.current_model, user.settings[user.current_model][UserSettings.VERSION])
     user_current_model = await get_product_by_quota(user_current_quota)
@@ -77,7 +74,7 @@ async def handle_profile(message: Message, state: FSMContext, telegram_user: Tel
         subscription.status if subscription else SubscriptionStatus.ACTIVE,
         user_current_model.names.get(user_language_code),
         user.currency,
-        renewal_date.strftime('%d.%m.%Y'),
+        subscription.end_date.strftime('%d.%m.%Y'),
     )
 
     blobs = await firebase.bucket.list_blobs(prefix=f'users/avatars/{user.id}.')
@@ -92,7 +89,7 @@ async def handle_profile(message: Message, state: FSMContext, telegram_user: Tel
         reply_markup = build_profile_keyboard(
             user_language_code,
             True,
-            subscription.status == SubscriptionStatus.ACTIVE if subscription else False,
+            subscription.status == SubscriptionStatus.ACTIVE or subscription.status == SubscriptionStatus.TRIAL if subscription else False,
             subscription.status == SubscriptionStatus.CANCELED if subscription else False,
         )
         if is_edit:
@@ -110,7 +107,7 @@ async def handle_profile(message: Message, state: FSMContext, telegram_user: Tel
         reply_markup = build_profile_keyboard(
             user_language_code,
             False,
-            subscription.status == SubscriptionStatus.ACTIVE if subscription else False,
+            subscription.status == SubscriptionStatus.ACTIVE or subscription.status == SubscriptionStatus.TRIAL if subscription else False,
             subscription.status == SubscriptionStatus.CANCELED if subscription else False,
         )
         if is_edit:
@@ -139,17 +136,6 @@ async def handle_profile_selection(callback_query: CallbackQuery, state: FSMCont
     elif action == 'show_quota':
         user = await get_user(user_id)
 
-        current_date = datetime.now(timezone.utc)
-        update_date = datetime(
-            current_date.year,
-            current_date.month,
-            current_date.day,
-            tzinfo=timezone.utc
-        ) + timedelta(days=1, hours=6)
-        time_left = update_date - current_date
-        hours, remainder = divmod(time_left.seconds, 3600)
-        minutes = remainder // 60
-
         user_subscription = await get_subscription(user.subscription_id)
         if user_subscription:
             product_subscription = await get_product(user_subscription.product_id)
@@ -160,8 +146,6 @@ async def handle_profile_selection(callback_query: CallbackQuery, state: FSMCont
             limits,
             user.daily_limits,
             user.additional_usage_quota,
-            hours,
-            minutes,
         )
         reply_markup = build_profile_quota_keyboard(user_language_code)
         await callback_query.message.reply(

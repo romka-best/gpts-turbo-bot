@@ -5,6 +5,7 @@ from bot.database.models.product import Product, ProductCategory, ProductType
 from bot.database.models.prompt import Prompt
 from bot.database.operations.product.getters import get_product
 from bot.helpers.formatters.format_number import format_number
+from bot.helpers.getters.get_time_until_limit_update import get_time_until_limit_update
 from bot.helpers.getters.get_user_discount import get_user_discount
 from bot.locales.texts import Texts
 from bot.database.models.common import (
@@ -12,9 +13,9 @@ from bot.database.models.common import (
     Quota,
     Model,
     ModelType,
-    EightifyFocus,
-    EightifyFormat,
-    EightifyAmount,
+    VideoSummaryFocus,
+    VideoSummaryFormat,
+    VideoSummaryAmount,
     AspectRatio,
     SendType,
 )
@@ -28,70 +29,112 @@ from bot.locales.types import LanguageCode
 
 class English(Texts):
     START = """
-🤖 <b>Welcome to the future of AI with me, MindFusion AI Bot!</b> 🎉
+🤖 <b>Hi there!</b> 👋
 
-I'm your personal gateway to the world of neural networks. Discover the capabilities of AI:
-━ 💭 <b>Text Responses</b>:
-    ┣ Communicate free with:
-        ┣ <b>ChatGPT 4.0 Omni Mini ✉️</b> /chatgpt
-        ┣ <b>Claude 3.5 Haiku 📜</b> /claude
-        ┗ <b>Gemini 1.5 Flash 🏎</b> /gemini
-    ┣ Unleash the full potential of AI with:
-        ┣ <b>ChatGPT 4.0 Omni 💥</b> and <b>ChatGPT o1-mini 🧩</b> /chatgpt
-        ┣ <b>Claude 3.5 Sonnet 💫</b> /claude
-        ┗ <b>Gemini 1.5 Pro 💼</b> /gemini
-    ┗ Explore the most advanced level of intelligence with:
-        ┣ <b>ChatGPT o1 🧪</b> /chatgpt
-        ┣ <b>Claude 3.0 Opus 🚀</b> /claude
-        ┗ <b>Gemini 1.0 Ultra 🛡️</b> /gemini
+I am your guide to the world of neural networks, providing access to the best tools for creating:
+━ 💭 text /text
+━ 📝 summaries /summary
+━ 🖼 images /image
+━ 🎵 music /music
+━ 📹 videos /video
 
-━ 📝 <b>Summary</b>:
-    ┗ <b>YouTube 👀</b> /youtube
+🏆 <b>I’m not just a bot — I’m your emotionally intelligent assistant</b>, always ready to inspire, guide, and make your experience with neural networks simple and effective
 
-━ 🖼 <b>Create Images</b>:
-    ┣ Draw beautiful, unforgettable pictures with:
-        ┣ <b>DALL-E 3 👨‍🎨</b> /dalle
-        ┣ <b>Midjourney 6.1 🎨</b> /midjourney
-        ┣ <b>Stable Diffusion 3.5 🎆</b> /stable_diffusion
-        ┗ <b>Flux 1.1 Pro 🫐</b> /flux
-    ┣ Exchange faces with someone in a photo with <b>FaceSwap 📷️</b> /face_swap
-    ┗ Edit your images using <b>Photoshop AI 🪄</b> /photoshop
+🆓 <b>Free</b>:
+━ Communicate with:
+    ┣ <b>ChatGPT 4.0 Omni Mini ✉️</b> /chatgpt
+    ┣ <b>Claude 3.5 Haiku 📜</b> /claude
+    ┗ <b>Gemini 2.0 Flash 🏎</b> /gemini
+━ Extract key points from:
+    ┣ <b>YouTube 👀</b> /youtube_summary
+    ┗ <b>Video 📼</b> /video_summary
+━ Create images with:
+    ┣ <b>DALL-E 3 👨‍🎨</b> /dalle
+    ┣ <b>Midjourney 6.1 🎨</b> /midjourney
+    ┣ <b>Stable Diffusion 3.5 🎆</b> /stable_diffusion
+    ┣ <b>Flux 1.1 Pro 🫐</b> /flux
+    ┗ <b>Luma Photon 🌌</b> /luma_photon
+━ Swap faces in photos with <b>FaceSwap 📷️</b> /face_swap
+━ Edit your images with <b>Photoshop AI 🪄</b> /photoshop
 
-━ 🎵 <b>Compose Music</b>:
-    ┣ Compose original melodies with <b>MusicGen 🎺</b> /music_gen
-    ┗ Record your own songs with <b>Suno 4.0 🎸</b> /suno
+💡 <b>Unlock more possibilities in /buy:</b>
+━ Advanced text-based AI:
+    ┣ <b>ChatGPT 4.0 Omni 💥</b> /chatgpt
+    ┣ <b>ChatGPT o1-mini 🧩</b> /chatgpt
+    ┣ <b>ChatGPT o1 🧪</b> /chatgpt
+    ┣ <b>Claude 3.5 Sonnet 💫</b> /claude
+    ┣ <b>Claude 3.0 Opus 🚀</b> /claude
+    ┣ <b>Gemini 1.5 Pro 💼</b> /gemini
+    ┣ <b>Gemini 1.0 Ultra 🛡</b> /gemini
+    ┣ <b>Grok 2.0 🐦</b> /grok
+    ┗ <b>Perplexity 🌐</b> /perplexity
+━ Music-focused AI:
+    ┣ Compose melodies with <b>MusicGen 🎺</b> /music_gen
+    ┗ Create songs with <b>Suno 4.0 🎸</b> /suno
+━ Video creativity:
+    ┣ Create videos with <b>Kling 🎬</b> /kling
+    ┣ Generate videos from images with <b>Runway Gen-3 Alpha Turbo 🎥</b> /runway
+    ┗ Bring your video ideas to life with <b>Luma Ray 🔆</b> /luma_ray
+━ And enjoy increased daily quotas 🔓
 
-━ 📹 <b>Video Creativity</b>:
-    ┗ Generate videos with <b>Runway Gen-3 Alpha Turbo 🎥</b> /runway
-
-I am constantly updating myself, implementing the most advanced technologies so that you can fully leverage the possibilities of artificial intelligence. <b>I am the only bot with emotional intelligence</b>, ready to help you with any questions and creative endeavors 🚀
+✨ <b>Start creating now!</b>
 """
     START_QUICK_GUIDE = "📖 Quick Guide"
     START_ADDITIONAL_FEATURES = "🔮 Additional Features"
+    START_PROMPT = """
+Main Points:
+- You are a Telegram bot
+- Create a highly effective, concise, but informative message about the capabilities of the AI model: ChatGPT 4.0 Omni Mini ✉️
+- Use simple language, avoid complex terms so that even a user with no experience or knowledge in neural networks can easily understand
+- Speak in the second person
+
+Goals:
+- Explain the tasks the model can perform.
+- Highlight the pain points/problems it solves.
+- Present the information in a structured, visually appealing way using markers, lists, or sections.
+- Add motivation for action, so the user wants to try the model, but don't explicitly state it as a call to action.
+
+Message Structure:
+- A headline with an emoji to grab attention, but don't overuse emojis.
+- A brief description of the model: what it is, how it works, and its unique features.
+
+Core Features:
+- A list of tasks the model can perform with a short description of each.
+- Examples of use cases or scenarios where the model is particularly useful.
+
+How It Addresses User Pain Points:
+- The typical problems the model solves.
+- Why it is effective for these tasks.
+
+Call to Action:
+- Let the user immediately try a query in the chat and suggest several very simple examples.
+- If they want to switch the model, suggest using the /model command.
+- If they want to adjust the model settings, suggest the /settings command.
+
+Formatting:
+- Use bold text to emphasize key features.
+- Categorize the tasks if there are many.
+- Add an inspiring closing sentence.
+"""
     QUICK_GUIDE = """
 📖 Here's a quick guide to get started:
 
 ━ 💭 <b>Text Responses</b>:
-    ┣ 1️⃣ Enter one of the commands:
-        ┣ /chatgpt 💥
-        ┣ /claude 💫
-        ┗ /gemini 💼
-    ┣ 2️⃣ Select the version
+    ┣ 1️⃣ Enter the command /text
+    ┣ 2️⃣ Select the model
     ┗ 3️⃣ Write your requests into the chat
 
 ━ 📝 <b>Summary</b>:
-    ┣ 1️⃣ Enter the command /youtube
-    ┗ 2️⃣ Send me a YouTube video link
+    ┣ 1️⃣ Enter the command /summary
+    ┣ 2️⃣ Select the model
+    ┗ 3️⃣ Send me a video or YouTube link
 
 ━ 🖼 <b>Create Images</b>:
-    ┣ 1️⃣ Enter one of the commands:
-        ┣ /dalle 👨‍🎨
-        ┣ /midjourney 🎨
-        ┣ /stable_diffusion 🎆
-        ┗ /flux 🫐
-    ┗ 2️⃣ Start creating using your imagination with your requests
+    ┣ 1️⃣ Enter the command /image
+    ┣ 2️⃣ Select the model
+    ┗ 3️⃣ Start creating using your imagination with your requests
 
-━ 😜 <b>Exchange Faces in Photos</b>:
+━ 📷️ <b>Exchange Faces in Photos</b>:
     ┣ 1️⃣ Enter the command /face_swap
     ┣ 2️⃣ Follow the instructions to help me creating better photos
     ┗ 3️⃣ Choose images from my unique packages or send your own photos
@@ -102,19 +145,19 @@ I am constantly updating myself, implementing the most advanced technologies so 
     ┗ 3️⃣ Send the image for editing
 
 ━ 🎵 <b>Compose Music</b>:
-    ┣ 1️⃣ Enter one of the command
-        ┣ /music_gen 🎺
-        ┗ /suno 🎸
-    ┗ 2️⃣ Write a description of the music or send your own lyrics
+    ┣ 1️⃣ Enter the command /music
+    ┣ 2️⃣ Select the model
+    ┗ 3️⃣ Write a description of the music or send your own lyrics
 
 ━ 📹 <b>Video Creation</b>:
-    ┣ 1️⃣ Enter the command /runway
-    ┗ 2️⃣ Write a video description and attach a photo
+    ┣ 1️⃣ Enter the command /video
+    ┣ 2️⃣ Select the model
+    ┗ 3️⃣ Write a video description and attach a photo
 """
     ADDITIONAL_FEATURES = """
 🔮 <b>Additional Features</b>:
 
-━ 🔄 /mode - One command for switching between all AI models
+━ 🔄 /model - One command for switching between all AI models
 ━ 📊 /profile - I'll show your profile and quotes
 ━ 🔍 /info - Useful information about each AI model
 ━ 📂 /catalog - Catalog of digital assistants and prompts
@@ -137,25 +180,31 @@ I am constantly updating myself, implementing the most advanced technologies so 
     ┗ 📄 /terms - <b>TOS</b>: Terms of Service
 
 ━ AI commands:
-    ┣ 🤖 /mode - <b>Swap neural network models</b> on the fly with — <b>ChatGPT</b>, <b>Claude</b>, <b>Gemini</b>, <b>YouTube Summary</b>, <b>DALL-E</b>, <b>Midjourney</b>, <b>Stable Diffusion</b>, <b>FaceSwap</b>, <b>Photoshop AI</b>, <b>MusicGen</b>, or <b>Suno</b>!
+    ┣ 🤖 /model - <b>Swap neural network models</b> on the fly with — all models are there
     ┣ ℹ️ /info - <b>Get information about AI</b>: Learn for what and why do you need them
     ┣ 📁 /catalog - <b>Catalog of roles and prompts</b>: Boost your communication efficiency with me
     ┣ 💥 /chatgpt - <b>Chat with ChatGPT</b>: Start a text conversation and receive advanced AI responses
     ┣ 🚀 /claude - <b>Chat with Claude</b>: Begin a discussion and explore the depth of responses from Claude
     ┣ ✨ /gemini - <b>Chat with Gemini</b>: Start chatting and immerse yourself in advanced answers from the new AI
-    ┣ 👀 /youtube - <b>Summarization in YouTube</b>: Just send me a link and you'll get the video's summary
+    ┣ 🐦 /grok - <b>Chat with Grok</b>: Experience cutting-edge analytical AI capabilities from X
+    ┣ 🌐 /perplexity - <b>Chat with Perplexity</b>: Get answers to complex questions with Perplexity's internet search
+    ┣ 👀 /youtube_summary - <b>YouTube Summarization</b>: Send a video link and receive a summary
+    ┣ 📼 /video_summary - <b>Summarization for Any Video</b>: Send a video link or upload your own and get a summary
     ┣ 👨‍🎨 /dalle - <b>Draw with DALL-E</b>: Turn your ideas into drawings
     ┣ 🎨 /midjourney - <b>Create with DALL-E 3</b>: Bring your imaginations to life with images
     ┣ 🎆 /stable_diffusion - <b>Uniqueness with Stable Diffusion</b>: Create unique images
     ┣ 🫐 /flux - <b>Experiments with Flux</b>: Explore endless image variations without limitations
-    ┣ 😜 /face_swap - <b>Have fun with FaceSwap</b>: Change faces in photos
+    ┣ 🌌 /luma_photon - <b>Create Art with Luma Photon</b>: Turn your ideas into stunning visual projects
+    ┣ 📷️ /face_swap - <b>Have fun with FaceSwap</b>: Change faces in photos
     ┣ 🪄 /photoshop - <b>Magic with Photoshop AI</b>: Retouch and edit your photos with one touch
     ┣ 🎺 /music_gen - <b>Melodies with MusicGen</b>: Create music without copyrights
     ┣ 🎸 /suno - <b>Songs with Suno</b>: Create your own song with your lyrics and different genres
+    ┣ 🎬 /kling - <b>Video with Kling</b>: Create high-quality videos
     ┣ 🎥 /runway - <b>Video with Runway</b>: Generate creative videos from a photo
+    ┣ 🔆 /luma_ray - <b>Video with Luma Ray</b>: Transform your ideas into video clips with innovative precision
     ┗ 🔧 /settings - <b>Customize your experience</b>: Tailor model to fit your needs. There you can also <b>select a digital employee</b> with <b>context-specific chats management</b>
 
-Just type away a command to begin your AI journey! 🌟
+Just enter the command. For any questions, you can also contact technical support:
 """
     INFO = """
 🤖 <b>Select the models type you want to get information about:</b>
@@ -228,7 +277,7 @@ Just type away a command to begin your AI journey! 🌟
     INFO_GEMINI = """
 🤖 <b>There is what each model can do for you:</b>
 
-🏎 <b>Gemini 1.5 Flash: Speed and Efficiency</b>
+🏎 <b>Gemini 2.0 Flash: Speed and Efficiency</b>
 - <i>Quick Data Analysis</i>: Ideal for tasks that require instant data processing and response generation.
 - <i>Immediate Results</i>: Perfect for fast information retrieval and instant problem-solving.
 - <i>Simplified Problem Solving</i>: Capable of assisting with basic calculations, daily tasks, and fast queries.
@@ -247,6 +296,26 @@ Just type away a command to begin your AI journey! 🌟
 - <i>Linguistic Mastery</i>: Expertise in translations and support for language tasks at the highest level.
 - <i>Creative Inspiration</i>: A valuable assistant in the creation and development of complex creative projects and ideas.
 - <i>Personalized Interaction</i>: Tailors its responses to your specific needs and preferences.
+"""
+    INFO_GROK = """
+🤖 <b>There is what the model can do for you:</b>
+
+🐦 <b>Grok 2.0: Context Master</b>
+- <i>Adaptive Analysis</i>: Perfect for deep contextual understanding and analyzing complex data.
+- <i>Long Text Processing</i>: Efficiently handles large volumes of information while retaining key insights.
+- <i>Creative Mentor</i>: Helps generate ideas for projects, articles, or scientific research.
+- <i>Learning and Mentorship</i>: Provides clear explanations of complex topics, assisting with educational and professional tasks.
+- <i>Strategy Development</i>: Supports creating strategies for business or personal goals based on in-depth analytical insights.
+"""
+    INFO_PERPLEXITY = """
+🤖 <b>There is what the model can do for you:</b>
+
+🌐 <b>Perplexity: Instant Answers with Global Reach</b>
+- <i>Global Information</i>: Exceptional ability to provide factual data and reference sources.
+- <i>Navigate Complex Topics</i>: Helps you understand anything from simple to the most intricate questions.
+- <i>Real-World Problem Solving</i>: Quick recommendations for business, education, and everyday life.
+- <i>Search on Demand</i>: Excels at handling specific queries, providing precise answers.
+- <i>User-Friendly Interface</i>: Easily integrates into your tasks and projects for convenient use.
 """
     INFO_DALL_E = """
 🤖 <b>There is what the model can do for you:</b>
@@ -289,10 +358,20 @@ Just type away a command to begin your AI journey! 🌟
 - <i>Diverse Visual Concepts</i>: Explore a wide range of artistic styles and approaches, adjusting the process to fit your project.
 - <i>Fast Visual Experiments</i>: Experiment with various concepts and styles without limitations, unlocking new creative possibilities.
 """
+    INFO_LUMA_PHOTON = """
+🤖 <b>There is what the model can do for you:</b>
+
+🌌 <b>Luma Photon: Professional Visualization</b>
+- <i>Photorealistic Images</i>: Create high-quality visualizations for architecture, design, and marketing.
+- <i>3D Modeling</i>: Generate 3D concepts and visualizations, perfect for presentations and projects.
+- <i>Lighting Effects and Textures</i>: Manage complex lighting effects and textures to produce realistic images.
+- <i>Creative Rendering</i>: Experiment with compositions and styles to craft unique artistic visualizations.
+- <i>Efficiency in Workflow</i>: Ideal for professionals seeking quick, high-quality results for their projects.
+"""
     INFO_FACE_SWAP = """
 🤖 <b>There is what the model can do for you:</b>
 
-🤡 <b>FaceSwap: The Entertainment Master</b>
+📷️ <b>FaceSwap: The Entertainment Master</b>
 - <i>Fun Reimaginations</i>: See how you'd look in different historical eras or as various movie characters.
 - <i>Personalized Greetings</i>: Create unique birthday cards or invitations with personalized images.
 - <i>Memes and Content Creation</i>: Spice up your social media with funny or imaginative face-swapped pictures.
@@ -327,16 +406,49 @@ Just type away a command to begin your AI journey! 🌟
 - <i>Music education and inspiration</i>: Learn about music theory and the history of genres through the practice of composition.
 - <i>Instant music creation</i>: Describe your emotions or scenario, and Suno will immediately bring your description to life as a song.
 """
+    INFO_KLING = """
+🤖 <b>There is what the model can do for you:</b>
+
+🎬 <b>Kling: High-Quality Video Creation</b>
+- <i>Video Generation from Descriptions</i>: Describe your idea, and Kling will create an impressive video clip.
+- <i>Work with Unique Styles</i>: Use a variety of styles to emphasize the individuality of your video.
+- <i>Dynamic Transitions</i>: Automatically adds smooth and impactful transitions between scenes.
+- <i>Creative Visual Effects</i>: Generate videos with modern effects for your projects.
+- <i>Content in Minutes</i>: Create impressive video clips in a short time without requiring video editing skills.
+"""
     INFO_RUNWAY = """
 🤖 <b>There is what the model can do for you:</b>
 
 🎥 <b>Runway: Video Generation</b>
-- <i>Create short video clips</i>: Describe an idea or a script, and Runway will produce a unique video clip.
+- <i>Create short video clips</i>: Describe an idea or a script and attach the first frame, and Runway will produce a unique video clip.
 - <i>Generate videos from photos + text</i>: Turn an image and text description into dynamic videos.
 - <i>Animations and visual effects</i>: Generate visually appealing and creative animations based on your ideas.
 - <i>AI content for social media</i>: Quickly create engaging videos for platforms and projects.
 - <i>Experiment with video formats</i>: Explore AI capabilities to create new styles and video content.
 """
+    INFO_LUMA_RAY = """
+🤖 <b>There is what the model can do for you:</b>
+
+🔆 <b>Luma Ray: Creativity in Video</b>
+- <i>High-Quality Video Clips</i>: Create realistic and dynamic videos based on descriptions.
+- <i>3D Animation</i>: Generate stunning three-dimensional animations for your projects.
+- <i>Cinematic Style</i>: Apply effects and compositions characteristic of professional cinema.
+- <i>Visual Magic</i>: Use cutting-edge technology to produce high-quality content.
+- <i>Innovative Video Formats</i>: Experiment with new styles and approaches to video content creation.
+"""
+
+    ADMIN_INFO = "👨‍💻 Choose an action, Admin 👩‍💻"
+    ADS_INFO = "Select what you want to do:"
+    ADS_CREATE = "Create an advertising link 📯"
+    ADS_GET = "Get information about the advertising campaign 📯"
+    ADS_SEND_LINK = "Send me a link to the advertising campaign 📯"
+    ADS_CHOOSE_SOURCE = "Choose the source of the advertising campaign 📯"
+    ADS_CHOOSE_MEDIUM = "Select the type of traffic for the advertising campaign 📯"
+    ADS_SEND_NAME = "Send the name of the advertising campaign as a single word without special characters 📯"
+    ADS_SEND_QUANTITY = "Send the number of links to create 📯"
+    BAN_INFO = "Send me the user ID of the person you want to ban/unban ⛔️"
+    BAN_SUCCESS = "You have successfully banned the user 📛"
+    UNBAN_SUCCESS = "You have successfully unbanned the user 🔥"
 
     SERVER = "💻 Server"
     DATABASE = "🗄 Database"
@@ -388,6 +500,8 @@ Unfortunately, your feedback was not constructive enough and I cannot increase y
 
 But don't worry! You can enter the command /bonus to see the other ways to top up the bonus balance!
 """
+    FEEDBACK_ADMIN_APPROVE = "Apprive ✅"
+    FEEDBACK_ADMIN_DENY = "Deny ❌"
 
     # Profile
     SHOW_QUOTA = "🔄 Show Quota"
@@ -570,6 +684,39 @@ Thanks to your efforts, a new user has joined! Unfortunately, we cannot award yo
 Enter the /bonus command to learn about other ways to earn bonus credits. Keep sharing and enjoy every moment here! 🎉
 """
 
+    # Blast
+    BLAST_CHOOSE_USER_TYPE = """
+📣 <b>Time to send a broadcast!</b>
+
+First, choose who you want to send the broadcast to:
+"""
+    BLAST_CHOOSE_LANGUAGE = """
+📣 <b>Let’s continue the broadcast!</b>
+
+Select the language for the broadcast or choose to send it to everyone:
+"""
+    BLAST_WRITE_IN_CHOSEN_LANGUAGE = """
+✍️ <b>Time to create your message!</b> 🚀
+
+You’ve chosen the language, now it’s time to pour your heart into the message!
+
+Write a broadcast message that will touch the hearts of your users, make them smile, or even inspire them for new achievements. Remember, every word is a brush, and your text is a canvas where you can paint anything. Go ahead, fill this world with the colors of your imagination! 🌈✨
+"""
+    BLAST_WRITE_IN_DEFAULT_LANGUAGE = """
+🚀 <b>It’s time for a global broadcast!</b> 🌍
+
+You’ve chosen "For Everyone," which means your message will reach every corner, regardless of users’ language preferences. Write your message in Russian, and I’ll automatically translate it for all our users. Create a message that inspires, entertains, or informs—it will fly straight to the hearts and minds of people around the world.
+
+Remember, your words can brighten someone’s day! 🌟
+"""
+    BLAST_SUCCESS = """
+🎉 <b>The broadcast was successfully sent!</b> 💌
+
+Your message is already on its way to users, ready to spark interest and bring smiles. You’ve taken a real step toward engagement and communication. Congratulations, admin-magician—your creation will soon be appreciated! 🌟
+
+Thank you for making me brighter and more exciting with every action you take! ✨
+"""
+
     # Promo code
     PROMO_CODE_ACTIVATE = "🔑 Activate promo code"
     PROMO_CODE_INFO = """
@@ -579,12 +726,76 @@ If you've got a <b>promo code</b>, just type it in to reveal hidden features and
 
 <b>No code?</b> No problem! Simply click 'Cancel' to continue exploring the AI universe without it 🚀
 """
+    PROMO_CODE_INFO_ADMIN = """
+🔑 <b>Time to create some magic with promo codes!</b> ✨
+
+Choose what you want to create a promo code for:
+🌠 <b>Subscription</b> - Unlock access to exclusive features and content
+🎨 <b>Package</b> - Add special capabilities for AI usage
+🪙 <b>Discount</b> - Let users purchase generations at a lower price
+
+Click the desired button, and let’s get started! 🚀
+"""
     PROMO_CODE_SUCCESS = """
 🎉 <b>Your promo code has been successfully activated!</b> 🌟
 
 Get ready to dive into a world of AI wonders with your shiny new perks
 
 Happy exploring! 🚀
+"""
+    PROMO_CODE_SUCCESS_ADMIN = """
+🌟 <b>Wow!</b>
+
+Your <b>promo code has been successfully created</b> and is ready to make its way into the pockets of our users. 🚀
+This little code will surely bring joy to someone out there!
+
+🎉 Congratulations, you're a true promo code wizard!
+"""
+    PROMO_CODE_CHOOSE_SUBSCRIPTION_ADMIN = """
+🌟 <b>Choose a subscription for the promo code!</b> 🎁
+
+✨ Select the subscription type you want to grant access to:
+"""
+    PROMO_CODE_CHOOSE_PACKAGE_ADMIN = """
+🌟 <b>Select a package for the promo code!</b> 🎁
+
+Start by choosing a package 👇
+"""
+    PROMO_CODE_CHOOSE_DISCOUNT_ADMIN = """
+🌟 <b>Choose a discount for the promo code!</b> 🎁
+
+Enter the discount percentage (from 1% to 50%) that you want to offer users 👇
+"""
+    PROMO_CODE_CHOOSE_NAME_ADMIN = """
+🖋️ <b>Create a name for your promo code</b> ✨
+
+Right now, you're like a true wizard crafting a spell! ✨🧙‍
+Write a unique and memorable name for your promo code.
+
+🔠 Use letters and numbers, but remember the magic of brevity. Don't hesitate to experiment and inspire your users!
+"""
+    PROMO_CODE_CHOOSE_DATE = """
+📅 <b>Time for some magic!</b> 🪄
+
+Enter the date until this promo code will spread happiness and surprise!
+Remember to use the format DD.MM.YYYY, for example, 12/25/2023 — perfect for a Christmas surprise! 🎄
+
+So go ahead, choose the date when the magic will end 🌟
+"""
+    PROMO_CODE_NAME_EXISTS_ERROR = """
+🚫 <b>Oh no, this code already exists!</b> 🤖
+
+As a true innovator, you've come up with a code that someone has already thought of!
+You’ll need something even more unique. Try again, because creativity knows no limits!
+
+Show off your originality and creativity. I'm sure you'll nail it this time!
+"""
+    PROMO_CODE_DATE_VALUE_ERROR = """
+🚫 <b>Oops!</b>
+
+It seems the date got lost in the calendar and can’t find the right format 📅
+
+Let’s try again, but this time in the format DD.MM.YYYY, for example, 12/25/2023. Accuracy is the key to success!
 """
     PROMO_CODE_ALREADY_HAVE_SUBSCRIPTION = """
 🚫 <b>Whoopsie-daisy!</b> 🙈
@@ -613,6 +824,78 @@ Looks like you've already used this promo code. It's a one-time magic spell, and
 No worries, though! You can check out our latest offers with clicking one of the buttons below:
 """
 
+    # Statistics
+    STATISTICS_INFO = """
+📊 <b>Statistics are on the way!</b>
+
+Time to dive into the world of numbers and charts. Choose a period, and I’ll show you how our bot has conquered AI heights 🚀:
+1️⃣ <b>Daily Statistics</b> - Find out what happened today! Were there any records?
+2️⃣ <b>Weekly Statistics</b> - A weekly dose of data. What were the trends?
+3️⃣ <b>Monthly Statistics</b> - A month in numbers. How many achievements did we gather?
+4️⃣ <b>All-Time Statistics</b> - A look into the past. Where did we start, and where are we now?
+5️⃣ <b>Record a Transaction</b> - Update our data to keep everything honest!
+
+Pick a button and let’s dive into the knowledge! 🕵️‍♂️🔍
+"""
+    STATISTICS_WRITE_TRANSACTION = """
+🧾 <b>Choose the type of transaction!</b>
+
+Hmm... It seems it's time to summarize our finances! 🕵️‍♂️💼 Now you have a choice:
+- Click "📈 Record Income" if our treasury has grown, and we’ve gained a few golden coins!
+- Or choose "📉 Record Expense" if we had to spend on magical ingredients or other essentials.
+
+Click the button and embark on a financial adventure! 💫🚀
+"""
+    STATISTICS_CHOOSE_SERVICE = """
+🔍 <b>Select the type of service for the transaction!</b>
+
+Oh, it seems we’ve reached the point of choosing the service type! 🌟📚 Here, it’s like a shop of wonders.
+
+Choose confidently, and may the financial records be as accurate as a star cartographer’s maps! 🗺️✨
+"""
+    STATISTICS_CHOOSE_CURRENCY = """
+💰 <b>Time to choose a currency!</b>
+
+For a complete picture, we need to know the currency for these transactions. So, which currency were we swimming in during these deals? Rubles, dollars, or perhaps golden doubloons? 😄
+
+Choose the button with the correct currency to log everything accurately. It’s important—after all, even pirates took their treasure accounting seriously! 💸🏴‍☠️
+"""
+    STATISTICS_SERVICE_QUANTITY = """
+✍️ <b>Time to record the number of transactions!</b>
+
+Please write the number of transactions.
+
+🔢🚀 Remember, every transaction is a step towards our shared success. Don’t miss a single one!
+"""
+    STATISTICS_SERVICE_AMOUNT = """
+🤑 <b>Let’s count the coins!</b>
+
+Please tell me the transaction amount. Remember, every penny (or cent) counts! Please use a decimal format with a dot, e.g., 999.99.
+
+Enter the numbers carefully, as if you were counting gold coins on a pirate ship. After all, accuracy is the courtesy of kings... and accountants! 🏴‍☠️📖
+"""
+    STATISTICS_SERVICE_DATE = """
+📅 <b>The final touch: Transaction Date!</b>
+
+Write the date when these transactions occurred. Format? Simple and clear: "DD.MM.YYYY", e.g., "04/01/2024" or "12/25/2023". This date is the key to organizing our temporal treasure chest.
+
+🕰️✨ Remember, the exact date is not just numbers; it’s a marker of our journey. We’ll use it to plan our future!
+"""
+    STATISTICS_SERVICE_DATE_VALUE_ERROR = """
+🤔 <b>Oops, it seems the date decided to misbehave!</b>
+
+Uh-oh, it looks like we got a little tangled in the calendar pages! The entered date doesn’t match the format "DD.MM.YYYY". Let’s try again—after all, we don’t have a time machine (yet) to fix this in the future.
+
+🗓️✏️ So, once more: when exactly did this financial miracle occur?
+"""
+    STATISTICS_WRITE_TRANSACTION_SUCCESSFUL = """
+🎉 <b>Transaction successfully recorded! Wow, we’re in business!</b>
+
+Hooray! Your financial maneuver has been successfully logged into our digital chronicles. Now this transaction shines in our database like a star in the bookkeeping sky!
+
+📚💰 Thank you for your accuracy and precision. Our digital elves are already dancing with joy. It seems your financial wisdom deserves its own chapter in the book of economic adventures!
+"""
+
     # AI
     MODEL = """
 To change a model click a button below 👇
@@ -632,7 +915,7 @@ To choose a <b>Gemini ✨</b> model click a button below 👇
     ALREADY_SWITCHED_TO_THIS_MODEL = """
 🔄 <b>Oops, looks like everything stayed the same!</b>
 
-You've selected the same model that's already active. Don't worry, your digital universe remains unchanged. You can continue chatting or creating as usual. If you want to switch things up, simply choose a different model using /mode
+You've selected the same model that's already active. Don't worry, your digital universe remains unchanged. You can continue chatting or creating as usual. If you want to switch things up, simply choose a different model using /model
 
 Either way, I'm here to help! 🛟
 """
@@ -654,13 +937,6 @@ My goal is safety and respect for every user! 🌟
     ALREADY_MAKE_REQUEST = "You've already made a request. Please wait ⚠️"
     READY_FOR_NEW_REQUEST = "You can ask the next request 😌"
     CONTINUE_GENERATING = "Continue generating"
-    REACHED_USAGE_LIMIT = """
-<b>Oops! 🚨</b>
-
-Your today's quota for the current model has just done a Houdini and disappeared! 🎩
-
-❗️But don't worry, you've got options:
-"""
     CHANGE_AI_MODEL = "🤖 Change AI Model"
     REMOVE_RESTRICTION = "⛔️ Remove the Restriction"
     REMOVE_RESTRICTION_INFO = "To remove the restriction, choose one of the actions 👇"
@@ -673,15 +949,6 @@ The file you sent is too large. I can only process files smaller than 20MB.
 
 Please try again with a smaller file 😊
 """
-
-    # Examples
-    CHATGPT4_OMNI_EXAMPLE = "👇 This is how *ChatGPT 4.0 Omni* would respond to your request 💥"
-    CLAUDE_3_SONNET_EXAMPLE = "👇 This is how *Claude 3.5 Sonnet* would respond to your request 🚀"
-    GEMINI_1_PRO_EXAMPLE = "👇 This is how *Gemini 1.5 Pro* would respond to your request 💼"
-    MIDJOURNEY_EXAMPLE = "☝️ These are the images that <b>Midjourney 🎨</b> would draw for your request"
-    SUNO_EXAMPLE = "☝️ This is the song that <b>Suno 🎸</b> would create for your request"
-    EXAMPLE_INFO = "Here's what you can do to gain access to this AI:"
-
     PHOTO_FEATURE_FORBIDDEN = """
 ⚠️ Sending photos is only available in models:
 
@@ -693,20 +960,45 @@ Please try again with a smaller file 😊
     ┣ Claude 3.0 Opus 🚀
     ┣ Gemini 1.5 Flash 🏎
     ┣ Gemini 1.5 Pro 💼
-    ┗ Gemini 1.0 Ultra 🛡️
+    ┣ Gemini 1.0 Ultra 🛡️
+    ┗ Grok 2.0 🐦
 
 🖼 <b>Image Models</b>:
     ┣ 🎨 Midjourney
     ┣ 🎆 Stable Diffusion
     ┣ 🫐 Flux
+    ┣ 🌌 Luma Photon
     ┣ 📷 FaceSwap
     ┗ 🪄 Photoshop AI
 
 📹 <b>Video Models</b>:
-    ┗ 🎥 Runway
+    ┣ 🎬 Kling
+    ┣ 🎥 Runway
+    ┗ 🔆 Luma Ray
 
 Use the button below to switch to a model that supports image vision 👀
 """
+
+    @staticmethod
+    def reached_usage_limit():
+        hours, minutes = get_time_until_limit_update()
+
+        return f"""
+<b>Oops! 🚨</b>
+
+Your today's quota for the current model has just done a Houdini and disappeared! 🎩
+
+🔄 <i>The limit will reset in: {hours} hr. {minutes} min.</i>
+
+❗️Don’t want to wait? Don’t worry, you've got options:
+"""
+
+    # Examples
+    CHATGPT4_OMNI_EXAMPLE = "👇 This is how *ChatGPT 4.0 Omni* would respond to your request 💥"
+    CLAUDE_3_SONNET_EXAMPLE = "👇 This is how *Claude 3.5 Sonnet* would respond to your request 🚀"
+    GEMINI_1_PRO_EXAMPLE = "👇 This is how *Gemini 1.5 Pro* would respond to your request 💼"
+    MIDJOURNEY_EXAMPLE = "☝️ These are the images that <b>Midjourney 🎨</b> would draw for your request"
+    EXAMPLE_INFO = "Here's what you can do to gain access to this AI:"
 
     # Eightify
     EIGHTIFY_INFO = """
@@ -718,17 +1010,81 @@ Using <b>YouTube Summary</b> you can get a concise text summary of any YouTube v
 
 Looking forward to your link! 😊
 """
-    EIGHTIFY_FOCUS_INSIGHTFUL = "Insightful 💡"
-    EIGHTIFY_FOCUS_FUNNY = "Funny 😄"
-    EIGHTIFY_FOCUS_ACTIONABLE = "Actionable 🛠"
-    EIGHTIFY_FOCUS_CONTROVERSIAL = "Controversial 🔥"
-    EIGHTIFY_FORMAT_LIST = "List 📋"
-    EIGHTIFY_FORMAT_FAQ = "Q&A 🗯"
-    EIGHTIFY_AMOUNT_AUTO = "Auto ⚙️"
-    EIGHTIFY_AMOUNT_SHORT = "Short ✂️"
-    EIGHTIFY_AMOUNT_DETAILED = "Detailed 📚"
     EIGHTIFY_VALUE_ERROR = "This doesn't seem to be a YouTube link 🧐\n\nPlease send me a different one"
     EIGHTIFY_VIDEO_ERROR = "Unfortunately, I can't process this YouTube video 😢\n\nPlease send another link"
+
+    # Gemini Video
+    GEMINI_VIDEO_INFO = """
+With <b>Video Summary</b>, you can get a concise text summary of any video.
+
+<b>How does it work?</b> There are 2 options:
+1.
+🔗 Send a link to the desired video
+⚠️ The video must be no longer than 1 hour
+✅ I’ll analyze the video and return a text summary to you
+
+2.
+🔗 Send the video directly here in Telegram
+⚠️ The video must be no longer than 1 hour and smaller than 20MB
+✅ I’ll analyze the video and return a text summary to you
+
+Looking forward to your link/video 😊
+"""
+    GEMINI_VIDEO_TOO_LONG_ERROR = "The video length must be less than 60 minutes ⚠️\n\nPlease send a different video"
+    GEMINI_VIDEO_VALUE_ERROR = "This doesn’t look like a video link 🧐\n\nPlease send a different link"
+
+    @staticmethod
+    def gemini_video_prompt(
+        focus: VideoSummaryFocus,
+        format: VideoSummaryFormat,
+        amount: VideoSummaryAmount,
+    ) -> str:
+        if focus == VideoSummaryFocus.INSIGHTFUL:
+            focus = English.VIDEO_SUMMARY_FOCUS_INSIGHTFUL
+        elif focus == VideoSummaryFocus.FUNNY:
+            focus = English.VIDEO_SUMMARY_FOCUS_FUNNY
+        elif focus == VideoSummaryFocus.ACTIONABLE:
+            focus = English.VIDEO_SUMMARY_FOCUS_ACTIONABLE
+        elif focus == VideoSummaryFocus.CONTROVERSIAL:
+            focus = English.VIDEO_SUMMARY_FOCUS_CONTROVERSIAL
+
+        if format == VideoSummaryFormat.LIST:
+            format = "1. <Emoji> Description"
+        elif format == VideoSummaryFormat.FAQ:
+            format = "❔ _Question_: <Question>\n❕ _Answer_: <Answer>"
+
+        if amount == VideoSummaryAmount.AUTO:
+            amount = English.VIDEO_SUMMARY_AMOUNT_AUTO
+        elif amount == VideoSummaryAmount.SHORT:
+            amount = English.VIDEO_SUMMARY_AMOUNT_SHORT
+        elif amount == VideoSummaryAmount.DETAILED:
+            amount = English.VIDEO_SUMMARY_AMOUNT_DETAILED
+
+        return f"""
+Please create a beautiful and structured summary of the provided video using Markdown formatting as follows:
+- Divide the summary into thematic blocks in the format: **<Emoji> Title of Thematic Block**.
+- For each block, include several key points in the format: {format}.
+- Conclude each point with a clear and informative statement.
+- Avoid using the "-" symbol for structure.
+- Avoid using HTML tags.
+- Highlight key words in the format: **Key Words**.
+- Construct the summary to be engaging, visually appealing, and well-structured.
+- Summary focus: {focus}.
+- Response length: {amount}. Where Short: 2-3 thematic blocks. Auto: 4-5 thematic blocks. Detailed: 6-10 thematic blocks. Thematic blocks refer to blocks with headings, not individual points, but the number of points may also depend on the response length.
+- Provide the response in English.
+
+Use unique emojis to represent the essence of each point. The response should look visually appealing and strictly follow the specified format, without introductory phrases or comments.
+"""
+
+    VIDEO_SUMMARY_FOCUS_INSIGHTFUL = "Insightful 💡"
+    VIDEO_SUMMARY_FOCUS_FUNNY = "Funny 😄"
+    VIDEO_SUMMARY_FOCUS_ACTIONABLE = "Actionable 🛠"
+    VIDEO_SUMMARY_FOCUS_CONTROVERSIAL = "Controversial 🔥"
+    VIDEO_SUMMARY_FORMAT_LIST = "List 📋"
+    VIDEO_SUMMARY_FORMAT_FAQ = "Q&A 🗯"
+    VIDEO_SUMMARY_AMOUNT_AUTO = "Auto ⚙️"
+    VIDEO_SUMMARY_AMOUNT_SHORT = "Short ✂️"
+    VIDEO_SUMMARY_AMOUNT_DETAILED = "Detailed 📚"
 
     # Midjourney
     MIDJOURNEY_ALREADY_CHOSE_UPSCALE = "You've already chosen this image, try a new one 🙂"
@@ -810,12 +1166,16 @@ Looks like you're trying to request more than 3 minutes, I can't generate more y
     SECONDS_300 = "🔹 300 seconds (5 minutes)"
     SECONDS_600 = "🔹 600 seconds (10 minutes)"
 
+    # Kling
+    KLING_MODE_STANDARD = "🔸 Standard"
+    KLING_MODE_PRO = "🔹 Pro"
+
     # Settings
     SETTINGS_CHOOSE_MODEL_TYPE = """
 ⚙️ <b>Welcome to Settings!</b>
 
 🌍 To change the interface language, enter the command /language
-🤖 To change the model, enter the command /mode
+🤖 To change the model, enter the command /model
 
 Here you are the artist, and settings are your palette. Choose the model type you want to personalize for yourself below 👇
 """
@@ -841,6 +1201,7 @@ Below are the voice response settings for all text models 🎙
     SETTINGS_PROMPT_SAFETY = "Prompt Security 🔐"
     SETTINGS_GENDER = "Gender 👕/👚"
     SETTINGS_DURATION = "Duration in Seconds 📏"
+    SETTINGS_MODE = "Mode 🤖"
 
     SHOW_THE_NAME_OF_THE_CHATS = "Show the name of the chats"
     SHOW_THE_NAME_OF_THE_ROLES = "Show the name of the roles"
@@ -872,7 +1233,6 @@ Choose by clicking a button below 👇
 """
     CHANGE_CURRENCY = "💱 Change currency"
     YOOKASSA_PAYMENT_METHOD = "🪆💳 YooKassa"
-    PAY_SELECTION_PAYMENT_METHOD = "🌍💳 PaySelection"
     STRIPE_PAYMENT_METHOD = "🌍💳 Stripe"
     TELEGRAM_STARS_PAYMENT_METHOD = "✈️⭐️ Telegram Stars"
     CHOOSE_PAYMENT_METHOD = """
@@ -1074,7 +1434,108 @@ You're just a click away from unlocking my treasure trove of AI roles, but it se
 
 No worries, though! You can grab it easily just hitting one of the buttons below:
 """
-    CREATE_ROLE = "Create a new role"
+    CATALOG_MANAGE = """
+🎭 <b>Role Catalog Management</b> 🌟
+
+Here you can:
+🔧 <b>Add a New Role</b>: Unleash your creativity and create a unique assistant!
+✏️ <b>Edit Existing Roles</b>: Bring your vision to life in already familiar characters.
+🗑️ <b>Delete the Unnecessary</b>: Sometimes saying goodbye is the beginning of something new.
+
+Choose your adventure in this world of AI talents! 🚀
+"""
+    CREATE_ROLE = "Create a Role"
+    CATALOG_MANAGE_CREATE = """
+🌈 <b>Creating a New Role</b> 🎨
+
+It’s time to give birth to a new AI assistant! Give your creation a name. Write a unique name for the new role in UPPER_SNAKE_CASE format, for example, SUPER_GENIUS or MAGIC_ADVISOR.
+
+💡 Remember, the name should be unique, vibrant, and memorable, like the brightest fireworks in the sky!
+"""
+    CATALOG_MANAGE_CREATE_ALREADY_EXISTS_ERROR = """
+🙈 <b>Oops! A duplicate spotted!</b> 🙈
+
+Hey, it seems this role already exists! Creating something unique is great, but duplicating an existing one is like launching the second internet. We already have <b>this star</b> in our AI cosmos.
+
+🤔 Try coming up with a different name, something fresh and original to make our catalog even cooler. How about getting inspired by something new and unusual? Onward to new ideas! 🚀
+"""
+    CATALOG_MANAGE_CREATE_ROLE_NAME = """
+🎨 <b>Time for Creativity!</b> 🌟
+
+Come up with a name for your new role that will sound like music in all the languages of the world! The name should not only be memorable and vibrant but also start with a fitting emoji, such as "🤖 Personal Assistant."
+
+🖌️ Write the name in Russian, and I’ll make sure it’s understood by users worldwide. What unique and creative name will you choose for your new AI assistant?
+"""
+    CATALOG_MANAGE_CREATE_ROLE_DESCRIPTION = """
+📝 <b>Time for Creativity!</b> 🎨
+
+Create a description for your new role. It should be three lines full of inspiration and ideas, which will be shown to users upon selecting the role. For example:
+<i>Always ready to help you find answers to any questions, whether they’re everyday issues or philosophical musings.
+Your personal guide in the world of knowledge and creativity, eager to share ideas and advice. 🌌
+Let’s explore new horizons together!</i>
+
+🖌️ Write the description in Russian to reflect the essence of the role while inspiring and delighting users. I’ll make sure it’s clear to users worldwide. Add some magic to every word with your creativity and imagination!
+"""
+    CATALOG_MANAGE_CREATE_ROLE_INSTRUCTION = """
+🤓 <b>Time for a System Instruction!</b> 📚
+
+Create a short but concise instruction for your assistant. This will be their guide for action, for example: "You are a thoughtful advisor, always ready to share wise thoughts and helpful ideas. Help users solve complex questions and offer original solutions. Your mission is to inspire and enrich every interaction!"
+
+🖌️ Write the instruction in Russian to guide your assistant in interacting with users. Make it bright and memorable so that every conversation with your assistant is special!
+"""
+    CATALOG_MANAGE_CREATE_ROLE_PHOTO = """
+📸 <b>The Final Touch – Your Assistant’s Photo!</b> 🌟
+
+It’s time to give your digital assistant a face. Send a photo that will become their calling card. It can be anything: a cheerful robot or a stylish cat in glasses. Remember, this image will be the "face" of your assistant in user dialogues!
+
+🖼️ Choose a photo that best reflects your assistant’s character and style. Make it appealing and unique so that users recognize it immediately!
+"""
+    CATALOG_MANAGE_CREATE_SUCCESS = """
+🎉 <b>Hooray! The new role has been successfully created!</b> 🌟
+
+🚀 Your new assistant has officially joined the team of our AI heroes. Their mission is to make users' journeys in the world of artificial intelligence even more exciting!
+
+💬 The assistant is ready to work and awaits users' commands. Congratulations on successfully expanding the AI team!
+"""
+    EDIT_ROLE_NAME = "Edit Name 🖌"
+    EDIT_ROLE_DESCRIPTION = "Edit Description 🖌"
+    EDIT_ROLE_INSTRUCTION = "Edit Instruction 🖌"
+    EDIT_ROLE_PHOTO = "Edit Photo 🖼"
+    CATALOG_MANAGE_EDIT_ROLE_NAME = """
+📝 <b>Time for a Rebrand!</b> 🎨
+
+You chose "Edit Name" for the assistant. Now’s the moment to give them something new and shiny! 🌟
+
+Enter the new name starting with an emoji in Russian and imagine how it will sound among our AI heroes. Don’t hesitate to be original—the best names are born in the magical atmosphere of creativity! ✨
+"""
+    CATALOG_MANAGE_EDIT_ROLE_DESCRIPTION = """
+🖋️ <b>Rewriting History!</b> 🌍
+
+You’ve decided to "Edit Description" for the assistant. Think about what you’d like to tell the world about them. This is your chance to showcase their uniqueness and features! 📚
+
+Write a new description emphasizing their best qualities in Russian. Add a pinch of humor and a dash of inspiration—and there it is, a description worthy of a true AI hero! 👾
+"""
+    CATALOG_MANAGE_EDIT_ROLE_INSTRUCTION = """
+📘 <b>New Rules of the Game!</b> 🕹️
+
+"Edit Instruction" means giving new directions to our AI hero. What will be their new mission? 🚀
+
+Write the instruction in Russian so that every line inspires great achievements in the AI world!
+"""
+    CATALOG_MANAGE_EDIT_ROLE_PHOTO = """
+📸 <b>New Employee – New Spirit!</b> 🌟
+
+It’s time to change the face of your digital assistant. Send a photo that will become their new calling card. It can be anything: a cheerful robot or a stylish cat in glasses. Remember, this image will be the new "face" of the assistant in user dialogues!
+
+🖼️ Choose a photo that best reflects your assistant’s character and style. Make it appealing and unique so that users recognize it immediately!
+"""
+    CATALOG_MANAGE_EDIT_SUCCESS = """
+🎉 <b>Ta-da! Changes successfully applied!</b> 🎨
+
+🤖 Your assistant has been gracefully transformed. Congratulations, you’ve just made your mark on AI assistant history! 🚀
+
+👀 There’s only one thing left—see them in action! Head to /catalog to view your updated assistant in all their glory.
+"""
 
     # Chats
     DEFAULT_CHAT_TITLE = "New chat"
@@ -1130,13 +1591,16 @@ How about adding more chats to your realm instead? Check out buttons below to bu
 Ready? Let's dive into a world of imagination! 🚀
 
 🌈 Send me a photo in which I will replace the face with yours from /profile or just <b>select a package below</b> and start your photo adventure 👇
-    """
+"""
+    CREATE_PACKAGE = "Create a new package"
+    EDIT_PACKAGE = "Edit existing package"
     GENERATIONS_IN_PACKAGES_ENDED = """
 🎨 <b>Wow, you've used up all your generations in our packages! Your creativity is astounding!</b> 🌟
 
 What's next?
 - 📷 Send me photos with faces for face swapping in FaceSwap!
-- 🔄 Or switch models via /mode to continue creating with other AI tools!
+- ✍️ Send me any prompt, and I’ll generate an image replacing it with your face!
+- 🔄 Or switch models via /model to continue creating with other AI tools!
 
 Time for new AI discoveries! 🚀
 """
@@ -1162,6 +1626,71 @@ Please upload a new photo where your face is clearly visible and in good quality
 
 🔄 After uploading a new photo, please try again. Thank you for your patience!
 """
+    FACE_SWAP_MANAGE = """
+🤹‍ <b>Welcome to the realm of FaceSwap!</b> 🎭
+
+🚀 Ready for some creativity? Here, you are the master wizard! Manage packages and photos. Begin your magical journey:
+- 📦 Add/Edit Package - Build a collection of face masks that will elevate your creativity to a new level or make changes to existing collections. Add, update, and organize—your imagination has no limits!
+- 🖼 Manage Photos - Each package contains many amazing faces waiting for their moment. Add, activate, or deactivate them at your discretion to control user accessibility. Unlock a world of limitless creative possibilities!
+
+Choose, create, amaze! In the world of FaceSwap, every step you take turns into something incredible! 🎨✨
+"""
+    FACE_SWAP_MANAGE_CREATE = """
+🌟 <b>Let’s begin a creative adventure!</b> 🌈
+
+📝 Create a new FaceSwap package! Start by giving it a unique name. Use the UPPER_SNAKE_CASE format to keep it clear and organized. For example, you could name it SEASONAL_PHOTO_SHOOT or FUNNY_FACE_FESTIVAL. This name will be your magical key to creating incredible transformations!
+
+🎨 Express your individuality! Write a system name that reflects the essence and idea of your package. Your name is the first step to creating something truly magical and unforgettable!
+"""
+    FACE_SWAP_MANAGE_CREATE_ALREADY_EXISTS_ERROR = """
+🚨 <b>Oops, it seems we’ve been here before!</b> 🔄
+
+🔍 The package name is already taken! It looks like the name you chose for your new FaceSwap package already exists in our gallery of wonders. But don’t worry, this is just an opportunity to unleash even more creativity!
+
+💡 Try something new! How about another unique name? Surely you have many exciting ideas waiting to be explored!
+"""
+    FACE_SWAP_MANAGE_CREATE_PACKAGE_NAME = """
+🎉 <b>Continuing our creative marathon!</b> 🚀
+
+📛 The next step is the package name! Now give your FaceSwap package a unique name in Russian that clearly reflects its essence and atmosphere. Don’t forget to add a bright emoji at the end to make it even more expressive! For example, "Movie Characters 🎥" or "Magical Worlds 🌌."
+
+🌍 International charm! This name will be automatically translated into other languages, revealing your idea to users worldwide.
+"""
+    FACE_SWAP_MANAGE_CREATE_SUCCESS = """
+🎉 <b>Hooray, the new FaceSwap package is ready to launch!</b> 🚀
+
+🌟 Congratulations on your successful creation! Your new package will soon await its fans. Get ready for your creation to capture users’ imaginations!
+
+🖼 Time for photo magic! You can now start filling the package with the most incredible and funny photos. From hilarious to inspiring, each image will add uniqueness to your package.
+"""
+    FACE_SWAP_MANAGE_EDIT_CHOOSE_GENDER = "Choose Gender:"
+    FACE_SWAP_MANAGE_EDIT_CHOOSE_PACKAGE = "Choose Package:"
+    FACE_SWAP_MANAGE_EDIT = """
+🎨 <b>Time to create! You’ve chosen a package to edit</b> 🖌️
+
+🔧 Editing options:
+- <b>Change Visibility</b> - Make the package visible or hidden from users.
+- <b>View Images</b> - Check out the masterpieces already in the package.
+- <b>Add New Image</b> - It’s time to bring fresh colors and new faces!
+
+🚀 Ready for changes? Your creativity will breathe new life into this package. Let every generation be unique and memorable!
+"""
+    FACE_SWAP_MANAGE_CHANGE_STATUS = "Change Visibility 👁"
+    FACE_SWAP_MANAGE_SHOW_PICTURES = "View Images 🖼"
+    FACE_SWAP_MANAGE_ADD_NEW_PICTURE = "Add New Image 👨‍🎨"
+    FACE_SWAP_MANAGE_ADD_NEW_PICTURE_NAME = "Send me the name of the new image in English using CamelCase, e.g., 'ContentMaker'"
+    FACE_SWAP_MANAGE_ADD_NEW_PICTURE_IMAGE = "Now, send me the photo"
+    FACE_SWAP_MANAGE_EXAMPLE_PICTURE = "Example Generation 🎭"
+    FACE_SWAP_MANAGE_EDIT_SUCCESS = """
+🌟 <b>Package successfully edited!</b> 🎉
+
+👏 Bravo, admin! Your changes have been successfully applied. The FaceSwap package is now updated and even more amazing.
+
+🚀 Ready for new adventures? Your creativity and package management skills make the world of FaceSwap brighter and more exciting. Keep creating and inspiring users with your unique ideas!
+"""
+    FACE_SWAP_PUBLIC = "Visible to All 🔓"
+    FACE_SWAP_PRIVATE = "Visible to Admins 🔒"
+
     # Photoshop AI
     PHOTOSHOP_AI_INFO = """
 This section brings together AI tools for editing and styling images.
@@ -1210,6 +1739,123 @@ Please try again 🥺
 
     TERMS_LINK = "https://telegra.ph/Terms-of-Service-in-GPTsTurboBot-05-07"
 
+    # Blast
+    @staticmethod
+    def blast_confirmation(
+        blast_letters: dict,
+    ):
+        letters = ''
+        for i, (language_code, letter) in enumerate(blast_letters.items()):
+            letters += f'{language_code}:\n{letter}'
+            letters += '\n' if i < len(blast_letters.items()) - 1 else ''
+
+        return f"""
+📢 <b>The final step before the big launch!</b> 🚀
+
+🤖 Broadcast Text:
+{letters}
+
+If everything looks perfect, press "Approve" If changes are needed, select "Cancel" 🌟
+"""
+
+    @staticmethod
+    def catalog_manage_create_role_confirmation(
+        role_names: dict,
+        role_descriptions: dict,
+        role_instructions: dict,
+    ):
+        names = ''
+        for i, (language_code, name) in enumerate(role_names.items()):
+            names += f'{language_code}: {name}'
+            names += '\n' if i < len(role_names.items()) - 1 else ''
+        descriptions = ''
+        for i, (language_code, description) in enumerate(role_descriptions.items()):
+            descriptions += f'{language_code}: {description}'
+            descriptions += '\n' if i < len(role_descriptions.items()) - 1 else ''
+        instructions = ''
+        for i, (language_code, instruction) in enumerate(role_instructions.items()):
+            instructions += f'{language_code}: {instruction}'
+            instructions += '\n' if i < len(role_instructions.items()) - 1 else ''
+
+        return f"""
+🎩 <b>Here’s what you’ve created:</b>
+
+🌍 Names:
+{names}
+
+💬 Descriptions:
+{descriptions}
+
+📜 Instructions:
+{instructions}
+
+If everything looks perfect, press "Approve" If changes are needed, select "Cancel" 🌟
+"""
+
+    @staticmethod
+    def catalog_manage_role_edit(
+        role_names: dict[LanguageCode, str],
+        role_descriptions: dict[LanguageCode, str],
+        role_instructions: dict[LanguageCode, str],
+    ):
+        names = ''
+        for i, (language_code, name) in enumerate(role_names.items()):
+            names += f'{language_code}: {name}'
+            names += '\n' if i < len(role_names.items()) - 1 else ''
+        descriptions = ''
+        for i, (language_code, description) in enumerate(role_descriptions.items()):
+            descriptions += f'{language_code}: {description}'
+            descriptions += '\n' if i < len(role_descriptions.items()) - 1 else ''
+        instructions = ''
+        for i, (language_code, instruction) in enumerate(role_instructions.items()):
+            instructions += f'{language_code}: {instruction}'
+            instructions += '\n' if i < len(role_instructions.items()) - 1 else ''
+
+        return f"""
+🎨 <b>Role Configuration</b> 🖌️
+
+🌍 <b>Names:</b>
+{names}
+
+💬 <b>Descriptions:</b>
+{descriptions}
+
+📜 <b>Instructions:</b>
+{instructions}
+
+🛠️ Now it’s your turn to add some magic! Choose what you’d like to edit:
+- "Edit Name" 📝
+- "Edit Description" 📖
+- "Edit Instruction" 🗒️
+- "Edit Photo" 🖼
+- "Back" 🔙
+"""
+
+    @staticmethod
+    def face_swap_manage_create_package_confirmation(
+        package_system_name: str,
+        package_names: dict,
+    ):
+        names = ''
+        for i, (language_code, name) in enumerate(package_names.items()):
+            names += f'{language_code}: {name}'
+            names += '\n' if i < len(package_names.items()) - 1 else ''
+
+        return f"""
+🌟 <b>That’s it! Your new FaceSwap package is almost ready for debut!</b> 🎉
+
+📝 Review all the details:
+- 🤖 <b>System Name:</b>
+{package_system_name}
+
+- 🌍 <b>Names:</b>
+{names}
+
+🔍 Make sure everything is correct. This is your creation, and it should be perfect!
+
+👇 Choose an action
+"""
+
     @staticmethod
     def purchase_minimal_price(currency: Currency, current_price: str) -> str:
         left_part_price = Currency.SYMBOLS[currency] if currency == Currency.USD else ''
@@ -1217,7 +1863,7 @@ Please try again 🥺
         return f"""
 😕 Oh no...
 
-To complete the purchase, the total amount must be equal to or greater than <b>{left_part_price}1{right_part_price}</b>
+To complete the purchase, the total amount must be equal to or greater than <b>{left_part_price}{1 if currency == Currency.USD else 50}{right_part_price}</b>
 Currently, the total purchase amount is: <b>{left_part_price}{current_price}{right_part_price}</b>
 """
 
@@ -1231,6 +1877,8 @@ Currently, the total purchase amount is: <b>{left_part_price}{current_price}{rig
     ) -> str:
         if subscription_status == SubscriptionStatus.CANCELED:
             subscription_info = f"📫 <b>Subscription Status:</b> Canceled. Active until {renewal_date}"
+        elif subscription_status == SubscriptionStatus.TRIAL:
+            subscription_info = f"📫 <b>Subscription Status:</b> Trial Period"
         else:
             subscription_info = "📫 <b>Subscription Status:</b> Active"
 
@@ -1260,9 +1908,9 @@ Choose action 👇
         subscription_limits: dict,
         daily_limits: dict,
         additional_usage_quota: dict,
-        hours_before_limit_update: int,
-        minutes_before_limit_update: int,
     ) -> str:
+        hours, minutes = get_time_until_limit_update()
+
         return f"""
 <b>Quota:</b>
 
@@ -1271,14 +1919,16 @@ Choose action 👇
     ┣ Daily Limits: {format_number(daily_limits[Quota.CHAT_GPT4_OMNI_MINI])}/{format_number(subscription_limits[Quota.CHAT_GPT4_OMNI_MINI])}
     ┣ ✉️ ChatGPT 4.0 Omni Mini{f': extra {additional_usage_quota[Quota.CHAT_GPT4_OMNI_MINI]}' if additional_usage_quota[Quota.CHAT_GPT4_OMNI_MINI] > 0 else ''}
     ┣ 📜 Claude 3.5 Haiku{f': extra {additional_usage_quota[Quota.CLAUDE_3_HAIKU]}' if additional_usage_quota[Quota.CLAUDE_3_HAIKU] > 0 else ''}
-    ┗ 🏎 Gemini 1.5 Flash{f': extra {additional_usage_quota[Quota.GEMINI_1_FLASH]}' if additional_usage_quota[Quota.GEMINI_1_FLASH] > 0 else ''}
+    ┗ 🏎 Gemini 2.0 Flash{f': extra {additional_usage_quota[Quota.GEMINI_2_FLASH]}' if additional_usage_quota[Quota.GEMINI_2_FLASH] > 0 else ''}
 
 ━ <b>Advanced</b>:
     ┣ Daily Limits: {format_number(daily_limits[Quota.CHAT_GPT4_OMNI])}/{format_number(subscription_limits[Quota.CHAT_GPT4_OMNI])}
     ┣ 💥 ChatGPT 4.0 Omni{f': extra {additional_usage_quota[Quota.CHAT_GPT4_OMNI]}' if additional_usage_quota[Quota.CHAT_GPT4_OMNI] > 0 else ''}
     ┣ 🧩 ChatGPT o1-mini{f': extra {additional_usage_quota[Quota.CHAT_GPT_O_1_MINI]}' if additional_usage_quota[Quota.CHAT_GPT_O_1_MINI] > 0 else ''}
     ┣ 💫 Claude 3.5 Sonnet{f': extra {additional_usage_quota[Quota.CLAUDE_3_SONNET]}' if additional_usage_quota[Quota.CLAUDE_3_SONNET] > 0 else ''}
-    ┗ 💼 Gemini 1.5 Pro{f': extra {additional_usage_quota[Quota.GEMINI_1_PRO]}' if additional_usage_quota[Quota.GEMINI_1_PRO] > 0 else ''}
+    ┣ 💼 Gemini 1.5 Pro{f': extra {additional_usage_quota[Quota.GEMINI_1_PRO]}' if additional_usage_quota[Quota.GEMINI_1_PRO] > 0 else ''}
+    ┣ 🐦 Grok 2.0{f': extra {additional_usage_quota[Quota.GROK_2]}' if additional_usage_quota[Quota.GROK_2] > 0 else ''}
+    ┗ 🌐 Perplexity{f': extra {additional_usage_quota[Quota.PERPLEXITY]}' if additional_usage_quota[Quota.PERPLEXITY] > 0 else ''}
 
 ━ <b>Flagship</b>:
     ┣ Daily Limits: {format_number(daily_limits[Quota.CHAT_GPT_O_1])}/{format_number(subscription_limits[Quota.CHAT_GPT_O_1])}
@@ -1290,7 +1940,8 @@ Choose action 👇
 
 📝 <b>Summary Models</b>:
     ┣ Daily Limits: {format_number(daily_limits[Quota.EIGHTIFY])}/{format_number(subscription_limits[Quota.EIGHTIFY])}
-    ┗ 👀 YouTube{f': extra {additional_usage_quota[Quota.EIGHTIFY]}' if additional_usage_quota[Quota.EIGHTIFY] > 0 else ''}
+    ┣ 👀 YouTube{f': extra {additional_usage_quota[Quota.EIGHTIFY]}' if additional_usage_quota[Quota.EIGHTIFY] > 0 else ''}
+    ┗ 📼 Video{f': extra {additional_usage_quota[Quota.GEMINI_VIDEO]}' if additional_usage_quota[Quota.GEMINI_VIDEO] > 0 else ''}
 
 ---------------------------
 
@@ -1300,6 +1951,7 @@ Choose action 👇
     ┣ 🎨 Midjourney{f': extra {additional_usage_quota[Quota.MIDJOURNEY]}' if additional_usage_quota[Quota.MIDJOURNEY] > 0 else ''}
     ┣ 🎆 Stable Diffusion{f': extra {additional_usage_quota[Quota.STABLE_DIFFUSION]}' if additional_usage_quota[Quota.STABLE_DIFFUSION] > 0 else ''}
     ┣ 🫐 Flux{f': extra {additional_usage_quota[Quota.FLUX]}' if additional_usage_quota[Quota.FLUX] > 0 else ''}
+    ┣ 🌌 Luma Photon{f': extra {additional_usage_quota[Quota.LUMA_PHOTON]}' if additional_usage_quota[Quota.LUMA_PHOTON] > 0 else ''}
     ┣ 📷 FaceSwap{f': extra {additional_usage_quota[Quota.FACE_SWAP]}' if additional_usage_quota[Quota.FACE_SWAP] > 0 else ''}
     ┗ 🪄 Photoshop AI{f': extra {additional_usage_quota[Quota.PHOTOSHOP_AI]}' if additional_usage_quota[Quota.PHOTOSHOP_AI] > 0 else ''}
 
@@ -1312,20 +1964,21 @@ Choose action 👇
 
 ---------------------------
 
-📹 <b>Видео Модели</b>:
-    ┣ Дневной лимит: {format_number(daily_limits[Quota.RUNWAY])}/{format_number(subscription_limits[Quota.RUNWAY])}
-    ┗ 🎥 Runway{f': доп. {additional_usage_quota[Quota.RUNWAY]}' if additional_usage_quota[Quota.RUNWAY] > 0 else ''}
+📹 <b>Video Models</b>:
+    ┣ 🎬 Kling{f': extra {additional_usage_quota[Quota.KLING]}' if additional_usage_quota[Quota.KLING] > 0 else ''}
+    ┣ 🎥 Runway{f': extra {additional_usage_quota[Quota.RUNWAY]}' if additional_usage_quota[Quota.RUNWAY] > 0 else ''}
+    ┗ 🔆 Luma Ray{f': extra {additional_usage_quota[Quota.LUMA_RAY]}' if additional_usage_quota[Quota.LUMA_RAY] > 0 else ''}
 
 ---------------------------
 
-━ 💬 <b>Thematic chats</b>: {daily_limits[Quota.ADDITIONAL_CHATS] + additional_usage_quota[Quota.ADDITIONAL_CHATS]}
-━ 🎭 <b>Access to a catalog with digital employees</b>: {'✅' if daily_limits[Quota.ACCESS_TO_CATALOG] or additional_usage_quota[Quota.ACCESS_TO_CATALOG] else '❌'}
-━ 🎙 <b>Voice messages</b>: {'✅' if daily_limits[Quota.VOICE_MESSAGES] or additional_usage_quota[Quota.VOICE_MESSAGES] else '❌'}
-━ ⚡ <b>Fast answers</b>: {'✅' if daily_limits[Quota.FAST_MESSAGES] or additional_usage_quota[Quota.FAST_MESSAGES] else '❌'}
+💬 <b>Thematic chats</b>: {daily_limits[Quota.ADDITIONAL_CHATS] + additional_usage_quota[Quota.ADDITIONAL_CHATS]}
+🎭 <b>Access to a catalog with digital employees</b>: {'✅' if daily_limits[Quota.ACCESS_TO_CATALOG] or additional_usage_quota[Quota.ACCESS_TO_CATALOG] else '❌'}
+🎙 <b>Voice messages</b>: {'✅' if daily_limits[Quota.VOICE_MESSAGES] or additional_usage_quota[Quota.VOICE_MESSAGES] else '❌'}
+⚡ <b>Fast answers</b>: {'✅' if daily_limits[Quota.FAST_MESSAGES] or additional_usage_quota[Quota.FAST_MESSAGES] else '❌'}
 
 ---------------------------
 
-🔄 <i>Limit will be updated in: {hours_before_limit_update} h. {minutes_before_limit_update} min.</i>
+🔄 <i>Limit will be updated in: {hours} h. {minutes} min.</i>
 """
 
     @staticmethod
@@ -1392,7 +2045,12 @@ Choose action 👇
         return f"Renewing a subscription {name} for user: {user_id}"
 
     @staticmethod
-    def subscribe(subscriptions: list[Product], currency: Currency, user_discount: int):
+    def subscribe(
+        subscriptions: list[Product],
+        currency: Currency,
+        user_discount: int,
+        is_trial=False,
+    ):
         text_subscriptions = ''
         for subscription in subscriptions:
             subscription_name = subscription.names.get(LanguageCode.EN)
@@ -1400,6 +2058,13 @@ Choose action 👇
             left_part_price = Currency.SYMBOLS[currency] if currency == Currency.USD else ''
             right_part_price = Currency.SYMBOLS[currency] if currency != Currency.USD else ''
             if subscription_name and subscription_price:
+                is_trial_info = ''
+
+                if is_trial and currency == Currency.RUB:
+                    is_trial_info = '1₽ first 3 days, then '
+                elif is_trial and currency == Currency.USD:
+                    is_trial_info = 'Free first 3 days, then '
+
                 text_subscriptions += f'- <b>{subscription_name}</b>: '
                 per_period = 'per month' if subscription.category == ProductCategory.MONTHLY else 'per year'
 
@@ -1413,9 +2078,9 @@ Choose action 👇
                         discount,
                         SubscriptionPeriod.MONTH1 if subscription.category == ProductCategory.MONTHLY else SubscriptionPeriod.MONTHS12,
                     )
-                    text_subscriptions += f'<s>{left_part_price}{subscription_price}{right_part_price}</s> {left_part_price}{discount_price}{right_part_price} {per_period}\n'
+                    text_subscriptions += f'{is_trial_info}<s>{left_part_price}{subscription_price}{right_part_price}</s> {left_part_price}{discount_price}{right_part_price} {per_period}\n'
                 else:
-                    text_subscriptions += f'{left_part_price}{subscription_price}{right_part_price} {per_period}\n'
+                    text_subscriptions += f'{is_trial_info}{left_part_price}{subscription_price}{right_part_price} {per_period}\n'
         return f"""
 🤖 Ready to supercharge your digital journey? Here's what's on the menu:
 
@@ -1430,12 +2095,18 @@ Pick your potion and hit the button below to subscribe:
         category: ProductCategory,
         currency: Currency,
         price: Union[str, int, float],
+        is_trial=False,
     ):
         left_price_part = Currency.SYMBOLS[currency] if currency == Currency.USD else ''
         right_price_part = '' if currency == Currency.USD else Currency.SYMBOLS[currency]
         period = 'month' if category == ProductCategory.MONTHLY else 'year'
+
+        trial_info = ''
+        if is_trial:
+            trial_info = ' with a trial period first 3 days'
+
         return f"""
-You're about to activate subscription {name} for {left_price_part}{price}{right_price_part}/{period}
+You're about to activate subscription {name} for {left_price_part}{price}{right_price_part}/{period}{trial_info}
 
 ❗️You can cancel your subscription at any time in <b>Profile 👤</b>
 """
@@ -1596,51 +2267,51 @@ Looks like you've got only <b>{available_seconds} seconds</b> left in your arsen
     @staticmethod
     def switched(model_name: str, model_type: ModelType, model_info: dict):
         if model_type == ModelType.TEXT:
-            facts = f"""ℹ️ Facts and Settings:
+            facts = f"""⚙️ Facts and Settings:
     ┣ 📅 Knowledge up to: {model_info.get('training_data')}
     ┣ 📷 Image Support: {'Yes ✅' if model_info.get('support_photos', False) else 'No ❌'}
     ┣ 🎙 Voice Answers: {'Enabled ✅' if model_info.get(UserSettings.TURN_ON_VOICE_MESSAGES, False) else 'Disabled ❌'}
     ┗ 🎭 Role: {model_info.get('role')}"""
         elif model_type == ModelType.SUMMARY:
-            model_focus = model_info.get(UserSettings.FOCUS, EightifyFocus.INSIGHTFUL)
-            if model_focus == EightifyFocus.INSIGHTFUL:
-                model_focus = English.EIGHTIFY_FOCUS_INSIGHTFUL
-            elif model_focus == EightifyFocus.FUNNY:
-                model_focus = English.EIGHTIFY_FOCUS_FUNNY
-            elif model_focus == EightifyFocus.ACTIONABLE:
-                model_focus = English.EIGHTIFY_FOCUS_ACTIONABLE
-            elif model_focus == EightifyFocus.CONTROVERSIAL:
-                model_focus = English.EIGHTIFY_FOCUS_CONTROVERSIAL
+            model_focus = model_info.get(UserSettings.FOCUS, VideoSummaryFocus.INSIGHTFUL)
+            if model_focus == VideoSummaryFocus.INSIGHTFUL:
+                model_focus = English.VIDEO_SUMMARY_FOCUS_INSIGHTFUL
+            elif model_focus == VideoSummaryFocus.FUNNY:
+                model_focus = English.VIDEO_SUMMARY_FOCUS_FUNNY
+            elif model_focus == VideoSummaryFocus.ACTIONABLE:
+                model_focus = English.VIDEO_SUMMARY_FOCUS_ACTIONABLE
+            elif model_focus == VideoSummaryFocus.CONTROVERSIAL:
+                model_focus = English.VIDEO_SUMMARY_FOCUS_CONTROVERSIAL
 
-            model_format = model_info.get(UserSettings.FORMAT, EightifyFormat.LIST)
-            if model_format == EightifyFormat.LIST:
-                model_format = English.EIGHTIFY_FORMAT_LIST
-            elif model_format == EightifyFormat.FAQ:
-                model_format = English.EIGHTIFY_FORMAT_FAQ
+            model_format = model_info.get(UserSettings.FORMAT, VideoSummaryFormat.LIST)
+            if model_format == VideoSummaryFormat.LIST:
+                model_format = English.VIDEO_SUMMARY_FORMAT_LIST
+            elif model_format == VideoSummaryFormat.FAQ:
+                model_format = English.VIDEO_SUMMARY_FORMAT_FAQ
 
-            model_amount = model_info.get(UserSettings.AMOUNT, EightifyAmount.AUTO)
-            if model_amount == EightifyAmount.AUTO:
-                model_amount = English.EIGHTIFY_AMOUNT_AUTO
-            elif model_amount == EightifyAmount.SHORT:
-                model_amount = English.EIGHTIFY_AMOUNT_SHORT
-            elif model_amount == EightifyAmount.DETAILED:
-                model_amount = English.EIGHTIFY_AMOUNT_DETAILED
+            model_amount = model_info.get(UserSettings.AMOUNT, VideoSummaryAmount.AUTO)
+            if model_amount == VideoSummaryAmount.AUTO:
+                model_amount = English.VIDEO_SUMMARY_AMOUNT_AUTO
+            elif model_amount == VideoSummaryAmount.SHORT:
+                model_amount = English.VIDEO_SUMMARY_AMOUNT_SHORT
+            elif model_amount == VideoSummaryAmount.DETAILED:
+                model_amount = English.VIDEO_SUMMARY_AMOUNT_DETAILED
 
-            facts = f"""ℹ️ Settings:
+            facts = f"""⚙️ Settings:
     ┣ 🎯 Focus: {model_focus}
     ┣ 🎛 Format: {model_format}
     ┣ 📏 Number of Items: {model_amount}
     ┗ 🎙 Voice Answers: {'Enabled ✅' if model_info.get(UserSettings.TURN_ON_VOICE_MESSAGES, False) else 'Disabled ❌'}"""
         elif model_type == ModelType.IMAGE:
-            facts = f"""ℹ️ Facts and Settings:
+            facts = f"""⚙️ Facts and Settings:
     ┣ 📷 Image Support: {'Yes ✅' if model_info.get('support_photos', False) else 'No ❌'}
     ┣ 📐 Aspect Ratio: {'Custom' if model_info.get(UserSettings.ASPECT_RATIO, AspectRatio.CUSTOM) == AspectRatio.CUSTOM else model_info.get(UserSettings.ASPECT_RATIO)}
     ┗ 🗯 Sending Type: {English.DOCUMENT if model_info.get(UserSettings.SEND_TYPE, SendType.IMAGE) == SendType.DOCUMENT else English.IMAGE}"""
         elif model_type == ModelType.MUSIC:
-            facts = f"""ℹ️ Settings:
+            facts = f"""⚙️ Settings:
     ┗ 🗯 Sending Type: {English.VIDEO if model_info.get(UserSettings.SEND_TYPE, SendType.AUDIO) == SendType.VIDEO else English.AUDIO}"""
         elif model_type == ModelType.VIDEO:
-            facts = f"""ℹ️ Facts and Settings:
+            facts = f"""⚙️ Facts and Settings:
     ┣ 📷 Image Support: {'Yes ✅' if model_info.get('support_photos', False) else 'No ❌'}
     ┣ 📐 Aspect Ratio: {'Custom' if model_info.get(UserSettings.ASPECT_RATIO, AspectRatio.CUSTOM) == AspectRatio.CUSTOM else model_info.get(UserSettings.ASPECT_RATIO)}
     ┣ 📏 Duration: {model_info.get(UserSettings.DURATION, 5)} seconds
@@ -1649,11 +2320,11 @@ Looks like you've got only <b>{available_seconds} seconds</b> left in your arsen
             facts = f"ℹ️ Facts and Settings: Coming Soon 🔜"
 
         return f"""
-🔄 <b>You have successfully switched to the {model_name} model</b>
+<b>Selected Model: {model_name}</b>
 
 {facts}
 
-⬇️ Use the buttons below to explore more:
+👇 Use the buttons below to explore more:
 """
 
     @staticmethod
@@ -1914,6 +2585,18 @@ Looks like you've got only <b>{available_seconds} seconds</b> left in your arsen
         return text
 
     @staticmethod
+    def processing_statistics() -> str:
+        texts = [
+            'Summoning cybernetic ducks to speed up the process. Quack-quack, and we have the data! 🦆💻',
+            'Using secret code spells to extract your statistics from the depths of data. Abracadabra! 🧙‍💾',
+            'Timer is set, kettle is on. While I brew tea, the data is gathering itself! ☕📊',
+            'Connecting to cosmic satellites to find the necessary statistics. Now that’s a stellar search! 🛰️✨',
+            'Calling in an army of pixels. They’re already marching through lines of code to deliver your data! 🪖🖥️',
+        ]
+
+        return random.choice(texts)
+
+    @staticmethod
     def photoshop_ai_actions() -> list[str]:
         return [
             English.PHOTOSHOP_AI_RESTORATION,
@@ -1926,7 +2609,7 @@ Looks like you've got only <b>{available_seconds} seconds</b> left in your arsen
     def settings(human_model: str, current_model: Model, generation_cost=1) -> str:
         if current_model == Model.DALL_E:
             additional_text = f"\nAt the current settings, 1 request costs: {generation_cost} 🖼"
-        elif current_model == Model.RUNWAY:
+        elif current_model == Model.KLING or current_model == Model.RUNWAY:
             additional_text = f"\nAt the current settings, 1 request costs: {generation_cost} 📹"
         else:
             additional_text = ""

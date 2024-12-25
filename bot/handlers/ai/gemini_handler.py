@@ -1,14 +1,14 @@
 import asyncio
+import base64
 from datetime import datetime, timezone
-from io import BytesIO
 
-import PIL.Image
 import httpx
 from aiogram import Router
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.utils.chat_action import ChatActionSender
+from filetype import filetype
 from google.generativeai.types import StopCandidateException, BlockedPromptException
 
 from bot.config import config, MessageEffect, MessageSticker
@@ -43,8 +43,8 @@ from bot.locales.types import LanguageCode
 
 gemini_router = Router()
 
-PRICE_GEMINI_1_FLASH_INPUT = 0.000000075
-PRICE_GEMINI_1_FLASH_OUTPUT = 0.0000003
+PRICE_GEMINI_2_FLASH_INPUT = 0.000000075
+PRICE_GEMINI_2_FLASH_OUTPUT = 0.0000003
 PRICE_GEMINI_1_PRO_INPUT = 0.00000125
 PRICE_GEMINI_1_PRO_OUTPUT = 0.000005
 PRICE_GEMINI_1_ULTRA_INPUT = 0.00000125
@@ -126,11 +126,14 @@ async def handle_gemini_choose_selection(callback_query: CallbackQuery, state: F
                     f'Model version is not found: {user.settings[user.current_model][UserSettings.VERSION]}'
                 )
 
-            await callback_query.message.answer(
+            answered_message = await callback_query.message.answer(
                 text=text,
                 reply_markup=reply_markup,
                 message_effect_id=config.MESSAGE_EFFECTS.get(MessageEffect.FIRE),
             )
+
+            await callback_query.bot.unpin_all_chat_messages(user.telegram_chat_id)
+            await callback_query.bot.pin_chat_message(user.telegram_chat_id, answered_message.message_id)
         else:
             text = get_localization(user_language_code).ALREADY_SWITCHED_TO_THIS_MODEL
             await callback_query.message.answer(
@@ -141,8 +144,15 @@ async def handle_gemini_choose_selection(callback_query: CallbackQuery, state: F
     await state.clear()
 
 
-async def handle_gemini(message: Message, state: FSMContext, user: User, user_quota: Quota, filenames=None):
-    if user_quota != Quota.GEMINI_1_FLASH and user_quota != Quota.GEMINI_1_PRO and user_quota != Quota.GEMINI_1_ULTRA:
+async def handle_gemini(
+    message: Message,
+    state: FSMContext,
+    user: User,
+    user_quota: Quota,
+    filenames=None,
+    single_mode=False,
+):
+    if user_quota != Quota.GEMINI_2_FLASH and user_quota != Quota.GEMINI_1_PRO and user_quota != Quota.GEMINI_1_ULTRA:
         raise NotImplementedError(f'User quota is not implemented: {user_quota}')
 
     await state.update_data(is_processing=True)
@@ -166,17 +176,19 @@ async def handle_gemini(message: Message, state: FSMContext, user: User, user_qu
 
     chat = await get_chat(user.current_chat_id)
     if not user.subscription_id:
-        limit = 4
+        limit = 6
     elif user_quota == Quota.GEMINI_1_ULTRA:
-        limit = 16
+        limit = 20
     else:
-        limit = 8
+        limit = 12
     messages = await get_messages_by_chat_id(
         chat_id=user.current_chat_id,
         limit=limit,
     )
     role = await get_role(chat.role_id)
     sorted_messages = sorted(messages, key=lambda m: m.created_at)
+    if single_mode:
+        sorted_messages = [sorted_messages[-1]]
     system_prompt = role.translated_instructions.get(user_language_code, LanguageCode.EN)
     history = []
     for sorted_message in sorted_messages:
@@ -192,9 +204,22 @@ async def handle_gemini(message: Message, state: FSMContext, user: User, user_qu
 
                 async with httpx.AsyncClient() as client:
                     response = await client.get(photo_link)
-                    photo_content = response.content
-                photo_file = await asyncio.to_thread(lambda: PIL.Image.open(BytesIO(photo_content)))
-                parts.append(photo_file)
+                    response_content = response.content
+
+                kind = await asyncio.to_thread(lambda: filetype.guess(response_content))
+                if kind:
+                    media_type = kind.mime
+                else:
+                    media_type = 'image/jpeg'
+
+                if not media_type.startswith('image') and not single_mode:
+                    continue
+
+                data = await asyncio.to_thread(lambda: base64.b64encode(response_content).decode('utf-8'))
+                parts.append({
+                    'mime_type': media_type,
+                    'data': data,
+                })
 
         if parts:
             history.append({
@@ -220,13 +245,12 @@ async def handle_gemini(message: Message, state: FSMContext, user: User, user_qu
             response = await get_response_message(
                 model_version=user.settings[user.current_model][UserSettings.VERSION],
                 system_prompt=system_prompt,
-                new_prompt=history[-1],
-                history=history[:-1],
+                history=history,
             )
             response_message = response['message']
-            if user_quota == Quota.GEMINI_1_FLASH:
-                input_price = response['input_tokens'] * PRICE_GEMINI_1_FLASH_INPUT
-                output_price = response['output_tokens'] * PRICE_GEMINI_1_FLASH_OUTPUT
+            if user_quota == Quota.GEMINI_2_FLASH:
+                input_price = response['input_tokens'] * PRICE_GEMINI_2_FLASH_INPUT
+                output_price = response['output_tokens'] * PRICE_GEMINI_2_FLASH_OUTPUT
             elif user_quota == Quota.GEMINI_1_PRO:
                 input_price = response['input_tokens'] * PRICE_GEMINI_1_PRO_INPUT
                 output_price = response['output_tokens'] * PRICE_GEMINI_1_PRO_OUTPUT
@@ -342,14 +366,13 @@ async def handle_gemini_1_pro_example(
             not user.subscription_id and
             user.current_model == Model.GEMINI and
             user.settings[user.current_model][UserSettings.SHOW_EXAMPLES] and
-            user.daily_limits[Quota.GEMINI_1_FLASH] + 1 in [3, 7] and
+            user.daily_limits[Quota.GEMINI_2_FLASH] + 1 in [3, 7] and
             (current_date - user.last_subscription_limit_update).days <= 3
         ):
             response = await get_response_message(
                 model_version=GeminiGPTVersion.V1_Pro,
                 system_prompt=system_prompt,
-                new_prompt=history[-1].get('parts'),
-                history=history[:-1],
+                history=history,
             )
             response_message = response['message']
 
@@ -379,7 +402,7 @@ async def handle_gemini_1_pro_example(
             )
 
             header_text = f'{get_localization(user_language_code).GEMINI_1_PRO_EXAMPLE}\n\n'
-            footer_text = f'\n\n{get_localization(user_language_code).EXAMPLE_INFO}'
+            footer_text = f'\n{get_localization(user_language_code).EXAMPLE_INFO}'
             full_text = f'{header_text}{message_content}{footer_text}'
             reply_markup = build_buy_motivation_keyboard(user_language_code)
             await send_ai_message(

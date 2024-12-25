@@ -8,7 +8,7 @@ from bot.keyboards.admin.admin import build_admin_keyboard
 from bot.keyboards.admin.ban import build_ban_keyboard
 from bot.keyboards.common.common import build_cancel_keyboard
 from bot.locales.main import get_user_language, get_localization
-from bot.states.ban import Ban
+from bot.states.admin.ban import Ban
 
 ban_router = Router()
 

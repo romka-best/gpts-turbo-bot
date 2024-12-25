@@ -256,7 +256,7 @@ def build_cancel_keyboard(language_code: LanguageCode) -> InlineKeyboardMarkup:
                 text=get_localization(language_code).CANCEL,
                 callback_data='common:cancel'
             )
-        ]
+        ],
     ]
 
     return InlineKeyboardMarkup(inline_keyboard=buttons)
@@ -270,7 +270,7 @@ def build_error_keyboard(language_code: LanguageCode) -> InlineKeyboardMarkup:
                 url='https://t.me/roman_danilov',
                 callback_data='error:tech_support'
             )
-        ]
+        ],
     ]
 
     return InlineKeyboardMarkup(inline_keyboard=buttons)

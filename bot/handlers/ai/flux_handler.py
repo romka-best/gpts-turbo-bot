@@ -62,11 +62,14 @@ async def flux(message: Message, state: FSMContext):
             user_language_code,
         )
         reply_markup = build_switched_to_ai_keyboard(user_language_code, Model.FLUX)
-        await message.answer(
+        answered_message = await message.answer(
             text=text,
             reply_markup=reply_markup,
             message_effect_id=config.MESSAGE_EFFECTS.get(MessageEffect.FIRE),
         )
+
+        await message.bot.unpin_all_chat_messages(user.telegram_chat_id)
+        await message.bot.pin_chat_message(user.telegram_chat_id, answered_message.message_id)
 
 
 async def handle_flux(

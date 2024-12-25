@@ -11,18 +11,13 @@ from yookassa import Configuration
 
 from bot.config import config
 from bot.database.models.common import Currency, PaymentMethod
-from bot.database.models.product import Product
+from bot.database.models.product import Product, ProductType
 from bot.database.models.user import User
-from bot.helpers.billing.generate_signature import generate_signature
-from bot.locales.main import get_localization
 from bot.locales.types import LanguageCode
 
 Configuration.account_id = config.YOOKASSA_ACCOUNT_ID.get_secret_value()
 Configuration.secret_key = config.YOOKASSA_SECRET_KEY.get_secret_value()
 stripe.api_key = config.STRIPE_SECRET_KEY.get_secret_value()
-
-YOOKASSA_URL = 'https://api.yookassa.ru/v3'
-PAY_SELECTION_URL = 'https://webform.payselection.com'
 
 
 class OrderItem(BaseModel):
@@ -41,9 +36,10 @@ async def create_payment(
     order_items: list[OrderItem],
     order_id=None,
     order_interval=None,
+    is_trial=False,
 ) -> dict:
     if payment_method == PaymentMethod.YOOKASSA:
-        url = f'{YOOKASSA_URL}/payments'
+        url = f'https://api.yookassa.ru/v3/payments'
         headers = {
             'Content-Type': 'application/json',
             'Idempotence-Key': str(uuid.uuid4()),
@@ -53,7 +49,7 @@ async def create_payment(
             product, price, quantity = order_item.product, order_item.price, order_item.quantity
             items.append({
                 'amount': {
-                    'value': price,
+                    'value': 1 if is_trial else price,
                     'currency': Currency.RUB,
                 },
                 'description': product.names.get(language_code),
@@ -62,7 +58,7 @@ async def create_payment(
             })
         payload = {
             'amount': {
-                'value': amount,
+                'value': 1 if is_trial else amount,
                 'currency': Currency.RUB,
             },
             'confirmation': {
@@ -87,43 +83,6 @@ async def create_payment(
             auth=BasicAuth(Configuration.account_id, Configuration.secret_key)
         ) as session:
             async with session.post(url, headers=headers, data=json.dumps(payload)) as response:
-                body = await response.json()
-                logging.info(body)
-                if response.ok:
-                    return body
-    elif payment_method == PaymentMethod.PAY_SELECTION:
-        url = f'{PAY_SELECTION_URL}/webpayments/paylink_create'
-        request_id = str(uuid.uuid4())
-        request_body = {
-            'MetaData': {
-                'PreviewForm': True,
-                'OfferUrl': get_localization(language_code).TERMS_LINK,
-            },
-            'PaymentRequest': {
-                'OrderId': order_id,
-                'Amount': f'{amount:.2f}',
-                'Currency': Currency.USD,
-                'Description': description,
-                'RebillFlag': is_recurring,
-                'ExtraData': {
-                    'ReturnUrl': config.BOT_URL,
-                    'WebhookUrl': f'{config.WEBHOOK_URL}/payment/pay-selection'
-                }
-            },
-            'CustomerInfo': {
-                'Language': language_code,
-            },
-        }
-
-        request_signature = generate_signature('POST', request_body, request_id)
-        request_headers = {
-            'X-SITE-ID': config.PAY_SELECTION_SITE_ID.get_secret_value(),
-            'X-REQUEST-ID': request_id,
-            'X-REQUEST-SIGNATURE': request_signature,
-        }
-
-        async with aiohttp.ClientSession() as session:
-            async with session.post(url, headers=request_headers, data=json.dumps(request_body)) as response:
                 body = await response.json()
                 logging.info(body)
                 if response.ok:
@@ -169,6 +128,7 @@ async def create_payment(
                 'metadata': {
                     'order_id': order_id,
                 },
+                **({'trial_period_days': 3} if is_trial else {}),
             } if is_recurring else None,
             automatic_tax={
                 'enabled': True,

@@ -12,7 +12,14 @@ class LoggingMessageMiddleware(BaseMiddleware):
         message: Message,
         data: dict[str, Any],
     ):
-        logging.info(f'Received message from {message.from_user.id}: {message.text}')
+        if message.text:
+            text = message.text
+        elif message.caption:
+            text = message.caption
+        else:
+            text = None
+
+        logging.info(f'Received message from {message.from_user.id}: {text}')
         await handler(message, data)
 
 

@@ -31,7 +31,6 @@ from bot.database.operations.subscription.writers import write_subscription
 from bot.database.operations.transaction.writers import write_transaction
 from bot.database.operations.user.getters import get_user
 from bot.database.operations.user.updaters import update_user
-from bot.handlers.ai.eightify_handler import handle_eightify
 from bot.handlers.ai.face_swap_handler import handle_face_swap
 from bot.handlers.ai.music_gen_handler import handle_music_gen
 from bot.handlers.ai.photoshop_ai_handler import handle_photoshop_ai
@@ -76,15 +75,22 @@ async def handle_stripe_webhook(request: dict, bot: Bot, dp: Dispatcher):
     if not order_id:
         return
 
-    payment_charge = await stripe.Charge.retrieve_async(
-        charge_id,
-        expand=['balance_transaction'],
-    )
-    balance_transaction = payment_charge.balance_transaction
+    if charge_id:
+        payment_charge = await stripe.Charge.retrieve_async(
+            charge_id,
+            expand=['balance_transaction'],
+        )
+        balance_transaction = payment_charge.balance_transaction
+    else:
+        balance_transaction = 0
+
     if balance_transaction:
         clear_amount = balance_transaction.net / 100
     else:
         clear_amount = round(get_net(amount * 100) / 100, 2)
+
+    if clear_amount < 0:
+        clear_amount = 0
 
     try:
         subscription = await get_subscription(order_id)
@@ -95,6 +101,7 @@ async def handle_stripe_webhook(request: dict, bot: Bot, dp: Dispatcher):
             user = await get_user(subscription.user_id)
             product = await get_product(subscription.product_id)
             if request_type == 'invoice.payment_succeeded':
+                is_trial = float(clear_amount) <= 0.01
                 transaction = firebase.db.transaction()
                 await create_subscription(
                     transaction,
@@ -105,6 +112,7 @@ async def handle_stripe_webhook(request: dict, bot: Bot, dp: Dispatcher):
                     request_id,
                     subscription.id,
                     request_object.get('subscription', ''),
+                    is_trial,
                 )
                 await write_transaction(
                     user_id=subscription.user_id,
@@ -119,6 +127,7 @@ async def handle_stripe_webhook(request: dict, bot: Bot, dp: Dispatcher):
                         'subscription_id': subscription.id,
                         'provider_payment_charge_id': request_id,
                         'provider_auto_payment_charge_id': subscription.id,
+                        'is_trial': is_trial,
                     },
                 )
 
@@ -145,12 +154,15 @@ async def handle_stripe_webhook(request: dict, bot: Bot, dp: Dispatcher):
                     user_language_code,
                 )
                 reply_markup = build_switched_to_ai_keyboard(user_language_code, user.current_model)
-                await bot.send_message(
+                answered_message = await bot.send_message(
                     chat_id=subscription.user_id,
                     text=text,
                     reply_markup=reply_markup,
-                    message_effect_id=config.MESSAGE_EFFECTS.get('FIRE'),
+                    message_effect_id=config.MESSAGE_EFFECTS.get(MessageEffect.FIRE),
                 )
+
+                await bot.unpin_all_chat_messages(user.telegram_chat_id)
+                await bot.pin_chat_message(user.telegram_chat_id, answered_message.message_id)
 
                 state = FSMContext(
                     storage=dp.storage,
@@ -161,11 +173,9 @@ async def handle_stripe_webhook(request: dict, bot: Bot, dp: Dispatcher):
                     )
                 )
                 if user.current_model == Model.EIGHTIFY:
-                    await handle_eightify(
-                        bot=bot,
+                    await bot.send_message(
                         chat_id=user.telegram_chat_id,
-                        state=state,
-                        user_id=user.id,
+                        text=get_localization(user_language_code).EIGHTIFY_INFO,
                     )
                 elif user.current_model == Model.FACE_SWAP:
                     await handle_face_swap(
@@ -196,17 +206,30 @@ async def handle_stripe_webhook(request: dict, bot: Bot, dp: Dispatcher):
                         user_id=user.id,
                     )
 
-                await send_message_to_admins(
-                    bot=bot,
-                    message=f'#payment #subscription #success\n\n'
-                            f'🤑 <b>Успешно оформлена подписка у пользователя: {subscription.user_id}</b>\n\n'
-                            f'ℹ️ ID: {subscription.id}\n'
-                            f'💱 Метод оплаты: {subscription.payment_method}\n'
-                            f'💳 Тип: {product.names.get(LanguageCode.RU)}\n'
-                            f'💰 Сумма: {subscription.amount}{Currency.SYMBOLS[subscription.currency]}\n'
-                            f'💸 Чистая сумма: {float(clear_amount)}{Currency.SYMBOLS[subscription.currency]}\n\n'
-                            f'Продолжаем в том же духе 💪',
-                )
+                if is_trial:
+                    await send_message_to_admins(
+                        bot=bot,
+                        message=f'#payment #trial #subscription #success\n\n'
+                                f'🤑 <b>Успешно оформлен пробный период подписки у пользователя: {subscription.user_id}</b>\n\n'
+                                f'ℹ️ ID: {subscription.id}\n'
+                                f'💱 Метод оплаты: {subscription.payment_method}\n'
+                                f'💳 Тип: {product.names.get(LanguageCode.RU)}\n'
+                                f'💰 Сумма: {subscription.amount}{Currency.SYMBOLS[subscription.currency]}\n'
+                                f'💸 Чистая сумма: {float(clear_amount)}{Currency.SYMBOLS[subscription.currency]}\n\n'
+                                f'Продолжаем в том же духе 💪',
+                    )
+                else:
+                    await send_message_to_admins(
+                        bot=bot,
+                        message=f'#payment #subscription #success\n\n'
+                                f'🤑 <b>Успешно оформлена подписка у пользователя: {subscription.user_id}</b>\n\n'
+                                f'ℹ️ ID: {subscription.id}\n'
+                                f'💱 Метод оплаты: {subscription.payment_method}\n'
+                                f'💳 Тип: {product.names.get(LanguageCode.RU)}\n'
+                                f'💰 Сумма: {subscription.amount}{Currency.SYMBOLS[subscription.currency]}\n'
+                                f'💸 Чистая сумма: {float(clear_amount)}{Currency.SYMBOLS[subscription.currency]}\n\n'
+                                f'Продолжаем в том же духе 💪',
+                    )
             elif request_type == 'invoice.payment_failed':
                 subscription.status = SubscriptionStatus.DECLINED
                 await update_subscription(
@@ -242,76 +265,110 @@ async def handle_stripe_webhook(request: dict, bot: Bot, dp: Dispatcher):
             old_subscription = await get_subscription_by_provider_auto_payment_charge_id(order_id)
             if (
                 old_subscription is not None and (
-                old_subscription.status == SubscriptionStatus.ACTIVE or old_subscription.status == SubscriptionStatus.FINISHED
+                old_subscription.status == SubscriptionStatus.ACTIVE or old_subscription.status == SubscriptionStatus.TRIAL or old_subscription.status == SubscriptionStatus.FINISHED
             )):
                 user = await get_user(old_subscription.user_id)
                 product = await get_product(old_subscription.product_id)
                 if request_type == 'invoice.payment_succeeded':
-                    transaction = firebase.db.transaction()
-                    await update_subscription(old_subscription.id, {'status': SubscriptionStatus.FINISHED})
-                    new_subscription = await write_subscription(
-                        None,
-                        user.id,
-                        old_subscription.product_id,
-                        old_subscription.period,
-                        SubscriptionStatus.ACTIVE,
-                        Currency.USD,
-                        float(amount),
-                        float(clear_amount),
-                        PaymentMethod.STRIPE,
-                        request_id,
-                    )
-                    await create_subscription(
-                        transaction,
-                        bot,
-                        new_subscription.id,
-                        new_subscription.user_id,
-                        float(clear_amount),
-                        request_id,
-                        order_id,
-                        old_subscription.stripe_id,
-                    )
-                    await write_transaction(
-                        user_id=new_subscription.user_id,
-                        type=TransactionType.INCOME,
-                        product_id=new_subscription.product_id,
-                        amount=new_subscription.amount,
-                        clear_amount=float(clear_amount),
-                        currency=new_subscription.currency,
-                        quantity=1,
-                        details={
-                            'payment_method': PaymentMethod.STRIPE,
-                            'subscription_id': new_subscription.id,
-                            'provider_payment_charge_id': request_id,
-                            'provider_auto_payment_charge_id': order_id,
-                        },
-                    )
+                    if old_subscription.status == SubscriptionStatus.TRIAL:
+                        new_income_amount = old_subscription.income_amount + float(clear_amount)
+                        await update_subscription(old_subscription.id, {
+                            'status': SubscriptionStatus.ACTIVE,
+                            'income_amount': new_income_amount,
+                        })
+                        await write_transaction(
+                            user_id=old_subscription.user_id,
+                            type=TransactionType.INCOME,
+                            product_id=old_subscription.product_id,
+                            amount=old_subscription.amount,
+                            clear_amount=float(clear_amount),
+                            currency=old_subscription.currency,
+                            quantity=1,
+                            details={
+                                'payment_method': PaymentMethod.STRIPE,
+                                'subscription_id': old_subscription.id,
+                                'provider_payment_charge_id': request_id,
+                                'provider_auto_payment_charge_id': order_id,
+                            },
+                        )
 
-                    await bot.send_sticker(
-                        chat_id=user.telegram_chat_id,
-                        sticker=config.MESSAGE_STICKERS.get(MessageSticker.LOVE),
-                        disable_notification=True,
-                    )
+                        await send_message_to_admins(
+                            bot=bot,
+                            message=f'#payment #trial #renew #subscription #success\n\n'
+                                    f'🤑 <b>Успешно продлена подписка после пробного периода у пользователя: {old_subscription.user_id}</b>\n\n'
+                                    f'ℹ️ ID: {old_subscription.id}\n'
+                                    f'💱 Метод оплаты: {old_subscription.payment_method}\n'
+                                    f'💳 Тип: {product.names.get(LanguageCode.RU)}\n'
+                                    f'💰 Сумма: {old_subscription.amount}{Currency.SYMBOLS[old_subscription.currency]}\n'
+                                    f'💸 Чистая сумма: {new_income_amount}{Currency.SYMBOLS[old_subscription.currency]}\n\n'
+                                    f'Продолжаем в том же духе 💪',
+                        )
+                    else:
+                        transaction = firebase.db.transaction()
+                        await update_subscription(old_subscription.id, {'status': SubscriptionStatus.FINISHED})
+                        new_subscription = await write_subscription(
+                            None,
+                            user.id,
+                            old_subscription.product_id,
+                            old_subscription.period,
+                            SubscriptionStatus.ACTIVE,
+                            Currency.USD,
+                            float(amount),
+                            float(clear_amount),
+                            PaymentMethod.STRIPE,
+                            request_id,
+                        )
+                        await create_subscription(
+                            transaction,
+                            bot,
+                            new_subscription.id,
+                            new_subscription.user_id,
+                            float(clear_amount),
+                            request_id,
+                            order_id,
+                            old_subscription.stripe_id,
+                        )
+                        await write_transaction(
+                            user_id=new_subscription.user_id,
+                            type=TransactionType.INCOME,
+                            product_id=new_subscription.product_id,
+                            amount=new_subscription.amount,
+                            clear_amount=float(clear_amount),
+                            currency=new_subscription.currency,
+                            quantity=1,
+                            details={
+                                'payment_method': PaymentMethod.STRIPE,
+                                'subscription_id': new_subscription.id,
+                                'provider_payment_charge_id': request_id,
+                                'provider_auto_payment_charge_id': order_id,
+                            },
+                        )
 
-                    user_language_code = await get_user_language(new_subscription.user_id, dp.storage)
-                    await bot.send_message(
-                        chat_id=new_subscription.user_id,
-                        text=get_localization(user_language_code).SUBSCRIPTION_RESET,
-                        message_effect_id=config.MESSAGE_EFFECTS.get(MessageEffect.HEART),
-                        disable_notification=True,
-                    )
+                        await bot.send_sticker(
+                            chat_id=user.telegram_chat_id,
+                            sticker=config.MESSAGE_STICKERS.get(MessageSticker.LOVE),
+                            disable_notification=True,
+                        )
 
-                    await send_message_to_admins(
-                        bot=bot,
-                        message=f'#payment #renew #subscription #success\n\n'
-                                f'🤑 <b>Успешно продлена подписка у пользователя: {new_subscription.user_id}</b>\n\n'
-                                f'ℹ️ ID: {new_subscription.id}\n'
-                                f'💱 Метод оплаты: {new_subscription.payment_method}\n'
-                                f'💳 Тип: {product.names.get(LanguageCode.RU)}\n'
-                                f'💰 Сумма: {new_subscription.amount}{Currency.SYMBOLS[new_subscription.currency]}\n'
-                                f'💸 Чистая сумма: {float(clear_amount)}{Currency.SYMBOLS[new_subscription.currency]}\n\n'
-                                f'Продолжаем в том же духе 💪',
-                    )
+                        user_language_code = await get_user_language(new_subscription.user_id, dp.storage)
+                        await bot.send_message(
+                            chat_id=new_subscription.user_id,
+                            text=get_localization(user_language_code).SUBSCRIPTION_RESET,
+                            message_effect_id=config.MESSAGE_EFFECTS.get(MessageEffect.HEART),
+                            disable_notification=True,
+                        )
+
+                        await send_message_to_admins(
+                            bot=bot,
+                            message=f'#payment #renew #subscription #success\n\n'
+                                    f'🤑 <b>Успешно продлена подписка у пользователя: {new_subscription.user_id}</b>\n\n'
+                                    f'ℹ️ ID: {new_subscription.id}\n'
+                                    f'💱 Метод оплаты: {new_subscription.payment_method}\n'
+                                    f'💳 Тип: {product.names.get(LanguageCode.RU)}\n'
+                                    f'💰 Сумма: {new_subscription.amount}{Currency.SYMBOLS[new_subscription.currency]}\n'
+                                    f'💸 Чистая сумма: {float(clear_amount)}{Currency.SYMBOLS[new_subscription.currency]}\n\n'
+                                    f'Продолжаем в том же духе 💪',
+                        )
                 elif request_type == 'invoice.payment_failed':
                     current_date = datetime.now(timezone.utc)
 
@@ -444,12 +501,15 @@ async def handle_stripe_webhook(request: dict, bot: Bot, dp: Dispatcher):
                     user_language_code,
                 )
                 reply_markup = build_switched_to_ai_keyboard(user_language_code, user.current_model)
-                await bot.send_message(
+                answered_message = await bot.send_message(
                     chat_id=package.user_id,
                     text=text,
                     reply_markup=reply_markup,
                     message_effect_id=config.MESSAGE_EFFECTS.get(MessageEffect.FIRE),
                 )
+
+                await bot.unpin_all_chat_messages(user.telegram_chat_id)
+                await bot.pin_chat_message(user.telegram_chat_id, answered_message.message_id)
 
                 state = FSMContext(
                     storage=dp.storage,
@@ -460,11 +520,9 @@ async def handle_stripe_webhook(request: dict, bot: Bot, dp: Dispatcher):
                     )
                 )
                 if user.current_model == Model.EIGHTIFY:
-                    await handle_eightify(
-                        bot=bot,
+                    await bot.send_message(
                         chat_id=user.telegram_chat_id,
-                        state=state,
-                        user_id=user.id,
+                        text=get_localization(user_language_code).EIGHTIFY_INFO,
                     )
                 elif user.current_model == Model.FACE_SWAP:
                     await handle_face_swap(
@@ -606,12 +664,15 @@ async def handle_stripe_webhook(request: dict, bot: Bot, dp: Dispatcher):
                     user_language_code,
                 )
                 reply_markup = build_switched_to_ai_keyboard(user_language_code, user.current_model)
-                await bot.send_message(
+                answered_message = await bot.send_message(
                     chat_id=user.id,
                     text=text,
                     reply_markup=reply_markup,
                     message_effect_id=config.MESSAGE_EFFECTS.get(MessageEffect.FIRE),
                 )
+
+                await bot.unpin_all_chat_messages(user.telegram_chat_id)
+                await bot.pin_chat_message(user.telegram_chat_id, answered_message.message_id)
 
                 state = FSMContext(
                     storage=dp.storage,
@@ -622,11 +683,9 @@ async def handle_stripe_webhook(request: dict, bot: Bot, dp: Dispatcher):
                     )
                 )
                 if user.current_model == Model.EIGHTIFY:
-                    await handle_eightify(
-                        bot=bot,
+                    await bot.send_message(
                         chat_id=user.telegram_chat_id,
-                        state=state,
-                        user_id=user.id,
+                        text=get_localization(user_language_code).EIGHTIFY_INFO,
                     )
                 elif user.current_model == Model.FACE_SWAP:
                     await handle_face_swap(

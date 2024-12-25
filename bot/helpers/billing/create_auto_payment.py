@@ -9,14 +9,12 @@ from yookassa import Configuration
 from bot.config import config
 from bot.database.models.common import Currency, PaymentMethod
 from bot.helpers.billing.create_payment import OrderItem
-from bot.helpers.billing.generate_signature import generate_signature
 from bot.locales.types import LanguageCode
 
 Configuration.account_id = config.YOOKASSA_ACCOUNT_ID.get_secret_value()
 Configuration.secret_key = config.YOOKASSA_SECRET_KEY.get_secret_value()
 
 YOOKASSA_URL = 'https://api.yookassa.ru/v3'
-PAY_SELECTION_URL = 'https://gw.payselection.com'
 
 
 async def create_auto_payment(
@@ -27,7 +25,6 @@ async def create_auto_payment(
     amount: float,
     language_code: LanguageCode,
     order_items: list[OrderItem],
-    order_id=None,
 ) -> dict:
     if payment_method == PaymentMethod.YOOKASSA:
         url = f'{YOOKASSA_URL}/payments'
@@ -69,31 +66,6 @@ async def create_auto_payment(
             auth=BasicAuth(Configuration.account_id, Configuration.secret_key)
         ) as session:
             async with session.post(url, headers=headers, data=json.dumps(payload)) as response:
-                body = await response.json()
-                logging.info(body)
-                if response.ok:
-                    return body
-    elif payment_method == PaymentMethod.PAY_SELECTION:
-        url = f'{PAY_SELECTION_URL}/payments/requests/rebill'
-        request_id = str(uuid.uuid4())
-        request_body = {
-            'OrderId': order_id,
-            'Amount': str(amount),
-            'Currency': Currency.USD,
-            'Description': description,
-            'RebillId': provider_auto_payment_charge_id,
-            'WebhookUrl': f'{config.WEBHOOK_URL}/payment/pay-selection',
-        }
-
-        request_signature = generate_signature('POST', request_body, request_id)
-        request_headers = {
-            'X-SITE-ID': config.PAY_SELECTION_SITE_ID.get_secret_value(),
-            'X-REQUEST-ID': request_id,
-            'X-REQUEST-SIGNATURE': request_signature,
-        }
-
-        async with aiohttp.ClientSession() as session:
-            async with session.post(url, headers=request_headers, data=json.dumps(request_body)) as response:
                 body = await response.json()
                 logging.info(body)
                 if response.ok:

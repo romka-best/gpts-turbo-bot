@@ -44,6 +44,7 @@ from bot.database.operations.user.updaters import update_user
 from bot.helpers.getters.get_quota_by_model import get_quota_by_model
 from bot.helpers.getters.get_switched_to_ai_model import get_switched_to_ai_model
 from bot.helpers.senders.send_error_info import send_error_info
+from bot.integrations.luma import get_response_face_swap
 from bot.integrations.replicateAI import create_face_swap_images
 from bot.keyboards.ai.face_swap import (
     build_face_swap_choose_keyboard,
@@ -53,8 +54,10 @@ from bot.keyboards.ai.model import build_switched_to_ai_keyboard
 from bot.keyboards.common.common import build_cancel_keyboard, build_error_keyboard
 from bot.keyboards.common.profile import build_profile_gender_keyboard
 from bot.locales.main import get_localization, get_user_language
-from bot.states.face_swap import FaceSwap
-from bot.states.profile import Profile
+from bot.locales.translate_text import translate_text
+from bot.locales.types import LanguageCode
+from bot.states.ai.face_swap import FaceSwap
+from bot.states.common.profile import Profile
 
 face_swap_router = Router()
 
@@ -95,11 +98,14 @@ async def face_swap(message: Message, state: FSMContext):
             user_language_code,
         )
         reply_markup = build_switched_to_ai_keyboard(user_language_code, Model.FACE_SWAP)
-        await message.answer(
+        answered_message = await message.answer(
             text=text,
             reply_markup=reply_markup,
             message_effect_id=config.MESSAGE_EFFECTS.get(MessageEffect.FIRE),
         )
+
+        await message.bot.unpin_all_chat_messages(user.telegram_chat_id)
+        await message.bot.pin_chat_message(user.telegram_chat_id, answered_message.message_id)
 
     await handle_face_swap(message.bot, user.telegram_chat_id, state, user_id)
 
@@ -177,6 +183,126 @@ async def handle_face_swap(bot: Bot, chat_id: str, state: FSMContext, user_id: s
                 reply_markup=reply_markup
             )
             await state.set_state(Profile.waiting_for_photo)
+
+
+async def handle_face_swap_prompt(
+    message: Message,
+    state: FSMContext,
+    user: User,
+):
+    await state.update_data(is_processing=True)
+
+    user_language_code = await get_user_language(user.id, state.storage)
+    user_data = await state.get_data()
+
+    prompt = user_data.get('recognized_text', None)
+    if prompt is None:
+        if message.caption:
+            prompt = message.caption
+        elif message.text:
+            prompt = message.text
+        else:
+            prompt = ''
+
+    processing_sticker = await message.answer_sticker(
+        sticker=config.MESSAGE_STICKERS.get(MessageSticker.IMAGE_GENERATION),
+    )
+    processing_message = await message.reply(
+        text=get_localization(user_language_code).processing_request_image(),
+        allow_sending_without_reply=True,
+    )
+
+    async with ChatActionSender.upload_photo(bot=message.bot, chat_id=message.chat.id):
+        product = await get_product_by_quota(Quota.FACE_SWAP)
+
+        user_not_finished_requests = await get_started_requests_by_user_id_and_product_id(user.id, product.id)
+
+        if len(user_not_finished_requests):
+            await message.reply(
+                text=get_localization(user_language_code).ALREADY_MAKE_REQUEST,
+                allow_sending_without_reply=True,
+            )
+
+            await processing_sticker.delete()
+            await processing_message.delete()
+            return
+
+        try:
+            user_photo_blobs = await firebase.bucket.list_blobs(prefix=f'users/avatars/{user.id}.')
+            user_photo = await firebase.bucket.get_blob(user_photo_blobs[-1])
+            user_photo_link = firebase.get_public_url(user_photo.name)
+
+            request = await write_request(
+                user_id=user.id,
+                processing_message_ids=[processing_sticker.message_id, processing_message.message_id],
+                product_id=product.id,
+                requested=1,
+            )
+
+            if prompt and user_language_code != LanguageCode.EN:
+                prompt = await translate_text(prompt, user_language_code, LanguageCode.EN)
+            result_id = await get_response_face_swap(
+                prompt,
+                user_photo_link,
+            )
+
+            await write_generation(
+                id=result_id,
+                request_id=request.id,
+                product_id=product.id,
+                has_error=result_id is None,
+                details={
+                    'prompt': prompt,
+                }
+            )
+        except aiohttp.ClientResponseError:
+            photo_path = 'users/avatars/example.png'
+            photo = await firebase.bucket.get_blob(photo_path)
+            photo_link = firebase.get_public_url(photo.name)
+
+            reply_markup = build_cancel_keyboard(user_language_code)
+            await message.answer_photo(
+                photo=URLInputFile(photo_link, filename=photo_path, timeout=300),
+                caption=get_localization(user_language_code).SEND_ME_YOUR_PICTURE,
+                reply_markup=reply_markup
+            )
+            await state.set_state(Profile.waiting_for_photo)
+        except Exception as e:
+            await message.answer_sticker(
+                sticker=config.MESSAGE_STICKERS.get(MessageSticker.ERROR),
+            )
+
+            reply_markup = build_error_keyboard(user_language_code)
+            await message.answer(
+                text=get_localization(user_language_code).ERROR,
+                reply_markup=reply_markup,
+            )
+            await send_error_info(
+                bot=message.bot,
+                user_id=user.id,
+                info=str(e),
+                hashtags=['face_swap'],
+            )
+
+            request.status = RequestStatus.FINISHED
+            await update_request(request.id, {
+                'status': request.status
+            })
+
+            generations = await get_generations_by_request_id(request.id)
+            for generation in generations:
+                generation.status = GenerationStatus.FINISHED,
+                generation.has_error = True
+                await update_generation(
+                    generation.id,
+                    {
+                        'status': generation.status,
+                        'has_error': generation.has_error,
+                    },
+                )
+
+            await processing_sticker.delete()
+            await processing_message.delete()
 
 
 async def handle_face_swap_choose_selection(
