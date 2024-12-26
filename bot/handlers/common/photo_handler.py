@@ -1,3 +1,4 @@
+import asyncio
 import time
 import uuid
 
@@ -16,9 +17,9 @@ from bot.database.models.common import (
     ChatGPTVersion,
     ClaudeGPTVersion,
     GeminiGPTVersion,
+    GrokGPTVersion,
     MidjourneyAction,
-    PhotoshopAIAction,
-)
+    PhotoshopAIAction, )
 from bot.database.models.face_swap_package import FaceSwapPackageStatus
 from bot.database.models.user import UserSettings
 from bot.database.operations.face_swap_package.getters import (
@@ -37,19 +38,22 @@ from bot.handlers.ai.claude_handler import handle_claude
 from bot.handlers.ai.face_swap_handler import handle_face_swap
 from bot.handlers.ai.flux_handler import handle_flux
 from bot.handlers.ai.gemini_handler import handle_gemini
+from bot.handlers.ai.grok_handler import handle_grok
+from bot.handlers.ai.kling_handler import handle_kling
+from bot.handlers.ai.luma_handler import handle_luma_photon, handle_luma_ray
 from bot.handlers.ai.midjourney_handler import handle_midjourney
 from bot.handlers.ai.runway_handler import handle_runway
 from bot.handlers.ai.stable_diffusion_handler import handle_stable_diffusion
 from bot.helpers.getters.get_quota_by_model import get_quota_by_model
 from bot.integrations.replicateAI import create_face_swap_image, create_photoshop_ai_image
 from bot.keyboards.admin.catalog import build_manage_catalog_create_role_confirmation_keyboard
-from bot.keyboards.common.common import build_cancel_keyboard, build_limit_exceeded_keyboard
+from bot.keyboards.common.common import build_cancel_keyboard, build_limit_exceeded_keyboard, build_suggestions_keyboard
 from bot.locales.main import get_localization, get_user_language
 from bot.middlewares.AlbumMiddleware import AlbumMiddleware
-from bot.states.catalog import Catalog
-from bot.states.face_swap import FaceSwap
-from bot.states.photoshop_ai import PhotoshopAI
-from bot.states.profile import Profile
+from bot.states.common.catalog import Catalog
+from bot.states.ai.face_swap import FaceSwap
+from bot.states.ai.photoshop_ai import PhotoshopAI
+from bot.states.common.profile import Profile
 from bot.utils.is_already_processing import is_already_processing
 from bot.utils.is_messages_limit_exceeded import is_messages_limit_exceeded
 from bot.utils.is_time_limit_exceeded import is_time_limit_exceeded
@@ -71,7 +75,7 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
         )
 
         photo_data_io = await message.bot.download_file(photo_file.file_path, timeout=300)
-        photo_data = photo_data_io.read()
+        photo_data = await asyncio.to_thread(photo_data_io.read)
         photo_extension = photo_file.file_path.split('.')[-1]
 
         blob_path = f'users/avatars/{user_id}.{photo_extension}'
@@ -109,7 +113,7 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
         user_data = await state.get_data()
 
         photo_data_io = await message.bot.download_file(photo_file.file_path, timeout=300)
-        photo_data = photo_data_io.read()
+        photo_data = await asyncio.to_thread(photo_data_io.read)
 
         photo_name = f'{user_data["system_role_name"]}.png'
         photo_path = f'roles/{photo_name}'
@@ -131,7 +135,7 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
         face_swap_picture_name = user_data['face_swap_picture_name']
 
         photo_data_io = await message.bot.download_file(photo_file.file_path, timeout=300)
-        photo_data = photo_data_io.read()
+        photo_data = await asyncio.to_thread(photo_data_io.read)
         photo_extension = photo_file.file_path.split('.')[-1]
 
         face_swap_package = await get_face_swap_package(face_swap_package_id)
@@ -162,7 +166,7 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
 
             reply_markup = build_limit_exceeded_keyboard(user_language_code)
             await message.answer(
-                text=get_localization(user_language_code).REACHED_USAGE_LIMIT,
+                text=get_localization(user_language_code).reached_usage_limit(),
                 reply_markup=reply_markup,
             )
             return
@@ -199,7 +203,7 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
 
         async with ChatActionSender.upload_photo(bot=message.bot, chat_id=message.chat.id):
             photo_data_io = await message.bot.download_file(photo_file.file_path, timeout=300)
-            photo_data = photo_data_io.read()
+            photo_data = await asyncio.to_thread(photo_data_io.read)
             photo_extension = photo_file.file_path.split('.')[-1]
             photo_name = f'{uuid.uuid4()}.{photo_extension}'
             photo_path = f'users/photoshop/{photoshop_ai_action_name}/{user_id}/{photo_name}'
@@ -229,16 +233,13 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
 
             await state.clear()
     elif (
-        (user.current_model == Model.CHAT_GPT and (
-            user.settings[user.current_model][UserSettings.VERSION] == ChatGPTVersion.V4_Omni_Mini or
-            user.settings[user.current_model][UserSettings.VERSION] == ChatGPTVersion.V4_Omni or
-            user.settings[user.current_model][UserSettings.VERSION] == ChatGPTVersion.V1_O
-        )) or
-        (user.current_model == Model.CLAUDE and (
-            user.settings[user.current_model][UserSettings.VERSION] == ClaudeGPTVersion.V3_Sonnet or
-            user.settings[user.current_model][UserSettings.VERSION] == ClaudeGPTVersion.V3_Opus
-        )) or
-        user.current_model == Model.GEMINI
+        user.settings[user.current_model][UserSettings.VERSION] == ChatGPTVersion.V4_Omni_Mini or
+        user.settings[user.current_model][UserSettings.VERSION] == ChatGPTVersion.V4_Omni or
+        user.settings[user.current_model][UserSettings.VERSION] == ChatGPTVersion.V1_O or
+        user.settings[user.current_model][UserSettings.VERSION] == ClaudeGPTVersion.V3_Sonnet or
+        user.settings[user.current_model][UserSettings.VERSION] == ClaudeGPTVersion.V3_Opus or
+        user.current_model == Model.GEMINI or
+        user.current_model == Model.GROK
     ):
         if user.settings[user.current_model][UserSettings.VERSION] == ChatGPTVersion.V4_Omni_Mini:
             quota = Quota.CHAT_GPT4_OMNI_MINI
@@ -250,12 +251,14 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
             quota = Quota.CLAUDE_3_SONNET
         elif user.settings[user.current_model][UserSettings.VERSION] == ClaudeGPTVersion.V3_Opus:
             quota = Quota.CLAUDE_3_OPUS
-        elif user.settings[user.current_model][UserSettings.VERSION] == GeminiGPTVersion.V1_Flash:
-            quota = Quota.GEMINI_1_FLASH
+        elif user.settings[user.current_model][UserSettings.VERSION] == GeminiGPTVersion.V2_Flash:
+            quota = Quota.GEMINI_2_FLASH
         elif user.settings[user.current_model][UserSettings.VERSION] == GeminiGPTVersion.V1_Pro:
             quota = Quota.GEMINI_1_PRO
         elif user.settings[user.current_model][UserSettings.VERSION] == GeminiGPTVersion.V1_Ultra:
             quota = Quota.GEMINI_1_ULTRA
+        elif user.settings[user.current_model][UserSettings.VERSION] == GrokGPTVersion.V2:
+            quota = Quota.GROK_2
         else:
             raise NotImplementedError(
                 f'User quota is not implemented: {user.settings[user.current_model][UserSettings.VERSION]}'
@@ -271,7 +274,7 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
             return
 
         photo_data_io = await message.bot.download_file(photo_file.file_path, timeout=300)
-        photo_data = photo_data_io.read()
+        photo_data = await asyncio.to_thread(photo_data_io.read)
         photo_extension = photo_file.file_path.split('.')[-1]
 
         photo_vision_filename = f'{uuid.uuid4()}.{photo_extension}'
@@ -285,7 +288,14 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
             await handle_claude(message, state, user, quota, [photo_vision_filename])
         elif user.current_model == Model.GEMINI:
             await handle_gemini(message, state, user, quota, [photo_vision_filename])
-    elif user.current_model == Model.MIDJOURNEY or user.current_model == Model.STABLE_DIFFUSION or user.current_model == Model.FLUX:
+        elif user.current_model == Model.GROK:
+            await handle_grok(message, state, user, [photo_vision_filename])
+    elif (
+        user.current_model == Model.MIDJOURNEY or
+        user.current_model == Model.STABLE_DIFFUSION or
+        user.current_model == Model.FLUX or
+        user.current_model == Model.LUMA_PHOTON
+    ):
         current_time = time.time()
 
         user_quota = get_quota_by_model(user.current_model, user.settings[user.current_model][UserSettings.VERSION])
@@ -299,7 +309,7 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
         await state.update_data(last_request_time=current_time)
 
         photo_data_io = await message.bot.download_file(photo_file.file_path, timeout=300)
-        photo_data = photo_data_io.read()
+        photo_data = await asyncio.to_thread(photo_data_io.read)
         photo_extension = photo_file.file_path.split('.')[-1]
 
         photo_vision_filename = f'{uuid.uuid4()}.{photo_extension}'
@@ -322,6 +332,8 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
             await handle_stable_diffusion(message, state, user, photo_vision_filename)
         elif user.current_model == Model.FLUX:
             await handle_flux(message, state, user, photo_vision_filename)
+        elif user.current_model == Model.LUMA_PHOTON:
+            await handle_luma_photon(message, state, user, photo_vision_filename)
     elif user.current_model == Model.FACE_SWAP:
         quota = user.daily_limits[Quota.FACE_SWAP] + user.additional_usage_quota[Quota.FACE_SWAP]
         quantity = 1
@@ -346,7 +358,7 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
                     user_photo = await firebase.bucket.get_blob(user_photo_blob)
                     user_photo_link = firebase.get_public_url(user_photo.name)
                     photo_data_io = await message.bot.download_file(photo_file.file_path, timeout=300)
-                    photo_data = photo_data_io.read()
+                    photo_data = await asyncio.to_thread(photo_data_io.read)
                     photo_extension = photo_file.file_path.split('.')[-1]
 
                     background_path = f'users/backgrounds/{user_id}/{uuid.uuid4()}.{photo_extension}'
@@ -386,20 +398,42 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
                         reply_markup=reply_markup
                     )
                     await state.set_state(Profile.waiting_for_photo)
-    elif user.current_model == Model.RUNWAY:
+    elif (
+        user.current_model == Model.KLING or
+        user.current_model == Model.RUNWAY or
+        user.current_model == Model.LUMA_RAY
+    ):
+        current_time = time.time()
+
+        user_quota = get_quota_by_model(user.current_model, user.settings[user.current_model][UserSettings.VERSION])
+        need_exit = (
+            await is_already_processing(message, state, current_time) or
+            await is_messages_limit_exceeded(message, state, user, user_quota) or
+            await is_time_limit_exceeded(message, state, user, current_time)
+        )
+        if need_exit:
+            return
+        await state.update_data(last_request_time=current_time)
+
         photo_data_io = await message.bot.download_file(photo_file.file_path, timeout=300)
-        photo_data = photo_data_io.read()
+        photo_data = await asyncio.to_thread(photo_data_io.read)
         photo_extension = photo_file.file_path.split('.')[-1]
 
-        video_frame_path = f'users/video_frames/runway/{user_id}/{uuid.uuid4()}.{photo_extension}'
+        video_frame_path = f'users/video_frames/{user_quota}/{user_id}/{uuid.uuid4()}.{photo_extension}'
         video_frame_photo = firebase.bucket.new_blob(video_frame_path)
         await video_frame_photo.upload(photo_data)
         video_frame_photo_link = firebase.get_public_url(video_frame_path)
 
-        await handle_runway(message, state, user, video_frame_photo_link)
+        if user.current_model == Model.KLING:
+            await handle_kling(message, state, user, video_frame_photo_link)
+        elif user.current_model == Model.RUNWAY:
+            await handle_runway(message, state, user, video_frame_photo_link)
+        elif user.current_model == Model.LUMA_RAY:
+            await handle_luma_ray(message, state, user, video_frame_photo_link)
     else:
         await message.reply(
-            text=get_localization(user_language_code).PHOTO_FORBIDDEN_ERROR,
+            text=get_localization(user_language_code).PHOTO_FEATURE_FORBIDDEN,
+            reply_markup=build_suggestions_keyboard(user_language_code),
             allow_sending_without_reply=True,
         )
 
@@ -410,16 +444,13 @@ async def handle_album(message: Message, state: FSMContext, album: list[Message]
     user_language_code = await get_user_language(user_id, state.storage)
 
     if (
-        (user.current_model == Model.CHAT_GPT and (
-            user.settings[user.current_model][UserSettings.VERSION] == ChatGPTVersion.V4_Omni_Mini or
-            user.settings[user.current_model][UserSettings.VERSION] == ChatGPTVersion.V4_Omni or
-            user.settings[user.current_model][UserSettings.VERSION] == ChatGPTVersion.V1_O
-        )) or
-        (user.current_model == Model.CLAUDE and (
-            user.settings[user.current_model][UserSettings.VERSION] == ClaudeGPTVersion.V3_Sonnet or
-            user.settings[user.current_model][UserSettings.VERSION] == ClaudeGPTVersion.V3_Opus
-        )) or
-        user.current_model == Model.GEMINI
+        user.settings[user.current_model][UserSettings.VERSION] == ChatGPTVersion.V4_Omni_Mini or
+        user.settings[user.current_model][UserSettings.VERSION] == ChatGPTVersion.V4_Omni or
+        user.settings[user.current_model][UserSettings.VERSION] == ChatGPTVersion.V1_O or
+        user.settings[user.current_model][UserSettings.VERSION] == ClaudeGPTVersion.V3_Sonnet or
+        user.settings[user.current_model][UserSettings.VERSION] == ClaudeGPTVersion.V3_Opus or
+        user.current_model == Model.GEMINI or
+        user.current_model == Model.GROK
     ):
         if user.settings[user.current_model][UserSettings.VERSION] == ChatGPTVersion.V4_Omni_Mini:
             quota = Quota.CHAT_GPT4_OMNI_MINI
@@ -431,12 +462,14 @@ async def handle_album(message: Message, state: FSMContext, album: list[Message]
             quota = Quota.CLAUDE_3_SONNET
         elif user.settings[user.current_model][UserSettings.VERSION] == ClaudeGPTVersion.V3_Opus:
             quota = Quota.CLAUDE_3_OPUS
-        elif user.settings[user.current_model][UserSettings.VERSION] == GeminiGPTVersion.V1_Flash:
-            quota = Quota.GEMINI_1_FLASH
+        elif user.settings[user.current_model][UserSettings.VERSION] == GeminiGPTVersion.V2_Flash:
+            quota = Quota.GEMINI_2_FLASH
         elif user.settings[user.current_model][UserSettings.VERSION] == GeminiGPTVersion.V1_Pro:
             quota = Quota.GEMINI_1_PRO
         elif user.settings[user.current_model][UserSettings.VERSION] == GeminiGPTVersion.V1_Ultra:
             quota = Quota.GEMINI_1_ULTRA
+        elif user.settings[user.current_model][UserSettings.VERSION] == GrokGPTVersion.V2:
+            quota = Quota.GROK_2
         else:
             raise NotImplementedError(
                 f'User quota is not implemented: {user.settings[user.current_model][UserSettings.VERSION]}'
@@ -461,7 +494,7 @@ async def handle_album(message: Message, state: FSMContext, album: list[Message]
                 continue
 
             photo_data_io = await message.bot.download_file(photo_file.file_path, timeout=300)
-            photo_data = photo_data_io.read()
+            photo_data = await asyncio.to_thread(photo_data_io.read)
             photo_extension = photo_file.file_path.split('.')[-1]
 
             photo_vision_filename = f'{uuid.uuid4()}.{photo_extension}'
@@ -477,14 +510,26 @@ async def handle_album(message: Message, state: FSMContext, album: list[Message]
             await handle_claude(message, state, user, quota, photo_vision_filenames)
         elif user.current_model == Model.GEMINI:
             await handle_gemini(message, state, user, quota, photo_vision_filenames)
-    elif user.current_model == Model.FACE_SWAP or user.current_model == Model.PHOTOSHOP_AI:
+        elif user.current_model == Model.GROK:
+            await handle_grok(message, state, user, photo_vision_filenames)
+    elif (
+        user.current_model == Model.MIDJOURNEY or
+        user.current_model == Model.STABLE_DIFFUSION or
+        user.current_model == Model.FLUX or
+        user.current_model == Model.LUMA_PHOTON or
+        user.current_model == Model.FACE_SWAP or
+        user.current_model == Model.PHOTOSHOP_AI or
+        user.current_model == Model.RUNWAY or
+        user.current_model == Model.LUMA_RAY
+    ):
         await message.reply(
             text=get_localization(user_language_code).ALBUM_FORBIDDEN_ERROR,
             allow_sending_without_reply=True,
         )
     else:
         await message.reply(
-            text=get_localization(user_language_code).PHOTO_FORBIDDEN_ERROR,
+            text=get_localization(user_language_code).PHOTO_FEATURE_FORBIDDEN,
+            reply_markup=build_suggestions_keyboard(user_language_code),
             allow_sending_without_reply=True,
         )
 

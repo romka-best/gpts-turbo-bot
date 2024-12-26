@@ -32,7 +32,6 @@ from bot.database.operations.subscription.writers import write_subscription
 from bot.database.operations.transaction.writers import write_transaction
 from bot.database.operations.user.getters import get_user
 from bot.database.operations.user.updaters import update_user
-from bot.handlers.ai.eightify_handler import handle_eightify
 from bot.handlers.ai.face_swap_handler import handle_face_swap
 from bot.handlers.ai.music_gen_handler import handle_music_gen
 from bot.handlers.ai.photoshop_ai_handler import handle_photoshop_ai
@@ -58,6 +57,7 @@ async def handle_yookassa_webhook(request: dict, bot: Bot, dp: Dispatcher):
             user = await get_user(subscription.user_id)
             product = await get_product(subscription.product_id)
             if payment.status == 'succeeded':
+                is_trial = float(payment.income_amount.value) <= 1
                 transaction = firebase.db.transaction()
                 await create_subscription(
                     transaction,
@@ -67,6 +67,8 @@ async def handle_yookassa_webhook(request: dict, bot: Bot, dp: Dispatcher):
                     float(payment.income_amount.value),
                     payment.id,
                     payment.payment_method.id if payment.payment_method.saved else '',
+                    None,
+                    is_trial,
                 )
                 await write_transaction(
                     user_id=subscription.user_id,
@@ -81,6 +83,7 @@ async def handle_yookassa_webhook(request: dict, bot: Bot, dp: Dispatcher):
                         'subscription_id': subscription.id,
                         'provider_payment_charge_id': payment.id,
                         'provider_auto_payment_charge_id': payment.payment_method.id if payment.payment_method.saved else '',
+                        'is_trial': is_trial,
                     },
                 )
 
@@ -107,12 +110,15 @@ async def handle_yookassa_webhook(request: dict, bot: Bot, dp: Dispatcher):
                     user_language_code,
                 )
                 reply_markup = build_switched_to_ai_keyboard(user_language_code, user.current_model)
-                await bot.send_message(
+                answered_message = await bot.send_message(
                     chat_id=subscription.user_id,
                     text=text,
                     reply_markup=reply_markup,
                     message_effect_id=config.MESSAGE_EFFECTS.get(MessageEffect.FIRE),
                 )
+
+                await bot.unpin_all_chat_messages(user.telegram_chat_id)
+                await bot.pin_chat_message(user.telegram_chat_id, answered_message.message_id)
 
                 state = FSMContext(
                     storage=dp.storage,
@@ -123,11 +129,9 @@ async def handle_yookassa_webhook(request: dict, bot: Bot, dp: Dispatcher):
                     )
                 )
                 if user.current_model == Model.EIGHTIFY:
-                    await handle_eightify(
-                        bot=bot,
+                    await bot.send_message(
                         chat_id=user.telegram_chat_id,
-                        state=state,
-                        user_id=user.id,
+                        text=get_localization(user_language_code).EIGHTIFY_INFO,
                     )
                 elif user.current_model == Model.FACE_SWAP:
                     await handle_face_swap(
@@ -158,17 +162,30 @@ async def handle_yookassa_webhook(request: dict, bot: Bot, dp: Dispatcher):
                         user_id=user.id,
                     )
 
-                await send_message_to_admins(
-                    bot=bot,
-                    message=f'#payment #subscription #success\n\n'
-                            f'🤑 <b>Успешно оформлена подписка у пользователя: {subscription.user_id}</b>\n\n'
-                            f'ℹ️ ID: {subscription.id}\n'
-                            f'💱 Метод оплаты: {subscription.payment_method}\n'
-                            f'💳 Тип: {product.names.get(LanguageCode.RU)}\n'
-                            f'💰 Сумма: {subscription.amount}{Currency.SYMBOLS[subscription.currency]}\n'
-                            f'💸 Чистая сумма: {float(payment.income_amount.value)}{Currency.SYMBOLS[subscription.currency]}\n\n'
-                            f'Продолжаем в том же духе 💪',
-                )
+                if is_trial:
+                    await send_message_to_admins(
+                        bot=bot,
+                        message=f'#payment #trial #subscription #success\n\n'
+                                f'🤑 <b>Успешно оформлен пробный период подписки у пользователя: {subscription.user_id}</b>\n\n'
+                                f'ℹ️ ID: {subscription.id}\n'
+                                f'💱 Метод оплаты: {subscription.payment_method}\n'
+                                f'💳 Тип: {product.names.get(LanguageCode.RU)}\n'
+                                f'💰 Сумма: {subscription.amount}{Currency.SYMBOLS[subscription.currency]}\n'
+                                f'💸 Чистая сумма: {float(payment.income_amount.value)}{Currency.SYMBOLS[subscription.currency]}\n\n'
+                                f'Продолжаем в том же духе 💪',
+                    )
+                else:
+                    await send_message_to_admins(
+                        bot=bot,
+                        message=f'#payment #subscription #success\n\n'
+                                f'🤑 <b>Успешно оформлена подписка у пользователя: {subscription.user_id}</b>\n\n'
+                                f'ℹ️ ID: {subscription.id}\n'
+                                f'💱 Метод оплаты: {subscription.payment_method}\n'
+                                f'💳 Тип: {product.names.get(LanguageCode.RU)}\n'
+                                f'💰 Сумма: {subscription.amount}{Currency.SYMBOLS[subscription.currency]}\n'
+                                f'💸 Чистая сумма: {float(payment.income_amount.value)}{Currency.SYMBOLS[subscription.currency]}\n\n'
+                                f'Продолжаем в том же духе 💪',
+                    )
             elif payment.status == 'canceled':
                 subscription.status = SubscriptionStatus.DECLINED
                 await update_subscription(
@@ -206,74 +223,106 @@ async def handle_yookassa_webhook(request: dict, bot: Bot, dp: Dispatcher):
                 user = await get_user(old_subscription.user_id)
                 product = await get_product(old_subscription.product_id)
                 if payment.status == 'succeeded':
-                    transaction = firebase.db.transaction()
-                    await update_subscription(old_subscription.id, {'status': SubscriptionStatus.FINISHED})
-                    new_subscription = await write_subscription(
-                        None,
-                        user.id,
-                        old_subscription.product_id,
-                        old_subscription.period,
-                        SubscriptionStatus.ACTIVE,
-                        Currency.RUB,
-                        float(payment.amount.value),
-                        float(payment.income_amount.value),
-                        PaymentMethod.YOOKASSA,
-                        payment.id,
-                    )
-                    await create_subscription(
-                        transaction,
-                        bot,
-                        new_subscription.id,
-                        new_subscription.user_id,
-                        float(payment.income_amount.value),
-                        payment.id,
-                        payment.payment_method.id if payment.payment_method.saved else '',
-                    )
-                    await write_transaction(
-                        user_id=new_subscription.user_id,
-                        type=TransactionType.INCOME,
-                        product_id=new_subscription.product_id,
-                        amount=new_subscription.amount,
-                        clear_amount=float(payment.income_amount.value),
-                        currency=new_subscription.currency,
-                        quantity=1,
-                        details={
-                            'payment_method': PaymentMethod.YOOKASSA,
-                            'subscription_id': new_subscription.id,
-                            'provider_payment_charge_id': payment.id,
-                            'provider_auto_payment_charge_id': payment.payment_method.id if payment.payment_method.saved else '',
-                        },
-                    )
+                    if old_subscription.status == SubscriptionStatus.TRIAL:
+                        new_income_amount = old_subscription.income_amount + float(payment.income_amount.value)
+                        await update_subscription(old_subscription.id, {
+                            'status': SubscriptionStatus.ACTIVE,
+                            'income_amount': new_income_amount,
+                        })
+                        await write_transaction(
+                            user_id=old_subscription.user_id,
+                            type=TransactionType.INCOME,
+                            product_id=old_subscription.product_id,
+                            amount=old_subscription.amount,
+                            clear_amount=float(payment.income_amount.value),
+                            currency=old_subscription.currency,
+                            quantity=1,
+                            details={
+                                'payment_method': PaymentMethod.YOOKASSA,
+                                'subscription_id': old_subscription.id,
+                                'provider_payment_charge_id': payment.id,
+                                'provider_auto_payment_charge_id': payment.payment_method.id if payment.payment_method.saved else '',
+                            },
+                        )
 
-                    await bot.send_sticker(
-                        chat_id=user.telegram_chat_id,
-                        sticker=config.MESSAGE_STICKERS.get(MessageSticker.LOVE),
-                        disable_notification=True,
-                    )
+                        await send_message_to_admins(
+                            bot=bot,
+                            message=f'#payment #trial #renew #subscription #success\n\n'
+                                    f'🤑 <b>Успешно продлена подписка после пробного периода у пользователя: {old_subscription.user_id}</b>\n\n'
+                                    f'ℹ️ ID: {old_subscription.id}\n'
+                                    f'💱 Метод оплаты: {old_subscription.payment_method}\n'
+                                    f'💳 Тип: {product.names.get(LanguageCode.RU)}\n'
+                                    f'💰 Сумма: {old_subscription.amount}{Currency.SYMBOLS[old_subscription.currency]}\n'
+                                    f'💸 Чистая сумма: {new_income_amount}{Currency.SYMBOLS[old_subscription.currency]}\n\n'
+                                    f'Продолжаем в том же духе 💪',
+                        )
+                    else:
+                        transaction = firebase.db.transaction()
+                        await update_subscription(old_subscription.id, {'status': SubscriptionStatus.FINISHED})
+                        new_subscription = await write_subscription(
+                            None,
+                            user.id,
+                            old_subscription.product_id,
+                            old_subscription.period,
+                            SubscriptionStatus.ACTIVE,
+                            Currency.RUB,
+                            float(payment.amount.value),
+                            float(payment.income_amount.value),
+                            PaymentMethod.YOOKASSA,
+                            payment.id,
+                        )
+                        await create_subscription(
+                            transaction,
+                            bot,
+                            new_subscription.id,
+                            new_subscription.user_id,
+                            float(payment.income_amount.value),
+                            payment.id,
+                            payment.payment_method.id if payment.payment_method.saved else '',
+                        )
+                        await write_transaction(
+                            user_id=new_subscription.user_id,
+                            type=TransactionType.INCOME,
+                            product_id=new_subscription.product_id,
+                            amount=new_subscription.amount,
+                            clear_amount=float(payment.income_amount.value),
+                            currency=new_subscription.currency,
+                            quantity=1,
+                            details={
+                                'payment_method': PaymentMethod.YOOKASSA,
+                                'subscription_id': new_subscription.id,
+                                'provider_payment_charge_id': payment.id,
+                                'provider_auto_payment_charge_id': payment.payment_method.id if payment.payment_method.saved else '',
+                            },
+                        )
 
-                    user_language_code = await get_user_language(new_subscription.user_id, dp.storage)
-                    await bot.send_message(
-                        chat_id=new_subscription.user_id,
-                        text=get_localization(user_language_code).SUBSCRIPTION_RESET,
-                        message_effect_id=config.MESSAGE_EFFECTS.get(MessageEffect.HEART),
-                        disable_notification=True,
-                    )
+                        await bot.send_sticker(
+                            chat_id=user.telegram_chat_id,
+                            sticker=config.MESSAGE_STICKERS.get(MessageSticker.LOVE),
+                            disable_notification=True,
+                        )
 
-                    await send_message_to_admins(
-                        bot=bot,
-                        message=f'#payment #renew #subscription #success\n\n'
-                                f'🤑 <b>Успешно продлена подписка у пользователя: {new_subscription.user_id}</b>\n\n'
-                                f'ℹ️ ID: {new_subscription.id}\n'
-                                f'💱 Метод оплаты: {new_subscription.payment_method}\n'
-                                f'💳 Тип: {product.names.get(LanguageCode.RU)}\n'
-                                f'💰 Сумма: {new_subscription.amount}{Currency.SYMBOLS[new_subscription.currency]}\n'
-                                f'💸 Чистая сумма: {float(payment.income_amount.value)}{Currency.SYMBOLS[new_subscription.currency]}\n\n'
-                                f'Продолжаем в том же духе 💪',
-                    )
+                        user_language_code = await get_user_language(new_subscription.user_id, dp.storage)
+                        await bot.send_message(
+                            chat_id=new_subscription.user_id,
+                            text=get_localization(user_language_code).SUBSCRIPTION_RESET,
+                            message_effect_id=config.MESSAGE_EFFECTS.get(MessageEffect.HEART),
+                            disable_notification=True,
+                        )
+
+                        await send_message_to_admins(
+                            bot=bot,
+                            message=f'#payment #renew #subscription #success\n\n'
+                                    f'🤑 <b>Успешно продлена подписка у пользователя: {new_subscription.user_id}</b>\n\n'
+                                    f'ℹ️ ID: {new_subscription.id}\n'
+                                    f'💱 Метод оплаты: {new_subscription.payment_method}\n'
+                                    f'💳 Тип: {product.names.get(LanguageCode.RU)}\n'
+                                    f'💰 Сумма: {new_subscription.amount}{Currency.SYMBOLS[new_subscription.currency]}\n'
+                                    f'💸 Чистая сумма: {float(payment.income_amount.value)}{Currency.SYMBOLS[new_subscription.currency]}\n\n'
+                                    f'Продолжаем в том же духе 💪',
+                        )
                 elif payment.status == 'canceled':
                     current_date = datetime.now(timezone.utc)
-
-                    old_subscription.status = SubscriptionStatus.FINISHED
 
                     activated_subscriptions = await get_activated_subscriptions_by_user_id(user.id, current_date)
                     for activated_subscription in activated_subscriptions:
@@ -286,7 +335,10 @@ async def handle_yookassa_webhook(request: dict, bot: Bot, dp: Dispatcher):
                         user.subscription_id = ''
                         user.daily_limits = SUBSCRIPTION_FREE_LIMITS
 
-                    await update_subscription(old_subscription.id, {'status': old_subscription.status})
+                    await update_subscription(old_subscription.id, {
+                        'status': SubscriptionStatus.FINISHED,
+                        'end_date': current_date if old_subscription.status == SubscriptionStatus.TRIAL else old_subscription.end_date,
+                    })
                     await update_user(old_subscription.user_id, {
                         'subscription_id': user.subscription_id,
                         'daily_limits': user.daily_limits,
@@ -306,16 +358,28 @@ async def handle_yookassa_webhook(request: dict, bot: Bot, dp: Dispatcher):
                         disable_notification=True,
                     )
 
-                    await send_message_to_admins(
-                        bot=bot,
-                        message=f'#payment #renew #subscription #declined\n\n'
-                                f'❌ <b>Не смогли продлить подписку у пользователя: {old_subscription.user_id}</b>\n\n'
-                                f'ℹ️ ID: {old_subscription.id}\n'
-                                f'💱 Метод оплаты: {old_subscription.payment_method}\n'
-                                f'💳 Тип: {product.names.get(LanguageCode.RU)}\n'
-                                f'💰 Сумма: {old_subscription.amount}{Currency.SYMBOLS[old_subscription.currency]}\n\n'
-                                f'Грустно, но что поделать 🤷',
-                    )
+                    if old_subscription.status == SubscriptionStatus.TRIAL:
+                        await send_message_to_admins(
+                            bot=bot,
+                            message=f'#payment #trial #renew #subscription #declined\n\n'
+                                    f'❌ <b>Не смогли продлить подписку после пробного периода у пользователя: {old_subscription.user_id}</b>\n\n'
+                                    f'ℹ️ ID: {old_subscription.id}\n'
+                                    f'💱 Метод оплаты: {old_subscription.payment_method}\n'
+                                    f'💳 Тип: {product.names.get(LanguageCode.RU)}\n'
+                                    f'💰 Сумма: {old_subscription.amount}{Currency.SYMBOLS[old_subscription.currency]}\n\n'
+                                    f'Грустно, но что поделать 🤷',
+                        )
+                    else:
+                        await send_message_to_admins(
+                            bot=bot,
+                            message=f'#payment #renew #subscription #declined\n\n'
+                                    f'❌ <b>Не смогли продлить подписку у пользователя: {old_subscription.user_id}</b>\n\n'
+                                    f'ℹ️ ID: {old_subscription.id}\n'
+                                    f'💱 Метод оплаты: {old_subscription.payment_method}\n'
+                                    f'💳 Тип: {product.names.get(LanguageCode.RU)}\n'
+                                    f'💰 Сумма: {old_subscription.amount}{Currency.SYMBOLS[old_subscription.currency]}\n\n'
+                                    f'Грустно, но что поделать 🤷',
+                        )
                 else:
                     await send_message_to_admins(
                         bot=bot,
@@ -401,12 +465,15 @@ async def handle_yookassa_webhook(request: dict, bot: Bot, dp: Dispatcher):
                     user_language_code,
                 )
                 reply_markup = build_switched_to_ai_keyboard(user_language_code, user.current_model)
-                await bot.send_message(
+                answered_message = await bot.send_message(
                     chat_id=package.user_id,
                     text=text,
                     reply_markup=reply_markup,
                     message_effect_id=config.MESSAGE_EFFECTS.get(MessageEffect.FIRE),
                 )
+
+                await bot.unpin_all_chat_messages(user.telegram_chat_id)
+                await bot.pin_chat_message(user.telegram_chat_id, answered_message.message_id)
 
                 state = FSMContext(
                     storage=dp.storage,
@@ -417,11 +484,9 @@ async def handle_yookassa_webhook(request: dict, bot: Bot, dp: Dispatcher):
                     )
                 )
                 if user.current_model == Model.EIGHTIFY:
-                    await handle_eightify(
-                        bot=bot,
+                    await bot.send_message(
                         chat_id=user.telegram_chat_id,
-                        state=state,
-                        user_id=user.id,
+                        text=get_localization(user_language_code).EIGHTIFY_INFO,
                     )
                 elif user.current_model == Model.FACE_SWAP:
                     await handle_face_swap(
@@ -563,12 +628,15 @@ async def handle_yookassa_webhook(request: dict, bot: Bot, dp: Dispatcher):
                     user_language_code,
                 )
                 reply_markup = build_switched_to_ai_keyboard(user_language_code, user.current_model)
-                await bot.send_message(
+                answered_message = await bot.send_message(
                     chat_id=user.id,
                     text=text,
                     reply_markup=reply_markup,
                     message_effect_id=config.MESSAGE_EFFECTS.get(MessageEffect.FIRE),
                 )
+
+                await bot.unpin_all_chat_messages(user.telegram_chat_id)
+                await bot.pin_chat_message(user.telegram_chat_id, answered_message.message_id)
 
                 state = FSMContext(
                     storage=dp.storage,
@@ -579,11 +647,9 @@ async def handle_yookassa_webhook(request: dict, bot: Bot, dp: Dispatcher):
                     )
                 )
                 if user.current_model == Model.EIGHTIFY:
-                    await handle_eightify(
-                        bot=bot,
+                    await bot.send_message(
                         chat_id=user.telegram_chat_id,
-                        state=state,
-                        user_id=user.id,
+                        text=get_localization(user_language_code).EIGHTIFY_INFO,
                     )
                 elif user.current_model == Model.FACE_SWAP:
                     await handle_face_swap(

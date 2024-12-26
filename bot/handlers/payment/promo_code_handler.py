@@ -24,7 +24,7 @@ from bot.helpers.creaters.create_package import create_package
 from bot.helpers.creaters.create_subscription import create_subscription
 from bot.keyboards.common.common import build_cancel_keyboard, build_buy_motivation_keyboard
 from bot.locales.main import get_localization, get_user_language
-from bot.states.promo_code import PromoCode
+from bot.states.payment.promo_code import PromoCode
 
 promo_code_router = Router()
 

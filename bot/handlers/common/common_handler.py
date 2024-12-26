@@ -3,20 +3,23 @@ import asyncio
 from aiogram import Router
 from aiogram.filters import Command, CommandStart, ChatMemberUpdatedFilter, KICKED, MEMBER
 from aiogram.fsm.context import FSMContext
-from aiogram.types import Message, CallbackQuery, ChatMemberUpdated, InaccessibleMessage
+from aiogram.types import Message, CallbackQuery, ChatMemberUpdated
+from aiogram.utils.chat_action import ChatActionSender
 
 from bot.config import config, MessageEffect, MessageSticker
 from bot.database.main import firebase
-from bot.database.models.common import Quota, UTM, ChatGPTVersion, ClaudeGPTVersion, GeminiGPTVersion, Model
+from bot.database.models.common import Quota, UTM, ChatGPTVersion, ClaudeGPTVersion, GeminiGPTVersion, Model, Currency
 from bot.database.models.generation import Generation
+from bot.database.models.transaction import TransactionType
 from bot.database.models.user import UserSettings
 from bot.database.operations.generation.updaters import update_generation
+from bot.database.operations.product.getters import get_product_by_quota
+from bot.database.operations.transaction.writers import write_transaction
 from bot.database.operations.user.getters import get_user, get_count_of_users_by_referral
 from bot.database.operations.user.initialize_user_for_the_first_time import initialize_user_for_the_first_time
 from bot.database.operations.user.updaters import update_user
-from bot.handlers.ai.chat_gpt_handler import handle_chatgpt
+from bot.handlers.ai.chat_gpt_handler import handle_chatgpt, PRICE_GPT4_OMNI_MINI_INPUT, PRICE_GPT4_OMNI_MINI_OUTPUT
 from bot.handlers.ai.claude_handler import handle_claude
-from bot.handlers.ai.eightify_handler import handle_eightify
 from bot.handlers.ai.face_swap_handler import handle_face_swap
 from bot.handlers.ai.gemini_handler import handle_gemini
 from bot.handlers.ai.model_handler import handle_model
@@ -28,7 +31,10 @@ from bot.handlers.payment.bonus_handler import handle_bonus
 from bot.handlers.payment.payment_handler import handle_subscribe, handle_package
 from bot.helpers.getters.get_quota_by_model import get_quota_by_model
 from bot.helpers.getters.get_switched_to_ai_model import get_switched_to_ai_model
+from bot.helpers.senders.send_ai_message import send_ai_message
+from bot.helpers.senders.send_error_info import send_error_info
 from bot.helpers.updaters.update_daily_limits import update_user_daily_limits
+from bot.integrations.openAI import get_response_message
 from bot.keyboards.ai.model import build_switched_to_ai_keyboard
 from bot.keyboards.common.common import (
     build_start_keyboard,
@@ -52,7 +58,10 @@ async def start(message: Message, state: FSMContext):
 
     user_id = str(message.from_user.id)
     user = await get_user(user_id)
+    is_new_user = False
     if not user:
+        is_new_user = True
+
         default_quota = Quota.CHAT_GPT4_OMNI_MINI
         referred_by = None
         referred_by_user = None
@@ -100,19 +109,25 @@ async def start(message: Message, state: FSMContext):
                     'claude3haiku',
                     'claude3sonnet',
                     'claude3opus',
-                    'gemini1flash',
+                    'gemini2flash',
                     'gemini1pro',
                     'gemini1ultra',
+                    'grok',
+                    'perplexity',
                     'eightify',
+                    'geminivideo',
                     'dalle',
                     'midjourney',
                     'stablediffusion',
                     'flux',
+                    'lumaphoton',
                     'faceswap',
                     'photoshopai',
                     'suno',
                     'musicgen',
+                    'kling',
                     'runway',
+                    'lumaray',
                 ]:
                     if sub_param_value == 'chatgpt4omnimini':
                         default_quota = Quota.CHAT_GPT4_OMNI_MINI
@@ -128,14 +143,20 @@ async def start(message: Message, state: FSMContext):
                         default_quota = Quota.CLAUDE_3_SONNET
                     elif sub_param_value == 'claude3opus':
                         default_quota = Quota.CLAUDE_3_OPUS
-                    elif sub_param_value == 'gemini1flash':
-                        default_quota = Quota.GEMINI_1_FLASH
+                    elif sub_param_value == 'gemini2flash':
+                        default_quota = Quota.GEMINI_2_FLASH
                     elif sub_param_value == 'gemini1pro':
                         default_quota = Quota.GEMINI_1_PRO
                     elif sub_param_value == 'gemini1ultra':
                         default_quota = Quota.GEMINI_1_ULTRA
+                    elif sub_param_value == 'grok':
+                        default_quota = Quota.GROK_2
+                    elif sub_param_value == 'perplexity':
+                        default_quota = Quota.PERPLEXITY
                     elif sub_param_value == 'eightify':
                         default_quota = Quota.EIGHTIFY
+                    elif sub_param_value == 'geminivideo':
+                        default_quota = Quota.GEMINI_VIDEO
                     elif sub_param_value == 'dalle':
                         default_quota = Quota.DALL_E
                     elif sub_param_value == 'midjourney':
@@ -144,6 +165,8 @@ async def start(message: Message, state: FSMContext):
                         default_quota = Quota.STABLE_DIFFUSION
                     elif sub_param_value == 'flux':
                         default_quota = Quota.FLUX
+                    elif sub_param_value == 'lumaphoton':
+                        default_quota = Quota.LUMA_PHOTON
                     elif sub_param_value == 'faceswap':
                         default_quota = Quota.FACE_SWAP
                     elif sub_param_value == 'photoshopai':
@@ -152,8 +175,12 @@ async def start(message: Message, state: FSMContext):
                         default_quota = Quota.SUNO
                     elif sub_param_value == 'musicgen':
                         default_quota = Quota.MUSIC_GEN
+                    elif sub_param_value == 'kling':
+                        default_quota = Quota.KLING
                     elif sub_param_value == 'runway':
                         default_quota = Quota.RUNWAY
+                    elif sub_param_value == 'lumaray':
+                        default_quota = Quota.LUMA_RAY
                 elif sub_param_key in utm:
                     user_utm[sub_param_key] = sub_param_value.lower()
 
@@ -203,7 +230,9 @@ async def start(message: Message, state: FSMContext):
         message_effect_id=config.MESSAGE_EFFECTS.get(MessageEffect.CONGRATS),
     )
 
-    await message.answer(
+    await asyncio.sleep(5)
+
+    answered_message = await message.answer(
         text=await get_switched_to_ai_model(
             user,
             get_quota_by_model(user.current_model, user.settings[user.current_model][UserSettings.VERSION]),
@@ -213,12 +242,12 @@ async def start(message: Message, state: FSMContext):
         message_effect_id=config.MESSAGE_EFFECTS.get(MessageEffect.FIRE),
     )
 
+    await message.bot.unpin_all_chat_messages(user.telegram_chat_id)
+    await message.bot.pin_chat_message(user.telegram_chat_id, answered_message.message_id)
+
     if user.current_model == Model.EIGHTIFY:
-        await handle_eightify(
-            bot=message.bot,
-            chat_id=user.telegram_chat_id,
-            state=state,
-            user_id=user.id,
+        await message.answer(
+            text=get_localization(user_language_code).EIGHTIFY_INFO,
         )
     elif user.current_model == Model.FACE_SWAP:
         await handle_face_swap(
@@ -248,6 +277,54 @@ async def start(message: Message, state: FSMContext):
             state=state,
             user_id=user.id,
         )
+    elif user.current_model == Model.CHAT_GPT and is_new_user:
+        async with ChatActionSender.typing(bot=message.bot, chat_id=message.chat.id):
+            try:
+                prompt = get_localization(user_language_code).START_PROMPT
+                history = [
+                    {
+                        'role': 'system',
+                        'content': prompt,
+                    }
+                ]
+                response = await get_response_message(ChatGPTVersion.V4_Omni_Mini, history)
+                response_message = response['message']
+                input_price = response['input_tokens'] * PRICE_GPT4_OMNI_MINI_INPUT
+                output_price = response['output_tokens'] * PRICE_GPT4_OMNI_MINI_OUTPUT
+
+                product = await get_product_by_quota(Quota.CHAT_GPT4_OMNI_MINI)
+
+                total_price = round(input_price + output_price, 6)
+                message_role, message_content = response_message.role, response_message.content
+                await write_transaction(
+                    user_id=user.id,
+                    type=TransactionType.EXPENSE,
+                    product_id=product.id,
+                    amount=total_price,
+                    clear_amount=total_price,
+                    currency=Currency.USD,
+                    quantity=1,
+                    details={
+                        'input_tokens': response['input_tokens'],
+                        'output_tokens': response['output_tokens'],
+                        'request': prompt,
+                        'answer': message_content,
+                        'is_suggestion': True,
+                        'has_error': False,
+                    },
+                )
+
+                await send_ai_message(
+                    message=message,
+                    text=message_content,
+                )
+            except Exception as e:
+                await send_error_info(
+                    bot=message.bot,
+                    user_id=user.id,
+                    info=str(e),
+                    hashtags=['chatgpt', 'example'],
+                )
 
     if len(tasks) > 0:
         await asyncio.gather(*tasks)
@@ -357,8 +434,8 @@ async def handle_continue_generation_choose_selection(callback_query: CallbackQu
             user_quota = Quota.CLAUDE_3_SONNET
         elif user.settings[user.current_model][UserSettings.VERSION] == ClaudeGPTVersion.V3_Opus:
             user_quota = Quota.CLAUDE_3_OPUS
-        elif user.settings[user.current_model][UserSettings.VERSION] == GeminiGPTVersion.V1_Flash:
-            user_quota = Quota.GEMINI_1_FLASH
+        elif user.settings[user.current_model][UserSettings.VERSION] == GeminiGPTVersion.V2_Flash:
+            user_quota = Quota.GEMINI_2_FLASH
         elif user.settings[user.current_model][UserSettings.VERSION] == GeminiGPTVersion.V1_Pro:
             user_quota = Quota.GEMINI_1_PRO
         elif user.settings[user.current_model][UserSettings.VERSION] == GeminiGPTVersion.V1_Ultra:
@@ -382,7 +459,7 @@ async def handle_continue_generation_choose_selection(callback_query: CallbackQu
         ]:
             await handle_claude(callback_query.message, state, user, user_quota)
         elif user_quota in [
-            Quota.GEMINI_1_FLASH,
+            Quota.GEMINI_2_FLASH,
             Quota.GEMINI_1_PRO,
             Quota.GEMINI_1_ULTRA,
         ]:
@@ -472,11 +549,20 @@ async def notify_about_quota_selection(callback_query: CallbackQuery, state: FSM
         )
 
 
+@common_router.callback_query(lambda c: c.data.startswith('suggestions:'))
+async def suggestions_selection(callback_query: CallbackQuery, state: FSMContext):
+    await callback_query.answer()
+
+    action = callback_query.data.split(':')[1]
+    if action == 'change_ai_model':
+        await handle_model(callback_query.message, state, str(callback_query.from_user.id))
+
+
 @common_router.callback_query(lambda c: c.data.endswith(':close'))
 async def handle_close_selection(callback_query: CallbackQuery):
     await callback_query.answer()
 
-    if not isinstance(callback_query.message, InaccessibleMessage):
+    if isinstance(callback_query.message, Message):
         await callback_query.message.delete()
 
 
@@ -484,7 +570,7 @@ async def handle_close_selection(callback_query: CallbackQuery):
 async def handle_cancel_selection(callback_query: CallbackQuery, state: FSMContext):
     await callback_query.answer()
 
-    if not isinstance(callback_query.message, InaccessibleMessage):
+    if isinstance(callback_query.message, Message):
         await callback_query.message.delete()
 
     await state.clear()

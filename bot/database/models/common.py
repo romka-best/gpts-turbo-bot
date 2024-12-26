@@ -17,16 +17,22 @@ class Model:
     CHAT_GPT = 'chat-gpt'
     CLAUDE = 'claude'
     GEMINI = 'gemini'
+    GROK = 'grok'
+    PERPLEXITY = 'perplexity'
     EIGHTIFY = 'eightify'
+    GEMINI_VIDEO = 'gemini-video'
     DALL_E = 'dall-e'
     MIDJOURNEY = 'midjourney'
     STABLE_DIFFUSION = 'stable-diffusion'
     FLUX = 'flux'
+    LUMA_PHOTON = 'luma-photon'
     FACE_SWAP = 'face-swap'
     PHOTOSHOP_AI = 'photoshop-ai'
     MUSIC_GEN = 'music-gen'
     SUNO = 'suno'
+    KLING = 'kling'
     RUNWAY = 'runway'
+    LUMA_RAY = 'luma-ray'
 
 
 class ModelType(StrEnum):
@@ -45,19 +51,25 @@ class Quota:
     CLAUDE_3_HAIKU = 'claude_3_haiku'
     CLAUDE_3_SONNET = 'claude_3_sonnet'
     CLAUDE_3_OPUS = 'claude_3_opus'
-    GEMINI_1_FLASH = 'gemini_1_flash'
+    GEMINI_2_FLASH = 'gemini_2_flash'
     GEMINI_1_PRO = 'gemini_1_pro'
     GEMINI_1_ULTRA = 'gemini_1_ultra'
+    GROK_2 = 'grok_2'
+    PERPLEXITY = 'perplexity'
     EIGHTIFY = 'eightify'
+    GEMINI_VIDEO = 'gemini_video'
     DALL_E = 'dall_e'
     MIDJOURNEY = 'midjourney'
     STABLE_DIFFUSION = 'stable_diffusion'
     FLUX = 'flux'
+    LUMA_PHOTON = 'luma_photon'
     FACE_SWAP = 'face_swap'
     PHOTOSHOP_AI = 'photoshop_ai'
     MUSIC_GEN = 'music_gen'
     SUNO = 'suno'
+    KLING = 'kling'
     RUNWAY = 'runway'
+    LUMA_RAY = 'luma_ray'
     ADDITIONAL_CHATS = 'additional_chats'
     FAST_MESSAGES = 'fast_messages'
     VOICE_MESSAGES = 'voice_messages'
@@ -78,28 +90,42 @@ class ClaudeGPTVersion:
 
 
 class GeminiGPTVersion:
-    V1_Flash = 'gemini-1.5-flash'
+    V2_Flash = 'gemini-2.0-flash-exp'
     V1_Pro = 'gemini-1.5-pro'
     V1_Ultra = 'gemini-1.0-ultra'
+
+
+class GrokGPTVersion:
+    V2 = 'grok-2-vision-1212'
+
+
+class PerplexityGPTVersion:
+    V3_Sonar_Small = 'llama-3.1-sonar-small-128k-online'
+    V3_Sonar_Large = 'llama-3.1-sonar-large-128k-online'
+    V3_Sonar_Huge = 'llama-3.1-sonar-huge-128k-online'
 
 
 class EightifyVersion:
     LATEST = 'LATEST'
 
 
-class EightifyFocus:
+class GeminiVideoVersion:
+    LATEST = 'LATEST'
+
+
+class VideoSummaryFocus:
     INSIGHTFUL = 'insightful'
     FUNNY = 'funny'
     ACTIONABLE = 'actionable'
     CONTROVERSIAL = 'controversial'
 
 
-class EightifyFormat:
+class VideoSummaryFormat:
     LIST = 'list'
     FAQ = 'faq'
 
 
-class EightifyAmount:
+class VideoSummaryAmount:
     AUTO = 'auto'
     SHORT = 'short'
     DETAILED = 'detailed'
@@ -152,7 +178,11 @@ class FluxVersion:
 class FluxSafetyTolerance:
     STRICT = 1
     MIDDLE = 3
-    PERMISSIVE = 5
+    PERMISSIVE = 6
+
+
+class LumaPhotonVersion:
+    V1 = 'photon-1'
 
 
 class FaceSwapVersion:
@@ -184,6 +214,20 @@ class SunoMode:
     CUSTOM = 'CUSTOM'
 
 
+class KlingVersion:
+    V1 = '1.6'
+
+
+class KlingMode:
+    STANDARD = 'std'
+    PRO = 'pro'
+
+
+class KlingDuration:
+    SECONDS_5 = 5
+    SECONDS_10 = 10
+
+
 class RunwayVersion:
     V3_Alpha_Turbo = 'gen3a_turbo'
 
@@ -196,6 +240,10 @@ class RunwayDuration:
 class RunwayResolution:
     LANDSCAPE = '1280:768'
     PORTRAIT = '768:1280'
+
+
+class LumaRayVersion:
+    LATEST = 'LATEST'
 
 
 class AspectRatio:

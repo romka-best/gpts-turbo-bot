@@ -9,10 +9,10 @@ def build_gemini_keyboard(language_code: LanguageCode, model: Model, model_versi
     buttons = [
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).GEMINI_1_FLASH + (
-                    ' ✅' if model == Model.GEMINI and model_version == GeminiGPTVersion.V1_Flash else ''
+                text=get_localization(language_code).GEMINI_2_FLASH + (
+                    ' ✅' if model == Model.GEMINI and model_version == GeminiGPTVersion.V2_Flash else ''
                 ),
-                callback_data=f'gemini:{GeminiGPTVersion.V1_Flash}'
+                callback_data=f'gemini:{GeminiGPTVersion.V2_Flash}'
             ),
         ],
         [

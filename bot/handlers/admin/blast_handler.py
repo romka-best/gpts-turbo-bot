@@ -15,7 +15,7 @@ from bot.keyboards.admin.blast import (
 from bot.keyboards.common.common import build_cancel_keyboard
 from bot.locales.main import get_localization, localization_classes, get_user_language
 from bot.locales.types import LanguageCode
-from bot.states.blast import Blast
+from bot.states.admin.blast import Blast
 
 blast_router = Router()
 

@@ -64,6 +64,18 @@ def build_info_text_models_keyboard(language_code: LanguageCode) -> InlineKeyboa
         ],
         [
             InlineKeyboardButton(
+                text=get_localization(language_code).GROK,
+                callback_data=f'info_text_models:{Model.GROK}'
+            ),
+        ],
+        [
+            InlineKeyboardButton(
+                text=get_localization(language_code).PERPLEXITY,
+                callback_data=f'info_text_models:{Model.PERPLEXITY}'
+            ),
+        ],
+        [
+            InlineKeyboardButton(
                 text=get_localization(language_code).BACK,
                 callback_data='info_text_models:back'
             ),
@@ -97,6 +109,12 @@ def build_info_image_models_keyboard(language_code: LanguageCode) -> InlineKeybo
             InlineKeyboardButton(
                 text=get_localization(language_code).FLUX,
                 callback_data=f'info_image_models:{Model.FLUX}'
+            ),
+        ],
+        [
+            InlineKeyboardButton(
+                text=get_localization(language_code).LUMA_PHOTON,
+                callback_data=f'info_image_models:{Model.LUMA_PHOTON}'
             ),
         ],
         [
@@ -151,8 +169,20 @@ def build_info_video_models_keyboard(language_code: LanguageCode) -> InlineKeybo
     buttons = [
         [
             InlineKeyboardButton(
+                text=get_localization(language_code).KLING,
+                callback_data=f'info_video_models:{Model.KLING}'
+            ),
+        ],
+        [
+            InlineKeyboardButton(
                 text=get_localization(language_code).RUNWAY,
                 callback_data=f'info_video_models:{Model.RUNWAY}'
+            ),
+        ],
+        [
+            InlineKeyboardButton(
+                text=get_localization(language_code).LUMA_RAY,
+                callback_data=f'info_video_models:{Model.LUMA_RAY}'
             ),
         ],
         [

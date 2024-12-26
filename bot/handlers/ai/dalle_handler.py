@@ -95,7 +95,7 @@ async def handle_dall_e(message: Message, state: FSMContext, user: User):
 
                 reply_markup = build_limit_exceeded_keyboard(user_language_code)
                 await message.reply(
-                    text=get_localization(user_language_code).REACHED_USAGE_LIMIT,
+                    text=get_localization(user_language_code).reached_usage_limit(),
                     reply_markup=reply_markup,
                     allow_sending_without_reply=True,
                 )

@@ -18,6 +18,7 @@ class SubscriptionPeriod:
 
 class SubscriptionStatus:
     ACTIVE = 'ACTIVE'
+    TRIAL = 'TRIAL'
     WAITING = 'WAITING'
     FINISHED = 'FINISHED'
     DECLINED = 'DECLINED'
@@ -33,19 +34,25 @@ SUBSCRIPTION_FREE_LIMITS = {
     Quota.CLAUDE_3_HAIKU: 10,
     Quota.CLAUDE_3_SONNET: 0,
     Quota.CLAUDE_3_OPUS: 0,
-    Quota.GEMINI_1_FLASH: 10,
+    Quota.GEMINI_2_FLASH: 10,
     Quota.GEMINI_1_PRO: 0,
     Quota.GEMINI_1_ULTRA: 0,
-    Quota.EIGHTIFY: 2,
+    Quota.GROK_2: 0,
+    Quota.PERPLEXITY: 0,
+    Quota.EIGHTIFY: 1,
+    Quota.GEMINI_VIDEO: 1,
     Quota.DALL_E: 1,
     Quota.MIDJOURNEY: 1,
     Quota.STABLE_DIFFUSION: 1,
     Quota.FLUX: 1,
+    Quota.LUMA_PHOTON: 1,
     Quota.FACE_SWAP: 1,
     Quota.PHOTOSHOP_AI: 1,
     Quota.MUSIC_GEN: 0,
     Quota.SUNO: 0,
+    Quota.KLING: 0,
     Quota.RUNWAY: 0,
+    Quota.LUMA_RAY: 0,
     Quota.ADDITIONAL_CHATS: 1,
     Quota.ACCESS_TO_CATALOG: False,
     Quota.FAST_MESSAGES: False,

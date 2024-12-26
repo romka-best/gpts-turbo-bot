@@ -38,7 +38,7 @@ from bot.keyboards.admin.face_swap import (
 from bot.keyboards.common.common import build_cancel_keyboard
 from bot.locales.main import get_localization, localization_classes, get_user_language
 from bot.locales.types import LanguageCode
-from bot.states.face_swap import FaceSwap
+from bot.states.ai.face_swap import FaceSwap
 
 admin_face_swap_router = Router()
 

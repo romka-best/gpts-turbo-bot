@@ -28,7 +28,7 @@ from bot.database.operations.transaction.writers import write_transaction
 from bot.database.operations.user.getters import get_user, get_count_of_users, get_count_of_users_referred_by
 from bot.keyboards.admin.admin import build_admin_keyboard
 from bot.keyboards.common.common import build_cancel_keyboard
-from bot.states.statistics import Statistics
+from bot.states.admin.statistics import Statistics
 from bot.keyboards.admin.statistics import (
     build_statistics_keyboard,
     build_statistics_write_transaction_keyboard,
@@ -345,7 +345,11 @@ async def handle_get_statistics(language_code: LanguageCode, period: str):
 
     text_products = {
         product.id: product.names.get(language_code) for product in products
-        if product.category == ProductCategory.TEXT or product.category == ProductCategory.SUMMARY
+        if product.category == ProductCategory.TEXT
+    }
+    summary_products = {
+        product.id: product.names.get(language_code) for product in products
+        if product.category == ProductCategory.SUMMARY
     }
     image_products = {
         product.id: product.names.get(language_code) for product in products
@@ -355,12 +359,34 @@ async def handle_get_statistics(language_code: LanguageCode, period: str):
         product.id: product.names.get(language_code) for product in products
         if product.category == ProductCategory.MUSIC
     }
-    ai_products = text_products | image_products | music_products
-
-    package_products = {
+    video_products = {
         product.id: product.names.get(language_code) for product in products
-        if product.type == ProductType.PACKAGE
+        if product.category == ProductCategory.VIDEO
     }
+    ai_products = text_products | summary_products | image_products | music_products | video_products
+
+    text_package_products = {
+        product.id: product.names.get(language_code) for product in products
+        if product.type == ProductType.PACKAGE and product.category == ProductCategory.TEXT
+    }
+    summary_package_products = {
+        product.id: product.names.get(language_code) for product in products
+        if product.type == ProductType.PACKAGE and product.category == ProductCategory.SUMMARY
+    }
+    image_package_products = {
+        product.id: product.names.get(language_code) for product in products
+        if product.type == ProductType.PACKAGE and product.category == ProductCategory.IMAGE
+    }
+    music_package_products = {
+        product.id: product.names.get(language_code) for product in products
+        if product.type == ProductType.PACKAGE and product.category == ProductCategory.MUSIC
+    }
+    video_package_products = {
+        product.id: product.names.get(language_code) for product in products
+        if product.type == ProductType.PACKAGE and product.category == ProductCategory.VIDEO
+    }
+
+    package_products = text_package_products | summary_package_products | image_package_products | music_package_products | video_package_products
 
     tech_products = {
         product.id: product.names.get(language_code) for product in products
@@ -488,10 +514,12 @@ async def handle_get_statistics(language_code: LanguageCode, period: str):
     }
     for product in products:
         if product.type == ProductType.SUBSCRIPTION and product.category == ProductCategory.MONTHLY:
-            subscription_products[product.id] = f'{get_localization(language_code).MONTHLY} {product.names.get(language_code)}'
+            subscription_products[product.id] = \
+                f'{get_localization(language_code).MONTHLY} {product.names.get(language_code)}'
     for product in products:
         if product.type == ProductType.SUBSCRIPTION and product.category == ProductCategory.YEARLY:
-            subscription_products[product.id] = f'{get_localization(language_code).YEARLY} {product.names.get(language_code)}'
+            subscription_products[product.id] = \
+                f'{get_localization(language_code).YEARLY} {product.names.get(language_code)}'
 
     count_users = await get_count_of_users()
     count_subscription_users[ServiceType.FREE] = abs(
@@ -759,6 +787,12 @@ async def handle_get_statistics(language_code: LanguageCode, period: str):
             count_all_transactions=count_all_transactions,
             count_all_transactions_before=count_all_transactions_before,
         ),
+        'summary_models': get_localization(language_code).statistics_summary_models(
+            period=period,
+            summary_products=summary_products,
+            count_all_transactions=count_all_transactions,
+            count_all_transactions_before=count_all_transactions_before,
+        ),
         'image_models': get_localization(language_code).statistics_image_models(
             period=period,
             image_products=image_products,
@@ -768,6 +802,12 @@ async def handle_get_statistics(language_code: LanguageCode, period: str):
         'music_models': get_localization(language_code).statistics_music_models(
             period=period,
             music_products=music_products,
+            count_all_transactions=count_all_transactions,
+            count_all_transactions_before=count_all_transactions_before,
+        ),
+        'video_models': get_localization(language_code).statistics_video_models(
+            period=period,
+            video_products=video_products,
             count_all_transactions=count_all_transactions,
             count_all_transactions_before=count_all_transactions_before,
         ),

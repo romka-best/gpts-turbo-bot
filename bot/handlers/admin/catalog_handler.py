@@ -16,7 +16,7 @@ from bot.keyboards.admin.catalog import (
 from bot.keyboards.common.common import build_cancel_keyboard
 from bot.locales.main import get_localization, localization_classes, get_user_language
 from bot.locales.types import LanguageCode
-from bot.states.catalog import Catalog
+from bot.states.common.catalog import Catalog
 
 admin_catalog_router = Router()
 

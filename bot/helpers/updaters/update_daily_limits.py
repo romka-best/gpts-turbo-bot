@@ -98,8 +98,73 @@ async def update_user_subscription(bot: Bot, user: User, batch: AsyncWriteBatch,
 
     if (
         current_subscription and
-        current_subscription.end_date <= current_date and
-        current_subscription.status != SubscriptionStatus.FINISHED
+        current_subscription.status == SubscriptionStatus.TRIAL and
+        (current_date - current_subscription.start_date).days >= 3
+    ):
+        user_language_code = await get_user_language(user.id, storage)
+
+        product = await get_product(current_subscription.product_id)
+        if current_subscription.payment_method == PaymentMethod.YOOKASSA:
+            payment = await create_auto_payment(
+                payment_method=current_subscription.payment_method,
+                provider_auto_payment_charge_id=current_subscription.provider_auto_payment_charge_id,
+                user_id=current_subscription.user_id,
+                description=get_localization(user_language_code).payment_description_renew_subscription(
+                    current_subscription.user_id,
+                    product.names.get(user_language_code),
+                ),
+                amount=current_subscription.amount,
+                language_code=user_language_code,
+                order_items=[
+                    OrderItem(
+                        product=product,
+                        price=current_subscription.amount,
+                    ),
+                ],
+            )
+            if not payment:
+                current_subscription.status = SubscriptionStatus.FINISHED
+
+                activated_subscriptions = await get_activated_subscriptions_by_user_id(user.id, current_date)
+                for activated_subscription in activated_subscriptions:
+                    if activated_subscription.id != current_subscription.id:
+                        activated_subscription_product = await get_product(activated_subscription.product_id)
+                        user.subscription_id = activated_subscription.id
+                        user.daily_limits = activated_subscription_product.details.get('limits')
+                        break
+                else:
+                    user.subscription_id = ''
+                    user.daily_limits = SUBSCRIPTION_FREE_LIMITS
+
+                await update_subscription(current_subscription.id, {
+                    'status': current_subscription.status,
+                    'end_date': current_date,
+                })
+                batch.update(user_ref, {
+                    'subscription_id': user.subscription_id,
+                    'daily_limits': user.daily_limits,
+                    'last_subscription_limit_update': current_date,
+                    'edited_at': current_date,
+                })
+
+                if not user.subscription_id:
+                    await send_sticker(
+                        bot,
+                        user.telegram_chat_id,
+                        config.MESSAGE_STICKERS.get(MessageSticker.SAD),
+                    )
+                    await send_message_to_user(
+                        bot,
+                        user,
+                        get_localization(user_language_code).SUBSCRIPTION_END,
+                        build_buy_motivation_keyboard(user_language_code),
+                    )
+            return user
+
+    if (
+        current_subscription and
+        current_subscription.status != SubscriptionStatus.FINISHED and
+        current_subscription.end_date <= current_date
     ):
         user_language_code = await get_user_language(user.id, storage)
         if current_subscription.provider_auto_payment_charge_id and current_subscription.status != SubscriptionStatus.CANCELED:
@@ -157,59 +222,6 @@ async def update_user_subscription(bot: Bot, user: User, batch: AsyncWriteBatch,
                             build_buy_motivation_keyboard(user_language_code),
                         )
                 return user
-            elif current_subscription.payment_method == PaymentMethod.PAY_SELECTION:
-                payment = await create_auto_payment(
-                    payment_method=current_subscription.payment_method,
-                    provider_auto_payment_charge_id=current_subscription.provider_auto_payment_charge_id,
-                    user_id=current_subscription.user_id,
-                    description=get_localization(user_language_code).payment_description_renew_subscription(
-                        current_subscription.user_id,
-                        product.names.get(user_language_code),
-                    ),
-                    amount=current_subscription.amount,
-                    language_code=user_language_code,
-                    order_items=[
-                        OrderItem(
-                            product=product,
-                            price=current_subscription.amount,
-                        ),
-                    ],
-                    order_id=current_subscription.provider_auto_payment_charge_id,
-                )
-                if not payment:
-                    current_subscription.status = SubscriptionStatus.FINISHED
-
-                    activated_subscriptions = await get_activated_subscriptions_by_user_id(user.id, current_date)
-                    for activated_subscription in activated_subscriptions:
-                        if activated_subscription.id != current_subscription.id:
-                            activated_subscription_product = await get_product(activated_subscription.product_id)
-                            user.subscription_id = activated_subscription.id
-                            user.daily_limits = activated_subscription_product.details.get('limits')
-                            break
-                    else:
-                        user.subscription_id = ''
-                        user.daily_limits = SUBSCRIPTION_FREE_LIMITS
-
-                    await update_subscription(current_subscription.id, {'status': current_subscription.status})
-                    batch.update(user_ref, {
-                        'subscription_id': user.subscription_id,
-                        'daily_limits': user.daily_limits,
-                        'last_subscription_limit_update': current_date,
-                        'edited_at': current_date,
-                    })
-
-                    if not user.subscription_id:
-                        await send_sticker(
-                            bot,
-                            user.telegram_chat_id,
-                            config.MESSAGE_STICKERS.get(MessageSticker.SAD),
-                        )
-                        await send_message_to_user(
-                            bot,
-                            user,
-                            get_localization(user_language_code).SUBSCRIPTION_END,
-                            build_buy_motivation_keyboard(user_language_code),
-                        )
             elif current_subscription.payment_method == PaymentMethod.STRIPE or current_subscription.payment_method == PaymentMethod.TELEGRAM_STARS:
                 days_difference = (current_date - current_subscription.end_date).days
                 if days_difference > 3:

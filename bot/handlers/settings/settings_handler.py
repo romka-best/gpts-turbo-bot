@@ -18,14 +18,16 @@ from bot.database.models.common import (
     Quota,
     SendType,
     AspectRatio,
-    EightifyFocus,
-    EightifyFormat,
-    EightifyAmount,
+    VideoSummaryFocus,
+    VideoSummaryFormat,
+    VideoSummaryAmount,
     DALLEResolution,
     DALLEQuality,
     MidjourneyVersion,
     FluxSafetyTolerance,
     SunoVersion,
+    KlingDuration,
+    KlingMode,
     RunwayResolution,
     RunwayDuration,
 )
@@ -39,6 +41,7 @@ from bot.handlers.payment.payment_handler import handle_buy
 from bot.helpers.creaters.create_new_chat import create_new_chat
 from bot.helpers.getters.get_human_model import get_human_model
 from bot.helpers.getters.get_model_type import get_model_type
+from bot.integrations.kling import Kling
 from bot.integrations.openAI import get_cost_for_image
 from bot.integrations.runway import get_cost_for_video
 from bot.keyboards.common.common import build_buy_motivation_keyboard
@@ -50,17 +53,17 @@ from bot.keyboards.settings.chats import (
     build_delete_chat_keyboard,
 )
 from bot.keyboards.settings.settings import (
+    build_settings_keyboard,
     build_settings_choose_model_type_keyboard,
     build_settings_choose_text_model_keyboard,
     build_settings_choose_summary_model_keyboard,
     build_settings_choose_image_model_keyboard,
     build_settings_choose_music_model_keyboard,
     build_settings_choose_video_model_keyboard,
-    build_settings_keyboard,
     build_voice_messages_settings_keyboard,
 )
 from bot.locales.main import get_localization, get_user_language
-from bot.states.chats import Chats
+from bot.states.common.chats import Chats
 
 settings_router = Router()
 
@@ -83,6 +86,11 @@ async def handle_settings(message: Message, user_id: str, state: FSMContext, adv
             generation_cost = get_cost_for_image(
                 user.settings[Model.DALL_E][UserSettings.QUALITY],
                 user.settings[Model.DALL_E][UserSettings.RESOLUTION],
+            )
+        elif user.current_model == Model.KLING:
+            generation_cost = Kling.get_cost_for_video(
+                user.settings[Model.KLING][UserSettings.MODE],
+                user.settings[Model.KLING][UserSettings.DURATION],
             )
         elif user.current_model == Model.RUNWAY:
             generation_cost = get_cost_for_video(
@@ -256,6 +264,11 @@ async def handle_settings_choose_video_model_selection(callback_query: CallbackQ
             reply_markup=reply_markup,
         )
         return
+    elif chosen_model == Model.KLING:
+        generation_cost = Kling.get_cost_for_video(
+            user.settings[Model.KLING][UserSettings.MODE],
+            user.settings[Model.KLING][UserSettings.DURATION],
+        )
     elif chosen_model == Model.RUNWAY:
         generation_cost = get_cost_for_video(
             user.settings[Model.RUNWAY][UserSettings.DURATION],
@@ -315,18 +328,18 @@ async def handle_setting_selection(callback_query: CallbackQuery, state: FSMCont
         return
 
     if (
-        chosen_setting == EightifyFocus.INSIGHTFUL or
-        chosen_setting == EightifyFocus.FUNNY or
-        chosen_setting == EightifyFocus.ACTIONABLE or
-        chosen_setting == EightifyFocus.CONTROVERSIAL
+        chosen_setting == VideoSummaryFocus.INSIGHTFUL or
+        chosen_setting == VideoSummaryFocus.FUNNY or
+        chosen_setting == VideoSummaryFocus.ACTIONABLE or
+        chosen_setting == VideoSummaryFocus.CONTROVERSIAL
     ):
-        user.settings[Model.EIGHTIFY][UserSettings.FOCUS] = chosen_setting
+        user.settings[chosen_model][UserSettings.FOCUS] = chosen_setting
         what_changed = UserSettings.FOCUS
-    elif chosen_setting == EightifyFormat.LIST or chosen_setting == EightifyFormat.FAQ:
-        user.settings[Model.EIGHTIFY][UserSettings.FORMAT] = chosen_setting
+    elif chosen_setting == VideoSummaryFormat.LIST or chosen_setting == VideoSummaryFormat.FAQ:
+        user.settings[chosen_model][UserSettings.FORMAT] = chosen_setting
         what_changed = UserSettings.FORMAT
-    elif chosen_setting == EightifyAmount.SHORT or chosen_setting == EightifyAmount.AUTO or chosen_setting == EightifyAmount.DETAILED:
-        user.settings[Model.EIGHTIFY][UserSettings.AMOUNT] = chosen_setting
+    elif chosen_setting == VideoSummaryAmount.SHORT or chosen_setting == VideoSummaryAmount.AUTO or chosen_setting == VideoSummaryAmount.DETAILED:
+        user.settings[chosen_model][UserSettings.AMOUNT] = chosen_setting
         what_changed = UserSettings.AMOUNT
     elif chosen_setting == DALLEResolution.LOW or chosen_setting == DALLEResolution.MEDIUM or chosen_setting == DALLEResolution.HIGH:
         user.settings[Model.DALL_E][UserSettings.RESOLUTION] = chosen_setting
@@ -355,9 +368,11 @@ async def handle_setting_selection(callback_query: CallbackQuery, state: FSMCont
         what_changed = UserSettings.GENDER
     elif (
         chosen_setting == str(RunwayDuration.SECONDS_5) or
-        chosen_setting == str(RunwayDuration.SECONDS_10)
+        chosen_setting == str(RunwayDuration.SECONDS_10) or
+        chosen_setting == str(KlingDuration.SECONDS_5) or
+        chosen_setting == str(KlingDuration.SECONDS_10)
     ):
-        user.settings[Model.RUNWAY][UserSettings.DURATION] = int(chosen_setting)
+        user.settings[chosen_model][UserSettings.DURATION] = int(chosen_setting)
         what_changed = UserSettings.DURATION
     elif (
         chosen_setting == 'SQUARE' or
@@ -395,6 +410,9 @@ async def handle_setting_selection(callback_query: CallbackQuery, state: FSMCont
     elif chosen_setting == SunoVersion.V3 or chosen_setting == SunoVersion.V3_5 or chosen_setting == SunoVersion.V4:
         user.settings[Model.SUNO][UserSettings.VERSION] = chosen_setting
         what_changed = UserSettings.VERSION
+    elif chosen_setting == KlingMode.STANDARD or chosen_setting == KlingMode.PRO:
+        user.settings[Model.KLING][UserSettings.MODE] = chosen_setting
+        what_changed = UserSettings.MODE
     else:
         user.settings[chosen_model][chosen_setting] = not user.settings[chosen_model][chosen_setting]
         what_changed = chosen_setting
@@ -424,10 +442,10 @@ async def handle_setting_selection(callback_query: CallbackQuery, state: FSMCont
                     text += ' ✅'
                     keyboard_changed = True
                 elif (
-                    callback_data == EightifyFocus.INSIGHTFUL or
-                    callback_data == EightifyFocus.FUNNY or
-                    callback_data == EightifyFocus.ACTIONABLE or
-                    callback_data == EightifyFocus.CONTROVERSIAL
+                    callback_data == VideoSummaryFocus.INSIGHTFUL or
+                    callback_data == VideoSummaryFocus.FUNNY or
+                    callback_data == VideoSummaryFocus.ACTIONABLE or
+                    callback_data == VideoSummaryFocus.CONTROVERSIAL
                 ):
                     text = text.replace(' ✅', '')
             elif what_changed == UserSettings.FORMAT:
@@ -435,8 +453,8 @@ async def handle_setting_selection(callback_query: CallbackQuery, state: FSMCont
                     text += ' ✅'
                     keyboard_changed = True
                 elif (
-                    callback_data == EightifyFormat.LIST or
-                    callback_data == EightifyFormat.FAQ
+                    callback_data == VideoSummaryFormat.LIST or
+                    callback_data == VideoSummaryFormat.FAQ
                 ):
                     text = text.replace(' ✅', '')
             elif what_changed == UserSettings.AMOUNT:
@@ -444,9 +462,9 @@ async def handle_setting_selection(callback_query: CallbackQuery, state: FSMCont
                     text += ' ✅'
                     keyboard_changed = True
                 elif (
-                    callback_data == EightifyAmount.SHORT or
-                    callback_data == EightifyAmount.AUTO or
-                    callback_data == EightifyAmount.DETAILED
+                    callback_data == VideoSummaryAmount.SHORT or
+                    callback_data == VideoSummaryAmount.AUTO or
+                    callback_data == VideoSummaryAmount.DETAILED
                 ):
                     text = text.replace(' ✅', '')
             elif what_changed == UserSettings.QUALITY:
@@ -513,7 +531,18 @@ async def handle_setting_selection(callback_query: CallbackQuery, state: FSMCont
                     keyboard_changed = True
                 elif (
                     callback_data == str(RunwayDuration.SECONDS_5) or
-                    callback_data == str(RunwayDuration.SECONDS_10)
+                    callback_data == str(RunwayDuration.SECONDS_10) or
+                    callback_data == str(KlingDuration.SECONDS_5) or
+                    callback_data == str(KlingDuration.SECONDS_10)
+                ):
+                    text = text.replace(' ✅', '')
+            elif what_changed == UserSettings.MODE:
+                if callback_data == chosen_setting and '✅' not in text:
+                    text += ' ✅'
+                    keyboard_changed = True
+                elif (
+                    callback_data == KlingMode.STANDARD or
+                    callback_data == KlingMode.PRO
                 ):
                     text = text.replace(' ✅', '')
             elif (
@@ -542,6 +571,11 @@ async def handle_setting_selection(callback_query: CallbackQuery, state: FSMCont
             generation_cost = get_cost_for_image(
                 user.settings[Model.DALL_E][UserSettings.QUALITY],
                 user.settings[Model.DALL_E][UserSettings.RESOLUTION],
+            )
+        elif chosen_model == Model.KLING:
+            generation_cost = Kling.get_cost_for_video(
+                user.settings[Model.KLING][UserSettings.MODE],
+                user.settings[Model.KLING][UserSettings.DURATION],
             )
         elif chosen_model == Model.RUNWAY:
             generation_cost = get_cost_for_video(
@@ -606,7 +640,11 @@ async def handle_voice_messages_setting_selection(callback_query: CallbackQuery,
         user.settings[Model.CHAT_GPT][chosen_setting] = False
         user.settings[Model.CLAUDE][chosen_setting] = False
         user.settings[Model.GEMINI][chosen_setting] = False
+        user.settings[Model.GROK][chosen_setting] = False
+        user.settings[Model.PERPLEXITY][chosen_setting] = False
+
         user.settings[Model.EIGHTIFY][chosen_setting] = False
+        user.settings[Model.GEMINI_VIDEO][chosen_setting] = False
         await handle_buy(callback_query.message, user_id, state)
 
         return
@@ -655,13 +693,21 @@ async def handle_voice_messages_setting_selection(callback_query: CallbackQuery,
             user.settings[Model.CHAT_GPT][UserSettings.VOICE] = chosen_setting
             user.settings[Model.CLAUDE][UserSettings.VOICE] = chosen_setting
             user.settings[Model.GEMINI][UserSettings.VOICE] = chosen_setting
+            user.settings[Model.GROK][UserSettings.VOICE] = chosen_setting
+            user.settings[Model.PERPLEXITY][UserSettings.VOICE] = chosen_setting
+
             user.settings[Model.EIGHTIFY][UserSettings.VOICE] = chosen_setting
+            user.settings[Model.GEMINI_VIDEO][UserSettings.VOICE] = chosen_setting
         else:
             new_setting = not user.settings[Model.CHAT_GPT][chosen_setting]
             user.settings[Model.CHAT_GPT][chosen_setting] = new_setting
             user.settings[Model.CLAUDE][chosen_setting] = new_setting
             user.settings[Model.GEMINI][chosen_setting] = new_setting
+            user.settings[Model.GROK][chosen_setting] = new_setting
+            user.settings[Model.PERPLEXITY][chosen_setting] = new_setting
+
             user.settings[Model.EIGHTIFY][chosen_setting] = new_setting
+            user.settings[Model.GEMINI_VIDEO][chosen_setting] = new_setting
 
         await update_user(
             user_id, {

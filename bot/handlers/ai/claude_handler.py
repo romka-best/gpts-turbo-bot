@@ -25,6 +25,7 @@ from bot.database.operations.transaction.writers import write_transaction
 from bot.database.operations.user.getters import get_user
 from bot.database.operations.user.updaters import update_user
 from bot.helpers.creaters.create_new_message_and_update_user import create_new_message_and_update_user
+from bot.helpers.getters.get_history_without_duplicates import get_history_without_duplicates
 from bot.helpers.getters.get_quota_by_model import get_quota_by_model
 from bot.helpers.getters.get_switched_to_ai_model import get_switched_to_ai_model
 from bot.helpers.reply_with_voice import reply_with_voice
@@ -126,11 +127,13 @@ async def handle_claude_choose_selection(callback_query: CallbackQuery, state: F
                     f'Model version is not found: {user.settings[user.current_model][UserSettings.VERSION]}'
                 )
 
-            await callback_query.message.answer(
+            answered_message = await callback_query.message.answer(
                 text=text,
                 reply_markup=reply_markup,
                 message_effect_id=config.MESSAGE_EFFECTS.get(MessageEffect.FIRE),
             )
+            await callback_query.bot.unpin_all_chat_messages(user.telegram_chat_id)
+            await callback_query.bot.pin_chat_message(user.telegram_chat_id, answered_message.message_id)
         else:
             text = get_localization(user_language_code).ALREADY_SWITCHED_TO_THIS_MODEL
             await callback_query.message.answer(
@@ -141,7 +144,14 @@ async def handle_claude_choose_selection(callback_query: CallbackQuery, state: F
     await state.clear()
 
 
-async def handle_claude(message: Message, state: FSMContext, user: User, user_quota: Quota, filenames=None):
+async def handle_claude(
+    message: Message,
+    state: FSMContext,
+    user: User,
+    user_quota: Quota,
+    filenames=None,
+    single_mode=False,
+):
     if user_quota != Quota.CLAUDE_3_HAIKU and user_quota != Quota.CLAUDE_3_SONNET and user_quota != Quota.CLAUDE_3_OPUS:
         raise NotImplementedError(f'User quota is not implemented: {user_quota}')
 
@@ -160,6 +170,7 @@ async def handle_claude(message: Message, state: FSMContext, user: User, user_qu
             text = ''
 
     can_work_with_photos = user_quota != Quota.CLAUDE_3_HAIKU
+    can_work_with_documents = user_quota == Quota.CLAUDE_3_SONNET
     if filenames and len(filenames):
         await write_message(user.current_chat_id, 'user', user.id, text, True, filenames)
     else:
@@ -178,6 +189,9 @@ async def handle_claude(message: Message, state: FSMContext, user: User, user_qu
     )
     role = await get_role(chat.role_id)
     sorted_messages = sorted(messages, key=lambda m: m.created_at)
+    if single_mode:
+        sorted_messages = [sorted_messages[-1]]
+
     system_prompt = role.translated_instructions.get(user_language_code, LanguageCode.EN)
     history = []
     for sorted_message in sorted_messages:
@@ -188,7 +202,7 @@ async def handle_claude(message: Message, state: FSMContext, user: User, user_qu
                 'text': sorted_message.content,
             })
 
-        if sorted_message.photo_filenames and can_work_with_photos:
+        if sorted_message.photo_filenames and (can_work_with_photos or can_work_with_documents):
             for photo_filename in sorted_message.photo_filenames:
                 photo_path = f'users/vision/{user.id}/{photo_filename}'
                 photo = await firebase.bucket.get_blob(photo_path)
@@ -196,20 +210,24 @@ async def handle_claude(message: Message, state: FSMContext, user: User, user_qu
 
                 async with httpx.AsyncClient() as client:
                     response = await client.get(photo_link)
-                    image_content = response.content
+                    response_content = response.content
 
-                kind = await asyncio.to_thread(lambda: filetype.guess(image_content))
+                kind = await asyncio.to_thread(lambda: filetype.guess(response_content))
                 if kind:
-                    image_media_type = kind.mime
+                    media_type = kind.mime
                 else:
-                    image_media_type = 'image/jpeg'
-                image_data = await asyncio.to_thread(lambda: base64.b64encode(image_content).decode('utf-8'))
+                    media_type = 'image/jpeg'
+
+                if not can_work_with_documents and not media_type.startswith('image') and not single_mode:
+                    continue
+
+                data = await asyncio.to_thread(lambda: base64.b64encode(response_content).decode('utf-8'))
                 content.append({
-                    'type': 'image',
+                    'type': 'image' if media_type.startswith('image') else 'document',
                     'source': {
                         'type': 'base64',
-                        'media_type': image_media_type,
-                        'data': image_data,
+                        'media_type': media_type,
+                        'data': data,
                     },
                 })
 
@@ -255,6 +273,7 @@ async def handle_claude(message: Message, state: FSMContext, user: User, user_qu
             product = await get_product_by_quota(user_quota)
 
             total_price = round(input_price + output_price, 6)
+            print(total_price)
             message_role, message_content = 'assistant', response_message
             await write_transaction(
                 user_id=user.id,
@@ -450,20 +469,3 @@ async def handle_claude_3_sonnet_example(
             info=str(e),
             hashtags=['claude', 'example'],
         )
-
-
-def get_history_without_duplicates(history: list) -> list:
-    result = []
-    first_user_found = False
-
-    for item in history:
-        if not first_user_found and item['role'] == 'user':
-            first_user_found = True
-
-        if first_user_found:
-            if result and item['role'] == result[-1]['role']:
-                result[-1] = item
-            else:
-                result.append(item)
-
-    return result

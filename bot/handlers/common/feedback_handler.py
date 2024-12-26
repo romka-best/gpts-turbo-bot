@@ -13,9 +13,9 @@ from bot.database.operations.user.updaters import update_user
 from bot.helpers.senders.send_message_to_admins_and_developers import send_message_to_admins_and_developers
 from bot.keyboards.admin.feedback import build_manage_feedback_keyboard
 
-from bot.keyboards.common.common import build_cancel_keyboard
+from bot.keyboards.common.feedback import build_feedback_keyboard
 from bot.locales.main import get_localization, get_user_language
-from bot.states.feedback import Feedback
+from bot.states.common.feedback import Feedback
 
 feedback_router = Router()
 
@@ -30,7 +30,7 @@ async def feedback(message: Message, state: FSMContext):
 async def handle_feedback(message: Message, user_id: str, state: FSMContext):
     user_language_code = await get_user_language(user_id, state.storage)
 
-    reply_markup = build_cancel_keyboard(user_language_code)
+    reply_markup = build_feedback_keyboard(user_language_code)
     await message.answer(
         text=get_localization(user_language_code).FEEDBACK,
         reply_markup=reply_markup,

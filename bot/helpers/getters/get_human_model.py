@@ -10,8 +10,14 @@ def get_human_model(model: Model, language_code: LanguageCode):
         human_model = get_localization(language_code).CLAUDE
     elif model == Model.GEMINI:
         human_model = get_localization(language_code).GEMINI
+    elif model == Model.GROK:
+        human_model = get_localization(language_code).GROK
+    elif model == Model.PERPLEXITY:
+        human_model = get_localization(language_code).PERPLEXITY
     elif model == Model.EIGHTIFY:
         human_model = get_localization(language_code).EIGHTIFY
+    elif model == Model.GEMINI_VIDEO:
+        human_model = get_localization(language_code).GEMINI_VIDEO
     elif model == Model.DALL_E:
         human_model = get_localization(language_code).DALL_E
     elif model == Model.MIDJOURNEY:
@@ -20,6 +26,8 @@ def get_human_model(model: Model, language_code: LanguageCode):
         human_model = get_localization(language_code).STABLE_DIFFUSION
     elif model == Model.FLUX:
         human_model = get_localization(language_code).FLUX
+    elif model == Model.LUMA_PHOTON:
+        human_model = get_localization(language_code).LUMA_PHOTON
     elif model == Model.FACE_SWAP:
         human_model = get_localization(language_code).FACE_SWAP
     elif model == Model.PHOTOSHOP_AI:
@@ -28,8 +36,12 @@ def get_human_model(model: Model, language_code: LanguageCode):
         human_model = get_localization(language_code).MUSIC_GEN
     elif model == Model.SUNO:
         human_model = get_localization(language_code).SUNO
+    elif model == Model.KLING:
+        human_model = get_localization(language_code).KLING
     elif model == Model.RUNWAY:
         human_model = get_localization(language_code).RUNWAY
+    elif model == Model.LUMA_RAY:
+        human_model = get_localization(language_code).LUMA_RAY
     else:
         human_model = model
 

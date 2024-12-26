@@ -28,7 +28,7 @@ from bot.keyboards.common.common import build_cancel_keyboard, build_error_keybo
 from bot.keyboards.ai.music_gen import build_music_gen_keyboard
 from bot.locales.main import get_localization, get_user_language
 from bot.locales.types import LanguageCode
-from bot.states.music_gen import MusicGen
+from bot.states.ai.music_gen import MusicGen
 
 music_gen_router = Router()
 
@@ -61,11 +61,14 @@ async def music_gen(message: Message, state: FSMContext):
             user_language_code,
         )
         reply_markup = build_switched_to_ai_keyboard(user_language_code, Model.MUSIC_GEN)
-        await message.answer(
+        answered_message = await message.answer(
             text=text,
             reply_markup=reply_markup,
             message_effect_id=config.MESSAGE_EFFECTS.get(MessageEffect.FIRE),
         )
+
+        await message.bot.unpin_all_chat_messages(user.telegram_chat_id)
+        await message.bot.pin_chat_message(user.telegram_chat_id, answered_message.message_id)
 
     await handle_music_gen(message.bot, str(message.chat.id), state, user_id)
 

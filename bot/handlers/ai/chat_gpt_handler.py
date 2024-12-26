@@ -125,11 +125,13 @@ async def handle_chat_gpt_choose_selection(callback_query: CallbackQuery, state:
                     f'Model version is not found: {user.settings[user.current_model][UserSettings.VERSION]}'
                 )
 
-            await callback_query.message.answer(
+            answered_message = await callback_query.message.answer(
                 text=text,
                 reply_markup=reply_markup,
                 message_effect_id=config.MESSAGE_EFFECTS.get(MessageEffect.FIRE),
             )
+            await callback_query.bot.unpin_all_chat_messages(user.telegram_chat_id)
+            await callback_query.bot.pin_chat_message(user.telegram_chat_id, answered_message.message_id)
         else:
             text = get_localization(user_language_code).ALREADY_SWITCHED_TO_THIS_MODEL
             await callback_query.message.answer(
@@ -170,12 +172,14 @@ async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_q
         await write_message(user.current_chat_id, 'user', user.id, text)
 
     chat = await get_chat(user.current_chat_id)
-    if not user.subscription_id:
-        limit = 4
-    elif can_work_with_photos and user_quota != Quota.CHAT_GPT_O_1:
-        limit = 8
-    elif user_quota == Quota.CHAT_GPT_O_1:
+    if user_quota == Quota.CHAT_GPT_O_1:
         limit = 3
+    elif user_quota == Quota.CHAT_GPT_O_1_MINI:
+        limit = 6
+    elif not user.subscription_id:
+        limit = 4
+    elif user_quota not in [Quota.CHAT_GPT_O_1, Quota.CHAT_GPT_O_1_MINI]:
+        limit = 8
     else:
         limit = 4
     messages = await get_messages_by_chat_id(
@@ -204,6 +208,10 @@ async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_q
                 photo_path = f'users/vision/{user.id}/{photo_filename}'
                 photo = await firebase.bucket.get_blob(photo_path)
                 photo_link = firebase.get_public_url(photo.name)
+
+                if photo_filename.split('.')[-1] not in ['png', 'jpg', 'jpeg', 'gif', 'webp']:
+                    continue
+
                 content.append({
                     'type': 'image_url',
                     'image_url': {

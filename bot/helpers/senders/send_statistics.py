@@ -11,8 +11,10 @@ async def send_statistics(bot: Bot, period='day'):
 
     await send_message_to_admins(bot, texts.get('users'))
     await send_message_to_super_admin(bot, texts.get('text_models'))
+    await send_message_to_super_admin(bot, texts.get('summary_models'))
     await send_message_to_super_admin(bot, texts.get('image_models'))
     await send_message_to_super_admin(bot, texts.get('music_models'))
+    await send_message_to_super_admin(bot, texts.get('video_models'))
     await send_message_to_super_admin(bot, texts.get('reactions'))
     await send_message_to_super_admin(bot, texts.get('bonuses'))
     await send_message_to_admins(bot, texts.get('expenses'))

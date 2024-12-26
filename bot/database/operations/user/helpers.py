@@ -40,10 +40,10 @@ def create_user_object(
             default_settings[default_model][UserSettings.VERSION] = ClaudeGPTVersion.V3_Sonnet
         elif quota == Quota.CLAUDE_3_OPUS:
             default_settings[default_model][UserSettings.VERSION] = ClaudeGPTVersion.V3_Opus
-    elif quota in [Quota.GEMINI_1_FLASH, Quota.GEMINI_1_PRO, Quota.GEMINI_1_ULTRA]:
+    elif quota in [Quota.GEMINI_2_FLASH, Quota.GEMINI_1_PRO, Quota.GEMINI_1_ULTRA]:
         default_model = Model.GEMINI
-        if quota == Quota.GEMINI_1_FLASH:
-            default_settings[default_model][UserSettings.VERSION] = GeminiGPTVersion.V1_Flash
+        if quota == Quota.GEMINI_2_FLASH:
+            default_settings[default_model][UserSettings.VERSION] = GeminiGPTVersion.V2_Flash
         elif quota == Quota.GEMINI_1_PRO:
             default_settings[default_model][UserSettings.VERSION] = GeminiGPTVersion.V1_Pro
         elif quota == Quota.GEMINI_1_ULTRA:

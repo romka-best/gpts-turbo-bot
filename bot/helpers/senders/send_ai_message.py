@@ -5,10 +5,13 @@ from aiogram.exceptions import TelegramBadRequest, TelegramNetworkError, Telegra
 from aiogram.types import Message
 from aiohttp import ClientOSError
 from redis.exceptions import ConnectionError
-from telegramify_markdown import markdownify
+from telegramify_markdown import markdownify, customize
 
 from bot.config import config
 from bot.helpers.split_message import split_message
+
+customize.markdown_symbol.head_level_3 = '🔖'
+customize.markdown_symbol.head_level_4 = '🔹'
 
 
 async def delayed_send_ai_message(message: Message, text: str, timeout: int, reply_markup=None):
@@ -26,7 +29,7 @@ async def delayed_send_ai_message(message: Message, text: str, timeout: int, rep
 
 async def send_ai_message(message: Message, text: str, reply_markup=None):
     formatted_text = markdownify(
-        text,
+        content=text,
         normalize_whitespace=True,
     )
 

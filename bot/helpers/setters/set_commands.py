@@ -26,15 +26,15 @@ commands_en = [
     ),
     BotCommand(
         command='text',
-        description='🔤 Generate Text with: ChatGPT, Claude, Gemini',
+        description='🔤 Generate Text with: ChatGPT, Claude, Gemini, Grok, Perplexity',
     ),
     BotCommand(
         command='summary',
-        description='📝 Generate Summary in: YouTube',
+        description='📝 Generate Summary in: YouTube, Video',
     ),
     BotCommand(
         command='image',
-        description='🖼 Generate Images with: DALL-E, Midjourney, Stable Diffusion, Flux, FaceSwap, Photoshop AI',
+        description='🖼 Generate Images with: DALL-E, Midjourney, Stable Diffusion, Flux, Luma Photon, FaceSwap, Photoshop AI',
     ),
     BotCommand(
         command='music',
@@ -42,7 +42,7 @@ commands_en = [
     ),
     BotCommand(
         command='video',
-        description='📹 Generate Videos with: Runway',
+        description='📹 Generate Videos with: Kling, Runway, Luma Ray',
     ),
     BotCommand(
         command='info',
@@ -89,15 +89,15 @@ commands_ru = [
     ),
     BotCommand(
         command='text',
-        description='🔤 Генерация текста с: ChatGPT, Claude, Gemini',
+        description='🔤 Генерация текста с: ChatGPT, Claude, Gemini, Grok, Perplexity',
     ),
     BotCommand(
         command='summary',
-        description='📝 Генерация резюме в: YouTube',
+        description='📝 Генерация резюме в: YouTube, Видео',
     ),
     BotCommand(
         command='image',
-        description='🖼 Генерация изображений с: DALL-E, Midjourney, Stable Diffusion, Flux, FaceSwap, Photoshop AI',
+        description='🖼 Генерация изображений с: DALL-E, Midjourney, Stable Diffusion, Flux, Luma Photon, FaceSwap, Photoshop AI',
     ),
     BotCommand(
         command='music',
@@ -105,7 +105,7 @@ commands_ru = [
     ),
     BotCommand(
         command='video',
-        description='📹 Генерация видео с: Runway',
+        description='📹 Генерация видео с: Kling, Runway, Luma Ray',
     ),
     BotCommand(
         command='info',

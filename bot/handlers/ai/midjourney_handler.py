@@ -68,11 +68,14 @@ async def midjourney(message: Message, state: FSMContext):
             user_language_code,
         )
         reply_markup = build_switched_to_ai_keyboard(user_language_code, Model.MIDJOURNEY)
-        await message.answer(
+        answered_message = await message.answer(
             text=text,
             reply_markup=reply_markup,
             message_effect_id=config.MESSAGE_EFFECTS.get(MessageEffect.FIRE),
         )
+
+        await message.bot.unpin_all_chat_messages(user.telegram_chat_id)
+        await message.bot.pin_chat_message(user.telegram_chat_id, answered_message.message_id)
 
 
 async def handle_midjourney(
@@ -112,7 +115,7 @@ async def handle_midjourney(
 
             reply_markup = build_limit_exceeded_keyboard(user_language_code)
             await message.reply(
-                text=get_localization(user_language_code).REACHED_USAGE_LIMIT,
+                text=get_localization(user_language_code).reached_usage_limit(),
                 reply_markup=reply_markup,
                 allow_sending_without_reply=True,
             )

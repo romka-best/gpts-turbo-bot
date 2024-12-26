@@ -16,7 +16,7 @@ async def is_messages_limit_exceeded(message: Message, state: FSMContext, user: 
             sticker=config.MESSAGE_STICKERS.get(MessageSticker.SAD),
         )
 
-        text = get_localization(user_language_code).REACHED_USAGE_LIMIT
+        text = get_localization(user_language_code).reached_usage_limit()
         reply_markup = build_limit_exceeded_keyboard(user_language_code)
         await message.reply(
             text=text,

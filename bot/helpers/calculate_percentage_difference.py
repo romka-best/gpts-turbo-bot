@@ -10,7 +10,7 @@ def calculate_percentage_difference(is_all_time: bool, current: Union[int, float
         elif current < 0:
             return f'(-∞%)'
         else:
-            return '(0%)'
+            return ''
 
     percentage_diff = round(((current - before) / before) * 100, 2)
     sign = '+' if percentage_diff >= 0 else ''
