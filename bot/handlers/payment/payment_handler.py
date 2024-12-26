@@ -131,7 +131,7 @@ async def handle_subscribe(message: Message, user_id: str, state: FSMContext):
         subscriptions,
         user.currency,
         user.discount,
-        len(last_user_subscriptions) == 0,
+        len(last_user_subscriptions) == 0 and user.currency != Currency.XTR,
     )
     reply_markup = build_subscriptions_keyboard(
         subscriptions,
@@ -181,7 +181,7 @@ async def handle_subscription_selection(callback_query: CallbackQuery, state: FS
             subscriptions,
             user.currency,
             user.discount,
-            len(last_user_subscriptions) == 0,
+            len(last_user_subscriptions) == 0 and user.currency != Currency.XTR,
         )
         reply_markup = build_subscriptions_keyboard(
             subscriptions,
@@ -229,7 +229,7 @@ async def handle_subscription_selection(callback_query: CallbackQuery, state: FS
             subscriptions,
             user.currency,
             user.discount,
-            len(last_user_subscriptions) == 0,
+            len(last_user_subscriptions) == 0 and user.currency != Currency.XTR,
         )
         reply_markup = build_subscriptions_keyboard(
             subscriptions,

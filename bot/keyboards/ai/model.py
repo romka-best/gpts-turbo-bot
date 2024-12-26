@@ -415,6 +415,7 @@ def build_switched_to_ai_keyboard(language_code: LanguageCode, model: Model) -> 
         Model.GEMINI_VIDEO,
         Model.FACE_SWAP,
         Model.PHOTOSHOP_AI,
+        Model.KLING,
         Model.RUNWAY,
         Model.LUMA_RAY,
     ]:

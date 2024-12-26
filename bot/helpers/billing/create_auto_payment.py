@@ -14,8 +14,6 @@ from bot.locales.types import LanguageCode
 Configuration.account_id = config.YOOKASSA_ACCOUNT_ID.get_secret_value()
 Configuration.secret_key = config.YOOKASSA_SECRET_KEY.get_secret_value()
 
-YOOKASSA_URL = 'https://api.yookassa.ru/v3'
-
 
 async def create_auto_payment(
     payment_method: PaymentMethod,
@@ -27,7 +25,7 @@ async def create_auto_payment(
     order_items: list[OrderItem],
 ) -> dict:
     if payment_method == PaymentMethod.YOOKASSA:
-        url = f'{YOOKASSA_URL}/payments'
+        url = f'https://api.yookassa.ru/v3/payments'
         headers = {
             'Content-Type': 'application/json',
             'Idempotence-Key': str(uuid.uuid4()),

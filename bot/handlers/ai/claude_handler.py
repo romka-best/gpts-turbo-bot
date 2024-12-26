@@ -218,7 +218,7 @@ async def handle_claude(
                 else:
                     media_type = 'image/jpeg'
 
-                if not media_type.startswith('image') and not single_mode:
+                if not can_work_with_documents and not media_type.startswith('image') and not single_mode:
                     continue
 
                 data = await asyncio.to_thread(lambda: base64.b64encode(response_content).decode('utf-8'))
@@ -273,6 +273,7 @@ async def handle_claude(
             product = await get_product_by_quota(user_quota)
 
             total_price = round(input_price + output_price, 6)
+            print(total_price)
             message_role, message_content = 'assistant', response_message
             await write_transaction(
                 user_id=user.id,

@@ -603,8 +603,6 @@ class Texts(Protocol):
 ━ 5️⃣ <b>Подписчики:</b>
 {subscription_info}
 ━ 6️⃣ <b>{'Заблокировали бота' if is_all_time else 'Заблокировали бота из пришедших'}:</b> {count_blocked_users} {calculate_percentage_difference(is_all_time, count_blocked_users, count_blocked_users_before)}
-
-🔍 Это всё, что нужно знать о пользователей на данный момент 🚀
 """
 
     @staticmethod
@@ -656,8 +654,6 @@ class Texts(Protocol):
     ┣ ❌ С ошибкой: {all_fail_requests} {calculate_percentage_difference(is_all_time, all_fail_requests, all_fail_requests_before)}
     ┣ 🚀 Примеров: {all_example_requests} {calculate_percentage_difference(is_all_time, all_example_requests, all_example_requests_before)}
     ┗ 📝 Всего: {all_requests} {calculate_percentage_difference(is_all_time, all_requests, all_requests_before)}
-
-🔍 Это всё, что нужно знать о текстовых моделях на данный момент 🚀
 """
 
     @staticmethod
@@ -703,8 +699,6 @@ class Texts(Protocol):
     ┣ ✅ Удачных: {all_success_requests} {calculate_percentage_difference(is_all_time, all_success_requests, all_success_requests_before)}
     ┣ ❌ С ошибкой: {all_fail_requests} {calculate_percentage_difference(is_all_time, all_fail_requests, all_fail_requests_before)}
     ┗ 📝 Всего: {all_requests} {calculate_percentage_difference(is_all_time, all_requests, all_requests_before)}
-
-🔍 Это всё, что нужно знать о резюме моделях на данный момент 🚀
 """
 
     @staticmethod
@@ -756,8 +750,6 @@ class Texts(Protocol):
     ┣ ❌ С ошибкой: {all_fail_requests} {calculate_percentage_difference(is_all_time, all_fail_requests, all_fail_requests_before)}
     ┣ 🚀 Примеров: {all_example_requests} {calculate_percentage_difference(is_all_time, all_example_requests, all_example_requests_before)}
     ┗ 📝 Всего: {all_requests} {calculate_percentage_difference(is_all_time, all_requests, all_requests_before)}
-
-🔍 Это всё, что нужно знать о графических моделях на данный момент 🚀
 """
 
     @staticmethod
@@ -856,8 +848,6 @@ class Texts(Protocol):
     ┣ ✅ Удачных: {all_success_requests} {calculate_percentage_difference(is_all_time, all_success_requests, all_success_requests_before)}
     ┣ ❌ С ошибкой: {all_fail_requests} {calculate_percentage_difference(is_all_time, all_fail_requests, all_fail_requests_before)}
     ┗ 📝 Всего: {all_requests} {calculate_percentage_difference(is_all_time, all_requests, all_requests_before)}
-
-🔍 Это всё, что нужно знать о видео моделях на данный момент 🚀
 """
 
     @staticmethod
@@ -938,8 +928,6 @@ class Texts(Protocol):
 ━ 🎲 <b>Кубик:</b> {count_games[GameType.DICE]} {calculate_percentage_difference(is_all_time, count_games[GameType.DICE], count_games_before[GameType.DICE])}
 ━ 🎰 <b>Казино:</b> {count_games[GameType.CASINO]} {calculate_percentage_difference(is_all_time, count_games[GameType.CASINO], count_games_before[GameType.CASINO])}
 ━ 🕹 <b>Всего:</b> {all_games} {calculate_percentage_difference(is_all_time, all_games, all_games_before)}
-
-🔍 Это всё, что нужно знать о реакциях и обратной связи на данный момент 🚀
 """
 
     @staticmethod
@@ -982,8 +970,6 @@ class Texts(Protocol):
     ┗ Всего: {all_bonuses} {calculate_percentage_difference(is_all_time, all_bonuses, all_bonuses_before)}
 ━ 3️⃣ <b>Промокоды:</b>
     ┗ Активировано: {count_activated_promo_codes} {calculate_percentage_difference(is_all_time, count_activated_promo_codes, count_activated_promo_codes_before)}
-
-🔍 Это всё, что нужно знать о бонусах на данный момент 🚀
 """
 
     @staticmethod
@@ -1047,8 +1033,6 @@ class Texts(Protocol):
 ━ 3️⃣ <b>Подписчики:</b>
 {subscription_info}
 ━ <b>Всего:</b> ${round(count_expense_money['ALL'], 4)} {calculate_percentage_difference(is_all_time, count_expense_money['ALL'], count_expense_money_before['ALL'])}
-
-🔍 Это всё, что нужно знать о расходах на данный момент 🚀
 """
 
     @staticmethod
@@ -1087,8 +1071,6 @@ class Texts(Protocol):
 ━ <b>Средний чек:</b> {round(count_income_money['AVERAGE_PRICE'], 2)}₽ {calculate_percentage_difference(is_all_time, count_income_money['AVERAGE_PRICE'], count_income_money_before['AVERAGE_PRICE'])}
 ━ <b>Всего:</b> {round(count_income_money['ALL'], 2)}₽ {calculate_percentage_difference(is_all_time, count_income_money['ALL'], count_income_money_before['ALL'])}
 ━ <b>Вал:</b> {round(count_income_money['VAL'], 2)}₽ {calculate_percentage_difference(is_all_time, count_income_money['VAL'], count_income_money_before['VAL'])}
-
-🔍 Это всё, что нужно знать о доходах на данный момент. Вперёд, к новым достижениям! 🚀
 """
 
     # Blast

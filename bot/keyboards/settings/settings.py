@@ -14,8 +14,10 @@ from bot.database.models.common import (
     MidjourneyVersion,
     FluxSafetyTolerance,
     SunoVersion,
+    KlingDuration,
+    KlingMode,
     RunwayResolution,
-    RunwayDuration, KlingDuration, KlingMode,
+    RunwayDuration,
 )
 from bot.database.models.user import UserSettings, UserGender
 from bot.locales.main import get_localization
@@ -209,6 +211,12 @@ def build_settings_choose_music_model_keyboard(language_code: LanguageCode) -> I
 
 def build_settings_choose_video_model_keyboard(language_code: LanguageCode) -> InlineKeyboardMarkup:
     buttons = [
+        [
+            InlineKeyboardButton(
+                text=get_localization(language_code).KLING,
+                callback_data=f'settings_choose_video_model:{Model.KLING}'
+            ),
+        ],
         [
             InlineKeyboardButton(
                 text=get_localization(language_code).RUNWAY,

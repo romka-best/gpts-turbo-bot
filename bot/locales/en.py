@@ -909,7 +909,7 @@ To choose a <b>Claude 📄</b> model click a button below 👇
     CHOOSE_GEMINI_MODEL = """
 To choose a <b>Gemini ✨</b> model click a button below 👇
 """
-    SWITCHED_TO_AI_SETTINGS = "⚙️ Go to Model's Settings"
+    SWITCHED_TO_AI_SETTINGS = "⚙️ Model's Settings"
     SWITCHED_TO_AI_INFO = "ℹ️ Learn More About This Model"
     SWITCHED_TO_AI_EXAMPLES = "💡 Show Examples"
     ALREADY_SWITCHED_TO_THIS_MODEL = """
@@ -930,7 +930,7 @@ My goal is safety and respect for every user! 🌟
     PHOTO_FORBIDDEN_ERROR = "I don't know how to work with photos in this AI model yet 👀"
     PHOTO_REQUIRED_ERROR = "A photo is required for this model ⚠️\n\nPlease send a photo together with your prompt"
     ALBUM_FORBIDDEN_ERROR = "In the current AI model, I can't process multiple photos at once, please send one 🙂"
-    VIDEO_FORBIDDEN_ERROR = "I don't know how to work with videos yet 👀"
+    VIDEO_FORBIDDEN_ERROR = "I don't know how to work with videos in this AI model yet 👀"
     DOCUMENT_FORBIDDEN_ERROR = "I don't know how to work with such documents yet 👀"
     STICKER_FORBIDDEN_ERROR = "I don't know how to work with stickers yet 👀"
     SERVER_OVERLOADED_ERROR = "I have a heavy load on the server right now 🫨\n\nPlease, try later!"
@@ -1590,7 +1590,9 @@ How about adding more chats to your realm instead? Check out buttons below to bu
 
 Ready? Let's dive into a world of imagination! 🚀
 
-🌈 Send me a photo in which I will replace the face with yours from /profile or just <b>select a package below</b> and start your photo adventure 👇
+- 📷 <b>Send me a photo with a face</b> for face swapping in FaceSwap!
+- ✍️ <b>Send me any prompt</b>, and I’ll generate an image replacing it with your face!
+- 🔄 Or just <b>select a package below</b> and start your photo adventure 👇
 """
     CREATE_PACKAGE = "Create a new package"
     EDIT_PACKAGE = "Edit existing package"
@@ -1598,7 +1600,7 @@ Ready? Let's dive into a world of imagination! 🚀
 🎨 <b>Wow, you've used up all your generations in our packages! Your creativity is astounding!</b> 🌟
 
 What's next?
-- 📷 Send me photos with faces for face swapping in FaceSwap!
+- 📷 Send me a photo with a face for face swapping in FaceSwap!
 - ✍️ Send me any prompt, and I’ll generate an image replacing it with your face!
 - 🔄 Or switch models via /model to continue creating with other AI tools!
 

@@ -47,7 +47,7 @@ from bot.handlers.ai.stable_diffusion_handler import handle_stable_diffusion
 from bot.helpers.getters.get_quota_by_model import get_quota_by_model
 from bot.integrations.replicateAI import create_face_swap_image, create_photoshop_ai_image
 from bot.keyboards.admin.catalog import build_manage_catalog_create_role_confirmation_keyboard
-from bot.keyboards.common.common import build_cancel_keyboard, build_limit_exceeded_keyboard
+from bot.keyboards.common.common import build_cancel_keyboard, build_limit_exceeded_keyboard, build_suggestions_keyboard
 from bot.locales.main import get_localization, get_user_language
 from bot.middlewares.AlbumMiddleware import AlbumMiddleware
 from bot.states.common.catalog import Catalog
@@ -432,7 +432,8 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
             await handle_luma_ray(message, state, user, video_frame_photo_link)
     else:
         await message.reply(
-            text=get_localization(user_language_code).PHOTO_FORBIDDEN_ERROR,
+            text=get_localization(user_language_code).PHOTO_FEATURE_FORBIDDEN,
+            reply_markup=build_suggestions_keyboard(user_language_code),
             allow_sending_without_reply=True,
         )
 
@@ -527,7 +528,8 @@ async def handle_album(message: Message, state: FSMContext, album: list[Message]
         )
     else:
         await message.reply(
-            text=get_localization(user_language_code).PHOTO_FORBIDDEN_ERROR,
+            text=get_localization(user_language_code).PHOTO_FEATURE_FORBIDDEN,
+            reply_markup=build_suggestions_keyboard(user_language_code),
             allow_sending_without_reply=True,
         )
 

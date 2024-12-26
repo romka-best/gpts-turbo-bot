@@ -549,6 +549,15 @@ async def notify_about_quota_selection(callback_query: CallbackQuery, state: FSM
         )
 
 
+@common_router.callback_query(lambda c: c.data.startswith('suggestions:'))
+async def suggestions_selection(callback_query: CallbackQuery, state: FSMContext):
+    await callback_query.answer()
+
+    action = callback_query.data.split(':')[1]
+    if action == 'change_ai_model':
+        await handle_model(callback_query.message, state, str(callback_query.from_user.id))
+
+
 @common_router.callback_query(lambda c: c.data.endswith(':close'))
 async def handle_close_selection(callback_query: CallbackQuery):
     await callback_query.answer()

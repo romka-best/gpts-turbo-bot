@@ -26,8 +26,10 @@ from bot.database.models.common import (
     MidjourneyVersion,
     FluxSafetyTolerance,
     SunoVersion,
+    KlingDuration,
+    KlingMode,
     RunwayResolution,
-    RunwayDuration, KlingDuration, KlingMode,
+    RunwayDuration,
 )
 from bot.database.models.user import UserSettings, UserGender
 from bot.database.operations.chat.deleters import delete_chat, reset_chat

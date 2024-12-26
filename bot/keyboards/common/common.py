@@ -249,6 +249,19 @@ def build_notify_about_quota_keyboard(language_code: LanguageCode) -> InlineKeyb
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
+def build_suggestions_keyboard(language_code: LanguageCode) -> InlineKeyboardMarkup:
+    buttons = [
+        [
+            InlineKeyboardButton(
+                text=get_localization(language_code).CHANGE_AI_MODEL,
+                callback_data='suggestions:change_ai_model'
+            )
+        ],
+    ]
+
+    return InlineKeyboardMarkup(inline_keyboard=buttons)
+
+
 def build_cancel_keyboard(language_code: LanguageCode) -> InlineKeyboardMarkup:
     buttons = [
         [

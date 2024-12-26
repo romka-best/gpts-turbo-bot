@@ -179,7 +179,7 @@ async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_q
     elif not user.subscription_id:
         limit = 4
     elif user_quota not in [Quota.CHAT_GPT_O_1, Quota.CHAT_GPT_O_1_MINI]:
-        limit = 12
+        limit = 8
     else:
         limit = 4
     messages = await get_messages_by_chat_id(
@@ -208,6 +208,10 @@ async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_q
                 photo_path = f'users/vision/{user.id}/{photo_filename}'
                 photo = await firebase.bucket.get_blob(photo_path)
                 photo_link = firebase.get_public_url(photo.name)
+
+                if photo_filename.split('.')[-1] not in ['png', 'jpg', 'jpeg', 'gif', 'webp']:
+                    continue
+
                 content.append({
                     'type': 'image_url',
                     'image_url': {

@@ -365,10 +365,28 @@ async def handle_get_statistics(language_code: LanguageCode, period: str):
     }
     ai_products = text_products | summary_products | image_products | music_products | video_products
 
-    package_products = {
+    text_package_products = {
         product.id: product.names.get(language_code) for product in products
-        if product.type == ProductType.PACKAGE
+        if product.type == ProductType.PACKAGE and product.category == ProductCategory.TEXT
     }
+    summary_package_products = {
+        product.id: product.names.get(language_code) for product in products
+        if product.type == ProductType.PACKAGE and product.category == ProductCategory.SUMMARY
+    }
+    image_package_products = {
+        product.id: product.names.get(language_code) for product in products
+        if product.type == ProductType.PACKAGE and product.category == ProductCategory.IMAGE
+    }
+    music_package_products = {
+        product.id: product.names.get(language_code) for product in products
+        if product.type == ProductType.PACKAGE and product.category == ProductCategory.MUSIC
+    }
+    video_package_products = {
+        product.id: product.names.get(language_code) for product in products
+        if product.type == ProductType.PACKAGE and product.category == ProductCategory.VIDEO
+    }
+
+    package_products = text_package_products | summary_package_products | image_package_products | music_package_products | video_package_products
 
     tech_products = {
         product.id: product.names.get(language_code) for product in products
@@ -496,12 +514,12 @@ async def handle_get_statistics(language_code: LanguageCode, period: str):
     }
     for product in products:
         if product.type == ProductType.SUBSCRIPTION and product.category == ProductCategory.MONTHLY:
-            subscription_products[
-                product.id] = f'{get_localization(language_code).MONTHLY} {product.names.get(language_code)}'
+            subscription_products[product.id] = \
+                f'{get_localization(language_code).MONTHLY} {product.names.get(language_code)}'
     for product in products:
         if product.type == ProductType.SUBSCRIPTION and product.category == ProductCategory.YEARLY:
-            subscription_products[
-                product.id] = f'{get_localization(language_code).YEARLY} {product.names.get(language_code)}'
+            subscription_products[product.id] = \
+                f'{get_localization(language_code).YEARLY} {product.names.get(language_code)}'
 
     count_users = await get_count_of_users()
     count_subscription_users[ServiceType.FREE] = abs(

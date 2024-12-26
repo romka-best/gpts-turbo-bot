@@ -21,7 +21,7 @@ async def get_switched_to_ai_model(user: User, quota: Quota, language_code: Lang
     if model_type == ModelType.TEXT:
         chat = await get_chat(user.current_chat_id)
         role = await get_role(chat.role_id)
-        role_info = {'role': role.translated_names[language_code]}
+        role_info = {'role': role.translated_names.get(language_code, LanguageCode.EN)}
 
     current_date = datetime.now(timezone.utc)
     training_data = product.details.get('training_data', current_date)
@@ -31,7 +31,7 @@ async def get_switched_to_ai_model(user: User, quota: Quota, language_code: Lang
     product_info = product.details
     settings_info = user.settings[user.current_model]
 
-    model_name = product.names[language_code]
+    model_name = product.names.get(language_code, LanguageCode.EN)
     model_type = cast(ModelType, product.category)
     model_info = product_info | role_info | settings_info
 
