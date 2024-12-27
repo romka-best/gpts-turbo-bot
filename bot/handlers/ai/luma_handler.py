@@ -33,7 +33,7 @@ from bot.locales.types import LanguageCode
 
 luma_router = Router()
 
-PRICE_LUMA_PHOTON = 0.16
+PRICE_LUMA_PHOTON = 0.016
 PRICE_LUMA_RAY = 0.4
 
 

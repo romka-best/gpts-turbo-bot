@@ -133,6 +133,11 @@ async def handle_yookassa_webhook(request: dict, bot: Bot, dp: Dispatcher):
                         chat_id=user.telegram_chat_id,
                         text=get_localization(user_language_code).EIGHTIFY_INFO,
                     )
+                elif user.current_model == Model.GEMINI_VIDEO:
+                    await bot.send_message(
+                        chat_id=user.telegram_chat_id,
+                        text=get_localization(user_language_code).GEMINI_VIDEO_INFO,
+                    )
                 elif user.current_model == Model.FACE_SWAP:
                     await handle_face_swap(
                         bot=bot,
@@ -488,6 +493,11 @@ async def handle_yookassa_webhook(request: dict, bot: Bot, dp: Dispatcher):
                         chat_id=user.telegram_chat_id,
                         text=get_localization(user_language_code).EIGHTIFY_INFO,
                     )
+                elif user.current_model == Model.GEMINI_VIDEO:
+                    await bot.send_message(
+                        chat_id=user.telegram_chat_id,
+                        text=get_localization(user_language_code).GEMINI_VIDEO_INFO,
+                    )
                 elif user.current_model == Model.FACE_SWAP:
                     await handle_face_swap(
                         bot=bot,
@@ -573,12 +583,17 @@ async def handle_yookassa_webhook(request: dict, bot: Bot, dp: Dispatcher):
 
             if payment.status == 'succeeded':
                 transaction = firebase.db.transaction()
+                total_amount = sum(float(package.amount) for package in packages)
                 for package in packages:
+                    package_clear_amount = round(
+                        (float(package.amount) / total_amount) * float(payment.income_amount.value),
+                        3,
+                    )
                     await create_package(
                         transaction,
                         package.id,
                         package.user_id,
-                        float(payment.income_amount.value),
+                        package_clear_amount,
                         payment.id,
                     )
 
@@ -587,7 +602,7 @@ async def handle_yookassa_webhook(request: dict, bot: Bot, dp: Dispatcher):
                         type=TransactionType.INCOME,
                         product_id=package.product_id,
                         amount=package.amount,
-                        clear_amount=float(payment.income_amount.value),
+                        clear_amount=package_clear_amount,
                         currency=package.currency,
                         quantity=package.quantity,
                         details={
@@ -650,6 +665,11 @@ async def handle_yookassa_webhook(request: dict, bot: Bot, dp: Dispatcher):
                     await bot.send_message(
                         chat_id=user.telegram_chat_id,
                         text=get_localization(user_language_code).EIGHTIFY_INFO,
+                    )
+                elif user.current_model == Model.GEMINI_VIDEO:
+                    await bot.send_message(
+                        chat_id=user.telegram_chat_id,
+                        text=get_localization(user_language_code).GEMINI_VIDEO_INFO,
                     )
                 elif user.current_model == Model.FACE_SWAP:
                     await handle_face_swap(

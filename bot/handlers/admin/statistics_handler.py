@@ -510,16 +510,15 @@ async def handle_get_statistics(language_code: LanguageCode, period: str):
         count_subscription_users_before[subscription] = count_before
 
     subscription_products = {
-        ServiceType.FREE: 'Бесплатные 🆓',
+        'Бесплатные 🆓': [ServiceType.FREE],
     }
     for product in products:
-        if product.type == ProductType.SUBSCRIPTION and product.category == ProductCategory.MONTHLY:
-            subscription_products[product.id] = \
-                f'{get_localization(language_code).MONTHLY} {product.names.get(language_code)}'
-    for product in products:
-        if product.type == ProductType.SUBSCRIPTION and product.category == ProductCategory.YEARLY:
-            subscription_products[product.id] = \
-                f'{get_localization(language_code).YEARLY} {product.names.get(language_code)}'
+        if product.type == ProductType.SUBSCRIPTION:
+            product_name = product.names.get(language_code)
+            if product_name in subscription_products:
+                subscription_products[product_name].append(product.id)
+            else:
+                subscription_products[product_name] = [product.id]
 
     count_users = await get_count_of_users()
     count_subscription_users[ServiceType.FREE] = abs(

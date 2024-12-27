@@ -4,24 +4,29 @@ from aiogram import Router
 from aiogram.filters import Command, CommandStart, ChatMemberUpdatedFilter, KICKED, MEMBER
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery, ChatMemberUpdated
-from aiogram.utils.chat_action import ChatActionSender
 
 from bot.config import config, MessageEffect, MessageSticker
 from bot.database.main import firebase
-from bot.database.models.common import Quota, UTM, ChatGPTVersion, ClaudeGPTVersion, GeminiGPTVersion, Model, Currency
+from bot.database.models.common import (
+    Model,
+    Quota,
+    UTM,
+    ChatGPTVersion,
+    ClaudeGPTVersion,
+    GeminiGPTVersion,
+    GrokGPTVersion,
+)
 from bot.database.models.generation import Generation
-from bot.database.models.transaction import TransactionType
 from bot.database.models.user import UserSettings
 from bot.database.operations.generation.updaters import update_generation
-from bot.database.operations.product.getters import get_product_by_quota
-from bot.database.operations.transaction.writers import write_transaction
 from bot.database.operations.user.getters import get_user, get_count_of_users_by_referral
 from bot.database.operations.user.initialize_user_for_the_first_time import initialize_user_for_the_first_time
 from bot.database.operations.user.updaters import update_user
-from bot.handlers.ai.chat_gpt_handler import handle_chatgpt, PRICE_GPT4_OMNI_MINI_INPUT, PRICE_GPT4_OMNI_MINI_OUTPUT
+from bot.handlers.ai.chat_gpt_handler import handle_chatgpt
 from bot.handlers.ai.claude_handler import handle_claude
 from bot.handlers.ai.face_swap_handler import handle_face_swap
 from bot.handlers.ai.gemini_handler import handle_gemini
+from bot.handlers.ai.grok_handler import handle_grok
 from bot.handlers.ai.model_handler import handle_model
 from bot.handlers.ai.music_gen_handler import handle_music_gen
 from bot.handlers.ai.photoshop_ai_handler import handle_photoshop_ai
@@ -31,10 +36,7 @@ from bot.handlers.payment.bonus_handler import handle_bonus
 from bot.handlers.payment.payment_handler import handle_subscribe, handle_package
 from bot.helpers.getters.get_quota_by_model import get_quota_by_model
 from bot.helpers.getters.get_switched_to_ai_model import get_switched_to_ai_model
-from bot.helpers.senders.send_ai_message import send_ai_message
-from bot.helpers.senders.send_error_info import send_error_info
 from bot.helpers.updaters.update_daily_limits import update_user_daily_limits
-from bot.integrations.openAI import get_response_message
 from bot.keyboards.ai.model import build_switched_to_ai_keyboard
 from bot.keyboards.common.common import (
     build_start_keyboard,
@@ -58,10 +60,7 @@ async def start(message: Message, state: FSMContext):
 
     user_id = str(message.from_user.id)
     user = await get_user(user_id)
-    is_new_user = False
     if not user:
-        is_new_user = True
-
         default_quota = Quota.CHAT_GPT4_OMNI_MINI
         referred_by = None
         referred_by_user = None
@@ -249,6 +248,10 @@ async def start(message: Message, state: FSMContext):
         await message.answer(
             text=get_localization(user_language_code).EIGHTIFY_INFO,
         )
+    elif user.current_model == Model.GEMINI_VIDEO:
+        await message.answer(
+            text=get_localization(user_language_code).GEMINI_VIDEO_INFO,
+        )
     elif user.current_model == Model.FACE_SWAP:
         await handle_face_swap(
             bot=message.bot,
@@ -277,54 +280,6 @@ async def start(message: Message, state: FSMContext):
             state=state,
             user_id=user.id,
         )
-    elif user.current_model == Model.CHAT_GPT and is_new_user:
-        async with ChatActionSender.typing(bot=message.bot, chat_id=message.chat.id):
-            try:
-                prompt = get_localization(user_language_code).START_PROMPT
-                history = [
-                    {
-                        'role': 'system',
-                        'content': prompt,
-                    }
-                ]
-                response = await get_response_message(ChatGPTVersion.V4_Omni_Mini, history)
-                response_message = response['message']
-                input_price = response['input_tokens'] * PRICE_GPT4_OMNI_MINI_INPUT
-                output_price = response['output_tokens'] * PRICE_GPT4_OMNI_MINI_OUTPUT
-
-                product = await get_product_by_quota(Quota.CHAT_GPT4_OMNI_MINI)
-
-                total_price = round(input_price + output_price, 6)
-                message_role, message_content = response_message.role, response_message.content
-                await write_transaction(
-                    user_id=user.id,
-                    type=TransactionType.EXPENSE,
-                    product_id=product.id,
-                    amount=total_price,
-                    clear_amount=total_price,
-                    currency=Currency.USD,
-                    quantity=1,
-                    details={
-                        'input_tokens': response['input_tokens'],
-                        'output_tokens': response['output_tokens'],
-                        'request': prompt,
-                        'answer': message_content,
-                        'is_suggestion': True,
-                        'has_error': False,
-                    },
-                )
-
-                await send_ai_message(
-                    message=message,
-                    text=message_content,
-                )
-            except Exception as e:
-                await send_error_info(
-                    bot=message.bot,
-                    user_id=user.id,
-                    info=str(e),
-                    hashtags=['chatgpt', 'example'],
-                )
 
     if len(tasks) > 0:
         await asyncio.gather(*tasks)
@@ -420,6 +375,7 @@ async def handle_continue_generation_choose_selection(callback_query: CallbackQu
 
     if action == 'continue':
         await state.update_data(recognized_text=get_localization(user_language_code).CONTINUE_GENERATING)
+
         if user.settings[user.current_model][UserSettings.VERSION] == ChatGPTVersion.V4_Omni_Mini:
             user_quota = Quota.CHAT_GPT4_OMNI_MINI
         elif user.settings[user.current_model][UserSettings.VERSION] == ChatGPTVersion.V4_Omni:
@@ -440,6 +396,8 @@ async def handle_continue_generation_choose_selection(callback_query: CallbackQu
             user_quota = Quota.GEMINI_1_PRO
         elif user.settings[user.current_model][UserSettings.VERSION] == GeminiGPTVersion.V1_Ultra:
             user_quota = Quota.GEMINI_1_ULTRA
+        elif user.settings[user.current_model][UserSettings.VERSION] == GrokGPTVersion.V2:
+            user_quota = Quota.GROK_2
         else:
             raise NotImplementedError(
                 f'AI version is not defined: {user.settings[user.current_model][UserSettings.VERSION]}'
@@ -464,7 +422,11 @@ async def handle_continue_generation_choose_selection(callback_query: CallbackQu
             Quota.GEMINI_1_ULTRA,
         ]:
             await handle_gemini(callback_query.message, state, user, user_quota)
+        elif user_quota == Quota.GROK_2:
+            await handle_grok(callback_query.message, state, user)
+
         await callback_query.message.edit_reply_markup(reply_markup=None)
+        await state.update_data(recognized_text=None)
 
     await state.clear()
 
