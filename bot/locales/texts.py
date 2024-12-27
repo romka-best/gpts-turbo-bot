@@ -598,6 +598,7 @@ class Texts(Protocol):
 📊 <b>{period}</b>
 
 👤 <b>Пользователи</b>
+
 1️⃣ <b>{'Всего пользователей' if is_all_time else 'Новых пользователей'}:</b> {count_all_users} {calculate_percentage_difference(is_all_time, count_all_users, count_all_users_before)}
     ┣ 🇺🇸 {count_english_users} ({round((count_english_users / count_all_users) * 100, 2) if count_all_users else 0}%) {calculate_percentage_difference(is_all_time, count_english_users, count_english_users_before)}
     ┣ 🇷🇺 {count_russian_users} ({round((count_russian_users / count_all_users) * 100, 2) if count_all_users else 0}%) {calculate_percentage_difference(is_all_time, count_russian_users, count_russian_users_before)}
@@ -653,6 +654,7 @@ class Texts(Protocol):
 📊 <b>{period}</b>
 
 🔤 <b>Текстовые модели</b>
+
 {text_info}
 <b>Резюме:</b>
     ┣ ✅ Удачных: {all_success_requests} {calculate_percentage_difference(is_all_time, all_success_requests, all_success_requests_before)}
@@ -699,6 +701,7 @@ class Texts(Protocol):
 📊 <b>{period}</b>
 
 📝 <b>Резюме модели</b>
+
 {summary_info}
 <b>Резюме:</b>
     ┣ ✅ Удачных: {all_success_requests} {calculate_percentage_difference(is_all_time, all_success_requests, all_success_requests_before)}
@@ -749,6 +752,7 @@ class Texts(Protocol):
 📊 <b>{period}</b>
 
 🖼 <b>Графические модели</b>
+
 {image_info}
 <b>Резюме:</b>
     ┣ ✅ Удачных: {all_success_requests} {calculate_percentage_difference(is_all_time, all_success_requests, all_success_requests_before)}
@@ -800,6 +804,7 @@ class Texts(Protocol):
 📊 <b>{period}</b>
 
 🎺 <b>Музыкальные модели</b>
+
 {music_info}
 <b>Резюме:</b>
     ┣ ✅ Удачных: {all_success_requests} {calculate_percentage_difference(is_all_time, all_success_requests, all_success_requests_before)}
@@ -848,6 +853,7 @@ class Texts(Protocol):
 📊 <b>{period}</b>
 
 📹 <b>Видео модели</b>
+
 {video_info}
 <b>Резюме:</b>
     ┣ ✅ Удачных: {all_success_requests} {calculate_percentage_difference(is_all_time, all_success_requests, all_success_requests_before)}
@@ -913,6 +919,7 @@ class Texts(Protocol):
 📊 <b>{period}</b>
 
 🧐 <b>Реакции</b>
+
 {reaction_info}
 <b>Резюме:</b>
     ┣ 👍 {all_liked} {calculate_percentage_difference(is_all_time, all_liked, all_liked_before)}
@@ -920,19 +927,21 @@ class Texts(Protocol):
     ┗ 🤷 {all_none} {calculate_percentage_difference(is_all_time, all_none, all_none_before)}
 
 📡 <b>Обратная связь:</b>
-━ 1️⃣ <b>Одобрено:</b> {count_feedbacks[FeedbackStatus.APPROVED]} {calculate_percentage_difference(is_all_time, count_feedbacks[FeedbackStatus.APPROVED], count_feedbacks_before[FeedbackStatus.APPROVED])}
-━ 2️⃣ <b>Отклонено:</b> {count_feedbacks[FeedbackStatus.DENIED]} {calculate_percentage_difference(is_all_time, count_feedbacks[FeedbackStatus.DENIED], count_feedbacks_before[FeedbackStatus.DENIED])}
-━ 3️⃣ <b>В ожидании:</b> {count_feedbacks[FeedbackStatus.WAITING]} {calculate_percentage_difference(is_all_time, count_feedbacks[FeedbackStatus.WAITING], count_feedbacks_before[FeedbackStatus.WAITING])}
-━ 4️⃣ <b>Всего:</b> {all_feedbacks} {calculate_percentage_difference(is_all_time, all_feedbacks, all_feedbacks_before)}
+
+1️⃣ <b>Одобрено:</b> {count_feedbacks[FeedbackStatus.APPROVED]} {calculate_percentage_difference(is_all_time, count_feedbacks[FeedbackStatus.APPROVED], count_feedbacks_before[FeedbackStatus.APPROVED])}
+2️⃣ <b>Отклонено:</b> {count_feedbacks[FeedbackStatus.DENIED]} {calculate_percentage_difference(is_all_time, count_feedbacks[FeedbackStatus.DENIED], count_feedbacks_before[FeedbackStatus.DENIED])}
+3️⃣ <b>В ожидании:</b> {count_feedbacks[FeedbackStatus.WAITING]} {calculate_percentage_difference(is_all_time, count_feedbacks[FeedbackStatus.WAITING], count_feedbacks_before[FeedbackStatus.WAITING])}
+4️⃣ <b>Всего:</b> {all_feedbacks} {calculate_percentage_difference(is_all_time, all_feedbacks, all_feedbacks_before)}
 
 🎮 <b>Игр сыграно:</b>
-━ 🎳 <b>Боулинг:</b> {count_games[GameType.BOWLING]} {calculate_percentage_difference(is_all_time, count_games[GameType.BOWLING], count_games_before[GameType.BOWLING])}
-━ ⚽️ <b>Футбол:</b> {count_games[GameType.SOCCER]} {calculate_percentage_difference(is_all_time, count_games[GameType.SOCCER], count_games_before[GameType.SOCCER])}
-━ 🏀 <b>Баскетбол:</b> {count_games[GameType.BASKETBALL]} {calculate_percentage_difference(is_all_time, count_games[GameType.BASKETBALL], count_games_before[GameType.BASKETBALL])}
-━ 🎯 <b>Дартс:</b> {count_games[GameType.DARTS]} {calculate_percentage_difference(is_all_time, count_games[GameType.DARTS], count_games_before[GameType.DARTS])}
-━ 🎲 <b>Кубик:</b> {count_games[GameType.DICE]} {calculate_percentage_difference(is_all_time, count_games[GameType.DICE], count_games_before[GameType.DICE])}
-━ 🎰 <b>Казино:</b> {count_games[GameType.CASINO]} {calculate_percentage_difference(is_all_time, count_games[GameType.CASINO], count_games_before[GameType.CASINO])}
-━ 🕹 <b>Всего:</b> {all_games} {calculate_percentage_difference(is_all_time, all_games, all_games_before)}
+
+🎳 <b>Боулинг:</b> {count_games[GameType.BOWLING]} {calculate_percentage_difference(is_all_time, count_games[GameType.BOWLING], count_games_before[GameType.BOWLING])}
+⚽️ <b>Футбол:</b> {count_games[GameType.SOCCER]} {calculate_percentage_difference(is_all_time, count_games[GameType.SOCCER], count_games_before[GameType.SOCCER])}
+🏀 <b>Баскетбол:</b> {count_games[GameType.BASKETBALL]} {calculate_percentage_difference(is_all_time, count_games[GameType.BASKETBALL], count_games_before[GameType.BASKETBALL])}
+🎯 <b>Дартс:</b> {count_games[GameType.DARTS]} {calculate_percentage_difference(is_all_time, count_games[GameType.DARTS], count_games_before[GameType.DARTS])}
+🎲 <b>Кубик:</b> {count_games[GameType.DICE]} {calculate_percentage_difference(is_all_time, count_games[GameType.DICE], count_games_before[GameType.DICE])}
+🎰 <b>Казино:</b> {count_games[GameType.CASINO]} {calculate_percentage_difference(is_all_time, count_games[GameType.CASINO], count_games_before[GameType.CASINO])}
+🕹 <b>Всего:</b> {all_games} {calculate_percentage_difference(is_all_time, all_games, all_games_before)}
 """
 
     @staticmethod
@@ -965,6 +974,7 @@ class Texts(Protocol):
 📊 <b>{period}</b>
 
 🎁 <b>Бонусы</b>
+
 1️⃣ <b>Кредитов приобретено:</b>
     ┣ 👤 За приглашения друзей: {count_credits['INVITE_FRIENDS']} {calculate_percentage_difference(is_all_time, count_credits['INVITE_FRIENDS'], count_credits_before['INVITE_FRIENDS'])}
     ┣ 📡 За обратную связь: {count_credits['LEAVE_FEEDBACKS']} {calculate_percentage_difference(is_all_time, count_credits['LEAVE_FEEDBACKS'], count_credits_before['LEAVE_FEEDBACKS'])}
@@ -1040,12 +1050,14 @@ class Texts(Protocol):
 📊 <b>{period}</b>
 
 📉 <b>Расходы</b>
+
 1️⃣ <b>AI модели:</b>
 {ai_info}
 2️⃣ <b>Технические:</b>
 {tech_info}
 3️⃣ <b>Подписчики:</b>
 {subscription_info}
+
 <b>Всего:</b> ${round(count_expense_money['ALL'], 4)} {calculate_percentage_difference(is_all_time, count_expense_money['ALL'], count_expense_money_before['ALL'])}
 """
 
@@ -1084,12 +1096,14 @@ class Texts(Protocol):
 📊 <b>{period}</b>
 
 📈 <b>Доходы</b>
+
 1️⃣ <b>Подписки:</b>
 {subscription_info}
     ┗ Всего: {round(count_income_money['SUBSCRIPTION_ALL'], 2)}₽ {calculate_percentage_difference(is_all_time, count_income_money['SUBSCRIPTION_ALL'], count_income_money_before['SUBSCRIPTION_ALL'])}
 2️⃣ <b>Пакеты:</b>
 {package_info}
     ┗ Всего: {round(count_income_money['PACKAGES_ALL'], 2)}₽ {calculate_percentage_difference(is_all_time, count_income_money['PACKAGES_ALL'], count_income_money_before['PACKAGES_ALL'])}
+
 <b>Средний чек:</b> {round(count_income_money['AVERAGE_PRICE'], 2)}₽ {calculate_percentage_difference(is_all_time, count_income_money['AVERAGE_PRICE'], count_income_money_before['AVERAGE_PRICE'])}
 <b>Всего:</b> {round(count_income_money['ALL'], 2)}₽ {calculate_percentage_difference(is_all_time, count_income_money['ALL'], count_income_money_before['ALL'])}
 <b>Вал:</b> {round(count_income_money['VAL'], 2)}₽ {calculate_percentage_difference(is_all_time, count_income_money['VAL'], count_income_money_before['VAL'])}
