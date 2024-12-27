@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 import aiohttp
 from aiogram import Router
 from aiogram.filters import Command
@@ -63,8 +65,10 @@ async def handle_profile(message: Message, state: FSMContext, telegram_user: Tel
     if subscription:
         product_subscription = await get_product(subscription.product_id)
         subscription_name = product_subscription.names.get(user_language_code)
+        renewal_date = subscription.end_date.strftime('%d.%m.%Y')
     else:
         subscription_name = '🆓'
+        renewal_date = (user.last_subscription_limit_update + timedelta(days=30)).strftime('%d.%m.%Y')
 
     user_current_quota = get_quota_by_model(user.current_model, user.settings[user.current_model][UserSettings.VERSION])
     user_current_model = await get_product_by_quota(user_current_quota)
@@ -74,7 +78,7 @@ async def handle_profile(message: Message, state: FSMContext, telegram_user: Tel
         subscription.status if subscription else SubscriptionStatus.ACTIVE,
         user_current_model.names.get(user_language_code),
         user.currency,
-        subscription.end_date.strftime('%d.%m.%Y'),
+        renewal_date,
     )
 
     blobs = await firebase.bucket.list_blobs(prefix=f'users/avatars/{user.id}.')

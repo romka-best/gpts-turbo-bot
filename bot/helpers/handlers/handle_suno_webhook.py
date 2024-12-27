@@ -22,10 +22,11 @@ from bot.database.operations.user.getters import get_user
 from bot.database.operations.user.updaters import update_user
 from bot.handlers.ai.suno_handler import PRICE_SUNO
 from bot.helpers.senders.send_audio import send_audio
+from bot.helpers.senders.send_error_info import send_error_info
 from bot.helpers.senders.send_video import send_video
 from bot.helpers.updaters.update_user_usage_quota import get_user_with_updated_quota
 from bot.keyboards.ai.suno import build_suno_keyboard
-from bot.keyboards.common.common import build_reaction_keyboard
+from bot.keyboards.common.common import build_reaction_keyboard, build_error_keyboard
 from bot.locales.main import get_user_language, get_localization
 
 
@@ -36,6 +37,10 @@ async def handle_suno_webhook(bot: Bot, dp: Dispatcher, body: dict):
         return False
     elif first_generation.status == GenerationStatus.FINISHED and second_generation.status == GenerationStatus.FINISHED:
         return True
+
+    request = await get_request(first_generation.request_id)
+    user = await get_user(request.user_id)
+    user_language_code = await get_user_language(user.id, dp.storage)
 
     is_generations_success, generations_result = body.get('success', False), body.get('data', [])
 
@@ -53,7 +58,24 @@ async def handle_suno_webhook(bot: Bot, dp: Dispatcher, body: dict):
             'has_error': second_generation.has_error,
         })
 
-        logging.exception(f'Error in suno_webhook', body.get('error', {}).get('message', ''))
+        error_message = body.get('error', {}).get('message', '')
+        logging.exception(f'Error in suno_webhook', error_message)
+        await bot.send_sticker(
+            chat_id=user.telegram_chat_id,
+            sticker=config.MESSAGE_STICKERS.get(MessageSticker.ERROR),
+        )
+
+        await bot.send_message(
+            chat_id=user.telegram_chat_id,
+            text=get_localization(user_language_code).ERROR,
+            reply_markup=build_error_keyboard(user_language_code),
+        )
+        await send_error_info(
+            bot=bot,
+            user_id=user.id,
+            info=str(error_message),
+            hashtags=['suno'],
+        )
     else:
         for i, current_generation in enumerate([first_generation, second_generation]):
             generation_result = generations_result[i]
@@ -74,10 +96,6 @@ async def handle_suno_webhook(bot: Bot, dp: Dispatcher, body: dict):
                 'result': current_generation.result,
                 'details': current_generation.details,
             })
-
-    request = await get_request(first_generation.request_id)
-    user = await get_user(request.user_id)
-    user_language_code = await get_user_language(user.id, dp.storage)
 
     if len(generations_result) > 0:
         for i, current_generation in enumerate([first_generation, second_generation]):

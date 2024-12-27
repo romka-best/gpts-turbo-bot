@@ -1323,6 +1323,10 @@ async def handle_successful_payment(message: Message, state: FSMContext):
         await message.answer(
             text=get_localization(user_language_code).EIGHTIFY_INFO,
         )
+    elif user.current_model == Model.GEMINI_VIDEO:
+        await message.answer(
+            text=get_localization(user_language_code).GEMINI_VIDEO_INFO,
+        )
     elif user.current_model == Model.FACE_SWAP:
         await handle_face_swap(
             bot=message.bot,

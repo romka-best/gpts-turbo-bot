@@ -209,6 +209,10 @@ async def handle_model_selection(callback_query: CallbackQuery, state: FSMContex
         await callback_query.message.answer(
             text=get_localization(user_language_code).EIGHTIFY_INFO,
         )
+    elif chosen_model == Model.GEMINI_VIDEO:
+        await callback_query.message.answer(
+            text=get_localization(user_language_code).GEMINI_VIDEO_INFO,
+        )
     elif chosen_model == Model.FACE_SWAP:
         await handle_face_swap(
             bot=callback_query.bot,

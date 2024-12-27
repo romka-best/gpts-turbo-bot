@@ -581,28 +581,33 @@ class Texts(Protocol):
         is_all_time = period == 'всё время'
 
         subscription_info = ''
-        for index, (key, name) in enumerate(subscription_products.items()):
+        for index, (subscription_product_name, subscription_product_ids) in enumerate(subscription_products.items()):
             is_last = index == len(subscription_products) - 1
             left_part = '┣' if not is_last else '┗'
             right_part = '\n' if not is_last else ''
-            subscription_info += f'    {left_part} <b>{name}:</b> {count_subscription_users[key]} {calculate_percentage_difference(is_all_time, count_subscription_users[key], count_subscription_users_before[key])}{right_part}'
+            count_current_subscription_users = 0
+            count_current_subscription_users_before = 0
+            for subscription_product_id in subscription_product_ids:
+                count_current_subscription_users += count_subscription_users[subscription_product_id]
+                count_current_subscription_users_before += count_subscription_users_before[subscription_product_id]
+            subscription_info += f'    {left_part} <b>{subscription_product_name}:</b> {count_current_subscription_users} {calculate_percentage_difference(is_all_time, count_current_subscription_users, count_current_subscription_users_before)}{right_part}'
 
         return f"""
 #statistics #users
 
-📊 <b>Статистика за {period} готова!</b>
+📊 <b>{period}</b>
 
 👤 <b>Пользователи</b>
-━ 1️⃣ <b>{'Всего пользователей' if is_all_time else 'Новых пользователей'}:</b> {count_all_users} {calculate_percentage_difference(is_all_time, count_all_users, count_all_users_before)}
+1️⃣ <b>{'Всего пользователей' if is_all_time else 'Новых пользователей'}:</b> {count_all_users} {calculate_percentage_difference(is_all_time, count_all_users, count_all_users_before)}
     ┣ 🇺🇸 {count_english_users} ({round((count_english_users / count_all_users) * 100, 2) if count_all_users else 0}%) {calculate_percentage_difference(is_all_time, count_english_users, count_english_users_before)}
     ┣ 🇷🇺 {count_russian_users} ({round((count_russian_users / count_all_users) * 100, 2) if count_all_users else 0}%) {calculate_percentage_difference(is_all_time, count_russian_users, count_russian_users_before)}
     ┗ 🌍 {count_other_users} ({round((count_other_users / count_all_users) * 100, 2) if count_all_users else 0}%) {calculate_percentage_difference(is_all_time, count_other_users, count_other_users_before)}
-━ 2️⃣ <b>{'Активированные' if is_all_time else 'Активные'}:</b> {count_activated_users} {calculate_percentage_difference(is_all_time, count_activated_users, count_activated_users_before)}
-━ 3️⃣ <b>Перешли по реферальной ссылке:</b> {count_referral_users} {calculate_percentage_difference(is_all_time, count_referral_users, count_referral_users_before)}
-━ 4️⃣ <b>Покупатели:</b> {count_paid_users} {calculate_percentage_difference(is_all_time, count_paid_users, count_paid_users_before)}
-━ 5️⃣ <b>Подписчики:</b>
+2️⃣ <b>{'Активированные' if is_all_time else 'Активные'}:</b> {count_activated_users} {calculate_percentage_difference(is_all_time, count_activated_users, count_activated_users_before)}
+3️⃣ <b>Перешли по реферальной ссылке:</b> {count_referral_users} {calculate_percentage_difference(is_all_time, count_referral_users, count_referral_users_before)}
+4️⃣ <b>Покупатели:</b> {count_paid_users} {calculate_percentage_difference(is_all_time, count_paid_users, count_paid_users_before)}
+5️⃣ <b>Подписчики:</b>
 {subscription_info}
-━ 6️⃣ <b>{'Заблокировали бота' if is_all_time else 'Заблокировали бота из пришедших'}:</b> {count_blocked_users} {calculate_percentage_difference(is_all_time, count_blocked_users, count_blocked_users_before)}
+6️⃣ <b>{'Заблокировали бота' if is_all_time else 'Заблокировали бота из пришедших'}:</b> {count_blocked_users} {calculate_percentage_difference(is_all_time, count_blocked_users, count_blocked_users_before)}
 """
 
     @staticmethod
@@ -635,7 +640,7 @@ class Texts(Protocol):
             all_requests_before += count_all_transactions_before[text_product_id]['ALL']
 
             emoji_number = ''.join(f'{digit}\uFE0F\u20E3' for digit in str(index + 1))
-            text_info += f"""━ {emoji_number} <b>{text_product_name}:</b>
+            text_info += f"""{emoji_number} <b>{text_product_name}:</b>
     ┣ ✅ Удачных: {count_all_transactions[text_product_id]['SUCCESS']} {calculate_percentage_difference(is_all_time, count_all_transactions[text_product_id]['SUCCESS'], count_all_transactions_before[text_product_id]['SUCCESS'])}
     ┣ ❌ С ошибкой: {count_all_transactions[text_product_id]['FAIL']} {calculate_percentage_difference(is_all_time, count_all_transactions[text_product_id]['FAIL'], count_all_transactions_before[text_product_id]['FAIL'])}
     ┣ 🚀 Примеров: {count_all_transactions[text_product_id]['EXAMPLE']} {calculate_percentage_difference(is_all_time, count_all_transactions[text_product_id]['EXAMPLE'], count_all_transactions_before[text_product_id]['EXAMPLE'])}
@@ -645,11 +650,11 @@ class Texts(Protocol):
         return f"""
 #statistics #text_models
 
-📊 <b>Статистика за {period} готова!</b>
+📊 <b>{period}</b>
 
 🔤 <b>Текстовые модели</b>
 {text_info}
-━ <b>Резюме:</b>
+<b>Резюме:</b>
     ┣ ✅ Удачных: {all_success_requests} {calculate_percentage_difference(is_all_time, all_success_requests, all_success_requests_before)}
     ┣ ❌ С ошибкой: {all_fail_requests} {calculate_percentage_difference(is_all_time, all_fail_requests, all_fail_requests_before)}
     ┣ 🚀 Примеров: {all_example_requests} {calculate_percentage_difference(is_all_time, all_example_requests, all_example_requests_before)}
@@ -682,7 +687,7 @@ class Texts(Protocol):
             all_requests_before += count_all_transactions_before[summary_product_id]['ALL']
 
             emoji_number = ''.join(f'{digit}\uFE0F\u20E3' for digit in str(index + 1))
-            summary_info += f"""━ {emoji_number} <b>{summary_product_name}:</b>
+            summary_info += f"""{emoji_number} <b>{summary_product_name}:</b>
     ┣ ✅ Удачных: {count_all_transactions[summary_product_id]['SUCCESS']} {calculate_percentage_difference(is_all_time, count_all_transactions[summary_product_id]['SUCCESS'], count_all_transactions_before[summary_product_id]['SUCCESS'])}
     ┣ ❌ С ошибкой: {count_all_transactions[summary_product_id]['FAIL']} {calculate_percentage_difference(is_all_time, count_all_transactions[summary_product_id]['FAIL'], count_all_transactions_before[summary_product_id]['FAIL'])}
     ┗ 📝 Всего: {count_all_transactions[summary_product_id]['ALL']} {calculate_percentage_difference(is_all_time, count_all_transactions[summary_product_id]['ALL'], count_all_transactions_before[summary_product_id]['ALL'])}
@@ -691,11 +696,11 @@ class Texts(Protocol):
         return f"""
 #statistics #summary_models
 
-📊 <b>Статистика за {period} готова!</b>
+📊 <b>{period}</b>
 
 📝 <b>Резюме модели</b>
 {summary_info}
-━ <b>Резюме:</b>
+<b>Резюме:</b>
     ┣ ✅ Удачных: {all_success_requests} {calculate_percentage_difference(is_all_time, all_success_requests, all_success_requests_before)}
     ┣ ❌ С ошибкой: {all_fail_requests} {calculate_percentage_difference(is_all_time, all_fail_requests, all_fail_requests_before)}
     ┗ 📝 Всего: {all_requests} {calculate_percentage_difference(is_all_time, all_requests, all_requests_before)}
@@ -731,7 +736,7 @@ class Texts(Protocol):
             all_requests_before += count_all_transactions_before[image_product_id]['ALL']
 
             emoji_number = ''.join(f'{digit}\uFE0F\u20E3' for digit in str(index + 1))
-            image_info += f"""━ {emoji_number} <b>{image_product_name}:</b>
+            image_info += f"""{emoji_number} <b>{image_product_name}:</b>
     ┣ ✅ Удачных: {count_all_transactions[image_product_id]['SUCCESS']} {calculate_percentage_difference(is_all_time, count_all_transactions[image_product_id]['SUCCESS'], count_all_transactions_before[image_product_id]['SUCCESS'])}
     ┣ ❌ С ошибкой: {count_all_transactions[image_product_id]['FAIL']} {calculate_percentage_difference(is_all_time, count_all_transactions[image_product_id]['FAIL'], count_all_transactions_before[image_product_id]['FAIL'])}
     ┣ 🚀 Примеров: {count_all_transactions[image_product_id]['EXAMPLE']} {calculate_percentage_difference(is_all_time, count_all_transactions[image_product_id]['EXAMPLE'], count_all_transactions_before[image_product_id]['EXAMPLE'])}
@@ -741,11 +746,11 @@ class Texts(Protocol):
         return f"""
 #statistics #image_models
 
-📊 <b>Статистика за {period} готова!</b>
+📊 <b>{period}</b>
 
 🖼 <b>Графические модели</b>
 {image_info}
-━ <b>Резюме:</b>
+<b>Резюме:</b>
     ┣ ✅ Удачных: {all_success_requests} {calculate_percentage_difference(is_all_time, all_success_requests, all_success_requests_before)}
     ┣ ❌ С ошибкой: {all_fail_requests} {calculate_percentage_difference(is_all_time, all_fail_requests, all_fail_requests_before)}
     ┣ 🚀 Примеров: {all_example_requests} {calculate_percentage_difference(is_all_time, all_example_requests, all_example_requests_before)}
@@ -782,7 +787,7 @@ class Texts(Protocol):
             all_requests_before += count_all_transactions_before[music_product_id]['ALL']
 
             emoji_number = ''.join(f'{digit}\uFE0F\u20E3' for digit in str(index + 1))
-            music_info += f"""━ {emoji_number} <b>{music_product_name}:</b>
+            music_info += f"""{emoji_number} <b>{music_product_name}:</b>
     ┣ ✅ Удачных: {count_all_transactions[music_product_id]['SUCCESS']} {calculate_percentage_difference(is_all_time, count_all_transactions[music_product_id]['SUCCESS'], count_all_transactions_before[music_product_id]['SUCCESS'])}
     ┣ ❌ С ошибкой: {count_all_transactions[music_product_id]['FAIL']} {calculate_percentage_difference(is_all_time, count_all_transactions[music_product_id]['FAIL'], count_all_transactions_before[music_product_id]['FAIL'])}
     ┣ 🚀 Примеров: {count_all_transactions[music_product_id]['EXAMPLE']} {calculate_percentage_difference(is_all_time, count_all_transactions[music_product_id]['EXAMPLE'], count_all_transactions_before[music_product_id]['EXAMPLE'])}
@@ -792,11 +797,11 @@ class Texts(Protocol):
         return f"""
 #statistics #music_models
 
-📊 <b>Статистика за {period} готова!</b>
+📊 <b>{period}</b>
 
 🎺 <b>Музыкальные модели</b>
 {music_info}
-━ <b>Резюме:</b>
+<b>Резюме:</b>
     ┣ ✅ Удачных: {all_success_requests} {calculate_percentage_difference(is_all_time, all_success_requests, all_success_requests_before)}
     ┣ ❌ С ошибкой: {all_fail_requests} {calculate_percentage_difference(is_all_time, all_fail_requests, all_fail_requests_before)}
     ┣ 🚀 Примеров: {all_example_requests} {calculate_percentage_difference(is_all_time, all_example_requests, all_example_requests_before)}
@@ -831,7 +836,7 @@ class Texts(Protocol):
             all_requests_before += count_all_transactions_before[video_product_id]['ALL']
 
             emoji_number = ''.join(f'{digit}\uFE0F\u20E3' for digit in str(index + 1))
-            video_info += f"""━ {emoji_number} <b>{video_product_name}:</b>
+            video_info += f"""{emoji_number} <b>{video_product_name}:</b>
     ┣ ✅ Удачных: {count_all_transactions[video_product_id]['SUCCESS']} {calculate_percentage_difference(is_all_time, count_all_transactions[video_product_id]['SUCCESS'], count_all_transactions_before[video_product_id]['SUCCESS'])}
     ┣ ❌ С ошибкой: {count_all_transactions[video_product_id]['FAIL']} {calculate_percentage_difference(is_all_time, count_all_transactions[video_product_id]['FAIL'], count_all_transactions_before[video_product_id]['FAIL'])}
     ┗ 📝 Всего: {count_all_transactions[video_product_id]['ALL']} {calculate_percentage_difference(is_all_time, count_all_transactions[video_product_id]['ALL'], count_all_transactions_before[video_product_id]['ALL'])}
@@ -840,11 +845,11 @@ class Texts(Protocol):
         return f"""
 #statistics #video_models
 
-📊 <b>Статистика за {period} готова!</b>
+📊 <b>{period}</b>
 
 📹 <b>Видео модели</b>
 {video_info}
-━ <b>Резюме:</b>
+<b>Резюме:</b>
     ┣ ✅ Удачных: {all_success_requests} {calculate_percentage_difference(is_all_time, all_success_requests, all_success_requests_before)}
     ┣ ❌ С ошибкой: {all_fail_requests} {calculate_percentage_difference(is_all_time, all_fail_requests, all_fail_requests_before)}
     ┗ 📝 Всего: {all_requests} {calculate_percentage_difference(is_all_time, all_requests, all_requests_before)}
@@ -881,7 +886,7 @@ class Texts(Protocol):
             all_none_before += count_reactions_before[product_with_reaction_id][GenerationReaction.NONE]
 
             emoji_number = ''.join(f'{digit}\uFE0F\u20E3' for digit in str(index + 1))
-            reaction_info += f"""━ {emoji_number} <b>{product_with_reactions_name}:</b>
+            reaction_info += f"""{emoji_number} <b>{product_with_reactions_name}:</b>
     ┣ 👍 {count_reactions[product_with_reaction_id][GenerationReaction.LIKED]} {calculate_percentage_difference(is_all_time, count_reactions[product_with_reaction_id][GenerationReaction.LIKED], count_reactions_before[product_with_reaction_id][GenerationReaction.LIKED])}
     ┣ 👎 {count_reactions[product_with_reaction_id][GenerationReaction.DISLIKED]} {calculate_percentage_difference(is_all_time, count_reactions[product_with_reaction_id][GenerationReaction.DISLIKED], count_reactions_before[product_with_reaction_id][GenerationReaction.DISLIKED])}
     ┗ 🤷 {count_reactions[product_with_reaction_id][GenerationReaction.NONE]} {calculate_percentage_difference(is_all_time, count_reactions[product_with_reaction_id][GenerationReaction.NONE], count_reactions_before[product_with_reaction_id][GenerationReaction.NONE])}
@@ -905,11 +910,11 @@ class Texts(Protocol):
         return f"""
 #statistics #reactions
 
-📊 <b>Статистика за {period} готова!</b>
+📊 <b>{period}</b>
 
 🧐 <b>Реакции</b>
 {reaction_info}
-━ <b>Резюме:</b>
+<b>Резюме:</b>
     ┣ 👍 {all_liked} {calculate_percentage_difference(is_all_time, all_liked, all_liked_before)}
     ┣ 👎 {all_disliked} {calculate_percentage_difference(is_all_time, all_disliked, all_disliked_before)}
     ┗ 🤷 {all_none} {calculate_percentage_difference(is_all_time, all_none, all_none_before)}
@@ -957,18 +962,18 @@ class Texts(Protocol):
         return f"""
 #statistics #bonuses
 
-📊 <b>Статистика за {period} готова!</b>
+📊 <b>{period}</b>
 
 🎁 <b>Бонусы</b>
-━ 1️⃣ <b>Кредитов приобретено:</b>
+1️⃣ <b>Кредитов приобретено:</b>
     ┣ 👤 За приглашения друзей: {count_credits['INVITE_FRIENDS']} {calculate_percentage_difference(is_all_time, count_credits['INVITE_FRIENDS'], count_credits_before['INVITE_FRIENDS'])}
     ┣ 📡 За обратную связь: {count_credits['LEAVE_FEEDBACKS']} {calculate_percentage_difference(is_all_time, count_credits['LEAVE_FEEDBACKS'], count_credits_before['LEAVE_FEEDBACKS'])}
     ┣ 🎮 За игры: {count_credits['PLAY_GAMES']} {calculate_percentage_difference(is_all_time, count_credits['PLAY_GAMES'], count_credits_before['PLAY_GAMES'])}
     ┗ 🪙 Всего: {count_credits['ALL']} {calculate_percentage_difference(is_all_time, count_credits['ALL'], count_credits_before['ALL'])}
-━ 2️⃣ <b>Кредитов потрачено на:</b>
+2️⃣ <b>Кредитов потрачено на:</b>
 {credits_info}
     ┗ Всего: {all_bonuses} {calculate_percentage_difference(is_all_time, all_bonuses, all_bonuses_before)}
-━ 3️⃣ <b>Промокоды:</b>
+3️⃣ <b>Промокоды:</b>
     ┗ Активировано: {count_activated_promo_codes} {calculate_percentage_difference(is_all_time, count_activated_promo_codes, count_activated_promo_codes_before)}
 """
 
@@ -1012,27 +1017,36 @@ class Texts(Protocol):
             tech_info += f"    {left_part} {tech_product_name}: ${round(count_expense_money[tech_product_id]['ALL'], 4)} {calculate_percentage_difference(is_all_time, count_expense_money[tech_product_id]['ALL'], count_expense_money_before[tech_product_id]['ALL'])}{right_part}"
 
         subscription_info = ''
-        for index, (subscription_product_id, subscription_product_name) in enumerate(subscription_products.items()):
+        for index, (subscription_product_name, subscription_product_ids) in enumerate(subscription_products.items()):
             is_last = index == len(subscription_products) - 1
             left_part = '┣' if not is_last else '┗'
             right_part = '\n' if not is_last else ''
+            average_price = 0
+            average_price_before = 0
+            all_price = 0
+            all_price_before = 0
+            for subscription_product_id in subscription_product_ids:
+                average_price += count_expense_money[subscription_product_id]['AVERAGE_PRICE']
+                average_price_before += count_expense_money_before[subscription_product_id]['AVERAGE_PRICE']
+                all_price += count_expense_money[subscription_product_id]['ALL']
+                all_price_before += count_expense_money_before[subscription_product_id]['ALL']
             subscription_info += f"""    {left_part} <b>{subscription_product_name}:</b>
-        ┣ 💸 Средняя цена подписчика: ${round(count_expense_money[subscription_product_id]['AVERAGE_PRICE'], 4)} {calculate_percentage_difference(is_all_time, count_expense_money[subscription_product_id]['AVERAGE_PRICE'], count_expense_money_before[subscription_product_id]['AVERAGE_PRICE'])}
-        ┗ 💰 Всего: ${round(count_expense_money[subscription_product_id]['ALL'], 4)} {calculate_percentage_difference(is_all_time, count_expense_money[subscription_product_id]['ALL'], count_expense_money_before[subscription_product_id]['ALL'])}{right_part}"""
+        ┣ 💸 Средняя цена подписчика: ${round(average_price, 4)} {calculate_percentage_difference(is_all_time, average_price, average_price_before)}
+        ┗ 💰 Всего: ${round(all_price, 4)} {calculate_percentage_difference(is_all_time, all_price, all_price_before)}{right_part}"""
 
         return f"""
 #statistics #expenses
 
-📊 <b>Статистика за {period} готова!</b>
+📊 <b>{period}</b>
 
 📉 <b>Расходы</b>
-━ 1️⃣ <b>AI модели:</b>
+1️⃣ <b>AI модели:</b>
 {ai_info}
-━ 2️⃣ <b>Технические:</b>
+2️⃣ <b>Технические:</b>
 {tech_info}
-━ 3️⃣ <b>Подписчики:</b>
+3️⃣ <b>Подписчики:</b>
 {subscription_info}
-━ <b>Всего:</b> ${round(count_expense_money['ALL'], 4)} {calculate_percentage_difference(is_all_time, count_expense_money['ALL'], count_expense_money_before['ALL'])}
+<b>Всего:</b> ${round(count_expense_money['ALL'], 4)} {calculate_percentage_difference(is_all_time, count_expense_money['ALL'], count_expense_money_before['ALL'])}
 """
 
     @staticmethod
@@ -1046,10 +1060,18 @@ class Texts(Protocol):
         is_all_time = period == 'всё время'
 
         subscription_info = ''
-        for index, (subscription_product_id, subscription_product_name) in enumerate(subscription_products.items()):
+        for index, (subscription_product_name, subscription_product_ids) in enumerate(subscription_products.items()):
+            if 'Бесплатные' in subscription_product_name:
+                continue
+
             is_last = index == len(subscription_products) - 1
             right_part = '\n' if not is_last else ''
-            subscription_info += f"    ┣ {subscription_product_name}: {round(count_income_money[subscription_product_id], 2)}₽ {calculate_percentage_difference(is_all_time, count_income_money[subscription_product_id], count_income_money_before[subscription_product_id])}{right_part}"
+            current_income_money = 0
+            current_income_money_before = 0
+            for subscription_product_id in subscription_product_ids:
+                current_income_money += count_income_money[subscription_product_id]
+                current_income_money_before += count_income_money_before[subscription_product_id]
+            subscription_info += f"    ┣ {subscription_product_name}: {round(current_income_money, 2)}₽ {calculate_percentage_difference(is_all_time, current_income_money, current_income_money_before)}{right_part}"
         package_info = ''
         for index, (package_product_id, package_product_name) in enumerate(package_products.items()):
             is_last = index == len(package_products) - 1
@@ -1059,18 +1081,18 @@ class Texts(Protocol):
         return f"""
 #statistics #incomes
 
-📊 <b>Статистика за {period} готова!</b>
+📊 <b>{period}</b>
 
 📈 <b>Доходы</b>
-━ 1️⃣ <b>Подписки:</b>
+1️⃣ <b>Подписки:</b>
 {subscription_info}
     ┗ Всего: {round(count_income_money['SUBSCRIPTION_ALL'], 2)}₽ {calculate_percentage_difference(is_all_time, count_income_money['SUBSCRIPTION_ALL'], count_income_money_before['SUBSCRIPTION_ALL'])}
-━ 2️⃣ <b>Пакеты:</b>
+2️⃣ <b>Пакеты:</b>
 {package_info}
     ┗ Всего: {round(count_income_money['PACKAGES_ALL'], 2)}₽ {calculate_percentage_difference(is_all_time, count_income_money['PACKAGES_ALL'], count_income_money_before['PACKAGES_ALL'])}
-━ <b>Средний чек:</b> {round(count_income_money['AVERAGE_PRICE'], 2)}₽ {calculate_percentage_difference(is_all_time, count_income_money['AVERAGE_PRICE'], count_income_money_before['AVERAGE_PRICE'])}
-━ <b>Всего:</b> {round(count_income_money['ALL'], 2)}₽ {calculate_percentage_difference(is_all_time, count_income_money['ALL'], count_income_money_before['ALL'])}
-━ <b>Вал:</b> {round(count_income_money['VAL'], 2)}₽ {calculate_percentage_difference(is_all_time, count_income_money['VAL'], count_income_money_before['VAL'])}
+<b>Средний чек:</b> {round(count_income_money['AVERAGE_PRICE'], 2)}₽ {calculate_percentage_difference(is_all_time, count_income_money['AVERAGE_PRICE'], count_income_money_before['AVERAGE_PRICE'])}
+<b>Всего:</b> {round(count_income_money['ALL'], 2)}₽ {calculate_percentage_difference(is_all_time, count_income_money['ALL'], count_income_money_before['ALL'])}
+<b>Вал:</b> {round(count_income_money['VAL'], 2)}₽ {calculate_percentage_difference(is_all_time, count_income_money['VAL'], count_income_money_before['VAL'])}
 """
 
     # Blast
