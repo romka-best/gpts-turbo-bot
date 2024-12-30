@@ -7,7 +7,7 @@ def get_info_by_model(model: Model, language_code: LanguageCode):
     info = None
 
     if model == Model.CHAT_GPT:
-        info = get_localization(language_code).INFO_CHATGPT
+        info = get_localization(language_code).INFO_CHAT_GPT
     elif model == Model.CLAUDE:
         info = get_localization(language_code).INFO_CLAUDE
     elif model == Model.GEMINI:

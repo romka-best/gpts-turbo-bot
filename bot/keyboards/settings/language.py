@@ -18,7 +18,17 @@ def build_language_keyboard(language_code: LanguageCode) -> InlineKeyboardMarkup
         ],
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).CLOSE,
+                text='🇪🇸 Español',
+                callback_data=f'language:{LanguageCode.ES}',
+            ),
+            InlineKeyboardButton(
+                text='🇮🇳 हिन्दी',
+                callback_data=f'language:{LanguageCode.HI}',
+            ),
+        ],
+        [
+            InlineKeyboardButton(
+                text=get_localization(language_code).ACTION_CLOSE,
                 callback_data='language:close'
             ),
         ],

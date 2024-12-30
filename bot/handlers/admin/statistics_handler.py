@@ -47,7 +47,7 @@ async def handle_statistics(message: Message, user_id: str, state: FSMContext):
 
     reply_markup = build_statistics_keyboard(user_language_code, is_admin(str(user_id)))
     await message.edit_text(
-        text=get_localization(user_language_code).STATISTICS_INFO,
+        text=get_localization(user_language_code).ADMIN_STATISTICS_INFO,
         reply_markup=reply_markup,
     )
 
@@ -55,7 +55,7 @@ async def handle_statistics(message: Message, user_id: str, state: FSMContext):
 async def handle_write_transaction(callback_query: CallbackQuery, language_code: LanguageCode):
     reply_markup = build_statistics_write_transaction_keyboard(language_code)
     await callback_query.message.edit_text(
-        text=get_localization(language_code).STATISTICS_WRITE_TRANSACTION,
+        text=get_localization(language_code).ADMIN_STATISTICS_WRITE_TRANSACTION,
         reply_markup=reply_markup,
     )
 
@@ -392,8 +392,8 @@ async def handle_get_statistics(language_code: LanguageCode, period: str):
         product.id: product.names.get(language_code) for product in products
         if product.type == ProductType.PACKAGE and 'voice answers' in product.names.get(LanguageCode.EN, '').lower()
     }
-    tech_products[ServiceType.SERVER] = get_localization(language_code).SERVER
-    tech_products[ServiceType.DATABASE] = get_localization(language_code).DATABASE
+    tech_products[ServiceType.SERVER] = get_localization(language_code).ADMIN_SERVER
+    tech_products[ServiceType.DATABASE] = get_localization(language_code).ADMIN_DATABASE
 
     # users
     (
@@ -407,6 +407,10 @@ async def handle_get_statistics(language_code: LanguageCode, period: str):
         count_english_users_before,
         count_russian_users,
         count_russian_users_before,
+        count_spanish_users,
+        count_spanish_users_before,
+        count_hindi_users,
+        count_hindi_users_before,
     ) = await asyncio.gather(
         # count_all_users
         get_count_of_users(
@@ -464,13 +468,41 @@ async def handle_get_statistics(language_code: LanguageCode, period: str):
             end_date=end_date_before,
             language_code=LanguageCode.RU,
         ) if start_date_before and end_date_before else get_zero(),
+        # count_spanish_users
+        get_count_of_users(
+            start_date=start_date,
+            end_date=end_date,
+            language_code=LanguageCode.ES,
+        ),
+        # count_spanish_users_before
+        get_count_of_users(
+            start_date=start_date_before,
+            end_date=end_date_before,
+            language_code=LanguageCode.ES,
+        ) if start_date_before and end_date_before else get_zero(),
+        # count_hindi_users
+        get_count_of_users(
+            start_date=start_date,
+            end_date=end_date,
+            language_code=LanguageCode.HI,
+        ),
+        # count_hindi_users_before
+        get_count_of_users(
+            start_date=start_date_before,
+            end_date=end_date_before,
+            language_code=LanguageCode.HI,
+        ) if start_date_before and end_date_before else get_zero(),
     )
     (
         count_other_users,
         count_other_users_before,
     ) = (
-        count_all_users - (count_english_users + count_russian_users),
-        count_all_users_before - (count_english_users_before + count_russian_users_before),
+        count_all_users - (
+            count_english_users + count_russian_users + count_spanish_users + count_hindi_users
+        ),
+        count_all_users_before - (
+            count_english_users_before + count_russian_users_before + count_spanish_users_before + count_hindi_users_before
+        ),
     )
 
     subscriptions = [
@@ -758,7 +790,7 @@ async def handle_get_statistics(language_code: LanguageCode, period: str):
     count_income_money_before['VAL'] = count_income_money_before['ALL'] - count_expense_money_before['ALL'] * 100
 
     texts = {
-        'users': get_localization(language_code).statistics_users(
+        'users': get_localization(language_code).admin_statistics_users(
             period=period,
             subscription_products=subscription_products,
             count_all_users=count_all_users,
@@ -771,6 +803,10 @@ async def handle_get_statistics(language_code: LanguageCode, period: str):
             count_english_users_before=count_english_users_before,
             count_russian_users=count_russian_users,
             count_russian_users_before=count_russian_users_before,
+            count_spanish_users=count_spanish_users,
+            count_spanish_users_before=count_spanish_users_before,
+            count_hindi_users=count_hindi_users,
+            count_hindi_users_before=count_hindi_users_before,
             count_other_users=count_other_users,
             count_other_users_before=count_other_users_before,
             count_paid_users=count_paid_users,
@@ -780,37 +816,37 @@ async def handle_get_statistics(language_code: LanguageCode, period: str):
             count_subscription_users=count_subscription_users,
             count_subscription_users_before=count_subscription_users_before,
         ),
-        'text_models': get_localization(language_code).statistics_text_models(
+        'text_models': get_localization(language_code).admin_statistics_text_models(
             period=period,
             text_products=text_products,
             count_all_transactions=count_all_transactions,
             count_all_transactions_before=count_all_transactions_before,
         ),
-        'summary_models': get_localization(language_code).statistics_summary_models(
+        'summary_models': get_localization(language_code).admin_statistics_summary_models(
             period=period,
             summary_products=summary_products,
             count_all_transactions=count_all_transactions,
             count_all_transactions_before=count_all_transactions_before,
         ),
-        'image_models': get_localization(language_code).statistics_image_models(
+        'image_models': get_localization(language_code).admin_statistics_image_models(
             period=period,
             image_products=image_products,
             count_all_transactions=count_all_transactions,
             count_all_transactions_before=count_all_transactions_before,
         ),
-        'music_models': get_localization(language_code).statistics_music_models(
+        'music_models': get_localization(language_code).admin_statistics_music_models(
             period=period,
             music_products=music_products,
             count_all_transactions=count_all_transactions,
             count_all_transactions_before=count_all_transactions_before,
         ),
-        'video_models': get_localization(language_code).statistics_video_models(
+        'video_models': get_localization(language_code).admin_statistics_video_models(
             period=period,
             video_products=video_products,
             count_all_transactions=count_all_transactions,
             count_all_transactions_before=count_all_transactions_before,
         ),
-        'reactions': get_localization(language_code).statistics_reactions(
+        'reactions': get_localization(language_code).admin_statistics_reactions(
             period=period,
             products_with_reactions=products_with_reactions,
             count_reactions=count_reactions,
@@ -820,7 +856,7 @@ async def handle_get_statistics(language_code: LanguageCode, period: str):
             count_games=count_games,
             count_games_before=count_games_before,
         ),
-        'bonuses': get_localization(language_code).statistics_bonuses(
+        'bonuses': get_localization(language_code).admin_statistics_bonuses(
             period=period,
             package_products=package_products,
             count_credits=count_credits,
@@ -830,7 +866,7 @@ async def handle_get_statistics(language_code: LanguageCode, period: str):
             count_activated_promo_codes=count_activated_promo_codes,
             count_activated_promo_codes_before=count_activated_promo_codes_before,
         ),
-        'expenses': get_localization(language_code).statistics_expenses(
+        'expenses': get_localization(language_code).admin_statistics_expenses(
             period=period,
             ai_products=ai_products,
             tech_products=tech_products,
@@ -838,7 +874,7 @@ async def handle_get_statistics(language_code: LanguageCode, period: str):
             count_expense_money=count_expense_money,
             count_expense_money_before=count_expense_money_before,
         ),
-        'incomes': get_localization(language_code).statistics_incomes(
+        'incomes': get_localization(language_code).admin_statistics_incomes(
             period=period,
             subscription_products=subscription_products,
             package_products=package_products,
@@ -873,7 +909,7 @@ async def handle_statistics_selection(callback_query: CallbackQuery, state: FSMC
         sticker=config.MESSAGE_STICKERS.get(MessageSticker.THINKING),
     )
     processing_message = await callback_query.message.reply(
-        text=get_localization(user_language_code).processing_statistics(),
+        text=get_localization(user_language_code).admin_statistics_processing_request(),
         allow_sending_without_reply=True,
     )
 
@@ -906,7 +942,7 @@ async def handle_statistics_write_transaction_selection(callback_query: Callback
         products = await get_products()
         reply_markup = build_statistics_choose_service_keyboard(user_language_code, products, transaction_type)
         await callback_query.message.edit_text(
-            text=get_localization(user_language_code).STATISTICS_CHOOSE_SERVICE,
+            text=get_localization(user_language_code).ADMIN_STATISTICS_CHOOSE_SERVICE,
             reply_markup=reply_markup
         )
 
@@ -922,7 +958,7 @@ async def handle_statistics_choose_service_selection(callback_query: CallbackQue
 
     reply_markup = build_statistics_choose_currency_keyboard(user_language_code)
     await callback_query.message.edit_text(
-        text=get_localization(user_language_code).STATISTICS_CHOOSE_CURRENCY,
+        text=get_localization(user_language_code).ADMIN_STATISTICS_CHOOSE_CURRENCY,
         reply_markup=reply_markup
     )
 
@@ -939,7 +975,7 @@ async def handle_statistics_choose_currency_selection(callback_query: CallbackQu
 
     reply_markup = build_cancel_keyboard(user_language_code)
     await callback_query.message.edit_text(
-        text=get_localization(user_language_code).STATISTICS_SERVICE_QUANTITY,
+        text=get_localization(user_language_code).ADMIN_STATISTICS_SERVICE_QUANTITY,
         reply_markup=reply_markup
     )
 
@@ -956,13 +992,13 @@ async def statistics_service_quantity_sent(message: Message, state: FSMContext):
         if quantity < 1:
             reply_markup = build_cancel_keyboard(user_language_code)
             await message.answer(
-                text=get_localization(user_language_code).MIN_ERROR,
+                text=get_localization(user_language_code).PACKAGE_QUANTITY_MIN_ERROR,
                 reply_markup=reply_markup,
             )
         else:
             reply_markup = build_cancel_keyboard(user_language_code)
             await message.answer(
-                text=get_localization(user_language_code).STATISTICS_SERVICE_AMOUNT,
+                text=get_localization(user_language_code).ADMIN_STATISTICS_SERVICE_AMOUNT,
                 reply_markup=reply_markup,
             )
 
@@ -971,7 +1007,7 @@ async def statistics_service_quantity_sent(message: Message, state: FSMContext):
     except (TypeError, ValueError):
         reply_markup = build_cancel_keyboard(user_language_code)
         await message.reply(
-            text=get_localization(user_language_code).VALUE_ERROR,
+            text=get_localization(user_language_code).ERROR_IS_NOT_NUMBER,
             reply_markup=reply_markup,
             allow_sending_without_reply=True,
         )
@@ -986,13 +1022,13 @@ async def statistics_service_amount_sent(message: Message, state: FSMContext):
         if amount < 0:
             reply_markup = build_cancel_keyboard(user_language_code)
             await message.answer(
-                text=get_localization(user_language_code).MIN_ERROR,
+                text=get_localization(user_language_code).PACKAGE_QUANTITY_MIN_ERROR,
                 reply_markup=reply_markup,
             )
         else:
             reply_markup = build_cancel_keyboard(user_language_code)
             await message.answer(
-                text=get_localization(user_language_code).STATISTICS_SERVICE_DATE,
+                text=get_localization(user_language_code).ADMIN_STATISTICS_SERVICE_DATE,
                 reply_markup=reply_markup,
             )
 
@@ -1001,7 +1037,7 @@ async def statistics_service_amount_sent(message: Message, state: FSMContext):
     except (TypeError, ValueError):
         reply_markup = build_cancel_keyboard(user_language_code)
         await message.reply(
-            text=get_localization(user_language_code).VALUE_ERROR,
+            text=get_localization(user_language_code).ERROR_IS_NOT_NUMBER,
             reply_markup=reply_markup,
             allow_sending_without_reply=True,
         )
@@ -1031,13 +1067,13 @@ async def statistics_service_date_sent(message: Message, state: FSMContext):
             quantity=service_quantity,
             created_at=service_date,
         )
-        await message.answer(text=get_localization(user_language_code).STATISTICS_WRITE_TRANSACTION_SUCCESSFUL)
+        await message.answer(text=get_localization(user_language_code).ADMIN_STATISTICS_WRITE_TRANSACTION_SUCCESSFUL)
 
         await state.clear()
     except (TypeError, ValueError):
         reply_markup = build_cancel_keyboard(user_language_code)
         await message.reply(
-            text=get_localization(user_language_code).STATISTICS_SERVICE_DATE_VALUE_ERROR,
+            text=get_localization(user_language_code).ADMIN_STATISTICS_SERVICE_DATE_VALUE_ERROR,
             reply_markup=reply_markup,
             allow_sending_without_reply=True,
         )

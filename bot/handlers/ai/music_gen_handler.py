@@ -46,7 +46,7 @@ async def music_gen(message: Message, state: FSMContext):
     if user.current_model == Model.MUSIC_GEN:
         reply_markup = build_switched_to_ai_keyboard(user_language_code, Model.MUSIC_GEN)
         await message.answer(
-            text=get_localization(user_language_code).ALREADY_SWITCHED_TO_THIS_MODEL,
+            text=get_localization(user_language_code).MODEL_ALREADY_SWITCHED_TO_THIS_MODEL,
             reply_markup=reply_markup,
         )
     else:
@@ -121,7 +121,7 @@ async def handle_music_gen_selection(
     except (TypeError, ValueError):
         reply_markup = build_cancel_keyboard(user_language_code)
         await message.reply(
-            text=get_localization(user_language_code).VALUE_ERROR,
+            text=get_localization(user_language_code).ERROR_IS_NOT_NUMBER,
             reply_markup=reply_markup,
             allow_sending_without_reply=True,
         )
@@ -132,7 +132,7 @@ async def handle_music_gen_selection(
         sticker=config.MESSAGE_STICKERS.get(MessageSticker.MUSIC_GENERATION),
     )
     processing_message = await message.reply(
-        text=get_localization(user_language_code).processing_request_music(),
+        text=get_localization(user_language_code).model_music_processing_request(),
         allow_sending_without_reply=True,
     )
 
@@ -151,7 +151,7 @@ async def handle_music_gen_selection(
         if quota * 10 < duration:
             reply_markup = build_cancel_keyboard(user_language_code)
             await message.reply(
-                text=get_localization(user_language_code).music_gen_forbidden(quota * 10),
+                text=get_localization(user_language_code).music_gen_forbidden_error(quota * 10),
                 reply_markup=reply_markup,
                 allow_sending_without_reply=True,
             )
@@ -185,7 +185,7 @@ async def handle_music_gen_selection(
 
             if len(user_not_finished_requests):
                 await message.reply(
-                    text=get_localization(user_language_code).ALREADY_MAKE_REQUEST,
+                    text=get_localization(user_language_code).MODEL_ALREADY_MAKE_REQUEST,
                     allow_sending_without_reply=True,
                 )
 

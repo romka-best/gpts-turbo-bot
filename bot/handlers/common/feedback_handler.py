@@ -32,7 +32,7 @@ async def handle_feedback(message: Message, user_id: str, state: FSMContext):
 
     reply_markup = build_feedback_keyboard(user_language_code)
     await message.answer(
-        text=get_localization(user_language_code).FEEDBACK,
+        text=get_localization(user_language_code).FEEDBACK_INFO,
         reply_markup=reply_markup,
     )
 

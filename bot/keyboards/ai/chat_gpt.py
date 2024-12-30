@@ -9,7 +9,7 @@ def build_chat_gpt_keyboard(language_code: LanguageCode, model: Model, model_ver
     buttons = [
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).CHATGPT4_OMNI_MINI + (
+                text=get_localization(language_code).CHAT_GPT_4_OMNI_MINI + (
                     ' ✅' if model == Model.CHAT_GPT and model_version == ChatGPTVersion.V4_Omni_Mini else ''
                 ),
                 callback_data=f'chat_gpt:{ChatGPTVersion.V4_Omni_Mini}'
@@ -17,7 +17,7 @@ def build_chat_gpt_keyboard(language_code: LanguageCode, model: Model, model_ver
         ],
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).CHATGPT4_OMNI + (
+                text=get_localization(language_code).CHAT_GPT_4_OMNI + (
                     ' ✅' if model == Model.CHAT_GPT and model_version == ChatGPTVersion.V4_Omni else ''
                 ),
                 callback_data=f'chat_gpt:{ChatGPTVersion.V4_Omni}'

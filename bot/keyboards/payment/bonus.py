@@ -10,32 +10,32 @@ def build_bonus_keyboard(language_code: LanguageCode, user_id: str) -> InlineKey
     buttons = [
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).INVITE_FRIEND,
-                url=get_localization(language_code).referral_link(user_id, True),
+                text=get_localization(language_code).BONUS_INVITE_FRIEND,
+                url=get_localization(language_code).bonus_referral_link(user_id, True),
                 callback_data=f'bonus:invite_friend'
             ),
         ],
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).LEAVE_FEEDBACK,
+                text=get_localization(language_code).BONUS_LEAVE_FEEDBACK,
                 callback_data=f'bonus:leave_feedback'
             ),
         ],
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).PLAY_GAME,
+                text=get_localization(language_code).BONUS_PLAY_GAME,
                 callback_data=f'bonus:play_game'
             ),
         ],
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).CASH_OUT,
+                text=get_localization(language_code).BONUS_CASH_OUT,
                 callback_data=f'bonus:cash_out'
             ),
         ],
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).CLOSE,
+                text=get_localization(language_code).ACTION_CLOSE,
                 callback_data=f'bonus:close'
             ),
         ],
@@ -48,43 +48,43 @@ def build_bonus_play_game_keyboard(language_code: LanguageCode) -> InlineKeyboar
     buttons = [
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).PLAY_BOWLING_GAME,
+                text=get_localization(language_code).BONUS_PLAY_BOWLING_GAME,
                 callback_data=f'bonus_play_game:{GameType.BOWLING}'
             ),
         ],
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).PLAY_SOCCER_GAME,
+                text=get_localization(language_code).BONUS_PLAY_SOCCER_GAME,
                 callback_data=f'bonus_play_game:{GameType.SOCCER}'
             ),
         ],
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).PLAY_BASKETBALL_GAME,
+                text=get_localization(language_code).BONUS_PLAY_BASKETBALL_GAME,
                 callback_data=f'bonus_play_game:{GameType.BASKETBALL}'
             ),
         ],
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).PLAY_DARTS_GAME,
+                text=get_localization(language_code).BONUS_PLAY_DARTS_GAME,
                 callback_data=f'bonus_play_game:{GameType.DARTS}'
             ),
         ],
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).PLAY_DICE_GAME,
+                text=get_localization(language_code).BONUS_PLAY_DICE_GAME,
                 callback_data=f'bonus_play_game:{GameType.DICE}'
             ),
         ],
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).PLAY_CASINO_GAME,
+                text=get_localization(language_code).BONUS_PLAY_CASINO_GAME,
                 callback_data=f'bonus_play_game:{GameType.CASINO}'
             ),
         ],
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).BACK,
+                text=get_localization(language_code).ACTION_BACK,
                 callback_data=f'bonus_play_game:back'
             ),
         ],
@@ -104,7 +104,7 @@ def build_bonus_play_game_chosen_keyboard(language_code: LanguageCode, game_type
     ):
         buttons.append([
             InlineKeyboardButton(
-                text=get_localization(language_code).PLAY,
+                text=get_localization(language_code).BONUS_PLAY,
                 callback_data=f'bonus_play_game_chosen:{game_type}'
             ),
         ])
@@ -112,38 +112,38 @@ def build_bonus_play_game_chosen_keyboard(language_code: LanguageCode, game_type
         buttons.extend([
             [
                 InlineKeyboardButton(
-                    text=get_localization(language_code).PLAY_DICE_GAME_CHOOSE_1,
+                    text=get_localization(language_code).BONUS_PLAY_DICE_GAME_CHOOSE_1,
                     callback_data=f'bonus_play_game_chosen:{game_type}:1'
                 ),
                 InlineKeyboardButton(
-                    text=get_localization(language_code).PLAY_DICE_GAME_CHOOSE_2,
+                    text=get_localization(language_code).BONUS_PLAY_DICE_GAME_CHOOSE_2,
                     callback_data=f'bonus_play_game_chosen:{game_type}:2'
                 ),
             ],
             [
                 InlineKeyboardButton(
-                    text=get_localization(language_code).PLAY_DICE_GAME_CHOOSE_3,
+                    text=get_localization(language_code).BONUS_PLAY_DICE_GAME_CHOOSE_3,
                     callback_data=f'bonus_play_game_chosen:{game_type}:3'
                 ),
                 InlineKeyboardButton(
-                    text=get_localization(language_code).PLAY_DICE_GAME_CHOOSE_4,
+                    text=get_localization(language_code).BONUS_PLAY_DICE_GAME_CHOOSE_4,
                     callback_data=f'bonus_play_game_chosen:{game_type}:4'
                 ),
             ],
             [
                 InlineKeyboardButton(
-                    text=get_localization(language_code).PLAY_DICE_GAME_CHOOSE_5,
+                    text=get_localization(language_code).BONUS_PLAY_DICE_GAME_CHOOSE_5,
                     callback_data=f'bonus_play_game_chosen:{game_type}:5'
                 ),
                 InlineKeyboardButton(
-                    text=get_localization(language_code).PLAY_DICE_GAME_CHOOSE_6,
+                    text=get_localization(language_code).BONUS_PLAY_DICE_GAME_CHOOSE_6,
                     callback_data=f'bonus_play_game_chosen:{game_type}:6'
                 ),
             ],
         ])
     buttons.append([
         InlineKeyboardButton(
-            text=get_localization(language_code).BACK,
+            text=get_localization(language_code).ACTION_BACK,
             callback_data=f'bonus_play_game_chosen:back'
         ),
     ])
@@ -157,7 +157,7 @@ def build_bonus_cash_out_keyboard(language_code: LanguageCode, products: list[Pr
     if page == 0:
         buttons.append([
             InlineKeyboardButton(
-                text=get_localization(language_code).TEXT_MODELS,
+                text=get_localization(language_code).MODELS_TEXT,
                 callback_data=f'bonus_cash_out:{ProductCategory.TEXT}',
             ),
         ])
@@ -189,7 +189,7 @@ def build_bonus_cash_out_keyboard(language_code: LanguageCode, products: list[Pr
     elif page == 0:
         buttons.append([
             InlineKeyboardButton(
-                text=get_localization(language_code).SUMMARY_MODELS,
+                text=get_localization(language_code).MODELS_SUMMARY,
                 callback_data=f'bonus_cash_out:{ProductCategory.SUMMARY}',
             ),
         ])
@@ -221,7 +221,7 @@ def build_bonus_cash_out_keyboard(language_code: LanguageCode, products: list[Pr
     elif page == 2:
         buttons.append([
             InlineKeyboardButton(
-                text=get_localization(language_code).IMAGE_MODELS,
+                text=get_localization(language_code).MODELS_IMAGE,
                 callback_data=f'bonus_cash_out:{ProductCategory.IMAGE}',
             ),
         ])
@@ -254,7 +254,7 @@ def build_bonus_cash_out_keyboard(language_code: LanguageCode, products: list[Pr
         buttons.append(
             [
                 InlineKeyboardButton(
-                    text=get_localization(language_code).MUSIC_MODELS,
+                    text=get_localization(language_code).MODELS_MUSIC,
                     callback_data=f'bonus_cash_out:{ProductCategory.MUSIC}',
                 ),
             ],
@@ -288,7 +288,7 @@ def build_bonus_cash_out_keyboard(language_code: LanguageCode, products: list[Pr
         buttons.append(
             [
                 InlineKeyboardButton(
-                    text=get_localization(language_code).VIDEO_MODELS,
+                    text=get_localization(language_code).MODELS_VIDEO,
                     callback_data=f'bonus_cash_out:{ProductCategory.VIDEO}',
                 ),
             ],
@@ -348,7 +348,7 @@ def build_bonus_cash_out_keyboard(language_code: LanguageCode, products: list[Pr
     buttons.append(
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).BACK,
+                text=get_localization(language_code).ACTION_BACK,
                 callback_data='bonus_cash_out:back'
             )
         ],

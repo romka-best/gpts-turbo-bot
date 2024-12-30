@@ -81,7 +81,7 @@ async def process_voice_message(bot: Bot, voice: File, user: User, user_language
             await asyncio.to_thread(audio_file.close)
             await bot.send_message(
                 chat_id=user.telegram_chat_id,
-                text=get_localization(user_language_code).FILE_TOO_BIG_ERROR,
+                text=get_localization(user_language_code).ERROR_FILE_TOO_BIG,
             )
             return
 
@@ -189,7 +189,7 @@ async def handle_voice(message: Message, state: FSMContext):
 
         await state.update_data(recognized_text=None)
     else:
-        text = get_localization(user_language_code).VOICE_MESSAGES_FORBIDDEN
+        text = get_localization(user_language_code).VOICE_MESSAGES_FORBIDDEN_ERROR
         reply_markup = build_buy_motivation_keyboard(user_language_code)
         await message.answer(
             text=text,

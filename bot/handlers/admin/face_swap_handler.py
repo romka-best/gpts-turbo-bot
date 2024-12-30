@@ -48,7 +48,7 @@ async def handle_manage_face_swap(message: Message, user_id: str, state: FSMCont
 
     reply_markup = build_manage_face_swap_keyboard(user_language_code)
     await message.edit_text(
-        text=get_localization(user_language_code).FACE_SWAP_MANAGE,
+        text=get_localization(user_language_code).ADMIN_FACE_SWAP_INFO,
         reply_markup=reply_markup,
     )
 
@@ -71,7 +71,7 @@ async def handle_face_swap_manage_selection(callback_query: CallbackQuery, state
     elif action == 'create':
         reply_markup = build_manage_face_swap_create_keyboard(user_language_code)
         await callback_query.message.edit_text(
-            text=get_localization(user_language_code).FACE_SWAP_MANAGE_CREATE,
+            text=get_localization(user_language_code).ADMIN_FACE_SWAP_CREATE,
             reply_markup=reply_markup,
         )
 
@@ -79,7 +79,7 @@ async def handle_face_swap_manage_selection(callback_query: CallbackQuery, state
     elif action == 'edit':
         reply_markup = build_manage_face_swap_edit_choose_gender_keyboard(user_language_code)
         await callback_query.message.edit_text(
-            text=get_localization(user_language_code).FACE_SWAP_MANAGE_EDIT_CHOOSE_GENDER,
+            text=get_localization(user_language_code).ADMIN_FACE_SWAP_EDIT_CHOOSE_GENDER,
             reply_markup=reply_markup,
         )
 
@@ -113,12 +113,12 @@ async def face_swap_manage_system_name_sent(message: Message, state: FSMContext)
     )
     if face_swap_package_male or face_swap_package_female:
         await message.answer(
-            text=get_localization(user_language_code).FACE_SWAP_MANAGE_CREATE_ALREADY_EXISTS_ERROR,
+            text=get_localization(user_language_code).ADMIN_FACE_SWAP_CREATE_PACKAGE_ALREADY_EXISTS_ERROR,
         )
     else:
         reply_markup = build_cancel_keyboard(user_language_code)
         await message.answer(
-            text=get_localization(user_language_code).FACE_SWAP_MANAGE_CREATE_PACKAGE_NAME,
+            text=get_localization(user_language_code).ADMIN_FACE_SWAP_CREATE_PACKAGE_NAME,
             reply_markup=reply_markup,
         )
 
@@ -144,7 +144,7 @@ async def face_swap_manage_name_sent(message: Message, state: FSMContext):
 
     reply_markup = build_manage_face_swap_create_confirmation_keyboard(user_language_code)
     await message.answer(
-        text=get_localization(user_language_code).face_swap_manage_create_package_confirmation(
+        text=get_localization(user_language_code).admin_face_swap_create_package_confirmation(
             package_system_name=user_data['system_face_swap_package_name'],
             package_names=face_swap_package_names,
         ),
@@ -179,7 +179,7 @@ async def handle_face_swap_manage_create_confirmation_selection(callback_query: 
             status=FaceSwapPackageStatus.PRIVATE,
         )
 
-        await callback_query.message.answer(text=get_localization(user_language_code).FACE_SWAP_MANAGE_CREATE_SUCCESS)
+        await callback_query.message.answer(text=get_localization(user_language_code).ADMIN_FACE_SWAP_CREATE_PACKAGE_SUCCESS)
         await handle_manage_face_swap(callback_query.message, str(callback_query.from_user.id), state)
 
         await callback_query.message.delete()
@@ -197,7 +197,7 @@ async def handle_face_swap_manage_edit_choose_gender_selection(callback_query: C
     face_swap_packages = await get_face_swap_packages_by_gender(gender)
     reply_markup = build_manage_face_swap_edit_choose_package_keyboard(user_language_code, face_swap_packages)
     await callback_query.message.edit_text(
-        text=get_localization(user_language_code).FACE_SWAP_MANAGE_EDIT_CHOOSE_PACKAGE,
+        text=get_localization(user_language_code).ADMIN_FACE_SWAP_EDIT_CHOOSE_PACKAGE,
         reply_markup=reply_markup,
     )
 
@@ -215,7 +215,7 @@ async def handle_face_swap_manage_edit_choose_package_selection(callback_query: 
 
     reply_markup = build_manage_face_swap_edit_keyboard(user_language_code)
     await callback_query.message.edit_text(
-        text=get_localization(user_language_code).FACE_SWAP_MANAGE_EDIT,
+        text=get_localization(user_language_code).ADMIN_FACE_SWAP_EDIT,
         reply_markup=reply_markup,
     )
 
@@ -287,7 +287,7 @@ async def handle_face_swap_manage_edit_selection(callback_query: CallbackQuery, 
                 face_swap_package.status,
             )
             await callback_query.message.edit_text(
-                text=get_localization(user_language_code).FACE_SWAP_MANAGE_CHANGE_STATUS,
+                text=get_localization(user_language_code).ADMIN_FACE_SWAP_CHANGE_STATUS,
                 reply_markup=reply_markup
             )
         elif action == 'show_pictures':
@@ -295,7 +295,7 @@ async def handle_face_swap_manage_edit_selection(callback_query: CallbackQuery, 
         elif action == 'add_new_picture':
             reply_markup = build_cancel_keyboard(user_language_code)
             await callback_query.message.edit_text(
-                text=get_localization(user_language_code).FACE_SWAP_MANAGE_ADD_NEW_PICTURE_NAME,
+                text=get_localization(user_language_code).ADMIN_FACE_SWAP_ADD_NEW_PICTURE_NAME,
                 reply_markup=reply_markup,
             )
             await state.set_state(FaceSwap.waiting_for_face_swap_picture_name)
@@ -307,7 +307,7 @@ async def face_swap_manage_picture_name_sent(message: Message, state: FSMContext
 
     reply_markup = build_cancel_keyboard(user_language_code)
     await message.answer(
-        text=get_localization(user_language_code).FACE_SWAP_MANAGE_ADD_NEW_PICTURE_IMAGE,
+        text=get_localization(user_language_code).ADMIN_FACE_SWAP_ADD_NEW_PICTURE_IMAGE,
         reply_markup=reply_markup,
     )
 
@@ -375,7 +375,7 @@ async def handle_face_swap_manage_edit_picture_selection(callback_query: Callbac
     if action == 'change_status':
         reply_markup = build_manage_face_swap_edit_picture_change_status_keyboard(user_language_code, file_status)
         await callback_query.message.edit_caption(
-            caption=get_localization(user_language_code).FACE_SWAP_MANAGE_CHANGE_STATUS,
+            caption=get_localization(user_language_code).ADMIN_FACE_SWAP_CHANGE_STATUS,
             reply_markup=reply_markup,
         )
         await state.update_data(file_name=file_name)
@@ -384,7 +384,7 @@ async def handle_face_swap_manage_edit_picture_selection(callback_query: Callbac
             sticker=config.MESSAGE_STICKERS.get(MessageSticker.IMAGE_GENERATION),
         )
         processing_message = await callback_query.message.reply(
-            text=get_localization(user_language_code).processing_request_face_swap(),
+            text=get_localization(user_language_code).model_face_swap_processing_request(),
             allow_sending_without_reply=True,
         )
 

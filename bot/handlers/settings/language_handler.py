@@ -43,7 +43,7 @@ async def handle_language_selection(callback_query: CallbackQuery, state: FSMCon
         await set_commands_for_user(callback_query.bot, user.telegram_chat_id, chosen_language)
 
     await callback_query.message.answer(
-        text=get_localization(chosen_language).CHOOSE_LANGUAGE,
+        text=get_localization(chosen_language).LANGUAGE_CHOSEN,
     )
 
     await callback_query.message.delete()

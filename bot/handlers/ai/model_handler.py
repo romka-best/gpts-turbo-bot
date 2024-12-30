@@ -200,7 +200,7 @@ async def handle_model_selection(callback_query: CallbackQuery, state: FSMContex
         await callback_query.bot.pin_chat_message(user.telegram_chat_id, answered_message.message_id)
     else:
         await callback_query.message.reply(
-            text=get_localization(user_language_code).ALREADY_SWITCHED_TO_THIS_MODEL,
+            text=get_localization(user_language_code).MODEL_ALREADY_SWITCHED_TO_THIS_MODEL,
             reply_markup=reply_markup,
             allow_sending_without_reply=True,
         )
@@ -277,7 +277,7 @@ async def handle_switched_to_ai_selection(callback_query: CallbackQuery, state: 
             settings=user.settings,
         )
         await callback_query.message.answer(
-            text=get_localization(user_language_code).settings(human_model, model, generation_cost),
+            text=get_localization(user_language_code).settings_info(human_model, model, generation_cost),
             reply_markup=reply_markup,
         )
     elif action == 'info':

@@ -42,7 +42,7 @@ async def runway(message: Message, state: FSMContext):
     if user.current_model == Model.RUNWAY:
         reply_markup = build_switched_to_ai_keyboard(user_language_code, Model.RUNWAY)
         await message.answer(
-            text=get_localization(user_language_code).ALREADY_SWITCHED_TO_THIS_MODEL,
+            text=get_localization(user_language_code).MODEL_ALREADY_SWITCHED_TO_THIS_MODEL,
             reply_markup=reply_markup,
         )
     else:
@@ -75,7 +75,7 @@ async def handle_runway(message: Message, state: FSMContext, user: User, video_f
 
     if not video_frame_link:
         await message.reply(
-            text=get_localization(user_language_code).PHOTO_REQUIRED_ERROR,
+            text=get_localization(user_language_code).ERROR_PHOTO_REQUIRED,
             allow_sending_without_reply=True,
         )
         await state.update_data(is_processing=False)
@@ -94,7 +94,7 @@ async def handle_runway(message: Message, state: FSMContext, user: User, video_f
         sticker=config.MESSAGE_STICKERS.get(MessageSticker.VIDEO_GENERATION),
     )
     processing_message = await message.reply(
-        text=get_localization(user_language_code).processing_request_video(),
+        text=get_localization(user_language_code).model_video_processing_request(),
         allow_sending_without_reply=True,
     )
 
@@ -113,7 +113,7 @@ async def handle_runway(message: Message, state: FSMContext, user: User, video_f
 
                 reply_markup = build_limit_exceeded_keyboard(user_language_code)
                 await message.reply(
-                    text=get_localization(user_language_code).reached_usage_limit(),
+                    text=get_localization(user_language_code).model_reached_usage_limit(),
                     reply_markup=reply_markup,
                     allow_sending_without_reply=True,
                 )
@@ -155,13 +155,13 @@ async def handle_runway(message: Message, state: FSMContext, user: User, video_f
                    user.daily_limits[Quota.RUNWAY] != float('inf') else ''
             if user.settings[Model.RUNWAY][UserSettings.SEND_TYPE] == SendType.DOCUMENT:
                 await message.reply_document(
-                    caption=f'{get_localization(user_language_code).VIDEO_SUCCESS}{footer_text}',
+                    caption=f'{get_localization(user_language_code).GENERATION_VIDEO_SUCCESS}{footer_text}',
                     document=response.get('result', [])[0],
                     allow_sending_without_reply=True,
                 )
             else:
                 await message.reply_video(
-                    caption=f'{get_localization(user_language_code).VIDEO_SUCCESS}{footer_text}',
+                    caption=f'{get_localization(user_language_code).GENERATION_VIDEO_SUCCESS}{footer_text}',
                     video=response.get('result', [])[0],
                     allow_sending_without_reply=True,
                 )
@@ -169,7 +169,7 @@ async def handle_runway(message: Message, state: FSMContext, user: User, video_f
             await update_user_usage_quota(user, Quota.RUNWAY, cost)
         except runwayml.RateLimitError:
             await message.reply(
-                text=get_localization(user_language_code).SERVER_OVERLOADED_ERROR,
+                text=get_localization(user_language_code).ERROR_SERVER_OVERLOADED,
                 allow_sending_without_reply=True,
             )
         except Exception as e:

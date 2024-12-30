@@ -27,7 +27,7 @@ async def handle_blast(message: Message, user_id: str, state: FSMContext):
 
     reply_markup = build_blast_keyboard(user_language_code)
     await message.edit_text(
-        text=get_localization(user_language_code).BLAST_CHOOSE_USER_TYPE,
+        text=get_localization(user_language_code).ADMIN_BLAST_CHOOSE_USER_TYPE,
         reply_markup=reply_markup,
     )
 
@@ -50,7 +50,7 @@ async def handle_blast_user_type_selection(callback_query: CallbackQuery, state:
     else:
         reply_markup = build_blast_language_keyboard(user_language_code)
         await callback_query.message.edit_text(
-            text=get_localization(user_language_code).BLAST_CHOOSE_USER_TYPE,
+            text=get_localization(user_language_code).ADMIN_BLAST_CHOOSE_USER_TYPE,
             reply_markup=reply_markup,
         )
 
@@ -75,12 +75,12 @@ async def handle_blast_language_selection(callback_query: CallbackQuery, state: 
         return
     elif language == 'all':
         await callback_query.message.edit_text(
-            text=get_localization(user_language_code).BLAST_WRITE_IN_DEFAULT_LANGUAGE,
+            text=get_localization(user_language_code).ADMIN_BLAST_WRITE_IN_DEFAULT_LANGUAGE,
             reply_markup=reply_markup,
         )
     else:
         await callback_query.message.edit_text(
-            text=get_localization(user_language_code).BLAST_WRITE_IN_CHOSEN_LANGUAGE,
+            text=get_localization(user_language_code).ADMIN_BLAST_WRITE_IN_CHOSEN_LANGUAGE,
             reply_markup=reply_markup,
         )
 
@@ -110,7 +110,7 @@ async def blast_letter_sent(message: Message, state: FSMContext):
 
     reply_markup = build_blast_confirmation_keyboard(user_language_code)
     await message.answer(
-        text=get_localization(user_language_code).blast_confirmation(blast_letters),
+        text=get_localization(user_language_code).admin_blast_confirmation(blast_letters),
         reply_markup=reply_markup,
     )
 
@@ -153,7 +153,7 @@ async def handle_blast_confirmation_selection(callback_query: CallbackQuery, sta
             )
         await asyncio.gather(*tasks, return_exceptions=True)
 
-        await callback_query.message.answer(text=get_localization(user_language_code).BLAST_SUCCESS)
+        await callback_query.message.answer(text=get_localization(user_language_code).ADMIN_BLAST_SUCCESS)
         await callback_query.message.delete()
 
         await state.clear()

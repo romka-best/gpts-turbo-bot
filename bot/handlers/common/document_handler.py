@@ -39,7 +39,7 @@ async def document(message: Message, state: FSMContext, album: list[Message]):
         user_language_code = await get_user_language(user_id, state.storage)
 
         await message.reply(
-            text=get_localization(user_language_code).DOCUMENT_FORBIDDEN_ERROR,
+            text=get_localization(user_language_code).ERROR_DOCUMENT_FORBIDDEN,
             allow_sending_without_reply=True,
         )
 
@@ -93,6 +93,6 @@ async def handle_document(message: Message, state: FSMContext, document_file: Fi
             await handle_gemini(message, state, user, quota, [document_vision_filename], True)
     else:
         await message.reply(
-            text=get_localization(user_language_code).DOCUMENT_FORBIDDEN_ERROR,
+            text=get_localization(user_language_code).ERROR_DOCUMENT_FORBIDDEN,
             allow_sending_without_reply=True,
         )

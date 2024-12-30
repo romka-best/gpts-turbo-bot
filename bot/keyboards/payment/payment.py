@@ -42,13 +42,13 @@ def build_subscriptions_keyboard(
     if currency != Currency.XTR:
         buttons.append([
             InlineKeyboardButton(
-                text=get_localization(language_code).MONTHLY + (
+                text=get_localization(language_code).SUBSCRIPTION_MONTHLY + (
                     ' 🟢' if category == ProductCategory.MONTHLY else ''
                 ),
                 callback_data=f'subscription:{ProductCategory.MONTHLY}'
             ),
             InlineKeyboardButton(
-                text=get_localization(language_code).YEARLY + (
+                text=get_localization(language_code).SUBSCRIPTION_YEARLY + (
                     ' 🟢' if category == ProductCategory.YEARLY else ''
                 ),
                 callback_data=f'subscription:{ProductCategory.YEARLY}'
@@ -67,13 +67,13 @@ def build_subscriptions_keyboard(
     buttons.extend([
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).CHANGE_CURRENCY,
+                text=get_localization(language_code).PAYMENT_CHANGE_CURRENCY,
                 callback_data=f'subscription:change_currency'
             ),
         ],
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).BACK,
+                text=get_localization(language_code).ACTION_BACK,
                 callback_data='subscription:back'
             )
         ],
@@ -89,31 +89,25 @@ def build_payment_method_for_subscription_keyboard(
     buttons = [
         [
             InlineKeyboardButton(
-                text=f'{get_localization(language_code).YOOKASSA_PAYMENT_METHOD}',
+                text=f'{get_localization(language_code).PAYMENT_YOOKASSA_PAYMENT_METHOD}',
                 callback_data=f'pms:{PaymentMethod.YOOKASSA}:{subscription_id}'
             ),
         ],
         [
             InlineKeyboardButton(
-                text=f'{get_localization(language_code).STRIPE_PAYMENT_METHOD}',
+                text=f'{get_localization(language_code).PAYMENT_STRIPE_PAYMENT_METHOD}',
                 callback_data=f'pms:{PaymentMethod.STRIPE}:{subscription_id}'
             ),
         ],
         [
             InlineKeyboardButton(
-                text=f'{get_localization(language_code).TELEGRAM_STARS_PAYMENT_METHOD}',
+                text=f'{get_localization(language_code).PAYMENT_TELEGRAM_STARS_PAYMENT_METHOD}',
                 callback_data=f'pms:{PaymentMethod.TELEGRAM_STARS}:{subscription_id}'
             ),
         ],
-        # [
-        #     InlineKeyboardButton(
-        #         text=f'{get_localization(language_code).CRYPTO_PAYMENT_METHOD}',
-        #         callback_data=f'pms:{PaymentMethod.CRYPTO}:{subscription_id}'
-        #     ),
-        # ],
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).BACK,
+                text=get_localization(language_code).ACTION_BACK,
                 callback_data='pms:back'
             )
         ],
@@ -126,7 +120,7 @@ def build_payment_keyboard(language_code: LanguageCode, payment_link: str) -> In
     buttons = [
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).PROCEED_TO_PAY,
+                text=get_localization(language_code).PAYMENT_PROCEED_TO_PAY,
                 url=payment_link,
                 callback_data=f'payment:pay'
             ),
@@ -140,13 +134,13 @@ def build_cancel_subscription_keyboard(language_code: LanguageCode) -> InlineKey
     buttons = [
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).APPROVE,
+                text=get_localization(language_code).ACTION_APPROVE,
                 callback_data=f'cancel_subscription:approve'
             )
         ],
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).CANCEL,
+                text=get_localization(language_code).ACTION_CANCEL,
                 callback_data=f'cancel_subscription:cancel'
             )
         ],
@@ -168,7 +162,7 @@ def build_packages_keyboard(language_code: LanguageCode, products: list[Product]
     if page == 0:
         buttons.append([
             InlineKeyboardButton(
-                text=get_localization(language_code).TEXT_MODELS,
+                text=get_localization(language_code).MODELS_TEXT,
                 callback_data=f'package:{ProductCategory.TEXT}',
             ),
         ])
@@ -200,7 +194,7 @@ def build_packages_keyboard(language_code: LanguageCode, products: list[Product]
     elif page == 1:
         buttons.append([
             InlineKeyboardButton(
-                text=get_localization(language_code).SUMMARY_MODELS,
+                text=get_localization(language_code).MODELS_SUMMARY,
                 callback_data=f'package:{ProductCategory.SUMMARY}',
             ),
         ])
@@ -232,7 +226,7 @@ def build_packages_keyboard(language_code: LanguageCode, products: list[Product]
     elif page == 2:
         buttons.append([
             InlineKeyboardButton(
-                text=get_localization(language_code).IMAGE_MODELS,
+                text=get_localization(language_code).MODELS_IMAGE,
                 callback_data=f'package:{ProductCategory.IMAGE}',
             ),
         ])
@@ -265,7 +259,7 @@ def build_packages_keyboard(language_code: LanguageCode, products: list[Product]
         buttons.append(
             [
                 InlineKeyboardButton(
-                    text=get_localization(language_code).MUSIC_MODELS,
+                    text=get_localization(language_code).MODELS_MUSIC,
                     callback_data=f'package:{ProductCategory.MUSIC}',
                 ),
             ],
@@ -299,7 +293,7 @@ def build_packages_keyboard(language_code: LanguageCode, products: list[Product]
         buttons.append(
             [
                 InlineKeyboardButton(
-                    text=get_localization(language_code).VIDEO_MODELS,
+                    text=get_localization(language_code).MODELS_VIDEO,
                     callback_data=f'package:{ProductCategory.VIDEO}',
                 ),
             ],
@@ -360,13 +354,13 @@ def build_packages_keyboard(language_code: LanguageCode, products: list[Product]
         [
             [
                 InlineKeyboardButton(
-                    text=get_localization(language_code).CHANGE_CURRENCY,
+                    text=get_localization(language_code).PAYMENT_CHANGE_CURRENCY,
                     callback_data=f'package:change_currency:{page}'
                 ),
             ],
             [
                 InlineKeyboardButton(
-                    text=get_localization(language_code).BACK,
+                    text=get_localization(language_code).ACTION_BACK,
                     callback_data='package:back'
                 )
             ],
@@ -380,7 +374,7 @@ def build_package_selection_keyboard(language_code: LanguageCode) -> InlineKeybo
     buttons = [
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).BACK,
+                text=get_localization(language_code).ACTION_BACK,
                 callback_data='package_selection:back'
             )
         ],
@@ -393,13 +387,13 @@ def build_package_quantity_sent_keyboard(language_code: LanguageCode) -> InlineK
     buttons = [
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).ADD_TO_CART,
+                text=get_localization(language_code).SHOPPING_CART_ADD,
                 callback_data='package_quantity_sent:add_to_cart'
             )
         ],
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).BUY_NOW,
+                text=get_localization(language_code).SHOPPING_CART_BUY_NOW,
                 callback_data='package_quantity_sent:buy_now'
             )
         ],
@@ -412,13 +406,13 @@ def build_package_add_to_cart_selection_keyboard(language_code: LanguageCode) ->
     buttons = [
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).GO_TO_CART,
+                text=get_localization(language_code).SHOPPING_CART_GO_TO,
                 callback_data='package_add_to_cart_selection:go_to_cart'
             )
         ],
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).CONTINUE_SHOPPING,
+                text=get_localization(language_code).SHOPPING_CART_CONTINUE_SHOPPING,
                 callback_data='package_add_to_cart_selection:continue_shopping'
             )
         ],
@@ -431,25 +425,25 @@ def build_package_cart_keyboard(language_code: LanguageCode) -> InlineKeyboardMa
     buttons = [
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).PROCEED_TO_CHECKOUT,
+                text=get_localization(language_code).PAYMENT_PROCEED_TO_CHECKOUT,
                 callback_data='package_cart:proceed_to_checkout'
             )
         ],
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).CLEAR_CART,
+                text=get_localization(language_code).SHOPPING_CART_CLEAR,
                 callback_data='package_cart:clear'
             )
         ],
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).CHANGE_CURRENCY,
+                text=get_localization(language_code).PAYMENT_CHANGE_CURRENCY,
                 callback_data=f'package_cart:change_currency'
             ),
         ],
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).BACK,
+                text=get_localization(language_code).ACTION_BACK,
                 callback_data='package_cart:back'
             )
         ],
@@ -466,31 +460,25 @@ def build_payment_method_for_package_keyboard(
     buttons = [
         [
             InlineKeyboardButton(
-                text=f'{get_localization(language_code).YOOKASSA_PAYMENT_METHOD}',
+                text=f'{get_localization(language_code).PAYMENT_YOOKASSA_PAYMENT_METHOD}',
                 callback_data=f'pmp:{PaymentMethod.YOOKASSA}:{package_product_id}:{package_quantity}'
             ),
         ],
         [
             InlineKeyboardButton(
-                text=f'{get_localization(language_code).STRIPE_PAYMENT_METHOD}',
+                text=f'{get_localization(language_code).PAYMENT_STRIPE_PAYMENT_METHOD}',
                 callback_data=f'pmp:{PaymentMethod.STRIPE}:{package_product_id}:{package_quantity}'
             ),
         ],
         [
             InlineKeyboardButton(
-                text=f'{get_localization(language_code).TELEGRAM_STARS_PAYMENT_METHOD}',
+                text=f'{get_localization(language_code).PAYMENT_TELEGRAM_STARS_PAYMENT_METHOD}',
                 callback_data=f'pmp:{PaymentMethod.TELEGRAM_STARS}:{package_product_id}:{package_quantity}'
             ),
         ],
-        # [
-        #     InlineKeyboardButton(
-        #         text=f'{get_localization(language_code).CRYPTO_PAYMENT_METHOD}',
-        #         callback_data=f'pmp:{PaymentMethod.CRYPTO}:{package_product_id}:{package_quantity}'
-        #     ),
-        # ],
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).BACK,
+                text=get_localization(language_code).ACTION_BACK,
                 callback_data='pmp:back'
             )
         ],
@@ -503,31 +491,25 @@ def build_payment_method_for_cart_keyboard(language_code: LanguageCode) -> Inlin
     buttons = [
         [
             InlineKeyboardButton(
-                text=f'{get_localization(language_code).YOOKASSA_PAYMENT_METHOD}',
+                text=f'{get_localization(language_code).PAYMENT_YOOKASSA_PAYMENT_METHOD}',
                 callback_data=f'pmc:{PaymentMethod.YOOKASSA}'
             ),
         ],
         [
             InlineKeyboardButton(
-                text=f'{get_localization(language_code).STRIPE_PAYMENT_METHOD}',
+                text=f'{get_localization(language_code).PAYMENT_STRIPE_PAYMENT_METHOD}',
                 callback_data=f'pmc:{PaymentMethod.STRIPE}'
             ),
         ],
         [
             InlineKeyboardButton(
-                text=f'{get_localization(language_code).TELEGRAM_STARS_PAYMENT_METHOD}',
+                text=f'{get_localization(language_code).PAYMENT_TELEGRAM_STARS_PAYMENT_METHOD}',
                 callback_data=f'pmc:{PaymentMethod.TELEGRAM_STARS}'
             ),
         ],
-        # [
-        #     InlineKeyboardButton(
-        #         text=f'{get_localization(language_code).CRYPTO_PAYMENT_METHOD}',
-        #         callback_data=f'pmc:{PaymentMethod.CRYPTO}'
-        #     ),
-        # ],
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).BACK,
+                text=get_localization(language_code).ACTION_BACK,
                 callback_data='pmc:back'
             )
         ],
@@ -540,7 +522,7 @@ def build_return_to_packages_keyboard(language_code: LanguageCode) -> InlineKeyb
     buttons = [
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).BACK,
+                text=get_localization(language_code).ACTION_BACK,
                 callback_data=f'pmp:back'
             ),
         ],

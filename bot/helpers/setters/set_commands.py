@@ -133,6 +133,132 @@ commands_ru = [
     ),
 ]
 
+commands_es = [
+    BotCommand(
+        command='start',
+        description='👋 Qué puede hacer este bot',
+    ),
+    BotCommand(
+        command='model',
+        description='🤖 Seleccionar modelo IA',
+    ),
+    BotCommand(
+        command='profile',
+        description='👤 Perfil',
+    ),
+    BotCommand(
+        command='buy',
+        description='💎 Comprar suscripción o paquetes',
+    ),
+    BotCommand(
+        command='text',
+        description='🔤 Generación de texto con: ChatGPT, Claude, Gemini, Grok, Perplexity',
+    ),
+    BotCommand(
+        command='summary',
+        description='📝 Generación de resúmenes en: YouTube, Video',
+    ),
+    BotCommand(
+        command='image',
+        description='🖼 Generación de imágenes con: DALL-E, Midjourney, Stable Diffusion, Flux, Luma Photon, FaceSwap, Photoshop IA',
+    ),
+    BotCommand(
+        command='music',
+        description='🎵 Generación de música con: MusicGen, Suno',
+    ),
+    BotCommand(
+        command='video',
+        description='📹 Generación de video con: Kling, Runway, Luma Ray',
+    ),
+    BotCommand(
+        command='info',
+        description='ℹ️ Información sobre modelos AI',
+    ),
+    BotCommand(
+        command='catalog',
+        description='📂 Catálogo de prompts y empleados digitales',
+    ),
+    BotCommand(
+        command='settings',
+        description='🔧 Configurar el modelo a tu medida',
+    ),
+    BotCommand(
+        command='language',
+        description='🌍 Cambiar idioma',
+    ),
+    BotCommand(
+        command='bonus',
+        description='🎁 Balance de bonificación',
+    ),
+    BotCommand(
+        command='help',
+        description='🛟 Información detallada sobre comandos',
+    ),
+]
+
+commands_hi = [
+    BotCommand(
+        command='start',
+        description='👋 इस बॉट की क्षमताएँ जानें',
+    ),
+    BotCommand(
+        command='model',
+        description='🤖 AI मॉडल चुनें',
+    ),
+    BotCommand(
+        command='profile',
+        description='👤 प्रोफ़ाइल',
+    ),
+    BotCommand(
+        command='buy',
+        description='💎 सदस्यता या पैकेज खरीदें',
+    ),
+    BotCommand(
+        command='text',
+        description='🔤 टेक्स्ट जनरेशन: ChatGPT, Claude, Gemini, Grok, Perplexity से',
+    ),
+    BotCommand(
+        command='summary',
+        description='📝 सारांश जनरेशन: YouTube, वीडियो से',
+    ),
+    BotCommand(
+        command='image',
+        description='🖼 छवियों का निर्माण: DALL-E, Midjourney, Stable Diffusion, Flux, Luma Photon, FaceSwap, Photoshop AI से',
+    ),
+    BotCommand(
+        command='music',
+        description='🎵 संगीत निर्माण: MusicGen, Suno से',
+    ),
+    BotCommand(
+        command='video',
+        description='📹 वीडियो निर्माण: Kling, Runway, Luma Ray से',
+    ),
+    BotCommand(
+        command='info',
+        description='ℹ️ AI मॉडल की जानकारी',
+    ),
+    BotCommand(
+        command='catalog',
+        description='📂 प्रॉम्प्ट और डिजिटल सहायक की सूची',
+    ),
+    BotCommand(
+        command='settings',
+        description='🔧 अपनी जरूरतों के अनुसार मॉडल सेट करें',
+    ),
+    BotCommand(
+        command='language',
+        description='🌍 भाषा बदलें',
+    ),
+    BotCommand(
+        command='bonus',
+        description='🎁 बोनस बैलेंस',
+    ),
+    BotCommand(
+        command='help',
+        description='🛟 कमांड की विस्तृत जानकारी',
+    ),
+]
+
 commands_admin = commands_ru + [
     BotCommand(command='admin', description='👨‍💻 Админка'),
 ]

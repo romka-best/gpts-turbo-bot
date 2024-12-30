@@ -15,7 +15,7 @@ def build_feedback_keyboard(language_code: LanguageCode) -> InlineKeyboardMarkup
         ],
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).CANCEL,
+                text=get_localization(language_code).ACTION_CANCEL,
                 callback_data='feedback:cancel'
             )
         ]

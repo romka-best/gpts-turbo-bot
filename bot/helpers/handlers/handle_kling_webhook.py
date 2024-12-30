@@ -92,7 +92,7 @@ async def handle_kling(
         footer_text = f'\n\n📹 {user.daily_limits[Quota.KLING] + user.additional_usage_quota[Quota.KLING]}' \
             if user.settings[Model.KLING][UserSettings.SHOW_USAGE_QUOTA] and \
                user.daily_limits[Quota.KLING] != float('inf') else ''
-        caption = f'{get_localization(user_language_code).VIDEO_SUCCESS}{footer_text}'
+        caption = f'{get_localization(user_language_code).GENERATION_VIDEO_SUCCESS}{footer_text}'
 
         reply_markup = build_reaction_keyboard(generation.id)
         if user.settings[Model.KLING][UserSettings.SEND_TYPE] == SendType.DOCUMENT:
@@ -109,7 +109,7 @@ async def handle_kling(
                 user.telegram_chat_id,
                 generation.result,
                 caption,
-                get_localization(user_language_code).VIDEO,
+                get_localization(user_language_code).SETTINGS_SEND_TYPE_VIDEO,
                 generation.details.get('duration', 5),
                 reply_markup,
             )

@@ -18,7 +18,7 @@ def build_model_keyboard(
             [
                 [
                     InlineKeyboardButton(
-                        text=get_localization(language_code).TEXT_MODELS,
+                        text=get_localization(language_code).MODELS_TEXT,
                         callback_data=f'model:{ModelType.TEXT}',
                     ),
                 ],
@@ -29,7 +29,7 @@ def build_model_keyboard(
                 [
                     [
                         InlineKeyboardButton(
-                            text=get_localization(language_code).CHATGPT4_OMNI_MINI + (
+                            text=get_localization(language_code).CHAT_GPT_4_OMNI_MINI + (
                                 ' ✅' if model == Model.CHAT_GPT and model_version == ChatGPTVersion.V4_Omni_Mini else ''
                             ),
                             callback_data=f'model:{Model.CHAT_GPT}:{ChatGPTVersion.V4_Omni_Mini}'
@@ -37,7 +37,7 @@ def build_model_keyboard(
                     ],
                     [
                         InlineKeyboardButton(
-                            text=get_localization(language_code).CHATGPT4_OMNI + (
+                            text=get_localization(language_code).CHAT_GPT_4_OMNI + (
                                 ' ✅' if model == Model.CHAT_GPT and model_version == ChatGPTVersion.V4_Omni else ''
                             ),
                             callback_data=f'model:{Model.CHAT_GPT}:{ChatGPTVersion.V4_Omni}'
@@ -61,7 +61,7 @@ def build_model_keyboard(
                     ],
                     [
                         InlineKeyboardButton(
-                            text=get_localization(language_code).BACK,
+                            text=get_localization(language_code).ACTION_BACK,
                             callback_data=f'model:{Model.CHAT_GPT}:back'
                         ),
                     ],
@@ -96,7 +96,7 @@ def build_model_keyboard(
                     ],
                     [
                         InlineKeyboardButton(
-                            text=get_localization(language_code).BACK,
+                            text=get_localization(language_code).ACTION_BACK,
                             callback_data=f'model:{Model.CLAUDE}:back'
                         ),
                     ],
@@ -131,7 +131,7 @@ def build_model_keyboard(
                     ],
                     [
                         InlineKeyboardButton(
-                            text=get_localization(language_code).BACK,
+                            text=get_localization(language_code).ACTION_BACK,
                             callback_data=f'model:{Model.GEMINI}:back'
                         ),
                     ],
@@ -142,7 +142,7 @@ def build_model_keyboard(
                 [
                     [
                         InlineKeyboardButton(
-                            text=get_localization(language_code).CHATGPT,
+                            text=get_localization(language_code).CHAT_GPT,
                             callback_data=f'model:{Model.CHAT_GPT}',
                         ),
                     ],
@@ -194,7 +194,7 @@ def build_model_keyboard(
         buttons.extend([
             [
                 InlineKeyboardButton(
-                    text=get_localization(language_code).SUMMARY_MODELS,
+                    text=get_localization(language_code).MODELS_SUMMARY,
                     callback_data=f'model:{ModelType.SUMMARY}',
                 ),
             ],
@@ -233,7 +233,7 @@ def build_model_keyboard(
         buttons.extend([
             [
                 InlineKeyboardButton(
-                    text=get_localization(language_code).IMAGE_MODELS,
+                    text=get_localization(language_code).MODELS_IMAGE,
                     callback_data=f'model:{ModelType.IMAGE}',
                 ),
             ],
@@ -308,7 +308,7 @@ def build_model_keyboard(
         buttons.extend([
             [
                 InlineKeyboardButton(
-                    text=get_localization(language_code).MUSIC_MODELS,
+                    text=get_localization(language_code).MODELS_MUSIC,
                     callback_data=f'model:{ModelType.MUSIC}',
                 ),
             ],
@@ -343,7 +343,7 @@ def build_model_keyboard(
         buttons.extend([
             [
                 InlineKeyboardButton(
-                    text=get_localization(language_code).VIDEO_MODELS,
+                    text=get_localization(language_code).MODELS_VIDEO,
                     callback_data=f'model:{ModelType.VIDEO}',
                 ),
             ],
@@ -394,7 +394,7 @@ def build_switched_to_ai_keyboard(language_code: LanguageCode, model: Model) -> 
     buttons = [
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).SWITCHED_TO_AI_SETTINGS,
+                text=get_localization(language_code).MODEL_SWITCHED_TO_AI_SETTINGS,
                 callback_data=f'switched_to_ai:settings:{model}'
             ),
         ],
@@ -404,7 +404,7 @@ def build_switched_to_ai_keyboard(language_code: LanguageCode, model: Model) -> 
         buttons.append(
             [
                 InlineKeyboardButton(
-                    text=get_localization(language_code).SWITCHED_TO_AI_INFO,
+                    text=get_localization(language_code).MODEL_SWITCHED_TO_AI_INFO,
                     callback_data=f'switched_to_ai:info:{model}'
                 ),
             ],
@@ -422,7 +422,7 @@ def build_switched_to_ai_keyboard(language_code: LanguageCode, model: Model) -> 
         buttons.append(
             [
                 InlineKeyboardButton(
-                    text=get_localization(language_code).SWITCHED_TO_AI_EXAMPLES,
+                    text=get_localization(language_code).MODEL_SWITCHED_TO_AI_EXAMPLES,
                     callback_data=f'switched_to_ai:examples:{model}'
                 )
             ],

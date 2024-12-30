@@ -8,13 +8,13 @@ def build_ban_keyboard(language_code: LanguageCode) -> InlineKeyboardMarkup:
     buttons = [
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).BACK,
+                text=get_localization(language_code).ACTION_BACK,
                 callback_data='ban:back',
             ),
         ],
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).CANCEL,
+                text=get_localization(language_code).ACTION_CANCEL,
                 callback_data='ban:cancel',
             ),
         ],

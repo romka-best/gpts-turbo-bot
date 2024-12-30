@@ -41,7 +41,7 @@ async def gemini_video(message: Message, state: FSMContext):
     if user.current_model == Model.GEMINI_VIDEO:
         reply_markup = build_switched_to_ai_keyboard(user_language_code, Model.GEMINI_VIDEO)
         await message.answer(
-            text=get_localization(user_language_code).ALREADY_SWITCHED_TO_THIS_MODEL,
+            text=get_localization(user_language_code).MODEL_ALREADY_SWITCHED_TO_THIS_MODEL,
             reply_markup=reply_markup,
         )
     else:
@@ -85,7 +85,7 @@ async def handle_gemini_video(message: Message, state: FSMContext, user: User, v
         sticker=config.MESSAGE_STICKERS.get(MessageSticker.SUMMARY_GENERATION),
     )
     processing_message = await message.reply(
-        text=get_localization(user_language_code).processing_request_text(),
+        text=get_localization(user_language_code).model_text_processing_request(),
         allow_sending_without_reply=True,
     )
 
@@ -150,7 +150,7 @@ async def handle_gemini_video(message: Message, state: FSMContext, user: User, v
                 sticker=config.MESSAGE_STICKERS.get(MessageSticker.FEAR),
             )
             await message.reply(
-                text=get_localization(user_language_code).REQUEST_FORBIDDEN_ERROR,
+                text=get_localization(user_language_code).ERROR_REQUEST_FORBIDDEN,
                 allow_sending_without_reply=True,
             )
         except ValueError:

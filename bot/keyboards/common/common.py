@@ -35,7 +35,7 @@ def build_start_chosen_keyboard(language_code: LanguageCode) -> InlineKeyboardMa
     buttons = [
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).BACK,
+                text=get_localization(language_code).ACTION_BACK,
                 callback_data='start:back'
             )
         ],
@@ -44,79 +44,11 @@ def build_start_chosen_keyboard(language_code: LanguageCode) -> InlineKeyboardMa
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
-async def build_recommendations_keyboard(
-    current_model: Model,
-    language_code: LanguageCode,
-    gender: Optional[UserGender] = UserGender.UNSPECIFIED,
-) -> ReplyKeyboardMarkup:
-    buttons = []
-    if current_model == Model.CHAT_GPT or current_model == Model.CLAUDE or current_model == Model.GEMINI:
-        recommendations = get_localization(language_code).requests_recommendations()
-        random.shuffle(recommendations)
-        for recommendation in recommendations[:4]:
-            buttons.append([
-                KeyboardButton(
-                    text=recommendation,
-                )
-            ])
-    elif (
-        current_model == Model.DALL_E or
-        current_model == Model.MIDJOURNEY or
-        current_model == Model.STABLE_DIFFUSION or
-        current_model == Model.FLUX
-    ):
-        recommendations = get_localization(language_code).image_recommendations()
-        random.shuffle(recommendations)
-        for recommendation in recommendations[:4]:
-            buttons.append([
-                KeyboardButton(
-                    text=recommendation,
-                )
-            ])
-    elif current_model == Model.FACE_SWAP:
-        face_swap_packages = await get_face_swap_packages_by_gender(
-            gender,
-            status=FaceSwapPackageStatus.PUBLIC,
-        )
-        for face_swap_package in face_swap_packages:
-            buttons.append(
-                [
-                    KeyboardButton(
-                        text=face_swap_package.translated_names.get(language_code, face_swap_package.name),
-                    )
-                ],
-            )
-    elif current_model == Model.PHOTOSHOP_AI:
-        for photoshop_ai_action in get_localization(language_code).photoshop_ai_actions():
-            buttons.append(
-                [
-                    KeyboardButton(
-                        text=photoshop_ai_action,
-                    )
-                ],
-            )
-    elif current_model == Model.MUSIC_GEN or current_model == Model.SUNO:
-        recommendations = get_localization(language_code).music_recommendations()
-        random.shuffle(recommendations)
-        for recommendation in recommendations[:4]:
-            buttons.append([
-                KeyboardButton(
-                    text=recommendation,
-                )
-            ])
-
-    return ReplyKeyboardMarkup(
-        keyboard=buttons,
-        resize_keyboard=True,
-        one_time_keyboard=True,
-    )
-
-
 def build_continue_generating_keyboard(language_code: LanguageCode) -> InlineKeyboardMarkup:
     buttons = [
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).CONTINUE_GENERATING,
+                text=get_localization(language_code).MODEL_CONTINUE_GENERATING,
                 callback_data='continue_generation:continue'
             )
         ]
@@ -171,7 +103,7 @@ def build_limit_exceeded_keyboard(language_code: LanguageCode) -> InlineKeyboard
     buttons = [
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).CHANGE_AI_MODEL,
+                text=get_localization(language_code).MODEL_CHANGE_AI,
                 callback_data='limit_exceeded:change_ai_model'
             )
         ],
@@ -240,7 +172,7 @@ def build_notify_about_quota_keyboard(language_code: LanguageCode) -> InlineKeyb
     buttons = [
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).SWITCHED_TO_AI_EXAMPLES,
+                text=get_localization(language_code).MODEL_SWITCHED_TO_AI_EXAMPLES,
                 callback_data=f'notify_about_quota:examples'
             )
         ],
@@ -253,7 +185,7 @@ def build_suggestions_keyboard(language_code: LanguageCode) -> InlineKeyboardMar
     buttons = [
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).CHANGE_AI_MODEL,
+                text=get_localization(language_code).MODEL_CHANGE_AI,
                 callback_data='suggestions:change_ai_model'
             )
         ],
@@ -266,7 +198,7 @@ def build_cancel_keyboard(language_code: LanguageCode) -> InlineKeyboardMarkup:
     buttons = [
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).CANCEL,
+                text=get_localization(language_code).ACTION_CANCEL,
                 callback_data='common:cancel'
             )
         ],

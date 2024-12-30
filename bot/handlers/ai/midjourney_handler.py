@@ -53,7 +53,7 @@ async def midjourney(message: Message, state: FSMContext):
     if user.current_model == Model.MIDJOURNEY:
         reply_markup = build_switched_to_ai_keyboard(user_language_code, Model.MIDJOURNEY)
         await message.answer(
-            text=get_localization(user_language_code).ALREADY_SWITCHED_TO_THIS_MODEL,
+            text=get_localization(user_language_code).MODEL_ALREADY_SWITCHED_TO_THIS_MODEL,
             reply_markup=reply_markup,
         )
     else:
@@ -102,7 +102,7 @@ async def handle_midjourney(
         sticker=config.MESSAGE_STICKERS.get(MessageSticker.IMAGE_GENERATION),
     )
     processing_message = await message.reply(
-        text=get_localization(user_language_code).processing_request_image(),
+        text=get_localization(user_language_code).model_image_processing_request(),
         allow_sending_without_reply=True,
     )
 
@@ -115,7 +115,7 @@ async def handle_midjourney(
 
             reply_markup = build_limit_exceeded_keyboard(user_language_code)
             await message.reply(
-                text=get_localization(user_language_code).reached_usage_limit(),
+                text=get_localization(user_language_code).model_reached_usage_limit(),
                 reply_markup=reply_markup,
                 allow_sending_without_reply=True,
             )
@@ -125,7 +125,7 @@ async def handle_midjourney(
             user_not_finished_requests = await get_started_requests_by_user_id_and_product_id(user.id, product.id)
             if len(user_not_finished_requests):
                 await message.reply(
-                    text=get_localization(user_language_code).ALREADY_MAKE_REQUEST,
+                    text=get_localization(user_language_code).MODEL_ALREADY_MAKE_REQUEST,
                     allow_sending_without_reply=True,
                 )
                 await processing_sticker.delete()

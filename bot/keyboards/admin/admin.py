@@ -50,7 +50,7 @@ def build_admin_keyboard(language_code: LanguageCode) -> InlineKeyboardMarkup:
         ],
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).CLOSE,
+                text=get_localization(language_code).ACTION_CLOSE,
                 callback_data='admin:close'
             ),
         ],

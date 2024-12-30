@@ -34,7 +34,7 @@ def build_photoshop_ai_chosen_keyboard(language_code: LanguageCode) -> InlineKey
     buttons = [
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).BACK,
+                text=get_localization(language_code).ACTION_BACK,
                 callback_data=f'photoshop_ai_chosen:back',
             ),
         ],

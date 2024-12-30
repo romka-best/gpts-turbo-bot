@@ -41,7 +41,7 @@ async def dall_e(message: Message, state: FSMContext):
     if user.current_model == Model.DALL_E:
         reply_markup = build_switched_to_ai_keyboard(user_language_code, Model.DALL_E)
         await message.answer(
-            text=get_localization(user_language_code).ALREADY_SWITCHED_TO_THIS_MODEL,
+            text=get_localization(user_language_code).MODEL_ALREADY_SWITCHED_TO_THIS_MODEL,
             reply_markup=reply_markup,
         )
     else:
@@ -77,7 +77,7 @@ async def handle_dall_e(message: Message, state: FSMContext, user: User):
         sticker=config.MESSAGE_STICKERS.get(MessageSticker.IMAGE_GENERATION),
     )
     processing_message = await message.reply(
-        text=get_localization(user_language_code).processing_request_image(),
+        text=get_localization(user_language_code).model_image_processing_request(),
         allow_sending_without_reply=True,
     )
 
@@ -95,7 +95,7 @@ async def handle_dall_e(message: Message, state: FSMContext, user: User):
 
                 reply_markup = build_limit_exceeded_keyboard(user_language_code)
                 await message.reply(
-                    text=get_localization(user_language_code).reached_usage_limit(),
+                    text=get_localization(user_language_code).model_reached_usage_limit(),
                     reply_markup=reply_markup,
                     allow_sending_without_reply=True,
                 )
@@ -130,13 +130,13 @@ async def handle_dall_e(message: Message, state: FSMContext, user: User):
                    user.daily_limits[Quota.DALL_E] != float('inf') else ''
             if user.settings[Model.DALL_E][UserSettings.SEND_TYPE] == SendType.DOCUMENT:
                 await message.reply_document(
-                    caption=f'{get_localization(user_language_code).IMAGE_SUCCESS}{footer_text}',
+                    caption=f'{get_localization(user_language_code).GENERATION_IMAGE_SUCCESS}{footer_text}',
                     document=response_url,
                     allow_sending_without_reply=True,
                 )
             else:
                 await message.reply_photo(
-                    caption=f'{get_localization(user_language_code).IMAGE_SUCCESS}{footer_text}',
+                    caption=f'{get_localization(user_language_code).GENERATION_IMAGE_SUCCESS}{footer_text}',
                     photo=response_url,
                     allow_sending_without_reply=True,
                 )
@@ -148,7 +148,7 @@ async def handle_dall_e(message: Message, state: FSMContext, user: User):
                     sticker=config.MESSAGE_STICKERS.get(MessageSticker.FEAR),
                 )
                 await message.reply(
-                    text=get_localization(user_language_code).REQUEST_FORBIDDEN_ERROR,
+                    text=get_localization(user_language_code).ERROR_REQUEST_FORBIDDEN,
                     allow_sending_without_reply=True,
                 )
             else:

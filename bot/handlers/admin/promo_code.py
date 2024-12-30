@@ -30,7 +30,7 @@ async def handle_create_promo_code(message: Message, user_id: str, state: FSMCon
 
     reply_markup = build_create_promo_code_keyboard(user_language_code)
     await message.edit_text(
-        text=get_localization(user_language_code).PROMO_CODE_INFO_ADMIN,
+        text=get_localization(user_language_code).ADMIN_PROMO_CODE_INFO,
         reply_markup=reply_markup,
     )
 
@@ -60,7 +60,7 @@ async def handle_create_promo_code_selection(callback_query: CallbackQuery, stat
             ProductCategory.MONTHLY,
         )
 
-        caption = get_localization(user_language_code).PROMO_CODE_CHOOSE_SUBSCRIPTION_ADMIN
+        caption = get_localization(user_language_code).ADMIN_PROMO_CODE_CHOOSE_SUBSCRIPTION
         reply_markup = build_create_promo_code_subscription_keyboard(user_language_code, products)
         await callback_query.message.answer_photo(
             photo=URLInputFile(photo_link, filename=photo_path, timeout=300),
@@ -74,7 +74,7 @@ async def handle_create_promo_code_selection(callback_query: CallbackQuery, stat
 
         products = await get_active_products_by_product_type_and_category(ProductType.PACKAGE)
 
-        caption = get_localization(user_language_code).PROMO_CODE_CHOOSE_PACKAGE_ADMIN
+        caption = get_localization(user_language_code).ADMIN_PROMO_CODE_CHOOSE_PACKAGE
         reply_markup = build_create_promo_code_package_keyboard(user_language_code, products)
         await callback_query.message.answer_photo(
             photo=URLInputFile(photo_link, filename=photo_path, timeout=300),
@@ -82,7 +82,7 @@ async def handle_create_promo_code_selection(callback_query: CallbackQuery, stat
             reply_markup=reply_markup,
         )
     elif promo_code_type == PromoCodeType.DISCOUNT:
-        text = get_localization(user_language_code).PROMO_CODE_CHOOSE_DISCOUNT_ADMIN
+        text = get_localization(user_language_code).ADMIN_PROMO_CODE_CHOOSE_DISCOUNT
         reply_markup = build_create_promo_code_discount_keyboard(user_language_code)
         await callback_query.message.answer(
             text=text,
@@ -104,7 +104,7 @@ async def handle_create_promo_code_period_of_subscription_selection(callback_que
 
     reply_markup = build_cancel_keyboard(user_language_code)
     await callback_query.message.edit_caption(
-        caption=get_localization(user_language_code).PROMO_CODE_CHOOSE_NAME_ADMIN,
+        caption=get_localization(user_language_code).ADMIN_PROMO_CODE_CHOOSE_NAME,
         reply_markup=reply_markup
     )
 
@@ -124,7 +124,7 @@ async def handle_create_promo_code_package_selection(callback_query: CallbackQue
     product_id = callback_query.data.split(':')[1]
     product = await get_product(product_id)
 
-    message = get_localization(user_language_code).choose_min(product.names.get(user_language_code))
+    message = get_localization(user_language_code).package_choose_min(product.names.get(user_language_code))
     reply_markup = build_cancel_keyboard(user_language_code)
     await callback_query.message.edit_caption(caption=message, reply_markup=reply_markup)
 
@@ -141,7 +141,7 @@ async def handle_create_promo_promo_code_package_quantity_sent(message: Message,
 
         reply_markup = build_cancel_keyboard(user_language_code)
         await message.answer(
-            text=get_localization(user_language_code).PROMO_CODE_CHOOSE_NAME_ADMIN,
+            text=get_localization(user_language_code).ADMIN_PROMO_CODE_CHOOSE_NAME,
             reply_markup=reply_markup
         )
 
@@ -153,7 +153,7 @@ async def handle_create_promo_promo_code_package_quantity_sent(message: Message,
     except (TypeError, ValueError):
         reply_markup = build_cancel_keyboard(user_language_code)
         await message.reply(
-            text=get_localization(user_language_code).VALUE_ERROR,
+            text=get_localization(user_language_code).ERROR_IS_NOT_NUMBER,
             reply_markup=reply_markup,
             allow_sending_without_reply=True,
         )
@@ -168,7 +168,7 @@ async def handle_create_promo_code_discount_selection(callback_query: CallbackQu
     discount = int(callback_query.data.split(':')[1])
     reply_markup = build_cancel_keyboard(user_language_code)
     await callback_query.message.answer(
-        text=get_localization(user_language_code).PROMO_CODE_CHOOSE_NAME_ADMIN,
+        text=get_localization(user_language_code).ADMIN_PROMO_CODE_CHOOSE_NAME,
         reply_markup=reply_markup
     )
 
@@ -189,7 +189,7 @@ async def handle_create_promo_code_discount_sent(message: Message, state: FSMCon
         if 1 <= discount <= 50:
             reply_markup = build_cancel_keyboard(user_language_code)
             await message.answer(
-                text=get_localization(user_language_code).PROMO_CODE_CHOOSE_NAME_ADMIN,
+                text=get_localization(user_language_code).ADMIN_PROMO_CODE_CHOOSE_NAME,
                 reply_markup=reply_markup
             )
 
@@ -203,7 +203,7 @@ async def handle_create_promo_code_discount_sent(message: Message, state: FSMCon
     except (TypeError, ValueError):
         reply_markup = build_cancel_keyboard(user_language_code)
         await message.reply(
-            text=get_localization(user_language_code).VALUE_ERROR,
+            text=get_localization(user_language_code).ERROR_IS_NOT_NUMBER,
             reply_markup=reply_markup,
             allow_sending_without_reply=True,
         )
@@ -218,13 +218,13 @@ async def promo_code_name_sent(message: Message, state: FSMContext):
     reply_markup = build_cancel_keyboard(user_language_code)
     if typed_promo_code:
         await message.reply(
-            text=get_localization(user_language_code).PROMO_CODE_NAME_EXISTS_ERROR,
+            text=get_localization(user_language_code).ADMIN_PROMO_CODE_NAME_EXISTS_ERROR,
             reply_markup=reply_markup,
             allow_sending_without_reply=True,
         )
     else:
         await message.reply(
-            text=get_localization(user_language_code).PROMO_CODE_CHOOSE_DATE,
+            text=get_localization(user_language_code).ADMIN_PROMO_CODE_CHOOSE_DATE,
             reply_markup=reply_markup,
             allow_sending_without_reply=True,
         )
@@ -261,13 +261,13 @@ async def promo_code_date_sent(message: Message, state: FSMContext):
             until=promo_code_until_date,
             details=details,
         )
-        await message.answer(text=get_localization(user_language_code).PROMO_CODE_SUCCESS_ADMIN)
+        await message.answer(text=get_localization(user_language_code).ADMIN_PROMO_CODE_SUCCESS)
 
         await state.clear()
     except (TypeError, ValueError):
         reply_markup = build_cancel_keyboard(user_language_code)
         await message.reply(
-            text=get_localization(user_language_code).PROMO_CODE_DATE_VALUE_ERROR,
+            text=get_localization(user_language_code).ADMIN_PROMO_CODE_DATE_VALUE_ERROR,
             reply_markup=reply_markup,
             allow_sending_without_reply=True,
         )

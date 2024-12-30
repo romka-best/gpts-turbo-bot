@@ -64,7 +64,7 @@ async def chatgpt(message: Message, state: FSMContext):
         user.settings[Model.CHAT_GPT][UserSettings.VERSION],
     )
     await message.answer(
-        text=get_localization(user_language_code).CHOOSE_CHATGPT_MODEL,
+        text=get_localization(user_language_code).MODEL_CHOOSE_CHAT_GPT,
         reply_markup=reply_markup,
     )
 
@@ -82,7 +82,7 @@ async def handle_chat_gpt_choose_selection(callback_query: CallbackQuery, state:
     if user.current_model == Model.CHAT_GPT and chosen_version == user.settings[Model.CHAT_GPT][UserSettings.VERSION]:
         reply_markup = build_switched_to_ai_keyboard(user_language_code, Model.CHAT_GPT)
         await callback_query.message.answer(
-            text=get_localization(user_language_code).ALREADY_SWITCHED_TO_THIS_MODEL,
+            text=get_localization(user_language_code).MODEL_ALREADY_SWITCHED_TO_THIS_MODEL,
             reply_markup=reply_markup,
         )
     else:
@@ -133,9 +133,8 @@ async def handle_chat_gpt_choose_selection(callback_query: CallbackQuery, state:
             await callback_query.bot.unpin_all_chat_messages(user.telegram_chat_id)
             await callback_query.bot.pin_chat_message(user.telegram_chat_id, answered_message.message_id)
         else:
-            text = get_localization(user_language_code).ALREADY_SWITCHED_TO_THIS_MODEL
             await callback_query.message.answer(
-                text=text,
+                text=get_localization(user_language_code).MODEL_ALREADY_SWITCHED_TO_THIS_MODEL,
                 reply_markup=reply_markup,
             )
 
@@ -228,7 +227,7 @@ async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_q
         sticker=config.MESSAGE_STICKERS.get(MessageSticker.TEXT_GENERATION),
     )
     processing_message = await message.reply(
-        text=get_localization(user_language_code).processing_request_text(),
+        text=get_localization(user_language_code).model_text_processing_request(),
         allow_sending_without_reply=True,
     )
 
@@ -312,7 +311,7 @@ async def handle_chatgpt(message: Message, state: FSMContext, user: User, user_q
                     sticker=config.MESSAGE_STICKERS.get(MessageSticker.FEAR),
                 )
                 await message.reply(
-                    text=get_localization(user_language_code).REQUEST_FORBIDDEN_ERROR,
+                    text=get_localization(user_language_code).ERROR_REQUEST_FORBIDDEN,
                     allow_sending_without_reply=True,
                 )
             else:
@@ -407,7 +406,7 @@ async def handle_chatgpt4_example(
                 },
             )
 
-            header_text = f'{get_localization(user_language_code).CHATGPT4_OMNI_EXAMPLE}\n\n'
+            header_text = f'{get_localization(user_language_code).example_text_model(get_localization(user_language_code).CHAT_GPT_4_OMNI)}\n\n'
             footer_text = f'\n\n{get_localization(user_language_code).EXAMPLE_INFO}'
             full_text = f'{header_text}{message_content}{footer_text}'
             reply_markup = build_buy_motivation_keyboard(user_language_code)

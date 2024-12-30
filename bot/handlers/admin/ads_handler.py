@@ -34,7 +34,7 @@ async def handle_ads(message: Message, user_id: str, state: FSMContext):
 
     reply_markup = build_ads_keyboard(user_language_code)
     await message.edit_text(
-        text=get_localization(user_language_code).ADS_INFO,
+        text=get_localization(user_language_code).ADMIN_ADS_INFO,
         reply_markup=reply_markup,
     )
 
@@ -58,13 +58,13 @@ async def handle_ads_selection(callback_query: CallbackQuery, state: FSMContext)
     elif action == 'create':
         reply_markup = build_ads_create_choose_source_keyboard(user_language_code)
         await callback_query.message.edit_text(
-            text=get_localization(user_language_code).ADS_CHOOSE_SOURCE,
+            text=get_localization(user_language_code).ADMIN_ADS_CHOOSE_SOURCE,
             reply_markup=reply_markup,
         )
     elif action == 'get':
         reply_markup = build_ads_get_keyboard(user_language_code)
         await callback_query.message.edit_text(
-            text=get_localization(user_language_code).ADS_SEND_LINK,
+            text=get_localization(user_language_code).ADMIN_ADS_SEND_LINK,
             reply_markup=reply_markup,
         )
 
@@ -81,13 +81,13 @@ async def handle_ads_create_choose_source_selection(callback_query: CallbackQuer
     if action == 'back':
         reply_markup = build_ads_keyboard(user_language_code)
         await callback_query.message.edit_text(
-            text=get_localization(user_language_code).ADS_INFO,
+            text=get_localization(user_language_code).ADMIN_ADS_INFO,
             reply_markup=reply_markup,
         )
     else:
         reply_markup = build_ads_create_choose_medium_keyboard(user_language_code)
         await callback_query.message.edit_text(
-            text=get_localization(user_language_code).ADS_CHOOSE_MEDIUM,
+            text=get_localization(user_language_code).ADMIN_ADS_CHOOSE_MEDIUM,
             reply_markup=reply_markup,
         )
 
@@ -104,13 +104,13 @@ async def handle_ads_create_choose_source_selection(callback_query: CallbackQuer
     if action == 'back':
         reply_markup = build_ads_keyboard(user_language_code)
         await callback_query.message.edit_text(
-            text=get_localization(user_language_code).ADS_INFO,
+            text=get_localization(user_language_code).ADMIN_ADS_INFO,
             reply_markup=reply_markup,
         )
     else:
         reply_markup = build_ads_create_keyboard(user_language_code)
         await callback_query.message.edit_text(
-            text=get_localization(user_language_code).ADS_SEND_NAME,
+            text=get_localization(user_language_code).ADMIN_ADS_SEND_NAME,
             reply_markup=reply_markup,
         )
 
@@ -126,7 +126,7 @@ async def ads_campaign_name_sent(message: Message, state: FSMContext):
     if re.match(r'^[a-zA-Z]+$', campaign_name):
         reply_markup = build_ads_create_keyboard(user_language_code)
         await message.reply(
-            text=get_localization(user_language_code).ADS_SEND_QUANTITY,
+            text=get_localization(user_language_code).ADMIN_ADS_SEND_QUANTITY,
             reply_markup=reply_markup,
             allow_sending_without_reply=True,
         )
@@ -135,7 +135,7 @@ async def ads_campaign_name_sent(message: Message, state: FSMContext):
     else:
         reply_markup = build_cancel_keyboard(user_language_code)
         await message.reply(
-            text=get_localization(user_language_code).VALUE_ERROR,
+            text=get_localization(user_language_code).ADMIN_ADS_VALUE_ERROR,
             reply_markup=reply_markup,
             allow_sending_without_reply=True,
         )
@@ -167,7 +167,7 @@ async def ads_quantity_sent(message: Message, state: FSMContext):
     except (TypeError, ValueError):
         reply_markup = build_cancel_keyboard(user_language_code)
         await message.reply(
-            text=get_localization(user_language_code).VALUE_ERROR,
+            text=get_localization(user_language_code).ERROR_IS_NOT_NUMBER,
             reply_markup=reply_markup,
             allow_sending_without_reply=True,
         )
@@ -183,7 +183,7 @@ async def handle_ads_create_selection(callback_query: CallbackQuery, state: FSMC
     if action == 'back':
         reply_markup = build_ads_keyboard(user_language_code)
         await callback_query.message.edit_text(
-            text=get_localization(user_language_code).ADS_INFO,
+            text=get_localization(user_language_code).ADMIN_ADS_INFO,
             reply_markup=reply_markup,
         )
 

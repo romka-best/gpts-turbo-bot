@@ -5,7 +5,7 @@ from bot.locales.types import LanguageCode
 
 def get_human_model(model: Model, language_code: LanguageCode):
     if model == Model.CHAT_GPT:
-        human_model = get_localization(language_code).CHATGPT
+        human_model = get_localization(language_code).CHAT_GPT
     elif model == Model.CLAUDE:
         human_model = get_localization(language_code).CLAUDE
     elif model == Model.GEMINI:

@@ -13,6 +13,6 @@ async def sticker(message: Message, state: FSMContext):
     user_language_code = await get_user_language(user_id, state.storage)
 
     await message.reply(
-        text=get_localization(user_language_code).STICKER_FORBIDDEN_ERROR,
+        text=get_localization(user_language_code).ERROR_STICKER_FORBIDDEN,
         allow_sending_without_reply=True,
     )

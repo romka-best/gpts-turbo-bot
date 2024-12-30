@@ -46,7 +46,7 @@ async def kling(message: Message, state: FSMContext):
     if user.current_model == Model.KLING:
         reply_markup = build_switched_to_ai_keyboard(user_language_code, Model.KLING)
         await message.answer(
-            text=get_localization(user_language_code).ALREADY_SWITCHED_TO_THIS_MODEL,
+            text=get_localization(user_language_code).MODEL_ALREADY_SWITCHED_TO_THIS_MODEL,
             reply_markup=reply_markup,
         )
     else:
@@ -93,7 +93,7 @@ async def handle_kling(
         sticker=config.MESSAGE_STICKERS.get(MessageSticker.VIDEO_GENERATION),
     )
     processing_message = await message.reply(
-        text=get_localization(user_language_code).processing_request_video(),
+        text=get_localization(user_language_code).model_video_processing_request(),
         allow_sending_without_reply=True,
     )
 
@@ -104,7 +104,7 @@ async def handle_kling(
 
         if len(user_not_finished_requests):
             await message.reply(
-                text=get_localization(user_language_code).ALREADY_MAKE_REQUEST,
+                text=get_localization(user_language_code).MODEL_ALREADY_MAKE_REQUEST,
                 allow_sending_without_reply=True,
             )
 

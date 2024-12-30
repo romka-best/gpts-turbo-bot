@@ -83,7 +83,7 @@ async def face_swap(message: Message, state: FSMContext):
     if user.current_model == Model.FACE_SWAP:
         reply_markup = build_switched_to_ai_keyboard(user_language_code, Model.FACE_SWAP)
         await message.answer(
-            text=get_localization(user_language_code).ALREADY_SWITCHED_TO_THIS_MODEL,
+            text=get_localization(user_language_code).MODEL_ALREADY_SWITCHED_TO_THIS_MODEL,
             reply_markup=reply_markup,
         )
     else:
@@ -118,7 +118,7 @@ async def handle_face_swap(bot: Bot, chat_id: str, state: FSMContext, user_id: s
         reply_markup = build_profile_gender_keyboard(user_language_code)
         await bot.send_message(
             chat_id=chat_id,
-            text=get_localization(user_language_code).TELL_ME_YOUR_GENDER,
+            text=get_localization(user_language_code).PROFILE_TELL_ME_YOUR_GENDER,
             reply_markup=reply_markup,
         )
     else:
@@ -162,13 +162,13 @@ async def handle_face_swap(bot: Bot, chat_id: str, state: FSMContext, user_id: s
                     reply_markup = build_face_swap_choose_keyboard(user_language_code, face_swap_packages)
                     await bot.send_message(
                         chat_id=chat_id,
-                        text=get_localization(user_language_code).CHOOSE_YOUR_PACKAGE,
+                        text=get_localization(user_language_code).FACE_SWAP_INFO,
                         reply_markup=reply_markup,
                     )
             else:
                 await bot.send_message(
                     chat_id=chat_id,
-                    text=get_localization(user_language_code).GENERATIONS_IN_PACKAGES_ENDED,
+                    text=get_localization(user_language_code).FACE_SWAP_GENERATIONS_IN_PACKAGES_ENDED,
                 )
         except aiohttp.ClientResponseError:
             photo_path = 'users/avatars/example.png'
@@ -179,7 +179,7 @@ async def handle_face_swap(bot: Bot, chat_id: str, state: FSMContext, user_id: s
             await bot.send_photo(
                 chat_id=chat_id,
                 photo=URLInputFile(photo_link, filename=photo_path, timeout=300),
-                caption=get_localization(user_language_code).SEND_ME_YOUR_PICTURE,
+                caption=get_localization(user_language_code).PROFILE_SEND_ME_YOUR_PICTURE,
                 reply_markup=reply_markup
             )
             await state.set_state(Profile.waiting_for_photo)
@@ -208,7 +208,7 @@ async def handle_face_swap_prompt(
         sticker=config.MESSAGE_STICKERS.get(MessageSticker.IMAGE_GENERATION),
     )
     processing_message = await message.reply(
-        text=get_localization(user_language_code).processing_request_image(),
+        text=get_localization(user_language_code).model_face_swap_processing_request(),
         allow_sending_without_reply=True,
     )
 
@@ -219,7 +219,7 @@ async def handle_face_swap_prompt(
 
         if len(user_not_finished_requests):
             await message.reply(
-                text=get_localization(user_language_code).ALREADY_MAKE_REQUEST,
+                text=get_localization(user_language_code).MODEL_ALREADY_MAKE_REQUEST,
                 allow_sending_without_reply=True,
             )
 
@@ -232,18 +232,18 @@ async def handle_face_swap_prompt(
             user_photo = await firebase.bucket.get_blob(user_photo_blobs[-1])
             user_photo_link = firebase.get_public_url(user_photo.name)
 
-            request = await write_request(
-                user_id=user.id,
-                processing_message_ids=[processing_sticker.message_id, processing_message.message_id],
-                product_id=product.id,
-                requested=1,
-            )
-
             if prompt and user_language_code != LanguageCode.EN:
                 prompt = await translate_text(prompt, user_language_code, LanguageCode.EN)
             result_id = await get_response_face_swap(
                 prompt,
                 user_photo_link,
+            )
+
+            request = await write_request(
+                user_id=user.id,
+                processing_message_ids=[processing_sticker.message_id, processing_message.message_id],
+                product_id=product.id,
+                requested=1,
             )
 
             await write_generation(
@@ -263,7 +263,7 @@ async def handle_face_swap_prompt(
             reply_markup = build_cancel_keyboard(user_language_code)
             await message.answer_photo(
                 photo=URLInputFile(photo_link, filename=photo_path, timeout=300),
-                caption=get_localization(user_language_code).SEND_ME_YOUR_PICTURE,
+                caption=get_localization(user_language_code).PROFILE_SEND_ME_YOUR_PICTURE,
                 reply_markup=reply_markup
             )
             await state.set_state(Profile.waiting_for_photo)
@@ -283,23 +283,6 @@ async def handle_face_swap_prompt(
                 info=str(e),
                 hashtags=['face_swap'],
             )
-
-            request.status = RequestStatus.FINISHED
-            await update_request(request.id, {
-                'status': request.status
-            })
-
-            generations = await get_generations_by_request_id(request.id)
-            for generation in generations:
-                generation.status = GenerationStatus.FINISHED,
-                generation.has_error = True
-                await update_generation(
-                    generation.id,
-                    {
-                        'status': generation.status,
-                        'has_error': generation.has_error,
-                    },
-                )
 
             await processing_sticker.delete()
             await processing_message.delete()
@@ -339,7 +322,7 @@ async def handle_face_swap_choose_selection(
 
     if message_id != 0:
         await bot.edit_message_text(
-            text=get_localization(user_language_code).choose_face_swap_package(
+            text=get_localization(user_language_code).face_swap_choose_package(
                 name=face_swap_package.translated_names.get(user_language_code, face_swap_package.name),
                 available_images=user_available_images,
                 total_images=face_swap_package_quantity,
@@ -351,7 +334,7 @@ async def handle_face_swap_choose_selection(
         )
     else:
         await bot.send_message(
-            text=get_localization(user_language_code).choose_face_swap_package(
+            text=get_localization(user_language_code).face_swap_choose_package(
                 name=face_swap_package.translated_names.get(user_language_code, face_swap_package.name),
                 available_images=user_available_images,
                 total_images=face_swap_package_quantity,
@@ -401,7 +384,7 @@ async def handle_face_swap_package_selection(callback_query: CallbackQuery, stat
         )
         reply_markup = build_face_swap_choose_keyboard(user_language_code, face_swap_packages)
         await callback_query.message.edit_text(
-            text=get_localization(user_language_code).CHOOSE_YOUR_PACKAGE,
+            text=get_localization(user_language_code).FACE_SWAP_INFO,
             reply_markup=reply_markup,
         )
 
@@ -461,7 +444,7 @@ async def face_swap_quantity_handler(message: Message, state: FSMContext, user_i
     except (TypeError, ValueError):
         reply_markup = build_cancel_keyboard(user_language_code)
         await message.reply(
-            text=get_localization(user_language_code).VALUE_ERROR,
+            text=get_localization(user_language_code).ERROR_IS_NOT_NUMBER,
             reply_markup=reply_markup,
             allow_sending_without_reply=True,
         )
@@ -472,7 +455,7 @@ async def face_swap_quantity_handler(message: Message, state: FSMContext, user_i
         sticker=config.MESSAGE_STICKERS.get(MessageSticker.IMAGE_GENERATION),
     )
     processing_message = await message.reply(
-        text=get_localization(user_language_code).processing_request_face_swap(),
+        text=get_localization(user_language_code).model_face_swap_processing_request(),
         allow_sending_without_reply=True,
     )
 
@@ -496,7 +479,7 @@ async def face_swap_quantity_handler(message: Message, state: FSMContext, user_i
         if quota < quantity:
             reply_markup = build_cancel_keyboard(user_language_code)
             await message.answer(
-                text=get_localization(user_language_code).face_swap_package_forbidden(quota),
+                text=get_localization(user_language_code).face_swap_package_forbidden_error(quota),
                 reply_markup=reply_markup,
             )
         elif quantity < 1:
@@ -518,7 +501,7 @@ async def face_swap_quantity_handler(message: Message, state: FSMContext, user_i
 
             if len(user_not_finished_requests):
                 await message.reply(
-                    text=get_localization(user_language_code).ALREADY_MAKE_REQUEST,
+                    text=get_localization(user_language_code).MODEL_ALREADY_MAKE_REQUEST,
                     allow_sending_without_reply=True,
                 )
 

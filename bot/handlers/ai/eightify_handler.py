@@ -40,7 +40,7 @@ async def eightify(message: Message, state: FSMContext):
     if user.current_model == Model.EIGHTIFY:
         reply_markup = build_switched_to_ai_keyboard(user_language_code, Model.EIGHTIFY)
         await message.answer(
-            text=get_localization(user_language_code).ALREADY_SWITCHED_TO_THIS_MODEL,
+            text=get_localization(user_language_code).MODEL_ALREADY_SWITCHED_TO_THIS_MODEL,
             reply_markup=reply_markup,
         )
     else:
@@ -99,7 +99,7 @@ async def handle_eightify(message: Message, state: FSMContext, user: User):
         sticker=config.MESSAGE_STICKERS.get(MessageSticker.SUMMARY_GENERATION),
     )
     processing_message = await message.reply(
-        text=get_localization(user_language_code).processing_request_text(),
+        text=get_localization(user_language_code).model_text_processing_request(),
         allow_sending_without_reply=True,
     )
 
@@ -118,7 +118,7 @@ async def handle_eightify(message: Message, state: FSMContext, user: User):
 
                 reply_markup = build_limit_exceeded_keyboard(user_language_code)
                 await message.answer(
-                    text=get_localization(user_language_code).reached_usage_limit(),
+                    text=get_localization(user_language_code).model_reached_usage_limit(),
                     reply_markup=reply_markup,
                 )
 

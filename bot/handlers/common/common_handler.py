@@ -79,7 +79,7 @@ async def start(message: Message, state: FSMContext):
                     if referred_by_user:
                         count_of_referred_users = await get_count_of_users_by_referral(referred_by_user.id)
                         if count_of_referred_users > 40:
-                            text = get_localization(referred_by_user_language_code).REFERRAL_LIMIT_ERROR
+                            text = get_localization(referred_by_user_language_code).BONUS_REFERRAL_LIMIT_ERROR
                             tasks.append(message.bot.send_message(
                                 chat_id=referred_by_user.telegram_chat_id,
                                 text=text,
@@ -93,7 +93,7 @@ async def start(message: Message, state: FSMContext):
                                 'balance': referred_by_user.balance,
                             })
 
-                            text = get_localization(referred_by_user_language_code).REFERRAL_SUCCESS
+                            text = get_localization(referred_by_user_language_code).BONUS_REFERRAL_SUCCESS
                             tasks.append(message.bot.send_message(
                                 chat_id=referred_by_user.telegram_chat_id,
                                 text=text,
@@ -186,7 +186,7 @@ async def start(message: Message, state: FSMContext):
         language_code = message.from_user.language_code
         await state.storage.redis.set(f'user:{user_id}:language', language_code)
 
-        chat_title = get_localization(language_code).DEFAULT_CHAT_TITLE
+        chat_title = get_localization(language_code).CHAT_DEFAULT_TITLE
         transaction = firebase.db.transaction()
         user = await initialize_user_for_the_first_time(
             transaction,
@@ -224,7 +224,7 @@ async def start(message: Message, state: FSMContext):
     )
 
     await message.answer(
-        text=get_localization(user_language_code).START,
+        text=get_localization(user_language_code).START_INFO,
         reply_markup=build_start_keyboard(user_language_code),
         message_effect_id=config.MESSAGE_EFFECTS.get(MessageEffect.CONGRATS),
     )
@@ -296,17 +296,17 @@ async def start_selection(callback_query: CallbackQuery, state: FSMContext):
 
     if action == 'quick_guide':
         await callback_query.message.edit_text(
-            text=get_localization(user_language_code).QUICK_GUIDE,
+            text=get_localization(user_language_code).START_QUICK_GUIDE,
             reply_markup=build_start_chosen_keyboard(user_language_code),
         )
     elif action == 'additional_features':
         await callback_query.message.edit_text(
-            text=get_localization(user_language_code).ADDITIONAL_FEATURES,
+            text=get_localization(user_language_code).START_ADDITIONAL_FEATURES,
             reply_markup=build_start_chosen_keyboard(user_language_code),
         )
     else:
         await callback_query.message.edit_text(
-            text=get_localization(user_language_code).START,
+            text=get_localization(user_language_code).START_INFO,
             reply_markup=build_start_keyboard(user_language_code),
             message_effect_id=config.MESSAGE_EFFECTS.get(MessageEffect.CONGRATS),
         )
@@ -345,7 +345,7 @@ async def handle_help(message: Message, state: FSMContext):
     user_id = str(message.from_user.id)
     user_language_code = await get_user_language(user_id, state.storage)
 
-    text = get_localization(user_language_code).COMMANDS
+    text = get_localization(user_language_code).HELP_INFO
     reply_markup = build_error_keyboard(user_language_code)
     await message.answer(
         text=text,
@@ -374,7 +374,7 @@ async def handle_continue_generation_choose_selection(callback_query: CallbackQu
     action = callback_query.data.split(':')[1]
 
     if action == 'continue':
-        await state.update_data(recognized_text=get_localization(user_language_code).CONTINUE_GENERATING)
+        await state.update_data(recognized_text=get_localization(user_language_code).MODEL_CONTINUE_GENERATING)
 
         if user.settings[user.current_model][UserSettings.VERSION] == ChatGPTVersion.V4_Omni_Mini:
             user_quota = Quota.CHAT_GPT4_OMNI_MINI

@@ -35,7 +35,7 @@ async def get_switched_to_ai_model(user: User, quota: Quota, language_code: Lang
     model_type = cast(ModelType, product.category)
     model_info = product_info | role_info | settings_info
 
-    text = get_localization(language_code).switched(
+    text = get_localization(language_code).model_switched(
         model_name,
         model_type,
         model_info,

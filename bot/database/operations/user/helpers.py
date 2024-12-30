@@ -69,6 +69,14 @@ def create_user_object(
     elif quota == Quota.RUNWAY:
         default_model = Model.RUNWAY
 
+    interface_language_code = LanguageCode.EN
+    if telegram_user.language_code == LanguageCode.RU:
+        interface_language_code = LanguageCode.RU
+    elif telegram_user.language_code == LanguageCode.ES:
+        interface_language_code = LanguageCode.ES
+    elif telegram_user.language_code == LanguageCode.HI:
+        interface_language_code = LanguageCode.HI
+
     return User(
         id=str(telegram_user.id),
         first_name=telegram_user.first_name,
@@ -80,7 +88,7 @@ def create_user_object(
         language_code=telegram_user.language_code,
         interface_language_code=user_data.get(
             'interface_language_code',
-            LanguageCode.RU if telegram_user.language_code == LanguageCode.RU else LanguageCode.EN,
+            interface_language_code,
         ),
         is_premium=telegram_user.is_premium or False,
         is_blocked=False,
