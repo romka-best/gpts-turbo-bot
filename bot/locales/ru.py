@@ -1679,7 +1679,7 @@ class Russian(Texts):
     SHOPPING_CART_ADD_OR_BUY_NOW = "Приобрести сразу или добавить в корзину?"
     SHOPPING_CART_ADDED = "Добавлено в корзину ✅"
     SHOPPING_CART_BUY_NOW = "🛍 Купить сейчас"
-    SHOPPING_CARY_REMOVE = "➖ Удалить из корзины"
+    SHOPPING_CART_REMOVE = "➖ Удалить из корзины"
     SHOPPING_CART_GO_TO = "🛒 Открыть корзину"
     SHOPPING_CART_GO_TO_OR_CONTINUE_SHOPPING = "Перейти к корзине или продолжить покупки?"
     SHOPPING_CART_CONTINUE_SHOPPING = "🛍 Продолжить покупки"
@@ -2011,7 +2011,7 @@ class Russian(Texts):
 
     # Voice
     VOICE_MESSAGES = "Голосовые ответы 🎙"
-    VOICE_MESSAGES_FORBIDDEN = """
+    VOICE_MESSAGES_FORBIDDEN_ERROR = """
 🎙 <b>Упс! Кажется, ваш голос потерялся в AI-пространстве!</b>
 
 Чтобы разблокировать чудо преобразования голоса в текст, просто воспользуйтесь волшебством кнопок ниже:
@@ -2851,15 +2851,14 @@ class Russian(Texts):
     ┗ 🤷 {count_reactions[product_with_reaction_id][GenerationReaction.NONE]} {calculate_percentage_difference(is_all_time, count_reactions[product_with_reaction_id][GenerationReaction.NONE], count_reactions_before[product_with_reaction_id][GenerationReaction.NONE])}
 """
 
-        feedback_statuses = [feedback_status for key, feedback_status in vars(FeedbackStatus).items() if
-                             not key.startswith('__')]
+        feedback_statuses = [feedback_status for feedback_status in list(FeedbackStatus.__members__.keys())]
         all_feedbacks = 0
         all_feedbacks_before = 0
         for feedback_status in feedback_statuses:
             all_feedbacks += count_feedbacks[feedback_status]
             all_feedbacks_before += count_feedbacks_before[feedback_status]
 
-        game_types = [game_type for key, game_type in vars(GameType).items() if not key.startswith('__')]
+        game_types = [game_type for game_type in list(GameType.__members__.keys())]
         all_games = 0
         all_games_before = 0
         for game_type in game_types:

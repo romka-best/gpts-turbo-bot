@@ -40,11 +40,21 @@ def build_blast_language_keyboard(language_code: LanguageCode) -> InlineKeyboard
         [
             InlineKeyboardButton(
                 text='🇺🇸 English',
-                callback_data='blast_language:en',
+                callback_data=f'blast_language:{LanguageCode.EN}',
             ),
             InlineKeyboardButton(
                 text='🇷🇺 Русский',
-                callback_data='blast_language:ru',
+                callback_data=f'blast_language:{LanguageCode.RU}',
+            ),
+        ],
+        [
+            InlineKeyboardButton(
+                text='🇪🇸 Español',
+                callback_data=f'blast_language:{LanguageCode.ES}',
+            ),
+            InlineKeyboardButton(
+                text='🇮🇳 हिन्दी',
+                callback_data=f'blast_language:{LanguageCode.HI}',
             ),
         ],
         [
@@ -55,7 +65,7 @@ def build_blast_language_keyboard(language_code: LanguageCode) -> InlineKeyboard
         ],
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).BACK,
+                text=get_localization(language_code).ACTION_BACK,
                 callback_data='blast_language:back'
             ),
         ],
@@ -68,13 +78,13 @@ def build_blast_confirmation_keyboard(language_code: LanguageCode) -> InlineKeyb
     buttons = [
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).APPROVE,
+                text=get_localization(language_code).ACTION_APPROVE,
                 callback_data='blast_confirmation:approve'
             )
         ],
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).CANCEL,
+                text=get_localization(language_code).ACTION_CANCEL,
                 callback_data='blast_confirmation:cancel'
             )
         ],

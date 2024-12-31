@@ -1678,7 +1678,7 @@ Below are the voice response settings for all text models 🎙
     SHOPPING_CART_ADD_OR_BUY_NOW = "Buy now or add to cart?"
     SHOPPING_CART_ADDED = "Added to cart ✅"
     SHOPPING_CART_BUY_NOW = "🛍 Buy now"
-    SHOPPING_CARY_REMOVE = "➖ Remove from cart"
+    SHOPPING_CART_REMOVE = "➖ Remove from cart"
     SHOPPING_CART_GO_TO = "🛒 Go to cart"
     SHOPPING_CART_GO_TO_OR_CONTINUE_SHOPPING = "Go to cart or continue shopping?"
     SHOPPING_CART_CONTINUE_SHOPPING = "🛍 Continue shopping"
@@ -2010,7 +2010,7 @@ To ensure your song in custom mode matches your preferences, please specify the 
 
     # Voice
     VOICE_MESSAGES = "Voice messages 🎙"
-    VOICE_MESSAGES_FORBIDDEN = """
+    VOICE_MESSAGES_FORBIDDEN_ERROR = """
 🎙 <b>Oops! Seems like your voice went into the AI void!</b>
 
 To unlock the magic of voice-to-text, simply wave your wand with buttons below:

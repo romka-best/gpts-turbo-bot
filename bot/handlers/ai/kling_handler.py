@@ -146,21 +146,30 @@ async def handle_kling(
                 }
             )
         except Exception as e:
-            await message.answer_sticker(
-                sticker=config.MESSAGE_STICKERS.get(MessageSticker.ERROR),
-            )
+            if 'the prompt contains sensitive words' in str(e):
+                await message.answer_sticker(
+                    sticker=config.MESSAGE_STICKERS.get(MessageSticker.FEAR),
+                )
+                await message.reply(
+                    text=get_localization(user_language_code).ERROR_REQUEST_FORBIDDEN,
+                    allow_sending_without_reply=True,
+                )
+            else:
+                await message.answer_sticker(
+                    sticker=config.MESSAGE_STICKERS.get(MessageSticker.ERROR),
+                )
 
-            reply_markup = build_error_keyboard(user_language_code)
-            await message.answer(
-                text=get_localization(user_language_code).ERROR,
-                reply_markup=reply_markup,
-            )
-            await send_error_info(
-                bot=message.bot,
-                user_id=user.id,
-                info=str(e),
-                hashtags=['kling'],
-            )
+                reply_markup = build_error_keyboard(user_language_code)
+                await message.answer(
+                    text=get_localization(user_language_code).ERROR,
+                    reply_markup=reply_markup,
+                )
+                await send_error_info(
+                    bot=message.bot,
+                    user_id=user.id,
+                    info=str(e),
+                    hashtags=['kling'],
+                )
 
             request.status = RequestStatus.FINISHED
             await update_request(request.id, {

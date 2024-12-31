@@ -36,8 +36,8 @@ class Texts(Protocol):
     @staticmethod
     def bonus_referral_link(user_id: str, is_share: bool) -> str:
         if is_share:
-            return f'https://t.me/share/url?url=https://t.me/GPTsTurboBot?start=referral-{user_id}'
-        return f'https://t.me/GPTsTurboBot?start=referral-{user_id}'
+            return f'https://t.me/share/url?url=https://t.me/GPTsTurboBot?start=r-{user_id}'
+        return f'https://t.me/GPTsTurboBot?start=r-{user_id}'
 
     BONUS_LEAVE_FEEDBACK: str
     BONUS_CASH_OUT: str
@@ -512,7 +512,7 @@ class Texts(Protocol):
     SHOPPING_CART_ADD_OR_BUY_NOW: str
     SHOPPING_CART_ADDED: str
     SHOPPING_CART_BUY_NOW: str
-    SHOPPING_CARY_REMOVE: str
+    SHOPPING_CART_REMOVE: str
     SHOPPING_CART_GO_TO: str
     SHOPPING_CART_GO_TO_OR_CONTINUE_SHOPPING: str
     SHOPPING_CART_CONTINUE_SHOPPING: str

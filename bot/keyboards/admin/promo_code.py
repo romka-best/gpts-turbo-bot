@@ -2,7 +2,6 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 from bot.database.models.product import Product
 from bot.database.models.promo_code import PromoCodeType
-from bot.database.models.subscription import SubscriptionPeriod
 from bot.locales.main import get_localization
 from bot.locales.types import LanguageCode
 
