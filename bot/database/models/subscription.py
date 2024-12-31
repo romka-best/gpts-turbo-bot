@@ -1,10 +1,11 @@
 from datetime import datetime, timedelta, timezone
+from enum import StrEnum
 from typing import Optional
 
 from bot.database.models.common import Currency, PaymentMethod, Quota
 
 
-class SubscriptionType:
+class SubscriptionType(StrEnum):
     MONTHLY = 'MONTHLY'
     YEARLY = 'YEARLY'
 
@@ -16,7 +17,7 @@ class SubscriptionPeriod:
     MONTHS12 = 'MONTHS_12'
 
 
-class SubscriptionStatus:
+class SubscriptionStatus(StrEnum):
     ACTIVE = 'ACTIVE'
     TRIAL = 'TRIAL'
     WAITING = 'WAITING'
@@ -53,7 +54,6 @@ SUBSCRIPTION_FREE_LIMITS = {
     Quota.KLING: 0,
     Quota.RUNWAY: 0,
     Quota.LUMA_RAY: 0,
-    Quota.ADDITIONAL_CHATS: 1,
     Quota.ACCESS_TO_CATALOG: False,
     Quota.FAST_MESSAGES: False,
     Quota.VOICE_MESSAGES: False,

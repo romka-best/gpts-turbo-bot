@@ -77,13 +77,13 @@ async def handle_midjourney_result(
         footer_text = f'\n\n🖼 {user.daily_limits[Quota.MIDJOURNEY] + user.additional_usage_quota[Quota.MIDJOURNEY]}' \
             if user.settings[Model.MIDJOURNEY][UserSettings.SHOW_USAGE_QUOTA] and \
                user.daily_limits[Quota.MIDJOURNEY] != float('inf') else ''
-        caption = f'{get_localization(user_language_code).IMAGE_SUCCESS}{footer_text}'
+        caption = f'{get_localization(user_language_code).GENERATION_IMAGE_SUCCESS}{footer_text}'
         if user.settings[Model.MIDJOURNEY][UserSettings.SEND_TYPE] == SendType.DOCUMENT:
             await send_document(bot, user.telegram_chat_id, generation.result, reply_markup, caption)
         else:
             await send_image(bot, user.telegram_chat_id, generation.result, reply_markup, caption)
     elif not generation.has_error and is_suggestion:
-        header_text = f'{get_localization(user_language_code).MIDJOURNEY_EXAMPLE}\n'
+        header_text = f'{get_localization(user_language_code).example_image_model(get_localization(user_language_code).MIDJOURNEY)}\n'
         footer_text = f'\n{get_localization(user_language_code).EXAMPLE_INFO}'
         full_text = f'{header_text}{footer_text}'
         reply_markup = build_buy_motivation_keyboard(user_language_code)
@@ -105,7 +105,7 @@ async def handle_midjourney_result(
                 )
                 await bot.send_message(
                     chat_id=user.telegram_chat_id,
-                    text=get_localization(user_language_code).REQUEST_FORBIDDEN_ERROR,
+                    text=get_localization(user_language_code).ERROR_REQUEST_FORBIDDEN,
                 )
         elif 'you can request another upscale for this image' in generation_error:
             await bot.send_message(
@@ -115,7 +115,7 @@ async def handle_midjourney_result(
         elif 'slow down!' in generation_error:
             await bot.send_message(
                 chat_id=user.telegram_chat_id,
-                text=get_localization(user_language_code).SERVER_OVERLOADED_ERROR,
+                text=get_localization(user_language_code).ERROR_SERVER_OVERLOADED,
             )
         else:
             if not is_suggestion:

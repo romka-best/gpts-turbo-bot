@@ -2,14 +2,16 @@ from typing import Type
 
 from aiogram.fsm.storage.base import BaseStorage
 
-from . import en, ru
+from . import en, ru, es, hi
 from .texts import Texts
 from .types import LanguageCode
 from ..database.operations.user.updaters import update_user
 
 localization_classes: dict[LanguageCode, Type[Texts]] = {
     LanguageCode.EN: en.English,
-    LanguageCode.RU: ru.Russian
+    LanguageCode.RU: ru.Russian,
+    LanguageCode.ES: es.Spanish,
+    LanguageCode.HI: hi.Hindi,
 }
 
 

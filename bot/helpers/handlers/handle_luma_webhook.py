@@ -100,7 +100,7 @@ async def handle_luma_photon(
         footer_text = f'\n\n🖼 {user.daily_limits[Quota.LUMA_PHOTON] + user.additional_usage_quota[Quota.LUMA_PHOTON]}' \
             if user.settings[Model.LUMA_PHOTON][UserSettings.SHOW_USAGE_QUOTA] and \
                user.daily_limits[Quota.LUMA_PHOTON] != float('inf') else ''
-        caption = f'{get_localization(user_language_code).IMAGE_SUCCESS}{footer_text}'
+        caption = f'{get_localization(user_language_code).GENERATION_IMAGE_SUCCESS}{footer_text}'
 
         reply_markup = build_reaction_keyboard(generation.id)
         if user.settings[Model.LUMA_PHOTON][UserSettings.SEND_TYPE] == SendType.DOCUMENT:
@@ -183,7 +183,7 @@ async def handle_luma_ray(
         footer_text = f'\n\n📹 {user.daily_limits[Quota.LUMA_RAY] + user.additional_usage_quota[Quota.LUMA_RAY]}' \
             if user.settings[Model.LUMA_RAY][UserSettings.SHOW_USAGE_QUOTA] and \
                user.daily_limits[Quota.LUMA_RAY] != float('inf') else ''
-        caption = f'{get_localization(user_language_code).VIDEO_SUCCESS}{footer_text}'
+        caption = f'{get_localization(user_language_code).GENERATION_VIDEO_SUCCESS}{footer_text}'
 
         reply_markup = build_reaction_keyboard(generation.id)
         if user.settings[Model.LUMA_RAY][UserSettings.SEND_TYPE] == SendType.DOCUMENT:
@@ -200,7 +200,7 @@ async def handle_luma_ray(
                 user.telegram_chat_id,
                 generation.result,
                 caption,
-                get_localization(user_language_code).VIDEO,
+                get_localization(user_language_code).SETTINGS_SEND_TYPE_VIDEO,
                 5,
                 reply_markup,
             )
@@ -280,7 +280,7 @@ async def handle_luma_face_swap(
         footer_text = f'\n\n🖼 {user.daily_limits[Quota.FACE_SWAP] + user.additional_usage_quota[Quota.FACE_SWAP]}' \
             if user.settings[Model.FACE_SWAP][UserSettings.SHOW_USAGE_QUOTA] and \
                user.daily_limits[Quota.FACE_SWAP] != float('inf') else ''
-        caption = f'{get_localization(user_language_code).IMAGE_SUCCESS}{footer_text}'
+        caption = f'{get_localization(user_language_code).GENERATION_IMAGE_SUCCESS}{footer_text}'
 
         reply_markup = build_reaction_keyboard(generation.id)
         if user.settings[Model.FACE_SWAP][UserSettings.SEND_TYPE] == SendType.DOCUMENT:

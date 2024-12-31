@@ -24,7 +24,7 @@ async def is_already_processing(message: Message, state: FSMContext, current_tim
         return False
 
     await message.reply(
-        text=get_localization(user_language_code).ALREADY_MAKE_REQUEST,
+        text=get_localization(user_language_code).MODEL_ALREADY_MAKE_REQUEST,
         allow_sending_without_reply=True,
     )
     return True

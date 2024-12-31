@@ -165,7 +165,7 @@ async def handle_profile_selection(callback_query: CallbackQuery, state: FSMCont
         reply_markup = build_cancel_keyboard(user_language_code)
         await callback_query.message.reply_photo(
             photo=URLInputFile(photo_link, filename=photo_path, timeout=300),
-            caption=get_localization(user_language_code).SEND_ME_YOUR_PICTURE,
+            caption=get_localization(user_language_code).PROFILE_SEND_ME_YOUR_PICTURE,
             reply_markup=reply_markup,
             allow_sending_without_reply=True,
         )
@@ -215,9 +215,9 @@ async def handle_profile_gender_selection(callback_query: CallbackQuery, state: 
             'settings': user.settings,
         })
 
-    text_your_gender = get_localization(user_language_code).YOUR_GENDER
-    text_gender_male = get_localization(user_language_code).MALE
-    text_gender_female = get_localization(user_language_code).FEMALE
+    text_your_gender = get_localization(user_language_code).PROFILE_YOUR_GENDER
+    text_gender_male = get_localization(user_language_code).GENDER_MALE
+    text_gender_female = get_localization(user_language_code).GENDER_FEMALE
     await callback_query.message.edit_text(
         f'{text_your_gender} {text_gender_male if user.settings[Model.FACE_SWAP][UserSettings.GENDER] == UserGender.MALE else text_gender_female}'
     )

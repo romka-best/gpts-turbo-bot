@@ -15,37 +15,37 @@ def build_chats_keyboard(
     buttons = [
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).SHOW_CHATS,
+                text=get_localization(language_code).CHAT_SHOW,
                 callback_data=f'chat:show'
             )
         ],
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).CREATE_CHAT,
+                text=get_localization(language_code).CHAT_CREATE,
                 callback_data=f'chat:create'
             )
         ],
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).SWITCH_CHAT,
+                text=get_localization(language_code).CHAT_SWITCH,
                 callback_data=f'chat:switch'
             )
         ],
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).RESET_CHAT,
+                text=get_localization(language_code).CHAT_RESET,
                 callback_data=f'chat:reset'
             )
         ],
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).DELETE_CHAT,
+                text=get_localization(language_code).CHAT_DELETE,
                 callback_data=f'chat:delete'
             )
         ],
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).BACK,
+                text=get_localization(language_code).ACTION_BACK,
                 callback_data=f'chat:back:{model}' if model else 'chat:back'
             )
         ]
@@ -58,7 +58,7 @@ def build_create_chat_keyboard(language_code: LanguageCode) -> InlineKeyboardMar
     buttons = [
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).CANCEL,
+                text=get_localization(language_code).ACTION_CANCEL,
                 callback_data='create_chat:cancel'
             )
         ]
@@ -78,7 +78,7 @@ def build_switch_chat_keyboard(language_code: LanguageCode, current_chat_id: str
         ])
     buttons.append([
         InlineKeyboardButton(
-            text=get_localization(language_code).CANCEL,
+            text=get_localization(language_code).ACTION_CANCEL,
             callback_data='switch_chat:cancel'
         )
     ])
@@ -98,7 +98,7 @@ def build_delete_chat_keyboard(language_code: LanguageCode, current_chat_id: str
             ])
     buttons.append([
         InlineKeyboardButton(
-            text=get_localization(language_code).CANCEL,
+            text=get_localization(language_code).ACTION_CANCEL,
             callback_data='delete_chat:cancel'
         )
     ])
@@ -110,13 +110,13 @@ def build_reset_chat_keyboard(language_code: LanguageCode) -> InlineKeyboardMark
     buttons = [
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).APPROVE,
+                text=get_localization(language_code).ACTION_APPROVE,
                 callback_data='reset_chat:approve'
             )
         ],
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).CANCEL,
+                text=get_localization(language_code).ACTION_CANCEL,
                 callback_data='reset_chat:cancel'
             )
         ],

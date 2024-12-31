@@ -26,7 +26,7 @@ def build_blast_keyboard(language_code: LanguageCode) -> InlineKeyboardMarkup:
         ],
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).BACK,
+                text=get_localization(language_code).ACTION_BACK,
                 callback_data='blast:back'
             ),
         ],

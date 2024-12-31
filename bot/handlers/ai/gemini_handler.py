@@ -65,7 +65,7 @@ async def gemini(message: Message, state: FSMContext):
         user.settings[Model.GEMINI][UserSettings.VERSION],
     )
     await message.answer(
-        text=get_localization(user_language_code).CHOOSE_GEMINI_MODEL,
+        text=get_localization(user_language_code).MODEL_CHOOSE_GEMINI,
         reply_markup=reply_markup,
     )
 
@@ -83,7 +83,7 @@ async def handle_gemini_choose_selection(callback_query: CallbackQuery, state: F
     if user.current_model == Model.GEMINI and chosen_version == user.settings[Model.GEMINI][UserSettings.VERSION]:
         reply_markup = build_switched_to_ai_keyboard(user_language_code, Model.GEMINI)
         await callback_query.message.answer(
-            text=get_localization(user_language_code).ALREADY_SWITCHED_TO_THIS_MODEL,
+            text=get_localization(user_language_code).MODEL_ALREADY_SWITCHED_TO_THIS_MODEL,
             reply_markup=reply_markup,
         )
     else:
@@ -135,7 +135,7 @@ async def handle_gemini_choose_selection(callback_query: CallbackQuery, state: F
             await callback_query.bot.unpin_all_chat_messages(user.telegram_chat_id)
             await callback_query.bot.pin_chat_message(user.telegram_chat_id, answered_message.message_id)
         else:
-            text = get_localization(user_language_code).ALREADY_SWITCHED_TO_THIS_MODEL
+            text = get_localization(user_language_code).MODEL_ALREADY_SWITCHED_TO_THIS_MODEL
             await callback_query.message.answer(
                 text=text,
                 reply_markup=reply_markup,
@@ -231,7 +231,7 @@ async def handle_gemini(
         sticker=config.MESSAGE_STICKERS.get(MessageSticker.TEXT_GENERATION),
     )
     processing_message = await message.reply(
-        text=get_localization(user_language_code).processing_request_text(),
+        text=get_localization(user_language_code).model_text_processing_request(),
         allow_sending_without_reply=True,
     )
 
@@ -315,7 +315,7 @@ async def handle_gemini(
                 sticker=config.MESSAGE_STICKERS.get(MessageSticker.FEAR),
             )
             await message.reply(
-                text=get_localization(user_language_code).REQUEST_FORBIDDEN_ERROR,
+                text=get_localization(user_language_code).ERROR_REQUEST_FORBIDDEN,
                 allow_sending_without_reply=True,
             )
         except Exception as e:
@@ -401,7 +401,7 @@ async def handle_gemini_1_pro_example(
                 },
             )
 
-            header_text = f'{get_localization(user_language_code).GEMINI_1_PRO_EXAMPLE}\n\n'
+            header_text = f'{get_localization(user_language_code).example_text_model(get_localization(user_language_code).GEMINI_1_PRO)}\n\n'
             footer_text = f'\n{get_localization(user_language_code).EXAMPLE_INFO}'
             full_text = f'{header_text}{message_content}{footer_text}'
             reply_markup = build_buy_motivation_keyboard(user_language_code)

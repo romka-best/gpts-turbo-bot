@@ -53,7 +53,7 @@ async def suno(message: Message, state: FSMContext):
     if user.current_model == Model.SUNO:
         reply_markup = build_switched_to_ai_keyboard(user_language_code, Model.SUNO)
         await message.answer(
-            text=get_localization(user_language_code).ALREADY_SWITCHED_TO_THIS_MODEL,
+            text=get_localization(user_language_code).MODEL_ALREADY_SWITCHED_TO_THIS_MODEL,
             reply_markup=reply_markup,
         )
     else:
@@ -157,7 +157,7 @@ async def suno_prompt_sent(message: Message, state: FSMContext):
         sticker=config.MESSAGE_STICKERS.get(MessageSticker.MUSIC_GENERATION),
     )
     processing_message = await message.reply(
-        text=get_localization(user_language_code).processing_request_music(),
+        text=get_localization(user_language_code).model_music_processing_request(),
         allow_sending_without_reply=True,
     )
 
@@ -170,7 +170,7 @@ async def suno_prompt_sent(message: Message, state: FSMContext):
 
             reply_markup = build_limit_exceeded_keyboard(user_language_code)
             await message.answer(
-                text=get_localization(user_language_code).reached_usage_limit(),
+                text=get_localization(user_language_code).model_reached_usage_limit(),
                 reply_markup=reply_markup,
             )
 
@@ -183,7 +183,7 @@ async def suno_prompt_sent(message: Message, state: FSMContext):
 
             if len(user_not_finished_requests):
                 await message.reply(
-                    text=get_localization(user_language_code).ALREADY_MAKE_REQUEST,
+                    text=get_localization(user_language_code).MODEL_ALREADY_MAKE_REQUEST,
                     allow_sending_without_reply=True,
                 )
 
@@ -237,11 +237,11 @@ async def suno_prompt_sent(message: Message, state: FSMContext):
             except Exception as e:
                 if 'Too Many Requests' in str(e) or 'You have exceeded the rate limit' in str(e):
                     await message.answer(
-                        text=get_localization(user_language_code).SERVER_OVERLOADED_ERROR,
+                        text=get_localization(user_language_code).ERROR_SERVER_OVERLOADED,
                     )
                 elif 'Bad Request' in str(e) or 'The API is not implemented' in str(e):
                     await message.answer(
-                        text=get_localization(user_language_code).SUNO_TOO_MANY_WORDS,
+                        text=get_localization(user_language_code).SUNO_TOO_MANY_WORDS_ERROR,
                     )
 
                     await handle_suno(message.bot, str(message.chat.id), state, user_id)
@@ -375,7 +375,7 @@ async def suno_genres_sent(message: Message, state: FSMContext):
         sticker=config.MESSAGE_STICKERS.get(MessageSticker.MUSIC_GENERATION),
     )
     processing_message = await message.reply(
-        text=get_localization(user_language_code).processing_request_music(),
+        text=get_localization(user_language_code).model_music_processing_request(),
         allow_sending_without_reply=True,
     )
 
@@ -389,7 +389,7 @@ async def suno_genres_sent(message: Message, state: FSMContext):
 
             reply_markup = build_limit_exceeded_keyboard(user_language_code)
             await message.answer(
-                text=get_localization(user_language_code).reached_usage_limit(),
+                text=get_localization(user_language_code).model_reached_usage_limit(),
                 reply_markup=reply_markup,
             )
 
@@ -402,7 +402,7 @@ async def suno_genres_sent(message: Message, state: FSMContext):
 
             if len(user_not_finished_requests):
                 await message.reply(
-                    text=get_localization(user_language_code).ALREADY_MAKE_REQUEST,
+                    text=get_localization(user_language_code).MODEL_ALREADY_MAKE_REQUEST,
                     allow_sending_without_reply=True,
                 )
 
@@ -468,11 +468,11 @@ async def suno_genres_sent(message: Message, state: FSMContext):
             except Exception as e:
                 if 'Too Many Requests' in str(e):
                     await message.answer(
-                        text=get_localization(user_language_code).SERVER_OVERLOADED_ERROR,
+                        text=get_localization(user_language_code).ERROR_SERVER_OVERLOADED,
                     )
                 elif 'Bad Request' in str(e):
                     await message.answer(
-                        text=get_localization(user_language_code).SUNO_TOO_MANY_WORDS,
+                        text=get_localization(user_language_code).SUNO_TOO_MANY_WORDS_ERROR,
                     )
 
                     await handle_suno(message.bot, str(message.chat.id), state, user_id)

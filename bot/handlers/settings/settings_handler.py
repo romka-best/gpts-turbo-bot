@@ -34,11 +34,11 @@ from bot.database.models.common import (
 from bot.database.models.user import UserSettings, UserGender
 from bot.database.operations.chat.deleters import delete_chat, reset_chat
 from bot.database.operations.chat.getters import get_chat_by_user_id, get_chats_by_user_id
+from bot.database.operations.chat.writers import write_chat
 from bot.database.operations.user.getters import get_user
 from bot.database.operations.user.updaters import update_user
 from bot.handlers.common.catalog_handler import handle_catalog_digital_employees
 from bot.handlers.payment.payment_handler import handle_buy
-from bot.helpers.creaters.create_new_chat import create_new_chat
 from bot.helpers.getters.get_human_model import get_human_model
 from bot.helpers.getters.get_model_type import get_model_type
 from bot.integrations.kling import Kling
@@ -104,7 +104,7 @@ async def handle_settings(message: Message, user_id: str, state: FSMContext, adv
             settings=user.settings,
         )
         await message.answer(
-            text=get_localization(user_language_code).settings(human_model, user.current_model, generation_cost),
+            text=get_localization(user_language_code).settings_info(human_model, user.current_model, generation_cost),
             reply_markup=reply_markup,
         )
     else:
@@ -161,7 +161,7 @@ async def handle_settings_choose_text_model_selection(callback_query: CallbackQu
     human_model = get_human_model(chosen_model, user_language_code)
     reply_markup = build_settings_keyboard(user_language_code, chosen_model, ModelType.TEXT, user.settings)
     await callback_query.message.edit_text(
-        text=get_localization(user_language_code).settings(human_model, chosen_model),
+        text=get_localization(user_language_code).settings_info(human_model, chosen_model),
         reply_markup=reply_markup,
     )
 
@@ -186,7 +186,7 @@ async def handle_settings_choose_summary_model_selection(callback_query: Callbac
     human_model = get_human_model(chosen_model, user_language_code)
     reply_markup = build_settings_keyboard(user_language_code, chosen_model, ModelType.SUMMARY, user.settings)
     await callback_query.message.edit_text(
-        text=get_localization(user_language_code).settings(human_model, chosen_model),
+        text=get_localization(user_language_code).settings_info(human_model, chosen_model),
         reply_markup=reply_markup,
     )
 
@@ -217,7 +217,7 @@ async def handle_settings_choose_image_model_selection(callback_query: CallbackQ
     human_model = get_human_model(chosen_model, user_language_code)
     reply_markup = build_settings_keyboard(user_language_code, chosen_model, ModelType.IMAGE, user.settings)
     await callback_query.message.edit_text(
-        text=get_localization(user_language_code).settings(human_model, chosen_model, generation_cost),
+        text=get_localization(user_language_code).settings_info(human_model, chosen_model, generation_cost),
         reply_markup=reply_markup,
     )
 
@@ -242,7 +242,7 @@ async def handle_settings_choose_music_model_selection(callback_query: CallbackQ
     human_model = get_human_model(chosen_model, user_language_code)
     reply_markup = build_settings_keyboard(user_language_code, chosen_model, ModelType.MUSIC, user.settings)
     await callback_query.message.edit_text(
-        text=get_localization(user_language_code).settings(human_model, chosen_model),
+        text=get_localization(user_language_code).settings_info(human_model, chosen_model),
         reply_markup=reply_markup,
     )
 
@@ -277,7 +277,7 @@ async def handle_settings_choose_video_model_selection(callback_query: CallbackQ
     human_model = get_human_model(chosen_model, user_language_code)
     reply_markup = build_settings_keyboard(user_language_code, chosen_model, ModelType.VIDEO, user.settings)
     await callback_query.message.edit_text(
-        text=get_localization(user_language_code).settings(human_model, chosen_model, generation_cost),
+        text=get_localization(user_language_code).settings_info(human_model, chosen_model, generation_cost),
         reply_markup=reply_markup,
     )
 
@@ -584,7 +584,7 @@ async def handle_setting_selection(callback_query: CallbackQuery, state: FSMCont
         human_model = get_human_model(chosen_model, user_language_code)
 
         await callback_query.message.edit_text(
-            text=get_localization(user_language_code).settings(human_model, chosen_model, generation_cost),
+            text=get_localization(user_language_code).settings_info(human_model, chosen_model, generation_cost),
             reply_markup=InlineKeyboardMarkup(inline_keyboard=new_keyboard),
         )
 
@@ -621,7 +621,7 @@ async def handle_voice_messages_setting_selection(callback_query: CallbackQuery,
                 settings=user.settings,
             )
             await callback_query.message.edit_text(
-                text=get_localization(user_language_code).settings(human_model, chosen_model),
+                text=get_localization(user_language_code).settings_info(human_model, chosen_model),
                 reply_markup=reply_markup,
             )
         else:
@@ -725,10 +725,9 @@ async def handle_chats(message: Message, user_id: str, state: FSMContext, model:
     all_chats = await get_chats_by_user_id(user_id)
     current_chat = await get_chat_by_user_id(user_id)
 
-    text = get_localization(user_language_code).chats(
+    text = get_localization(user_language_code).chat_info(
         current_chat.title,
         len(all_chats),
-        user.daily_limits[Quota.ADDITIONAL_CHATS] + user.additional_usage_quota[Quota.ADDITIONAL_CHATS],
     )
     reply_markup = build_chats_keyboard(user_language_code, model)
     await message.edit_text(
@@ -758,7 +757,7 @@ async def handle_chat_selection(callback_query: CallbackQuery, state: FSMContext
                 settings=user.settings,
             )
             await callback_query.message.edit_text(
-                text=get_localization(user_language_code).settings(human_model, chosen_model),
+                text=get_localization(user_language_code).settings_info(human_model, chosen_model),
                 reply_markup=reply_markup,
             )
         else:
@@ -776,22 +775,14 @@ async def handle_chat_selection(callback_query: CallbackQuery, state: FSMContext
 
         await callback_query.message.answer(text=text)
     elif action == 'create':
-        if user.daily_limits[Quota.ADDITIONAL_CHATS] + user.additional_usage_quota[Quota.ADDITIONAL_CHATS] > 0:
-            reply_markup = build_create_chat_keyboard(user_language_code)
+        reply_markup = build_create_chat_keyboard(user_language_code)
 
-            await callback_query.message.answer(
-                text=get_localization(user_language_code).TYPE_CHAT_NAME,
-                reply_markup=reply_markup,
-            )
+        await callback_query.message.answer(
+            text=get_localization(user_language_code).CHAT_TYPE_TITLE,
+            reply_markup=reply_markup,
+        )
 
-            await state.set_state(Chats.waiting_for_chat_name)
-        else:
-            text = get_localization(user_language_code).CREATE_CHAT_FORBIDDEN
-            reply_markup = build_buy_motivation_keyboard(user_language_code)
-            await callback_query.message.answer(
-                text=text,
-                reply_markup=reply_markup,
-            )
+        await state.set_state(Chats.waiting_for_chat_name)
     elif action == 'switch':
         all_chats = await get_chats_by_user_id(user_id)
 
@@ -800,11 +791,11 @@ async def handle_chat_selection(callback_query: CallbackQuery, state: FSMContext
             reply_markup = build_switch_chat_keyboard(user_language_code, current_chat.id, all_chats)
 
             await callback_query.message.answer(
-                text=get_localization(user_language_code).SWITCH_CHAT,
+                text=get_localization(user_language_code).CHAT_SWITCH,
                 reply_markup=reply_markup,
             )
         else:
-            text = get_localization(user_language_code).SWITCH_CHAT_FORBIDDEN
+            text = get_localization(user_language_code).CHAT_SWITCH_FORBIDDEN_ERROR
             reply_markup = build_buy_motivation_keyboard(user_language_code)
             await callback_query.message.answer(
                 text=text,
@@ -813,7 +804,7 @@ async def handle_chat_selection(callback_query: CallbackQuery, state: FSMContext
     elif action == 'reset':
         reply_keyboard = build_reset_chat_keyboard(user_language_code)
         await callback_query.message.answer(
-            text=get_localization(user_language_code).RESET_CHAT_WARNING,
+            text=get_localization(user_language_code).CHAT_RESET_WARNING,
             reply_markup=reply_keyboard,
         )
     elif action == 'delete':
@@ -824,11 +815,11 @@ async def handle_chat_selection(callback_query: CallbackQuery, state: FSMContext
             reply_markup = build_delete_chat_keyboard(user_language_code, current_chat.id, all_chats)
 
             await callback_query.message.answer(
-                text=get_localization(user_language_code).DELETE_CHAT,
+                text=get_localization(user_language_code).CHAT_DELETE,
                 reply_markup=reply_markup,
             )
         else:
-            text = get_localization(user_language_code).DELETE_CHAT_FORBIDDEN
+            text = get_localization(user_language_code).CHAT_DELETE_FORBIDDEN_ERROR
             reply_markup = build_buy_motivation_keyboard(user_language_code)
             await callback_query.message.answer(
                 text=text,
@@ -874,7 +865,7 @@ async def handle_switch_chat_selection(callback_query: CallbackQuery, state: FSM
         )
 
         await callback_query.message.reply(
-            text=get_localization(user_language_code).SWITCH_CHAT_SUCCESS,
+            text=get_localization(user_language_code).CHAT_SWITCH_SUCCESS,
             allow_sending_without_reply=True,
         )
 
@@ -907,7 +898,7 @@ async def handle_delete_chat_selection(callback_query: CallbackQuery, state: FSM
     )
 
     await callback_query.message.reply(
-        text=get_localization(user_language_code).DELETE_CHAT_SUCCESS,
+        text=get_localization(user_language_code).CHAT_DELETE_SUCCESS,
         allow_sending_without_reply=True,
     )
 
@@ -918,10 +909,9 @@ async def chat_name_sent(message: Message, state: FSMContext):
     user = await get_user(user_id)
     user_language_code = await get_user_language(user_id, state.storage)
 
-    transaction = firebase.db.transaction()
-    await create_new_chat(transaction, user, str(message.chat.id), message.text)
+    await write_chat(user.id, str(message.chat.id), message.text)
 
-    await message.answer(get_localization(user_language_code).CREATE_CHAT_SUCCESS)
+    await message.answer(get_localization(user_language_code).CHAT_CREATE_SUCCESS)
 
     await message.delete()
 
@@ -940,5 +930,5 @@ async def handle_reset_chat_selection(callback_query: CallbackQuery, state: FSMC
     if action == 'approve':
         await reset_chat(user.current_chat_id)
         await callback_query.message.edit_text(
-            text=get_localization(user_language_code).RESET_CHAT_SUCCESS,
+            text=get_localization(user_language_code).CHAT_RESET_SUCCESS,
         )

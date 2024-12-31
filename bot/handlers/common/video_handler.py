@@ -58,6 +58,6 @@ async def handle_video(message: Message, state: FSMContext, video_file: Video):
         await handle_gemini_video(message, state, user, video_link)
     else:
         await message.reply(
-            text=get_localization(user_language_code).VIDEO_FORBIDDEN_ERROR,
+            text=get_localization(user_language_code).ERROR_VIDEO_FORBIDDEN,
             allow_sending_without_reply=True,
         )

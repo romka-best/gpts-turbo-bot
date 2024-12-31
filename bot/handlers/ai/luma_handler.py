@@ -48,7 +48,7 @@ async def luma_photon(message: Message, state: FSMContext):
     if user.current_model == Model.LUMA_PHOTON:
         reply_markup = build_switched_to_ai_keyboard(user_language_code, Model.LUMA_PHOTON)
         await message.answer(
-            text=get_localization(user_language_code).ALREADY_SWITCHED_TO_THIS_MODEL,
+            text=get_localization(user_language_code).MODEL_ALREADY_SWITCHED_TO_THIS_MODEL,
             reply_markup=reply_markup,
         )
     else:
@@ -91,6 +91,13 @@ async def handle_luma_photon(
         else:
             prompt = ''
 
+    if not prompt:
+        await message.reply(
+            text=get_localization(user_language_code).ERROR_PROMPT_REQUIRED,
+            allow_sending_without_reply=True,
+        )
+        return
+
     image_link = None
     if image_filename:
         image_path = f'users/vision/{user.id}/{image_filename}'
@@ -101,7 +108,7 @@ async def handle_luma_photon(
         sticker=config.MESSAGE_STICKERS.get(MessageSticker.IMAGE_GENERATION),
     )
     processing_message = await message.reply(
-        text=get_localization(user_language_code).processing_request_image(),
+        text=get_localization(user_language_code).model_image_processing_request(),
         allow_sending_without_reply=True,
     )
 
@@ -112,7 +119,7 @@ async def handle_luma_photon(
 
         if len(user_not_finished_requests):
             await message.reply(
-                text=get_localization(user_language_code).ALREADY_MAKE_REQUEST,
+                text=get_localization(user_language_code).MODEL_ALREADY_MAKE_REQUEST,
                 allow_sending_without_reply=True,
             )
 
@@ -194,7 +201,7 @@ async def luma_ray(message: Message, state: FSMContext):
     if user.current_model == Model.LUMA_RAY:
         reply_markup = build_switched_to_ai_keyboard(user_language_code, Model.LUMA_RAY)
         await message.answer(
-            text=get_localization(user_language_code).ALREADY_SWITCHED_TO_THIS_MODEL,
+            text=get_localization(user_language_code).MODEL_ALREADY_SWITCHED_TO_THIS_MODEL,
             reply_markup=reply_markup,
         )
     else:
@@ -241,7 +248,7 @@ async def handle_luma_ray(
         sticker=config.MESSAGE_STICKERS.get(MessageSticker.VIDEO_GENERATION),
     )
     processing_message = await message.reply(
-        text=get_localization(user_language_code).processing_request_video(),
+        text=get_localization(user_language_code).model_video_processing_request(),
         allow_sending_without_reply=True,
     )
 
@@ -252,7 +259,7 @@ async def handle_luma_ray(
 
         if len(user_not_finished_requests):
             await message.reply(
-                text=get_localization(user_language_code).ALREADY_MAKE_REQUEST,
+                text=get_localization(user_language_code).MODEL_ALREADY_MAKE_REQUEST,
                 allow_sending_without_reply=True,
             )
 

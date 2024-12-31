@@ -22,5 +22,5 @@ async def handle_big_file(bot: Bot, telegram_update: Update):
         )
         await bot.send_message(
             chat_id=user.telegram_chat_id,
-            text=get_localization(user.interface_language_code).FILE_TOO_BIG_ERROR,
+            text=get_localization(user.interface_language_code).ERROR_FILE_TOO_BIG,
         )

@@ -1,14 +1,15 @@
 from datetime import datetime, timezone
+from enum import StrEnum
 
 from bot.database.models.common import Currency
 
 
-class TransactionType:
+class TransactionType(StrEnum):
     INCOME = 'INCOME'
     EXPENSE = 'EXPENSE'
 
 
-class ServiceType:
+class ServiceType(StrEnum):
     FREE = 'FREE'
     SERVER = 'SERVER'
     DATABASE = 'DATABASE'

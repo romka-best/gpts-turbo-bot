@@ -19,13 +19,13 @@ def build_manage_catalog_keyboard(language_code: LanguageCode, roles: list[Role]
     buttons.extend([
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).CREATE_ROLE,
+                text=get_localization(language_code).ADMIN_CATALOG_CREATE_ROLE,
                 callback_data='catalog_manage:create'
             )
         ],
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).BACK,
+                text=get_localization(language_code).ACTION_BACK,
                 callback_data='catalog_manage:back'
             )
         ]
@@ -38,13 +38,13 @@ def build_manage_catalog_create_keyboard(language_code: LanguageCode) -> InlineK
     buttons = [
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).BACK,
+                text=get_localization(language_code).ACTION_BACK,
                 callback_data='catalog_manage_create:back'
             )
         ],
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).CANCEL,
+                text=get_localization(language_code).ACTION_CANCEL,
                 callback_data='catalog_manage_create:cancel'
             )
         ],
@@ -57,13 +57,13 @@ def build_manage_catalog_create_role_confirmation_keyboard(language_code: Langua
     buttons = [
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).APPROVE,
+                text=get_localization(language_code).ACTION_APPROVE,
                 callback_data='catalog_manage_create_role_confirmation:approve'
             )
         ],
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).CANCEL,
+                text=get_localization(language_code).ACTION_CANCEL,
                 callback_data='catalog_manage_create_role_confirmation:cancel'
             )
         ],
@@ -76,31 +76,31 @@ def build_manage_catalog_edit_keyboard(language_code: LanguageCode, role_id: str
     buttons = [
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).EDIT_ROLE_NAME,
+                text=get_localization(language_code).ADMIN_CATALOG_EDIT_ROLE_NAME,
                 callback_data=f'catalog_manage_edit:name:{role_id}'
             )
         ],
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).EDIT_ROLE_DESCRIPTION,
+                text=get_localization(language_code).ADMIN_CATALOG_EDIT_ROLE_DESCRIPTION,
                 callback_data=f'catalog_manage_edit:description:{role_id}'
             )
         ],
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).EDIT_ROLE_INSTRUCTION,
+                text=get_localization(language_code).ADMIN_CATALOG_EDIT_ROLE_INSTRUCTION,
                 callback_data=f'catalog_manage_edit:instruction:{role_id}'
             )
         ],
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).EDIT_ROLE_PHOTO,
+                text=get_localization(language_code).ADMIN_CATALOG_EDIT_ROLE_PHOTO,
                 callback_data=f'catalog_manage_edit:photo:{role_id}'
             )
         ],
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).BACK,
+                text=get_localization(language_code).ACTION_BACK,
                 callback_data='catalog_manage_edit:back'
             )
         ]

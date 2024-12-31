@@ -17,7 +17,7 @@ async def notify_user_after_timeout(bot: Bot, chat_id: int, delay: int, language
 
     await bot.send_message(
         chat_id=chat_id,
-        text=get_localization(language_code).READY_FOR_NEW_REQUEST,
+        text=get_localization(language_code).MODEL_READY_FOR_NEW_REQUEST,
         reply_to_message_id=reply_to_message_id,
         allow_sending_without_reply=True,
     )
@@ -48,7 +48,7 @@ async def is_time_limit_exceeded(message: Message, state: FSMContext, user: User
 
     remaining_time = int(config.LIMIT_BETWEEN_REQUESTS_SECONDS - time_elapsed)
     if user_data.get('additional_request_made'):
-        text = get_localization(user_language_code).ALREADY_MAKE_REQUEST
+        text = get_localization(user_language_code).MODEL_ALREADY_MAKE_REQUEST
         await message.reply(
             text=text,
             allow_sending_without_reply=True,
@@ -56,7 +56,7 @@ async def is_time_limit_exceeded(message: Message, state: FSMContext, user: User
     else:
         await state.update_data(additional_request_made=True)
 
-        text = get_localization(user_language_code).wait_for_another_request(remaining_time)
+        text = get_localization(user_language_code).model_wait_for_another_request(remaining_time)
         reply_markup = build_time_limit_exceeded_keyboard(user_language_code)
         await message.reply(
             text=text,

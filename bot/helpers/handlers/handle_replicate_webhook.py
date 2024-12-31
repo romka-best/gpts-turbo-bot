@@ -70,7 +70,7 @@ async def handle_replicate_webhook(bot: Bot, dp: Dispatcher, prediction: dict):
         )
         await bot.send_message(
             chat_id=user.telegram_chat_id,
-            text=get_localization(user_language_code).REQUEST_FORBIDDEN_ERROR,
+            text=get_localization(user_language_code).ERROR_REQUEST_FORBIDDEN,
         )
     elif generation_error or not generation_result:
         generation.has_error = True
@@ -126,7 +126,7 @@ async def handle_replicate_photoshop_ai(
         footer_text = f'\n\n🖼 {user.daily_limits[Quota.PHOTOSHOP_AI] + user.additional_usage_quota[Quota.PHOTOSHOP_AI]}' \
             if user.settings[Model.PHOTOSHOP_AI][UserSettings.SHOW_USAGE_QUOTA] and \
                user.daily_limits[Quota.PHOTOSHOP_AI] != float('inf') else ''
-        caption = f'{get_localization(user_language_code).IMAGE_SUCCESS}{footer_text}'
+        caption = f'{get_localization(user_language_code).GENERATION_IMAGE_SUCCESS}{footer_text}'
 
         reply_markup = build_reaction_keyboard(generation.id)
         if user.settings[Model.PHOTOSHOP_AI][UserSettings.SEND_TYPE] == SendType.DOCUMENT:
@@ -433,7 +433,7 @@ async def handle_replicate_stable_diffusion(
         footer_text = f'\n\n🖼 {user.daily_limits[Quota.STABLE_DIFFUSION] + user.additional_usage_quota[Quota.STABLE_DIFFUSION]}' \
             if user.settings[Model.STABLE_DIFFUSION][UserSettings.SHOW_USAGE_QUOTA] and \
                user.daily_limits[Quota.STABLE_DIFFUSION] != float('inf') else ''
-        caption = f'{get_localization(user_language_code).IMAGE_SUCCESS}{footer_text}'
+        caption = f'{get_localization(user_language_code).GENERATION_IMAGE_SUCCESS}{footer_text}'
 
         reply_markup = build_reaction_keyboard(generation.id)
         if user.settings[Model.STABLE_DIFFUSION][UserSettings.SEND_TYPE] == SendType.DOCUMENT:
@@ -516,7 +516,7 @@ async def handle_replicate_flux(
         footer_text = f'\n\n🖼 {user.daily_limits[Quota.FLUX] + user.additional_usage_quota[Quota.FLUX]}' \
             if user.settings[Model.FLUX][UserSettings.SHOW_USAGE_QUOTA] and \
                user.daily_limits[Quota.FLUX] != float('inf') else ''
-        caption = f'{get_localization(user_language_code).IMAGE_SUCCESS}{footer_text}'
+        caption = f'{get_localization(user_language_code).GENERATION_IMAGE_SUCCESS}{footer_text}'
 
         reply_markup = build_reaction_keyboard(generation.id)
         if user.settings[Model.FLUX][UserSettings.SEND_TYPE] == SendType.DOCUMENT:

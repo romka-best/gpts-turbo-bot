@@ -47,7 +47,7 @@ async def grok(message: Message, state: FSMContext):
     if user.current_model == Model.GROK:
         reply_markup = build_switched_to_ai_keyboard(user_language_code, Model.GROK)
         await message.answer(
-            text=get_localization(user_language_code).ALREADY_SWITCHED_TO_THIS_MODEL,
+            text=get_localization(user_language_code).MODEL_ALREADY_SWITCHED_TO_THIS_MODEL,
             reply_markup=reply_markup,
         )
     else:
@@ -139,7 +139,7 @@ async def handle_grok(message: Message, state: FSMContext, user: User, photo_fil
         sticker=config.MESSAGE_STICKERS.get(MessageSticker.TEXT_GENERATION),
     )
     processing_message = await message.reply(
-        text=get_localization(user_language_code).processing_request_text(),
+        text=get_localization(user_language_code).model_text_processing_request(),
         allow_sending_without_reply=True,
     )
 
@@ -213,7 +213,7 @@ async def handle_grok(message: Message, state: FSMContext, user: User, photo_fil
                     sticker=config.MESSAGE_STICKERS.get(MessageSticker.FEAR),
                 )
                 await message.reply(
-                    text=get_localization(user_language_code).REQUEST_FORBIDDEN_ERROR,
+                    text=get_localization(user_language_code).ERROR_REQUEST_FORBIDDEN,
                     allow_sending_without_reply=True,
                 )
             else:

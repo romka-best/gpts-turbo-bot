@@ -51,7 +51,7 @@ async def catalog(message: Message, state: FSMContext):
 
     user_language_code = await get_user_language(str(message.from_user.id), state.storage)
 
-    text = get_localization(user_language_code).CATALOG
+    text = get_localization(user_language_code).CATALOG_INFO
     reply_markup = build_catalog_keyboard(user_language_code)
     await message.answer(
         text=text,
@@ -126,7 +126,7 @@ async def handle_catalog_digital_employees_selection(callback_query: CallbackQue
                     settings=user.settings,
                 )
                 await callback_query.message.edit_text(
-                    text=get_localization(user_language_code).settings(human_model, chosen_model),
+                    text=get_localization(user_language_code).settings_info(human_model, chosen_model),
                     reply_markup=reply_markup,
                 )
             else:
@@ -136,7 +136,7 @@ async def handle_catalog_digital_employees_selection(callback_query: CallbackQue
                     reply_markup=reply_markup,
                 )
         else:
-            text = get_localization(user_language_code).CATALOG
+            text = get_localization(user_language_code).CATALOG_INFO
             reply_markup = build_catalog_keyboard(user_language_code)
             await callback_query.message.edit_text(
                 text=text,
@@ -150,7 +150,7 @@ async def handle_catalog_digital_employees_selection(callback_query: CallbackQue
     role_photo_link = firebase.get_public_url(role_photo.name)
 
     if not user.daily_limits[Quota.ACCESS_TO_CATALOG] and not user.additional_usage_quota[Quota.ACCESS_TO_CATALOG]:
-        text = get_localization(user_language_code).CATALOG_FORBIDDEN_ERROR
+        text = get_localization(user_language_code).CATALOG_DIGITAL_EMPLOYEES_FORBIDDEN_ERROR
         reply_markup = build_buy_motivation_keyboard(user_language_code)
         await callback_query.message.reply_photo(
             photo=URLInputFile(role_photo_link, filename=role.photo, timeout=300),
@@ -226,7 +226,7 @@ async def handle_catalog_prompts_model_type_selection(callback_query: CallbackQu
 
     model_type = cast(ModelType, callback_query.data.split(':')[1])
     if model_type == 'back':
-        text = get_localization(user_language_code).CATALOG
+        text = get_localization(user_language_code).CATALOG_INFO
         reply_markup = build_catalog_keyboard(user_language_code)
         await callback_query.message.edit_text(
             text=text,

@@ -109,7 +109,7 @@ async def update_user_subscription(bot: Bot, user: User, batch: AsyncWriteBatch,
                 payment_method=current_subscription.payment_method,
                 provider_auto_payment_charge_id=current_subscription.provider_auto_payment_charge_id,
                 user_id=current_subscription.user_id,
-                description=get_localization(user_language_code).payment_description_renew_subscription(
+                description=get_localization(user_language_code).subscription_renew_description(
                     current_subscription.user_id,
                     product.names.get(user_language_code),
                 ),
@@ -174,7 +174,7 @@ async def update_user_subscription(bot: Bot, user: User, batch: AsyncWriteBatch,
                     payment_method=current_subscription.payment_method,
                     provider_auto_payment_charge_id=current_subscription.provider_auto_payment_charge_id,
                     user_id=current_subscription.user_id,
-                    description=get_localization(user_language_code).payment_description_renew_subscription(
+                    description=get_localization(user_language_code).subscription_renew_description(
                         current_subscription.user_id,
                         product.names.get(user_language_code),
                     ),
@@ -345,7 +345,7 @@ async def update_user_additional_usage_quota(
             user.settings[user.current_model][UserSettings.TURN_ON_VOICE_MESSAGES] = False
 
         if not user.additional_usage_quota[Quota.ACCESS_TO_CATALOG]:
-            await reset_user_chats(user, bot, storage)
+            await reset_user_chats(user)
 
         batch.update(user_ref, {
             'additional_usage_quota': user.additional_usage_quota,
@@ -368,22 +368,11 @@ async def update_user_additional_usage_quota(
             )
 
 
-async def reset_user_chats(user: User, bot: Bot, storage: BaseStorage):
+async def reset_user_chats(user: User):
     chats = await get_chats_by_user_id(user.id)
 
-    need_to_send_message = False
     for chat in chats:
         if chat.role_id != config.DEFAULT_ROLE_ID.get_secret_value():
             await update_chat(chat.id, {
                 'role_id': config.DEFAULT_ROLE_ID.get_secret_value(),
             })
-            need_to_send_message = True
-
-    if need_to_send_message:
-        user_language_code = await get_user_language(user.id, storage)
-        await send_message_to_user(
-            bot,
-            user,
-            get_localization(user_language_code).CHATS_RESET,
-            build_buy_motivation_keyboard(user_language_code),
-        )

@@ -77,7 +77,7 @@ async def handle_buy(message: Message, user_id: str, state: FSMContext):
     user_language_code = await get_user_language(user_id, state.storage)
 
     reply_keyboard = build_buy_keyboard(user_language_code)
-    text = get_localization(user_language_code).BUY
+    text = get_localization(user_language_code).PAYMENT_BUY
     await message.answer(
         text=text,
         reply_markup=reply_keyboard,
@@ -246,7 +246,7 @@ async def handle_subscription_selection(callback_query: CallbackQuery, state: FS
 
         subscription = await get_product(subscription_type)
 
-        caption = get_localization(user_language_code).CHOOSE_PAYMENT_METHOD
+        caption = get_localization(user_language_code).PAYMENT_CHOOSE_PAYMENT_METHOD
         reply_markup = build_payment_method_for_subscription_keyboard(user_language_code, subscription.id)
         photo_path = subscription.photos.get(user_language_code)
         photo = await firebase.bucket.get_blob(photo_path)
@@ -312,7 +312,7 @@ async def handle_payment_method_subscription_selection(callback_query: CallbackQ
             )
             payment = await callback_query.bot.create_invoice_link(
                 title=subscription_name,
-                description=get_localization(user_language_code).payment_description_subscription(
+                description=get_localization(user_language_code).subscription_description(
                     user_id,
                     subscription_name,
                 ),
@@ -332,7 +332,7 @@ async def handle_payment_method_subscription_selection(callback_query: CallbackQ
             payment = await create_payment(
                 payment_method=payment_method,
                 user=user,
-                description=get_localization(user_language_code).payment_description_subscription(
+                description=get_localization(user_language_code).subscription_description(
                     user_id,
                     subscription_name,
                 ),
@@ -362,7 +362,7 @@ async def handle_payment_method_subscription_selection(callback_query: CallbackQ
         else:
             raise NotImplementedError(f'Payment method is not recognized: {payment_method}')
 
-        caption = get_localization(user_language_code).confirmation_subscribe(
+        caption = get_localization(user_language_code).subscribe_confirmation(
             subscription_name,
             subscription.category,
             currency,
@@ -436,7 +436,7 @@ async def handle_package(message: Message, user_id: str, state: FSMContext, is_e
         user.currency,
         discount,
     )
-    text = get_localization(user_language_code).package(user.currency, cost)
+    text = get_localization(user_language_code).package_info(user.currency, cost)
     reply_markup = build_packages_keyboard(user_language_code, products, page)
 
     if is_edit:
@@ -503,7 +503,7 @@ async def handle_package_selection(callback_query: CallbackQuery, state: FSMCont
         else:
             subscription_discount = 0
         discount = get_user_discount(user.discount, subscription_discount, 0)
-        caption = await get_localization(user_language_code).shopping_cart(
+        caption = await get_localization(user_language_code).shopping_cart_info(
             user.currency,
             cart.items,
             discount,
@@ -512,7 +512,7 @@ async def handle_package_selection(callback_query: CallbackQuery, state: FSMCont
         await callback_query.message.edit_caption(caption=caption, reply_markup=reply_markup)
     else:
         product = await get_product(package_type)
-        caption = get_localization(user_language_code).choose_min(product.names.get(user_language_code))
+        caption = get_localization(user_language_code).package_choose_min(product.names.get(user_language_code))
         reply_markup = build_package_selection_keyboard(user_language_code)
         await callback_query.message.edit_caption(caption=caption, reply_markup=reply_markup)
 
@@ -545,7 +545,7 @@ async def quantity_of_package_sent(message: Message, state: FSMContext):
         reply_markup = build_package_quantity_sent_keyboard(user_language_code)
         await message.reply_photo(
             photo=URLInputFile(photo_link, filename=photo_path, timeout=300),
-            caption=get_localization(user_language_code).ADD_TO_CART_OR_BUY_NOW,
+            caption=get_localization(user_language_code).SHOPPING_CART_ADD_OR_BUY_NOW,
             reply_markup=reply_markup,
             allow_sending_without_reply=True,
         )
@@ -554,7 +554,7 @@ async def quantity_of_package_sent(message: Message, state: FSMContext):
     except (TypeError, ValueError):
         reply_markup = build_package_selection_keyboard(user_language_code)
         await message.reply(
-            text=get_localization(user_language_code).VALUE_ERROR,
+            text=get_localization(user_language_code).ERROR_IS_NOT_NUMBER,
             reply_markup=reply_markup,
             allow_sending_without_reply=True,
         )
@@ -589,7 +589,7 @@ async def handle_package_quantity_sent_selection(callback_query: CallbackQuery, 
 
         reply_markup = build_package_add_to_cart_selection_keyboard(user_language_code)
         await callback_query.message.edit_caption(
-            caption=get_localization(user_language_code).GO_TO_CART_OR_CONTINUE_SHOPPING,
+            caption=get_localization(user_language_code).SHOPPING_CART_GO_TO_OR_CONTINUE_SHOPPING,
             reply_markup=reply_markup,
         )
     elif action == 'buy_now':
@@ -599,7 +599,7 @@ async def handle_package_quantity_sent_selection(callback_query: CallbackQuery, 
             package_quantity,
         )
         await callback_query.message.edit_caption(
-            caption=get_localization(user_language_code).CHOOSE_PAYMENT_METHOD,
+            caption=get_localization(user_language_code).PAYMENT_CHOOSE_PAYMENT_METHOD,
             reply_markup=reply_markup,
         )
 
@@ -627,7 +627,7 @@ async def handle_package_add_to_cart_selection(callback_query: CallbackQuery, st
         else:
             subscription_discount = 0
         discount = get_user_discount(user.discount, subscription_discount, 0)
-        caption = await get_localization(user_language_code).shopping_cart(
+        caption = await get_localization(user_language_code).shopping_cart_info(
             user.currency,
             cart.items,
             discount,
@@ -656,7 +656,7 @@ async def handle_package_cart_selection(callback_query: CallbackQuery, state: FS
     if action == 'proceed_to_checkout':
         reply_markup = build_payment_method_for_cart_keyboard(user_language_code)
         await callback_query.message.edit_caption(
-            caption=get_localization(user_language_code).CHOOSE_PAYMENT_METHOD,
+            caption=get_localization(user_language_code).PAYMENT_CHOOSE_PAYMENT_METHOD,
             reply_markup=reply_markup,
         )
     elif action == 'clear':
@@ -674,7 +674,7 @@ async def handle_package_cart_selection(callback_query: CallbackQuery, state: FS
             else:
                 subscription_discount = 0
             discount = get_user_discount(user.discount, subscription_discount, 0)
-            caption = await get_localization(user_language_code).shopping_cart(
+            caption = await get_localization(user_language_code).shopping_cart_info(
                 user.currency,
                 cart.items,
                 discount,
@@ -704,7 +704,7 @@ async def handle_package_cart_selection(callback_query: CallbackQuery, state: FS
         else:
             subscription_discount = 0
         discount = get_user_discount(user.discount, subscription_discount, 0)
-        caption = await get_localization(user_language_code).shopping_cart(
+        caption = await get_localization(user_language_code).shopping_cart_info(
             user.currency,
             cart.items,
             discount,
@@ -733,7 +733,7 @@ async def handle_package_proceed_to_checkout_selection(callback_query: CallbackQ
     else:
         subscription_discount = 0
     discount = get_user_discount(user.discount, subscription_discount, 0)
-    caption = await get_localization(user_language_code).shopping_cart(
+    caption = await get_localization(user_language_code).shopping_cart_info(
         user.currency,
         cart.items,
         discount,
@@ -792,7 +792,7 @@ async def handle_payment_method_package_selection(callback_query: CallbackQuery,
         ):
             reply_markup = build_return_to_packages_keyboard(user_language_code)
             await callback_query.message.edit_caption(
-                caption=get_localization(user_language_code).purchase_minimal_price(currency, package_amount),
+                caption=get_localization(user_language_code).payment_purchase_minimal_price(currency, package_amount),
                 reply_markup=reply_markup,
             )
             return
@@ -829,7 +829,7 @@ async def handle_payment_method_package_selection(callback_query: CallbackQuery,
             payment = await create_payment(
                 payment_method=payment_method,
                 user=user,
-                description=get_localization(user_language_code).payment_description_package(
+                description=get_localization(user_language_code).payment_package_description(
                     user_id,
                     package_name,
                     package_quantity,
@@ -859,7 +859,7 @@ async def handle_payment_method_package_selection(callback_query: CallbackQuery,
         else:
             raise NotImplementedError(f'Payment method is not recognized: {payment_method}')
 
-        caption = get_localization(user_language_code).confirmation_package(
+        caption = get_localization(user_language_code).package_confirmation(
             package_name,
             package_quantity,
             currency,
@@ -908,7 +908,7 @@ async def handle_payment_method_cart_selection(callback_query: CallbackQuery, st
         else:
             subscription_discount = 0
         discount = get_user_discount(user.discount, subscription_discount, 0)
-        caption = await get_localization(user_language_code).shopping_cart(
+        caption = await get_localization(user_language_code).shopping_cart_info(
             user.currency,
             cart.items,
             discount,
@@ -984,7 +984,7 @@ async def handle_payment_method_cart_selection(callback_query: CallbackQuery, st
         ):
             reply_markup = build_return_to_packages_keyboard(user_language_code)
             await callback_query.message.edit_caption(
-                caption=get_localization(user_language_code).purchase_minimal_price(currency, amount),
+                caption=get_localization(user_language_code).payment_purchase_minimal_price(currency, amount),
                 reply_markup=reply_markup,
             )
             return
@@ -1008,7 +1008,7 @@ async def handle_payment_method_cart_selection(callback_query: CallbackQuery, st
             payment = await create_payment(
                 payment_method=payment_method,
                 user=user,
-                description=get_localization(user_language_code).payment_description_cart(user_id),
+                description=get_localization(user_language_code).packages_description(user_id),
                 amount=amount,
                 language_code=user_language_code,
                 is_recurring=False,
@@ -1028,7 +1028,7 @@ async def handle_payment_method_cart_selection(callback_query: CallbackQuery, st
         else:
             raise NotImplementedError(f'Payment method is not recognized: {payment_method}')
 
-        caption = await get_localization(user_language_code).confirmation_cart(
+        caption = await get_localization(user_language_code).shopping_cart_confirmation(
             cart.items,
             currency,
             amount,
@@ -1365,10 +1365,10 @@ async def handle_cancel_subscription(message: Message, user_id: str, state: FSMC
     if subscription and (
         subscription.status == SubscriptionStatus.ACTIVE or subscription.status == SubscriptionStatus.TRIAL
     ):
-        text = get_localization(user_language_code).CANCEL_SUBSCRIPTION_CONFIRMATION
+        text = get_localization(user_language_code).PROFILE_CANCEL_SUBSCRIPTION_CONFIRMATION
         reply_markup = build_cancel_subscription_keyboard(user_language_code)
     else:
-        text = get_localization(user_language_code).NO_ACTIVE_SUBSCRIPTION
+        text = get_localization(user_language_code).PROFILE_NO_ACTIVE_SUBSCRIPTION
         reply_markup = None
 
     await message.answer(
@@ -1387,7 +1387,7 @@ async def handle_renew_subscription(message: Message, user_id: str, state: FSMCo
     await resubscribe_wrapper(transaction, old_subscription, message.bot)
 
     await message.answer(
-        text=get_localization(user_language_code).RENEW_SUBSCRIPTION_SUCCESS,
+        text=get_localization(user_language_code).PROFILE_RENEW_SUBSCRIPTION_SUCCESS,
         message_effect_id=config.MESSAGE_EFFECTS.get(MessageEffect.HEART),
     )
 
@@ -1408,7 +1408,7 @@ async def handle_cancel_subscription_selection(callback_query: CallbackQuery, st
 
         user_language_code = await get_user_language(user_id, state.storage)
         await callback_query.message.edit_text(
-            text=get_localization(user_language_code).CANCEL_SUBSCRIPTION_SUCCESS,
+            text=get_localization(user_language_code).PROFILE_CANCEL_SUBSCRIPTION_SUCCESS,
         )
     else:
         await callback_query.message.delete()

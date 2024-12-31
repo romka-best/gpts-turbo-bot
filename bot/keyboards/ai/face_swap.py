@@ -35,7 +35,7 @@ def build_face_swap_package_keyboard(language_code: LanguageCode, quantities: li
     buttons.extend([
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).BACK,
+                text=get_localization(language_code).ACTION_BACK,
                 callback_data='face_swap_package:back'
             )
         ],

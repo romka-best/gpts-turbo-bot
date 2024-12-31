@@ -34,7 +34,7 @@ async def photoshop_ai(message: Message, state: FSMContext):
     if user.current_model == Model.PHOTOSHOP_AI:
         reply_markup = build_switched_to_ai_keyboard(user_language_code, Model.PHOTOSHOP_AI)
         await message.answer(
-            text=get_localization(user_language_code).ALREADY_SWITCHED_TO_THIS_MODEL,
+            text=get_localization(user_language_code).MODEL_ALREADY_SWITCHED_TO_THIS_MODEL,
             reply_markup=reply_markup,
         )
     else:

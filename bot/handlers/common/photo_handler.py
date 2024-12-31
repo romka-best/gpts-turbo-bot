@@ -70,7 +70,7 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
     current_state = await state.get_state()
     if current_state == Profile.waiting_for_photo.state:
         processing_message = await message.reply(
-            text=get_localization(user_language_code).UPLOADING_PHOTO,
+            text=get_localization(user_language_code).PROFILE_UPLOADING_PHOTO,
             allow_sending_without_reply=True,
         )
 
@@ -103,7 +103,7 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
                 'used_images': [],
             })
 
-        await processing_message.edit_text(get_localization(user_language_code).CHANGE_PHOTO_SUCCESS)
+        await processing_message.edit_text(get_localization(user_language_code).PROFILE_CHANGE_PHOTO_SUCCESS)
 
         await state.clear()
 
@@ -122,7 +122,7 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
 
         reply_markup = build_manage_catalog_create_role_confirmation_keyboard(user_language_code)
         await message.answer(
-            text=get_localization(user_language_code).catalog_manage_create_role_confirmation(
+            text=get_localization(user_language_code).admin_catalog_create_role_confirmation(
                 role_names=user_data.get('role_names', {}),
                 role_descriptions=user_data.get('role_descriptions', {}),
                 role_instructions=user_data.get('role_instructions', {}),
@@ -155,7 +155,7 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
             }
         )
 
-        await message.answer(text=get_localization(user_language_code).FACE_SWAP_MANAGE_EDIT_SUCCESS)
+        await message.answer(text=get_localization(user_language_code).ADMIN_FACE_SWAP_EDIT_SUCCESS)
         await handle_manage_face_swap(message, str(message.from_user.id), state)
     elif current_state == PhotoshopAI.waiting_for_photo.state:
         quota = user.daily_limits[Quota.PHOTOSHOP_AI] + user.additional_usage_quota[Quota.PHOTOSHOP_AI]
@@ -166,7 +166,7 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
 
             reply_markup = build_limit_exceeded_keyboard(user_language_code)
             await message.answer(
-                text=get_localization(user_language_code).reached_usage_limit(),
+                text=get_localization(user_language_code).model_reached_usage_limit(),
                 reply_markup=reply_markup,
             )
             return
@@ -175,7 +175,7 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
             sticker=config.MESSAGE_STICKERS.get(MessageSticker.IMAGE_GENERATION),
         )
         processing_message = await message.reply(
-            text=get_localization(user_language_code).processing_request_image(),
+            text=get_localization(user_language_code).model_image_processing_request(),
             allow_sending_without_reply=True,
         )
 
@@ -184,7 +184,7 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
         user_not_finished_requests = await get_started_requests_by_user_id_and_product_id(user.id, product.id)
         if len(user_not_finished_requests):
             await message.reply(
-                text=get_localization(user_language_code).ALREADY_MAKE_REQUEST,
+                text=get_localization(user_language_code).MODEL_ALREADY_MAKE_REQUEST,
                 allow_sending_without_reply=True,
             )
 
@@ -338,13 +338,13 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
         quota = user.daily_limits[Quota.FACE_SWAP] + user.additional_usage_quota[Quota.FACE_SWAP]
         quantity = 1
         if quota < quantity:
-            await message.answer(text=get_localization(user_language_code).face_swap_package_forbidden(quota))
+            await message.answer(text=get_localization(user_language_code).face_swap_package_forbidden_error(quota))
         else:
             processing_sticker = await message.answer_sticker(
                 sticker=config.MESSAGE_STICKERS.get(MessageSticker.IMAGE_GENERATION),
             )
             processing_message = await message.reply(
-                text=get_localization(user_language_code).processing_request_face_swap(),
+                text=get_localization(user_language_code).model_face_swap_processing_request(),
                 allow_sending_without_reply=True,
             )
 
@@ -394,7 +394,7 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
                     reply_markup = build_cancel_keyboard(user_language_code)
                     await message.answer_photo(
                         photo=URLInputFile(photo_link, filename=photo_path, timeout=300),
-                        caption=get_localization(user_language_code).SEND_ME_YOUR_PICTURE,
+                        caption=get_localization(user_language_code).PROFILE_SEND_ME_YOUR_PICTURE,
                         reply_markup=reply_markup
                     )
                     await state.set_state(Profile.waiting_for_photo)
@@ -432,7 +432,7 @@ async def handle_photo(message: Message, state: FSMContext, photo_file: File):
             await handle_luma_ray(message, state, user, video_frame_photo_link)
     else:
         await message.reply(
-            text=get_localization(user_language_code).PHOTO_FEATURE_FORBIDDEN,
+            text=get_localization(user_language_code).ERROR_PHOTO_FORBIDDEN,
             reply_markup=build_suggestions_keyboard(user_language_code),
             allow_sending_without_reply=True,
         )
@@ -523,12 +523,12 @@ async def handle_album(message: Message, state: FSMContext, album: list[Message]
         user.current_model == Model.LUMA_RAY
     ):
         await message.reply(
-            text=get_localization(user_language_code).ALBUM_FORBIDDEN_ERROR,
+            text=get_localization(user_language_code).ERROR_ALBUM_FORBIDDEN,
             allow_sending_without_reply=True,
         )
     else:
         await message.reply(
-            text=get_localization(user_language_code).PHOTO_FEATURE_FORBIDDEN,
+            text=get_localization(user_language_code).ERROR_PHOTO_FORBIDDEN,
             reply_markup=build_suggestions_keyboard(user_language_code),
             allow_sending_without_reply=True,
         )

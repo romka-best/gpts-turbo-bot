@@ -11,7 +11,7 @@ from yookassa import Configuration
 
 from bot.config import config
 from bot.database.models.common import Currency, PaymentMethod
-from bot.database.models.product import Product, ProductType
+from bot.database.models.product import Product
 from bot.database.models.user import User
 from bot.locales.types import LanguageCode
 

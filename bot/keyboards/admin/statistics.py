@@ -45,7 +45,7 @@ def build_statistics_keyboard(language_code: LanguageCode, is_admin: bool) -> In
 
     buttons.append([
         InlineKeyboardButton(
-            text=get_localization(language_code).BACK,
+            text=get_localization(language_code).ACTION_BACK,
             callback_data='statistics:back'
         )
     ])
@@ -69,7 +69,7 @@ def build_statistics_write_transaction_keyboard(language_code: LanguageCode) -> 
         ],
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).BACK,
+                text=get_localization(language_code).ACTION_BACK,
                 callback_data='statistics_write_transaction:back'
             )
         ],
@@ -89,14 +89,14 @@ def build_statistics_choose_service_keyboard(
             if product.category == ProductCategory.MONTHLY:
                 buttons.append([
                     InlineKeyboardButton(
-                        text=f'{product.names.get(language_code)} {get_localization(language_code).MONTHLY}',
+                        text=f'{product.names.get(language_code)} {get_localization(language_code).SUBSCRIPTION_MONTHLY}',
                         callback_data=f'statistics_choose_service:{product.id}'
                     )
                 ])
             elif product.category == ProductCategory.YEARLY:
                 buttons.append([
                     InlineKeyboardButton(
-                        text=f'{product.names.get(language_code)} {get_localization(language_code).YEARLY}',
+                        text=f'{product.names.get(language_code)} {get_localization(language_code).SUBSCRIPTION_YEARLY}',
                         callback_data=f'statistics_choose_service:{product.id}'
                     )
                 ])
@@ -142,7 +142,7 @@ def build_statistics_choose_service_keyboard(
         ])
     buttons.append([
         InlineKeyboardButton(
-            text=get_localization(language_code).CANCEL,
+            text=get_localization(language_code).ACTION_CANCEL,
             callback_data='statistics_choose_service:cancel'
         )
     ], )
@@ -172,7 +172,7 @@ def build_statistics_choose_currency_keyboard(language_code: LanguageCode) -> In
         ],
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).CANCEL,
+                text=get_localization(language_code).ACTION_CANCEL,
                 callback_data='statistics_choose_currency:cancel'
             )
         ],

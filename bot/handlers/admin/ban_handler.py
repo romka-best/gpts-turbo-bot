@@ -20,7 +20,7 @@ async def handle_ban(message: Message, user_id: str, state: FSMContext):
 
     reply_markup = build_ban_keyboard(user_language_code)
     await message.edit_text(
-        text=get_localization(user_language_code).BAN_INFO,
+        text=get_localization(user_language_code).ADMIN_BAN_INFO,
         reply_markup=reply_markup,
     )
 
@@ -60,12 +60,12 @@ async def ban_user_id_sent(message: Message, state: FSMContext):
 
         if user.is_banned:
             await message.reply(
-                text=get_localization(user_language_code).BAN_SUCCESS,
+                text=get_localization(user_language_code).ADMIN_BAN_SUCCESS,
                 allow_sending_without_reply=True,
             )
         else:
             await message.reply(
-                text=get_localization(user_language_code).UNBAN_SUCCESS,
+                text=get_localization(user_language_code).ADMIN_UNBAN_SUCCESS,
                 allow_sending_without_reply=True,
             )
 
@@ -73,7 +73,7 @@ async def ban_user_id_sent(message: Message, state: FSMContext):
     except (TypeError, ValueError):
         reply_markup = build_cancel_keyboard(user_language_code)
         await message.reply(
-            text=get_localization(user_language_code).VALUE_ERROR,
+            text=get_localization(user_language_code).ERROR_IS_NOT_NUMBER,
             reply_markup=reply_markup,
             allow_sending_without_reply=True,
         )

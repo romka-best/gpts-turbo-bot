@@ -15,5 +15,5 @@ async def handle_network_error(bot: Bot, user_id: str):
             )
             await bot.send_message(
                 chat_id=user.telegram_chat_id,
-                text=get_localization(user.interface_language_code).NETWORK_ERROR,
+                text=get_localization(user.interface_language_code).ERROR_NETWORK,
             )

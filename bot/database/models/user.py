@@ -111,7 +111,6 @@ class User:
         Quota.GEMINI_1_ULTRA: 0,
         Quota.GROK_2: 0,
         Quota.PERPLEXITY: 0,
-        Quota.ADDITIONAL_CHATS: 0,
         Quota.EIGHTIFY: 0,
         Quota.GEMINI_VIDEO: 0,
         Quota.DALL_E: 0,

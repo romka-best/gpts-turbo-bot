@@ -57,7 +57,7 @@ async def handle_bonus(message: Message, user_id: str, state: FSMContext):
     photo = await firebase.bucket.get_blob(photo_path)
     photo_link = firebase.get_public_url(photo.name)
 
-    text = get_localization(user_language_code).bonus(
+    text = get_localization(user_language_code).bonus_info(
         user_id,
         user.balance,
         count_of_referred_users,
@@ -84,7 +84,7 @@ async def handle_bonus_selection(callback_query: CallbackQuery, state: FSMContex
 
         reply_markup = build_bonus_play_game_keyboard(user_language_code)
         await callback_query.message.edit_caption(
-            caption=get_localization(user_language_code).PLAY_GAME_CHOOSE,
+            caption=get_localization(user_language_code).BONUS_PLAY_GAME_CHOOSE,
             reply_markup=reply_markup,
         )
     elif action == 'cash_out':
@@ -133,32 +133,32 @@ async def handle_bonus_play_game_selection(callback_query: CallbackQuery, state:
     reply_markup = build_bonus_play_game_chosen_keyboard(user_language_code, game_type)
     if game_type == GameType.BOWLING:
         await callback_query.message.edit_caption(
-            caption=get_localization(user_language_code).PLAY_BOWLING_GAME_DESCRIPTION,
+            caption=get_localization(user_language_code).BONUS_PLAY_BOWLING_GAME_INFO,
             reply_markup=reply_markup,
         )
     elif game_type == GameType.SOCCER:
         await callback_query.message.edit_caption(
-            caption=get_localization(user_language_code).PLAY_SOCCER_GAME_DESCRIPTION,
+            caption=get_localization(user_language_code).BONUS_PLAY_SOCCER_GAME_INFO,
             reply_markup=reply_markup,
         )
     elif game_type == GameType.BASKETBALL:
         await callback_query.message.edit_caption(
-            caption=get_localization(user_language_code).PLAY_BASKETBALL_GAME_DESCRIPTION,
+            caption=get_localization(user_language_code).BONUS_PLAY_BASKETBALL_GAME_INFO,
             reply_markup=reply_markup,
         )
     elif game_type == GameType.DARTS:
         await callback_query.message.edit_caption(
-            caption=get_localization(user_language_code).PLAY_DARTS_GAME_DESCRIPTION,
+            caption=get_localization(user_language_code).BONUS_PLAY_DARTS_GAME_INFO,
             reply_markup=reply_markup,
         )
     elif game_type == GameType.DICE:
         await callback_query.message.edit_caption(
-            caption=get_localization(user_language_code).PLAY_DICE_GAME_CHOOSE,
+            caption=get_localization(user_language_code).BONUS_PLAY_DICE_GAME_INFO,
             reply_markup=reply_markup,
         )
     elif game_type == GameType.CASINO:
         await callback_query.message.edit_caption(
-            caption=get_localization(user_language_code).PLAY_CASINO_GAME_DESCRIPTION,
+            caption=get_localization(user_language_code).BONUS_PLAY_CASINO_GAME_INFO,
             reply_markup=reply_markup,
         )
     else:
@@ -168,7 +168,7 @@ async def handle_bonus_play_game_selection(callback_query: CallbackQuery, state:
         count_of_feedbacks = await get_count_of_approved_feedbacks_by_user_id(user_id)
         count_of_games = await get_count_of_games_by_user_id(user_id)
 
-        text = get_localization(user_language_code).bonus(
+        text = get_localization(user_language_code).bonus_info(
             user_id,
             user.balance,
             count_of_referred_users,
@@ -191,7 +191,7 @@ async def send_game_status_after_timeout(
 ):
     await asyncio.sleep(3)
 
-    text = get_localization(language_code).PLAY_GAME_WON if won else get_localization(language_code).PLAY_GAME_LOST
+    text = get_localization(language_code).BONUS_PLAY_GAME_WON if won else get_localization(language_code).BONUS_PLAY_GAME_LOST
 
     await bot.send_message(
         chat_id=chat_id,
@@ -213,7 +213,7 @@ async def handle_bonus_play_game_chosen_selection(callback_query: CallbackQuery,
     if game_type == 'back':
         reply_markup = build_bonus_play_game_keyboard(user_language_code)
         await callback_query.message.edit_caption(
-            caption=get_localization(user_language_code).PLAY_GAME_CHOOSE,
+            caption=get_localization(user_language_code).BONUS_PLAY_GAME_CHOOSE,
             reply_markup=reply_markup,
         )
         return
@@ -222,18 +222,8 @@ async def handle_bonus_play_game_chosen_selection(callback_query: CallbackQuery,
     current_date_beginning = current_date.replace(hour=0, minute=0, second=0, microsecond=0)
     count_of_games = await get_count_of_games_by_user_id(user_id, current_date_beginning)
     if count_of_games > 0:
-        update_date = datetime(
-            current_date.year,
-            current_date.month,
-            current_date.day,
-            tzinfo=timezone.utc
-        ) + timedelta(days=1)
-        time_left = update_date - current_date
-        hours, remainder = divmod(time_left.seconds, 3600)
-        minutes = remainder // 60
-
         await callback_query.message.answer(
-            text=get_localization(user_language_code).play_game_reached_limit(hours, minutes),
+            text=get_localization(user_language_code).bonus_play_game_reached_limit(),
         )
         return
 
@@ -320,7 +310,7 @@ async def handle_bonus_cash_out_selection(callback_query: CallbackQuery, state: 
         count_of_feedbacks = await get_count_of_approved_feedbacks_by_user_id(user_id)
         count_of_games = await get_count_of_games_by_user_id(user_id)
 
-        text = get_localization(user_language_code).bonus(
+        text = get_localization(user_language_code).bonus_info(
             user_id,
             user.balance,
             count_of_referred_users,
@@ -334,7 +324,7 @@ async def handle_bonus_cash_out_selection(callback_query: CallbackQuery, state: 
         )
     else:
         product = await get_product(product_id)
-        message = get_localization(user_language_code).choose_min(product.names.get(user_language_code))
+        message = get_localization(user_language_code).package_choose_min(product.names.get(user_language_code))
 
         reply_markup = build_cancel_keyboard(user_language_code)
         await callback_query.message.edit_caption(caption=message, reply_markup=reply_markup)
@@ -366,7 +356,7 @@ async def quantity_of_bonus_package_sent(message: Message, state: FSMContext):
         if price > user.balance:
             reply_markup = build_cancel_keyboard(user_language_code)
             await message.reply(
-                text=get_localization(user_language_code).MAX_ERROR,
+                text=get_localization(user_language_code).PACKAGE_QUANTITY_MAX_ERROR,
                 reply_markup=reply_markup,
                 allow_sending_without_reply=True,
             )
@@ -420,7 +410,7 @@ async def quantity_of_bonus_package_sent(message: Message, state: FSMContext):
     except (TypeError, ValueError):
         reply_markup = build_cancel_keyboard(user_language_code)
         await message.reply(
-            text=get_localization(user_language_code).VALUE_ERROR,
+            text=get_localization(user_language_code).ERROR_IS_NOT_NUMBER,
             reply_markup=reply_markup,
             allow_sending_without_reply=True,
         )

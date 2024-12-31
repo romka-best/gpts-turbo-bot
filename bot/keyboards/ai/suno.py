@@ -28,7 +28,7 @@ def build_suno_simple_mode_keyboard(language_code: LanguageCode) -> InlineKeyboa
     buttons = [
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).BACK,
+                text=get_localization(language_code).ACTION_BACK,
                 callback_data=f'suno_simple_mode:back'
             )
         ],
@@ -41,13 +41,13 @@ def build_suno_custom_mode_lyrics_keyboard(language_code: LanguageCode) -> Inlin
     buttons = [
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).SKIP,
+                text=get_localization(language_code).SUNO_SKIP,
                 callback_data=f'suno_custom_mode_lyrics:skip'
             )
         ],
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).BACK,
+                text=get_localization(language_code).ACTION_BACK,
                 callback_data=f'suno_custom_mode_lyrics:back'
             )
         ],

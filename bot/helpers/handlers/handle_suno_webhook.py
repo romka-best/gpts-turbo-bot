@@ -120,7 +120,7 @@ async def handle_suno_webhook(bot: Bot, dp: Dispatcher, body: dict):
                     bot=bot,
                     chat_id=user.telegram_chat_id,
                     result=video_url,
-                    caption=f'{hlink(get_localization(user_language_code).AUDIO, audio_url)}\n{lyric}',
+                    caption=f'{hlink(get_localization(user_language_code).SETTINGS_SEND_TYPE_AUDIO, audio_url)}\n{lyric}',
                     filename=title,
                     duration=duration,
                     reply_markup=reply_markup,
@@ -130,7 +130,7 @@ async def handle_suno_webhook(bot: Bot, dp: Dispatcher, body: dict):
                     bot=bot,
                     chat_id=user.telegram_chat_id,
                     result=audio_url,
-                    caption=f'{hlink(get_localization(user_language_code).VIDEO, video_url)}\n{lyric}',
+                    caption=f'{hlink(get_localization(user_language_code).SETTINGS_SEND_TYPE_VIDEO, video_url)}\n{lyric}',
                     filename=title,
                     duration=duration,
                     reply_markup=reply_markup,
@@ -140,7 +140,7 @@ async def handle_suno_webhook(bot: Bot, dp: Dispatcher, body: dict):
                     bot=bot,
                     chat_id=user.telegram_chat_id,
                     result=audio_url,
-                    caption=f'{hlink(get_localization(user_language_code).AUDIO, audio_url)}\n{lyric}',
+                    caption=f'{hlink(get_localization(user_language_code).SETTINGS_SEND_TYPE_AUDIO, audio_url)}\n{lyric}',
                     filename=title,
                     duration=duration,
                     reply_markup=reply_markup,
@@ -167,7 +167,7 @@ async def handle_suno_webhook(bot: Bot, dp: Dispatcher, body: dict):
             )
             await bot.send_message(
                 chat_id=user.telegram_chat_id,
-                text=get_localization(user_language_code).REQUEST_FORBIDDEN_ERROR,
+                text=get_localization(user_language_code).ERROR_REQUEST_FORBIDDEN,
             )
 
         quantity_to_delete = total_result

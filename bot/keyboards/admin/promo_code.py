@@ -23,13 +23,13 @@ def build_create_promo_code_keyboard(language_code: LanguageCode) -> InlineKeybo
         ],
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).DISCOUNT,
+                text=get_localization(language_code).PAYMENT_DISCOUNT,
                 callback_data=f'create_promo_code:{PromoCodeType.DISCOUNT}'
             )
         ],
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).BACK,
+                text=get_localization(language_code).ACTION_BACK,
                 callback_data=f'create_promo_code:back'
             )
         ],
@@ -38,8 +38,10 @@ def build_create_promo_code_keyboard(language_code: LanguageCode) -> InlineKeybo
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
-def build_create_promo_code_subscription_keyboard(language_code: LanguageCode,
-                                                  products: list[Product]) -> InlineKeyboardMarkup:
+def build_create_promo_code_subscription_keyboard(
+    language_code: LanguageCode,
+    products: list[Product],
+) -> InlineKeyboardMarkup:
     buttons = []
     for product in products:
         buttons.append([
@@ -50,7 +52,7 @@ def build_create_promo_code_subscription_keyboard(language_code: LanguageCode,
         ])
     buttons.append([
         InlineKeyboardButton(
-            text=get_localization(language_code).CANCEL,
+            text=get_localization(language_code).ACTION_CANCEL,
             callback_data='create_promo_code_subscription:cancel'
         )
     ])
@@ -72,7 +74,7 @@ def build_create_promo_code_package_keyboard(language_code: LanguageCode, produc
     buttons.append(
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).CANCEL,
+                text=get_localization(language_code).ACTION_CANCEL,
                 callback_data='create_promo_code_package:cancel'
             )
         ],
@@ -103,7 +105,7 @@ def build_create_promo_code_discount_keyboard(language_code: LanguageCode):
         ],
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).CANCEL,
+                text=get_localization(language_code).ACTION_CANCEL,
                 callback_data='create_promo_code_discount:cancel'
             )
         ]

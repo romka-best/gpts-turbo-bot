@@ -9,31 +9,31 @@ def build_info_keyboard(language_code: LanguageCode) -> InlineKeyboardMarkup:
     buttons = [
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).TEXT_MODELS,
+                text=get_localization(language_code).MODELS_TEXT,
                 callback_data=f'info:{ModelType.TEXT}'
             ),
         ],
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).IMAGE_MODELS,
+                text=get_localization(language_code).MODELS_IMAGE,
                 callback_data=f'info:{ModelType.IMAGE}'
             ),
         ],
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).MUSIC_MODELS,
+                text=get_localization(language_code).MODELS_MUSIC,
                 callback_data=f'info:{ModelType.MUSIC}'
             ),
         ],
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).VIDEO_MODELS,
+                text=get_localization(language_code).MODELS_VIDEO,
                 callback_data=f'info:{ModelType.VIDEO}'
             ),
         ],
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).CLOSE,
+                text=get_localization(language_code).ACTION_CLOSE,
                 callback_data='info:close'
             ),
         ],
@@ -46,7 +46,7 @@ def build_info_text_models_keyboard(language_code: LanguageCode) -> InlineKeyboa
     buttons = [
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).CHATGPT,
+                text=get_localization(language_code).CHAT_GPT,
                 callback_data=f'info_text_models:{Model.CHAT_GPT}'
             ),
         ],
@@ -76,7 +76,7 @@ def build_info_text_models_keyboard(language_code: LanguageCode) -> InlineKeyboa
         ],
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).BACK,
+                text=get_localization(language_code).ACTION_BACK,
                 callback_data='info_text_models:back'
             ),
         ],
@@ -131,7 +131,7 @@ def build_info_image_models_keyboard(language_code: LanguageCode) -> InlineKeybo
         ],
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).BACK,
+                text=get_localization(language_code).ACTION_BACK,
                 callback_data='info_image_models:back'
             ),
         ],
@@ -156,7 +156,7 @@ def build_info_music_models_keyboard(language_code: LanguageCode) -> InlineKeybo
         ],
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).BACK,
+                text=get_localization(language_code).ACTION_BACK,
                 callback_data='info_music_models:back'
             ),
         ],
@@ -187,7 +187,7 @@ def build_info_video_models_keyboard(language_code: LanguageCode) -> InlineKeybo
         ],
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).BACK,
+                text=get_localization(language_code).ACTION_BACK,
                 callback_data='info_video_models:back'
             ),
         ],
@@ -200,7 +200,7 @@ def build_info_chosen_model_type_keyboard(language_code: LanguageCode, model_typ
     buttons = [
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).BACK,
+                text=get_localization(language_code).ACTION_BACK,
                 callback_data=f'info_chosen_model_type:back:{model_type}'
             ),
         ],

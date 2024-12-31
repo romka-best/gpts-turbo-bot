@@ -28,7 +28,7 @@ async def handle_manage_catalog(message: Message, user_id: str, state: FSMContex
 
     reply_markup = build_manage_catalog_keyboard(user_language_code, roles)
     await message.edit_text(
-        text=get_localization(user_language_code).CATALOG_MANAGE,
+        text=get_localization(user_language_code).ADMIN_CATALOG,
         reply_markup=reply_markup,
     )
 
@@ -52,7 +52,7 @@ async def handle_catalog_manage_selection(callback_query: CallbackQuery, state: 
     elif action == 'create':
         reply_markup = build_manage_catalog_create_keyboard(user_language_code)
         await callback_query.message.edit_text(
-            text=get_localization(user_language_code).CATALOG_MANAGE_CREATE,
+            text=get_localization(user_language_code).ADMIN_CATALOG_CREATE,
             reply_markup=reply_markup,
         )
 
@@ -65,7 +65,7 @@ async def handle_catalog_manage_selection(callback_query: CallbackQuery, state: 
         reply_markup = build_manage_catalog_edit_keyboard(user_language_code, role.id)
         await callback_query.message.answer_photo(
             photo=URLInputFile(role_photo_link, filename=role.photo, timeout=300),
-            caption=get_localization(user_language_code).catalog_manage_role_edit(
+            caption=get_localization(user_language_code).admin_catalog_edit_role_info(
                 role_names=role.translated_names,
                 role_descriptions=role.translated_descriptions,
                 role_instructions=role.translated_instructions,
@@ -107,7 +107,7 @@ async def handle_catalog_manage_create_role_confirmation_selection(callback_quer
             photo=f'roles/{user_data["system_role_name"]}.png'
         )
 
-        await callback_query.message.answer(text=get_localization(user_language_code).CATALOG_MANAGE_CREATE_SUCCESS)
+        await callback_query.message.answer(text=get_localization(user_language_code).ADMIN_CATALOG_CREATE_ROLE_SUCCESS)
         await callback_query.message.delete()
 
         await state.clear()
@@ -120,7 +120,7 @@ async def catalog_manage_create_role_system_name_sent(message: Message, state: F
     system_role_name = message.text.upper()
     reply_markup = build_cancel_keyboard(user_language_code)
     await message.answer(
-        text=get_localization(user_language_code).CATALOG_MANAGE_CREATE_ROLE_NAME,
+        text=get_localization(user_language_code).ADMIN_CATALOG_CREATE_ROLE_NAME,
         reply_markup=reply_markup,
     )
 
@@ -145,7 +145,7 @@ async def catalog_manage_create_role_name_sent(message: Message, state: FSMConte
 
     reply_markup = build_cancel_keyboard(user_language_code)
     await message.answer(
-        text=get_localization(user_language_code).CATALOG_MANAGE_CREATE_ROLE_DESCRIPTION,
+        text=get_localization(user_language_code).ADMIN_CATALOG_CREATE_ROLE_DESCRIPTION,
         reply_markup=reply_markup,
     )
 
@@ -170,7 +170,7 @@ async def catalog_manage_create_role_description_sent(message: Message, state: F
 
     reply_markup = build_cancel_keyboard(user_language_code)
     await message.answer(
-        text=get_localization(user_language_code).CATALOG_MANAGE_CREATE_ROLE_INSTRUCTION,
+        text=get_localization(user_language_code).ADMIN_CATALOG_CREATE_ROLE_INSTRUCTION,
         reply_markup=reply_markup,
     )
 
@@ -195,7 +195,7 @@ async def catalog_manage_create_role_instruction_sent(message: Message, state: F
 
     reply_markup = build_cancel_keyboard(user_language_code)
     await message.answer(
-        text=get_localization(user_language_code).CATALOG_MANAGE_CREATE_ROLE_PHOTO,
+        text=get_localization(user_language_code).ADMIN_CATALOG_CREATE_ROLE_PHOTO,
         reply_markup=reply_markup,
     )
 
@@ -223,28 +223,28 @@ async def handle_catalog_manage_edit_selection(callback_query: CallbackQuery, st
         reply_markup = build_cancel_keyboard(user_language_code)
         if action == 'name':
             await callback_query.message.edit_text(
-                text=get_localization(user_language_code).CATALOG_MANAGE_EDIT_ROLE_NAME,
+                text=get_localization(user_language_code).ADMIN_CATALOG_EDIT_ROLE_NAME_INFO,
                 reply_markup=reply_markup,
             )
 
             await state.set_state(Catalog.waiting_for_new_role_info)
         elif action == 'description':
             await callback_query.message.edit_text(
-                text=get_localization(user_language_code).CATALOG_MANAGE_EDIT_ROLE_DESCRIPTION,
+                text=get_localization(user_language_code).ADMIN_CATALOG_EDIT_ROLE_DESCRIPTION_INFO,
                 reply_markup=reply_markup,
             )
 
             await state.set_state(Catalog.waiting_for_new_role_info)
         elif action == 'instruction':
             await callback_query.message.edit_text(
-                text=get_localization(user_language_code).CATALOG_MANAGE_EDIT_ROLE_INSTRUCTION,
+                text=get_localization(user_language_code).ADMIN_CATALOG_EDIT_ROLE_INSTRUCTION_INFO,
                 reply_markup=reply_markup,
             )
 
             await state.set_state(Catalog.waiting_for_new_role_info)
         elif action == 'photo':
             await callback_query.message.edit_text(
-                text=get_localization(user_language_code).CATALOG_MANAGE_EDIT_ROLE_PHOTO,
+                text=get_localization(user_language_code).ADMIN_CATALOG_EDIT_ROLE_PHOTO_INFO,
                 reply_markup=reply_markup,
             )
 
@@ -284,13 +284,13 @@ async def catalog_manage_edit_role_sent(message: Message, state: FSMContext):
     })
 
     await message.reply(
-        text=get_localization(user_language_code).CATALOG_MANAGE_EDIT_SUCCESS,
+        text=get_localization(user_language_code).ADMIN_CATALOG_EDIT_SUCCESS,
         allow_sending_without_reply=True,
     )
 
     reply_markup = build_manage_catalog_edit_keyboard(user_language_code, role.id)
     await message.answer(
-        text=get_localization(user_language_code).catalog_manage_role_edit(
+        text=get_localization(user_language_code).admin_catalog_edit_role_info(
             role_names=role.translated_names,
             role_descriptions=role.translated_descriptions,
             role_instructions=role.translated_instructions,

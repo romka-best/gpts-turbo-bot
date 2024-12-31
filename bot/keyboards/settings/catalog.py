@@ -49,7 +49,7 @@ def build_catalog_digital_employees_keyboard(
         )
     buttons.append([
         InlineKeyboardButton(
-            text=get_localization(language_code).BACK,
+            text=get_localization(language_code).ACTION_BACK,
             callback_data=f'catalog_digital_employees:back:{from_settings}:{model}' if model else f'catalog_digital_employees:back:{from_settings}'
         )
     ])
@@ -63,25 +63,25 @@ def build_catalog_prompts_model_type_keyboard(
     buttons = [
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).TEXT_MODELS,
+                text=get_localization(language_code).MODELS_TEXT,
                 callback_data=f'catalog_prompts_model_type:{ModelType.TEXT}'
             ),
         ],
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).IMAGE_MODELS,
+                text=get_localization(language_code).MODELS_IMAGE,
                 callback_data=f'catalog_prompts_model_type:{ModelType.IMAGE}'
             ),
         ],
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).MUSIC_MODELS,
+                text=get_localization(language_code).MODELS_VIDEO,
                 callback_data=f'catalog_prompts_model_type:{ModelType.MUSIC}'
             ),
         ],
         [
             InlineKeyboardButton(
-                text=get_localization(language_code).BACK,
+                text=get_localization(language_code).ACTION_BACK,
                 callback_data=f'catalog_prompts_model_type:back'
             )
         ],
@@ -109,14 +109,14 @@ def build_catalog_prompt_categories_keyboard(
     if has_close_button:
         buttons.append([
             InlineKeyboardButton(
-                text=get_localization(language_code).CLOSE,
+                text=get_localization(language_code).ACTION_CLOSE,
                 callback_data=f'catalog_prompt_category:close'
             )
         ])
     else:
         buttons.append([
             InlineKeyboardButton(
-                text=get_localization(language_code).BACK,
+                text=get_localization(language_code).ACTION_BACK,
                 callback_data=f'catalog_prompt_category:back'
             )
         ])
@@ -140,7 +140,7 @@ def build_catalog_prompt_subcategories_keyboard(
         )
     buttons.append([
         InlineKeyboardButton(
-            text=get_localization(language_code).BACK,
+            text=get_localization(language_code).ACTION_BACK,
             callback_data=f'catalog_prompt_subcategory:back'
         )
     ])
@@ -172,7 +172,7 @@ def build_prompts_catalog_keyboard(
 
     buttons.append([
         InlineKeyboardButton(
-            text=get_localization(language_code).BACK,
+            text=get_localization(language_code).ACTION_BACK,
             callback_data=f'catalog_prompt:back'
         )
     ])
@@ -210,7 +210,7 @@ def build_prompts_catalog_chosen_keyboard(
 
     buttons.append([
         InlineKeyboardButton(
-            text=get_localization(language_code).BACK,
+            text=get_localization(language_code).ACTION_BACK,
             callback_data=f'catalog_prompt_chosen:back'
         )
     ])
@@ -236,7 +236,7 @@ def build_prompts_catalog_copy_keyboard(
 
     buttons.append([
         InlineKeyboardButton(
-            text=get_localization(language_code).BACK,
+            text=get_localization(language_code).ACTION_BACK,
             callback_data=f'catalog_prompt_info_chosen:back'
         )
     ])
