@@ -70,7 +70,6 @@ class Quota:
     KLING = 'kling'
     RUNWAY = 'runway'
     LUMA_RAY = 'luma_ray'
-    ADDITIONAL_CHATS = 'additional_chats'
     FAST_MESSAGES = 'fast_messages'
     VOICE_MESSAGES = 'voice_messages'
     ACCESS_TO_CATALOG = 'access_to_catalog'

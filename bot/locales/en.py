@@ -369,6 +369,20 @@ I lost my connection with Telegram 🤒
 
 Please try again 🥺
 """
+    ERROR_PROMPT_REQUIRED = """
+🚨 <b>Hold on! Where's the prompt?</b> 🧐
+
+Looks like we're missing a prompt here, like tea without sugar — no taste at all ☕️
+
+Go ahead, write something — and the magic will begin! 🪄
+"""
+    ERROR_PROMPT_TOO_LONG = """
+🚨 <b>Whoa! This isn't a prompt; it's a whole novel!</b> 😅
+
+Try trimming it down a bit so the model doesn't go on vacation 🌴
+
+Keep it short and sweet, and it will create a masterpiece! ✨
+"""
     ERROR_REQUEST_FORBIDDEN = """
 <b>Oops! Your request just bumped into our safety guardian!</b> 🚨
 

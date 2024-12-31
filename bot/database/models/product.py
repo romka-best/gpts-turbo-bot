@@ -1,3 +1,4 @@
+from dataclasses import field
 from datetime import datetime, timezone
 from enum import StrEnum
 from typing import Optional, ClassVar, Union
@@ -39,7 +40,7 @@ class Product(BaseModel):
     photos: Optional[dict] = None
     order: int = -1
     discount: int = 0
-    details: Optional[dict] = Field(default_factory=lambda: {})
+    details: Optional[dict] = field(default_factory=lambda: {})
     created_at: Optional[datetime] = Field(default_factory=lambda: datetime.now(timezone.utc))
     edited_at: Optional[datetime] = Field(default_factory=lambda: datetime.now(timezone.utc))
 

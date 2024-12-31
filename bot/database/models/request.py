@@ -1,7 +1,8 @@
 from datetime import datetime, timezone
+from enum import StrEnum
 
 
-class RequestStatus:
+class RequestStatus(StrEnum):
     STARTED = 'STARTED'
     FINISHED = 'FINISHED'
 

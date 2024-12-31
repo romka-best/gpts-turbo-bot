@@ -1,7 +1,8 @@
 from datetime import datetime, timezone
+from enum import StrEnum
 
 
-class FeedbackStatus:
+class FeedbackStatus(StrEnum):
     WAITING = 'WAITING'
     APPROVED = 'APPROVED'
     DENIED = 'DENIED'

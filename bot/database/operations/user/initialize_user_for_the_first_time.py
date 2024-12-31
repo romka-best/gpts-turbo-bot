@@ -1,6 +1,7 @@
 from typing import Optional
 
 import stripe
+from firebase_admin.exceptions import AlreadyExistsError
 from google.cloud import firestore
 
 from bot.database.main import firebase
@@ -45,9 +46,12 @@ async def initialize_user_for_the_first_time(
     )
 
     # create user in firebase
-    await firebase.create_user(
-        uid=user.id,
-        display_name=full_name,
-    )
+    try:
+        await firebase.create_user(
+            uid=user.id,
+            display_name=full_name,
+        )
+    except AlreadyExistsError:
+        pass
 
     return user

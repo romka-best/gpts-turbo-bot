@@ -229,7 +229,11 @@ async def handle_face_swap_prompt(
 
         try:
             user_photo_blobs = await firebase.bucket.list_blobs(prefix=f'users/avatars/{user.id}.')
-            user_photo = await firebase.bucket.get_blob(user_photo_blobs[-1])
+            if len(user_photo_blobs) > 0:
+                user_photo = user_photo_blobs[-1]
+            else:
+                user_photo = f'users/avatars/{user.id}.jpeg'
+            user_photo = await firebase.bucket.get_blob(user_photo)
             user_photo_link = firebase.get_public_url(user_photo.name)
 
             if prompt and user_language_code != LanguageCode.EN:
@@ -267,6 +271,9 @@ async def handle_face_swap_prompt(
                 reply_markup=reply_markup
             )
             await state.set_state(Profile.waiting_for_photo)
+
+            await processing_sticker.delete()
+            await processing_message.delete()
         except Exception as e:
             await message.answer_sticker(
                 sticker=config.MESSAGE_STICKERS.get(MessageSticker.ERROR),

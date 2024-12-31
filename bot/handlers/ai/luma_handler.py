@@ -91,6 +91,13 @@ async def handle_luma_photon(
         else:
             prompt = ''
 
+    if not prompt:
+        await message.reply(
+            text=get_localization(user_language_code).ERROR_PROMPT_REQUIRED,
+            allow_sending_without_reply=True,
+        )
+        return
+
     image_link = None
     if image_filename:
         image_path = f'users/vision/{user.id}/{image_filename}'

@@ -1,12 +1,13 @@
 from datetime import datetime, timezone
+from enum import StrEnum
 
 
-class GenerationStatus:
+class GenerationStatus(StrEnum):
     STARTED = 'STARTED'
     FINISHED = 'FINISHED'
 
 
-class GenerationReaction:
+class GenerationReaction(StrEnum):
     NONE = 'NONE'
     LIKED = 'LIKED'
     DISLIKED = 'DISLIKED'

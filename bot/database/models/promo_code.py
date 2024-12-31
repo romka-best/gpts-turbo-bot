@@ -1,7 +1,8 @@
 from datetime import datetime, timezone
+from enum import StrEnum
 
 
-class PromoCodeType:
+class PromoCodeType(StrEnum):
     SUBSCRIPTION = 'SUBSCRIPTION'
     PACKAGE = 'PACKAGE'
     DISCOUNT = 'DISCOUNT'

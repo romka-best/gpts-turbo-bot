@@ -1,7 +1,8 @@
 from datetime import datetime, timezone
+from enum import StrEnum
 
 
-class GameType:
+class GameType(StrEnum):
     BOWLING = 'BOWLING'
     SOCCER = 'SOCCER'
     BASKETBALL = 'BASKETBALL'
@@ -10,7 +11,7 @@ class GameType:
     CASINO = 'CASINO'
 
 
-class GameStatus:
+class GameStatus(StrEnum):
     LOST = 'LOST'
     WON = 'WON'
 

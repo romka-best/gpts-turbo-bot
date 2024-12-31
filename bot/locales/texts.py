@@ -145,6 +145,8 @@ class Texts(Protocol):
     # Errors
     ERROR: str
     ERROR_NETWORK: str
+    ERROR_PROMPT_REQUIRED: str
+    ERROR_PROMPT_TOO_LONG: str
     ERROR_REQUEST_FORBIDDEN: str
     ERROR_PHOTO_FORBIDDEN: str
     ERROR_PHOTO_REQUIRED: str

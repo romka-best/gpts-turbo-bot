@@ -370,6 +370,20 @@ He perdido la conexión con Telegram 🤒
 
 Por favor, inténtalo de nuevo 🥺
 """
+    ERROR_PROMPT_REQUIRED = """
+🚨 <b>¡Espera! ¿Dónde está el prompt?</b> 🧐
+
+Parece que falta el prompt, como un té sin azúcar — sin sabor ☕️
+
+Vamos, escribe algo — ¡y la magia comenzará! 🪄
+"""
+    ERROR_PROMPT_TOO_LONG = """
+🚨 <b>¡Vaya! Esto no es un prompt, ¡es toda una novela!</b> 😅
+
+Intenta acortar un poco el texto para que el modelo no se tome unas vacaciones 🌴
+
+Hazlo más breve, ¡y creará una obra maestra! ✨
+"""
     ERROR_REQUEST_FORBIDDEN = """
 <b>¡Ups! Parece que tu solicitud se topó con una barrera de seguridad.</b> 🚨
 
@@ -1519,7 +1533,7 @@ Seleccione una acción 👇
     PROFILE_SHOW_QUOTA = "🔄 Mostrar cuota"
     PROFILE_TELL_ME_YOUR_GENDER = "Indique su género:"
     PROFILE_YOUR_GENDER = "Su género:"
-    SEND_ME_YOUR_PICTURE = """
+    PROFILE_SEND_ME_YOUR_PICTURE = """
 📸 <b>¿Listo para la transformación fotográfica? Envíame tu foto</b>
 
 👍 <b>Recomendaciones para una foto perfecta:</b>
@@ -1539,8 +1553,8 @@ Seleccione una acción 👇
 
 Una vez que tengas la foto ideal, <b>súbela</b> y deja que la magia comience 🌟
 """
-    UPLOAD_PHOTO = "📷 Subir foto"
-    UPLOADING_PHOTO = "Subiendo foto..."
+    PROFILE_UPLOAD_PHOTO = "📷 Subir foto"
+    PROFILE_UPLOADING_PHOTO = "Subiendo foto..."
     PROFILE_CHANGE_PHOTO = "📷 Cambiar foto"
     PROFILE_CHANGE_PHOTO_SUCCESS = "📸 ¡Foto subida exitosamente! 🌟"
     PROFILE_RENEW_SUBSCRIPTION = "♻️ Renovar suscripción"

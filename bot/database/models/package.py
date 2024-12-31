@@ -1,9 +1,10 @@
 from datetime import datetime, timezone
+from enum import StrEnum
 
 from bot.database.models.common import Currency, PaymentMethod
 
 
-class PackageStatus:
+class PackageStatus(StrEnum):
     SUCCESS = 'SUCCESS'
     WAITING = 'WAITING'
     CANCELED = 'CANCELED'

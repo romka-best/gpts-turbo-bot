@@ -122,6 +122,13 @@ async def handle_runway(message: Message, state: FSMContext, user: User, video_f
             if prompt and user_language_code != LanguageCode.EN:
                 prompt = await translate_text(prompt, user_language_code, LanguageCode.EN)
 
+            if len(prompt) > 512:
+                await message.reply(
+                    text=get_localization(user_language_code).ERROR_PROMPT_TOO_LONG,
+                    allow_sending_without_reply=True,
+                )
+                return
+
             response = await get_response_video(
                 model_version,
                 prompt,
