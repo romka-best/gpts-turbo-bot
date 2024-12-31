@@ -71,7 +71,7 @@ async def start(message: Message, state: FSMContext):
                     continue
 
                 sub_param_key, sub_param_value = sub_param.split('-')
-                if sub_param_key == 'referral':
+                if sub_param_key == 'r' or sub_param_key == 'referral':
                     referred_by = sub_param_value
                     referred_by_user = await get_user(referred_by)
                     referred_by_user_language_code = await get_user_language(referred_by, state.storage)

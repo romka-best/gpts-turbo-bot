@@ -628,12 +628,10 @@ async def handle_get_statistics(language_code: LanguageCode, period: str):
     count_paid_users_before = len(paid_users_before)
 
     count_games = {
-        value: 0 for key, value in vars(GameType).items()
-        if not key.startswith('__')
+        key: 0 for key in list(GameType.__members__.keys())
     }
     count_games_before = {
-        value: 0 for key, value in vars(GameType).items()
-        if not key.startswith('__')
+        key: 0 for key in list(GameType.__members__.keys())
     }
 
     (

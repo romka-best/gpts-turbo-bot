@@ -229,7 +229,10 @@ async def handle_yookassa_webhook(request: dict, bot: Bot, dp: Dispatcher):
                 product = await get_product(old_subscription.product_id)
                 if payment.status == 'succeeded':
                     if old_subscription.status == SubscriptionStatus.TRIAL:
-                        new_income_amount = old_subscription.income_amount + float(payment.income_amount.value)
+                        new_income_amount = round(
+                            old_subscription.income_amount + float(payment.income_amount.value),
+                            2,
+                        )
                         await update_subscription(old_subscription.id, {
                             'status': SubscriptionStatus.ACTIVE,
                             'income_amount': new_income_amount,

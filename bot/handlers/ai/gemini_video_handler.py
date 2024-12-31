@@ -1,3 +1,5 @@
+import re
+
 from aiogram import Router, Bot, F
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
@@ -74,6 +76,18 @@ async def handle_gemini_video(message: Message, state: FSMContext, user: User, v
     await state.update_data(is_processing=True)
 
     user_language_code = await get_user_language(user.id, state.storage)
+
+    video_regex = (
+        r'^https://.+'
+    )
+    match = re.search(video_regex, video_link)
+    if not match:
+        await message.reply(
+            text=get_localization(user_language_code).GEMINI_VIDEO_VALUE_ERROR,
+            allow_sending_without_reply=True,
+        )
+        await state.update_data(is_processing=False)
+        return
 
     system_prompt = get_localization(user_language_code).gemini_video_prompt(
         focus=user.settings[Model.GEMINI_VIDEO][UserSettings.FOCUS],

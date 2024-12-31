@@ -2007,7 +2007,7 @@ Para que tu canción en modo avanzado se ajuste completamente a tus preferencias
 
     # Voice
     VOICE_MESSAGES = "Respuestas de voz 🎙"
-    VOICE_MESSAGES_FORBIDDEN = """
+    VOICE_MESSAGES_FORBIDDEN_ERROR = """
 🎙 <b>¡Ups! Parece que tu voz se perdió en el espacio IA!</b>
 
 Para desbloquear la magia de la conversión de voz a texto, simplemente usa los botones mágicos a continuación:
