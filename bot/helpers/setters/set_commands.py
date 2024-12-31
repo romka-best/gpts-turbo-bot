@@ -267,6 +267,8 @@ commands_admin = commands_ru + [
 async def set_commands(bot: Bot):
     await bot.set_my_commands(commands=commands_en)
     await bot.set_my_commands(commands=commands_ru, language_code=LanguageCode.RU)
+    await bot.set_my_commands(commands=commands_es, language_code=LanguageCode.ES)
+    await bot.set_my_commands(commands=commands_hi, language_code=LanguageCode.HI)
 
     for chat_id in config.ADMIN_IDS:
         try:
@@ -282,6 +284,10 @@ async def set_commands_for_user(bot: Bot, chat_id: str, language=LanguageCode):
     try:
         if language == LanguageCode.RU:
             await bot.set_my_commands(commands=commands_ru, scope=BotCommandScopeChat(chat_id=chat_id))
+        elif language == LanguageCode.ES:
+            await bot.set_my_commands(commands=commands_es, scope=BotCommandScopeChat(chat_id=chat_id))
+        elif language == LanguageCode.HI:
+            await bot.set_my_commands(commands=commands_hi, scope=BotCommandScopeChat(chat_id=chat_id))
         else:
             await bot.set_my_commands(commands=commands_en, scope=BotCommandScopeChat(chat_id=chat_id))
     except TelegramBadRequest as error:
