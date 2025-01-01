@@ -864,11 +864,26 @@ async def handle_get_statistics(language_code: LanguageCode, period: str):
             count_activated_promo_codes=count_activated_promo_codes,
             count_activated_promo_codes_before=count_activated_promo_codes_before,
         ),
-        'expenses': get_localization(language_code).admin_statistics_expenses(
+        'ai_expenses': get_localization(language_code).admin_statistics_ai_expenses(
             period=period,
             ai_products=ai_products,
+            count_expense_money=count_expense_money,
+            count_expense_money_before=count_expense_money_before,
+        ),
+        'tech_expenses': get_localization(language_code).admin_statistics_tech_expenses(
+            period=period,
             tech_products=tech_products,
+            count_expense_money=count_expense_money,
+            count_expense_money_before=count_expense_money_before,
+        ),
+        'user_expenses': get_localization(language_code).admin_statistics_user_expenses(
+            period=period,
             subscription_products=subscription_products,
+            count_expense_money=count_expense_money,
+            count_expense_money_before=count_expense_money_before,
+        ),
+        'expenses': get_localization(language_code).admin_statistics_expenses(
+            period=period,
             count_expense_money=count_expense_money,
             count_expense_money_before=count_expense_money_before,
         ),
