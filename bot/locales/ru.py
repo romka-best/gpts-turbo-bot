@@ -2551,7 +2551,6 @@ class Russian(Texts):
 📊 <b>{period}</b>
 
 👤 <b>Пользователи</b>
-
 1️⃣ <b>{'Всего пользователей' if is_all_time else 'Новых пользователей'}:</b> {count_all_users} {calculate_percentage_difference(is_all_time, count_all_users, count_all_users_before)}
     ┣ 🇺🇸 {count_english_users} ({round((count_english_users / count_all_users) * 100, 2) if count_all_users else 0}%) {calculate_percentage_difference(is_all_time, count_english_users, count_english_users_before)}
     ┣ 🇷🇺 {count_russian_users} ({round((count_russian_users / count_all_users) * 100, 2) if count_all_users else 0}%) {calculate_percentage_difference(is_all_time, count_russian_users, count_russian_users_before)}
@@ -2609,7 +2608,6 @@ class Russian(Texts):
 📊 <b>{period}</b>
 
 🔤 <b>Текстовые модели</b>
-
 {text_info}
 <b>Резюме:</b>
     ┣ ✅ Удачных: {all_success_requests} {calculate_percentage_difference(is_all_time, all_success_requests, all_success_requests_before)}
@@ -2656,7 +2654,6 @@ class Russian(Texts):
 📊 <b>{period}</b>
 
 📝 <b>Резюме модели</b>
-
 {summary_info}
 <b>Резюме:</b>
     ┣ ✅ Удачных: {all_success_requests} {calculate_percentage_difference(is_all_time, all_success_requests, all_success_requests_before)}
@@ -2707,7 +2704,6 @@ class Russian(Texts):
 📊 <b>{period}</b>
 
 🖼 <b>Графические модели</b>
-
 {image_info}
 <b>Резюме:</b>
     ┣ ✅ Удачных: {all_success_requests} {calculate_percentage_difference(is_all_time, all_success_requests, all_success_requests_before)}
@@ -2759,7 +2755,6 @@ class Russian(Texts):
 📊 <b>{period}</b>
 
 🎺 <b>Музыкальные модели</b>
-
 {music_info}
 <b>Резюме:</b>
     ┣ ✅ Удачных: {all_success_requests} {calculate_percentage_difference(is_all_time, all_success_requests, all_success_requests_before)}
@@ -2871,7 +2866,6 @@ class Russian(Texts):
 📊 <b>{period}</b>
 
 🧐 <b>Реакции</b>
-
 {reaction_info}
 <b>Резюме:</b>
     ┣ 👍 {all_liked} {calculate_percentage_difference(is_all_time, all_liked, all_liked_before)}
@@ -2879,14 +2873,12 @@ class Russian(Texts):
     ┗ 🤷 {all_none} {calculate_percentage_difference(is_all_time, all_none, all_none_before)}
 
 📡 <b>Обратная связь:</b>
-
 1️⃣ <b>Одобрено:</b> {count_feedbacks[FeedbackStatus.APPROVED]} {calculate_percentage_difference(is_all_time, count_feedbacks[FeedbackStatus.APPROVED], count_feedbacks_before[FeedbackStatus.APPROVED])}
 2️⃣ <b>Отклонено:</b> {count_feedbacks[FeedbackStatus.DENIED]} {calculate_percentage_difference(is_all_time, count_feedbacks[FeedbackStatus.DENIED], count_feedbacks_before[FeedbackStatus.DENIED])}
 3️⃣ <b>В ожидании:</b> {count_feedbacks[FeedbackStatus.WAITING]} {calculate_percentage_difference(is_all_time, count_feedbacks[FeedbackStatus.WAITING], count_feedbacks_before[FeedbackStatus.WAITING])}
 4️⃣ <b>Всего:</b> {all_feedbacks} {calculate_percentage_difference(is_all_time, all_feedbacks, all_feedbacks_before)}
 
 🎮 <b>Игр сыграно:</b>
-
 🎳 <b>Боулинг:</b> {count_games[GameType.BOWLING]} {calculate_percentage_difference(is_all_time, count_games[GameType.BOWLING], count_games_before[GameType.BOWLING])}
 ⚽️ <b>Футбол:</b> {count_games[GameType.SOCCER]} {calculate_percentage_difference(is_all_time, count_games[GameType.SOCCER], count_games_before[GameType.SOCCER])}
 🏀 <b>Баскетбол:</b> {count_games[GameType.BASKETBALL]} {calculate_percentage_difference(is_all_time, count_games[GameType.BASKETBALL], count_games_before[GameType.BASKETBALL])}
@@ -2926,7 +2918,6 @@ class Russian(Texts):
 📊 <b>{period}</b>
 
 🎁 <b>Бонусы</b>
-
 1️⃣ <b>Кредитов приобретено:</b>
     ┣ 👤 За приглашения друзей: {count_credits['INVITE_FRIENDS']} {calculate_percentage_difference(is_all_time, count_credits['INVITE_FRIENDS'], count_credits_before['INVITE_FRIENDS'])}
     ┣ 📡 За обратную связь: {count_credits['LEAVE_FEEDBACKS']} {calculate_percentage_difference(is_all_time, count_credits['LEAVE_FEEDBACKS'], count_credits_before['LEAVE_FEEDBACKS'])}
@@ -2940,45 +2931,98 @@ class Russian(Texts):
 """
 
     @staticmethod
-    def admin_statistics_expenses(
+    def admin_statistics_ai_expenses(
         period: str,
         ai_products: dict[str, str],
-        tech_products: dict[str, str],
-        subscription_products: dict[str, list[str]],
         count_expense_money: dict,
         count_expense_money_before: dict,
     ):
         is_all_time = period == 'всё время'
 
         ai_info = ''
+        final_sum = 0
+        final_sum_before = 0
         for index, (ai_product_id, ai_product_name) in enumerate(ai_products.items()):
             is_last = index == len(ai_products) - 1
             left_part = '┣' if not is_last else '┗'
             right_part = '\n' if not is_last else ''
+
+            final_sum += count_expense_money[ai_product_id]['ALL']
+            final_sum_before += count_expense_money_before[ai_product_id]['ALL']
 
             if (
                 count_expense_money[ai_product_id]['EXAMPLE_ALL'] or
                 count_expense_money[ai_product_id]['AVERAGE_EXAMPLE_PRICE']
             ):
                 ai_info += f"""    {left_part} {ai_product_name}:
-        ┣ 🎁 Средняя цена примера: ${round(count_expense_money[ai_product_id]['AVERAGE_EXAMPLE_PRICE'], 3)} {calculate_percentage_difference(is_all_time, count_expense_money[ai_product_id]['AVERAGE_EXAMPLE_PRICE'], count_expense_money_before[ai_product_id]['AVERAGE_EXAMPLE_PRICE'])}
-        ┣ 🚀 Всего за примеры: ${round(count_expense_money[ai_product_id]['EXAMPLE_ALL'], 3)} {calculate_percentage_difference(is_all_time, count_expense_money[ai_product_id]['EXAMPLE_ALL'], count_expense_money_before[ai_product_id]['EXAMPLE_ALL'])}
-        ┣ 💸 Средняя цена запроса: ${round(count_expense_money[ai_product_id]['AVERAGE_PRICE'], 3)} {calculate_percentage_difference(is_all_time, count_expense_money[ai_product_id]['AVERAGE_PRICE'], count_expense_money_before[ai_product_id]['AVERAGE_PRICE'])}
-        ┗ 💰 Всего: ${round(count_expense_money[ai_product_id]['ALL'], 3)} {calculate_percentage_difference(is_all_time, count_expense_money[ai_product_id]['ALL'], count_expense_money_before[ai_product_id]['ALL'])}{right_part}"""
+            ┣ 🎁 Средняя цена примера: ${round(count_expense_money[ai_product_id]['AVERAGE_EXAMPLE_PRICE'], 4)} {calculate_percentage_difference(is_all_time, count_expense_money[ai_product_id]['AVERAGE_EXAMPLE_PRICE'], count_expense_money_before[ai_product_id]['AVERAGE_EXAMPLE_PRICE'])}
+            ┣ 🚀 Всего за примеры: ${round(count_expense_money[ai_product_id]['EXAMPLE_ALL'], 4)} {calculate_percentage_difference(is_all_time, count_expense_money[ai_product_id]['EXAMPLE_ALL'], count_expense_money_before[ai_product_id]['EXAMPLE_ALL'])}
+            ┣ 💸 Средняя цена запроса: ${round(count_expense_money[ai_product_id]['AVERAGE_PRICE'], 4)} {calculate_percentage_difference(is_all_time, count_expense_money[ai_product_id]['AVERAGE_PRICE'], count_expense_money_before[ai_product_id]['AVERAGE_PRICE'])}
+            ┗ 💰 Всего: ${round(count_expense_money[ai_product_id]['ALL'], 4)} {calculate_percentage_difference(is_all_time, count_expense_money[ai_product_id]['ALL'], count_expense_money_before[ai_product_id]['ALL'])}{right_part}"""
                 continue
 
             ai_info += f"""    {left_part} {ai_product_name}:
-        ┣ 💸 Средняя цена запроса: ${round(count_expense_money[ai_product_id]['AVERAGE_PRICE'], 3)} {calculate_percentage_difference(is_all_time, count_expense_money[ai_product_id]['AVERAGE_PRICE'], count_expense_money_before[ai_product_id]['AVERAGE_PRICE'])}
-        ┗ 💰 Всего: ${round(count_expense_money[ai_product_id]['ALL'], 3)} {calculate_percentage_difference(is_all_time, count_expense_money[ai_product_id]['ALL'], count_expense_money_before[ai_product_id]['ALL'])}{right_part}"""
+            ┣ 💸 Средняя цена запроса: ${round(count_expense_money[ai_product_id]['AVERAGE_PRICE'], 4)} {calculate_percentage_difference(is_all_time, count_expense_money[ai_product_id]['AVERAGE_PRICE'], count_expense_money_before[ai_product_id]['AVERAGE_PRICE'])}
+            ┗ 💰 Всего: ${round(count_expense_money[ai_product_id]['ALL'], 4)} {calculate_percentage_difference(is_all_time, count_expense_money[ai_product_id]['ALL'], count_expense_money_before[ai_product_id]['ALL'])}{right_part}"""
+
+        return f"""
+#statistics #expenses
+
+📊 <b>{period}</b>
+
+📉 <b>Расходы</b>
+1️⃣ <b>AI модели:</b>
+{ai_info}
+
+<b>Всего:</b> ${round(final_sum, 4)} {calculate_percentage_difference(is_all_time, final_sum, final_sum_before)}
+"""
+
+    @staticmethod
+    def admin_statistics_tech_expenses(
+        period: str,
+        tech_products: dict[str, str],
+        count_expense_money: dict,
+        count_expense_money_before: dict,
+    ):
+        is_all_time = period == 'всё время'
 
         tech_info = ''
+        final_sum = 0
+        final_sum_before = 0
         for index, (tech_product_id, tech_product_name) in enumerate(tech_products.items()):
             is_last = index == len(tech_products) - 1
             left_part = '┣' if not is_last else '┗'
             right_part = '\n' if not is_last else ''
+
+            final_sum += count_expense_money[tech_product_id]['ALL']
+            final_sum_before += count_expense_money_before[tech_product_id]['ALL']
+
             tech_info += f"    {left_part} {tech_product_name}: ${round(count_expense_money[tech_product_id]['ALL'], 3)} {calculate_percentage_difference(is_all_time, count_expense_money[tech_product_id]['ALL'], count_expense_money_before[tech_product_id]['ALL'])}{right_part}"
 
+        return f"""
+#statistics #expenses
+
+📊 <b>{period}</b>
+
+📉 <b>Расходы</b>
+2️⃣ <b>Технические:</b>
+{tech_info}
+
+<b>Всего:</b> ${round(final_sum, 4)} {calculate_percentage_difference(is_all_time, final_sum, final_sum_before)}
+"""
+
+    @staticmethod
+    def admin_statistics_user_expenses(
+        period: str,
+        subscription_products: dict[str, list[str]],
+        count_expense_money: dict,
+        count_expense_money_before: dict,
+    ):
+        is_all_time = period == 'всё время'
+
         subscription_info = ''
+        final_sum = 0
+        final_sum_before = 0
         for index, (subscription_product_name, subscription_product_ids) in enumerate(subscription_products.items()):
             is_last = index == len(subscription_products) - 1
             left_part = '┣' if not is_last else '┗'
@@ -2987,14 +3031,18 @@ class Russian(Texts):
             average_price_before = 0
             all_price = 0
             all_price_before = 0
+
             for subscription_product_id in subscription_product_ids:
                 average_price += count_expense_money[subscription_product_id]['AVERAGE_PRICE']
                 average_price_before += count_expense_money_before[subscription_product_id]['AVERAGE_PRICE']
                 all_price += count_expense_money[subscription_product_id]['ALL']
                 all_price_before += count_expense_money_before[subscription_product_id]['ALL']
+
+            final_sum += all_price
+            final_sum_before += all_price_before
             subscription_info += f"""    {left_part} <b>{subscription_product_name}:</b>
-        ┣ 💸 Средняя цена подписчика: ${round(average_price, 3)} {calculate_percentage_difference(is_all_time, average_price, average_price_before)}
-        ┗ 💰 Всего: ${round(all_price, 3)} {calculate_percentage_difference(is_all_time, all_price, all_price_before)}{right_part}"""
+            ┣ 💸 Средняя цена подписчика: ${round(average_price, 4)} {calculate_percentage_difference(is_all_time, average_price, average_price_before)}
+            ┗ 💰 Всего: ${round(all_price, 4)} {calculate_percentage_difference(is_all_time, all_price, all_price_before)}{right_part}"""
 
         return f"""
 #statistics #expenses
@@ -3002,15 +3050,27 @@ class Russian(Texts):
 📊 <b>{period}</b>
 
 📉 <b>Расходы</b>
-
-1️⃣ <b>AI модели:</b>
-{ai_info}
-2️⃣ <b>Технические:</b>
-{tech_info}
 3️⃣ <b>Подписчики:</b>
 {subscription_info}
 
-<b>Всего:</b> ${round(count_expense_money['ALL'], 3)} {calculate_percentage_difference(is_all_time, count_expense_money['ALL'], count_expense_money_before['ALL'])}
+<b>Всего:</b> ${round(final_sum, 4)} {calculate_percentage_difference(is_all_time, final_sum, final_sum_before)}
+"""
+
+    @staticmethod
+    def admin_statistics_expenses(
+        period: str,
+        count_expense_money: dict,
+        count_expense_money_before: dict,
+    ):
+        is_all_time = period == 'всё время'
+
+        return f"""
+#statistics #expenses
+
+📊 <b>{period}</b>
+
+📉 <b>Расходы</b>
+<b>Всего:</b> ${round(count_expense_money['ALL'], 4)} {calculate_percentage_difference(is_all_time, count_expense_money['ALL'], count_expense_money_before['ALL'])}
 """
 
     @staticmethod

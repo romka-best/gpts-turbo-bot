@@ -176,10 +176,8 @@ async def handle_claude(
         await write_message(user.current_chat_id, 'user', user.id, text)
 
     chat = await get_chat(user.current_chat_id)
-    if not user.subscription_id:
+    if not user.subscription_id or user_quota == Quota.CLAUDE_3_OPUS:
         limit = 4
-    elif user_quota == Quota.CLAUDE_3_OPUS:
-        limit = 6
     else:
         limit = 8
     messages = await get_messages_by_chat_id(

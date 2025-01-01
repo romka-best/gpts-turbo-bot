@@ -831,11 +831,35 @@ class Texts(Protocol):
         raise NotImplementedError
 
     @staticmethod
-    def admin_statistics_expenses(
+    def admin_statistics_ai_expenses(
         period: str,
         ai_products: dict[str, str],
+        count_expense_money: dict,
+        count_expense_money_before: dict,
+    ):
+        raise NotImplementedError
+
+    @staticmethod
+    def admin_statistics_tech_expenses(
+        period: str,
         tech_products: dict[str, str],
+        count_expense_money: dict,
+        count_expense_money_before: dict,
+    ):
+        raise NotImplementedError
+
+    @staticmethod
+    def admin_statistics_user_expenses(
+        period: str,
         subscription_products: dict[str, list[str]],
+        count_expense_money: dict,
+        count_expense_money_before: dict,
+    ):
+        raise NotImplementedError
+
+    @staticmethod
+    def admin_statistics_expenses(
+        period: str,
         count_expense_money: dict,
         count_expense_money_before: dict,
     ):
